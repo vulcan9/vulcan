@@ -1,0 +1,31 @@
+<document>
+  <properties>
+    <title>Vulcan Build Manager</title>
+  </properties>
+  <body>
+    <section name="Known Issues">
+    	<div>
+			<span>WebLogic 9.0 &amp; Cglib</span>
+			<p>WebLogic ships with an old version of cglib in weblogic.jar.  This causes a problem
+				when the Spring Framework tries to use cglib to create subclasses on the fly.  To
+				work around the problem, drop cglib 2.0 into your jre/lib/ext folder.</p>
+		</div>
+
+    	<div>
+			<span>WebLogic 9.1 &amp; DOCTYPE</span>
+			<p>WebLogic 9.1 fixes the cglib issue in 9.0 but introduces a different bug where
+				JSP Documents (JSP 2.0 XML Documents) do not render the DOCTYPE declaration
+				even when you ask it nicely.  This breaks JavaScript in Mozilla based browsers.</p>
+		</div>
+
+    	<div>
+			<span>Shift-click to multi select checkboxes</span>
+			<p>A convenience is provided where you can select multiple projects in any form
+				in vulcan by checking one project and shift-clicking another one.  All of 
+				the projects in between will be selected or deselected.  However, if you
+				use Opera and click the label instead of the checkbox itself, this will
+				not work.  It works fine in Firefox and IE.</p>
+		</div>
+    </section>
+  </body>
+</document>

@@ -1,0 +1,21 @@
+<Project DefaultTargets="SayHello" InitialTargets="" 
+	xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+	
+	<Target Name="SayHello">
+		<Message Text="This is a message originating from an MSBuild script."/>
+	</Target>
+	
+	<Target Name="Fail">
+		<Error Text="You can't do that on television."/>
+	</Target>
+	
+	<Target Name="Echo">
+		<Warning Text="Build Number: $(BuildNumber)
+Revision: $(ProjectRevision)
+NumericRevision: $(RepositoryRevision)
+ProjectTag: $(ProjectTag)
+Configuration: $(Configuration)
+Foo: $(Foo)
+Bar: $(Bar)"/>
+	</Target>
+</Project>

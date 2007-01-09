@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="vulcan-ant-test-project" basedir="." default="all">
+
+	<target name="all">
+		<echo message="all target started"/>
+	</target>
+	
+	<target name="fail">
+		<fail message="Can the listener grab this message?"/>
+	</target>
+	
+	<target name="echo-build-info-1">
+		<echo message="revision: ${repo.revision} (${repo.revision.numeric})"/>
+		<echo message="tag: ${repo.tag}"/>
+		<echo message="build number: ${build.number}"/>
+	</target>
+		
+	<target name="echo-build-info-2">
+		<echo message="revision: ${foo} (${qwerty})"/>
+		<echo message="tag: ${bar}"/>
+		<echo message="build number: ${pretzel}"/>
+	</target>
+
+	<target name="task">
+		<antcall target="subtask"/>
+	</target>
+	
+	<target name="subtask"/>
+	
+	<target name="run-test">
+		<echo message="[junit] Running com.example.FooTest"/>
+		<echo message="[junit] Tests run: 2, Failures: 0, Errors: 0, Time elapsed: 0.271 sec"/>
+		<echo message="[junit] Running com.example.BarTest"/>
+		<echo message="[junit] Tests run: 3, Failures: 1, Errors: 0, Time elapsed: 0.271 sec"/>
+		<echo message="[junit] Running com.example.BazTest"/>
+		<echo message="[junit] Tests run: 1, Failures: 0, Errors: 1, Time elapsed: 0.271 sec"/>
+	</target>
+	
+	<target name="run-test2">
+		<echo message="[junit] Running com.example.FooTest"/>
+		<echo message="[junit] Tests run: 5, Failures: 0, Errors: 0, Time elapsed: 0.271 sec"/>
+		<echo message="[junit] Running com.example.BarTest"/>
+		<echo message="[junit] Tests run: 15, Failures: 1, Errors: 14, Time elapsed: 0.271 sec"/>
+		<echo message="[junit] Running com.example.BazTest"/>
+		<echo message="[junit] Tests run: 11, Failures: 0, Errors: 11, Time elapsed: 0.271 sec"/>
+	</target>
+	
+	<target name="thing1">
+		<antcall target="thing2"/>
+		<fail message="thing1 doesn't work"/>
+	</target>
+	
+	<target name="thing2">
+	</target>
+	
+	<target name="generateWarnings">
+		<echo level="warning" message="You are allowed to do that but you really shouldn't."/>
+		<echo level="error" message="Foo.java:43: syntax error."/>
+		<echo level="warning" message="This is a fake deprecation message."/>
+	</target>
+	
+	<target name="compile">
+		<javac srcdir="${basedir}" />
+	</target>
+</project>

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project default="vulcan"
+  xmlns:j="jelly:core"
+  xmlns:ant="jelly:ant"
+  xmlns:define="jelly:define"
+  xmlns:maven="jelly:maven">
+
+	<goal name="fail">
+		<ant:fail message="maven uses ant"/>
+	</goal>
+	<goal name="echo-repository-info">
+		<ant:echo message="build number: ${build.number}"/>
+		<ant:echo message="revision: ${repo.revision}"/>
+		<ant:echo message="numeric revision: ${repo.revision.numeric}"/>
+		<ant:echo message="tag: ${repo.tag}"/>
+	</goal>
+</project>

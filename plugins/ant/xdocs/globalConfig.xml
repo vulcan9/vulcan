@@ -1,0 +1,76 @@
+<document>
+  <properties>
+    <title>Ant Plugin for Vulcan Build Manager</title>
+  </properties>
+  <body>
+    <section name="Global Configuration">
+		<table>
+			<thead>
+				<tr>
+					<th>Field</th>
+					<th>Required</th>
+					<th>Description</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr>
+					<td>Ant Home</td>
+					<td class="required">Yes</td>
+					<td>The directory where Ant is installed.</td>
+				</tr>
+				<tr>
+					<td>Java Homes</td>
+					<td class="required">Yes</td>
+					<td>You may define as many Java environments as you need.  By default, the same Java home that is running Vulcan will
+					be configured.  You may customize or remove the default if you wish, and add other Java homes for your projects.  The plugin
+					will work with Java Runtime Environment versions 1.3 and later.</td>
+				</tr>
+				<tr>
+					<td>Ant Properties</td>
+					<td>No</td>
+					<td>Properties, in the form name=value.  Any properties you define in the global configuration will be passed to every
+					project that uses Ant.  It is not necessary to include the -D switch which is used on the command line to define an Ant
+					property, although if you do this the plugin will still correctly configure the property.</td>
+				</tr>
+				<tr>
+					<td>Build Number Property</td>
+					<td>No</td>
+					<td>The name of an Ant property which will specify the build number that Vulcan has assigned to the project.</td>
+				</tr>
+				<tr>
+					<td>Revision Label Property</td>
+					<td>No</td>
+					<td>The name of an Ant property which will specify a revision string which represents the source repository revision
+					which was used to create the working copy.</td>
+				</tr>
+				<tr>
+					<td>Revision Number Property</td>
+					<td>No</td>
+					<td>The name of an Ant property which will specify a numeric representation of the revision used to create
+					the working copy.</td>
+				</tr>
+				<tr>
+					<td>Revision Tag Name Property</td>
+					<td>No</td>
+					<td>The name of an Ant property which will specify the tag or branch used to create the working copy.  This property
+					is particularly useful when performing a Manual Build using an alternate tag.  In most other cases, this value will
+					either be <span class="keyword">trunk</span> or <span class="keyword">HEAD</span>.</td>
+				</tr>
+			</tbody>
+		</table>
+		
+		<p>The last four properties, while optional, are intended to provide traceability between Vulcan build numbers, source repository
+		revisions and your deliverables.  You can inject these values into Jar manifests, properties files or anywhere else.  For example:</p>
+		
+<code>&lt;target name="inject-version"&gt;
+	&lt;echo file="docroot/WEB-INF/version.properties"&gt;version.build=${project.build.number}&lt;echo&gt;
+	&lt;echo file="docroot/WEB-INF/version.properties" append="true"&gt;version.revision=${project.revision}&lt;echo&gt;
+	&lt;echo file="docroot/WEB-INF/version.properties" append="true"&gt;version.tag=${project.tag}&lt;echo&gt;
+&lt;/taget&gt;			
+</code>
+
+		<p>The Revision Number Property is intended for constructing ordinal version numbers.  In other cases, the Revision Label
+		Property is preferred.</p>
+    </section>
+  </body>
+</document>

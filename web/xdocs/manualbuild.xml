@@ -1,0 +1,15 @@
+<document>
+  <properties>
+    <title>Vulcan Build Manager</title>
+  </properties>
+  <body>
+    <section name="Manual Build">
+    	<p>
+    		TODO
+    		<br/>
+    		Editor Note:  talk about how incremental build can be useful for verifying a "quick fix"
+    		
+    	</p>
+    </section>
+  </body>
+</document>

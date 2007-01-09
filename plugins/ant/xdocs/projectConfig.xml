@@ -1,0 +1,56 @@
+<document>
+  <properties>
+    <title>Ant Plugin for Vulcan Build Manager</title>
+  </properties>
+  <body>
+    <section name="Project Configuration">
+		<table>
+			<thead>
+				<tr>
+					<th>Field</th>
+					<th>Required</th>
+					<th>Description</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr>
+					<td>Build Script</td>
+					<td>No</td>
+					<td>If your project build script is named something other than build.xml, or is not in the top level directory,
+					you can specify a relative path to your build script.</td>
+				</tr>
+				<tr>
+					<td>Target(s)</td>
+					<td>No</td>
+					<td>You can override your build script's default target by specifying targets here, separated by spaces.</td>
+				</tr>
+				<tr>
+					<td>Java Home</td>
+					<td class="required">Yes</td>
+					<td>Select which Java Home to use to run Ant.  New profiles can be defined in the Ant plugin global configuration.</td>
+				</tr>
+				<tr>
+					<td>Verbose Logging</td>
+					<td>No</td>
+					<td>Check this box to pass the switch <span class="keyword">-verbose</span> to Ant.  This will result in a much larger
+					build log, useful for troubleshooting when your build script is not working.</td>
+				</tr>
+				<tr>
+					<td>Debug Logging</td>
+					<td>No</td>
+					<td>Check this box to pass the switch <span class="keyword">-debug</span> to Ant.  This will result in a much larger
+					build log, useful for troubleshooting when Verbose Logging does not provide enough insight to resolve a build script
+					issue.</td>
+				</tr>
+				<tr>
+					<td>Ant Properties</td>
+					<td>No</td>
+					<td>Properties, in the form name=value.  Properties defined here will be added to properties defined in the global Ant plugin
+					configuration.  Project properties will override global property values.  It is not necessary to include the -D switch which
+					is used on the command line to define an Ant property, although if you do this the plugin will still correctly configure the property.</td>
+				</tr>
+			</tbody>
+		</table>
+    </section>
+  </body>
+</document>

@@ -1,0 +1,168 @@
+<document>
+  <properties>
+	<title>Vulcan - Advanced Customization</title>
+  </properties>
+  <body>
+	<section name="Overview">
+		<p>
+			Projects can be created, modified and deleted through Vulcan's web interface.  Click
+			the <span class="location">Setup</span> link in the top menu on the Vulcan dashboard.
+		</p>
+		<p>
+			To create a new project, click <spac class="location">New Project</spac> in the
+			left-hand menu.  You can review and modify existing project configuration by
+			clicking the project of interest in the same menu.
+		</p>
+		<p>
+			<span class="note">Note:</span> If this is the first time you are configuring
+			Vulcan, you should probably configure your Repository Adaptor Plugins and
+			Build Tool Plugins before creating new projects.
+		</p>
+	</section>
+	<section name="Configuration Options">
+		<p>
+			The Project Configuration screen allows you to enter the following
+			information about your project.
+		</p>
+		<table>
+			<thead>
+				<tr>
+					<th>Field</th>
+					<th>Required</th>
+					<th>Description</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr>
+					<td>Project Name</td>
+					<td class="required">Yes</td>
+					<td>The name you want to use to identify your project within Vulcan.
+						You may use mixed-case letters, numbers, hyphens and underscores.
+					</td>
+				</tr>
+				<tr>
+					<td>Working Copy Directory</td>
+					<td class="required">Yes</td>
+					<td>The location to use when checking out files from your repository.</td>
+				</tr>
+				<tr>
+					<td>Site Index</td>
+					<td>No</td>
+					<td>Vulcan allows users to browse the working copy of the most recent
+						build.  If you have a landing page in the workig copy, you can
+						configure the link from the build details page to link directly
+						to that page.  For example, if you use Apache Maven and generate a
+						site, you could use "target/site/index.html" for this value.</td>
+				</tr>
+				<tr>
+					<td>Bugtraq URL</td>
+					<td>No</td>
+					<td>If your team has a web-enabled issue tracker, you can configure
+						this setting so Vulcan will link to issues that are mentioned
+						in commit logs.  If you use Bugzilla, enter something like:
+						<code>http://bugzilla.example.com/show_bug.cgi?id=%BUGID%</code>
+						Vulcan will replace %BUGID% with the issue ID so you can link
+						directly to the issue that was mentioned.
+					</td>
+				</tr>
+				<tr>
+					<td>Bugtraq Keyword Regex</td>
+					<td>No</td>
+					<td>This regular expression will be used to parse issue/bug IDs out
+						out of commit messages.  A typical example is:
+						<code>bug (\d+)</code>
+						However, if you may want to match other keywords (like "issue"),
+						and be more flexible.  A very flexible pattern is:
+						<code>([Bb]ug|[Ii]ssue):? ?#?(\d+)</code>
+						This pattern would match any of the following strings:
+						<ul>
+							<li>bug #12</li>
+							<li>Bug 43</li>
+							<li>issue: 56</li>
+							<li>Issue56</li>
+						</ul>
+						If a Bugtraq ID Regex is not specified, the last capture group
+						must match the numeric bug ID.
+						
+						<span class="note">
+							If you are using Subversion, you may have these settings defined
+							in your repository.  In that case, instead of repeating them here,
+							you can configure the Vulcan Subversion plugin to obtain these
+							settings from your working copy.  See 
+							<a href="../plugins/subversion">Subversion Plugin</a> documentation
+							for more details.
+						</span>
+					</td>
+				</tr>
+				<tr>
+					<td>Bugtraq ID Regex</td>
+					<td>No</td>
+					<td>This field should be set only if you wish to match multiple issue/bug IDs
+						after a single keyword.  For example, if you want to match the message:
+						<code>Fixes for bugs 12, 14, and 42.</code>
+						In this case, the Bugtraq Keyword Regex should match the entire string
+						"bugs 12, 14, and 42" and the Bugtraq ID Regex should match each issue/bug
+						ID within that string.  An example for the Bugtraq Pattern Regex:
+						<code>bugs #?(\d+)(,? ?(and)? ?#?(\d+))+</code>
+						In most cases, the Bugtraq ID Regex should simply be set to:
+						<code>\d+</code>
+					</td>
+				</tr>
+				<tr>
+					<td>Repository Adaptor</td>
+					<td class="required">Yes</td>
+					<td>The plugin to use which will integrate with your source repository.
+						Choose from the available plugins, then you must click the
+						<span class="location">Configure</span> button to enter
+						information specific to the adaptor.
+					</td>
+				</tr>
+				<tr>
+					<td>Build Tool</td>
+					<td class="required">Yes</td>
+					<td>The plugin to use which will build your project.  Choose from
+						the available plugins, then you must click the
+						<span class="location">Configure</span> button to enter
+						information specific to the build tool.
+					</td>
+				</tr>
+				<tr>
+					<td>Dependencies</td>
+					<td>No</td>
+					<td>If you are building more than one project with Vulcan, and some
+						projects depend on others, you can express those dependencies here.
+						Vulcan will automatically build your projects in the correct order.
+					</td>
+				</tr>
+				<tr>
+					<td>Build Options</td>
+					<td>No</td>
+					<td>This section has several options which should be self-explanatory.
+						The first option is useful if you have many dependencies and don't want
+						to assign each individual project to a scheduler.  By checking this option
+						on your highest level projects, the dependencies will automatically be
+						queued for build even though they are not assigned to a scheduler.
+					</td>
+				</tr>
+				<tr>
+					<td>Update Policy</td>
+					<td>Yes</td>
+					<td>This section allows you to configure incremental builds for your project.
+						See the section on <a href="../incrementalbuilds.html">incremental builds</a>
+						before changing the default setting.
+					</td>
+				</tr>
+				<tr>
+					<td>Build Scheduler</td>
+					<td class="required">Yes</td>
+					<td>This is where you assign a project to be added to the build queue
+						when the selected scheduler fires.  If you do not want your project
+						to be built on a periodic schedule, leave the default value of
+						<span class="location">none</span>.
+					</td>
+				</tr>
+			</tbody>
+		</table>
+	</section>
+  </body>
+</document>

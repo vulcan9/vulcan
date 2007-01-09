@@ -1,0 +1,338 @@
+/*
+ * Vulcan Build Manager
+ * Copyright (C) 2005-2006 Chris Eldredge
+ * 
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+package net.sourceforge.vulcan.core.support;
+
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileFilter;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.StringReader;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
+
+import net.sourceforge.vulcan.core.Store;
+import net.sourceforge.vulcan.dto.PluginMetaDataDto;
+import net.sourceforge.vulcan.event.ErrorEvent;
+import net.sourceforge.vulcan.event.EventHandler;
+import net.sourceforge.vulcan.event.WarningEvent;
+import net.sourceforge.vulcan.exception.CannotCreateDirectoryException;
+import net.sourceforge.vulcan.exception.DuplicatePluginIdException;
+import net.sourceforge.vulcan.exception.InvalidPluginLayoutException;
+import net.sourceforge.vulcan.exception.StoreException;
+import net.sourceforge.vulcan.integration.PluginVersionSpec;
+import net.sourceforge.vulcan.integration.support.PluginVersionDigester;
+import net.sourceforge.vulcan.metadata.SvnRevision;
+
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.io.filefilter.FileFilterUtils;
+import org.apache.commons.io.filefilter.SuffixFileFilter;
+
+
+@SvnRevision(id="$Id$", url="$HeadURL$")
+public abstract class AbstractFileStore implements Store {
+	protected String workingCopyLocationPattern;
+	protected File configRoot;
+	protected EventHandler eventHandler;
+	private int maxBuildLogsPerProject;
+	
+	public final void init() {
+		if (!configRoot.exists()) {
+			eventHandler.reportEvent(new WarningEvent(this, "FileStore.create.dir",
+					 new Object[] {configRoot}));
+			configRoot.mkdirs();
+			getPluginsRoot().mkdirs();
+		}
+		getProjectsRoot().mkdirs();
+	}
+	public final PluginMetaDataDto extractPlugin(InputStream is) throws StoreException {
+		final File pluginsDir = getPluginsRoot();
+		String toplevel = null;
+		File topDir = null;
+		
+		if (!pluginsDir.exists()) {
+			createDir(pluginsDir);
+		}
+		
+		final ZipInputStream zis = new ZipInputStream(is);
+		ZipEntry entry;
+		
+		try {
+			entry = zis.getNextEntry();
+			if (entry == null || !entry.isDirectory()) {
+				throw new InvalidPluginLayoutException();
+			}
+			toplevel = entry.getName();
+			topDir = new File(pluginsDir, toplevel);
+			if (!topDir.exists()) {
+				createDir(topDir);
+			}
+
+			final String id = toplevel.replaceAll("/", "");
+
+			checkPluginVersion(pluginsDir, id, zis);
+			
+			while ((entry = zis.getNextEntry()) != null) {
+				final File out = new File(pluginsDir, entry.getName());
+				if (!entry.getName().startsWith(toplevel)) {
+					throw new InvalidPluginLayoutException();
+				}
+
+				if (entry.isDirectory()) {
+					createDir(out);
+					zis.closeEntry();
+				} else {
+					final FileOutputStream os = new FileOutputStream(out);
+					
+					try {
+						IOUtils.copy(zis, os);
+					} finally {
+						os.close();
+						zis.closeEntry();
+					}
+				}
+			}
+			return createPluginConfig(topDir);
+		} catch (DuplicatePluginIdException e) {
+			throw e;
+		} catch (Exception e) {
+			if (topDir != null) {
+				try {
+					FileUtils.deleteDirectory(topDir);
+				} catch (Exception ignore) {
+				}
+			}
+			if (e instanceof StoreException) {
+				throw (StoreException) e;
+			}
+			throw new StoreException(e.getMessage(), e);
+		} finally {
+			try {
+				zis.close();
+			} catch (IOException ignore) {
+			}
+		}
+	}
+	public final void deletePlugin(String id) throws StoreException {
+		final File dir = new File(getPluginsRoot(), id);
+		try {
+			if (!dir.exists()) {
+				throw new FileNotFoundException(id);
+			}
+			FileUtils.deleteDirectory(dir);	
+		} catch (Exception e) {
+			try {
+				new File(dir, ".delete").createNewFile();
+			} catch (IOException ioe) {
+				eventHandler.reportEvent(new ErrorEvent(this, 
+						"FileStore.mark.plugin.for.delete",
+						new Object[] {dir}, ioe));
+			}
+			throw new StoreException(e.getMessage(), e);
+		}
+	}
+	public final PluginMetaDataDto[] getPluginConfigs() {
+		final List<PluginMetaDataDto> plugins = new ArrayList<PluginMetaDataDto>();
+		final File[] dirs = getPluginsRoot().listFiles((FileFilter)FileFilterUtils.directoryFileFilter());
+
+		if (dirs != null) {
+			for (int i=0; i<dirs.length; i++) {
+				if (new File(dirs[i], ".delete").exists()) {
+					try {
+						FileUtils.deleteDirectory(dirs[i]);
+					} catch (IOException e) {
+						eventHandler.reportEvent(new ErrorEvent(this,
+								"FileStore.delete.marked.plugin",
+								new Object[] {dirs[i]}, e));
+					}
+					continue;
+				}
+				try {
+					plugins.add(createPluginConfig(dirs[i]));
+				} catch (IOException e) {
+					eventHandler.reportEvent(new ErrorEvent(this,
+							"errors.plugin.load.version.failure",
+							new Object[] {e.getMessage()}, e));
+				}
+			}
+		}
+		return plugins.toArray(new PluginMetaDataDto[plugins.size()]);
+	}
+	public final void setConfigRoot(String root) {
+		final File rootDir;
+		if (root.startsWith("${user.home}")) {
+			root = root.substring(13);
+			rootDir = new File(getAppDataDir(), root);
+		} else {
+			rootDir = new File(root);
+		}
+		configRoot = rootDir;
+	}
+	public final String getConfigRoot() {
+		return configRoot.getPath();
+	}
+	public String getWorkingCopyLocationPattern() {
+		if (new File(workingCopyLocationPattern).isAbsolute()) {
+			return workingCopyLocationPattern;
+		}
+		
+		return new File(configRoot, workingCopyLocationPattern).getAbsolutePath();
+	}
+	public void setWorkingCopyLocationPattern(String workingCopyLocationPattern) {
+		this.workingCopyLocationPattern = workingCopyLocationPattern;
+	}
+	public boolean isWorkingCopyLocationInvalid(String location) {
+		final File file = new File(location);
+		
+		if (file.equals(configRoot) || file.equals(getProjectsRoot())
+				|| file.getParentFile().equals(getProjectsRoot())) {
+			return true;
+		}
+		return false;
+	}
+	public final File getConfigFile() {
+		return new File(configRoot, "config.xml");
+	}
+	public final File getPluginsRoot() {
+		return new File(getConfigRoot(), "plugins");
+	}
+	public final File getProjectsRoot() {
+		return new File(getConfigRoot(), "projects");
+	}
+	public int getMaxBuildLogsPerProject() {
+		return maxBuildLogsPerProject;
+	}
+	public void setMaxBuildLogsPerProject(int maxBuildLogsPerProject) {
+		this.maxBuildLogsPerProject = maxBuildLogsPerProject;
+	}
+	public EventHandler getEventHandler() {
+		return eventHandler;
+	}
+	public void setEventHandler(EventHandler errorHandler) {
+		this.eventHandler = errorHandler;
+	}
+	public final static File getAppDataDir() {
+		final File home = new File(System.getProperty("user.home"));
+		if (System.getProperty("os.name").startsWith("Windows")) {
+			return new File(home, "Application Data");
+		}
+		return home;
+	}
+	@SuppressWarnings("unchecked")
+	final URL[] getJars(File dir) {
+		final List<URL> list = new ArrayList<URL>();
+		
+		final Collection<File> jars = FileUtils.listFiles(dir, new SuffixFileFilter(".jar"), null);
+		
+		for (File file : jars) {
+			try {
+				list.add(file.toURL());
+			} catch (MalformedURLException e) {
+				throw new RuntimeException(e);
+			}
+		}
+		return list.toArray(new URL[list.size()]);
+	}
+	protected final PluginMetaDataDto createPluginConfig(File pluginDir) throws IOException {
+		final PluginMetaDataDto plugin = new PluginMetaDataDto();
+		plugin.setId(pluginDir.getName());
+		plugin.setClassPath(getJars(pluginDir));
+		plugin.setDirectory(pluginDir);
+		
+		final File versionFile = new File(pluginDir, "plugin-version.xml");
+		
+		if (!versionFile.exists()) {
+			return plugin;
+		}
+		
+		final InputStream is = new FileInputStream(versionFile);
+		
+		final String versionContents;
+		try {
+			versionContents = IOUtils.toString(is);
+		} finally {
+			is.close();
+		}
+		
+		final PluginVersionSpec spec = PluginVersionDigester.digest(new StringReader(versionContents));
+		
+		plugin.setRevision(spec.getPluginRevision());
+		plugin.setVersion(spec.getVersion());
+
+		return plugin;
+	}
+	protected void checkPluginVersion(File pluginsDir, String id, ZipInputStream zis) throws IOException, InvalidPluginLayoutException, DuplicatePluginIdException {
+		final ZipEntry first = zis.getNextEntry();
+		
+		final String name = first.getName();
+		
+		if (!name.endsWith("plugin-version.xml")) {
+			throw new InvalidPluginLayoutException();
+		}
+		
+		final String versionContents = IOUtils.toString(zis);
+		
+		final File versionFile = new File(pluginsDir, name);
+		if (versionFile.exists()) {
+			// verify that zis is newer than existing
+			final PluginVersionSpec importVersion = PluginVersionDigester.digest(new StringReader(versionContents));
+			final InputStream is = new FileInputStream(versionFile);
+			final PluginVersionSpec installedVersion;
+			
+			try {
+				installedVersion = PluginVersionDigester
+					.digest(new InputStreamReader(is));
+			} finally {
+				is.close();
+			}
+			
+			if (importVersion.getPluginRevision() <= installedVersion.getPluginRevision()) {
+				throw new DuplicatePluginIdException(id);				
+			}
+			
+			FileUtils.cleanDirectory(versionFile.getParentFile());
+			
+			eventHandler.reportEvent(new WarningEvent(this, "FileStore.plugin.updated", new String[] {id}));
+		}
+		
+		final OutputStream os = new FileOutputStream(versionFile);
+		
+		try {
+			IOUtils.copy(new ByteArrayInputStream(versionContents.getBytes()), os);
+		} finally {
+			os.close();
+		}
+	}
+	private void createDir(final File dir) throws CannotCreateDirectoryException {
+		if (!dir.mkdirs()) {
+			throw new CannotCreateDirectoryException(dir);
+		}
+	}
+}

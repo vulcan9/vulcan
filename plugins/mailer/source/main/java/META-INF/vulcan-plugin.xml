@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" 
+	"http://www.springframework.org/dtd/spring-beans.dtd">
+<beans>
+	<bean name="plugin" class="net.sourceforge.vulcan.mailer.EmailPlugin"
+			init-method="init" destroy-method="destroy">
+		<property name="eventHandler">
+			<ref parent="eventHandler"/>
+		</property>
+		<property name="messageAssembler">
+			<bean class="net.sourceforge.vulcan.mailer.MessageAssembler"/>
+		</property>
+		<property name="projectDomBuilder">
+			<ref parent="projectDomBuilder"/>
+		</property>
+		<property name="cssLocation">
+			<value>/css/standard.css</value>
+		</property>
+	</bean>
+	
+	<bean id="messageSource" class="org.springframework.context.support.ResourceBundleMessageSource">
+		<property name="basenames">
+			<list>
+				<value>net.sourceforge.vulcan.mailer.resources.application</value>
+			</list>
+		</property>
+	</bean>
+</beans>

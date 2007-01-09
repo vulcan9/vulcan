@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" 
+	"http://www.springframework.org/dtd/spring-beans.dtd">
+<beans>
+	<bean name="plugin" class="net.sourceforge.vulcan.subversion.SubversionPlugin">
+		<property name="eventHandler">
+			<ref parent="eventHandler"/>
+		</property>
+		<property name="stateManager">
+			<ref parent="stateManager"/>
+		</property>
+	</bean>
+	
+	<bean id="messageSource" class="org.springframework.context.support.ResourceBundleMessageSource">
+		<property name="basenames">
+			<list>
+				<value>net.sourceforge.vulcan.subversion.resources.application</value>
+			</list>
+		</property>
+	</bean>
+</beans>

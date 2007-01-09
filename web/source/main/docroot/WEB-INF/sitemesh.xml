@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sitemesh>
+	<property name="decorators-file" value="/WEB-INF/decorators.xml"/>
+
+	<excludes file="${decorators-file}"/>
+
+	<page-parsers>
+		<parser content-type="application/xhtml+xml" class="net.sourceforge.vulcan.web.sitemesh.FastPageParser"/>
+		<parser content-type="text/xml" class="net.sourceforge.vulcan.web.sitemesh.FastPageParser"/>
+		<parser content-type="text/html" class="net.sourceforge.vulcan.web.sitemesh.FastPageParser"/>
+	</page-parsers>
+
+	<decorator-mappers>
+		<mapper class="com.opensymphony.module.sitemesh.mapper.ConfigDecoratorMapper">
+			<param name="config" value="${decorators-file}" />
+		</mapper>
+	</decorator-mappers>
+</sitemesh>

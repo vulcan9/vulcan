@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" 
+	"http://www.springframework.org/dtd/spring-beans.dtd">
+<beans>
+	<bean name="plugin" 
+		class="net.sourceforge.vulcan.spring.SpringPluginManagerTest$MockPlugin"
+		init-method="init" destroy-method="end">
+		<property name="id"><value>1</value></property>
+        </bean>
+</beans>

@@ -1,0 +1,89 @@
+<?xml version="1.0"?>
+
+<project xmlns:j="jelly:core"
+         xmlns:license="license"
+         xmlns:util="jelly:util"
+         xmlns:ant="jelly:ant"
+         xmlns:artifact="artifact"
+         xmlns:caller="caller">
+
+	<goal name="vulcan" prereqs="vulcan:zip" description="Build a Vulcan plugin zip file"/>
+
+	<goal name="vulcan:version" description="Create Vulcan version annotations for package">
+		<j:if test="${context.getVariable('maven.vulcan.plugin.version.file') == NULL}">
+			<j:set var="maven.vulcan.plugin.version.file" value="${context.getVariable('maven.build.dir')}/plugin-version.xml"/>
+			
+			<!-- defaults when not executing in an integrated build -->
+			<ant:property name="project.build.number" value="0"/>
+			
+			<j:if test="${context.getVariable('project.revision.numeric') == NULL}">
+				<ant:echo>Executing "svn info" to obtain Last-Changed-Rev...</ant:echo>
+				<ant:exec executable="sh" outputproperty="project.revision.numeric">
+					<ant:arg line="-c 'svn info | grep Last\ Changed\ Rev | cut -c19-'"/>
+				</ant:exec>
+			</j:if>
+		
+			<j:set var="_vulcan.version" value="${pom.currentVersion}.${project.build.number}.${project.revision.numeric}"/>
+
+			<ant:echo>Generated version string: ${_vulcan.version}</ant:echo>	
+			<ant:echo file="${context.getVariable('maven.vulcan.plugin.version.file')}"><vulcan-version-descriptor pluginRevision="${project.revision.numeric}" version="${_vulcan.version}" />${line.separator}</ant:echo>
+		</j:if>
+		<j:if test="${context.getVariable('maven.vulcan.plugin.version.file') != NULL}">
+			<ant:copy file="${context.getVariable('maven.vulcan.plugin.version.file')}" tofile="${context.getVariable('maven.build.dir')}/plugin-version.xml"/>
+		</j:if>
+	</goal>
+	
+	<goal name="vulcan:bundle" prereqs="vulcan:zip" description="Bundle plugin with Vulcan war file in local repository">
+		<j:if test="${context.getVariable('maven.vulcan.war') == NULL}">
+			<ant:fail message="Please define maven.vulcan.war to specify which war file the plugin should be bundled with."/>
+		</j:if>
+
+		<ant:zip destfile="${context.getVariable('maven.vulcan.war')}" update="true">
+			<ant:zipfileset prefix="WEB-INF/plugins"
+					dir="${maven.build.dir}">
+				<include name="${pom.package}.zip"/>
+			</ant:zipfileset>
+		</ant:zip>
+	</goal>
+
+	<goal name="vulcan:zip" prereqs="jar:jar,vulcan:version" description="Build a Vulcan plugin zip file">
+		<ant:tempfile property="tmp.jar" destdir="${maven.build.dir}"/>
+		<ant:copy file="${maven.build.dir}/${maven.final.name}.jar" tofile="${tmp.jar}"/>
+
+		<ant:zip destfile="${maven.build.dir}/${maven.final.name}.jar" update="true">
+			<ant:fileset dir="source/main/java" includes="META-INF/vulcan-plugin.xml"/>
+		</ant:zip>
+
+		<ant:zip destfile="${maven.build.dir}/${pom.package}.zip">
+			<ant:zipfileset prefix="${pom.package}"
+					dir="${context.getVariable('maven.build.dir')}">
+				<include name="plugin-version.xml"/>
+			</ant:zipfileset>
+			<ant:zipfileset prefix="${pom.package}"
+					dir="${maven.build.dir}">
+				<include name="${maven.final.name}.jar"/>
+			</ant:zipfileset>
+			<j:forEach var="lib" items="${pom.artifacts}">
+				<j:set var="dep" value="${lib.dependency}"/>
+				<j:if test="${dep.getProperty('vulcan.bundle')=='true'}">
+					<ant:zipfileset prefix="${pom.package}"
+							dir="${lib.file.parent}">
+						<include name="${lib.file.name}"/>
+					</ant:zipfileset>
+				</j:if>
+			</j:forEach>
+			
+			<available file="${maven.build.dir}/vulcan-plugin-includes"
+		        property="maven.plugin.includes"/>
+		    
+		    <j:if test="${maven.plugin.includes}">
+				<ant:zipfileset prefix="${pom.package}"
+						dir="${maven.build.dir}/vulcan-plugin-includes">
+					<include name="**/*"/>
+				</ant:zipfileset>
+			</j:if>
+		</ant:zip>
+		<ant:copy tofile="${maven.build.dir}/${maven.final.name}.jar" file="${tmp.jar}"/>
+		<ant:delete file="${tmp.jar}"/>
+	</goal>
+</project>
