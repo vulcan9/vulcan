@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	
+	<parent>
+		<groupId>net.sourceforge.vulcan.plugins</groupId>
+		<artifactId>abstract-plugin</artifactId>
+		<version>0.9</version>
+	</parent>
+	
+	<groupId>net.sourceforge.vulcan.plugins</groupId>
+	<artifactId>vulcan-cvs</artifactId>
+	<name>vulcan-cvs</name>
+	
+	<packaging>jar</packaging>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>net.sourceforge.vulcan</groupId>
+				<artifactId>maven-vulcan-plugin</artifactId>
+				<configuration>
+					<!-- Override vulcanPluginId for backwards compatibility. -->
+					<vulcanPluginId>net.sourceforge.vulcan.cvs</vulcanPluginId>
+					<bundledDependencies>
+						<param>org.netbeans:cvsclient</param>
+					</bundledDependencies>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+	
+	<dependencies>
+		<dependency>
+			<groupId>org.netbeans</groupId>
+			<artifactId>cvsclient</artifactId>
+			<version>5.5</version>
+			<type>jar</type>
+			<scope>compile</scope>
+		</dependency>
+	</dependencies>
+</project>

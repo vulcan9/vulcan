@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	
+	<groupId>net.sourceforge.vulcan</groupId>
+	<artifactId>vulcan-modules</artifactId>
+	<name>vulcan-modules</name>	
+	<version>0.9</version>
+	<packaging>pom</packaging>
+	
+	<modules>
+		<!-- Core components -->
+		<module>core</module>
+		
+		<!-- J2EE Web Application front-end -->
+		<module>web</module>
+
+		<!-- The Maven-2 plugin used to build Vulcan plugins -->
+		<module>maven-vulcan-plugin</module>
+		
+		<!-- Parent POM for bundled Vulcan plugins -->
+		<module>plugins/abstract-plugin</module>
+		
+		<!-- Bundled Vulcan plugins: -->
+		<module>plugins/vulcan-ant</module>
+		<module>plugins/vulcan-cvs</module>
+	</modules>
+</project>

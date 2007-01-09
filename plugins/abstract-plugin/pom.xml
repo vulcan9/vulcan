@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	
+	<parent>
+		<groupId>net.sourceforge.vulcan</groupId>
+		<artifactId>core</artifactId>
+		<version>0.9</version>
+	</parent>
+	
+	<groupId>net.sourceforge.vulcan.plugins</groupId>
+	<artifactId>abstract-plugin</artifactId>
+	<name>abstract-plugin</name>
+	<packaging>pom</packaging>
+	
+	<build>
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<groupId>net.sourceforge.vulcan</groupId>
+					<artifactId>maven-vulcan-plugin</artifactId>
+					<configuration>
+						<versionLabel>${project.version}.${project.build.number}.${project.revision.numeric}</versionLabel>
+					</configuration>
+					<executions>
+						<execution>
+							<goals>
+								<goal>get-subversion-revision</goal>
+								<goal>generate-plugin-version</goal>
+								<goal>zip</goal>
+								<goal>bundle</goal>
+							</goals>
+						</execution>
+					</executions>
+				</plugin>
+			</plugins>
+		</pluginManagement>
+	</build>
+
+	<dependencies>
+		<dependency>
+			<groupId>net.sourceforge.vulcan</groupId>
+			<!--  TODO: rename artifact to core, use core to manage version -->
+			<artifactId>core</artifactId>
+			<version>0.9</version>
+			<type>jar</type>
+		</dependency>
+	</dependencies>
+</project>
