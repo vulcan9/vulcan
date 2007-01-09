@@ -21,6 +21,7 @@ package net.sourceforge.vulcan;
 import net.sourceforge.vulcan.metadata.SvnRevision;
 
 @SvnRevision(id="$Id$", url="$HeadURL$")
+//TODO: move into web
 public interface Keys {
 	String STATE_MANAGER = "stateManager";
 	String PROJECT_MANAGER = "stateManager";

@@ -6,7 +6,7 @@
 	
 	<parent>
 		<groupId>net.sourceforge.vulcan</groupId>
-		<artifactId>core</artifactId>
+		<artifactId>vulcan</artifactId>
 		<version>0.9</version>
 	</parent>
 	
@@ -42,8 +42,7 @@
 	<dependencies>
 		<dependency>
 			<groupId>net.sourceforge.vulcan</groupId>
-			<!--  TODO: rename artifact to core, use core to manage version -->
-			<artifactId>core</artifactId>
+			<artifactId>vulcan-core</artifactId>
 			<version>0.9</version>
 			<type>jar</type>
 		</dependency>

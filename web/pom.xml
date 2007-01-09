@@ -6,14 +6,15 @@
 	
 	<parent>
 		<groupId>net.sourceforge.vulcan</groupId>
-		<artifactId>core</artifactId>
+		<artifactId>vulcan</artifactId>
 		<version>0.9</version>
 	</parent>
 	
 	<groupId>net.sourceforge.vulcan</groupId>
-	<artifactId>web</artifactId>
-	<packaging>war</packaging>
+	<artifactId>vulcan-web</artifactId>
 	<name>vulcan-web</name>
+	
+	<packaging>war</packaging>
 	
 	<description>
 		Vulcan is a web application providing continuous integration
@@ -21,7 +22,6 @@
 	</description>
 	
 	<build>
-		<finalName>vulcan</finalName>
 		<plugins>
 			<plugin>
 				<artifactId>maven-war-plugin</artifactId>
@@ -35,6 +35,11 @@
 		</plugins>
 	</build>
 	<dependencies>
+		<dependency>
+			<groupId>net.sourceforge.vulcan</groupId>
+			<artifactId>vulcan-core</artifactId>
+			<version>0.9</version>
+		</dependency>
 		<dependency>
 			<groupId>opensymphony</groupId>
 			<artifactId>sitemesh</artifactId>

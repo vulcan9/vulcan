@@ -27,6 +27,7 @@ import org.springframework.web.context.support.StaticWebApplicationContext;
 
 
 @SvnRevision(id="$Id$", url="$HeadURL$")
+@Deprecated
 public class MockWebApplicationContext extends StaticWebApplicationContext {
 	public MockWebApplicationContext() {
 		super();

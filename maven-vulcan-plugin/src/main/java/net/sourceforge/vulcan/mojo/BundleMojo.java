@@ -21,7 +21,6 @@ public class BundleMojo	extends AbstractMojo {
 	 * The directory for the generated WAR.
 	 *
 	 * @parameter expression="${vulcan.war.target}"
-	 * @required
 	 */
 	private File warFile;
 
@@ -46,6 +45,13 @@ public class BundleMojo	extends AbstractMojo {
 	private MavenProject project;
 
 	public void execute() throws MojoExecutionException	{
+		if (warFile == null) {
+			getLog().info("Not bundling plugin to war because no war file was specified.");
+			return;
+		}
+		if (!warFile.exists()) {
+			throw new MojoExecutionException("War file " + warFile.getPath() + " does not exist.");
+		}
 		
 		archiver.setDestFile(warFile);
 		
