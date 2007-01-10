@@ -20,7 +20,7 @@
 			<plugins>
 				<plugin>
 					<groupId>net.sourceforge.vulcan</groupId>
-					<artifactId>maven-vulcan-plugin</artifactId>
+					<artifactId>vulcan-maven-plugin</artifactId>
 					<configuration>
 						<versionLabel>${project.version}.${project.build.number}.${project.revision.numeric}</versionLabel>
 					</configuration>

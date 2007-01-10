@@ -10,22 +10,15 @@
 	<version>0.9</version>
 	<packaging>pom</packaging>
 	
-	<url>http://vulcan.sourceforge.net</url>
-	
-	<issueManagement>
-		<system>google</system>
-		<url>http://code.google.com/p/vulcan/issues/list</url>
-	</issueManagement>
-	
 	<modules>
 		<!-- Core components -->
-		<module>core</module>
+		<module>vulcan-core</module>
 		
 		<!-- J2EE Web Application front-end -->
-		<module>web</module>
+		<module>vulcan-web</module>
 
 		<!-- The Maven-2 plugin used to build Vulcan plugins -->
-		<module>maven-vulcan-plugin</module>
+		<module>vulcan-maven-plugin</module>
 		
 		<!-- Parent POM for bundled Vulcan plugins -->
 		<module>plugins/abstract-plugin</module>
@@ -34,6 +27,13 @@
 		<module>plugins/vulcan-ant</module>
 		<module>plugins/vulcan-cvs</module>
 	</modules>
+	
+	<url>http://vulcan.sourceforge.net</url>
+	
+	<issueManagement>
+		<system>google</system>
+		<url>http://code.google.com/p/vulcan/issues/list</url>
+	</issueManagement>
 	
 	<ciManagement>
 		<system>Vulcan</system>
