@@ -42,7 +42,7 @@ public class PackageDependencyTest extends TestCase {
 	public void setUp() throws IOException {
 		jdepend = new JDepend();
 
-		jdepend.addDirectory("target/classes");
+		jdepend.addDirectory(TestUtils.resolveRelativePath("target/classes"));
 		
 		pkgs = jdepend.analyze();
 	}

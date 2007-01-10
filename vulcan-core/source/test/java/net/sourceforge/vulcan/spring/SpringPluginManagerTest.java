@@ -18,8 +18,9 @@
  */
 package net.sourceforge.vulcan.spring;
 
+import static net.sourceforge.vulcan.TestUtils.resolveRelativeFile;
+
 import java.io.ByteArrayInputStream;
-import java.io.File;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -258,7 +259,7 @@ public class SpringPluginManagerTest extends EasyMockTestCase {
 	public void testInitLoadsBundlesPlugins() throws Exception {
 		mgr.setImportBundledPlugins(true);
 		final String resourcePattern = "/plugins/*.zip";
-		final FileSystemResource resource = new FileSystemResource(new File("source/test/pluginTests/mockPlugin.zip"));
+		final FileSystemResource resource = new FileSystemResource(resolveRelativeFile("source/test/pluginTests/mockPlugin.zip"));
 		
 		mgr.setBundledPluginResourcesPattern(resourcePattern);
 		final MockApplicationContext ctx = new MockApplicationContext() {
@@ -442,7 +443,7 @@ public class SpringPluginManagerTest extends EasyMockTestCase {
 		final PluginMetaDataDto cfg = new PluginMetaDataDto();
 		cfg.setId(Integer.toString(count++));
 		try {
-			cfg.setClassPath(new URL[] {new File(path).toURL()});
+			cfg.setClassPath(new URL[] {resolveRelativeFile(path).toURL()});
 		} catch (MalformedURLException e) {
 			throw new RuntimeException(e);
 		}
