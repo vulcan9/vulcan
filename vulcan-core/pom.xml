@@ -17,4 +17,12 @@
 	
 	<packaging>jar</packaging>
 	<version>0.9</version>
+	
+	<dependencies>
+		<dependency>
+			<groupId>net.sourceforge.vulcan</groupId>
+			<artifactId>vulcan-test-utils</artifactId>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
 </project>

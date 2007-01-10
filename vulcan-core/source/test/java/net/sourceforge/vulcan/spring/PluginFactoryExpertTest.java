@@ -22,7 +22,7 @@ import java.util.List;
 
 import junit.framework.TestCase;
 import net.sourceforge.vulcan.dto.PluginConfigDto;
-import net.sourceforge.vulcan.integration.PluginConfigStub;
+import net.sourceforge.vulcan.integration.PluginStub;
 import net.sourceforge.vulcan.metadata.SvnRevision;
 
 
@@ -65,8 +65,8 @@ public class PluginFactoryExpertTest extends TestCase {
 	public void testGetCtrArgs() throws Exception {
 		id = "mock";
 		
-		expert.registerPlugin(PluginConfigStub.class.getClassLoader(), "mock");
-		final PluginConfigDto cfg = new PluginConfigStub();
+		expert.registerPlugin(PluginStub.class.getClassLoader(), "mock");
+		final PluginConfigDto cfg = new PluginStub();
 		
 		assertEquals("createObject", expert.getFactoryMethod(cfg));
 		
@@ -74,13 +74,13 @@ public class PluginFactoryExpertTest extends TestCase {
 		assertEquals(2, elems.size());
 		
 		assertEquals("mock", elems.get(0));
-		assertEquals(PluginConfigStub.class.getName(), elems.get(1));
+		assertEquals(PluginStub.class.getName(), elems.get(1));
 	}
 	public static enum Foo { A, B };
 	public void testGetFactoryMethod() throws Exception {
 		id = "clock";
-		expert.registerPlugin(PluginConfigStub.class.getClassLoader(), id);
-		final PluginConfigDto cfg = new PluginConfigStub();
+		expert.registerPlugin(PluginStub.class.getClassLoader(), id);
+		final PluginConfigDto cfg = new PluginStub();
 		expert.getConstructorArgs(cfg);
 		
 		assertEquals("createEnum", expert.getFactoryMethod(Foo.A));

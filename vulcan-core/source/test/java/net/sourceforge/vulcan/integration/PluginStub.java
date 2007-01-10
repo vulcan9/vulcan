@@ -16,25 +16,27 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-package net.sourceforge.vulcan;
+package net.sourceforge.vulcan.integration;
 
+import java.beans.PropertyDescriptor;
+import java.util.List;
+import java.util.Locale;
+
+import net.sourceforge.vulcan.dto.PluginConfigDto;
 import net.sourceforge.vulcan.metadata.SvnRevision;
 
-import org.springframework.beans.BeansException;
-import org.springframework.context.support.AbstractApplicationContext;
-import org.springframework.context.support.AbstractMessageSource;
-import org.springframework.web.context.support.StaticWebApplicationContext;
-
-
 @SvnRevision(id="$Id$", url="$HeadURL$")
-public class MockApplicationContext extends StaticWebApplicationContext {
-	public MockApplicationContext() {
-		super();
-		
-		((AbstractMessageSource)super.getBean(AbstractApplicationContext.MESSAGE_SOURCE_BEAN_NAME))
-				.setUseCodeAsDefaultMessage(true);
+public class PluginStub extends PluginConfigDto {
+	@Override
+	public String getPluginId() {
+		return "mock";
 	}
-	public void registerSingleton(String beanName, Object bean) throws BeansException {
-		getBeanFactory().registerSingleton(beanName, bean);
+	@Override
+	public String getPluginName() {
+		return "Mock Plugin";
+	}
+	@Override
+	public List<PropertyDescriptor> getPropertyDescriptors(Locale locale) {
+		return null;
 	}
 }

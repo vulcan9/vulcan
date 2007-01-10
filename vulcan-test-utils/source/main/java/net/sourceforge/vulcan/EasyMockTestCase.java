@@ -29,15 +29,12 @@ import java.util.List;
 
 import junit.framework.TestCase;
 
-import net.sourceforge.vulcan.metadata.SvnRevision;
-
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.easymock.EasyMock;
 import org.easymock.IArgumentMatcher;
 import org.easymock.IExpectationSetters;
 import org.easymock.IMocksControl;
 
-@SvnRevision(id="$Id", url="$HeadURL$")
 public abstract class EasyMockTestCase extends TestCase {
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target({ElementType.METHOD})

@@ -241,6 +241,18 @@
 	
 	<dependencyManagement>
 		<dependencies>
+			<dependency>
+				<groupId>net.sourceforge.vulcan</groupId>
+				<artifactId>vulcan-core</artifactId>
+				<version>0.9</version>
+				<type>jar</type>
+			</dependency>
+			<dependency>
+				<groupId>net.sourceforge.vulcan</groupId>
+				<artifactId>vulcan-test-utils</artifactId>
+				<version>0.9</version>
+				<type>jar</type>
+			</dependency>
 		</dependencies>
 	</dependencyManagement>
 	
@@ -249,6 +261,20 @@
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
 			<version>3.8.2</version>
+			<type>jar</type>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>easymock</groupId>
+			<artifactId>easymock</artifactId>
+			<version>2.2</version>
+			<type>jar</type>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>jdepend</groupId>
+			<artifactId>jdepend</artifactId>
+			<version>2.7</version>
 			<type>jar</type>
 			<scope>test</scope>
 		</dependency>
@@ -316,13 +342,6 @@
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
-			<groupId>easymock</groupId>
-			<artifactId>easymock</artifactId>
-			<version>2.2</version>
-			<type>jar</type>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
 			<groupId>jug</groupId>
 			<artifactId>jug-lgpl</artifactId>
 			<version>2.0.0</version>
@@ -342,13 +361,6 @@
 			<version>1.0</version>
 			<type>jar</type>
 			<scope>compile</scope>
-		</dependency>
-		<dependency>
-			<groupId>jdepend</groupId>
-			<artifactId>jdepend</artifactId>
-			<version>2.7</version>
-			<type>jar</type>
-			<scope>test</scope>
 		</dependency>
 	</dependencies>
 </project>

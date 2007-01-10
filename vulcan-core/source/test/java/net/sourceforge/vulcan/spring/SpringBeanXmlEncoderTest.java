@@ -31,7 +31,6 @@ import java.util.UUID;
 
 import junit.framework.TestCase;
 import net.sourceforge.vulcan.dto.Date;
-import net.sourceforge.vulcan.integration.PluginConfigStub;
 import net.sourceforge.vulcan.metadata.SvnRevision;
 import net.sourceforge.vulcan.metadata.Transient;
 import net.sourceforge.vulcan.spring.SpringBeanXmlEncoderTest.Bean.Status;
@@ -551,9 +550,8 @@ public class SpringBeanXmlEncoderTest extends TestCase {
 		
 		final Element root = new Element("beans");
 
-		PluginConfigStub cfg = new PluginConfigStub();
+		Bean cfg = new Bean();
 		cfg.setValue("a value");
-		cfg.setObj(null);
 		
 		enc.encodeBeanOrValue(root, cfg);
 		

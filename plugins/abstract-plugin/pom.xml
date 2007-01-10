@@ -43,8 +43,12 @@
 		<dependency>
 			<groupId>net.sourceforge.vulcan</groupId>
 			<artifactId>vulcan-core</artifactId>
-			<version>0.9</version>
-			<type>jar</type>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>net.sourceforge.vulcan</groupId>
+			<artifactId>vulcan-test-utils</artifactId>
+			<scope>test</scope>
 		</dependency>
 	</dependencies>
 </project>

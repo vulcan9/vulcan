@@ -22,9 +22,6 @@ import java.io.File;
 
 import org.apache.commons.lang.StringUtils;
 
-import net.sourceforge.vulcan.metadata.SvnRevision;
-
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public abstract class TestUtils {
 	private static final String basedir;
 	

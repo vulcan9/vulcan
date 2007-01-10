@@ -38,7 +38,12 @@
 		<dependency>
 			<groupId>net.sourceforge.vulcan</groupId>
 			<artifactId>vulcan-core</artifactId>
-			<version>0.9</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>net.sourceforge.vulcan</groupId>
+			<artifactId>vulcan-test-utils</artifactId>
+			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>opensymphony</groupId>

@@ -18,21 +18,20 @@
  */
 package net.sourceforge.vulcan;
 
-import java.security.Principal;
+import org.springframework.beans.BeansException;
+import org.springframework.context.support.AbstractApplicationContext;
+import org.springframework.context.support.AbstractMessageSource;
+import org.springframework.web.context.support.StaticWebApplicationContext;
 
-public class SimplePrincipal implements Principal {
-	private String name;
-	
-	public SimplePrincipal() {
-		this("testuser");
+
+public class MockApplicationContext extends StaticWebApplicationContext {
+	public MockApplicationContext() {
+		super();
+		
+		((AbstractMessageSource)super.getBean(AbstractApplicationContext.MESSAGE_SOURCE_BEAN_NAME))
+				.setUseCodeAsDefaultMessage(true);
 	}
-	public SimplePrincipal(String name) {
-		this.name = name;
-	}
-	public String getName() {
-		return name;
-	}
-	public void setName(String name) {
-		this.name = name;
+	public void registerSingleton(String beanName, Object bean) throws BeansException {
+		getBeanFactory().registerSingleton(beanName, bean);
 	}
 }

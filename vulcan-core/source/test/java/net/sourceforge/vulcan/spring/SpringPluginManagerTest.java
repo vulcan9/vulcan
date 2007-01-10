@@ -41,7 +41,7 @@ import net.sourceforge.vulcan.exception.PluginNotFoundException;
 import net.sourceforge.vulcan.integration.BuildManagerObserverPlugin;
 import net.sourceforge.vulcan.integration.ConfigurablePlugin;
 import net.sourceforge.vulcan.integration.Plugin;
-import net.sourceforge.vulcan.integration.PluginConfigStub;
+import net.sourceforge.vulcan.integration.PluginStub;
 import net.sourceforge.vulcan.integration.ProjectNameAwarePlugin;
 import net.sourceforge.vulcan.metadata.SvnRevision;
 
@@ -188,7 +188,7 @@ public class SpringPluginManagerTest extends EasyMockTestCase {
 	static boolean destroyCalled = false;
 	static boolean nameChangeCalled = false;
 	static BuildCompletedEvent event = null;
-	static PluginConfigDto configBean = new PluginConfigStub();
+	static PluginConfigDto configBean = new PluginStub();
 	
 	public static class MockPlugin implements BuildManagerObserverPlugin, ProjectNameAwarePlugin {
 		String id;
