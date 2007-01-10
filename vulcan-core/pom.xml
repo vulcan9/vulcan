@@ -16,7 +16,6 @@
 	<name>vulcan-core</name>
 	
 	<packaging>jar</packaging>
-	<version>0.9</version>
 	
 	<dependencies>
 		<dependency>

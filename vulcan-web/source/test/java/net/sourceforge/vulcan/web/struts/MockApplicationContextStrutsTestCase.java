@@ -35,6 +35,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import junit.framework.AssertionFailedError;
 import net.sourceforge.vulcan.Keys;
+import net.sourceforge.vulcan.TestUtils;
 import net.sourceforge.vulcan.core.BuildManager;
 import net.sourceforge.vulcan.core.ProjectDomBuilder;
 import net.sourceforge.vulcan.core.Store;
@@ -105,7 +106,7 @@ public abstract class MockApplicationContextStrutsTestCase extends EasyMockStrut
 		
 		multipartElements.clear();
 		
-		setContextDirectory(new File("source/main/docroot"));
+		setContextDirectory(TestUtils.resolveRelativeFile("source/main/docroot"));
 		
 		setRequestProcessor(new RequestProcessor() {
 			@Override

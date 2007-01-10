@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.util.Properties;
 
 import junit.framework.TestCase;
+import net.sourceforge.vulcan.TestUtils;
 import net.sourceforge.vulcan.dto.ProjectConfigDto;
 
 import org.apache.commons.lang.StringUtils;
@@ -41,7 +42,7 @@ abstract class AntBuildToolTestBase extends TestCase {
 		if (StringUtils.isBlank(tmp)) {
 			try {
 				final Properties props = new Properties();
-				props.load(new FileInputStream(new File("build.properties")));
+				props.load(new FileInputStream(TestUtils.resolveRelativeFile("build.properties")));
 				tmp = props.getProperty("ant.home");
 			} catch (IOException e) {
 				tmp = null;
@@ -60,7 +61,7 @@ abstract class AntBuildToolTestBase extends TestCase {
 		tool = new AntBuildTool(config, antConfig);
 		
 		projectConfig = new ProjectConfigDto();
-		projectConfig.setWorkDir("source/test/workdir");
+		projectConfig.setWorkDir(TestUtils.resolveRelativePath("source/test/workdir"));
 		
 		if (StringUtils.isBlank(antHome) || !(new File(antHome)).isDirectory()) {
 			fail("Please define ant.home in build.properties");

@@ -27,6 +27,7 @@ import java.util.Date;
 import javax.servlet.ServletException;
 
 import net.sourceforge.vulcan.Keys;
+import net.sourceforge.vulcan.TestUtils;
 import net.sourceforge.vulcan.dto.ProjectConfigDto;
 import net.sourceforge.vulcan.exception.NoSuchProjectException;
 import net.sourceforge.vulcan.metadata.SvnRevision;
@@ -35,7 +36,7 @@ import org.springframework.web.context.WebApplicationContext;
 
 @SvnRevision(id="$Id$", url="$HeadURL$")
 public class ProjectFileServletTest extends ServletTestCase {
-	final static File TEST_DIR = new File("source/test/servlet");
+	final static File TEST_DIR = TestUtils.resolveRelativeFile("source/test/servlet");
 
 	final Date modDate = new Date(1132616904000L);
 	
