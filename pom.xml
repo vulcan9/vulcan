@@ -11,6 +11,9 @@
 	<packaging>pom</packaging>
 	
 	<modules>
+		<!-- Test resources -->
+		<module>vulcan-test-utils</module>
+		
 		<!-- Core components -->
 		<module>vulcan-core</module>
 		
