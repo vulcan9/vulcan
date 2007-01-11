@@ -16,18 +16,18 @@
 	
 	<packaging>jar</packaging>
 
+	<properties>
+		<vulcan.plugin.id>net.sourceforge.vulcan.ant</vulcan.plugin.id>
+	</properties>
+	
 	<build>
 		<plugins>
 			<plugin>
 				<groupId>net.sourceforge.vulcan</groupId>
 				<artifactId>vulcan-maven-plugin</artifactId>
-				<configuration>
-					<!-- Override vulcanPluginId for backwards compatibility. -->
-					<vulcanPluginId>net.sourceforge.vulcan.ant</vulcanPluginId>
-					<!--bundledDependencies>
-						<param>ant:nonesuch</param>
-					</bundledDependencies-->
-				</configuration>
+			</plugin>
+			<plugin>
+				<artifactId>maven-assembly-plugin</artifactId>
 			</plugin>
 			<plugin>
 				<artifactId>maven-compiler-plugin</artifactId>
@@ -61,6 +61,7 @@
 			<artifactId>ant</artifactId>
 			<version>1.6.5</version>
 			<type>jar</type>
+			<scope>provided</scope>
 		</dependency>
 	</dependencies>
 </project>

@@ -1,0 +1,21 @@
+<assembly>
+	<id>vulcan-plugin</id>
+	<formats>
+		<format>zip</format>
+	</formats>
+	<includeBaseDirectory>false</includeBaseDirectory>
+	<fileSets>
+		<fileSet>
+			<directory>target</directory>
+			<outputDirectory>${vulcan.plugin.id}</outputDirectory>
+			<includes>
+				<include>plugin-version.xml</include>
+				<include>*.jar</include>
+			</includes>
+		</fileSet>
+		<fileSet>
+			<directory>target/vulcan-plugin-includes</directory>
+			<outputDirectory>${vulcan.plugin.id}</outputDirectory>
+		</fileSet>
+	</fileSets>
+</assembly>

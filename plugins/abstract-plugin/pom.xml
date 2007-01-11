@@ -15,6 +15,10 @@
 	<name>abstract-plugin</name>
 	<packaging>pom</packaging>
 	
+	<properties>
+		<vulcan-maven-plugin.version>1.0-SNAPSHOT</vulcan-maven-plugin.version>
+	</properties>
+	
 	<build>
 		<pluginManagement>
 			<plugins>
@@ -23,19 +27,69 @@
 					<artifactId>vulcan-maven-plugin</artifactId>
 					<configuration>
 						<versionLabel>${project.version}.${project.build.number}.${project.revision.numeric}</versionLabel>
+						<vulcanPluginId>${vulcan.plugin.id}</vulcanPluginId>
 					</configuration>
 					<executions>
 						<execution>
 							<goals>
 								<goal>get-subversion-revision</goal>
 								<goal>generate-plugin-version</goal>
-								<goal>zip</goal>
 								<goal>bundle</goal>
 							</goals>
 						</execution>
 					</executions>
 				</plugin>
-			</plugins>
+
+				<!-- Some plugins need to be bundled with a subset of their
+					dependencies.  Since maven2 has limited use for scoping
+					dependencies, they must be singled out instead of inventing
+					a new scope. -->			
+				<plugin>
+					<groupId>org.codehaus.mojo</groupId>
+					<artifactId>dependency-maven-plugin</artifactId>
+					<configuration>
+						<outputDirectory>${project.build.directory}/vulcan-plugin-includes</outputDirectory>
+					</configuration>
+					<executions>
+						<execution>
+							<id>copy-dependencies</id>
+							<phase>package</phase>
+							<goals>
+								<goal>copy</goal>
+							</goals>
+						</execution>
+					</executions>
+				</plugin>
+				
+				<plugin>
+					<artifactId>maven-assembly-plugin</artifactId>
+					<configuration>
+						<finalName>${vulcan.plugin.id}</finalName>
+						<appendAssemblyId>false</appendAssemblyId>
+						<descriptorRefs>
+							<param>
+								vulcan-plugin
+							</param>
+						</descriptorRefs>
+					</configuration>
+					<executions>
+						<execution>
+							<id>build-vulcan-plugin-zip</id>
+							<phase>package</phase>
+							<goals>
+								<goal>attached</goal>
+							</goals>
+						</execution>
+					</executions>
+					<dependencies>
+						<dependency>
+							<groupId>net.sourceforge.vulcan</groupId>
+							<artifactId>vulcan-maven-plugin</artifactId>
+							<version>${vulcan-maven-plugin.version}</version>
+						</dependency>
+					</dependencies> 
+				</plugin>
+			</plugins>		
 		</pluginManagement>
 	</build>
 

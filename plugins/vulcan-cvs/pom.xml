@@ -16,29 +16,49 @@
 	
 	<packaging>jar</packaging>
 
+	<properties>
+		<vulcan.plugin.id>net.sourceforge.vulcan.cvs</vulcan.plugin.id>
+	</properties>
+	
 	<build>
 		<plugins>
 			<plugin>
 				<groupId>net.sourceforge.vulcan</groupId>
 				<artifactId>vulcan-maven-plugin</artifactId>
+			</plugin>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>dependency-maven-plugin</artifactId>
 				<configuration>
-					<!-- Override vulcanPluginId for backwards compatibility. -->
-					<vulcanPluginId>net.sourceforge.vulcan.cvs</vulcanPluginId>
-					<bundledDependencies>
-						<param>org.netbeans:cvsclient</param>
-					</bundledDependencies>
+					<artifactItems>
+						<artifactItem>
+							 <groupId>org.netbeans</groupId>
+							 <artifactId>cvsclient</artifactId>
+						 </artifactItem>
+					 </artifactItems>
 				</configuration>
+			</plugin>
+			<plugin>
+				<artifactId>maven-assembly-plugin</artifactId>
 			</plugin>
 		</plugins>
 	</build>
 	
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>org.netbeans</groupId>
+				<artifactId>cvsclient</artifactId>
+				<version>5.5</version>
+				<scope>compile</scope>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
+
 	<dependencies>
 		<dependency>
 			<groupId>org.netbeans</groupId>
 			<artifactId>cvsclient</artifactId>
-			<version>5.5</version>
-			<type>jar</type>
-			<scope>compile</scope>
 		</dependency>
 	</dependencies>
 </project>
