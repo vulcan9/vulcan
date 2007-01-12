@@ -34,7 +34,6 @@
 							<goals>
 								<goal>get-subversion-revision</goal>
 								<goal>generate-plugin-version</goal>
-								<goal>bundle</goal>
 							</goals>
 						</execution>
 					</executions>
