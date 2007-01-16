@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	
+	<parent>
+		<groupId>net.sourceforge.vulcan.plugins</groupId>
+		<artifactId>abstract-plugin</artifactId>
+		<version>0.9</version>
+	</parent>
+	
+	<groupId>net.sourceforge.vulcan.plugins</groupId>
+	<artifactId>vulcan-subvserion</artifactId>
+	<name>vulcan-subvserion</name>
+	
+	<packaging>jar</packaging>
+
+	<properties>
+		<vulcan.plugin.id>net.sourceforge.vulcan.subversion</vulcan.plugin.id>
+	</properties>
+	
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>net.sourceforge.vulcan</groupId>
+				<artifactId>vulcan-maven-plugin</artifactId>
+			</plugin>
+			<plugin>
+				<artifactId>maven-assembly-plugin</artifactId>
+			</plugin>
+		</plugins>
+	</build>
+	
+	<dependencies>
+		<dependency>
+			<groupId>org.tmate</groupId>
+			<artifactId>svnkit</artifactId>
+			<version>1.1.0</version>
+		</dependency>
+	</dependencies>
+</project>

@@ -99,6 +99,7 @@
 				<includes>
 					<include>**/*.properties</include>
 					<include>**/*.xml</include>
+					<include>**/*.xsl</include>
 				</includes>
 			</resource>
 		</resources>
@@ -108,6 +109,7 @@
 				<includes>
 					<include>**/*.properties</include>
 					<include>**/*.xml</include>
+					<include>**/*.xsl</include>
 				</includes>
 			</testResource>
 		</testResources>
@@ -270,6 +272,11 @@
 				<groupId>commons-io</groupId>
 				<artifactId>commons-io</artifactId>
 				<version>1.2</version>
+			</dependency>
+			<dependency>
+				<groupId>ant</groupId>
+				<artifactId>ant</artifactId>
+				<version>1.6.5</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
