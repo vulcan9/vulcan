@@ -18,7 +18,6 @@
  */
 package net.sourceforge.vulcan.core.support;
 
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.FileInputStream;
@@ -27,7 +26,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
 import java.io.StringReader;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -90,21 +88,20 @@ public abstract class AbstractFileStore implements Store {
 				throw new InvalidPluginLayoutException();
 			}
 			toplevel = entry.getName();
-			topDir = new File(pluginsDir, toplevel);
+			topDir = new File(pluginsDir, "tmp-" + toplevel);
 			if (!topDir.exists()) {
 				createDir(topDir);
 			}
 
 			final String id = toplevel.replaceAll("/", "");
 
-			checkPluginVersion(pluginsDir, id, zis);
-			
 			while ((entry = zis.getNextEntry()) != null) {
-				final File out = new File(pluginsDir, entry.getName());
 				if (!entry.getName().startsWith(toplevel)) {
 					throw new InvalidPluginLayoutException();
 				}
 
+				final File out = new File(pluginsDir, "tmp-" + entry.getName());
+				
 				if (entry.isDirectory()) {
 					createDir(out);
 					zis.closeEntry();
@@ -119,7 +116,10 @@ public abstract class AbstractFileStore implements Store {
 					}
 				}
 			}
-			return createPluginConfig(topDir);
+			
+			checkPluginVersion(pluginsDir, id);
+			
+			return createPluginConfig(new File(pluginsDir, toplevel));
 		} catch (DuplicatePluginIdException e) {
 			throw e;
 		} catch (Exception e) {
@@ -288,46 +288,46 @@ public abstract class AbstractFileStore implements Store {
 
 		return plugin;
 	}
-	protected void checkPluginVersion(File pluginsDir, String id, ZipInputStream zis) throws IOException, InvalidPluginLayoutException, DuplicatePluginIdException {
-		final ZipEntry first = zis.getNextEntry();
+	protected void checkPluginVersion(File pluginsDir, String id) throws IOException, InvalidPluginLayoutException, DuplicatePluginIdException {
+		final File tmpDir = new File(pluginsDir, "tmp-" + id);
+		final File newVersionFile = new File(tmpDir, "plugin-version.xml");
+
+		final File targetDir = new File(pluginsDir, id);
+		final File existingVersionFile = new File(targetDir, "plugin-version.xml");
 		
-		final String name = first.getName();
+		if (!targetDir.exists()) {
+			if (!tmpDir.renameTo(targetDir)) {
+				throw new IOException("Cannot rename " + tmpDir + " to " + targetDir);
+			}
+
+			return;
+		}
 		
-		if (!name.endsWith("plugin-version.xml")) {
+		if (!newVersionFile.exists()) {
 			throw new InvalidPluginLayoutException();
 		}
 		
-		final String versionContents = IOUtils.toString(zis);
-		
-		final File versionFile = new File(pluginsDir, name);
-		if (versionFile.exists()) {
-			// verify that zis is newer than existing
-			final PluginVersionSpec importVersion = PluginVersionDigester.digest(new StringReader(versionContents));
-			final InputStream is = new FileInputStream(versionFile);
-			final PluginVersionSpec installedVersion;
+		final PluginVersionSpec importVersion = parsePluginVersion(newVersionFile);
+		final PluginVersionSpec installedVersion = parsePluginVersion(existingVersionFile);
 			
-			try {
-				installedVersion = PluginVersionDigester
-					.digest(new InputStreamReader(is));
-			} finally {
-				is.close();
-			}
+		if (importVersion.getPluginRevision() <= installedVersion.getPluginRevision()) {
+			throw new DuplicatePluginIdException(id);				
+		}
 			
-			if (importVersion.getPluginRevision() <= installedVersion.getPluginRevision()) {
-				throw new DuplicatePluginIdException(id);				
-			}
-			
-			FileUtils.cleanDirectory(versionFile.getParentFile());
-			
-			eventHandler.reportEvent(new WarningEvent(this, "FileStore.plugin.updated", new String[] {id}));
+		FileUtils.deleteDirectory(targetDir);
+		if (!tmpDir.renameTo(targetDir)) {
+			throw new IOException("Cannot rename " + tmpDir + " to " + targetDir);
 		}
 		
-		final OutputStream os = new FileOutputStream(versionFile);
-		
+		eventHandler.reportEvent(new WarningEvent(this, "FileStore.plugin.updated", new String[] {id}));
+	}
+	private PluginVersionSpec parsePluginVersion(final File existingVersionFile) throws FileNotFoundException, IOException {
+		final InputStream is = new FileInputStream(existingVersionFile);
+
 		try {
-			IOUtils.copy(new ByteArrayInputStream(versionContents.getBytes()), os);
+			return PluginVersionDigester.digest(new InputStreamReader(is));
 		} finally {
-			os.close();
+			is.close();
 		}
 	}
 	private void createDir(final File dir) throws CannotCreateDirectoryException {

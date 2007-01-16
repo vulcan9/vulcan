@@ -17,11 +17,26 @@
 	
 	<properties>
 		<vulcan-maven-plugin.version>1.0-SNAPSHOT</vulcan-maven-plugin.version>
+		<vulcan.zips.target>${basedir}/../zips</vulcan.zips.target>
 	</properties>
 	
 	<build>
 		<pluginManagement>
 			<plugins>
+				<plugin>
+					<artifactId>maven-clean-plugin</artifactId>
+					<configuration>
+						<filesets>
+							<fileset>
+								<directory>${vulcan.zips.target}</directory>
+								<includes>
+									<include>${vulcan.plugin.id}*</include>
+								</includes>
+							</fileset>
+						</filesets>
+					</configuration>
+				</plugin>
+				
 				<plugin>
 					<groupId>net.sourceforge.vulcan</groupId>
 					<artifactId>vulcan-maven-plugin</artifactId>
@@ -39,31 +54,11 @@
 					</executions>
 				</plugin>
 
-				<!-- Some plugins need to be bundled with a subset of their
-					dependencies.  Since maven2 has limited use for scoping
-					dependencies, they must be singled out instead of inventing
-					a new scope. -->			
-				<plugin>
-					<groupId>org.codehaus.mojo</groupId>
-					<artifactId>dependency-maven-plugin</artifactId>
-					<configuration>
-						<outputDirectory>${project.build.directory}/vulcan-plugin-includes</outputDirectory>
-					</configuration>
-					<executions>
-						<execution>
-							<id>copy-dependencies</id>
-							<phase>package</phase>
-							<goals>
-								<goal>copy</goal>
-							</goals>
-						</execution>
-					</executions>
-				</plugin>
-				
 				<plugin>
 					<artifactId>maven-assembly-plugin</artifactId>
 					<configuration>
 						<finalName>${vulcan.plugin.id}</finalName>
+						<outputDirectory>${vulcan.zips.target}</outputDirectory>
 						<appendAssemblyId>false</appendAssemblyId>
 						<descriptorRefs>
 							<param>

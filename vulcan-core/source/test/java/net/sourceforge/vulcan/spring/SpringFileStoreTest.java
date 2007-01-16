@@ -217,6 +217,25 @@ public class SpringFileStoreTest extends EasyMockTestCase {
 			FileUtils.deleteDirectory(mockPluginDir);
 		}
 	}
+	public void testExtractPluginVersionDescriptorNotFirstEntry() throws Exception {
+		try {
+			final File zip = TestUtils.resolveRelativeFile("source/test/pluginTests/mockPluginUnordered.zip");
+			assertTrue(zip.exists());
+			
+			final InputStream is = new FileInputStream(zip);
+			
+			assertFalse(mockPluginDir.isDirectory());
+			
+			final PluginMetaDataDto plugin = store.extractPlugin(is);
+			assertEquals(1, plugin.getClassPath().length);
+			assertTrue(plugin.getClassPath()[0].toString().endsWith("mock/token.jar"));
+			assertEquals(mockPluginDir, plugin.getDirectory());
+			
+			assertTrue(mockPluginDir.isDirectory());
+		} finally {
+			FileUtils.deleteDirectory(mockPluginDir);
+		}
+	}
 	public void testExtractPluginNoTopLevel() throws Exception {
 		final File zip = TestUtils.resolveRelativeFile("source/test/pluginTests/flat.zip");
 		assertTrue(zip.exists());

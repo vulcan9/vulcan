@@ -26,25 +26,44 @@
 			<plugin>
 				<artifactId>maven-war-plugin</artifactId>
 				<configuration>
-					<warSourceDirectory>source/main/docroot</warSourceDirectory>
 					<archiveClasses>true</archiveClasses>
-					<dependentWarExcludes>
-					</dependentWarExcludes>
+					<webResources>
+						<resource>
+							<directory>${basedir}/source/main/docroot</directory>
+							<excludes>
+								<!-- Hack when building on Windows with Subversion
+									Asp.NET hack enabled. -->
+								<exclude>**/_svn/**</exclude>
+							</excludes>
+						</resource>
+						<resource>
+							<directory>${basedir}/../plugins/zips</directory>
+							<targetPath>WEB-INF/plugins</targetPath>
+							<includes>
+								<include>*.zip</include>
+							</includes>
+						</resource>
+						
+					</webResources>
 				</configuration>
 			</plugin>
 		</plugins>
 	</build>
+	
 	<dependencies>
+		<!-- Dependencies managed by parent -->
 		<dependency>
 			<groupId>net.sourceforge.vulcan</groupId>
 			<artifactId>vulcan-core</artifactId>
-			<scope>provided</scope>
+			<scope>compile</scope>
 		</dependency>
 		<dependency>
 			<groupId>net.sourceforge.vulcan</groupId>
 			<artifactId>vulcan-test-utils</artifactId>
 			<scope>test</scope>
 		</dependency>
+
+		<!--  Dependencies managed by vulcan-web -->
 		<dependency>
 			<groupId>opensymphony</groupId>
 			<artifactId>sitemesh</artifactId>

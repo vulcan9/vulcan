@@ -27,38 +27,17 @@
 				<artifactId>vulcan-maven-plugin</artifactId>
 			</plugin>
 			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>dependency-maven-plugin</artifactId>
-				<configuration>
-					<artifactItems>
-						<artifactItem>
-							 <groupId>org.netbeans</groupId>
-							 <artifactId>cvsclient</artifactId>
-						 </artifactItem>
-					 </artifactItems>
-				</configuration>
-			</plugin>
-			<plugin>
 				<artifactId>maven-assembly-plugin</artifactId>
 			</plugin>
 		</plugins>
 	</build>
 	
-	<dependencyManagement>
-		<dependencies>
-			<dependency>
-				<groupId>org.netbeans</groupId>
-				<artifactId>cvsclient</artifactId>
-				<version>5.5</version>
-				<scope>compile</scope>
-			</dependency>
-		</dependencies>
-	</dependencyManagement>
-
 	<dependencies>
 		<dependency>
 			<groupId>org.netbeans</groupId>
 			<artifactId>cvsclient</artifactId>
+			<version>5.5</version>
+			<scope>compile</scope>
 		</dependency>
 	</dependencies>
 </project>
