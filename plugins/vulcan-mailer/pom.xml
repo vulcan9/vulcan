@@ -11,13 +11,13 @@
 	</parent>
 	
 	<groupId>net.sourceforge.vulcan.plugins</groupId>
-	<artifactId>vulcan-metrics</artifactId>
-	<name>vulcan-metrics</name>
+	<artifactId>vulcan-mailer</artifactId>
+	<name>vulcan-mailer</name>
 	
 	<packaging>jar</packaging>
 
 	<properties>
-		<vulcan.plugin.id>net.sourceforge.vulcan.metrics</vulcan.plugin.id>
+		<vulcan.plugin.id>net.sourceforge.vulcan.mailer</vulcan.plugin.id>
 	</properties>
 	
 	<build>
@@ -34,8 +34,9 @@
 	
 	<dependencies>
 		<dependency>
-			<groupId>org.apache.ant</groupId>
-			<artifactId>ant</artifactId>
+			<groupId>javax.mail</groupId>
+			<artifactId>mail</artifactId>
+			<version>1.4</version>
 			<scope>compile</scope>
 		</dependency>
 	</dependencies>

@@ -18,16 +18,15 @@
  */
 package net.sourceforge.vulcan.metrics.scanner.ant;
 
-import java.io.File;
-
 import junit.framework.TestCase;
+import net.sourceforge.vulcan.TestUtils;
 
 public class AntFileScannerTest extends TestCase {
 	AntFileScanner scanner = new AntFileScanner();
 	
 	public void testScanNoIncludes() throws Exception {
 		final String[] matched = scanner.scanFiles(
-				new File("source/test/scan-root"),
+				TestUtils.resolveRelativeFile("source/test/scan-root"),
 				new String[0],
 				new String[0]);
 		
@@ -36,7 +35,7 @@ public class AntFileScannerTest extends TestCase {
 
 	public void testScanIncludesAll() throws Exception {
 		final String[] matched = scanner.scanFiles(
-				new File("source/test/scan-root"),
+				TestUtils.resolveRelativeFile("source/test/scan-root"),
 				new String[] {"**/*"},
 				new String[0]);
 		
@@ -45,7 +44,7 @@ public class AntFileScannerTest extends TestCase {
 
 	public void testScanIncludesSingleLevel() throws Exception {
 		final String[] matched = scanner.scanFiles(
-				new File("source/test/scan-root"),
+				TestUtils.resolveRelativeFile("source/test/scan-root"),
 				new String[] {"*/*"},
 				new String[0]);
 		
@@ -54,7 +53,7 @@ public class AntFileScannerTest extends TestCase {
 
 	public void testScanExcludes() throws Exception {
 		final String[] matched = scanner.scanFiles(
-				new File("source/test/scan-root"),
+				TestUtils.resolveRelativeFile("source/test/scan-root"),
 				new String[] {"**/*"},
 				new String[] {"*/2"});
 		
@@ -63,7 +62,7 @@ public class AntFileScannerTest extends TestCase {
 
 	public void testScanExcludesWild() throws Exception {
 		final String[] matched = scanner.scanFiles(
-				new File("source/test/scan-root"),
+				TestUtils.resolveRelativeFile("source/test/scan-root"),
 				new String[] {"**/*"},
 				new String[] {"**/2"});
 		

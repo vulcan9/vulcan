@@ -94,20 +94,7 @@ public class SerializingBuildEventPublisherTest extends TestCase {
 		
 		final BuildException buildException = new BuildException("whoops", new IllegalStateException());
 		
-		final Task task = new Task() {
-			@Override
-			public String getTaskName() {
-				return "mockTask";
-			}
-			@Override
-			public String getDescription() {
-				return "mockTaskDescription";
-			}
-			@Override
-			public void execute() throws BuildException {
-				throw buildException;
-			}
-		};
+		final Task task = new TaskStub(buildException);
 		task.setProject(p);
 		
 		tgt.addTask(task);
@@ -127,6 +114,28 @@ public class SerializingBuildEventPublisherTest extends TestCase {
 			assertNotNull(event);
 			assertNotNull("Event has null project", event.getProjectName());
 			
+		}
+	}
+	public static final class TaskStub extends Task {
+		private final BuildException exception;
+
+		public TaskStub(BuildException exception) {
+			this.exception = exception;
+		}
+
+		@Override
+		public String getTaskName() {
+			return "mockTask";
+		}
+
+		@Override
+		public String getDescription() {
+			return "mockTaskDescription";
+		}
+
+		@Override
+		public void execute() throws BuildException {
+			throw exception;
 		}
 	}
 }
