@@ -43,7 +43,6 @@
 								<include>*.zip</include>
 							</includes>
 						</resource>
-						
 					</webResources>
 				</configuration>
 			</plugin>
