@@ -11,12 +11,14 @@
 	<fmt:message key="build.timestamp.format" var="timestampPattern"/>	
 
 	<c:set var="buildingProjects" value="${stateManager.buildManager.projectsBeingBuilt}"/>
+	<c:set var="projects" value="${stateManager.config.projects}"/>
+	<c:set var="projectStatus" value="${stateManager.buildManager.projectStatus}"/>
 	
-	<c:forEach items="${stateManager.config.projects}" var="project">
+	<c:forEach items="${projects}" var="project">
 		<jsp:element name="project">
 			<jsp:attribute name="name">${project.name}</jsp:attribute>
 			<jsp:body>
-				<c:set var="status" value="${stateManager.buildManager.projectStatus[project.name]}"/>
+				<c:set var="status" value="${projectStatus[project.name]}"/>
 				<c:choose>
 					<c:when test="${buildingProjects[project.name] != null}">
 						<status>BUILDING</status>
