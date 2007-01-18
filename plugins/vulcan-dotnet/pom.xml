@@ -19,7 +19,6 @@
 	<properties>
 		<vulcan.plugin.id>net.sourceforge.vulcan.dotnet</vulcan.plugin.id>
 	</properties>
-	
 	<build>
 		<plugins>
 			<plugin>
@@ -33,13 +32,13 @@
 			
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>maven-exec-plugin</artifactId>
+				<artifactId>exec-maven-plugin</artifactId>
 				<executions>
 					<execution>
 						<id>nant</id>
 						<phase>compile</phase>
 						<goals>
-							<goal>compile</goal>
+							<goal>exec</goal>
 						</goals>
 						<configuration>
 							<executable>${nant.program.path}</executable>
@@ -47,6 +46,7 @@
 							<arguments>
 								<argument>-t:${nant.target.framework}</argument>
 								<argument>-D:nunit.bin.dir=${nunit.bin.dir}</argument>
+								<argument>-D:version=${project.version}.${project.build.number}.${project.revision.numeric}</argument>
 							</arguments>
 						</configuration>
 					</execution>

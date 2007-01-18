@@ -1,16 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <project name="vulcan-dotnet" default="all" xmlns="http://nant.sf.net/schemas/nant.xsd">
 	<property name="assembly.target.dir" value="${project::get-base-directory()}/target/assemblies"/>
+	<property name="assembly.dist.dir" value="${project::get-base-directory()}/target/vulcan-plugin-includes"/>
 	<property name="assembly.info.file" value="${project::get-base-directory()}/target/AssemblyInfo.cs"/>
 	<property name="test.report.dir" value="${project::get-base-directory()}/target/nunit-reports"/>
 
 	<property name="build.debug" value="false"/>
 
-	<property name="version" value="0.9.0.0"/>
+	<property name="version" value="0.0.0.0"/>
 
 	<target name="all">
 		<call target="build"/>
 		<call target="unit-test"/>
+		<call target="copy-dist"/>
 	</target>
 
 	<target name="build">
@@ -113,6 +115,15 @@
 				outputdir="${test.report.dir}"/>
 			<test assemblyname="${assembly.target.dir}/UnitTests.dll"/>
 		</nunit2>
+	</target>
+	
+	<target name="copy-dist">
+		<copy todir="${assembly.dist.dir}">
+			<fileset basedir="${assembly.target.dir}">
+				<include name="*.dll"/>
+				<exclude name="*test*"/>
+			</fileset>
+		</copy>
 	</target>
 </project>
 
