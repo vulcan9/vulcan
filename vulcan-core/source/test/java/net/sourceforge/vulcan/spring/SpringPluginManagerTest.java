@@ -21,6 +21,7 @@ package net.sourceforge.vulcan.spring;
 import static net.sourceforge.vulcan.TestUtils.resolveRelativeFile;
 
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -66,7 +67,6 @@ public class SpringPluginManagerTest extends EasyMockTestCase {
 		mgr.setStore(store);
 		
 		mgr.setPluginBeanName("plugin");
-		mgr.setPluginConfigResourcePath("META-INF/vulcan-plugin.xml");
 		mgr.setMessageSource(loader);
 		mgr.setBuildEventPluginPublisher(buildEventPluginPublisher);
 		mgr.setEventHandler(new EventHandler() {
@@ -168,7 +168,8 @@ public class SpringPluginManagerTest extends EasyMockTestCase {
 			mgr.createPlugin(createFakePluginConfig(false), true);
 			fail("expected exception");
 		} catch (PluginLoadFailureException e) {
-			assertEquals("IOException parsing XML document from class path resource [META-INF/vulcan-plugin.xml]; nested exception is java.io.FileNotFoundException: class path resource [META-INF/vulcan-plugin.xml] cannot be opened because it does not exist", e.getMessage());
+			final String message = e.getMessage();
+			assertTrue(message, message.startsWith("IOException parsing XML document"));
 		}
 		assertEquals(0, mgr.plugins.size());
 	}
@@ -442,8 +443,10 @@ public class SpringPluginManagerTest extends EasyMockTestCase {
 	private PluginMetaDataDto createFakePluginConfig(String path) {
 		final PluginMetaDataDto cfg = new PluginMetaDataDto();
 		cfg.setId(Integer.toString(count++));
+		final File dir = resolveRelativeFile(path);
+		cfg.setDirectory(dir);
 		try {
-			cfg.setClassPath(new URL[] {resolveRelativeFile(path).toURL()});
+			cfg.setClassPath(new URL[] {dir.toURL()});
 		} catch (MalformedURLException e) {
 			throw new RuntimeException(e);
 		}
