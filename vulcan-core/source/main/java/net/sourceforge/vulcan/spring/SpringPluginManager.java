@@ -97,7 +97,7 @@ public class SpringPluginManager
 		PluginMetaDataDto pluginConfig;
 		Plugin plugin;
 		
-		PluginState(PluginMetaDataDto pluginConfig, String contextPath, String beanName, ApplicationContext ctx) throws Exception {
+		PluginState(PluginMetaDataDto pluginConfig, String contextUrl, String beanName, ApplicationContext ctx) throws Exception {
 			final ClassLoader tmpLoader = Thread.currentThread().getContextClassLoader();
 			
 			this.pluginConfig = pluginConfig;
@@ -107,7 +107,7 @@ public class SpringPluginManager
 				Thread.currentThread().setContextClassLoader(this.classLoader);
 
 				this.context = new FileSystemXmlApplicationContext(
-						new String[] {contextPath}, false, ctx);
+						new String[] {contextUrl}, false, ctx);
 				
 				this.context.addBeanFactoryPostProcessor(
 					new BeanFactoryPostProcessor() {
@@ -382,10 +382,9 @@ public class SpringPluginManager
 	synchronized void createPlugin(PluginMetaDataDto plugin, boolean deleteOnFailure) throws PluginLoadFailureException {
 		final String id = plugin.getId();
 		
-		String contextPath = new File(plugin.getDirectory(), "vulcan-plugin.xml").getAbsolutePath();
-		
 		try {
-			final PluginState state = new PluginState(plugin, contextPath, pluginBeanName, ctx);
+			final String contextUrl = new File(plugin.getDirectory(), "vulcan-plugin.xml").toURL().toString();
+			final PluginState state = new PluginState(plugin, contextUrl, pluginBeanName, ctx);
 			
 			if (plugins.containsKey(id)) {
 				destroyPlugin(id);
