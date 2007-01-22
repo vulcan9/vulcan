@@ -73,7 +73,7 @@ public abstract class AbstractFileStore implements Store {
 	public final PluginMetaDataDto extractPlugin(InputStream is) throws StoreException {
 		final File pluginsDir = getPluginsRoot();
 		String toplevel = null;
-		File topDir = null;
+		File tmpDir = null;
 		
 		if (!pluginsDir.exists()) {
 			createDir(pluginsDir);
@@ -88,9 +88,9 @@ public abstract class AbstractFileStore implements Store {
 				throw new InvalidPluginLayoutException();
 			}
 			toplevel = entry.getName();
-			topDir = new File(pluginsDir, "tmp-" + toplevel);
-			if (!topDir.exists()) {
-				createDir(topDir);
+			tmpDir = new File(pluginsDir, "tmp-" + toplevel);
+			if (!tmpDir.exists()) {
+				createDir(tmpDir);
 			}
 
 			final String id = toplevel.replaceAll("/", "");
@@ -123,12 +123,6 @@ public abstract class AbstractFileStore implements Store {
 		} catch (DuplicatePluginIdException e) {
 			throw e;
 		} catch (Exception e) {
-			if (topDir != null) {
-				try {
-					FileUtils.deleteDirectory(topDir);
-				} catch (Exception ignore) {
-				}
-			}
 			if (e instanceof StoreException) {
 				throw (StoreException) e;
 			}
@@ -137,6 +131,12 @@ public abstract class AbstractFileStore implements Store {
 			try {
 				zis.close();
 			} catch (IOException ignore) {
+			}
+			if (tmpDir != null && tmpDir.exists()) {
+				try {
+					FileUtils.deleteDirectory(tmpDir);
+				} catch (Exception ignore) {
+				}
 			}
 		}
 	}

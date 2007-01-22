@@ -24,5 +24,12 @@
 			<directory>target/vulcan-plugin-includes</directory>
 			<outputDirectory>${vulcan.plugin.id}</outputDirectory>
 		</fileSet>
+		<fileSet>
+			<directory>source/main/config</directory>
+			<outputDirectory>${vulcan.plugin.id}</outputDirectory>
+			<includes>
+				<include>vulcan-plugin.xml</include>
+			</includes>
+		</fileSet>
 	</fileSets>
 </assembly>

@@ -18,6 +18,10 @@
  */
 package net.sourceforge.vulcan.spring;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -25,11 +29,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URLClassLoader;
 
 import net.sourceforge.vulcan.BuildTool;
 import net.sourceforge.vulcan.PluginManager;
@@ -65,7 +64,7 @@ import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
-import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.springframework.context.support.FileSystemXmlApplicationContext;
 import org.springframework.context.support.ResourceBundleMessageSource;
 import org.springframework.core.io.Resource;
 
@@ -83,7 +82,6 @@ public class SpringPluginManager
 	DelegatingResourceBundleMessageSource messageSource;
 	SpringBeanXmlEncoder.FactoryExpert factoryExpert;
 	
-	String pluginConfigResourcePath;
 	String pluginBeanName;
 	
 	boolean importBundledPlugins;
@@ -94,12 +92,12 @@ public class SpringPluginManager
 	final Map<String, PluginState> plugins = new HashMap<String, PluginState>();
 	
 	class PluginState {
-		ClassPathXmlApplicationContext context;
+		FileSystemXmlApplicationContext context;
 		ClassLoader classLoader;
 		PluginMetaDataDto pluginConfig;
 		Plugin plugin;
 		
-		PluginState(PluginMetaDataDto pluginConfig, String pluginConfigResourcePath, String beanName, ApplicationContext ctx) throws Exception {
+		PluginState(PluginMetaDataDto pluginConfig, String contextPath, String beanName, ApplicationContext ctx) throws Exception {
 			final ClassLoader tmpLoader = Thread.currentThread().getContextClassLoader();
 			
 			this.pluginConfig = pluginConfig;
@@ -108,8 +106,8 @@ public class SpringPluginManager
 			try {
 				Thread.currentThread().setContextClassLoader(this.classLoader);
 
-				this.context = new ClassPathXmlApplicationContext(
-						new String[] {pluginConfigResourcePath}, false, ctx);
+				this.context = new FileSystemXmlApplicationContext(
+						new String[] {contextPath}, false, ctx);
 				
 				this.context.addBeanFactoryPostProcessor(
 					new BeanFactoryPostProcessor() {
@@ -334,12 +332,6 @@ public class SpringPluginManager
 	public void setStore(Store store) {
 		this.store = store;
 	}
-	public String getPluginConfigResourcePath() {
-		return pluginConfigResourcePath;
-	}
-	public void setPluginConfigResourcePath(String pluginConfigResourcePath) {
-		this.pluginConfigResourcePath = pluginConfigResourcePath;
-	}
 	public String getPluginBeanName() {
 		return pluginBeanName;
 	}
@@ -390,8 +382,10 @@ public class SpringPluginManager
 	synchronized void createPlugin(PluginMetaDataDto plugin, boolean deleteOnFailure) throws PluginLoadFailureException {
 		final String id = plugin.getId();
 		
+		String contextPath = new File(plugin.getDirectory(), "vulcan-plugin.xml").getAbsolutePath();
+		
 		try {
-			final PluginState state = new PluginState(plugin, pluginConfigResourcePath, pluginBeanName, ctx);
+			final PluginState state = new PluginState(plugin, contextPath, pluginBeanName, ctx);
 			
 			if (plugins.containsKey(id)) {
 				destroyPlugin(id);
