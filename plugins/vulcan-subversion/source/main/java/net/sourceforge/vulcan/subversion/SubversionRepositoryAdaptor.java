@@ -55,10 +55,12 @@ import org.apache.commons.logging.LogFactory;
 import org.tmatesoft.svn.core.ISVNLogEntryHandler;
 import org.tmatesoft.svn.core.SVNCancelException;
 import org.tmatesoft.svn.core.SVNDirEntry;
+import org.tmatesoft.svn.core.SVNErrorCode;
 import org.tmatesoft.svn.core.SVNException;
 import org.tmatesoft.svn.core.SVNLogEntry;
 import org.tmatesoft.svn.core.SVNNodeKind;
 import org.tmatesoft.svn.core.SVNURL;
+import org.tmatesoft.svn.core.auth.BasicAuthenticationManager;
 import org.tmatesoft.svn.core.internal.io.dav.DAVRepositoryFactory;
 import org.tmatesoft.svn.core.internal.wc.DefaultSVNOptions;
 import org.tmatesoft.svn.core.io.SVNRepository;
@@ -74,6 +76,11 @@ import org.tmatesoft.svn.core.wc.SVNUpdateClient;
 import org.tmatesoft.svn.core.wc.SVNWCClient;
 
 public class SubversionRepositoryAdaptor extends PluginSupport implements RepositoryAdaptor {
+	static {
+		// Prefer Basic in case server offers to use NTLM first.
+		System.setProperty("svnkit.http.methods", "Basic"); 
+	}
+	
 	private final Log log = LogFactory.getLog(getClass());
 	private final SubversionProjectConfigDto config;
 	private final SubversionRepositoryProfileDto profile;
@@ -83,13 +90,12 @@ public class SubversionRepositoryAdaptor extends PluginSupport implements Reposi
 	private final Map<String, Long> byteCounters;
 	
 	final DefaultSVNOptions options;
+	final LineOfDevelopment lineOfDevelopment = new LineOfDevelopment();
 
-	private String tagName;
 	private long revision = -1;
+	private long diffStartRevision = -1;
 	
-	final Set<String> tagFolderNames = new HashSet<String>();
 	private final StateManager stateManager;
-	
 	
 	public SubversionRepositoryAdaptor(SubversionConfigDto repoConfig, ProjectConfigDto projectConfig, SubversionProjectConfigDto config, StateManager stateManager) throws ConfigException {
 		this(repoConfig, projectConfig, config, stateManager, true);
@@ -127,7 +133,7 @@ public class SubversionRepositoryAdaptor extends PluginSupport implements Reposi
 		
 		if (StringUtils.isNotBlank(profile.getUsername())) {
 			svnRepository.setAuthenticationManager(
-					new NonCachingAuthenticationManager(
+					new BasicAuthenticationManager(
 							profile.getUsername(),
 							profile.getPassword()));
 		}
@@ -135,20 +141,24 @@ public class SubversionRepositoryAdaptor extends PluginSupport implements Reposi
 		this.options = new DefaultSVNOptions();
 		this.options.setAuthStorageEnabled(false);
 		
-		tagFolderNames.addAll(Arrays.asList(repoConfig.getTagFolderNames()));
+		lineOfDevelopment.setPath(config.getPath());
+		lineOfDevelopment.setRepositoryRoot(profile.getRootUrl());
+		lineOfDevelopment.setTagFolderNames(new HashSet<String>(Arrays.asList(repoConfig.getTagFolderNames())));
 	}
 
 	public RevisionTokenDto getLatestRevision() throws RepositoryException {
+		final String path = lineOfDevelopment.getComputedRelativePath();
 		final SVNDirEntry info;
+		
 		try {
-			info = svnRepository.info(getRelativePath(), revision);
+			info = svnRepository.info(path, revision);
 		} catch (SVNException e) {
 			throw new RepositoryException(e);
 		}
 		
 		if (info == null) {
 			throw new RepositoryException("svn.path.not.exist",
-					new String[] {getRelativePath()}, null);
+					new String[] {path}, null);
 		}
 		
 		revision = info.getRevision();
@@ -206,7 +216,7 @@ public class SubversionRepositoryAdaptor extends PluginSupport implements Reposi
 		final SVNRevision r2 = SVNRevision.create(revision);
 		
 		final List<ChangeSetDto> changeSets = fetchChangeSets(r1, r2);
-		fetchDifferences(r1, r2, diffOutputStream);
+		fetchDifferences(SVNRevision.create(diffStartRevision), r2, diffOutputStream);
 		
 		final ChangeLogDto changeLog = new ChangeLogDto();
 		
@@ -217,7 +227,7 @@ public class SubversionRepositoryAdaptor extends PluginSupport implements Reposi
 
 	@SuppressWarnings("unchecked")
 	public List<RepositoryTagDto> getAvailableTags() throws RepositoryException {
-		final String projectRoot = determineTagRoot(getRelativePath());
+		final String projectRoot = lineOfDevelopment.getComputedTagRoot();
 		
 		final List<RepositoryTagDto> tags = new ArrayList<RepositoryTagDto>();
 		
@@ -231,7 +241,7 @@ public class SubversionRepositoryAdaptor extends PluginSupport implements Reposi
 			
 			for (SVNDirEntry entry : entries) {
 				final String folderName = entry.getName();
-				if (entry.getKind() == SVNNodeKind.DIR && isTag(folderName)) {
+				if (entry.getKind() == SVNNodeKind.DIR && lineOfDevelopment.isTag(folderName)) {
 					addTags(projectRoot, folderName, tags);
 				}
 			}
@@ -257,28 +267,11 @@ public class SubversionRepositoryAdaptor extends PluginSupport implements Reposi
 	}
 	
 	public String getTagName() {
-		if (tagName != null) {
-			return tagName;
-		}
-		
-		final String[] paths = getRelativePath().split("/");
-		
-		if (paths.length > 1) {
-			for (int i=0; i<paths.length-1; i++) {
-				if (isTag(paths[i])) {
-					return paths[i] + "/" + paths[i+1];
-				}
-			}
-		}
-		return "trunk";
+		return lineOfDevelopment.getComputedTagName();
 	}
 
 	public void setTagName(String tagName) {
-		this.tagName = tagName;
-	}
-	
-	private boolean isTag(String name) {
-		return tagFolderNames.contains(name);
+		lineOfDevelopment.setAlternateTagName(tagName);
 	}
 	
 	List<ChangeSetDto> fetchChangeSets(final SVNRevision r1, final SVNRevision r2) throws RepositoryException {
@@ -287,17 +280,24 @@ public class SubversionRepositoryAdaptor extends PluginSupport implements Reposi
 		
 		final List<ChangeSetDto> changeSets = new ArrayList<ChangeSetDto>();
 		
+		diffStartRevision = r2.getNumber();
+		
 		final ISVNLogEntryHandler handler = new ISVNLogEntryHandler() {
 			@SuppressWarnings("unchecked")
 			public void handleLogEntry(SVNLogEntry logEntry) {
-				if (logEntry.getRevision() == r1.getNumber()) {
+				final long logEntryRevision = logEntry.getRevision();
+				if (diffStartRevision > logEntryRevision) {
+					diffStartRevision = logEntryRevision;
+				}
+				
+				if (logEntryRevision == r1.getNumber()) {
 					/* The log message for r1 is in the previous build report.  Don't include it twice */ 
 					return;
 				}
 				
 				final ChangeSetDto changeSet = new ChangeSetDto();
 				
-				changeSet.setRevision(new RevisionTokenDto(logEntry.getRevision(), "r" + logEntry.getRevision()));
+				changeSet.setRevision(new RevisionTokenDto(logEntryRevision, "r" + logEntryRevision));
 				changeSet.setAuthor(logEntry.getAuthor());
 				changeSet.setMessage(logEntry.getMessage());
 				changeSet.setTimestamp(new Date(logEntry.getDate().getTime()));
@@ -313,7 +313,7 @@ public class SubversionRepositoryAdaptor extends PluginSupport implements Reposi
 		try {
 			logClient.doLog(
 					SVNURL.parseURIEncoded(profile.getRootUrl()),
-					new String[] {getRelativePath()},
+					new String[] {lineOfDevelopment.getComputedRelativePath()},
 					r1, r1, r2,
 					true,
 					true,
@@ -341,6 +341,7 @@ public class SubversionRepositoryAdaptor extends PluginSupport implements Reposi
 
 	void fetchDifferences(final SVNRevision r1, final SVNRevision r2, OutputStream os) throws RepositoryException {
 		final SVNDiffClient diffClient = new SVNDiffClient(svnRepository.getAuthenticationManager(), options);
+
 		diffClient.setEventHandler(eventHandler);
 		
 		try {
@@ -348,69 +349,21 @@ public class SubversionRepositoryAdaptor extends PluginSupport implements Reposi
 			os.close();
 		} catch (SVNCancelException e) {
 		} catch (SVNException e) {
-			throw new RepositoryException(e);
+			if (e.getErrorMessage().getErrorCode() == SVNErrorCode.RA_DAV_PATH_NOT_FOUND) {
+				// This usually happens when building from a different branch or tag that 
+				// does not share ancestry with the previous build.
+				log.info("Failed to obtain diff of revisions r"
+						+ r1.getNumber() + ":" + r2.getNumber(), e);
+			} else {
+				throw new RepositoryException(e);
+			}
 		} catch (IOException e) {
 			throw new RepositoryException(e);
 		}
 	}
 	
 	SVNURL getCompleteSVNURL() throws SVNException {
-		final String relativePath = getRelativePath();
-		
-		final StringBuffer url = new StringBuffer(profile.getRootUrl());
-		
-		if (!profile.getRootUrl().endsWith("/") && !relativePath.startsWith("/")) {
-			url.append("/");
-		}
-		url.append(relativePath);
-		
-		return SVNURL.parseURIEncoded(url.toString());
-	}
-	
-	String getRelativePath() {
-		if (tagName != null) {
-			StringBuffer buf = new StringBuffer(determineTagRoot(config.getPath()));
-			
-			if (buf.charAt(buf.length()-1) != '/' && tagName.charAt(0) != '/') {
-				buf.append('/');
-			}
-			
-			buf.append(tagName);
-			return buf.toString();
-		}
-		return config.getPath();
-	}
-
-	String determineTagRoot(String path) {
-		final String[] paths = path.split("/");
-		int lastPath = -1;
-		
-		for (int i=0; i<paths.length; i++) {
-			if ("trunk".equals(paths[i])) {
-				lastPath = i;
-				break;
-			} else if (isTag(paths[i])) {
-				lastPath = i;
-				break;
-			}
-		}
-
-		if (lastPath < 0) {
-			return path;
-		}
-		
-		final StringBuffer buf = new StringBuffer();
-		
-		for (int i=0; i<lastPath; i++) {
-			if (StringUtils.isBlank(paths[i])) {
-				continue;
-			}
-			
-			buf.append("/");
-			buf.append(paths[i]);
-		}
-		
-		return buf.toString();
+		return SVNURL.parseURIEncoded(lineOfDevelopment.getAbsoluteUrl());
 	}
 	
 	String combinePatterns(String logRegex, String messagePattern) {

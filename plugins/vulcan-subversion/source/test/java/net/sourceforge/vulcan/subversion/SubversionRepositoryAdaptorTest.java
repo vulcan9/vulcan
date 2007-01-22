@@ -62,98 +62,8 @@ public class SubversionRepositoryAdaptorTest extends TestCase {
 		r = new SubversionRepositoryAdaptor(globalConfig, projectConfig, repoConfig, null, false);
 	}
 	
-	public void testDefaultIsTrunk() throws Exception {
-		assertTagName("", "trunk");
-		assertTagName("/", "trunk");
-		assertTagName("/foo", "trunk");
-		assertTagName("/trunk", "trunk");
-		assertTagName("/foo/trunk", "trunk");
-		assertTagName("foo/trunk", "trunk");
-		assertTagName("foo/trunk/bar", "trunk");
-		assertTagName("foo/head", "trunk");
-	}
-
-	public void testDetectsTagInNestedFolder() throws Exception {
-		r.tagFolderNames.add("branches");
-		r.tagFolderNames.add("tags");
-		
-		assertTagName("foo/trunk/bar", "trunk");
-		assertTagName("foo/branches/1.6/bar", "branches/1.6");
-		assertTagName("/tags/1.6/bar/cat", "tags/1.6");
-	}
-	
-	public void testBranch() throws Exception {
-		assertTagName("/myProject/branches/1.1-bug-fix", "trunk");
-		
-		r.tagFolderNames.add("branches");
-		
-		assertTagName("/myProject/branches/1.1-bug-fix", "branches/1.1-bug-fix");
-	}
-	
-	public void testGoofy() throws Exception {
-		assertTagName("/myProject/goofy/1.1-bug-fix", "trunk");
-		
-		r.tagFolderNames.add("goofy");
-		
-		assertTagName("/myProject/goofy/1.1-bug-fix", "goofy/1.1-bug-fix");
-	}
-	
-	public void testSetTagName() throws Exception {
-		repoConfig.setPath("/myProject/trunk");
-		
-		assertEquals("http://localhost/svn/myProject/trunk", r.getCompleteSVNURL().toString());
-		assertEquals("/myProject/trunk", r.getRelativePath());
-		
-		r.setTagName("branches/bug-fix");
-		
-		assertEquals("branches/bug-fix", r.getTagName());
-		
-		assertEquals("/myProject/branches/bug-fix", r.getRelativePath());
-		assertEquals("http://localhost/svn/myProject/branches/bug-fix", r.getCompleteSVNURL().toString());
-	}
-	
-	public void testSetTagNameOnVariantPath() throws Exception {
-		r.tagFolderNames.add("samples");
-		
-		repoConfig.setPath("/myProject/samples/4.1");
-		
-		assertEquals("http://localhost/svn/myProject/samples/4.1", r.getCompleteSVNURL().toString());
-		assertEquals("/myProject/samples/4.1", r.getRelativePath());
-		
-		r.setTagName("branches/bug-fix");
-		
-		assertEquals("branches/bug-fix", r.getTagName());
-		
-		assertEquals("/myProject/branches/bug-fix", r.getRelativePath());
-		assertEquals("http://localhost/svn/myProject/branches/bug-fix", r.getCompleteSVNURL().toString());
-	}
-	
-	public void testDetectProjectRoot() throws Exception {
-		assertEquals("/myProject", r.determineTagRoot("/myProject"));
-		assertEquals("/myProject", r.determineTagRoot("/myProject/trunk"));
-		assertEquals("/myProject", r.determineTagRoot("/myProject/trunk/"));
-		
-		assertEquals("/myProject/taggy/hello", r.determineTagRoot("/myProject/taggy/hello"));
-		assertEquals("/myProject/branchy/howdy", r.determineTagRoot("/myProject/branchy/howdy"));
-		
-		r.tagFolderNames.add("taggy");
-		r.tagFolderNames.add("branchy");
-		
-		assertEquals("/myProject", r.determineTagRoot("/myProject/taggy/hello"));
-		assertEquals("/myProject", r.determineTagRoot("/myProject/branchy/howdy"));
-	}
-	
-	public void testDetectProjectRootSubModule() throws Exception {
-		assertEquals("/myProject", r.determineTagRoot("/myProject/trunk/submodule"));
-	}
-	
-	public void testDetectProjectRootSubModuleBranch() throws Exception {
-		assertEquals("/myProject/branches/1.5/submodule", r.determineTagRoot("/myProject/branches/1.5/submodule"));
-		r.tagFolderNames.add("branches");
-		assertEquals("/myProject", r.determineTagRoot("/myProject/branches/1.5/submodule"));
-	}
-	
 	public void testSortsTags() throws Exception {
+		final String path = "/myProject";
 		final List<SVNDirEntry> unsorted = new ArrayList<SVNDirEntry>();
 		
 		final SVNURL fakeURL = SVNURL.parseURIEncoded("http://localhost");
@@ -161,10 +71,12 @@ public class SubversionRepositoryAdaptorTest extends TestCase {
 		unsorted.add(new SVNDirEntry(fakeURL, "b", SVNNodeKind.DIR, 1, false, 1, new Date(), ""));
 		unsorted.add(new SVNDirEntry(fakeURL, "a", SVNNodeKind.DIR, 1, false, 1, new Date(), ""));
 		
+		repoConfig.setPath(path);
+		
 		r = new SubversionRepositoryAdaptor(globalConfig, projectConfig, repoConfig, null, new SVNRepositoryImpl(fakeURL, null) {
 			@Override
 			public Collection getDir(String path, long arg1, Map arg2, Collection arg3) throws SVNException {
-				if (repoConfig.getPath().equals(path)) {
+				if (path.equals(path)) {
 					return Collections.singletonList(new SVNDirEntry(fakeURL, "tags", SVNNodeKind.DIR, 1, false, 1, new Date(), "tags"));
 				}
 				
@@ -172,7 +84,8 @@ public class SubversionRepositoryAdaptorTest extends TestCase {
 			}
 		});
 		
-		repoConfig.setPath("/myProject");
+		
+		r.lineOfDevelopment.setPath(path);
 		
 		final List<RepositoryTagDto> tags = r.getAvailableTags();
 		
@@ -223,9 +136,5 @@ public class SubversionRepositoryAdaptorTest extends TestCase {
 		assertEquals("bug (\\d+)", r.combinePatterns("bug (\\d+)", null));
 		assertEquals("Bug-ID: (\\d+)", r.combinePatterns(null, "Bug-ID: %BUGID%"));
 		assertEquals("bug (\\d+)|Bug-ID: (\\d+)", r.combinePatterns("bug (\\d+)", "Bug-ID: %BUGID%"));
-	}
-	private void assertTagName(String path, String expectedTagName) {
-		repoConfig.setPath(path);
-		assertEquals("for path " + path, expectedTagName, r.getTagName());
 	}
 }
