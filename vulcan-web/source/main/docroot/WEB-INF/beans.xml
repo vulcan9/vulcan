@@ -69,7 +69,6 @@
 		<property name="eventHandler" ref="eventHandler"/>
 		<property name="messageSource" ref="messageSource"/>
 		<property name="factoryExpert" ref="factoryExpert"/>
-		<property name="pluginConfigResourcePath"><value>META-INF/vulcan-plugin.xml</value></property>
 		<property name="pluginBeanName"><value>plugin</value></property>
 		<property name="importBundledPlugins"><value>true</value></property>
 		<property name="bundledPluginResourcesPattern"><value>/WEB-INF/plugins/*.zip</value></property>
