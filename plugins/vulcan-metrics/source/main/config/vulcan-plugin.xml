@@ -15,8 +15,8 @@
 		</property>
 		<property name="transfomSources">
 			<list>
-				<value>net/sourceforge/vulcan/metrics/resources/unit-test.xsl</value>
-				<value>net/sourceforge/vulcan/metrics/resources/code-coverage.xsl</value>
+				<value>classpath:net/sourceforge/vulcan/metrics/resources/unit-test.xsl</value>
+				<value>classpath:net/sourceforge/vulcan/metrics/resources/code-coverage.xsl</value>
 			</list>
 		</property>
 		<property name="transformerFactory">
