@@ -23,6 +23,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Hashtable;
@@ -42,7 +43,6 @@ import net.sourceforge.vulcan.core.Store;
 import net.sourceforge.vulcan.event.EventHandler;
 import net.sourceforge.vulcan.event.EventPool;
 import net.sourceforge.vulcan.metadata.SvnRevision;
-import net.sourceforge.vulcan.web.MockWebApplicationContext;
 import net.sourceforge.vulcan.web.ServletTestCase;
 
 import org.apache.commons.lang.StringUtils;
@@ -59,12 +59,15 @@ import org.apache.struts.upload.CommonsMultipartRequestHandler;
 import org.apache.struts.upload.FormFile;
 import org.apache.struts.util.ModuleUtils;
 import org.springframework.web.context.WebApplicationContext;
+import org.springframework.web.context.support.StaticWebApplicationContext;
+
+import servletunit.struts.ExceptionDuringTestError;
 
 @SvnRevision(id="$Id$", url="$HeadURL$")
 public abstract class MockApplicationContextStrutsTestCase extends EasyMockStrutsTestCase {
 	protected ActionForward resultForward;
 	protected final static Hashtable<String, Object> multipartElements = new Hashtable<String, Object>();
-	protected final MockWebApplicationContext wac = new MockWebApplicationContext();
+	protected final StaticWebApplicationContext wac = new StaticWebApplicationContext();
 
 	protected ServletTestCase.StateAndProjectManager manager;
 	protected BuildManager buildManager;
@@ -100,7 +103,13 @@ public abstract class MockApplicationContextStrutsTestCase extends EasyMockStrut
 	
 	@Override
 	public void setUp() throws Exception {
-		super.setUp();
+		setUp(true);
+	}
+
+	protected void setUp(boolean callSuper) throws Exception, ServletException {
+		if (callSuper) {
+			super.setUp();
+		}
 
 		context.setAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE, wac);
 		
@@ -153,20 +162,22 @@ public abstract class MockApplicationContextStrutsTestCase extends EasyMockStrut
 		try {
 			super.actionPerform();
 		} catch (UncaughtExceptionError e) {
-			final Throwable cause = e.getCause();
-			if (cause instanceof ServletException) {
-				final Throwable seCause = cause.getCause();
-				if (seCause instanceof RuntimeException) {
-					throw (RuntimeException) seCause;
-				} else if (seCause != null) {
-					throw new RuntimeException(seCause);
-				}
-			} else if (cause instanceof RuntimeException) {
-				throw (RuntimeException) cause;
+			throwCause(e.getCause());
+		} catch (ExceptionDuringTestError e) {
+			final Throwable t;
+			
+			try {
+				final Field field = e.getClass().getDeclaredField("rootCause");
+				field.setAccessible(true);
+				t = (Throwable) field.get(e);
+			} catch (Exception reflectionException) {
+				throw new RuntimeException(reflectionException);
 			}
-			throw e;
+			
+			throwCause(t);
 		}
 	}
+
 	@Override
 	public final void verifyForward(String forwardName) throws AssertionFailedError {
 		if (resultForward == null) {
@@ -280,7 +291,7 @@ public abstract class MockApplicationContextStrutsTestCase extends EasyMockStrut
 	protected final <T> T defineWacSingleton(String beanName, Class<T> type) {
 		final T t = createMock(type);
 		
-		wac.registerSingleton(beanName, t);
+		wac.getBeanFactory().registerSingleton(beanName, t);
 		
 		return t;
 	}
@@ -307,4 +318,19 @@ public abstract class MockApplicationContextStrutsTestCase extends EasyMockStrut
 		wac.refresh();
 	}
 
+
+	private void throwCause(Throwable cause) {
+		if (cause instanceof ServletException) {
+			final Throwable seCause = cause.getCause();
+			if (seCause instanceof RuntimeException) {
+				throw (RuntimeException) seCause;
+			} else if (seCause != null) {
+				throw new RuntimeException(seCause);
+			}
+		} else if (cause instanceof RuntimeException) {
+			throw (RuntimeException) cause;
+		}
+		
+		throw new RuntimeException(cause);
+	}
 }

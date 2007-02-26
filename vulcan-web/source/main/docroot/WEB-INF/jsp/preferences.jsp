@@ -9,8 +9,6 @@
 	xmlns:html="http://jakarta.apache.org/struts/tags-html"
 	xmlns:v="http://vulcan.sourceforge.net/j2ee/jsp/tags">
 
-<jsp:directive.page session="false"/>
-
 <html:xhtml/>
 
 <head>
@@ -24,10 +22,24 @@
 <body>
 
 <v:bubble styleClass="preferences">
-	<form name="preferencesForm" id="preferencesForm" action="#" method="post">
+	<html:form action="/viewPreferences" styleId="preferencesForm" method="post">
 		<table>
 			<caption><fmt:message key="captions.preferences"/></caption>
 			<tbody>
+				<tr>
+					<th><fmt:message key="th.style.sheet"/></th>
+					<td>
+						<ul class="metaDataOptions">
+							<c:forEach items="${preferencesForm.availableStyleSheets}" var="option">
+								<li>
+									<html:radio property="dto.styleSheet"
+										value="${option.value}" styleId="${option.value}"/>
+									<label for="${option.value}">${option.name}</label>
+								</li>
+							</c:forEach>
+						</ul>
+					</td>
+				</tr>
 				<tr>
 					<th><fmt:message key="th.external.resources"/></th>
 					<td>
@@ -99,7 +111,7 @@
 				</tr>
 			</tbody>
 		</table>
-	</form>
+	</html:form>
 </v:bubble>
 
 </body>

@@ -21,7 +21,16 @@
 	<jsp:element name="link">
 		<jsp:attribute name="rel">stylesheet</jsp:attribute>
 		<jsp:attribute name="type">text/css</jsp:attribute>
-		<jsp:attribute name="href"><c:url value="/css/standard.css"/></jsp:attribute>
+		<jsp:attribute name="href">
+			<c:choose>
+				<c:when test="${preferences.styleSheet ne null}">
+					<c:url value="/css/${preferences.styleSheet}.css"/>
+				</c:when>
+				<c:otherwise>
+					<c:url value="/css/standard.css"/>
+				</c:otherwise>
+			</c:choose>
+		</jsp:attribute>
 	</jsp:element>
 	<jsp:element name="link">
 		<jsp:attribute name="rel">shortcut icon</jsp:attribute>

@@ -593,7 +593,6 @@
 		<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-US">
 			<head>
 				<title>Build History Report</title>
-				<link rel="stylesheet" href="css/standard.css" type="text/css"/>
 			</head>
 			<body>
 				<div class="buildHistoryReport">

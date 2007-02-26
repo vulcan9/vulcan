@@ -8,6 +8,7 @@
 -->
 <struts-config>
 	<form-beans>
+		<form-bean name="preferencesForm" type="net.sourceforge.vulcan.web.struts.forms.PreferencesForm"/>
 		<form-bean name="projectConfigForm" type="net.sourceforge.vulcan.web.struts.forms.ProjectConfigForm"/>
 		<form-bean name="schedulerConfigForm" type="net.sourceforge.vulcan.web.struts.forms.SchedulerConfigForm"/>
 		<form-bean name="pluginConfigForm" type="net.sourceforge.vulcan.web.struts.forms.PluginConfigForm"/>
@@ -18,16 +19,14 @@
 	
 	<global-forwards>
 		<forward name="dashboard" path="/" redirect="true"/>
+		<forward name="viewPreferences" path="/viewPreferences.do"/>
 		<forward name="about" path="/about.jsp"/>
 		<forward name="report" path="/buildHistoryReport.do"/>
-		
 		
 		<forward name="site" path="/site/"/>
 		<forward name="projectDetails" path="/WEB-INF/jsp/projectConfiguration.jsp"/>
 		<forward name="error" path="/WEB-INF/jsp/error.jsp"/>
 		<forward name="failure" path="/WEB-INF/jsp/error.jsp"/>
-		
-		<forward name="preferences" path="/preferences.jsp"/>
 		
 		<forward name="viewProjectStatus" path="/viewProjectStatus.do"/>
 		
@@ -55,6 +54,18 @@
 		<action path="/viewProjectStatus"
 				type="org.springframework.web.struts.DelegatingActionProxy"/>
 		
+		<action path="/viewPreferences"
+				type="org.apache.struts.actions.ForwardAction"
+				name="preferencesForm"
+				validate="false"
+				scope="session"
+				parameter="/WEB-INF/jsp/preferences.jsp"/>
+				
+		<action path="/savePreferences"
+				type="net.sourceforge.vulcan.web.struts.actions.SavePreferencesAction"
+				name="preferencesForm"
+				scope="session"/>
+				
 		<action path="/buildHistoryReport"
 				type="org.apache.struts.actions.ForwardAction"
 				name="reportForm"

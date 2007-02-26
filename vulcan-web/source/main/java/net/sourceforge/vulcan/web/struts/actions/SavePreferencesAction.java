@@ -16,32 +16,26 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-package net.sourceforge.vulcan.dto;
+package net.sourceforge.vulcan.web.struts.actions;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import net.sourceforge.vulcan.metadata.SvnRevision;
 
+import org.apache.struts.action.Action;
+import org.apache.struts.action.ActionForm;
+import org.apache.struts.action.ActionForward;
+import org.apache.struts.action.ActionMapping;
+
+
 @SvnRevision(id="$Id$", url="$HeadURL$")
-public class PreferencesDto extends BaseDto {
-	private String sortColumn;
-	private String sortOrder;
-	private String styleSheet;
+public final class SavePreferencesAction extends Action {
 	
-	public String getSortColumn() {
-		return sortColumn;
-	}
-	public void setSortColumn(String sortColumn) {
-		this.sortColumn = sortColumn;
-	}
-	public String getSortOrder() {
-		return sortOrder;
-	}
-	public void setSortOrder(String sortOrder) {
-		this.sortOrder = sortOrder;
-	}
-	public String getStyleSheet() {
-		return styleSheet;
-	}
-	public void setStyleSheet(String styleSheet) {
-		this.styleSheet = styleSheet;
+	@Override
+	public ActionForward execute(ActionMapping mapping, ActionForm form,
+			HttpServletRequest request, HttpServletResponse response) throws Exception {
+		
+		return mapping.findForward("dashboard");
 	}
 }

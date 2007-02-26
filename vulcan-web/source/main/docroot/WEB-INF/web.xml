@@ -56,6 +56,10 @@
 		<filter-name>PreferencesFilter</filter-name>
 		<url-pattern>*.jsp</url-pattern>
 	</filter-mapping>
+	<filter-mapping>
+		<filter-name>PreferencesFilter</filter-name>
+		<servlet-name>Action</servlet-name>
+	</filter-mapping>
 	
 	<filter-mapping>
 		<filter-name>SiteMesh</filter-name>
