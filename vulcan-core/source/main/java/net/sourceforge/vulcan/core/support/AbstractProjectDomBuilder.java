@@ -55,6 +55,7 @@ import net.sourceforge.vulcan.dto.TestFailureDto;
 import net.sourceforge.vulcan.dto.ProjectStatusDto.Status;
 import net.sourceforge.vulcan.event.ErrorEvent;
 import net.sourceforge.vulcan.event.EventHandler;
+import net.sourceforge.vulcan.exception.NoSuchProjectException;
 import net.sourceforge.vulcan.exception.NoSuchTransformFormatException;
 import net.sourceforge.vulcan.metadata.SvnRevision;
 
@@ -323,10 +324,13 @@ public abstract class AbstractProjectDomBuilder implements ProjectDomBuilder {
 	private void linkifyCommitMessage(Element changeSet, ChangeSetDto changes, String projectName) {
 		final CommitLogParser commitLogParser = new CommitLogParser();
 
-		final ProjectConfigDto projectConfig = projectManager.getProjectConfig(projectName);
+		try {
+			final ProjectConfigDto projectConfig = projectManager.getProjectConfig(projectName);
 		
-		commitLogParser.setKeywordPattern(projectConfig.getBugtraqLogRegex1());
-		commitLogParser.setIdPattern(projectConfig.getBugtraqLogRegex2());
+			commitLogParser.setKeywordPattern(projectConfig.getBugtraqLogRegex1());
+			commitLogParser.setIdPattern(projectConfig.getBugtraqLogRegex2());
+		} catch (NoSuchProjectException ignore) {
+		}
 		
 		try {
 			commitLogParser.parse(changes.getMessage());

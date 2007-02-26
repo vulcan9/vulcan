@@ -50,7 +50,6 @@ public class BuildOutcomeCacheTest extends EasyMockTestCase {
 		cache.setStore(store);
 		cache.setCacheSize(10);
 		
-		
 		storedOutcomes.put(zero, new ProjectStatusDto());
 		storedOutcomes.put(one, new ProjectStatusDto());
 		
@@ -72,6 +71,16 @@ public class BuildOutcomeCacheTest extends EasyMockTestCase {
 	@TrainingMethod("trainInit")
 	public void testInit() throws Exception {
 		cache.init();		
+	}
+	
+	@TrainingMethod("trainInit")
+	public void testSetsProjectNameOnStatus() throws Exception {
+		// If a project is renamed, outcomes stored with the old name
+		// should have the name updated to the new name.
+		cache.init();
+		
+		final ProjectStatusDto status = cache.getOutcome(zero);
+		assertEquals("myProject", status.getName());
 	}
 	
 	@TrainingMethod("trainInit")

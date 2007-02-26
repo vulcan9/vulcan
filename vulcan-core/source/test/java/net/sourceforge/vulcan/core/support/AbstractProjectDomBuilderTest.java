@@ -56,6 +56,7 @@ import net.sourceforge.vulcan.dto.TestFailureDto;
 import net.sourceforge.vulcan.dto.ProjectStatusDto.Status;
 import net.sourceforge.vulcan.event.Event;
 import net.sourceforge.vulcan.event.EventHandler;
+import net.sourceforge.vulcan.exception.NoSuchProjectException;
 import net.sourceforge.vulcan.exception.NoSuchTransformFormatException;
 import net.sourceforge.vulcan.metadata.SvnRevision;
 
@@ -571,6 +572,51 @@ public class AbstractProjectDomBuilderTest extends EasyMockTestCase {
 
 		assertEquals("<message>Used new feature found at <link>http://www.example.com</link>" +
 				" <issue issue-id=\"27172\">Bug# 27172</issue>\nWorks great.</message>",
+				os.toString().replaceAll("\r", ""));
+		
+		verify();
+	}
+	public void testLinkifyContinuesOnMissingProjectConfig() throws Exception {
+		expect(pm.getProjectConfig("a name")).andThrow(new NoSuchProjectException("a name"));
+
+		replay();
+
+		final ChangeLogDto changeLog = new ChangeLogDto();
+		final ChangeSetDto changeSet = new ChangeSetDto();
+		
+		changeSet.setAuthor("jane");
+		changeSet.setRevision(projectStatus.getRevision());
+		changeSet.setTimestamp(new Date(date.getTime() + 1000000));
+		changeSet.setMessage("Used new feature found at http://www.example.com.");
+		changeSet.setModifiedPaths(new String[] {"/a/file", "/other/stuff"});
+		
+		changeLog.setChangeSets(Collections.singletonList(changeSet));
+		
+		projectStatus.setChangeLog(changeLog);
+		
+		final Document doc = doCall();
+
+		final Element root = doc.getRootElement();
+		
+		final Element logs = root.getChild("change-sets");
+		
+		assertNotNull(logs);
+		
+		assertEquals(1, logs.getContentSize());
+		
+		final Element child = logs.getChild("change-set");
+		final Element message = child.getChild("message");
+
+		final OutputStream os = new ByteArrayOutputStream();
+		final Format format = Format.getCompactFormat();
+		
+		format.setTextMode(TextMode.PRESERVE);
+		
+		XMLOutputter out = new XMLOutputter(format);
+		
+		out.output(message, os);
+
+		assertEquals("<message>Used new feature found at <link>http://www.example.com</link>.</message>",
 				os.toString().replaceAll("\r", ""));
 		
 		verify();

@@ -188,8 +188,10 @@ public class BuildOutcomeCache {
 				status.setBuildNumber(index);
 			}
 			
-			outcomes.put(id, status);
+			// In case project was renamed, force status to use current name
+			status.setName(projectName);
 			
+			outcomes.put(id, status);
 			return status;
 		} catch (StoreException e) {
 			return null;
