@@ -39,7 +39,7 @@
 		<li><html:link forward="report"><fmt:message key="link.report.build.history"/></html:link></li>
 		<li><html:link forward="manualBuildForm"><fmt:message key="link.build.manual"/></html:link></li>
 	</c:if>
-	<li><html:link forward="preferences"><fmt:message key="link.preferences"/></html:link></li>
+	<li><html:link forward="viewPreferences"><fmt:message key="link.preferences"/></html:link></li>
 	<li><html:link forward="setup"><fmt:message key="link.setup"/></html:link></li>
 </ul>
 

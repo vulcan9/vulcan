@@ -20,22 +20,9 @@ package net.sourceforge.vulcan.web;
 
 import net.sourceforge.vulcan.metadata.SvnRevision;
 
-import org.springframework.beans.BeansException;
-import org.springframework.context.support.AbstractApplicationContext;
-import org.springframework.context.support.AbstractMessageSource;
-import org.springframework.web.context.support.StaticWebApplicationContext;
-
-
 @SvnRevision(id="$Id$", url="$HeadURL$")
-@Deprecated
-public class MockWebApplicationContext extends StaticWebApplicationContext {
-	public MockWebApplicationContext() {
-		super();
-		
-		((AbstractMessageSource)super.getBean(AbstractApplicationContext.MESSAGE_SOURCE_BEAN_NAME))
-				.setUseCodeAsDefaultMessage(true);
-	}
-	public void registerSingleton(String beanName, Object bean) throws BeansException {
-		getBeanFactory().registerSingleton(beanName, bean);
+public class IncompatiblePreferenceDataException extends RuntimeException {
+	public IncompatiblePreferenceDataException(Throwable cause) {
+		super(cause);
 	}
 }

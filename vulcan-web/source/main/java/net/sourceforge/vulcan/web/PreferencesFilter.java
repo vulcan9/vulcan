@@ -18,7 +18,9 @@
  */
 package net.sourceforge.vulcan.web;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -29,6 +31,7 @@ import javax.servlet.http.HttpServletResponse;
 import net.sourceforge.vulcan.dto.PreferencesDto;
 import net.sourceforge.vulcan.metadata.SvnRevision;
 
+import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -39,16 +42,22 @@ public class PreferencesFilter extends OncePerRequestFilter {
 		paramToCookie(request, response, "sortColumn");
 		paramToCookie(request, response, "sortOrder");
 		
-		createPreferences(request);
+		loadOrCreatePreferences(request);
 		
 		chain.doFilter(request, response);
 	}
 
-	private void createPreferences(HttpServletRequest request) {
-		final PreferencesDto prefs = new PreferencesDto();
+	private void loadOrCreatePreferences(HttpServletRequest request) {
+		final PreferencesDto prefs;
 		
-		prefs.setSortColumn(getFromParamOrCookie(request, "sortColumn"));
-		prefs.setSortOrder(getFromParamOrCookie(request, "sortOrder"));
+		final String prefData = getFromParamOrCookie(request, "preferenceData");
+		if (StringUtils.isNotEmpty(prefData)) {
+			prefs = decodePreferences(prefData.getBytes());
+		} else {
+			prefs = new PreferencesDto();
+			prefs.setSortColumn(getFromParamOrCookie(request, "sortColumn"));
+			prefs.setSortOrder(getFromParamOrCookie(request, "sortOrder"));
+		}
 		
 		request.setAttribute("preferences", prefs);
 	}

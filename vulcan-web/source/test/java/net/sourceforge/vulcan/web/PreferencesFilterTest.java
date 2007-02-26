@@ -18,7 +18,9 @@
  */
 package net.sourceforge.vulcan.web;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.ObjectOutputStream;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.Cookie;
@@ -26,10 +28,13 @@ import javax.servlet.http.Cookie;
 import net.sourceforge.vulcan.dto.PreferencesDto;
 import net.sourceforge.vulcan.metadata.SvnRevision;
 
+import org.apache.commons.codec.binary.Base64;
+
 
 @SvnRevision(id="$Id$", url="$HeadURL$")
 public class PreferencesFilterTest extends ServletFilterTestCase {
 	PreferencesFilter filter = new PreferencesFilter();
+	PreferencesStore codec = new PreferencesStore();
 	
 	@Override
 	protected void setUp() throws Exception {
@@ -41,8 +46,24 @@ public class PreferencesFilterTest extends ServletFilterTestCase {
 		filter();
 		
 		assertEquals(0, cookies.size());
+		
+		assertNotNull(request.getAttribute("preferences"));
 	}
 	
+	public void testLoadsCookieIfPresent() throws Exception {
+		final PreferencesDto prefs = new PreferencesDto();
+		prefs.setSortOrder("ascending");
+		
+		final String data = codec.encodePreferences(prefs);
+		request.addCookie(new Cookie("VULCAN_preferenceData", data));
+		
+		filter();
+		
+		final PreferencesDto actual = (PreferencesDto) request.getAttribute("preferences");
+		assertNotNull(actual);
+		assertEquals(prefs, actual);
+	}
+
 	public void testSetsCookies() throws Exception {
 		request.addParameter("sortColumn", "name");
 		request.addParameter("sortOrder", "ascending");
