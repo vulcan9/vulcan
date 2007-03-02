@@ -100,9 +100,6 @@
     <Content Include="icons\success.ico" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="VulcanTray_TemporaryKey.pfx" />
-  </ItemGroup>
-  <ItemGroup>
     <PublishFile Include="icons\error.ico">
       <Visible>False</Visible>
       <Group>

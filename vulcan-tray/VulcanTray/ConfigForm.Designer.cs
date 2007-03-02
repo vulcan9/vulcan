@@ -36,6 +36,8 @@ namespace SourceForge.Vulcan.Tray
 			this.pollingInterval = new System.Windows.Forms.NumericUpDown();
 			this.label2 = new System.Windows.Forms.Label();
 			this.label3 = new System.Windows.Forms.Label();
+			this.chkBubbleFailures = new System.Windows.Forms.CheckBox();
+			this.chkBubbleSuccess = new System.Windows.Forms.CheckBox();
 			((System.ComponentModel.ISupportInitialize)(this.pollingInterval)).BeginInit();
 			this.SuspendLayout();
 			// 
@@ -100,11 +102,37 @@ namespace SourceForge.Vulcan.Tray
 			this.label3.TabIndex = 6;
 			this.label3.Text = "seconds";
 			// 
+			// chkBubbleFailures
+			// 
+			this.chkBubbleFailures.AutoSize = true;
+			this.chkBubbleFailures.Checked = true;
+			this.chkBubbleFailures.CheckState = System.Windows.Forms.CheckState.Checked;
+			this.chkBubbleFailures.Location = new System.Drawing.Point(20, 83);
+			this.chkBubbleFailures.Name = "chkBubbleFailures";
+			this.chkBubbleFailures.Size = new System.Drawing.Size(144, 17);
+			this.chkBubbleFailures.TabIndex = 7;
+			this.chkBubbleFailures.Text = "Show bubbles on failures";
+			this.chkBubbleFailures.UseVisualStyleBackColor = true;
+			// 
+			// chkBubbleSuccess
+			// 
+			this.chkBubbleSuccess.AutoSize = true;
+			this.chkBubbleSuccess.Checked = true;
+			this.chkBubbleSuccess.CheckState = System.Windows.Forms.CheckState.Checked;
+			this.chkBubbleSuccess.Location = new System.Drawing.Point(20, 106);
+			this.chkBubbleSuccess.Name = "chkBubbleSuccess";
+			this.chkBubbleSuccess.Size = new System.Drawing.Size(150, 17);
+			this.chkBubbleSuccess.TabIndex = 8;
+			this.chkBubbleSuccess.Text = "Show bubbles on success";
+			this.chkBubbleSuccess.UseVisualStyleBackColor = true;
+			// 
 			// ConfigForm
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.ClientSize = new System.Drawing.Size(489, 277);
+			this.Controls.Add(this.chkBubbleSuccess);
+			this.Controls.Add(this.chkBubbleFailures);
 			this.Controls.Add(this.label3);
 			this.Controls.Add(this.label2);
 			this.Controls.Add(this.pollingInterval);
@@ -134,5 +162,7 @@ namespace SourceForge.Vulcan.Tray
 		private System.Windows.Forms.NumericUpDown pollingInterval;
 		private System.Windows.Forms.Label label2;
 		private System.Windows.Forms.Label label3;
+		private System.Windows.Forms.CheckBox chkBubbleFailures;
+		private System.Windows.Forms.CheckBox chkBubbleSuccess;
 	}
 }
