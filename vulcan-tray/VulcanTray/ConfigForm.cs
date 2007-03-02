@@ -24,12 +24,17 @@ namespace SourceForge.Vulcan.Tray
 		{
 			url.Text = Preferences.Url;
 			pollingInterval.Value = Preferences.Interval/1000;
+
+			chkBubbleFailures.Checked = preferences.BubbleFailures;
+			chkBubbleSuccess.Checked = preferences.BubbleSuccess;
 		}
 
 		private void onClosing(object sender, FormClosingEventArgs e)
 		{
 			Preferences.Url = url.Text;
 			Preferences.Interval = (int)pollingInterval.Value*1000;
+			preferences.BubbleFailures = chkBubbleFailures.Checked;
+			preferences.BubbleSuccess = chkBubbleSuccess.Checked;
 		}
 	}
 }

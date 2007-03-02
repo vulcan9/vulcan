@@ -4,7 +4,9 @@ namespace SourceForge.Vulcan.Tray
 	{
 		private string url;
 		private int interval;
-
+		private bool bubbleFailures;
+		private bool bubbleSuccess;
+		
 		public string Url
 		{
 			get { return url; }
@@ -16,7 +18,19 @@ namespace SourceForge.Vulcan.Tray
 			get { return interval; }
 			set { interval = value; }
 		}
-		
+
+		public bool BubbleFailures
+		{
+			get { return bubbleFailures; }
+			set { bubbleFailures = value; }
+		}
+
+		public bool BubbleSuccess
+		{
+			get { return bubbleSuccess; }
+			set { bubbleSuccess = value; }
+		}
+
 		public Preferences Clone()
 		{
 			return (Preferences) MemberwiseClone();

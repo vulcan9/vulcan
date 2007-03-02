@@ -38,6 +38,11 @@ namespace SourceForge.Vulcan.Tray
 			timer.Enabled = true;
 		}
 
+		public Preferences Preferences
+		{
+			get { return preferences; }
+		}
+
 		public void Restore()
 		{
 			if (!Visible)
@@ -126,7 +131,7 @@ namespace SourceForge.Vulcan.Tray
 
 		private void onSettingsClicked(object sender, EventArgs e)
 		{
-			ConfigForm configForm = new ConfigForm(preferences);
+			ConfigForm configForm = new ConfigForm(Preferences);
 
 			configForm.ShowDialog(this);
 
@@ -134,7 +139,7 @@ namespace SourceForge.Vulcan.Tray
 			{
 				this.preferences = configForm.Preferences;
 				configure();
-				this.preferenceStore.Save(this.preferences);
+				this.preferenceStore.Save(this.Preferences);
 			}
 		}
 
@@ -144,14 +149,14 @@ namespace SourceForge.Vulcan.Tray
 		
 		private void configure()
 		{
-			browserIntegration.Url = preferences.Url;
-			statusMonitor.Url = preferences.Url;
-			timer.Interval = preferences.Interval;
+			browserIntegration.Url = Preferences.Url;
+			statusMonitor.Url = Preferences.Url;
+			timer.Interval = Preferences.Interval;
 		}
 
 		private void updateProjectStatus()
 		{
-			string baseUrl = preferences.Url;
+			string baseUrl = Preferences.Url;
 			
 			if (!baseUrl.EndsWith("/"))
 			{

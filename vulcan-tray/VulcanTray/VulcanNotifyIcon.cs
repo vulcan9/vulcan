@@ -191,6 +191,16 @@ namespace SourceForge.Vulcan.Tray
 			string status = latestProject.SelectSingleNode("status").InnerText;
 			string message = latestProject.SelectSingleNode("message").InnerText;
 
+			bool isPass = "PASS".Equals(status);
+
+			bool shouldBubble = (isPass && statusForm.Preferences.BubbleSuccess)
+				|| (!isPass && statusForm.Preferences.BubbleFailures);
+
+			if (!shouldBubble)
+			{
+				return;
+			}
+
 			string title = string.Format(
 				"{0}: {1}",
 				projectName,
@@ -201,13 +211,13 @@ namespace SourceForge.Vulcan.Tray
 				message);
 
 			ToolTipIcon icon = ToolTipIcon.Error;
-
-			if ("PASS".Equals(status))
+			
+			if (isPass)
 			{
 				icon = ToolTipIcon.Info;
 			}
 
-			displayBubble(title, text, icon);
+			displayBubble(title, text, icon);	
 		}
 
 		private void onDoubleClick(object sender, EventArgs e)
