@@ -371,6 +371,33 @@ public class DependencyGroupImplTest extends TestCase {
 		
 		assertEquals(Arrays.asList(d, e, b, a, c), dg.getPendingProjects());
 	}
+
+	// Issue 71 http://code.google.com/p/vulcan/issues/detail?id=71
+	public void testGetsNextOnPendingDepSingleGroup() throws Exception {
+		final ProjectConfigDto a = createConfigDto("a");
+		final ProjectConfigDto b = createConfigDto("b", new String[] {"a"});
+		final ProjectConfigDto c = createConfigDto("c", new String[] {"b"});
+		final ProjectConfigDto d = createConfigDto("d", new String[] {"a"});
+		
+		dg.addTarget(a);
+		dg.addTarget(b);
+		dg.addTarget(c);
+		dg.addTarget(d);
+		
+		assertEquals(Arrays.asList(a, b, c, d), dg.getPendingProjects());
+		
+		assertSame(a, dg.getNextTarget());
+		dg.targetCompleted(a, true);
+
+		assertSame(b, dg.getNextTarget());
+		
+		assertSame(d, dg.getNextTarget());
+		
+		dg.targetCompleted(b, true);
+		
+		assertSame(c, dg.getNextTarget());
+	}
+
 	private ProjectConfigDto createConfigDto(String name) {
 		return createConfigDto(name, new String[0]);
 	}

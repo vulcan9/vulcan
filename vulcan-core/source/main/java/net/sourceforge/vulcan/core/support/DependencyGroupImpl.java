@@ -211,7 +211,8 @@ public final class DependencyGroupImpl implements DependencyGroup {
 		} else {
 			results.put(name, Status.FAIL);
 		}
-		
+
+		Collections.sort(targets);
 	}
 
 	public ProjectStatusDto[] getPendingTargets() {

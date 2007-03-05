@@ -489,16 +489,16 @@ public class BuildManagerImplTest extends TestCase {
 		
 		assertEquals(1, fireCount);
 		
-		assertSame(null, mgr.getTarget(info1));
-		
-		assertEquals(2, fireCount);
-		
 		assertSame(b, mgr.getTarget(info1));
 
+		assertEquals(1, fireCount);
+		
+		mgr.targetCompleted(info1, b, 
+				createFakeStatus(b, rev0, Status.PASS, null, null, null));
+		
 		assertEquals(2, fireCount);
 		
-		mgr.targetCompleted(info1, b,
-				createFakeStatus(b, rev0, Status.PASS, null, null, null));
+		assertSame(null, mgr.getTarget(info1));
 
 		assertEquals(3, fireCount);
 	}
