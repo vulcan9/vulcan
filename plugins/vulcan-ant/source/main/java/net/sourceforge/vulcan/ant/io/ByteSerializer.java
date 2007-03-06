@@ -38,21 +38,17 @@ public class ByteSerializer implements Serializer {
 		}
 
 		public String readString() {
-			final int pos = position;
-			final int length = data[pos] + (data[pos+1] << 8);
+			int length = 0;
 			
-			if (length < 0) {
-				position += 2;
-				return null;
+			while (data[position + length] != 0) {
+				length++;
 			}
+
+			final String string = new String(data, position, length);
 			
-			position += length + 2;
+			position += length + 1;
 			
-			if (length > 0) {
-				return new String(data, pos + 2, length);
-			}
-			
-			return "";
+			return string;
 		}
 	}
 	public synchronized AntEventSummary deserialize(byte[] data) {
@@ -67,7 +63,7 @@ public class ByteSerializer implements Serializer {
 		final String lineNumber = r.readString();
 		final String code = r.readString();
 		final String message = r.readString();
-		
+
 		final int prio;
 		
 		if (StringUtils.isNotBlank(priority)) {
@@ -121,19 +117,11 @@ public class ByteSerializer implements Serializer {
 	}
 
 	private void addString(final ByteArrayOutputStream os, String string) {
-		if (string == null) {
-			os.write(-1);
-			os.write(0);
-			return;
-		}
-		
 		try {
-			final int length = string.length();
-			
-			os.write(length & 0x00FF);
-			os.write((length & 0xFF00) >> 8);
-			
-			os.write(string.getBytes());
+			if (string != null) {
+				os.write(string.getBytes());
+			}
+			os.write(0);
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}

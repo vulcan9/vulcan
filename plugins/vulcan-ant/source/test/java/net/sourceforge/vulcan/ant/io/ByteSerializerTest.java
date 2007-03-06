@@ -40,17 +40,6 @@ public class ByteSerializerTest extends TestCase {
 		
 		longString = sb.toString();
 	}
-	public void testSimple() throws Exception {
-		final byte[] data = s.serialize(new AntEventSummary("Foo", null, null, null, null));
-		
-		assertNotNull(data);
-		assertEquals(3, data[0] + (data[1] << 8));
-	}
-	public void testLong() throws Exception {
-		final byte[] data = s.serialize(new AntEventSummary(longString, null, null, null, null));
-		
-		assertEquals(longString.length(), data[0] + (data[1] << 8));
-	}
 	public void testRoundTrip() throws Exception {
 		final AntEventSummary a = new AntEventSummary("a", "b", "c", "d", "e", 4, "Jay.java", 33, "X32");
 		
@@ -60,14 +49,14 @@ public class ByteSerializerTest extends TestCase {
 		
 		assertEquals(a, b);
 	}
-	public void testBlanksAndNull() throws Exception {
+	public void testNullsAreConvertedToBlank() throws Exception {
 		final AntEventSummary a = new AntEventSummary("a", "b", "", null, "e", 4, "x.java", null, null);
 		
 		final byte[] data = s.serialize(a);
 		
 		final AntEventSummary b = s.deserialize(data);
 		
-		assertEquals(a, b);
+		assertEquals(new AntEventSummary("a", "b", "", "", "e", 4, "x.java", null, ""), b);
 	}
 	
 	public static void assertEquals(AntEventSummary expected, AntEventSummary actual) {
