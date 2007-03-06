@@ -23,17 +23,10 @@ namespace SourceForge.Vulcan.DotNet
 		System.IO.MemoryStream ms = new System.IO.MemoryStream();
 		
 		public void Write(string s) {
-			if (s == null) {
-				ms.WriteByte(unchecked((byte)-1));
-				ms.WriteByte(0);
-				return;
+			if (!string.IsNullOrEmpty(s)) {
+				ms.Write(enc.GetBytes(s), 0, s.Length);
 			}
-			
-			int length = s.Length;
-			
-			ms.WriteByte((byte) (length & 0x00FF));
-			ms.WriteByte((byte) ((length & 0xFF00) >> 8));
-			ms.Write(enc.GetBytes(s), 0, length);
+			ms.WriteByte(0);			
 		}
 		
 		public byte[] ToArray() {

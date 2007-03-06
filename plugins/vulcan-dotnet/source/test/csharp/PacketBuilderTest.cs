@@ -31,14 +31,13 @@ namespace SourceForge.Vulcan.DotNet {
 			
 			byte[] data = pb.ToArray();
 			
-			Assert.AreEqual(7, data.Length);
-			Assert.AreEqual(5, data[0]);
-			Assert.AreEqual(0, data[1]);
-			Assert.AreEqual((byte) 'h', data[2]);
-			Assert.AreEqual((byte) 'e', data[3]);
-			Assert.AreEqual((byte) 'l', data[4]);
-			Assert.AreEqual((byte) 'l', data[5]);
-			Assert.AreEqual((byte) 'o', data[6]);
+			Assert.AreEqual(6, data.Length);
+			Assert.AreEqual((byte) 'h', data[0]);
+			Assert.AreEqual((byte) 'e', data[1]);
+			Assert.AreEqual((byte) 'l', data[2]);
+			Assert.AreEqual((byte) 'l', data[3]);
+			Assert.AreEqual((byte) 'o', data[4]);
+			Assert.AreEqual((byte) 0, data[5]);
 		}
 		
 		[Test]
@@ -53,9 +52,8 @@ namespace SourceForge.Vulcan.DotNet {
 			
 			byte[] data = pb.ToArray();
 			
-			Assert.AreEqual(321, data.Length);
-			Assert.AreEqual(63, data[0]);
-			Assert.AreEqual(1, data[1]);
+			Assert.AreEqual(320, data.Length);
+			Assert.AreEqual(0, data[319]);
 		}
 		
 		[Test]
@@ -66,9 +64,8 @@ namespace SourceForge.Vulcan.DotNet {
 			
 			byte[] data = pb.ToArray();
 			
-			Assert.AreEqual(2, data.Length);
-			Assert.AreEqual(255, data[0]);
-			Assert.AreEqual(0, data[1]);
+			Assert.AreEqual(1, data.Length);
+			Assert.AreEqual(0, data[0]);
 		}
 		
 		[Test]
@@ -77,7 +74,7 @@ namespace SourceForge.Vulcan.DotNet {
 			
 			pb.Write("hello");
 			
-			Assert.AreEqual(7, pb.ToArray().Length);
+			Assert.AreEqual(6, pb.ToArray().Length);
 			
 			pb.Reset();
 			
