@@ -143,13 +143,13 @@ public abstract class AbstractProjectDomBuilder implements ProjectDomBuilder {
 		
 		applyParameters(transformer, locale);
 		if (projectSiteURL != null) {
-			transformer.setParameter("projectSiteURL", projectSiteURL);
+			transformer.setParameter("projectSiteURL", projectSiteURL.toExternalForm());
 		}
 		if (viewProjectStatusURL != null) {
-			transformer.setParameter("viewProjectStatusURL", viewProjectStatusURL);	
+			transformer.setParameter("viewProjectStatusURL", viewProjectStatusURL.toExternalForm());	
 		}
 		if (issueTrackerURL != null) {
-			transformer.setParameter("issueTrackerURL", issueTrackerURL);	
+			transformer.setParameter("issueTrackerURL", issueTrackerURL.toExternalForm());	
 		}
 		
 		transformer.setParameter("index", new Integer(index));
