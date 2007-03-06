@@ -192,6 +192,9 @@ public class BuildManagerImpl implements BuildManager {
 	public ProjectStatusDto getStatus(UUID id) {
 		return cache.getOutcome(id);
 	}
+	public ProjectStatusDto getStatusByBuildNumber(String projectName, int buildNumber) {
+		return cache.getOutcomeByBuildNumber(projectName, buildNumber);
+	}
 	public List<UUID> getAvailableStatusIds(String projectName) {
 		return Collections.unmodifiableList(cache.getOutcomeIds(projectName));
 	}

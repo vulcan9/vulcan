@@ -22,8 +22,10 @@ import static org.easymock.EasyMock.getCurrentArguments;
 
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 import net.sourceforge.vulcan.EasyMockTestCase;
@@ -42,6 +44,9 @@ public class BuildOutcomeCacheTest extends EasyMockTestCase {
 	
 	final UUID zero = UUID.randomUUID();
 	final UUID one = UUID.randomUUID();
+	final UUID two = UUID.randomUUID();
+	final UUID three = UUID.randomUUID();
+	final UUID four = UUID.randomUUID();
 	
 	@Override
 	protected void setUp() throws Exception {
@@ -52,10 +57,17 @@ public class BuildOutcomeCacheTest extends EasyMockTestCase {
 		
 		storedOutcomes.put(zero, new ProjectStatusDto());
 		storedOutcomes.put(one, new ProjectStatusDto());
+		storedOutcomes.put(two, new ProjectStatusDto());
+		storedOutcomes.put(three, new ProjectStatusDto());
+		storedOutcomes.put(four, new ProjectStatusDto());
 		
-		storedOutcomes.get(one).setBuildNumber(0);
+		storedOutcomes.get(zero).setBuildNumber(0);
+		storedOutcomes.get(one).setBuildNumber(1);
+		storedOutcomes.get(two).setBuildNumber(2);
+		storedOutcomes.get(three).setBuildNumber(3);
+		storedOutcomes.get(four).setBuildNumber(4);
 		
-		map.put("myProject", Arrays.asList(zero, one));
+		map.put("myProject", Arrays.asList(zero, one, two, three, four));
 	}
 	
 	public void trainInit() throws Exception {
@@ -102,5 +114,128 @@ public class BuildOutcomeCacheTest extends EasyMockTestCase {
 		
 		assertEquals((Integer)0, cache.getOutcome(zero).getBuildNumber());
 		assertEquals((Integer)1, cache.getOutcome(one).getBuildNumber());
+	}
+	
+	@TrainingMethod("trainInit")
+	public void testGetOutcomeByBuildNumberOneToOne() throws Exception {
+		cache.init();
+		
+		assertSame(storedOutcomes.get(zero), cache.getOutcomeByBuildNumber("myProject", 0));
+		assertSame(storedOutcomes.get(one), cache.getOutcomeByBuildNumber("myProject", 1));
+	}
+	
+	@TrainingMethod("trainInit")
+	public void testGetOutcomeByBuildNumberOutOfBounds() throws Exception {
+		cache.init();
+		
+		assertEquals(null, cache.getOutcomeByBuildNumber("myProject", 5));
+	}
+	
+	@TrainingMethod("trainInit")
+	public void testGetOutcomeByBuildNumberInvalidProject() throws Exception {
+		cache.init();
+		
+		assertEquals(null, cache.getOutcomeByBuildNumber("noSuch", 5));
+	}
+	
+	@TrainingMethod("trainInit")
+	public void testGetOutcomeByBuildNumberOffset() throws Exception {
+		cache.init();
+		
+		offsetBuildNumbers();
+		
+		assertSame(storedOutcomes.get(zero), cache.getOutcomeByBuildNumber("myProject", 757));
+		assertSame(storedOutcomes.get(one), cache.getOutcomeByBuildNumber("myProject", 758));
+		assertSame(storedOutcomes.get(two), cache.getOutcomeByBuildNumber("myProject", 759));
+		assertSame(storedOutcomes.get(three), cache.getOutcomeByBuildNumber("myProject", 760));
+		assertSame(storedOutcomes.get(four), cache.getOutcomeByBuildNumber("myProject", 761));
+	}
+
+	@TrainingMethod("trainInit")
+	public void testGetOutcomeByBuildNumberOffsetLowerBound() throws Exception {
+		cache.init();
+		
+		offsetBuildNumbers();
+		
+		assertEquals(null, cache.getOutcomeByBuildNumber("myProject", 756));
+	}
+	
+	@TrainingMethod("trainInit")
+	public void testGetOutcomeByBuildNumberOffsetUpperBound() throws Exception {
+		cache.init();
+		
+		offsetBuildNumbers();
+		
+		assertEquals(null, cache.getOutcomeByBuildNumber("myProject", 762));
+	}
+	
+	@TrainingMethod("trainInit")
+	public void testGetOutcomeByBuildNumberIncongruous() throws Exception {
+		cache.init();
+		
+		setBuildNumbers(7, 8, 100, 101, 102);
+		
+		assertSame(storedOutcomes.get(zero), cache.getOutcomeByBuildNumber("myProject", 7));
+		assertSame(storedOutcomes.get(one), cache.getOutcomeByBuildNumber("myProject", 8));
+		assertSame(storedOutcomes.get(two), cache.getOutcomeByBuildNumber("myProject", 100));
+		assertSame(storedOutcomes.get(three), cache.getOutcomeByBuildNumber("myProject", 101));
+		assertSame(storedOutcomes.get(four), cache.getOutcomeByBuildNumber("myProject", 102));
+	}
+	
+	@TrainingMethod("trainInit")
+	public void testGetOutcomeByBuildNumberIncongruous2() throws Exception {
+		cache.init();
+		
+		setBuildNumbers(7, 81, 90, 101, 120);
+		
+		assertSame(storedOutcomes.get(zero), cache.getOutcomeByBuildNumber("myProject", 7));
+		assertSame(storedOutcomes.get(one), cache.getOutcomeByBuildNumber("myProject", 81));
+		assertSame(storedOutcomes.get(two), cache.getOutcomeByBuildNumber("myProject", 90));
+		assertSame(storedOutcomes.get(three), cache.getOutcomeByBuildNumber("myProject", 101));
+		assertSame(storedOutcomes.get(four), cache.getOutcomeByBuildNumber("myProject", 120));
+	}
+
+	@TrainingMethod("trainInit")
+	public void testGetOutcomeByBuildNumberIncongruous3() throws Exception {
+		cache.init();
+		
+		setBuildNumbers(0, 2, 4, 6, 8);
+		
+		assertSame(storedOutcomes.get(one), cache.getOutcomeByBuildNumber("myProject", 2));
+	}
+
+	@TrainingMethod("trainInit")
+	public void testGetOutcomeByBuildNumberIncongruous4() throws Exception {
+		cache.init();
+		
+		setBuildNumbers(-2, 0, 2, 4, 6);
+		
+		assertSame(storedOutcomes.get(three), cache.getOutcomeByBuildNumber("myProject", 4));
+	}
+	
+	@TrainingMethod("trainInit")
+	public void testGetOutcomeByBuildNumberIncongruousNullMissingBuilds() throws Exception {
+		cache.init();
+		
+		setBuildNumbers(7, 81, 90, 101, 120);
+		Set<Integer> valid = new HashSet<Integer>(Arrays.asList(7, 81, 90, 101, 120));
+		
+		for (int i=0; i<200; i++) {
+			if (!valid.contains(i)) {
+				assertEquals(null, cache.getOutcomeByBuildNumber("myProject", i));
+			}
+		}
+	}
+	
+	private void setBuildNumbers(int i, int j, int k, int l, int m) {
+		storedOutcomes.get(zero).setBuildNumber(i);
+		storedOutcomes.get(one).setBuildNumber(j);
+		storedOutcomes.get(two).setBuildNumber(k);
+		storedOutcomes.get(three).setBuildNumber(l);
+		storedOutcomes.get(four).setBuildNumber(m);
+	}
+
+	private void offsetBuildNumbers() {
+		setBuildNumbers(757, 758, 759, 760, 761);
 	}
 }

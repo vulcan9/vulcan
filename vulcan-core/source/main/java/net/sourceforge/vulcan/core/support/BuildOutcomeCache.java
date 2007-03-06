@@ -200,6 +200,65 @@ public class BuildOutcomeCache {
 		}
 	}
 	
+	public ProjectStatusDto getOutcomeByBuildNumber(String projectName, int buildNumber) {
+		final List<UUID> outcomeIds = getOutcomeIds(projectName);
+		
+		if (outcomeIds == null || outcomeIds.isEmpty()) {
+			return null;
+		}
+		
+		return findOutcomeByNumber(outcomeIds, buildNumber, buildNumber, new HashSet<Integer>());
+	}
+
+	private ProjectStatusDto findOutcomeByNumber(final List<UUID> outcomeIds, int buildNumber, int guess, Set<Integer> visitedIndexes) {
+		final int numOutcomes = outcomeIds.size();
+
+		int delta = 0;
+		
+		if (guess >= numOutcomes) {
+			guess = numOutcomes - 1;
+		} else if (guess < 0) {
+			guess = 0;
+		}
+		
+		if (visitedIndexes.contains(guess)) {
+			return null;
+		}
+		
+		final ProjectStatusDto outcome = getOutcome(outcomeIds.get(guess));
+		final int actualBuildNumber = outcome.getBuildNumber();
+		
+		delta = buildNumber - actualBuildNumber;
+
+		if (delta == 0) {
+			return outcome;
+		}
+		
+		visitedIndexes.add(guess);
+		
+		if (buildNumber > actualBuildNumber && guess >= numOutcomes - 1) {
+			return null;
+		}
+		
+		if (guess == 0 && delta < 0) {
+			return null;
+		}
+		
+		int nextGuess = guess + delta;
+		
+		if (delta < 0 && guess + delta < 0) {
+			nextGuess = guess - 1;
+		} else if (delta > 0 && guess + delta >= numOutcomes) {
+			nextGuess = guess + 1;
+		}
+		
+		while (visitedIndexes.contains(nextGuess)) {
+			nextGuess--;
+		}
+		
+		return findOutcomeByNumber(outcomeIds, buildNumber, nextGuess, visitedIndexes);
+	}
+
 	public Store getStore() {
 		return store;
 	}

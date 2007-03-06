@@ -82,6 +82,9 @@ public abstract class StateManagerTestBase extends EasyMockTestCase
 			public ProjectStatusDto getStatus(UUID statusId) {
 				return null;
 			}
+			public ProjectStatusDto getStatusByBuildNumber(String projectName, int buildNumber) {
+				return null;
+			}
 			public ProjectStatusDto[] getPendingTargets() {
 				return null;
 			}

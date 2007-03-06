@@ -51,7 +51,9 @@ public interface BuildManager {
 	ProjectStatusDto getLatestStatus(String projectName);
 
 	ProjectStatusDto getStatus(UUID statusId);
-
+	
+	ProjectStatusDto getStatusByBuildNumber(String projectName, int buildNumber);
+	
 	List<UUID> getAvailableStatusIds(String projectName);
 	
 	/**
@@ -64,5 +66,4 @@ public interface BuildManager {
 	Map<String, BuildDaemonInfoDto> getProjectsBeingBuilt();
 
 	Map<String, ProjectStatusDto> getProjectStatus();
-
 }

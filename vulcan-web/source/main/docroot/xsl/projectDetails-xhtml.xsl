@@ -120,10 +120,19 @@
 	
 	<xsl:template name="buildLink">
 		<xsl:param name="buildNumber" select="."/>
+		<xsl:param name="byIndex" select="false()"/>
 		<xsl:param name="text" select="$buildNumber"/>
 		
 		<a xmlns="http://www.w3.org/1999/xhtml">
-			<xsl:attribute name="href"><xsl:value-of select="$viewProjectStatusURL"/>&amp;projectName=<xsl:value-of select="/project/name"/>&amp;index=<xsl:value-of select="$buildNumber"/></xsl:attribute>
+			<xsl:choose>
+				<xsl:when test="$byIndex">
+					<xsl:attribute name="href"><xsl:value-of select="$viewProjectStatusURL"/>&amp;projectName=<xsl:value-of select="/project/name"/>&amp;index=<xsl:value-of select="$buildNumber"/></xsl:attribute>
+				</xsl:when>
+				<xsl:otherwise>
+					<xsl:attribute name="href"><xsl:value-of select="$viewProjectStatusURL"/>&amp;projectName=<xsl:value-of select="/project/name"/>&amp;buildNumber=<xsl:value-of select="$buildNumber"/></xsl:attribute>
+				</xsl:otherwise>
+			</xsl:choose>
+			
 			<xsl:value-of select="$text"/>
 		</a>
 	</xsl:template>
@@ -226,14 +235,14 @@
 				
 				<li>
 					<xsl:element name="a">
-							<xsl:attribute name="href"><xsl:value-of select="$viewProjectStatusURL"/>&amp;projectName=<xsl:value-of select="/project/name"/>&amp;index=<xsl:value-of select="/project/build-number"/>&amp;view=log</xsl:attribute>
+							<xsl:attribute name="href"><xsl:value-of select="$viewProjectStatusURL"/>&amp;projectName=<xsl:value-of select="/project/name"/>&amp;buildNumber=<xsl:value-of select="/project/build-number"/>&amp;view=log</xsl:attribute>
 							<xsl:attribute name="class">external</xsl:attribute>
 							<xsl:value-of select="$buildLogLabel"/>
 					</xsl:element>
 				</li>
 				<li>
 					<xsl:element name="a">
-							<xsl:attribute name="href"><xsl:value-of select="$viewProjectStatusURL"/>&amp;projectName=<xsl:value-of select="/project/name"/>&amp;index=<xsl:value-of select="/project/build-number"/>&amp;view=diff</xsl:attribute>
+							<xsl:attribute name="href"><xsl:value-of select="$viewProjectStatusURL"/>&amp;projectName=<xsl:value-of select="/project/name"/>&amp;buildNumber=<xsl:value-of select="/project/build-number"/>&amp;view=diff</xsl:attribute>
 							<xsl:attribute name="class">external</xsl:attribute>
 							<xsl:value-of select="$diffHeader"/>
 					</xsl:element>
@@ -343,6 +352,7 @@
 		<xsl:call-template name="buildLink">
 			<xsl:with-param name="buildNumber" select="."/>
 			<xsl:with-param name="text" select="$nextBuildLabel"/>
+			<xsl:with-param name="byIndex" select="true()"/>
 		</xsl:call-template>
 	</xsl:template>
 	
@@ -350,6 +360,7 @@
 		<xsl:call-template name="buildLink">
 			<xsl:with-param name="buildNumber" select="."/>
 			<xsl:with-param name="text" select="$prevBuildLabel"/>
+			<xsl:with-param name="byIndex" select="true()"/>
 		</xsl:call-template>
 	</xsl:template>
 	
@@ -466,7 +477,7 @@
 				<td><xsl:apply-templates select="@name"/></td>
 				<td>
 					<a>
-						<xsl:attribute name="href"><xsl:value-of select="$viewProjectStatusURL"/>&amp;projectName=<xsl:value-of select="@name"/>&amp;index=<xsl:value-of select="@build-number"/></xsl:attribute>
+						<xsl:attribute name="href"><xsl:value-of select="$viewProjectStatusURL"/>&amp;projectName=<xsl:value-of select="@name"/>&amp;buildNumber=<xsl:value-of select="@build-number"/></xsl:attribute>
 						<xsl:apply-templates select="@build-number"/>
 					</a>
 				</td>
@@ -697,7 +708,7 @@
 			<td><xsl:apply-templates select="name"/></td>
 			<td>
 				<a>
-					<xsl:attribute name="href"><xsl:value-of select="$viewProjectStatusURL"/>&amp;projectName=<xsl:value-of select="name"/>&amp;index=<xsl:value-of select="build-number"/></xsl:attribute>
+					<xsl:attribute name="href"><xsl:value-of select="$viewProjectStatusURL"/>&amp;projectName=<xsl:value-of select="name"/>&amp;buildNumber=<xsl:value-of select="build-number"/></xsl:attribute>
 					<xsl:apply-templates select="build-number"/>
 				</a>
 			</td>

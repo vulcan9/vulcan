@@ -48,6 +48,7 @@ public final class ViewProjectStatusAction extends ProjectReportBaseAction {
 	@Override
 	public ActionForward execute(ActionMapping mapping, ActionForm form, HttpServletRequest request, HttpServletResponse response) throws Exception {
 		final String projectName = request.getParameter("projectName");
+		boolean byBuildNumber = false;
 		
 		if (StringUtils.isBlank(projectName)) {
 			BaseDispatchAction.saveError(request, ActionMessages.GLOBAL_MESSAGE,
@@ -68,7 +69,18 @@ public final class ViewProjectStatusAction extends ProjectReportBaseAction {
 			}
 		}
 		
-		final String transform = request.getParameter("transform");
+		int buildNumber = -1;
+		final String buildNumberString = request.getParameter("buildNumber");
+		if (!StringUtils.isBlank(buildNumberString)) {
+			try {
+				buildNumber = Integer.parseInt(buildNumberString);
+				byBuildNumber = true;
+			} catch (NumberFormatException e) {
+				BaseDispatchAction.saveError(request, ActionMessages.GLOBAL_MESSAGE,
+						new ActionMessage("errors.request.invalid"));
+				return mapping.findForward("failure");
+			}
+		}
 		
 		final ProjectConfigDto projectConfig;
 		
@@ -79,32 +91,33 @@ public final class ViewProjectStatusAction extends ProjectReportBaseAction {
 					new ActionMessage("errors.no.such.project", new String[] {projectName}));
 			return mapping.findForward("failure");
 		}
-		
+
+		ProjectStatusDto status = null;
 		final List<UUID> ids = buildManager.getAvailableStatusIds(projectName);
 		
-		ProjectStatusDto status = null;
-		
-		if (ids != null && !ids.isEmpty()) {
+		if (byBuildNumber) {
+			status = buildManager.getStatusByBuildNumber(projectName, buildNumber);
+			index = ids.indexOf(status.getId());
+			
 			if (index < 0) {
-				index += ids.size();
+				throw new IllegalStateException(
+						"Build Number " + buildNumber +
+						" is not in the list of available outcomes for project " + 
+						projectName + " ID {" + status.getId() + "}.");
 			}
-			try {
-				status = buildManager.getStatus(ids.get(index));
-			} catch (IndexOutOfBoundsException e) {
-				BaseDispatchAction.saveError(request, ActionMessages.GLOBAL_MESSAGE,
-						new ActionMessage("errors.request.invalid"));
-				return mapping.findForward("failure");
+		} else {
+			if (ids != null && !ids.isEmpty()) {
+				if (index < 0) {
+					index += ids.size();
+				}
+				try {
+					status = buildManager.getStatus(ids.get(index));
+				} catch (IndexOutOfBoundsException e) {
+					BaseDispatchAction.saveError(request, ActionMessages.GLOBAL_MESSAGE,
+							new ActionMessage("errors.request.invalid"));
+					return mapping.findForward("failure");
+				}
 			}
-		}
-		
-		final String view = request.getParameter("view");
-		
-		if ("diff".equals(view)) {
-			sendDiff(request, response, status);
-			return null;
-		} else if ("log".equals(view)) {
-			sendLog(request, response, status);
-			return null;
 		}
 		
 		if (status == null) {
@@ -115,10 +128,22 @@ public final class ViewProjectStatusAction extends ProjectReportBaseAction {
 			}
 			return mapping.findForward("failure");
 		}
+
+		final String transform = request.getParameter("transform");
+		final String view = request.getParameter("view");
+		
+		if ("diff".equals(view)) {
+			sendDiff(request, response, status);
+			return null;
+		} else if ("log".equals(view)) {
+			sendLog(request, response, status);
+			return null;
+		}
 		
 		final Document doc = projectDomBuilder.createProjectDocument(status, request.getLocale());
 		
-		if (index == ids.size() - 1 && buildManager.getProjectsBeingBuilt().containsKey(projectName)) {
+		final boolean isNewest = index == ids.size() - 1;
+		if (isNewest && buildManager.getProjectsBeingBuilt().containsKey(projectName)) {
 			final Element e = new Element("currently-building");
 			e.setText("true");
 			

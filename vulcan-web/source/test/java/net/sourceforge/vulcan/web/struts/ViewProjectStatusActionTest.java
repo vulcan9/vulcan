@@ -254,6 +254,36 @@ public class ViewProjectStatusActionTest extends MockApplicationContextStrutsTes
 				response.getWriterBuffer().toString().trim()
 					.replaceAll("\n", "").replaceAll("\r", ""));
 	}
+	public void testGetStatusByBuildNumber() throws Exception {
+		status.setId(ids.get(1));
+		
+		manager.getProjectConfig("some project");
+		expectLastCall().andReturn(new ProjectConfigDto());
+		
+		buildManager.getAvailableStatusIds("some project");
+		expectLastCall().andReturn(ids);
+
+		buildManager.getStatusByBuildNumber("some project", 1234);
+		expectLastCall().andReturn(status);
+		
+		projectDomBuilder.createProjectDocument(status, request.getLocale());
+		expectLastCall().andReturn(dom);
+		
+		addRequestParameter("projectName", "some project");
+		addRequestParameter("buildNumber", "1234");
+		
+		replay();
+		
+		actionPerform();
+		
+		verify();
+		
+		assertEquals("application/xml", response.getContentType());
+		
+		assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?><project>  <prev-index>0</prev-index>  <next-index>2</next-index></project>",
+				response.getWriterBuffer().toString().trim()
+					.replaceAll("\n", "").replaceAll("\r", ""));
+	}
 	public void testGetDiff() throws Exception {
 		manager.getProjectConfig("some project");
 		expectLastCall().andReturn(new ProjectConfigDto());
