@@ -22,7 +22,7 @@
 			<item>
 				<title>${event.projectConfig.name} - ${event.status.status} - Build ${event.status.buildNumber} - ${event.status.revision}</title>
 				<pubDate><fmt:formatDate value="${event.status.completionDate}" pattern="${datePattern}"/></pubDate>
-				<link>${contextRoot}viewProjectStatus.do?transform=xhtml&amp;amp;projectName=${event.projectConfig.name}&amp;amp;index=${event.status.buildNumber}</link>
+				<link>${contextRoot}viewProjectStatus.do?transform=xhtml&amp;amp;projectName=${event.projectConfig.name}&amp;amp;buildNumber=${event.status.buildNumber}</link>
 				<description><spring:message code="${event.key}" arguments="${event.args}" htmlEscape="true"/></description>
 			</item>
 		</c:forEach>
