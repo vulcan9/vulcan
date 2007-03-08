@@ -43,7 +43,8 @@ public abstract class TransformTestCase extends TestCase {
 		plugin.setEventHandler(new Handler());
 		plugin.setTransfomSources(new Resource[] {
 				new ClassPathResource("net/sourceforge/vulcan/metrics/resources/unit-test.xsl"),
-				new ClassPathResource("net/sourceforge/vulcan/metrics/resources/code-coverage.xsl")});
+				new ClassPathResource("net/sourceforge/vulcan/metrics/resources/code-coverage.xsl"),
+				new ClassPathResource("net/sourceforge/vulcan/metrics/resources/static-analysis.xsl")});
 		
 		plugin.setTransformerFactory(TransformerFactory.newInstance());
 		

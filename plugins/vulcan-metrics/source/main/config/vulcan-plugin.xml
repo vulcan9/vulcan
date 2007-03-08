@@ -17,6 +17,7 @@
 			<list>
 				<value>classpath:net/sourceforge/vulcan/metrics/resources/unit-test.xsl</value>
 				<value>classpath:net/sourceforge/vulcan/metrics/resources/code-coverage.xsl</value>
+				<value>classpath:net/sourceforge/vulcan/metrics/resources/static-analysis.xsl</value>
 			</list>
 		</property>
 		<property name="transformerFactory">
