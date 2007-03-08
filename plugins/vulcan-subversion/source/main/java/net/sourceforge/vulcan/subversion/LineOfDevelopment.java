@@ -19,6 +19,7 @@ class LineOfDevelopment {
 	
 	void setTagFolderNames(Set<String> tagFolderNames) {
 		this.tagFolderNames = tagFolderNames;
+		compute();
 	}
 
 	void setPath(String path) {
