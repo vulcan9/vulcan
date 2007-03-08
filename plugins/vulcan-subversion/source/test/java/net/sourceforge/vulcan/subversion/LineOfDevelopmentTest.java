@@ -18,6 +18,8 @@
  */
 package net.sourceforge.vulcan.subversion;
 
+import java.util.Collections;
+
 import junit.framework.TestCase;
 
 public class LineOfDevelopmentTest extends TestCase {
@@ -132,6 +134,13 @@ public class LineOfDevelopmentTest extends TestCase {
 		assertEquals("/tags/1.0/submodule", lod.getComputedRelativePath());
 		assertEquals("http://localhost/svn/tags/1.0/submodule", lod.getAbsoluteUrl());
 		assertEquals("tags/1.0", lod.getComputedTagName());
+	}
+	
+	public void testRecomputesTagWhenFolderNamesSet() throws Exception {
+		lod.setPath("/releases/xx/yy");
+		lod.setTagFolderNames(Collections.singleton("releases"));
+		
+		assertEquals("releases/xx", lod.getComputedTagName());
 	}
 	
 	private String determineTagRoot(String path) {
