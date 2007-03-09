@@ -401,7 +401,7 @@ table.build-summary {
 	float: left;
 	margin-right: 2em;
 }
-table.change-sets {
+table.change-sets, .build-errors, .build-warning, .test-failures {
 	clear: left;
 }
 table.about th {

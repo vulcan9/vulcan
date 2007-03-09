@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.UUID;
 
 import net.sourceforge.vulcan.dto.ProjectStatusDto;
+import net.sourceforge.vulcan.dto.ProjectStatusDto.Status;
 import net.sourceforge.vulcan.metadata.SvnRevision;
 
 import org.apache.struts.action.ActionMessages;
@@ -249,6 +250,41 @@ public class ViewProjectBuildHistoryActionTest extends MockApplicationContextStr
 		assertEquals("application/xml", response.getContentType());
 		assertEquals("attachment; filename=vulcan-build-history.xml", response.getHeader("Content-Disposition"));
 	}		
+	public void testOmitSkipAndError() throws Exception {
+		addRequestParameter("download", "true");
+		addRequestParameter("projectNames", "Trundle");
+		addRequestParameter("rangeType", "all");
+		addRequestParameter("omitTypes", new String[] {"ERROR", "SKIP"});
+		
+		buildManager.getAvailableStatusIds("Trundle");
+		expectLastCall().andReturn(ids);
+		
+		buildManager.getStatus(ids.get(0));
+		expectLastCall().andReturn(createFakeStatus(Status.PASS));
+		
+		buildManager.getStatus(ids.get(1));
+		expectLastCall().andReturn(createFakeStatus(Status.SKIP));
+		
+		buildManager.getStatus(ids.get(2));
+		expectLastCall().andReturn(createFakeStatus(Status.ERROR));
+
+		projectDomBuilder.createProjectSummaries(Collections.singletonList(createFakeStatus(Status.PASS)),
+				"0", "3", request.getLocale());
+		
+		expectLastCall().andReturn(dom);
+		
+		replay();
+		
+		actionPerform();
+		
+		verifyNoActionErrors();
+		
+		verify();
+		
+		assertEquals("application/xml", response.getContentType());
+		assertEquals("attachment; filename=vulcan-build-history.xml", response.getHeader("Content-Disposition"));
+	}
+
 	public void testIncludeAllMultipleProjects() throws Exception {
 		addRequestParameter("projectNames", new String[] {"Trundle", "Other"});
 		addRequestParameter("rangeType", "all");
@@ -332,5 +368,12 @@ public class ViewProjectBuildHistoryActionTest extends MockApplicationContextStr
 		
 		assertEquals("application/xml", response.getContentType());
 	}
+	private ProjectStatusDto createFakeStatus(Status result) {
+		final ProjectStatusDto copy = (ProjectStatusDto) status.copy();
+		
+		copy.setStatus(result);
+		
+		return copy;
+	}		
 }
 

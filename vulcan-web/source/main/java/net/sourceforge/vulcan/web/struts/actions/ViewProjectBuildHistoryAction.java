@@ -23,12 +23,14 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import net.sourceforge.vulcan.dto.ProjectStatusDto;
+import net.sourceforge.vulcan.dto.ProjectStatusDto.Status;
 import net.sourceforge.vulcan.metadata.SvnRevision;
 import net.sourceforge.vulcan.web.struts.forms.ReportForm;
 
@@ -103,10 +105,16 @@ public final class ViewProjectBuildHistoryAction extends ProjectReportBaseAction
 			return mapping.getInputForward();
 		}
 		
+		final Set<Status> omittedTypes = parseOmittedTypes(reportForm.getOmitTypes());
+		
 		final List<ProjectStatusDto> outcomes = new ArrayList<ProjectStatusDto>();
 		
 		for (UUID id : ids) {
-			outcomes.add(buildManager.getStatus(id));
+			final ProjectStatusDto outcome = buildManager.getStatus(id);
+			
+			if (!omittedTypes.contains(outcome.getStatus())) {
+				outcomes.add(outcome);	
+			}
 		}
 		
 		final Document doc = projectDomBuilder.createProjectSummaries(outcomes, fromLabel, toLabel, request.getLocale());
@@ -120,5 +128,15 @@ public final class ViewProjectBuildHistoryAction extends ProjectReportBaseAction
 	
 	public void setFilename(String filename) {
 		this.filename = filename;
+	}
+	
+	private Set<Status> parseOmittedTypes(String[] typeStrings) {
+		final Set<Status> types = new HashSet<Status>();
+		
+		for (String omitType : typeStrings) {
+			types.add(Status.valueOf(omitType));
+		}
+		
+		return types;
 	}
 }
