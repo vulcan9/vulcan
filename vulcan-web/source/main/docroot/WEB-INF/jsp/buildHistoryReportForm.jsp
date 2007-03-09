@@ -103,6 +103,21 @@
 			</td>
 		</tr>
 		<tr>
+			<td><fmt:message key="label.options"/></td>
+			<td colspan="3">
+				<ul class="metaDataOptions">
+					<li>
+						<html:multibox property="omitTypes" value="SKIP" styleId="omitSkip"/>
+						<label for="omitSkip"><fmt:message key="label.report.omit.skip"/></label>
+					</li>
+					<li>
+						<html:multibox property="omitTypes" value="ERROR" styleId="omitError"/>
+						<label for="omitError"><fmt:message key="label.report.omit.error"/></label>
+					</li>
+				</ul>
+			</td>
+		</tr>
+		<tr>
 			<td><fmt:message key="label.transform"/></td>
 			<td colspan="3">
 				<html:select property="transform" styleClass="transform">
