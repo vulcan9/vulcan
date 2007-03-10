@@ -18,40 +18,40 @@
  */
 package net.sourceforge.vulcan;
 
-import java.util.Properties;
-
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.URL;
 
 import org.springframework.core.io.ClassPathResource;
 
 class CoberturaSupport {
-	static final boolean enabled;
-	static final String datafileLocation;
+	private static final boolean enabled;
+	private static String jarLocation;
 	
 	static {
-		final InputStream stream = Thread.currentThread().getContextClassLoader().getResourceAsStream("cobertura.properties");
-		
-		if (stream != null) {
+		final ClassPathResource resource = new ClassPathResource(
+			"net/sourceforge/cobertura/coveragedata/HasBeenInstrumented.class");
+
+		if (resource.exists()) {
 			enabled = true;
-			final Properties props = new Properties();
+			final URL url;
 			try {
-				props.load(stream);
+				url = resource.getURL();
 			} catch (IOException e) {
 				throw new RuntimeException(e);
-			} finally {
-				try {
-					stream.close();
-				} catch (IOException ignore) {
-				}
 			}
 			
-			datafileLocation = props.getProperty("net.sourceforge.cobertura.datafile");
+			if ("jar".equals(url.getProtocol())) {
+				String path = url.getPath().substring(5);
+				path = path.substring(0, path.indexOf('!'));
+				
+				jarLocation = new File(path.replaceAll("%20", " ")).getAbsolutePath();
+			} else {
+				throw new RuntimeException("Cobertura is not in a jar!");
+			}
 		} else {
 			enabled = false;
-			datafileLocation = null;
+			jarLocation = null;
 		}
 	}
 	
@@ -59,28 +59,7 @@ class CoberturaSupport {
 		return enabled;
 	}
 	
-	static String getDatafileLocation() {
-		return datafileLocation;
-	}
-
 	public static String getJarLocation() {
-		final ClassPathResource resource = new ClassPathResource(
-				"net/sourceforge/cobertura/coveragedata/HasBeenInstrumented.class");
-		
-		final URL url;
-		try {
-			url = resource.getURL();
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		}
-		
-		if ("jar".equals(url.getProtocol())) {
-			String path = url.getPath().substring(5);
-			path = path.substring(0, path.indexOf('!'));
-			
-			return new File(path.replaceAll("%20", " ")).getAbsolutePath();
-		}
-		
-		throw new RuntimeException("Cobertura is not in a jar!");
+		return jarLocation;
 	}
 }
