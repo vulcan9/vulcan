@@ -135,12 +135,7 @@
 				<configuration>
 					<!-- Need to specify emtpy excludes to prevent default
 						exclude *Abstract*Test.java from omitting valid tests. -->
-
-					<!-- surefire 2.1 throws NullPointerException if you leave the
-						pattern blank, so here we specify one that matches nothing. -->
-					<excludes>
-						<exclude>thispatternwillnotmatchanything</exclude>
-					</excludes>
+					<excludes/>
 				</configuration>
 			</plugin>
 			
@@ -169,25 +164,6 @@
 				</configuration>
 			</plugin>
 		</plugins>
-		<pluginManagement>
-			<plugins>
-				<plugin>
-					<!-- version 2.2 has a bug where the unit tests
-						from one suite are included in the xml report
-						for all following suites, which results in
-						a summation of all suites instead of the actual
-						number of tests.
-
-						See http://jira.codehaus.org/browse/MSUREFIRE-114
-
-						This is fixed in 2.3 but has not been released. -->
-
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-surefire-plugin</artifactId>
-					<version>2.1.3</version>
-				</plugin>
-			</plugins>
-		</pluginManagement>
 	</build>
 	
 	<reporting>
