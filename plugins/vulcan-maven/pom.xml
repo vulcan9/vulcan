@@ -53,6 +53,21 @@
 					</execution>
 				</executions>
 			</plugin>
+			<plugin>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<configuration>
+					<systemProperties>
+						<property>
+							<name>maven1.home</name>
+							<value>${maven1.home}</value>
+						</property>
+						<property>
+							<name>maven2.home</name>
+							<value>${maven2.home}</value>
+						</property>
+					</systemProperties>
+				</configuration>
+			</plugin>
 		</plugins>
 	</build>
 	
