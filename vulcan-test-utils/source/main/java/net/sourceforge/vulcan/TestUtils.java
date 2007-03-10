@@ -61,4 +61,16 @@ public abstract class TestUtils {
 		
 		return relativePath;
 	}
+	
+	public static boolean isCoberturaEnabled() {
+		return CoberturaSupport.isEnabled();
+	}
+	
+	public static String getCoberturaDatafileLocation() {
+		return CoberturaSupport.getDatafileLocation();
+	}
+	
+	public static String getCoberturaJarLocation() {
+		return CoberturaSupport.getJarLocation();
+	}
 }

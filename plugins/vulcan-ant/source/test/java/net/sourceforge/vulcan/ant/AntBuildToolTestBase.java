@@ -25,7 +25,9 @@ import java.util.Properties;
 
 import junit.framework.TestCase;
 import net.sourceforge.vulcan.TestUtils;
+import net.sourceforge.vulcan.ant.receiver.UdpEventSource;
 import net.sourceforge.vulcan.dto.ProjectConfigDto;
+import net.sourceforge.vulcan.exception.ConfigException;
 
 import org.apache.commons.lang.StringUtils;
 
@@ -34,6 +36,10 @@ abstract class AntBuildToolTestBase extends TestCase {
 	AntConfig antConfig;
 	AntProjectConfig config;
 	ProjectConfigDto projectConfig;
+	
+	private final boolean addCoberturaRuntimeIfEnabled;
+	private JavaHome javaEnvironment;
+	private UdpEventSource eventSource;
 	
 	static final String antHome;
 	
@@ -49,8 +55,16 @@ abstract class AntBuildToolTestBase extends TestCase {
 			}
 		}
 		antHome = tmp;
-		
 	}
+	
+	public AntBuildToolTestBase() {
+		this(false);
+	}
+	
+	public AntBuildToolTestBase(boolean addCoberturaRuntimeIfEnabled) {
+		this.addCoberturaRuntimeIfEnabled = addCoberturaRuntimeIfEnabled;
+	}
+	
 	@Override
 	protected void setUp() throws Exception {
 		antConfig = new AntConfig();
@@ -58,7 +72,16 @@ abstract class AntBuildToolTestBase extends TestCase {
 		config = new AntProjectConfig();
 		config.setTargets("clean compile");
 		
-		tool = new AntBuildTool(config, antConfig);
+		javaEnvironment = new JavaHome();
+		javaEnvironment.setJavaHome(System.getProperty("java.home"));
+		
+		eventSource = new UdpEventSource();
+
+		if (addCoberturaRuntimeIfEnabled) {
+			configureCobertura();
+		}
+
+		tool = new AntBuildTool(config, antConfig, javaEnvironment, eventSource);
 		
 		projectConfig = new ProjectConfigDto();
 		projectConfig.setWorkDir(TestUtils.resolveRelativePath("source/test/workdir"));
@@ -67,7 +90,27 @@ abstract class AntBuildToolTestBase extends TestCase {
 			fail("Please define ant.home in build.properties");
 		}
 		
+		
 		// clear any pending interrupts
 		Thread.interrupted();
+	}
+	
+	private void configureCobertura() {
+		if (TestUtils.isCoberturaEnabled()) {
+			String prop = "net.sourceforge.cobertura.datafile=" + TestUtils.getCoberturaDatafileLocation();
+			javaEnvironment.setSystemProperties(new String[] {prop});
+			
+			eventSource = new CoberturaUdpEventSource();
+		}
+	}
+	
+	public class CoberturaUdpEventSource extends UdpEventSource {
+		@Override
+		public void addAntCommandLineArgs(JavaCommandBuilder jcb) throws ConfigException {
+			jcb.addArgument("-lib");
+			jcb.addArgument(TestUtils.getCoberturaJarLocation());
+
+			super.addAntCommandLineArgs(jcb);
+		}
 	}
 }

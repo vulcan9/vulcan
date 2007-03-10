@@ -70,7 +70,7 @@ public class UdpEventSource extends SerializedEventSource {
 	public void addAntCommandLineArgs(JavaCommandBuilder jcb) throws ConfigException {
 		jcb.addArgument("-lib");
 		try {
-			jcb.addArgument(AntBuildTool.getLocalClassPathEntry(getClass(), null).getCanonicalPath());
+			jcb.addArgument(AntBuildTool.getLocalClassPathEntry(UdpEventSource.class, null).getCanonicalPath());
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}

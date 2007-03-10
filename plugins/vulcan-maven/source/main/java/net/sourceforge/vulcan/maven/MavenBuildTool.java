@@ -53,6 +53,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.maven.AntProjectBuilder;
+import org.apache.maven.VulcanMavenExtensionsMarker;
 
 public class MavenBuildTool extends AntBuildTool {
 	static final Log log = LogFactory.getLog(MavenBuildTool.class);
@@ -185,7 +186,7 @@ public class MavenBuildTool extends AntBuildTool {
 								.getCanonicalPath());
 			jcb.addSystemProperty("vulcan-maven.jar", 
 					AntBuildTool.getLocalClassPathEntry(
-							AntProjectBuilder.class, null)
+							VulcanMavenExtensionsMarker.class, null)
 								.getCanonicalPath());
 
 			if (!maven2 && !maven1_1) {

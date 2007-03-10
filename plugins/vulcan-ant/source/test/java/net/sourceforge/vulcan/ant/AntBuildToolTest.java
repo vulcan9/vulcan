@@ -114,7 +114,7 @@ public class AntBuildToolTest extends AntBuildToolTestBase {
 		
 		assertTrue("returned path is not a directory", path.isDirectory());
 		assertTrue("wrong path: " + path.getCanonicalPath(), 
-				path.getCanonicalPath().endsWith("target" + File.separator + "classes"));
+				path.getCanonicalPath().contains(File.separator + "target" + File.separator));
 	}
 	public void testGetsListenerClassPathFromJar() throws Exception {
 		final File path = AntBuildTool.getLocalClassPathEntry(TestCase.class, null);
