@@ -97,9 +97,6 @@ abstract class AntBuildToolTestBase extends TestCase {
 	
 	private void configureCobertura() {
 		if (TestUtils.isCoberturaEnabled()) {
-			String prop = "net.sourceforge.cobertura.datafile=" + TestUtils.getCoberturaDatafileLocation();
-			javaEnvironment.setSystemProperties(new String[] {prop});
-			
 			eventSource = new CoberturaUdpEventSource();
 		}
 	}
