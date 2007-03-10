@@ -67,7 +67,11 @@ public class MavenBuildPlugin extends PluginSupport
 		final JavaHome javaHome;
 		
 		if (isNotBlank(javaHomeName) && javaHomeName.startsWith("System")) {
-			javaHome = null;
+			javaHome = getSelectedEnvironment(
+				this.config.getJavaHomes(),
+				"System",
+				null,
+				true);
 		} else {
 			javaHome = getSelectedEnvironment(
 				this.config.getJavaHomes(),
