@@ -28,6 +28,7 @@ import net.sourceforge.vulcan.dto.ProjectStatusDto;
 import net.sourceforge.vulcan.exception.ConfigException;
 
 import org.apache.maven.AntProjectBuilder;
+import org.apache.maven.VulcanMavenExtensionsMarker;
 
 public class MavenBuildToolTest extends MavenBuildToolTestBase {
 	public void testGetForeheadJar() throws Exception {
@@ -129,7 +130,7 @@ public class MavenBuildToolTest extends MavenBuildToolTestBase {
 							.getCanonicalPath());
 		expected.addSystemProperty("vulcan-maven.jar", 
 				AntBuildTool.getLocalClassPathEntry(
-						AntProjectBuilder.class, null)
+						VulcanMavenExtensionsMarker.class, null)
 							.getCanonicalPath());
 		
 		expected.addSystemProperty("javax.xml.parsers.SAXParserFactory", "org.apache.xerces.jaxp.SAXParserFactoryImpl");

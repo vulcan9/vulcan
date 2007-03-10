@@ -55,6 +55,10 @@ public class AntBuildToolInvocationTest extends AntBuildToolTestBase {
 		}
 	};
 	
+	public AntBuildToolInvocationTest() {
+		super(true);
+	}
+	
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
