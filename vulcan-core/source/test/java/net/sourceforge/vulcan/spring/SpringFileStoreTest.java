@@ -461,6 +461,26 @@ public class SpringFileStoreTest extends EasyMockTestCase {
 		final File file = new File(dir, status.getId().toString());
 		assertTrue(file.exists());
 	}
+
+	@TrainingMethod("trainStoreOutcome")
+	public void testStoreProjectOutcomeRemovesUnusedBuildLogId() throws Exception {
+		ProjectStatusDto status = new ProjectStatusDto();
+		status.setName("fake");
+		status.setBuildLogId(UUID.randomUUID());
+		
+		final File dir = new File(projectsDir + File.separator + "fake", "outcomes");
+		
+		assertFalse(dir.exists());
+		assertNull(status.getId());
+		
+		assertEquals(store.storeBuildOutcome(status), status.getId());
+		
+		assertNull(status.getBuildLogId());
+		
+		assertTrue(dir.exists());
+		final File file = new File(dir, status.getId().toString());
+		assertTrue(file.exists());
+	}
 	
 	@TrainingMethod("trainStoreOutcome")
 	public void testStoreProjectOutcomeDoesNotOverrideId() throws Exception {
@@ -545,6 +565,19 @@ public class SpringFileStoreTest extends EasyMockTestCase {
 		
 		assertEquals("hello", str1);
 		assertEquals("hi", str2);
+	}
+	public void testDeletesChangeLogOnEmpty() throws Exception {
+		ProjectStatusDto st1 = store.createBuildOutcome("myProject");
+		
+		OutputStream s1 = store.getChangeLogOutputStream("myProject", st1.getDiffId());
+		
+		s1.close();
+		
+		try {
+			store.getChangeLogInputStream("myProject", st1.getDiffId());
+			fail("expected exception");
+		} catch (ResourceNotFoundException e) {
+		}
 	}
 	public void testGetChangeLogInputStreamThrowsOnNotFound() throws Exception {
 		try {
