@@ -1,13 +1,10 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-		xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	
 	<groupId>net.sourceforge.vulcan</groupId>
 	<artifactId>vulcan</artifactId>
 	<name>vulcan</name>	
-	<version>0.9-SNAPSHOT</version>
+	<version>0.9</version>
 	<packaging>pom</packaging>
 	
 	<modules>
@@ -91,9 +88,9 @@
 		</license>
 	</licenses>
 	<scm>
-		<connection>scm:svn:http://vulcan.googlecode.com/svn/</connection>
-		<developerConnection>scm:svn:https://vulcan.googlecode.com/svn/</developerConnection>
-		<url>http://vulcan.googlecode.com/svn/</url>
+		<connection>scm:svn:https://vulcan.googlecode.com/svn/tags/vulcan-0.9</connection>
+		<developerConnection>scm:svn:https://vulcan.googlecode.com/svn/tags/vulcan-0.9</developerConnection>
+		<url>https://vulcan.googlecode.com/svn/tags/vulcan-0.9</url>
 	</scm>
 	
 	<build>
@@ -135,7 +132,7 @@
 				<configuration>
 					<!-- Need to specify emtpy excludes to prevent default
 						exclude *Abstract*Test.java from omitting valid tests. -->
-					<excludes/>
+					<excludes />
 				</configuration>
 			</plugin>
 			
@@ -229,17 +226,17 @@
 			<dependency>
 				<groupId>net.sourceforge.vulcan</groupId>
 				<artifactId>vulcan-core</artifactId>
-				<version>0.9-SNAPSHOT</version>
+				<version>0.9</version>
 			</dependency>
 			<dependency>
 				<groupId>net.sourceforge.vulcan</groupId>
 				<artifactId>vulcan-test-utils</artifactId>
-				<version>0.9-SNAPSHOT</version>
+				<version>0.9</version>
 			</dependency>
 			<dependency>
 				<groupId>net.sourceforge.vulcan.plugins</groupId>
 				<artifactId>vulcan-ant</artifactId>
-				<version>0.9-SNAPSHOT</version>
+				<version>0.9</version>
 			</dependency>
 			<dependency>
 				<groupId>org.springframework</groupId>
