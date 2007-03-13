@@ -219,7 +219,7 @@
 			<url>scp://minotaur.apache.org/www/cvs.apache.org/maven-snapshot-repository</url>
 		</snapshotRepository-->
 		<site>
-			<id>website</id>
+			<id>vulcan-website</id>
 			<url>scp://shell.sourceforge.net/home/groups/v/vu/vulcan/htdocs</url>
 		</site>
 	</distributionManagement>
