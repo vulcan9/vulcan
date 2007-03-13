@@ -405,6 +405,14 @@ public abstract class AbstractProjectDomBuilder implements ProjectDomBuilder {
 			addChildNodeWithText(root, "build-reason",
 					formatMessage(buildReasonKey, status.getBuildReasonArgs(), locale));
 		}
+		
+		if (status.getBuildLogId() != null) {
+			addChildNodeWithText(root, "build-log-available", null);
+		}
+
+		if (status.getDiffId() != null) {
+			addChildNodeWithText(root, "diff-available", null);
+		}
 	}
 	private void addElapsedTime(Element root, ProjectStatusDto status, Locale locale) {
 		final Date startDate = status.getStartDate();

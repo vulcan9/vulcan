@@ -131,6 +131,8 @@ public class SpringFileStore extends AbstractFileStore implements BeanFactoryAwa
 			outcome.setId(id);
 		}
 		
+		removeUnusedResources(outcome.getName(), outcome);
+		
 		beanEncoder.reset();
 		beanEncoder.addBean("build-outcome", outcome);
 		
@@ -154,7 +156,11 @@ public class SpringFileStore extends AbstractFileStore implements BeanFactoryAwa
 		
 		final BeanFactory beanFactory = new XmlBeanFactory(new FileSystemResource(file), this.beanFactory);
 		
-		return (ProjectStatusDto) beanFactory.getBean("build-outcome");
+		final ProjectStatusDto outcome = (ProjectStatusDto) beanFactory.getBean("build-outcome");
+		
+		removeUnusedResources(projectName, outcome);
+
+		return outcome;
 	}
 	public ProjectStatusDto createBuildOutcome(String projectName) {
 		final ProjectStatusDto status = new ProjectStatusDto();
@@ -182,11 +188,16 @@ public class SpringFileStore extends AbstractFileStore implements BeanFactoryAwa
 		}
 	}
 	public InputStream getChangeLogInputStream(String projectName, UUID diffId) throws StoreException {
-		try {
-			return new FileInputStream(new File(getChangeLogDir(projectName), diffId.toString()));
-		} catch (FileNotFoundException e) {
-			throw new ResourceNotFoundException(e);
+		final File file = new File(getChangeLogDir(projectName), diffId.toString());
+		
+		if (checkFile(file)) {
+			try {
+				return new FileInputStream(file);
+			} catch (FileNotFoundException ignore) {
+			}
 		}
+
+		throw new ResourceNotFoundException("ProjectName: " + projectName + ", diffId: " + diffId);
 	}
 	public OutputStream getBuildLogOutputStream(String projectName, UUID buildLogId) throws StoreException {
 		final File dir = getBuildLogDir(projectName);
@@ -199,13 +210,19 @@ public class SpringFileStore extends AbstractFileStore implements BeanFactoryAwa
 			return new FileOutputStream(new File(dir, buildLogId.toString()));
 		} catch (FileNotFoundException e) {
 			throw new StoreException(e);
-		}	}
-	public InputStream getBuildLogInputStream(String projectName, UUID buildLogId) throws StoreException {
-		try {
-			return new FileInputStream(new File(getBuildLogDir(projectName), buildLogId.toString()));
-		} catch (FileNotFoundException e) {
-			throw new ResourceNotFoundException(e);
 		}
+	}
+	public InputStream getBuildLogInputStream(String projectName, UUID buildLogId) throws StoreException {
+		final File file = new File(getBuildLogDir(projectName), buildLogId.toString());
+				
+		if (checkFile(file)) {
+			try {
+				return new FileInputStream(file);
+			} catch (FileNotFoundException ignore) {
+			}
+		}
+
+		throw new ResourceNotFoundException("ProjectName: " + projectName + ", buildLogId: " + buildLogId);
 	}
 
 	public synchronized Map<String, List<UUID>> getBuildOutcomeIDs() {
@@ -309,5 +326,33 @@ public class SpringFileStore extends AbstractFileStore implements BeanFactoryAwa
 		return new File(
 				getProjectsRoot() + File.separator + projectName,
 				"buildlogs");
+	}
+	private boolean checkFile(File file) {
+		if (file.exists()) {
+			if (file.length() > 0) {
+				return true;
+			}
+			
+			// sometimes diffs are created but have no contents.  delete them.
+			file.delete();
+		}
+		return false;
+	}
+	private void removeUnusedResources(String projectName, final ProjectStatusDto outcome) {
+		if (outcome.getBuildLogId() != null) {
+			final File buildLog = new File(getBuildLogDir(projectName), outcome.getBuildLogId().toString());
+			
+			if (checkFile(buildLog) == false) {
+				outcome.setBuildLogId(null);
+			}
+		}
+		
+		if (outcome.getDiffId() != null) {
+			final File diff = new File(getChangeLogDir(projectName), outcome.getDiffId().toString());
+			
+			if (checkFile(diff) == false) {
+				outcome.setDiffId(null);
+			}
+		}
 	}
 }

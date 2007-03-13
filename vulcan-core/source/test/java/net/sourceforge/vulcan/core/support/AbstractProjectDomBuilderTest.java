@@ -135,6 +135,7 @@ public class AbstractProjectDomBuilderTest extends EasyMockTestCase {
 		projectStatus.setCompletionDate(date);
 		projectStatus.setMessageKey("fake.outcome.message");
 		projectStatus.setBuildLogId(UUID.randomUUID());
+		projectStatus.setDiffId(UUID.randomUUID());
 		projectStatus.setRevision(new RevisionTokenDto(0l, "fake revision"));
 		projectStatus.setRepositoryUrl("http://localhost");
 		projectStatus.setTagName("rc2");
@@ -208,6 +209,9 @@ public class AbstractProjectDomBuilderTest extends EasyMockTestCase {
 		
 		assertContainsChildWithText(elem, "update-type", "Full");
 		
+		assertNotNull(elem.getChild("diff-available"));
+		assertNotNull(elem.getChild("build-log-available"));
+
 		verify();
 	}
 	
@@ -221,6 +225,7 @@ public class AbstractProjectDomBuilderTest extends EasyMockTestCase {
 		projectStatus.setName("a name");
 		projectStatus.setRevision(null);
 		projectStatus.setStatus(null);
+		projectStatus.setDiffId(null);
 		projectStatus.setBuildLogId(null);
 		projectStatus.setBuildReasonKey(null);
 		projectStatus.setBuildReasonArgs(null);
@@ -234,6 +239,9 @@ public class AbstractProjectDomBuilderTest extends EasyMockTestCase {
 		
 		assertContainsChildWithText(elem, "name", projectStatus.getName());
 		verify();
+		
+		assertNull(elem.getChild("diff-available"));
+		assertNull(elem.getChild("build-log-available"));
 	}
 
 	public void testElapsedTime() throws Exception {

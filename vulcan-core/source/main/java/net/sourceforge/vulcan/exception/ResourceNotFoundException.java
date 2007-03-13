@@ -25,6 +25,9 @@ public class ResourceNotFoundException extends StoreException {
 	public ResourceNotFoundException(Throwable cause) {
 		super(cause);
 	}
+	public ResourceNotFoundException(String message) {
+		super(message, null);
+	}
 	public ResourceNotFoundException(String message, Throwable cause) {
 		super(message, cause);
 	}

@@ -233,20 +233,26 @@
 				
 				<xsl:apply-templates select="/project/repository-url"/>
 				
-				<li>
-					<xsl:element name="a">
-							<xsl:attribute name="href"><xsl:value-of select="$viewProjectStatusURL"/>&amp;projectName=<xsl:value-of select="/project/name"/>&amp;buildNumber=<xsl:value-of select="/project/build-number"/>&amp;view=log</xsl:attribute>
-							<xsl:attribute name="class">external</xsl:attribute>
-							<xsl:value-of select="$buildLogLabel"/>
-					</xsl:element>
-				</li>
-				<li>
-					<xsl:element name="a">
-							<xsl:attribute name="href"><xsl:value-of select="$viewProjectStatusURL"/>&amp;projectName=<xsl:value-of select="/project/name"/>&amp;buildNumber=<xsl:value-of select="/project/build-number"/>&amp;view=diff</xsl:attribute>
-							<xsl:attribute name="class">external</xsl:attribute>
-							<xsl:value-of select="$diffHeader"/>
-					</xsl:element>
-				</li>
+				<xsl:if test="/project/build-log-available">
+					<li>
+						<xsl:element name="a">
+								<xsl:attribute name="href"><xsl:value-of select="$viewProjectStatusURL"/>&amp;projectName=<xsl:value-of select="/project/name"/>&amp;buildNumber=<xsl:value-of select="/project/build-number"/>&amp;view=log</xsl:attribute>
+								<xsl:attribute name="class">external</xsl:attribute>
+								<xsl:value-of select="$buildLogLabel"/>
+						</xsl:element>
+					</li>
+				</xsl:if>
+				
+				<xsl:if test="/project/diff-available">
+					<li>
+						<xsl:element name="a">
+								<xsl:attribute name="href"><xsl:value-of select="$viewProjectStatusURL"/>&amp;projectName=<xsl:value-of select="/project/name"/>&amp;buildNumber=<xsl:value-of select="/project/build-number"/>&amp;view=diff</xsl:attribute>
+								<xsl:attribute name="class">external</xsl:attribute>
+								<xsl:value-of select="$diffHeader"/>
+						</xsl:element>
+					</li>
+				</xsl:if>
+				
 				<xsl:if test="/project/metrics">
 					<li>
 						<a href="#metrics">
