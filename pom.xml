@@ -7,7 +7,7 @@
 	<groupId>net.sourceforge.vulcan</groupId>
 	<artifactId>vulcan</artifactId>
 	<name>vulcan</name>	
-	<version>0.9</version>
+	<version>0.9-SNAPSHOT</version>
 	<packaging>pom</packaging>
 	
 	<modules>
@@ -159,6 +159,13 @@
 					<siteDirectory>source/site</siteDirectory>
 				</configuration>
 			</plugin>
+			
+			<plugin>
+				<artifactId>maven-release-plugin</artifactId>
+				<configuration>
+					<tagBase>https://vulcan.googlecode.com/svn/tags/</tagBase>
+				</configuration>
+			</plugin>
 		</plugins>
 	</build>
 	
@@ -222,17 +229,17 @@
 			<dependency>
 				<groupId>net.sourceforge.vulcan</groupId>
 				<artifactId>vulcan-core</artifactId>
-				<version>0.9</version>
+				<version>0.9-SNAPSHOT</version>
 			</dependency>
 			<dependency>
 				<groupId>net.sourceforge.vulcan</groupId>
 				<artifactId>vulcan-test-utils</artifactId>
-				<version>0.9</version>
+				<version>0.9-SNAPSHOT</version>
 			</dependency>
 			<dependency>
 				<groupId>net.sourceforge.vulcan.plugins</groupId>
 				<artifactId>vulcan-ant</artifactId>
-				<version>0.9</version>
+				<version>0.9-SNAPSHOT</version>
 			</dependency>
 			<dependency>
 				<groupId>org.springframework</groupId>
