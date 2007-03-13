@@ -62,6 +62,8 @@ import org.tmatesoft.svn.core.SVNNodeKind;
 import org.tmatesoft.svn.core.SVNURL;
 import org.tmatesoft.svn.core.auth.BasicAuthenticationManager;
 import org.tmatesoft.svn.core.internal.io.dav.DAVRepositoryFactory;
+import org.tmatesoft.svn.core.internal.io.fs.FSRepositoryFactory;
+import org.tmatesoft.svn.core.internal.io.svn.SVNRepositoryFactoryImpl;
 import org.tmatesoft.svn.core.internal.wc.DefaultSVNOptions;
 import org.tmatesoft.svn.core.io.SVNRepository;
 import org.tmatesoft.svn.core.io.SVNRepositoryFactory;
@@ -78,7 +80,12 @@ import org.tmatesoft.svn.core.wc.SVNWCClient;
 public class SubversionRepositoryAdaptor extends PluginSupport implements RepositoryAdaptor {
 	static {
 		// Prefer Basic in case server offers to use NTLM first.
-		System.setProperty("svnkit.http.methods", "Basic"); 
+		System.setProperty("svnkit.http.methods", "Basic");
+
+		// Enable support for various protocols.
+		FSRepositoryFactory.setup();
+		DAVRepositoryFactory.setup();
+		SVNRepositoryFactoryImpl.setup();
 	}
 	
 	private final Log log = LogFactory.getLog(getClass());
@@ -459,7 +466,6 @@ public class SubversionRepositoryAdaptor extends PluginSupport implements Reposi
 			throw new ConfigException("svn.profile.not.selected", null);
 		}
 		try {
-			DAVRepositoryFactory.setup();
 			return SVNRepositoryFactory.create(SVNURL.parseURIEncoded(profile.getRootUrl()));
 		} catch (Exception e) {
 			throw new RepositoryException(e);
