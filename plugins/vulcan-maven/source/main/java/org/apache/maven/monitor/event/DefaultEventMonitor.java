@@ -58,6 +58,7 @@ public class DefaultEventMonitor extends AbstractSelectiveEventMonitor {
 			throw new RuntimeException(e);
 		}
 	}
+	// Ignore @Override warning because this code must be Java 1.3 compatible.
 	protected void doStartEvent(String eventName, String target, long timestamp) {
 		logger.info( "[" + target + "]" );
 		
@@ -69,6 +70,7 @@ public class DefaultEventMonitor extends AbstractSelectiveEventMonitor {
 				null));
 	}
 	
+	// Ignore @Override warning because this code must be Java 1.3 compatible.
 	protected void doEndEvent(String eventName, String target, long timestamp) {
 		transmitEvent(new AntEventSummary(
 				Constants.TARGET_FINISHED,
@@ -77,7 +79,8 @@ public class DefaultEventMonitor extends AbstractSelectiveEventMonitor {
 				null,
 				null));
 	}
-
+	
+	// Ignore @Override warning because this code must be Java 1.3 compatible.
 	protected void doErrorEvent(String eventName, String target, long timestamp, Throwable cause) {
 		transmitEvent(new AntEventSummary(
 				Constants.MESSAGE_LOGGED,

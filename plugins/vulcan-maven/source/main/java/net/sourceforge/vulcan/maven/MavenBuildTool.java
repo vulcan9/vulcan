@@ -20,8 +20,6 @@ package net.sourceforge.vulcan.maven;
 
 import static org.apache.commons.lang.StringUtils.isNotBlank;
 
-import java.util.Collection;
-
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -32,6 +30,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.PrintWriter;
+import java.util.Collection;
 
 import net.sourceforge.vulcan.ant.AntBuildTool;
 import net.sourceforge.vulcan.ant.AntConfig;
@@ -52,7 +51,6 @@ import org.apache.commons.io.filefilter.PrefixFileFilter;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.maven.AntProjectBuilder;
 import org.apache.maven.VulcanMavenExtensionsMarker;
 
 public class MavenBuildTool extends AntBuildTool {

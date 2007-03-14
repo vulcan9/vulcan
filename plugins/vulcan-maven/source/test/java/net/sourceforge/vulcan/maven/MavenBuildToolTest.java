@@ -27,7 +27,6 @@ import net.sourceforge.vulcan.ant.buildlistener.UdpBuildEventPublisher;
 import net.sourceforge.vulcan.dto.ProjectStatusDto;
 import net.sourceforge.vulcan.exception.ConfigException;
 
-import org.apache.maven.AntProjectBuilder;
 import org.apache.maven.VulcanMavenExtensionsMarker;
 
 public class MavenBuildToolTest extends MavenBuildToolTestBase {
