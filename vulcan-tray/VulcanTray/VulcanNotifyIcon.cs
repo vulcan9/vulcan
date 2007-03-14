@@ -1,10 +1,10 @@
 using System;
-using System.Collections.Generic;
 using System.Drawing;
 using System.Reflection;
 using System.Timers;
 using System.Windows.Forms;
 using System.Xml;
+using Timer=System.Timers.Timer;
 
 namespace SourceForge.Vulcan.Tray
 {
@@ -54,10 +54,9 @@ namespace SourceForge.Vulcan.Tray
 		
 		private readonly bool ballonsSupported;
 		private readonly StatusForm statusForm;
-		private readonly StatusMonitor statusMonitor;
 		private readonly BrowserIntegration browserIntegration;
 		private readonly NotifyIcon notifyIcon;
-		private readonly System.Timers.Timer timer;
+		private readonly Timer timer;
 		
 		private Icon[] activeIcons;
 		private int currentIconIndex;
@@ -68,13 +67,12 @@ namespace SourceForge.Vulcan.Tray
 		internal VulcanNotifyIcon(StatusForm statusForm, StatusMonitor statusMonitor, BrowserIntegration browserIntegration)
 		{
 			this.statusForm = statusForm;
-			this.statusMonitor = statusMonitor;
 			this.browserIntegration = browserIntegration;
 
 			this.activeIcons = Blank;
 			this.currentIconIndex = 0;
 
-			this.timer = new System.Timers.Timer(AnimationInterval);
+			this.timer = new Timer(AnimationInterval);
 			this.timer.Elapsed += new ElapsedEventHandler(this.onTimerElapsed);
 			this.timer.Start();
 			
