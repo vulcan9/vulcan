@@ -1,6 +1,5 @@
 using System;
 using System.Net;
-using System.Timers;
 using System.Xml;
 
 namespace SourceForge.Vulcan.Tray
@@ -120,7 +119,14 @@ namespace SourceForge.Vulcan.Tray
 				if ("BUILDING".Equals(status))
 				{
 					currentlyBuilding = true;
-					parseFailure(project.SelectSingleNode("previous-status").InnerText, ref failuresPresent);
+					XmlNode previousStatusNode = project.SelectSingleNode("previous-status");
+					string previousStatusText = "";
+					
+					if (previousStatusNode != null)
+					{
+						previousStatusText = previousStatusNode.InnerText;
+					}
+					parseFailure(previousStatusText, ref failuresPresent);
 				}
 				else
 				{
