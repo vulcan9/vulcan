@@ -44,6 +44,7 @@ public final class UdpBuildEventPublisher extends SerializingBuildEventPublisher
 		this.socket = new DatagramSocket();
 	}
 	
+	// Ignore @Override warning because this code must be Java 1.3 compatible.
 	protected void transmit(byte[] serializedData) {
 		final DatagramPacket packet = new DatagramPacket(serializedData, serializedData.length);
 		packet.setAddress(remoteAddress);
