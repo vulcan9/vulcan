@@ -27,6 +27,7 @@
 			class="net.sourceforge.vulcan.web.struts.actions.ManualBuildAction">
 		<property name="buildManager" ref="buildManager"/>
 		<property name="projectManager" ref="stateManager"/>
+		<property name="stateManager" ref="stateManager"/>
 	</bean>
 
 	<bean name="/buildmanagement/flushBuildQueue"

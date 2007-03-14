@@ -33,4 +33,9 @@ public interface Scheduler {
 	public boolean isRunning();
 	public String getName();
 	public Date getNextExecutionDate();
+
+	/**
+	 * Execute if idle.
+	 */
+	void wakeUp();
 }

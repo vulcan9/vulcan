@@ -99,6 +99,27 @@ public class AbstractSchedulerTest extends TestCase {
 		}
 		assertTrue("stop did not stop, or did not join", prev == count);
 	}
+	public void testWakeup() throws Exception {
+		config.setInterval(10000);
+		
+		rs.start();
+
+		synchronized(rs) {
+			rs.wait(100);
+		}
+
+		assertEquals(0, count);
+		
+		rs.wakeUp();
+		
+		synchronized(rs) {
+			rs.wait(100);
+		}
+		
+		assertEquals(1, count);
+		
+		rs.stop();
+	}
 	public void testChangeConfigOkWhenStopped() throws Exception {
 		config = (SchedulerConfigDto) config.copy();
 		config.setName("other");
