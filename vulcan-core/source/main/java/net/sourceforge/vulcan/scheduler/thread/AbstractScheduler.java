@@ -79,7 +79,9 @@ public abstract class AbstractScheduler implements Scheduler {
 					} else {
 						nextExecutionDate = new Date(new Date().getTime() + interval);
 						try {
-							Thread.sleep(interval);
+							synchronized(AbstractScheduler.this) {
+								AbstractScheduler.this.wait(interval);
+							}
 							try {
 								execute();
 							} catch (InterruptedException e) {
@@ -150,5 +152,9 @@ public abstract class AbstractScheduler implements Scheduler {
 	}
 	protected final Thread getThread() {
 		return thread;
+	}
+
+	public synchronized void wakeUp() {
+		notify();
 	}
 }

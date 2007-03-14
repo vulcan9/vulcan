@@ -20,6 +20,7 @@ package net.sourceforge.vulcan.web.struts;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import net.sourceforge.vulcan.Keys;
@@ -33,6 +34,7 @@ import net.sourceforge.vulcan.dto.ProjectConfigDto;
 import net.sourceforge.vulcan.dto.ProjectStatusDto;
 import net.sourceforge.vulcan.dto.RepositoryTagDto;
 import net.sourceforge.vulcan.metadata.SvnRevision;
+import net.sourceforge.vulcan.scheduler.BuildDaemon;
 import net.sourceforge.vulcan.web.struts.forms.ManualBuildForm;
 
 @SvnRevision(id="$Id$", url="$HeadURL$")
@@ -93,6 +95,62 @@ public class ManualBuildActionTest extends MockApplicationContextStrutsTestCase 
 		
 		buildManager.add(expectedDg);
 
+		expect(manager.getBuildDaemons()).andReturn(Collections.<BuildDaemon>emptyList());
+		
+		replay();
+		
+		actionPerform();
+		
+		verify();
+		
+		verifyNoActionMessages();
+		verifyNoActionErrors();
+		
+		verifyForward("dashboard");
+	}
+	public void testWakesUpBuildDaemon() throws Exception {
+		BuildDaemon bd1 = createMock(BuildDaemon.class);
+		BuildDaemon bd2 = createMock(BuildDaemon.class);
+		BuildDaemon bd3 = createMock(BuildDaemon.class);
+		BuildDaemon bd4 = createMock(BuildDaemon.class);
+		
+		addRequestParameter("targets", new String[] {"a", "b"});
+		addRequestParameter("updateStrategy", "Default");
+		
+		expect(manager.getProjectConfig("a")).andReturn(projects[0]);
+		expect(manager.getProjectConfig("b")).andReturn(projects[1]);
+		
+		final DependencyGroup dg = new DependencyGroupImpl();
+		dg.addTarget(projects[0]);
+		dg.addTarget(projects[1]);
+		
+		expect(manager.buildDependencyGroup(
+			aryEq(projects),
+			eq(DependencyBuildPolicy.NONE),
+			eq(WorkingCopyUpdateStrategy.Default),
+			eq(false), eq(false))).andReturn(dg);
+		
+		final DependencyGroup expectedDg = new DependencyGroupImpl();
+		expectedDg.addTarget(projects[0]);
+		expectedDg.addTarget(projects[1]);
+		
+		expectedDg.setManualBuild(true);
+		expectedDg.setName(request.getRemoteHost());
+		
+		buildManager.add(expectedDg);
+
+		expect(manager.getBuildDaemons()).andReturn(Arrays.asList(bd1, bd2, bd3, bd4));
+		
+		expect(bd1.isRunning()).andReturn(false);
+		
+		expect(bd2.isRunning()).andReturn(true);
+		expect(bd2.isBuilding()).andReturn(true);
+		
+		expect(bd3.isRunning()).andReturn(true);
+		expect(bd3.isBuilding()).andReturn(false);
+		
+		bd3.wakeUp();
+		
 		replay();
 		
 		actionPerform();
@@ -146,6 +204,8 @@ public class ManualBuildActionTest extends MockApplicationContextStrutsTestCase 
 		
 		buildManager.add(expectedDg);
 
+		expect(manager.getBuildDaemons()).andReturn(Collections.<BuildDaemon>emptyList());
+		
 		replay();
 		
 		actionPerform();
@@ -195,6 +255,8 @@ public class ManualBuildActionTest extends MockApplicationContextStrutsTestCase 
 		
 		buildManager.add(expectedDg);
 		
+		expect(manager.getBuildDaemons()).andReturn(Collections.<BuildDaemon>emptyList());
+		
 		replay();
 		
 		actionPerform();
@@ -224,6 +286,8 @@ public class ManualBuildActionTest extends MockApplicationContextStrutsTestCase 
 		expectLastCall().andReturn(dg);
 
 		buildManager.add(dg);
+		
+		expect(manager.getBuildDaemons()).andReturn(Collections.<BuildDaemon>emptyList());
 		
 		replay();
 		

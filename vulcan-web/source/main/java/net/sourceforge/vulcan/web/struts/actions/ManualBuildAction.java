@@ -28,6 +28,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import net.sourceforge.vulcan.ProjectManager;
 import net.sourceforge.vulcan.RepositoryAdaptor;
+import net.sourceforge.vulcan.StateManager;
 import net.sourceforge.vulcan.core.BuildManager;
 import net.sourceforge.vulcan.core.DependencyBuildPolicy;
 import net.sourceforge.vulcan.core.DependencyGroup;
@@ -36,6 +37,7 @@ import net.sourceforge.vulcan.dto.ProjectStatusDto;
 import net.sourceforge.vulcan.dto.RepositoryTagDto;
 import net.sourceforge.vulcan.exception.ConfigException;
 import net.sourceforge.vulcan.metadata.SvnRevision;
+import net.sourceforge.vulcan.scheduler.BuildDaemon;
 import net.sourceforge.vulcan.web.struts.forms.ManualBuildForm;
 
 import org.apache.struts.action.Action;
@@ -47,6 +49,7 @@ import org.apache.struts.action.ActionMapping;
 public final class ManualBuildAction extends Action {
 	private BuildManager buildManager;
 	private ProjectManager projectManager;
+	private StateManager stateManager;
 	
 	@Override
 	public ActionForward execute(ActionMapping mapping, ActionForm form,
@@ -99,7 +102,8 @@ public final class ManualBuildAction extends Action {
 		
 		buildManager.add(dg);
 		
-		//TODO: find an idle build daemon, wake it up, and sleep so dashboard will show building status
+		wakeUpBuildDaemon();
+		
 		return mapping.findForward("dashboard");
 	}
 
@@ -118,6 +122,14 @@ public final class ManualBuildAction extends Action {
 	public void setProjectManager(ProjectManager projectManager) {
 		this.projectManager = projectManager;
 	}
+
+	public StateManager getStateManager() {
+		return stateManager;
+	}
+	
+	public void setStateManager(StateManager stateManager) {
+		this.stateManager = stateManager;
+	}
 	
 	static String getRequestUsernameOrHostname(HttpServletRequest request) {
 		final Principal userPrincipal = request.getUserPrincipal();
@@ -127,6 +139,27 @@ public final class ManualBuildAction extends Action {
 		}
 		
 		return request.getRemoteHost();
+	}
+
+	// Wake up an idle build daemon if one is found in order to show that
+	// the project is building when the user is brought back to the dashboard.
+	private void wakeUpBuildDaemon() {
+		final List<BuildDaemon> buildDaemons = stateManager.getBuildDaemons();
+		
+		for (BuildDaemon bd : buildDaemons) {
+			if (bd.isRunning() && !bd.isBuilding()) {
+				bd.wakeUp();
+				
+				// sleep to allow buildDaemon a chance to fetch the target.
+				try {
+					Thread.sleep(100);
+				} catch (InterruptedException ignore) {
+					// propagate interrupt that is not intended for us.
+					Thread.currentThread().interrupt();
+				}
+				return;
+			}
+		}
 	}
 
 	private void fetchAvailableTags(ManualBuildForm buildForm, HttpServletRequest request, DependencyGroup dg) {

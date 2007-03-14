@@ -93,6 +93,10 @@ public class QuartzProjectScheduler implements ProjectScheduler {
 		}
 	}
 
+	public void wakeUp() {
+		throw new UnsupportedOperationException("not implemented");
+	}
+	
 	public void stop() {
 		stopIfScheduled();
 	}

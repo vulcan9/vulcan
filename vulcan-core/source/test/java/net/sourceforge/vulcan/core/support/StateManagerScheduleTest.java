@@ -73,6 +73,8 @@ public class StateManagerScheduleTest extends StateManagerTestBase {
 		public void stop() {
 			stopCallCount++;
 		}
+		public void wakeUp() {
+		}
 		public Date getNextExecutionDate() {
 			return null;
 		}

@@ -79,6 +79,8 @@ public class StateManagerDaemonTest extends StateManagerTestBase {
 		public boolean isKilling() {
 			return false;
 		}
+		public void wakeUp() {
+		}
 	};
 	@Override
 	public void setUp() {
