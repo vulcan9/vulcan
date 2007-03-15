@@ -230,6 +230,7 @@ public class ProjectBuilderImpl implements ProjectBuilder {
 		
 		buildStatus.setStartDate(new Date());
 		buildStatus.setRequestedBy(currentTarget.getRequestedBy());
+		buildStatus.setScheduledBuild(currentTarget.isScheduledBuild());
 		buildStatus.setStatus(Status.PASS);
 		buildStatus.setErrors(errors);
 		buildStatus.setWarnings(warnings);

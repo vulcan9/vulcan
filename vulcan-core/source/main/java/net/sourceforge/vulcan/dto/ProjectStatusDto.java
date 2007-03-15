@@ -71,6 +71,7 @@ public class ProjectStatusDto extends NameDto {
 	
 	private boolean isStatusChanged;
 	
+	private boolean isScheduledBuild;
 	private String requestedBy;
 	
 	private UpdateType updateType = UpdateType.Full;
@@ -228,6 +229,12 @@ public class ProjectStatusDto extends NameDto {
 	}
 	public void setStatusChanged(boolean isStatusChanged) {
 		this.isStatusChanged = isStatusChanged;
+	}
+	public boolean isScheduledBuild() {
+		return isScheduledBuild;
+	}
+	public void setScheduledBuild(boolean isScheduledBuild) {
+		this.isScheduledBuild = isScheduledBuild;
 	}
 	public String getRequestedBy() {
 		return requestedBy;

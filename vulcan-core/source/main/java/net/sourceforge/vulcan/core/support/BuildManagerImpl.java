@@ -69,7 +69,7 @@ public class BuildManagerImpl implements BuildManager {
 	EventHandler eventHandler;
 	
 	BuildManagerConfigDto buildManagerConfig;
-	BuildOutcomeCache cache;	
+	BuildOutcomeCache cache;
 	
 	final Lock readLock;
 	final Lock writeLock;
@@ -497,6 +497,9 @@ public class BuildManagerImpl implements BuildManager {
 
 			if (current != null) {
 				current.setRequestedBy(getName());
+				if (!group.isManualBuild()) {
+					current.setScheduledBuild(true);
+				}
 			}
 			
 			return current;

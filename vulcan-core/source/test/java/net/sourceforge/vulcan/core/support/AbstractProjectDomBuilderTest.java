@@ -215,6 +215,18 @@ public class AbstractProjectDomBuilderTest extends EasyMockTestCase {
 		verify();
 	}
 	
+	public void testBuiltByScheduler() throws Exception {
+		replay();
+
+		projectStatus.setRequestedBy("Nightly");
+		projectStatus.setScheduledBuild(true);
+		
+		final Document doc = doCall();
+
+		final Element elem = doc.getRootElement();
+		
+		assertContainsChildWithText(elem, "build-scheduled-by", "Nightly");
+	}
 	public void testBasicsNull() throws Exception {
 		projectStatus.setChangeLog(null);
 		projectStatus.setStartDate(null);
