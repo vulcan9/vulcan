@@ -47,20 +47,20 @@ public class ProjectConfigDto extends NameDto {
 	boolean buildOnDependencyFailure;
 	boolean buildOnNoUpdates;
 	
-	/**
-	 * This property is not meant to be configured with a project.
-	 * Instead, it is used during a "managed build" to specify
-	 * which tag to use.  It will not be persisted.
-	 */
-	String repositoryTagName;
-	String requestedBy;
-	
 	boolean suppressErrors;
 	boolean suppressWarnings;
 	
 	Date lastModificationDate;
 	
 	UpdateStrategy updateStrategy = UpdateStrategy.CleanAlways;
+
+	/*
+	 * These properties arer not meant to be configured with a project.
+	 * They will not be persisted.
+	 */
+	String repositoryTagName;
+	String requestedBy;
+	boolean isScheduledBuild;
 	
 	public String getId() {
 		return getName();
@@ -192,5 +192,11 @@ public class ProjectConfigDto extends NameDto {
 	}
 	public void setUpdateStrategy(UpdateStrategy updateStrategy) {
 		this.updateStrategy = updateStrategy;
+	}
+	public boolean isScheduledBuild() {
+		return isScheduledBuild;
+	}
+	public void setScheduledBuild(boolean isScheduledBuild) {
+		this.isScheduledBuild = isScheduledBuild;
 	}
 }

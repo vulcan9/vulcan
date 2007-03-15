@@ -31,6 +31,7 @@
 	<xsl:param name="repositoryTagNameHeader"/>
 	<xsl:param name="currentlyBuildingMessage"/>
 	<xsl:param name="buildRequestedByLabel"/>
+	<xsl:param name="buildScheduledByLabel"/>
 	<xsl:param name="elapsedTimeLabel"/>
 	<xsl:param name="buildReasonLabel"/>
 	<xsl:param name="updateTypeLabel"/>
@@ -217,6 +218,7 @@
 			<xsl:apply-templates select="/project/update-type"/>
 			
 			<xsl:apply-templates select="/project/build-requested-by"/>
+			<xsl:apply-templates select="/project/build-scheduled-by"/>
 			
 			<xsl:apply-templates select="/project/elapsed-time"/>
 			
@@ -335,6 +337,14 @@
 	<xsl:template match="build-requested-by">
 		<div xmlns="http://www.w3.org/1999/xhtml" class="requestUser">
 			<xsl:value-of select="$buildRequestedByLabel"/>
+			<xsl:text> </xsl:text>
+			<xsl:value-of select="."/>
+		</div>
+	</xsl:template>
+	
+	<xsl:template match="build-scheduled-by">
+		<div xmlns="http://www.w3.org/1999/xhtml" class="requestUser">
+			<xsl:value-of select="$buildScheduledByLabel"/>
 			<xsl:text> </xsl:text>
 			<xsl:value-of select="."/>
 		</div>

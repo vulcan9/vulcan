@@ -397,7 +397,11 @@ public abstract class AbstractProjectDomBuilder implements ProjectDomBuilder {
 		
 		final String requestedBy = status.getRequestedBy();
 		if (isNotBlank(requestedBy)) {
-			addChildNodeWithText(root, "build-requested-by", requestedBy);
+			if (status.isScheduledBuild()) {
+				addChildNodeWithText(root, "build-scheduled-by", requestedBy);
+			} else {
+				addChildNodeWithText(root, "build-requested-by", requestedBy);
+			}
 		}
 		
 		final String buildReasonKey = status.getBuildReasonKey();

@@ -150,6 +150,7 @@
 				<entry key="repositoryTagNameHeader" value="th.repository.tag.name"/>
 				<entry key="currentlyBuildingMessage" value="messages.project.currently.building"/>
 				<entry key="buildRequestedByLabel" value="label.build.request.username"/>
+				<entry key="buildScheduledByLabel" value="label.build.scheduled.by"/>
 				<entry key="elapsedTimeLabel" value="label.build.elapsed.time"/>
 				<entry key="issueListHeader" value="label.issue.list"/>
 				<entry key="errorsLabel" value="label.errors.occurred"/>
