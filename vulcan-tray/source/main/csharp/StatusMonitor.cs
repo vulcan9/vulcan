@@ -22,55 +22,6 @@ using System.Xml;
 
 namespace SourceForge.Vulcan.Tray
 {
-	internal class DashboardStatus
-	{
-		private readonly bool failuresPresent;
-		private readonly bool currentlyBuilding;
-		
-		internal DashboardStatus(bool failuresPresent, bool currentlyBuilding)
-		{
-			this.failuresPresent = failuresPresent;
-			this.currentlyBuilding = currentlyBuilding;
-		}
-
-		internal bool CurrentlyBuilding
-		{
-			get { return currentlyBuilding; }
-		}
-
-		internal bool FailuresPresent
-		{
-			get { return failuresPresent; }
-		}
-		
-		internal DashboardStatus Clone()
-		{
-			return (DashboardStatus) MemberwiseClone();
-		}
-		
-		public override bool Equals(object o)
-		{
-			if (this == o)
-			{
-				return true;
-			}
-			
-			DashboardStatus other = o as DashboardStatus;
-			
-			if (other == null)
-			{
-				return false;
-			}
-
-			return failuresPresent == other.failuresPresent && currentlyBuilding == other.currentlyBuilding;
-		}
-
-		public override int GetHashCode()
-		{
-			return failuresPresent.GetHashCode() * 37 + currentlyBuilding.GetHashCode();
-		}
-	}
-	
 	internal class StatusMonitor
 	{
 		public delegate void DataLoadedHandler(object source, DataLoadedEventArgs e);
@@ -104,11 +55,11 @@ namespace SourceForge.Vulcan.Tray
 
 		public void Reload()
 		{
-			XmlDocument doc = new XmlDocument();
+			XmlDocument doc;
 
 			try
 			{
-				doc.Load(url);	
+				doc = LoadXml();	
 			}
 			catch (WebException e)
 			{
@@ -116,18 +67,28 @@ namespace SourceForge.Vulcan.Tray
 				{
 					DataLoadError(this, new DataLoadErrorEventArgs(e));
 				}
+
+				return;
 			}
-			
 			
 			if (DataLoaded != null)
 			{
 				DataLoaded(this, new DataLoadedEventArgs(doc));
 			}
 
-			detectStateChanges(doc);
+			DetectStateChanges(doc);
 		}
-		
-		private void detectStateChanges(XmlDocument doc)
+
+		internal virtual XmlDocument LoadXml()
+		{
+			XmlDocument doc = new XmlDocument();
+			
+			doc.Load(url);
+
+			return doc;
+		}
+
+		private void DetectStateChanges(XmlDocument doc)
 		{
 			XmlNodeList projects = doc.SelectNodes("/projects/project");
 			DateTime newestUpdate = DateTime.MinValue;
@@ -149,14 +110,21 @@ namespace SourceForge.Vulcan.Tray
 					{
 						previousStatusText = previousStatusNode.InnerText;
 					}
-					parseFailure(previousStatusText, ref failuresPresent);
+					ParseFailure(previousStatusText, ref failuresPresent);
 				}
 				else
 				{
-					parseFailure(status, ref failuresPresent);
+					ParseFailure(status, ref failuresPresent);
 				}
-						
-				string dtStr = project.SelectSingleNode("timestamp").InnerText;
+
+				XmlNode timestampNode = project.SelectSingleNode("timestamp");
+				
+				if (timestampNode == null)
+				{
+					continue;
+				}
+				
+				string dtStr = timestampNode.InnerText;
 				
 				if (string.IsNullOrEmpty(dtStr))
 				{
@@ -167,7 +135,7 @@ namespace SourceForge.Vulcan.Tray
 				
 				if (dt > this.lastUpdate)
 				{
-					fireStatusUpdated(project);
+					FireNewBuildAvailable(project);
 				}
 				
 				if (dt > newestUpdate)
@@ -181,13 +149,13 @@ namespace SourceForge.Vulcan.Tray
 			DashboardStatus newStatus = new DashboardStatus(failuresPresent, currentlyBuilding);
 			if (!newStatus.Equals(lastStatus))
 			{
-				fireDashboardStatusChanged(newStatus);
+				FireDashboardStatusChanged(newStatus);
 			}
 
 			lastStatus = newStatus;
 		}
 
-		private void fireDashboardStatusChanged(DashboardStatus status)
+		private void FireDashboardStatusChanged(DashboardStatus status)
 		{
 			if (DashboardStatusChanged != null)
 			{
@@ -195,7 +163,7 @@ namespace SourceForge.Vulcan.Tray
 			}
 		}
 
-		private void fireStatusUpdated(XmlNode project)
+		private void FireNewBuildAvailable(XmlNode project)
 		{
 			if (NewBuildAvailable != null)
 			{
@@ -203,7 +171,7 @@ namespace SourceForge.Vulcan.Tray
 			}
 		}
 
-		private static void parseFailure(string statusText, ref bool failuresPresent)
+		private static void ParseFailure(string statusText, ref bool failuresPresent)
 		{
 			if ("FAIL".Equals(statusText) || "SKIP".Equals(statusText) || "ERROR".Equals(statusText))
 			{
