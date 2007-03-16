@@ -46,6 +46,11 @@ namespace SourceForge.Vulcan.Tray
 
 			return failuresPresent == other.failuresPresent && currentlyBuilding == other.currentlyBuilding;
 		}
+
+		public override int GetHashCode()
+		{
+			return failuresPresent.GetHashCode() * 37 + currentlyBuilding.GetHashCode();
+		}
 	}
 	
 	internal class StatusMonitor
