@@ -28,6 +28,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="nunit.framework, Version=2.2.8.0, Culture=neutral, PublicKeyToken=96d09a1eb7f44a77, processorArchitecture=MSIL" />
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Deployment" />
@@ -43,6 +44,7 @@
     <Compile Include="source\main\csharp\ConfigForm.Designer.cs">
       <DependentUpon>ConfigForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="source\main\csharp\DashboardStatus.cs" />
     <Compile Include="source\main\csharp\Icons.Designer.cs" />
     <Compile Include="source\main\csharp\Preferences.cs" />
     <Compile Include="source\main\csharp\PreferenceStore.cs" />
@@ -57,6 +59,7 @@
     </Compile>
     <Compile Include="source\main\csharp\StatusMonitor.cs" />
     <Compile Include="source\main\csharp\VulcanNotifyIcon.cs" />
+    <Compile Include="source\test\csharp\StatusMonitorTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="icons\error.ico" />
@@ -116,8 +119,10 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
+    <None Include="nant.build" />
+  </ItemGroup>
+  <ItemGroup>
     <Folder Include="Properties\" />
-    <Folder Include="source\test\csharp\" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>
