@@ -20,18 +20,8 @@
 		<!-- The Maven-2 plugin used to build Vulcan plugins -->
 		<module>vulcan-maven-plugin</module>
 		
-		<!-- Parent POM for bundled Vulcan plugins -->
-		<module>plugins/abstract-plugin</module>
-		
-		<!-- Bundled Vulcan plugins: -->
-		<module>plugins/vulcan-ant</module>
-		<module>plugins/vulcan-cvs</module>
-		<module>plugins/vulcan-dotnet</module>
-		<module>plugins/vulcan-filesystem</module>
-		<module>plugins/vulcan-mailer</module>
-		<module>plugins/vulcan-maven</module>
-		<module>plugins/vulcan-metrics</module>
-		<module>plugins/vulcan-subversion</module>
+		<!-- Bundled Vulcan plugins -->
+		<module>plugins</module>
 		
 		<!-- J2EE Web Application front-end -->
 		<module>vulcan-web</module>
