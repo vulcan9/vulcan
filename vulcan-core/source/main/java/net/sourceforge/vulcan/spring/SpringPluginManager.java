@@ -155,7 +155,6 @@ public class SpringPluginManager
 			try {
 				createPlugin(plugins[i], false);
 			} catch (PluginLoadFailureException e) {
-				log.error(e.getMessage(), e);
 				final ErrorEvent errorEvent = new ErrorEvent(this,
 						"PluginManager.load.failed",
 						new Object[] {plugins[i].getId(), e.getMessage()},
@@ -383,7 +382,7 @@ public class SpringPluginManager
 		final String id = plugin.getId();
 		
 		try {
-			final String contextUrl = new File(plugin.getDirectory(), "vulcan-plugin.xml").toURL().toString();
+			final String contextUrl = new File(plugin.getDirectory(), "vulcan-plugin.xml").toURI().toURL().toString();
 			final PluginState state = new PluginState(plugin, contextUrl, pluginBeanName, ctx);
 			
 			if (plugins.containsKey(id)) {
@@ -445,7 +444,6 @@ public class SpringPluginManager
 			} catch (DuplicatePluginIdException ignore) {
 				// This happens when plugin is up to date.
 			} catch (Exception e) {
-				log.error("Error extracting bundled plugin", e);
 				ErrorEvent errorEvent = new ErrorEvent(this,
 						"PluginManager.load.failed",
 						new Object[] {r.getFilename(), e.getMessage()},

@@ -28,15 +28,11 @@ import net.sourceforge.vulcan.event.ErrorEvent;
 import net.sourceforge.vulcan.event.EventHandler;
 import net.sourceforge.vulcan.metadata.SvnRevision;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.WebApplicationContextUtils;
 
 @SvnRevision(id="$Id$", url="$HeadURL$")
 public final class VulcanContextListener implements ServletContextListener {
-	Log log = LogFactory.getLog(VulcanContextListener.class);
-	
 	StateManager stateManager;
 	
 	public void contextInitialized(ServletContextEvent event) {
@@ -54,8 +50,6 @@ public final class VulcanContextListener implements ServletContextListener {
 		try {
 			stateManager.start();
 		} catch (Exception e) {
-			log.error("Failed to start stateManager", e);
-			
 			final EventHandler eventHandler = (EventHandler) wac.getBean(Keys.EVENT_HANDLER, EventHandler.class);
 			
 			eventHandler.reportEvent(new ErrorEvent(this, "errors.load.failure", new String[] {e.getMessage()}, e));

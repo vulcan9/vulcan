@@ -217,6 +217,9 @@ div.tables table {
 div.projectCheckboxes {
 	-moz-column-width: 12em;
 }
+div.projectCheckboxes li {
+	white-space: nowrap;
+}
 
 a.xml {
 	float: right;

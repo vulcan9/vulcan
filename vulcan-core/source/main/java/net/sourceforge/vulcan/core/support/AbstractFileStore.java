@@ -253,7 +253,7 @@ public abstract class AbstractFileStore implements Store {
 		
 		for (File file : jars) {
 			try {
-				list.add(file.toURL());
+				list.add(file.toURI().toURL());
 			} catch (MalformedURLException e) {
 				throw new RuntimeException(e);
 			}

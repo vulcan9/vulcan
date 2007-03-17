@@ -151,8 +151,9 @@ public abstract class EasyMockTestCase extends TestCase {
 		return (T) EasyMock.notNull();
 	}
 	
-	public static Object isNull() {
-		return EasyMock.isNull();
+	@SuppressWarnings("unchecked")
+	public static <T> T isNull() {
+		return (T)EasyMock.isNull();
 	}
 
 	public static <T> T[] aryEq(T[] arr) {
@@ -163,7 +164,7 @@ public abstract class EasyMockTestCase extends TestCase {
 		return EasyMock.eq(b);
 	}
 
-	public static Object eq(Object obj) {
+	public static <T> T eq(T obj) {
 		return EasyMock.eq(obj);
 	}
 

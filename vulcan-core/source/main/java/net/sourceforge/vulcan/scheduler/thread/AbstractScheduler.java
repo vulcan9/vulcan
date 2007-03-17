@@ -87,7 +87,6 @@ public abstract class AbstractScheduler implements Scheduler {
 							} catch (InterruptedException e) {
 								throw e;
 							} catch (Exception e) {
-								log.error("uncaught exception while executing scheduler '" + config.getName() + "'", e);
 								eventHandler.reportEvent(
 										new ErrorEvent(this, "Scheduler.exception",
 												new Object[] {config.getName(), e.getMessage()}, e));

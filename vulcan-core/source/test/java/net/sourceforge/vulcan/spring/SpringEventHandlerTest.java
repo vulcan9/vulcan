@@ -18,8 +18,11 @@
  */
 package net.sourceforge.vulcan.spring;
 
+import java.util.Locale;
+
 import net.sourceforge.vulcan.EasyMockTestCase;
 import net.sourceforge.vulcan.event.ErrorEvent;
+import net.sourceforge.vulcan.event.WarningEvent;
 import net.sourceforge.vulcan.metadata.SvnRevision;
 
 import org.springframework.context.ApplicationContext;
@@ -43,7 +46,19 @@ public class SpringEventHandlerTest extends EasyMockTestCase {
 		
 		replay();
 		
-		handler.reportEvent(new ErrorEvent(this, null, null));
+		handler.reportEvent(new WarningEvent(this, null, null));
+		
+		verify();
+	}
+
+	public void testLogsErrorEvent() throws Exception {
+		expect(ctx.getMessage(eq("foo"), aryEq(new Object[0]), EasyMockTestCase.<Locale>isNull())).andReturn("bar");
+		
+		ctx.publishEvent((ApplicationEvent) anyObject());
+		expectLastCall();
+		replay();
+		
+		handler.reportEvent(new ErrorEvent(this, "foo", null));
 		
 		verify();
 	}
