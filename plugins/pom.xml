@@ -17,8 +17,20 @@
 	
 	<properties>
 		<vulcan-maven-plugin.version>1.0-SNAPSHOT</vulcan-maven-plugin.version>
-		<vulcan.zips.target>${basedir}/../zips</vulcan.zips.target>
+		<vulcan.zips.target>${basedir}/../target/plugin-zips</vulcan.zips.target>
 	</properties>
+	
+	<modules>
+		<!-- Bundled Vulcan plugins: -->
+		<module>vulcan-ant</module>
+		<module>vulcan-cvs</module>
+		<module>vulcan-dotnet</module>
+		<module>vulcan-filesystem</module>
+		<module>vulcan-mailer</module>
+		<module>vulcan-maven</module>
+		<module>vulcan-metrics</module>
+		<module>vulcan-subversion</module>
+	</modules>
 	
 	<build>
 		<pluginManagement>

@@ -37,7 +37,7 @@
 							</excludes>
 						</resource>
 						<resource>
-							<directory>${basedir}/../plugins/zips</directory>
+							<directory>${basedir}/../plugins/target/plugin-zips</directory>
 							<targetPath>WEB-INF/plugins</targetPath>
 							<includes>
 								<include>*.zip</include>
