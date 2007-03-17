@@ -30,7 +30,6 @@ import net.sourceforge.vulcan.event.EventHandler;
 import net.sourceforge.vulcan.web.struts.forms.ImportConfigFileForm;
 
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.struts.action.Action;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
@@ -38,7 +37,6 @@ import org.apache.struts.action.ActionMapping;
 
 public class ImportConfigAction extends Action {
 	private Log auditLog;
-	private Log log = LogFactory.getLog(ImportConfigAction.class);
 	private EventHandler eventHandler;
 	private StateManager stateManager;
 	private Store store;
@@ -58,8 +56,6 @@ public class ImportConfigAction extends Action {
 		try {
 			stateManager.start();
 		} catch (Exception e) {
-			log.error("Failed to start stateManager", e);
-			
 			eventHandler.reportEvent(new ErrorEvent(this, "errors.load.failure", new String[] {e.getMessage()}, e));
 		}
 		

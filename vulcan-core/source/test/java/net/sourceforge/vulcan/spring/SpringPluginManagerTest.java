@@ -446,7 +446,7 @@ public class SpringPluginManagerTest extends EasyMockTestCase {
 		final File dir = resolveRelativeFile(path);
 		cfg.setDirectory(dir);
 		try {
-			cfg.setClassPath(new URL[] {dir.toURL()});
+			cfg.setClassPath(new URL[] {dir.toURI().toURL()});
 		} catch (MalformedURLException e) {
 			throw new RuntimeException(e);
 		}

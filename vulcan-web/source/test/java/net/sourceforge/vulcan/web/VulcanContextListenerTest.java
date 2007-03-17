@@ -25,7 +25,6 @@ import net.sourceforge.vulcan.event.Event;
 import net.sourceforge.vulcan.exception.StoreException;
 import net.sourceforge.vulcan.metadata.SvnRevision;
 
-import org.apache.commons.logging.Log;
 import org.springframework.web.context.WebApplicationContext;
 
 @SvnRevision(id="$Id$", url="$HeadURL$")
@@ -34,13 +33,9 @@ public class VulcanContextListenerTest extends ServletTestCase {
 	
 	ServletContextEvent event = new ServletContextEvent(servletContext);
 	
-	Log log = createStrictMock(Log.class);
-	
 	@Override
 	public void setUp() throws Exception {
 		super.setUp();
-		
-		l.log = log;
 	}
 	@TrainingMethod("trainNoCalls")
 	public void testInitNoWac() {
@@ -70,7 +65,6 @@ public class VulcanContextListenerTest extends ServletTestCase {
 		mgr.start();
 		expectLastCall().andThrow(e);
 		
-		log.error("Failed to start stateManager", e);
 		eventHandler.reportEvent((Event) notNull());
 		
 		replay();

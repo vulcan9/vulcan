@@ -437,7 +437,7 @@ public class SpringFileStoreTest extends EasyMockTestCase {
 		assertNotNull(plugins);
 		assertEquals(1, plugins.length);
 		assertEquals(1, plugins[0].getClassPath().length);
-		assertEquals(new File(mockPluginDir, "token.jar").toURL(), plugins[0].getClassPath()[0]);
+		assertEquals(new File(mockPluginDir, "token.jar").toURI().toURL(), plugins[0].getClassPath()[0]);
 	}
 	public void trainStoreOutcome() throws IOException {
 		beanEncoder.reset();

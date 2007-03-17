@@ -341,9 +341,9 @@ public class ProjectBuilderTest extends EasyMockTestCase {
 		buildToolStatus.setBuildReasonKey("messages.build.reason.repository.changes");
 		
 		tool.buildProject(
-				(ProjectConfigDto) eq(project),
-				(ProjectStatusDto) eq(buildToolStatus),
-				(File) eq(logFile),
+				eq(project),
+				eq(buildToolStatus),
+				eq(logFile),
 				(BuildDetailCallback)notNull());
 		
 		mgr.targetCompleted(info, project, createFakeBuildOutcome(project.getName(), 0, rev0, "trunk", Status.PASS, null, null, null, "http://localhost", true, null, "messages.build.reason.repository.changes", null, ProjectStatusDto.UpdateType.Full));
@@ -410,9 +410,9 @@ public class ProjectBuilderTest extends EasyMockTestCase {
 		buildToolStatus.getWarnings().add(new BuildMessageDto(warningMessage, null, null, null));
 		
 		tool.buildProject(
-				(ProjectConfigDto) eq(project),
-				(ProjectStatusDto) eq(buildToolStatus),
-				(File) eq(logFile),
+				eq(project),
+				eq(buildToolStatus),
+				eq(logFile),
 				(BuildDetailCallback)notNull());
 		
 
@@ -452,9 +452,9 @@ public class ProjectBuilderTest extends EasyMockTestCase {
 		buildToolStatus.getWarnings().add(new BuildMessageDto(warningMessage, null, null, null));
 		
 		tool.buildProject(
-				(ProjectConfigDto) eq(project),
-				(ProjectStatusDto) eq(buildToolStatus),
-				(File) eq(logFile),
+				eq(project),
+				eq(buildToolStatus),
+				eq(logFile),
 				(BuildDetailCallback)notNull());
 		
 
@@ -497,9 +497,9 @@ public class ProjectBuilderTest extends EasyMockTestCase {
 		buildToolStatus.setChangeLog(new ChangeLogDto());
 		
 		tool.buildProject(
-				(ProjectConfigDto) eq(project),
-				(ProjectStatusDto) eq(buildToolStatus),
-				(File) eq(logFile),
+				eq(project),
+				eq(buildToolStatus),
+				eq(logFile),
 				(BuildDetailCallback)notNull());
 		
 		mgr.targetCompleted(info, project, createFakeBuildOutcome(project.getName(), 0, rev1, "trunk", Status.PASS, null, null, new ChangeLogDto(), "http://localhost", true, null, "messages.build.reason.repository.changes", null, ProjectStatusDto.UpdateType.Full));
@@ -541,9 +541,9 @@ public class ProjectBuilderTest extends EasyMockTestCase {
 		buildToolStatus.setChangeLog(new ChangeLogDto());
 		
 		tool.buildProject(
-				(ProjectConfigDto) eq(project),
-				(ProjectStatusDto) eq(buildToolStatus),
-				(File) eq(logFile),
+				eq(project),
+				eq(buildToolStatus),
+				eq(logFile),
 				(BuildDetailCallback)notNull());
 		
 		mgr.targetCompleted(info, project, createFakeBuildOutcome(project.getName(), 0, rev1, "trunk", Status.PASS, null, null, new ChangeLogDto(), "http://localhost", true, null, "messages.build.reason.repository.changes", null, ProjectStatusDto.UpdateType.Incremental));
@@ -582,9 +582,9 @@ public class ProjectBuilderTest extends EasyMockTestCase {
 		buildToolStatus.setChangeLog(new ChangeLogDto());
 		
 		tool.buildProject(
-				(ProjectConfigDto) eq(project),
-				(ProjectStatusDto) eq(buildToolStatus),
-				(File) eq(logFile),
+				eq(project),
+				eq(buildToolStatus),
+				eq(logFile),
 				(BuildDetailCallback)notNull());
 
 		
@@ -619,9 +619,9 @@ public class ProjectBuilderTest extends EasyMockTestCase {
 		buildToolStatus.setRevision(rev1);
 		
 		tool.buildProject(
-				(ProjectConfigDto) eq(project),
-				(ProjectStatusDto) eq(buildToolStatus),
-				(File) eq(logFile),
+				eq(project),
+				eq(buildToolStatus),
+				eq(logFile),
 				(BuildDetailCallback)notNull());
 		
 		mgr.targetCompleted(info, project, createFakeBuildOutcome(project.getName(), 0, rev1, "rc1", Status.PASS, null, null, null, "http://localhost", false, null, "messages.build.reason.repository.changes", null, ProjectStatusDto.UpdateType.Full));
@@ -754,9 +754,9 @@ public class ProjectBuilderTest extends EasyMockTestCase {
 		buildToolStatus.setBuildNumber(43);
 		
 		tool.buildProject(
-				(ProjectConfigDto) eq(project),
-				(ProjectStatusDto) eq(buildToolStatus),
-				(File) eq(logFile),
+				eq(project),
+				eq(buildToolStatus),
+				eq(logFile),
 				(BuildDetailCallback)notNull());
 
 		mgr.targetCompleted(info, project, createFakeBuildOutcome(project.getName(), 43, rev0,
@@ -797,9 +797,9 @@ public class ProjectBuilderTest extends EasyMockTestCase {
 		buildToolStatus.setBuildNumber(43);
 		
 		tool.buildProject(
-				(ProjectConfigDto) eq(project),
-				(ProjectStatusDto) eq(buildToolStatus),
-				(File) eq(logFile),
+				eq(project),
+				eq(buildToolStatus),
+				eq(logFile),
 				(BuildDetailCallback)notNull());
 
 		mgr.targetCompleted(info, project, createFakeBuildOutcome(project.getName(), 43, rev0,
@@ -857,9 +857,9 @@ public class ProjectBuilderTest extends EasyMockTestCase {
 		buildToolStatus.setBuildNumber(43);
 		
 		tool.buildProject(
-				(ProjectConfigDto) eq(project),
-				(ProjectStatusDto) eq(buildToolStatus),
-				(File) eq(logFile),
+				eq(project),
+				eq(buildToolStatus),
+				eq(logFile),
 				(BuildDetailCallback)notNull());
 
 		mgr.targetCompleted(info, project, createFakeBuildOutcome(project.getName(), 43, rev0,
@@ -900,9 +900,9 @@ public class ProjectBuilderTest extends EasyMockTestCase {
 		buildToolStatus.setBuildNumber(43);
 		
 		tool.buildProject(
-				(ProjectConfigDto) eq(project),
-				(ProjectStatusDto) eq(buildToolStatus),
-				(File) eq(logFile),
+				eq(project),
+				eq(buildToolStatus),
+				eq(logFile),
 				(BuildDetailCallback)notNull());
 
 		mgr.targetCompleted(info, project, createFakeBuildOutcome(project.getName(), 43, rev0,
