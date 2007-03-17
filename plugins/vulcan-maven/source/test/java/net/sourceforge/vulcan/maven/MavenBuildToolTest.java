@@ -80,8 +80,8 @@ public class MavenBuildToolTest extends MavenBuildToolTestBase {
 		final JavaCommandBuilder expected = new JavaCommandBuilder();
 		
 		expected.addArgument("--debug");
-		expected.addArgument("-Dproject.build.number=12");
 		expected.addArgument("-Dexample=car");
+		expected.addArgument("-Dproject.build.number=12");
 		expected.addArgument("-Dsimple=");
 
 		setDefaults(expected, false);

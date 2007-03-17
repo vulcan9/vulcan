@@ -20,12 +20,16 @@ package net.sourceforge.vulcan.ant;
 
 import static org.apache.commons.lang.StringUtils.isNotBlank;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Stack;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Stack;
 
 import net.sourceforge.vulcan.BuildTool;
 import net.sourceforge.vulcan.ant.buildlistener.AntEventSummary;
@@ -465,7 +469,11 @@ public class AntBuildTool implements BuildTool {
 		}
 	}
 	protected void antPropsToArgs(final JavaCommandBuilder jcb) {
-		for (String key : antProps.keySet()) {
+		final List<String> keys = new ArrayList<String>(antProps.keySet());
+		
+		Collections.sort(keys);
+		
+		for (String key : keys) {
 			final StringBuffer buf = new StringBuffer("-D");
 			buf.append(key);
 			buf.append("=");
