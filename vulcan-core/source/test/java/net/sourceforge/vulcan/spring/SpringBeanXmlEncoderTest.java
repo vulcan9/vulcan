@@ -18,16 +18,19 @@
  */
 package net.sourceforge.vulcan.spring;
 
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.OutputStreamWriter;
-import java.io.Writer;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
 
 import junit.framework.TestCase;
 import net.sourceforge.vulcan.dto.Date;
@@ -392,6 +395,7 @@ public class SpringBeanXmlEncoderTest extends TestCase {
 		assertEquals(Long.toString(child2.getTime()), beanInList.getText());
 		
 	}
+	@SuppressWarnings("unchecked")
 	public void testEncodesMap() {
 		final Element root = new Element("beans");
 		Bean b = new Bean();
@@ -417,38 +421,20 @@ public class SpringBeanXmlEncoderTest extends TestCase {
 		Element mapNode = propertyNode.getChild("map");
 		assertNotNull(mapNode);
 		
-		List<?> nodesInMap = mapNode.getChildren();
+		List<Element> nodesInMap = new ArrayList<Element>(mapNode.getChildren());
 		assertEquals(3, nodesInMap.size());
 		
-		Element entry = (Element) nodesInMap.get(0);
-		assertNotNull(entry);
-		assertEquals("entry", entry.getName());
+		Collections.sort(nodesInMap, new Comparator<Element>() {
+			public int compare(Element o1, Element o2) {
+				final String t1 = o1.getChild("key").getValue();
+				final String t2 = o2.getChild("key").getValue();
+				return t1.compareTo(t2);
+			}
+		});
 		
+		Element entry = nodesInMap.get(0);
 		assertEquals(2, entry.getContentSize());
 		Element key = entry.getChild("key");
-		assertNotNull(key);
-		assertNotNull(key.getChild("value"));
-		assertEquals("prim", key.getChild("value").getText());
-		assertNotNull(entry.getChild("value"));
-		assertEquals("1", entry.getChild("value").getText());
-
-		entry = (Element) nodesInMap.get(1);
-		assertNotNull(entry);
-		assertEquals("entry", entry.getName());
-		
-		assertEquals(2, entry.getContentSize());
-		key = entry.getChild("key");
-		assertNotNull(key);
-		assertNotNull(key.getChild("value"));
-		assertEquals("null", key.getChild("value").getText());
-		assertNotNull(entry.getChild("null"));
-
-		entry = (Element) nodesInMap.get(2);
-		assertNotNull(entry);
-		assertEquals("entry", entry.getName());
-		
-		assertEquals(2, entry.getContentSize());
-		key = entry.getChild("key");
 		assertNotNull(key);
 		assertNotNull(key.getChild("value"));
 		assertEquals("bean", key.getChild("value").getText());
@@ -461,6 +447,34 @@ public class SpringBeanXmlEncoderTest extends TestCase {
 		assertEquals("value", beanNode.getChild("property").getAttributeValue("name"));
 		assertNotNull(beanNode.getChild("property").getChild("value"));
 		assertEquals("a value", beanNode.getChild("property").getChild("value").getText());
+
+		entry = nodesInMap.get(1);
+		assertNotNull(entry);
+		assertEquals("entry", entry.getName());
+		
+		assertEquals(2, entry.getContentSize());
+		key = entry.getChild("key");
+		assertNotNull(key);
+		assertNotNull(key.getChild("value"));
+		assertEquals("null", key.getChild("value").getText());
+		assertNotNull(entry.getChild("null"));
+
+		entry = nodesInMap.get(2);
+		assertNotNull(entry);
+		assertEquals("entry", entry.getName());
+		
+		assertEquals(2, entry.getContentSize());
+		key = entry.getChild("key");
+		assertNotNull(key);
+		assertNotNull(key.getChild("value"));
+		assertEquals("prim", key.getChild("value").getText());
+		assertNotNull(entry.getChild("value"));
+		assertEquals("1", entry.getChild("value").getText());
+
+		entry = nodesInMap.get(0);
+		assertNotNull(entry);
+		assertEquals("entry", entry.getName());
+		
 	}
 	public void testEncodesMapKeyAsBean() {
 		final Element root = new Element("beans");

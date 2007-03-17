@@ -18,20 +18,22 @@
  */
 package net.sourceforge.vulcan.core.support;
 
-import java.io.ByteArrayOutputStream;
-import java.io.OutputStream;
-import java.io.StringWriter;
-import java.net.URL;
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 import java.util.UUID;
+
+import java.io.ByteArrayOutputStream;
+import java.io.OutputStream;
+import java.io.StringWriter;
+import java.net.URL;
+import java.text.MessageFormat;
 
 import javax.xml.transform.ErrorListener;
 import javax.xml.transform.Result;
@@ -334,7 +336,15 @@ public class AbstractProjectDomBuilderTest extends EasyMockTestCase {
 		
 		assertEquals(3, deps.getContentSize());
 		
-		final List<Element> children = deps.getChildren();
+		final List<Element> children = new ArrayList<Element>(deps.getChildren());
+		Collections.sort(children, new Comparator<Element>() {
+			public int compare(Element o1, Element o2) {
+				final String t1 = o1.getAttributeValue("name");
+				final String t2 = o2.getAttributeValue("name");
+				
+				return t1.compareTo(t2);
+			}
+		});
 		
 		assertEquals("dependency", children.get(0).getName());
 		assertEquals("one", children.get(0).getAttributeValue("name"));
@@ -344,15 +354,16 @@ public class AbstractProjectDomBuilderTest extends EasyMockTestCase {
 		assertEquals("rc3", children.get(0).getAttributeValue("repository-tag-name"));
 				
 		assertEquals("dependency", children.get(1).getName());
-		assertEquals("two", children.get(1).getAttributeValue("name"));
-		assertEquals("191", children.get(1).getAttributeValue("build-number"));
-		assertEquals("second", children.get(1).getAttributeValue("revision"));
-		assertEquals("FAIL", children.get(1).getAttributeValue("status"));
-		assertEquals(null, children.get(1).getAttributeValue("repository-tag-name"));
+		assertEquals("three", children.get(1).getAttributeValue("name"));
+		assertEquals(null, children.get(1).getAttributeValue("revision"));
 		
 		assertEquals("dependency", children.get(2).getName());
-		assertEquals("three", children.get(2).getAttributeValue("name"));
-		assertEquals(null, children.get(2).getAttributeValue("revision"));
+		assertEquals("two", children.get(2).getAttributeValue("name"));
+		assertEquals("191", children.get(2).getAttributeValue("build-number"));
+		assertEquals("second", children.get(2).getAttributeValue("revision"));
+		assertEquals("FAIL", children.get(2).getAttributeValue("status"));
+		assertEquals(null, children.get(2).getAttributeValue("repository-tag-name"));
+		
 		verify();
 	}
 	public void testEmptyChangeLog() throws Exception {
