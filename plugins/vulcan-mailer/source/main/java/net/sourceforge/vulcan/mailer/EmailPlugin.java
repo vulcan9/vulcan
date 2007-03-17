@@ -124,40 +124,15 @@ public class EmailPlugin implements BuildManagerObserverPlugin, ConfigurablePlug
 		
 		final ProjectConfigDto projectConfig = event.getProjectConfig();
 		
+		final ClassLoader prev = Thread.currentThread().getContextClassLoader();
 		
-		for (Map.Entry<Locale, List<String>> ent : subscribers.entrySet()) {
-			try {
-				final URL sandboxURL = generateSandboxURL(projectConfig);
-				final URL statusURL = generateStatusURL();
-				URL trackerURL = null;
-				
-				if (StringUtils.isNotBlank(projectConfig.getBugtraqUrl())) {
-					trackerURL = new URL(projectConfig.getBugtraqUrl());
-				}
-				
-				final Document document = projectDomBuilder.createProjectDocument(event.getStatus(), ent.getKey());
-				
-				final String content = 
-					generateXhtml(document, sandboxURL, statusURL, trackerURL, ent.getKey());
-				
-				final MimeMessage message = messageAssembler.constructMessage(
-						StringUtils.join(ent.getValue().iterator(), ","), config, event.getStatus(), content);
-				
-				sendMessage(message);
-			} catch (AddressException e) {
-				eventHandler.reportEvent(
-						new ErrorEvent(this, "errors.address.exception",
-								new Object[] {e.getRef(), e.getMessage()}, e));
-			} catch (MessagingException e) {
-				eventHandler.reportEvent(
-						new ErrorEvent(this, "errors.messaging.exception",
-								new Object[] {e.getMessage()}, e));
-			} catch (Exception e) {
-				eventHandler.reportEvent(
-						new ErrorEvent(this, "errors.exception",
-								new Object[] {e.getMessage()}, e));
-			}
+		try {
+			Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
+			sendMessages(event, projectConfig, subscribers);
+		} finally {
+			Thread.currentThread().setContextClassLoader(prev);
 		}
+			
 	}
 	public ProjectDomBuilder getProjectDomBuilder() {
 		return projectDomBuilder;
@@ -231,6 +206,41 @@ public class EmailPlugin implements BuildManagerObserverPlugin, ConfigurablePlug
 			}
 		}
 		return null;
+	}
+	private void sendMessages(BuildCompletedEvent event, final ProjectConfigDto projectConfig, final Map<Locale, List<String>> subscribers) {
+		for (Map.Entry<Locale, List<String>> ent : subscribers.entrySet()) {
+			try {
+				final URL sandboxURL = generateSandboxURL(projectConfig);
+				final URL statusURL = generateStatusURL();
+				URL trackerURL = null;
+				
+				if (StringUtils.isNotBlank(projectConfig.getBugtraqUrl())) {
+					trackerURL = new URL(projectConfig.getBugtraqUrl());
+				}
+				
+				final Document document = projectDomBuilder.createProjectDocument(event.getStatus(), ent.getKey());
+				
+				final String content = 
+					generateXhtml(document, sandboxURL, statusURL, trackerURL, ent.getKey());
+				
+				final MimeMessage message = messageAssembler.constructMessage(
+						StringUtils.join(ent.getValue().iterator(), ","), config, event.getStatus(), content);
+				
+				sendMessage(message);
+			} catch (AddressException e) {
+				eventHandler.reportEvent(
+						new ErrorEvent(this, "errors.address.exception",
+								new Object[] {e.getRef(), e.getMessage()}, e));
+			} catch (MessagingException e) {
+				eventHandler.reportEvent(
+						new ErrorEvent(this, "errors.messaging.exception",
+								new Object[] {e.getMessage()}, e));
+			} catch (Exception e) {
+				eventHandler.reportEvent(
+						new ErrorEvent(this, "errors.exception",
+								new Object[] {e.getMessage()}, e));
+			}
+		}
 	}
 	private boolean matchPolicy(Status status, ProfileDto profile, boolean statusChanged) {
 		final List<Policy> policy = Arrays.asList(profile.getPolicy());
