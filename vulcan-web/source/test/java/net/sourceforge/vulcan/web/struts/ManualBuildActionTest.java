@@ -33,6 +33,7 @@ import net.sourceforge.vulcan.core.support.DependencyGroupImpl;
 import net.sourceforge.vulcan.dto.ProjectConfigDto;
 import net.sourceforge.vulcan.dto.ProjectStatusDto;
 import net.sourceforge.vulcan.dto.RepositoryTagDto;
+import net.sourceforge.vulcan.exception.RepositoryException;
 import net.sourceforge.vulcan.metadata.SvnRevision;
 import net.sourceforge.vulcan.scheduler.BuildDaemon;
 import net.sourceforge.vulcan.web.struts.forms.ManualBuildForm;
@@ -369,6 +370,41 @@ public class ManualBuildActionTest extends MockApplicationContextStrutsTestCase 
 		final String[] selectedTags = form.getSelectedTags();
 		assertEquals("rc2", selectedTags[0]);
 		assertEquals("2.0", selectedTags[1]);
+	}
+	public void testChooseTagsReportsRepositoryError() throws Exception {
+		addRequestParameter("targets", new String[] {"a"});
+		addRequestParameter("chooseTags", "true");
+		addRequestParameter("dependencies", DependencyBuildPolicy.NONE.name());
+		
+		final ProjectConfigDto project = projects[0];
+		expect(manager.getProjectConfig("a")).andReturn(project);
+		
+		final DependencyGroup dg = new DependencyGroupImpl();
+		dg.addTarget(project);
+		
+		manager.buildDependencyGroup(
+				aryEq(new ProjectConfigDto[] {project}),
+				eq(DependencyBuildPolicy.NONE),
+				eq(WorkingCopyUpdateStrategy.Default),
+				eq(false), eq(true));
+		expectLastCall().andReturn(dg);
+
+		expect(manager.getRepositoryAdaptor(project)).andReturn(ra1);
+		
+		expect(ra1.getAvailableTags()).andThrow(new RepositoryException("key.message", null, null));
+		
+		expect(buildManager.getLatestStatus("a")).andReturn(new ProjectStatusDto());
+
+		replay();
+		
+		actionPerform();
+		
+		verifyForward("chooseTags");
+		
+		verifyNoActionMessages();
+		assertPropertyHasError("a", "key.message");
+		
+		verify();
 	}
 	public void testTagsSelectedProceeds() throws Exception {
 		final DependencyGroupImpl withoutTagNames = new DependencyGroupImpl();

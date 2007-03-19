@@ -44,6 +44,7 @@ import org.apache.struts.action.Action;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
+import org.apache.struts.action.ActionMessage;
 
 @SvnRevision(id="$Id$", url="$HeadURL$")
 public final class ManualBuildAction extends Action {
@@ -179,6 +180,9 @@ public final class ManualBuildAction extends Action {
 				final RepositoryAdaptor ra = projectManager.getRepositoryAdaptor(target);
 				projectTags = ra.getAvailableTags();
 			} catch (ConfigException e) {
+				BaseDispatchAction.saveError(request, target.getName(),
+						new ActionMessage(e.getKey(), e.getArgs()));
+				
 				projectTags = Collections.emptyList();
 			}
 			
@@ -205,6 +209,12 @@ public final class ManualBuildAction extends Action {
 			}
 		}
 		
-		selectedTags.add(projectTags.get(projectTags.size()-1).getName());
+		String tagName = "";
+		
+		if (projectTags.size() > 0) {
+			tagName = projectTags.get(projectTags.size()-1).getName();
+		}
+		
+		selectedTags.add(tagName);
 	}
 }

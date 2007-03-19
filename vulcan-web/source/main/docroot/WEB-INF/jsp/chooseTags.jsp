@@ -25,28 +25,39 @@
 			</td>
 		</tr>
 		<c:forEach items="${manualBuildForm.projectNames}" var="projectName" varStatus="loopStatus">
+			<c:set var="projectErrorPresent" value="false"/>
 			<tr>
 				<td>${projectName}</td>
 				<td>
-					<html:hidden property="targets" value="${projectName}"/>
-					<html:select property="selectedTags">
-						<c:forEach items="${manualBuildForm.availableTags[loopStatus.index]}" var="tag">
-							<c:choose>
-								<c:when test="${manualBuildForm.selectedTags[loopStatus.index] eq tag.name}">
-									<option selected="selected" value="${tag.name}">${tag.description}</option>
-								</c:when>
-								<c:otherwise>
-									<option value="${tag.name}">${tag.description}</option>
-								</c:otherwise>
-							</c:choose>
-						</c:forEach>
-					</html:select>
+					<html:messages property="${projectName}" id="msg">
+						<c:set var="projectErrorPresent" value="true"/>
+						<c:set var="errorPresent" value="true"/>
+						<span class="error">${msg}</span>
+					</html:messages>
+					
+					<c:if test="${not projectErrorPresent}">
+						<html:hidden property="targets" value="${projectName}"/>
+						<html:select property="selectedTags">
+							<c:forEach items="${manualBuildForm.availableTags[loopStatus.index]}" var="tag">
+								<c:choose>
+									<c:when test="${manualBuildForm.selectedTags[loopStatus.index] eq tag.name}">
+										<option selected="selected" value="${tag.name}">${tag.description}</option>
+									</c:when>
+									<c:otherwise>
+										<option value="${tag.name}">${tag.description}</option>
+									</c:otherwise>
+								</c:choose>
+							</c:forEach>
+						</html:select>
+					</c:if>
 				</td>
 			</tr>
 		</c:forEach>
 		<tr>
 			<td class="buttons" colspan="2">
-				<html:submit property="action" value="Build"/>
+				<c:if test="${not errorPresent}">
+					<html:submit property="action" value="Build"/>
+				</c:if>
 			</td>
 		</tr>
 	</tbody>
