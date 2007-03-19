@@ -67,7 +67,7 @@ public class PluginConfigFormTest extends MockApplicationContextStrutsTestCase {
 		
 		assertEquals("pluginConfig.obj.class", pds.get(0).getName());
 		assertEquals("pluginConfig.obj.nestedValue", pds.get(1).getName());
-		assertEquals("Setup -> Plugins -> Mock Plugin -> Nested Object", (String)request.getAttribute("location"));
+		assertEquals("Setup > Plugins > Mock Plugin > Nested Object", (String)request.getAttribute("location"));
 	}
 	public void testSetsLocationOnProject() throws Exception {
 		PluginConfigStub config = new PluginConfigStub();
@@ -84,7 +84,7 @@ public class PluginConfigFormTest extends MockApplicationContextStrutsTestCase {
 		
 		assertEquals("pluginConfig.obj.class", pds.get(0).getName());
 		assertEquals("pluginConfig.obj.nestedValue", pds.get(1).getName());
-		assertEquals("Setup -> Projects -> My Dumb Project -> Mock Plugin -> Nested Object", (String)request.getAttribute("location"));
+		assertEquals("Setup > Projects > My Dumb Project > Mock Plugin > Nested Object", (String)request.getAttribute("location"));
 	}
 	public void testGetChoices() throws Exception {
 		final List<String> projects = Arrays.asList(new String[] {"a", "b"});

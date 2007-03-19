@@ -19,7 +19,9 @@
 package net.sourceforge.vulcan;
 
 import java.util.List;
+import java.util.Set;
 
+import net.sourceforge.vulcan.dto.PluginProfileDto;
 import net.sourceforge.vulcan.dto.StateManagerConfigDto;
 import net.sourceforge.vulcan.dto.PluginConfigDto;
 import net.sourceforge.vulcan.dto.ProjectConfigDto;
@@ -65,7 +67,7 @@ public interface StateManager {
 
 	public PluginManager getPluginManager();
 
-	public void updatePluginConfig(PluginConfigDto pluginConfig) throws PluginNotFoundException, StoreException;
+	public void updatePluginConfig(PluginConfigDto pluginConfig, Set<PluginProfileDto> renamedProfiles) throws PluginNotFoundException, StoreException;
 	public void removePlugin(String pluginId) throws StoreException, PluginNotFoundException;
 
 	public void save() throws StoreException;

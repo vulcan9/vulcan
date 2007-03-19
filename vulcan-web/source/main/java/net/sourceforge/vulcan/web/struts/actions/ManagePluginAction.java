@@ -27,6 +27,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import net.sourceforge.vulcan.dto.BuildToolConfigDto;
 import net.sourceforge.vulcan.dto.PluginConfigDto;
+import net.sourceforge.vulcan.dto.PluginProfileDto;
 import net.sourceforge.vulcan.dto.ProjectConfigDto;
 import net.sourceforge.vulcan.dto.RepositoryAdaptorConfigDto;
 import net.sourceforge.vulcan.exception.CannotCreateDirectoryException;
@@ -112,10 +113,10 @@ public final class ManagePluginAction extends BaseDispatchAction {
 			return mapping.findForward("configure");
 		}
 		
-		stateManager.updatePluginConfig(configForm.getPluginConfig());
-			
+		stateManager.updatePluginConfig(configForm.getPluginConfig(), configForm.getRenamedProfiles());
+		
 		saveSuccessMessage(request);
-			
+		
 		return mapping.findForward("pluginList");
 	}
 	public ActionForward configure(ActionMapping mapping, ActionForm form,
@@ -152,6 +153,14 @@ public final class ManagePluginAction extends BaseDispatchAction {
 		if (configForm.isProjectPlugin() && !configForm.isNested()) {
 			putConfigInProjectForm(mapping, request, configForm.getPluginConfig());
 			return mapping.findForward("projectDetails");
+		}
+		
+		final Object focusObject = configForm.getFocusObject();
+		if (focusObject instanceof PluginProfileDto) {
+			final PluginProfileDto pluginProfileDto = (PluginProfileDto)focusObject;
+			if (pluginProfileDto.isRenamed()) {
+				configForm.getRenamedProfiles().add(pluginProfileDto);
+			}
 		}
 		
 		focus = focus.substring(0, focus.lastIndexOf("."));

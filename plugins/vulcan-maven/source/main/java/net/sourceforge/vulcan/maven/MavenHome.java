@@ -23,13 +23,18 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-import net.sourceforge.vulcan.dto.NamedObject;
-import net.sourceforge.vulcan.dto.PluginConfigDto;
+import net.sourceforge.vulcan.dto.PluginProfileDto;
 
-public class MavenHome extends PluginConfigDto implements NamedObject {
+public class MavenHome extends PluginProfileDto {
 	private String description;
 	private String directory;
 	
+	@Override
+	public String getProjectConfigProfilePropertyName() {
+		return "mavenHome";
+	}
+
+	@Override
 	public String getName() {
 		return description;
 	}

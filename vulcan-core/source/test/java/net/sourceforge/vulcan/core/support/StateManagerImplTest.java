@@ -19,13 +19,18 @@
 package net.sourceforge.vulcan.core.support;
 
 import java.beans.PropertyDescriptor;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 
 import net.sourceforge.vulcan.dto.BuildManagerConfigDto;
+import net.sourceforge.vulcan.dto.BuildToolConfigDto;
 import net.sourceforge.vulcan.dto.Date;
 import net.sourceforge.vulcan.dto.PluginConfigDto;
+import net.sourceforge.vulcan.dto.PluginProfileDto;
+import net.sourceforge.vulcan.dto.PluginProfileDtoStub;
 import net.sourceforge.vulcan.dto.ProjectConfigDto;
+import net.sourceforge.vulcan.dto.RepositoryAdaptorConfigDto;
 import net.sourceforge.vulcan.exception.DuplicateNameException;
 import net.sourceforge.vulcan.exception.NoSuchProjectException;
 import net.sourceforge.vulcan.exception.ProjectNeedsDependencyException;
@@ -323,11 +328,35 @@ public class StateManagerImplTest extends StateManagerTestBase
 	public void testUpdatePluginConfig() throws Exception {
 		final PluginConfigDto pluginConfig = new FakePluginConfig();
 		
-		assertNull(pluginConfig.getLastModificationDate());
+		pluginMgr.configurePlugin(pluginConfig);
 		
-		stateMgr.updatePluginConfig(pluginConfig);
+		replay();
+		
+		assertNull(pluginConfig.getLastModificationDate());
+
+		stateMgr.updatePluginConfig(pluginConfig, null);
 		
 		assertNotNull(pluginConfig.getLastModificationDate());
+
+		verify();
+	}
+	public void testUpdatePluginConfigRenameBuildToolProfile() throws Exception {
+		runRenameProfileTest("old-name", "a.fake.plugin", "new-name", null, "old-name");
+	}
+	public void testUpdatePluginConfigRenameBuildToolPluginIdNotMatch() throws Exception {
+		runRenameProfileTest("old-name", "another.fake.plugin", "old-name", null, "old-name");
+	}
+	public void testUpdatePluginConfigRenameBuildToolProfileNotMatch() throws Exception {
+		runRenameProfileTest("unrelated-name", "a.fake.plugin", "unrelated-name", null, "unrelated-name");
+	}
+	public void testUpdatePluginConfigRenameRepoProfile() throws Exception {
+		runRenameProfileTest("old-name", null, "old-name", "a.fake.plugin", "new-name");
+	}
+	public void testUpdatePluginConfigRenameRepoPluginIdNotMatch() throws Exception {
+		runRenameProfileTest("old-name", null, "old-name", "another.fake.plugin", "old-name");
+	}
+	public void testUpdatePluginConfigRenameRepoProfileNotMatch() throws Exception {
+		runRenameProfileTest("unrelated-name", null, "unrelated-name", "another.fake.plugin", "unrelated-name");
 	}
 	public void testGetPluginModificationDateNull() throws Exception {
 		final PluginConfigDto cfg = new FakePluginConfig();
@@ -352,6 +381,47 @@ public class StateManagerImplTest extends StateManagerTestBase
 		config.setName(name);
 		return config;
 	}
+	private void runRenameProfileTest(String projectSetting,
+			String buildToolPluginId, String expectedBuildToolSetting,
+			String repoPluginId, String expectedRepoSetting) throws Exception {
+		
+		final String pluginId = "a.fake.plugin";
+		final PluginConfigDto pluginConfig = new FakePluginConfig();
+		final PluginProfileDtoStub profile = new PluginProfileDtoStub();
+
+		profile.setName("old-name");
+		profile.checkPoint();
+		profile.setName("new-name");
+		profile.setPluginId(pluginId);
+		profile.setProjectConfigProfilePropertyName("fakeProfileName");
+		
+		final ProjectConfigDto project = createProjectDto("a");
+		project.setBuildToolPluginId(buildToolPluginId);
+		project.setRepositoryAdaptorPluginId(repoPluginId);
+		
+		final FakeBuildToolConfig buildToolConfig = new FakeBuildToolConfig(buildToolPluginId);
+		buildToolConfig.setFakeProfileName(projectSetting);
+
+		project.setBuildToolConfig(buildToolConfig);
+		
+		final FakeRepoConfig repoConfig = new FakeRepoConfig(repoPluginId);
+		repoConfig.setFakeProfileName(projectSetting);
+		
+		project.setRepositoryAdaptorConfig(repoConfig);
+		
+		stateMgr.getConfig().setProjects(new ProjectConfigDto[] {project});
+		
+		pluginMgr.configurePlugin(pluginConfig);
+		
+		replay();
+		
+		stateMgr.updatePluginConfig(pluginConfig, Collections.<PluginProfileDto>singleton(profile));
+		
+		verify();
+		
+		assertEquals(expectedBuildToolSetting, buildToolConfig.getFakeProfileName());
+		assertEquals(expectedRepoSetting, repoConfig.getFakeProfileName());
+	}
 	private class FakePluginConfig extends PluginConfigDto {
 		@Override
 		public String getPluginId() {
@@ -366,6 +436,58 @@ public class StateManagerImplTest extends StateManagerTestBase
 		@Override
 		public List<PropertyDescriptor> getPropertyDescriptors(Locale locale) {
 			return null;
+		}
+	}
+	public static class FakeBuildToolConfig extends BuildToolConfigDto {
+		private String pluginId;
+		private String fakeProfileName;
+		
+		public FakeBuildToolConfig(String pluginId) {
+			this.pluginId = pluginId;
+		}
+		@Override
+		public String getPluginId() {
+			return pluginId;
+		}
+		@Override
+		public String getPluginName() {
+			return null;
+		}
+		@Override
+		public List<PropertyDescriptor> getPropertyDescriptors(Locale locale) {
+			return null;
+		}
+		public String getFakeProfileName() {
+			return fakeProfileName;
+		}
+		public void setFakeProfileName(String fakeProfileName) {
+			this.fakeProfileName = fakeProfileName;
+		}
+	}
+	public static class FakeRepoConfig extends RepositoryAdaptorConfigDto {
+		private String pluginId;
+		private String fakeProfileName;
+		
+		public FakeRepoConfig(String pluginId) {
+			this.pluginId = pluginId;
+		}
+		@Override
+		public String getPluginId() {
+			return pluginId;
+		}
+		@Override
+		public String getPluginName() {
+			return null;
+		}
+		@Override
+		public List<PropertyDescriptor> getPropertyDescriptors(Locale locale) {
+			return null;
+		}
+		public String getFakeProfileName() {
+			return fakeProfileName;
+		}
+		public void setFakeProfileName(String fakeProfileName) {
+			this.fakeProfileName = fakeProfileName;
 		}
 	}
 }

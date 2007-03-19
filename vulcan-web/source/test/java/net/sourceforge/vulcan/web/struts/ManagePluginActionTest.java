@@ -24,6 +24,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 
@@ -31,6 +32,7 @@ import junit.framework.AssertionFailedError;
 import net.sourceforge.vulcan.PluginManager;
 import net.sourceforge.vulcan.dto.BaseDto;
 import net.sourceforge.vulcan.dto.PluginConfigDto;
+import net.sourceforge.vulcan.dto.PluginProfileDto;
 import net.sourceforge.vulcan.dto.ProjectConfigDto;
 import net.sourceforge.vulcan.dto.StateManagerConfigDto;
 import net.sourceforge.vulcan.exception.CannotCreateDirectoryException;
@@ -285,7 +287,7 @@ public class ManagePluginActionTest extends MockApplicationContextStrutsTestCase
 		assertNotSame(config, form.getPluginConfig());
 		assertFalse(form.isProjectPlugin());
 		
-		assertEquals("Setup -> Plugins -> Mock Plugin", request.getAttribute("location"));
+		assertEquals("Setup > Plugins > Mock Plugin", request.getAttribute("location"));
 	}
 	public void testConfigurePluginBlankPasswordStaysBlank() throws Exception {
 		final PluginConfigForm form = new PluginConfigForm();
@@ -334,7 +336,7 @@ public class ManagePluginActionTest extends MockApplicationContextStrutsTestCase
  		cfg.setPassword("sompswrd");
  		cfg.validate();
  		
- 		manager.updatePluginConfig(cfg);
+ 		manager.updatePluginConfig(cfg, Collections.<PluginProfileDto>emptySet());
  		replay();
  		
  		actionPerform();
@@ -370,7 +372,7 @@ public class ManagePluginActionTest extends MockApplicationContextStrutsTestCase
  		
 		cfg.validate();
 		
-		manager.updatePluginConfig(cfg);
+		manager.updatePluginConfig(cfg, Collections.<PluginProfileDto>emptySet());
 		replay();
 		
 		actionPerform();
@@ -501,7 +503,7 @@ public class ManagePluginActionTest extends MockApplicationContextStrutsTestCase
 		form.setPluginConfig(request, new PluginConfigStub());
 		form.setFocus("pluginConfig.value");
 		request.getSession().setAttribute("pluginConfigForm", form);
-		assertEquals("Setup -> Plugins -> Mock Plugin", request.getAttribute("location"));
+		assertEquals("Setup > Plugins > Mock Plugin", request.getAttribute("location"));
 		
 		replay();
 		
@@ -536,7 +538,7 @@ public class ManagePluginActionTest extends MockApplicationContextStrutsTestCase
 
 		assertEquals("foo", ((PluginConfigStub)form.getPluginConfig()).getValue());
 		assertEquals("pluginConfig.obj.nestedValue", form.getAllProperties().get(1).getName());
-		assertEquals("Setup -> Plugins -> Mock Plugin -> Nested Object", request.getAttribute("location"));
+		assertEquals("Setup > Plugins > Mock Plugin > Nested Object", request.getAttribute("location"));
 	}
 	public void testConfigureNestedObjectBack() throws Exception {
 		addRequestParameter("action", "Back");
@@ -549,7 +551,7 @@ public class ManagePluginActionTest extends MockApplicationContextStrutsTestCase
 		form.setPluginConfig(request, new PluginConfigStub());
 		form.setFocus("pluginConfig.obj");
 		form.introspect(request);
-		assertEquals("Setup -> Plugins -> Mock Plugin -> Nested Object", request.getAttribute("location"));
+		assertEquals("Setup > Plugins > Mock Plugin > Nested Object", request.getAttribute("location"));
 		
 		request.getSession().setAttribute("pluginConfigForm", form);
 		
@@ -565,7 +567,77 @@ public class ManagePluginActionTest extends MockApplicationContextStrutsTestCase
 
 		assertEquals("foobar", ((PluginConfigStub)form.getPluginConfig()).getObj().getNestedValue());
 		assertEquals("pluginConfig", form.getFocus());
-		assertEquals("Setup -> Plugins -> Mock Plugin", request.getAttribute("location"));
+		assertEquals("Setup > Plugins > Mock Plugin", request.getAttribute("location"));
+	}
+	public void testConfigureRenamableNestedObjectBack() throws Exception {
+		addRequestParameter("action", "Back");
+		addRequestParameter("pluginId", "a.b.c.plugin");
+		addRequestParameter("pluginConfig.renameable.name", "b");
+		addRequestParameter("focus", "pluginConfig.renameable");
+		
+		final PluginConfigForm form = new PluginConfigForm();
+		
+		final PluginConfigStub pluginConfig = new PluginConfigStub();
+		pluginConfig.getRenameable().setName("a");
+		
+		form.setPluginConfig(request, pluginConfig);
+		form.setFocus("pluginConfig.renameable");
+		form.introspect(request);
+		
+		request.getSession().setAttribute("pluginConfigForm", form);
+		
+		replay();
+		
+		actionPerform();
+		
+		verify();
+		
+		verifyForward("configure");
+		
+		assertSame(form, request.getSession().getAttribute("pluginConfigForm"));
+
+		final PluginConfigStub configured = ((PluginConfigStub)form.getPluginConfig());
+		
+		assertEquals("b", configured.getRenameable().getName());
+		assertEquals("pluginConfig", form.getFocus());
+		assertTrue(configured.getRenameable().isRenamed());
+		
+		assertEquals(1, form.getRenamedProfiles().size());
+	}
+	public void testConfigureRenamableNestedObjectNotRenamedBack() throws Exception {
+		addRequestParameter("action", "Back");
+		addRequestParameter("pluginId", "a.b.c.plugin");
+		addRequestParameter("pluginConfig.renameable.name", "a");
+		addRequestParameter("focus", "pluginConfig.renameable");
+		
+		final PluginConfigForm form = new PluginConfigForm();
+		
+		final PluginConfigStub pluginConfig = new PluginConfigStub();
+		pluginConfig.getRenameable().setName("a");
+		
+		form.setPluginConfig(request, pluginConfig);
+		form.setFocus("pluginConfig.renameable");
+		form.introspect(request);
+		
+		request.getSession().setAttribute("pluginConfigForm", form);
+		
+		replay();
+		
+		actionPerform();
+		
+		verify();
+		
+		verifyForward("configure");
+		
+		assertSame(form, request.getSession().getAttribute("pluginConfigForm"));
+
+		final PluginConfigStub configured = ((PluginConfigStub)form.getPluginConfig());
+		
+		assertEquals("a", configured.getRenameable().getName());
+		assertEquals("pluginConfig", form.getFocus());
+		assertFalse(configured.getRenameable().isRenamed());
+		
+		assertEquals(0, form.getRenamedProfiles().size());
 	}
 	public void testConfigureAddIndexedNestedObjectNullArray() throws Exception {
 		addRequestParameter("action", "Add");
@@ -576,7 +648,7 @@ public class ManagePluginActionTest extends MockApplicationContextStrutsTestCase
 		final PluginConfigForm form = new PluginConfigForm();
 		form.setPluginConfig(request, new PluginConfigWithArray());
 		request.getSession().setAttribute("pluginConfigForm", form);
-		assertEquals("Setup -> Plugins -> Mock Plugin", request.getAttribute("location"));
+		assertEquals("Setup > Plugins > Mock Plugin", request.getAttribute("location"));
 
 		expect(mgr.createObject("a.b.c.plugin", NestedArrayElement.class.getName()))
 			.andReturn(new NestedArrayElement());
@@ -592,7 +664,7 @@ public class ManagePluginActionTest extends MockApplicationContextStrutsTestCase
 		assertSame(form, request.getSession().getAttribute("pluginConfigForm"));
 
 		assertEquals("pluginConfig.arr[0]", form.getFocus());
-		assertEquals("Setup -> Plugins -> Mock Plugin -> Nested List of Objects", request.getAttribute("location"));
+		assertEquals("Setup > Plugins > Mock Plugin > Nested List of Objects", request.getAttribute("location"));
 	}
 	public void testConfigureAddIndexedNestedObject() throws Exception {
 		addRequestParameter("action", "Add");
@@ -660,7 +732,7 @@ public class ManagePluginActionTest extends MockApplicationContextStrutsTestCase
 		assertEquals(0, config.getArr()[0].getValue());
 		assertEquals(1, config.getArr()[1].getValue());
 		assertEquals(3, config.getArr()[2].getValue());
-		assertEquals("Setup -> Plugins -> Mock Plugin", request.getAttribute("location"));
+		assertEquals("Setup > Plugins > Mock Plugin", request.getAttribute("location"));
 	}
 	public static class PluginConfigWithArray extends PluginConfigStub {
 		private NestedArrayElement[] arr;
