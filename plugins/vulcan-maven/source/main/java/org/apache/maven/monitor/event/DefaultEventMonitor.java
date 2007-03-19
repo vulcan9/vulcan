@@ -145,7 +145,7 @@ public class DefaultEventMonitor extends AbstractSelectiveEventMonitor {
 				end = matcher.start();
 			}
 			
-			final String msg = message.substring(start, end).replaceAll("\r", "");
+			final String msg = message.substring(start, end).replaceAll("\r", "").trim();
 			
 			errors.add(new AntEventSummary(Constants.MESSAGE_LOGGED, "project", target, "task",
 					msg, 0, file, line, null));
