@@ -154,9 +154,15 @@ public class SpringFileStore extends AbstractFileStore implements BeanFactoryAwa
 			throw new StoreException("No such build outcome for project " + projectName, null);
 		}
 		
-		final BeanFactory beanFactory = new XmlBeanFactory(new FileSystemResource(file), this.beanFactory);
+		final ProjectStatusDto outcome;
 		
-		final ProjectStatusDto outcome = (ProjectStatusDto) beanFactory.getBean("build-outcome");
+		try {
+			final BeanFactory beanFactory = new XmlBeanFactory(new FileSystemResource(file), this.beanFactory);
+		
+			outcome = (ProjectStatusDto) beanFactory.getBean("build-outcome");
+		} catch (Exception e) {
+			throw new StoreException(e);
+		}
 		
 		removeUnusedResources(projectName, outcome);
 
@@ -327,17 +333,9 @@ public class SpringFileStore extends AbstractFileStore implements BeanFactoryAwa
 				getProjectsRoot() + File.separator + projectName,
 				"buildlogs");
 	}
-	private boolean checkFile(File file) {
-		if (file.exists()) {
-			if (file.length() > 0) {
-				return true;
-			}
-			
-			// sometimes diffs are created but have no contents.  delete them.
-			file.delete();
-		}
-		return false;
-	}
+	/**
+	 * Delete empty/missing build log / unified diff references. 
+	 */
 	private void removeUnusedResources(String projectName, final ProjectStatusDto outcome) {
 		if (outcome.getBuildLogId() != null) {
 			final File buildLog = new File(getBuildLogDir(projectName), outcome.getBuildLogId().toString());
@@ -354,5 +352,16 @@ public class SpringFileStore extends AbstractFileStore implements BeanFactoryAwa
 				outcome.setDiffId(null);
 			}
 		}
+	}
+	private boolean checkFile(File file) {
+		if (file.exists()) {
+			if (file.length() > 0) {
+				return true;
+			}
+			
+			// sometimes diffs are created but have no contents.  delete them.
+			file.delete();
+		}
+		return false;
 	}
 }
