@@ -33,6 +33,8 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import net.sourceforge.vulcan.core.Store;
 import net.sourceforge.vulcan.dto.ProjectStatusDto;
+import net.sourceforge.vulcan.event.ErrorEvent;
+import net.sourceforge.vulcan.event.EventHandler;
 import net.sourceforge.vulcan.exception.StoreException;
 import net.sourceforge.vulcan.metadata.SvnRevision;
 
@@ -61,6 +63,7 @@ public class BuildOutcomeCache {
 	final Map<UUID, String> idToProjects = new HashMap<UUID, String>();
 	
 	Store store;
+	EventHandler eventHandler;
 	
 	public BuildOutcomeCache() {
 		final ReadWriteLock lock = new ReentrantReadWriteLock();
@@ -176,14 +179,15 @@ public class BuildOutcomeCache {
 		
 		writeLock.lock();
 		
+		final String projectName = idToProjects.get(id);
+		
 		try {
-			final String projectName = idToProjects.get(id);
 			final ProjectStatusDto status = store.loadBuildOutcome(projectName, id);
 			
 			if (status.getBuildNumber() == null) {
 				// Legacy: build number was not introduced until several
-				// instances went live.
-				Integer index = outcomeIDs.get(projectName).indexOf(id);
+				// instances went live.  Use index as build number.
+				final Integer index = outcomeIDs.get(projectName).indexOf(id);
 				
 				status.setBuildNumber(index);
 			}
@@ -194,6 +198,10 @@ public class BuildOutcomeCache {
 			outcomes.put(id, status);
 			return status;
 		} catch (StoreException e) {
+			eventHandler.reportEvent(new ErrorEvent(
+					this, "errors.load.build.outcome",
+					new Object[] {id, projectName}, e));
+			
 			return null;
 		} finally {
 			writeLock.unlock();
@@ -267,6 +275,14 @@ public class BuildOutcomeCache {
 		this.store = store;
 	}
 
+	public EventHandler getEventHandler() {
+		return eventHandler;
+	}
+	
+	public void setEventHandler(EventHandler eventHandler) {
+		this.eventHandler = eventHandler;
+	}
+	
 	public int getCacheSize() {
 		return cacheSize;
 	}
