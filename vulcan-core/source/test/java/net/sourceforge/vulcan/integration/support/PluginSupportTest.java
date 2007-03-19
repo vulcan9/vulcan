@@ -19,12 +19,12 @@
 package net.sourceforge.vulcan.integration.support;
 
 import junit.framework.TestCase;
-import net.sourceforge.vulcan.dto.ProjectConfigDto;
+import net.sourceforge.vulcan.dto.PluginProfileDtoStub;
 import net.sourceforge.vulcan.exception.ConfigException;
 
 public class PluginSupportTest extends TestCase {
-	ProjectConfigDto[] dtos = new ProjectConfigDto[] {
-			new ProjectConfigDto(), new ProjectConfigDto()
+	PluginProfileDtoStub[] dtos = new PluginProfileDtoStub[] {
+			new PluginProfileDtoStub(), new PluginProfileDtoStub()
 	};
 
 	@Override

@@ -1,6 +1,6 @@
 /*
  * Vulcan Build Manager
- * Copyright (C) 2005-2006 Chris Eldredge
+ * Copyright (C) 2005-2007 Chris Eldredge
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,13 +18,14 @@
  */
 package net.sourceforge.vulcan.integration;
 
+import java.beans.IntrospectionException;
+import java.beans.PropertyDescriptor;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 
-import java.beans.IntrospectionException;
-import java.beans.PropertyDescriptor;
-
+import net.sourceforge.vulcan.dto.PluginProfileDto;
 import net.sourceforge.vulcan.dto.RepositoryAdaptorConfigDto;
 import net.sourceforge.vulcan.exception.ValidationException;
 import net.sourceforge.vulcan.metadata.SvnRevision;
@@ -36,6 +37,7 @@ public class PluginConfigStub extends RepositoryAdaptorConfigDto {
 	private String value;
 	private Boolean bool;
 	private NestedObject obj = new NestedObject();
+	private PluginProfileDtoStub renameable = new PluginProfileDtoStub();
 	private String password;
 	
 	public static class NestedObject {
@@ -46,6 +48,25 @@ public class PluginConfigStub extends RepositoryAdaptorConfigDto {
 		}
 		public void setNestedValue(String nestedValue) {
 			this.nestedValue = nestedValue;
+		}
+	}
+	
+	public static class PluginProfileDtoStub extends PluginProfileDto {
+		@Override
+		public String getProjectConfigProfilePropertyName() {
+			return null;
+		}
+		@Override
+		public String getPluginId() {
+			return null;
+		}
+		@Override
+		public String getPluginName() {
+			return null;
+		}
+		@Override
+		public List<PropertyDescriptor> getPropertyDescriptors(Locale locale) {
+			return Collections.emptyList();
 		}
 	}
 	@Override
@@ -87,6 +108,12 @@ public class PluginConfigStub extends RepositoryAdaptorConfigDto {
 	}
 	public void setObj(NestedObject obj) {
 		this.obj = obj;
+	}
+	public PluginProfileDtoStub getRenameable() {
+		return renameable;
+	}
+	public void setRenameable(PluginProfileDtoStub renameable) {
+		this.renameable = renameable;
 	}
 	public Boolean getBool() {
 		return bool;

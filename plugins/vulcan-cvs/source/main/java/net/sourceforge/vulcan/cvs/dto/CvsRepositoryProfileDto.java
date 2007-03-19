@@ -27,11 +27,10 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-import net.sourceforge.vulcan.dto.NamedObject;
-import net.sourceforge.vulcan.dto.PluginConfigDto;
+import net.sourceforge.vulcan.dto.PluginProfileDto;
 import net.sourceforge.vulcan.integration.ConfigChoice;
 
-public class CvsRepositoryProfileDto extends PluginConfigDto implements NamedObject {
+public class CvsRepositoryProfileDto extends PluginProfileDto {
 	private String description;
 	private String protocol;
 	private String host;
@@ -39,6 +38,11 @@ public class CvsRepositoryProfileDto extends PluginConfigDto implements NamedObj
 	
 	private String username;
 	private String password;
+	
+	@Override
+	public String getProjectConfigProfilePropertyName() {
+		return "repositoryProfile";
+	}
 	
 	@Override
 	public List<PropertyDescriptor> getPropertyDescriptors(Locale locale) {
@@ -77,6 +81,7 @@ public class CvsRepositoryProfileDto extends PluginConfigDto implements NamedObj
 	public String getPluginName() {
 		return CvsConfigDto.PLUGIN_NAME;
 	}
+	@Override
 	public String getName() {
 		return description;
 	}

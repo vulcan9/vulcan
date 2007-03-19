@@ -18,12 +18,6 @@
  */
 package net.sourceforge.vulcan.web.struts.forms;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import java.beans.BeanInfo;
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
@@ -32,11 +26,19 @@ import java.io.IOException;
 import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 
 import net.sourceforge.vulcan.StateManager;
 import net.sourceforge.vulcan.dto.PluginConfigDto;
+import net.sourceforge.vulcan.dto.PluginProfileDto;
 import net.sourceforge.vulcan.dto.PluginConfigDto.Widget;
 import net.sourceforge.vulcan.integration.ConfigChoice;
 import net.sourceforge.vulcan.metadata.SvnRevision;
@@ -53,7 +55,6 @@ import org.apache.struts.action.ActionMapping;
 import org.apache.struts.upload.FormFile;
 import org.apache.struts.validator.ValidatorForm;
 
-//TODO: resolve serialization problems
 @SvnRevision(id="$Id$", url="$HeadURL$")
 public final class PluginConfigForm extends ValidatorForm implements DispatchForm {
 	private static final Log log = LogFactory.getLog(PluginConfigForm.class);
@@ -70,6 +71,7 @@ public final class PluginConfigForm extends ValidatorForm implements DispatchFor
 	private transient FormFile pluginFile;
 	private transient PluginConfigDto pluginConfig;
 	private transient List<PropertyDescriptor> propertyDescriptors = new ArrayList<PropertyDescriptor>();
+	private transient Set<PluginProfileDto> renamedProfiles = new HashSet<PluginProfileDto>();
 	
 	private boolean projectPlugin;
 	private String projectName;
@@ -85,6 +87,7 @@ public final class PluginConfigForm extends ValidatorForm implements DispatchFor
 	
 	private List<String> availableProjects;
 	private List<String> location = new ArrayList<String>();
+	
 	
 	public String getName() {
 		return pluginId;
@@ -122,9 +125,13 @@ public final class PluginConfigForm extends ValidatorForm implements DispatchFor
 		final PropertyDescriptor[] pds;
 		
 		if (PluginConfigDto.class.isAssignableFrom(cls)) {
-			final PluginConfigDto pluginConfig = (PluginConfigDto) PropertyUtils.getProperty(this, focus);
+			final PluginConfigDto pluginConfig = (PluginConfigDto) getFocusObject();
 			final List<PropertyDescriptor> tmp = pluginConfig.getPropertyDescriptors(request.getLocale());
 			pds = tmp.toArray(new PropertyDescriptor[tmp.size()]);
+			
+			if (pluginConfig instanceof PluginProfileDto) {
+				((PluginProfileDto)pluginConfig).checkPoint();
+			}
 		} else {
 			final BeanInfo beanInfo = Introspector.getBeanInfo(cls);
 			Introspector.flushFromCaches(cls);
@@ -156,9 +163,19 @@ public final class PluginConfigForm extends ValidatorForm implements DispatchFor
 		
 		putLocationInRequest(request);
 	}
+	
+	public Object getFocusObject() {
+		try {
+			return PropertyUtils.getProperty(this, focus);
+		} catch (RuntimeException e) {
+			throw e;
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
 
 	public void putLocationInRequest(HttpServletRequest request) {
-		request.setAttribute("location", StringUtils.join(this.location.iterator(), " -> "));
+		request.setAttribute("location", StringUtils.join(this.location.iterator(), " > "));
 	}
 
 	@Override
@@ -199,6 +216,7 @@ public final class PluginConfigForm extends ValidatorForm implements DispatchFor
 	public void setPluginConfig(HttpServletRequest request, PluginConfigDto pluginConfig) throws IntrospectionException, IllegalAccessException, InvocationTargetException, NoSuchMethodException, InstantiationException {
 		this.pluginConfig = (PluginConfigDto) pluginConfig.copy();
 		this.pluginId = this.pluginConfig.getPluginId();
+		this.renamedProfiles.clear();
 		
 		introspect(request);
 	}
@@ -210,6 +228,9 @@ public final class PluginConfigForm extends ValidatorForm implements DispatchFor
 	}
 	public void setPluginFile(FormFile pluginFile) {
 		this.pluginFile = pluginFile;
+	}
+	public Set<PluginProfileDto> getRenamedProfiles() {
+		return renamedProfiles;
 	}
 	public List<PropertyDescriptor> getAllProperties() {
 		return propertyDescriptors;

@@ -18,21 +18,24 @@
  */
 package net.sourceforge.vulcan.subversion.dto;
 
+import java.beans.PropertyDescriptor;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 
-import java.beans.PropertyDescriptor;
+import net.sourceforge.vulcan.dto.PluginProfileDto;
 
-import net.sourceforge.vulcan.dto.NamedObject;
-import net.sourceforge.vulcan.dto.PluginConfigDto;
-
-public class SubversionRepositoryProfileDto extends PluginConfigDto implements NamedObject {
+public class SubversionRepositoryProfileDto extends PluginProfileDto {
 	private String description;
 	private String rootUrl;
 	private String username;
 	private String password;
+	
+	@Override
+	public String getProjectConfigProfilePropertyName() {
+		return "repositoryProfile";
+	}
 	
 	@Override
 	public List<PropertyDescriptor> getPropertyDescriptors(Locale locale) {
@@ -80,6 +83,7 @@ public class SubversionRepositoryProfileDto extends PluginConfigDto implements N
 	public void setUsername(String username) {
 		this.username = username;
 	}
+	@Override
 	public String getName() {
 		return description;
 	}

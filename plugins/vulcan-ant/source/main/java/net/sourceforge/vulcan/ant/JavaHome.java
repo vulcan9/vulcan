@@ -23,12 +23,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-import net.sourceforge.vulcan.dto.NamedObject;
-import net.sourceforge.vulcan.dto.PluginConfigDto;
+import net.sourceforge.vulcan.dto.PluginProfileDto;
 
 import org.apache.commons.lang.ArrayUtils;
 
-public class JavaHome extends PluginConfigDto implements NamedObject {
+public class JavaHome extends PluginProfileDto {
 	public static final String SYSTEM_DESC = "System (" + 
 		System.getProperty("java.vendor") + " " +
 		System.getProperty("java.version") + ")";
@@ -39,6 +38,7 @@ public class JavaHome extends PluginConfigDto implements NamedObject {
 	String maxMemory;
 	String[] systemProperties = {};
 	
+	@Override
 	public String getName() {
 		return description;
 	}
@@ -54,7 +54,10 @@ public class JavaHome extends PluginConfigDto implements NamedObject {
 	public String getPluginName() {
 		return AntConfig.PLUGIN_NAME;
 	}
-
+	@Override
+	public String getProjectConfigProfilePropertyName() {
+		return "javaHome";
+	}
 	@Override
 	public JavaHome copy() {
 		final JavaHome copy = (JavaHome) super.copy();

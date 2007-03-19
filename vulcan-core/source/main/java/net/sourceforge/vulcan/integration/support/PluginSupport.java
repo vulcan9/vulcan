@@ -19,19 +19,19 @@
 package net.sourceforge.vulcan.integration.support;
 
 import net.sourceforge.vulcan.core.BuildDetailCallback;
-import net.sourceforge.vulcan.dto.NamedObject;
+import net.sourceforge.vulcan.dto.PluginProfileDto;
 import net.sourceforge.vulcan.exception.ConfigException;
 
 import org.apache.commons.lang.StringUtils;
 
 public abstract class PluginSupport {
 
-	protected static <T extends NamedObject> T getSelectedEnvironment(T[] environments, String name,
+	protected static <T extends PluginProfileDto> T getSelectedEnvironment(T[] environments, String name,
 			String missingMessageKey) throws ConfigException {
 		return getSelectedEnvironment(environments, name, missingMessageKey, false);
 	}
 	
-	protected static <T extends NamedObject> T getSelectedEnvironment(T[] environments, String name,
+	protected static <T extends PluginProfileDto> T getSelectedEnvironment(T[] environments, String name,
 			String missingMessageKey, boolean matchPartial) throws ConfigException {
 		
 		if (StringUtils.isBlank(name)) {

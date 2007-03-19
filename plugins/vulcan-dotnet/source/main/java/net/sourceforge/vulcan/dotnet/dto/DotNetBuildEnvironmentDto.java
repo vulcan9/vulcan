@@ -23,9 +23,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-import net.sourceforge.vulcan.dto.NamedObject;
+import net.sourceforge.vulcan.dotnet.DotNetBuildPlugin;
+import net.sourceforge.vulcan.dto.PluginProfileDto;
 
-public class DotNetBuildEnvironmentDto extends DotNetBaseDto implements NamedObject {
+public class DotNetBuildEnvironmentDto extends PluginProfileDto {
 	public static enum DotNetEnvironmentType {
 		MSBuild, NAnt
 	}
@@ -33,6 +34,19 @@ public class DotNetBuildEnvironmentDto extends DotNetBaseDto implements NamedObj
 	private String description;
 	private String location;
 	private DotNetEnvironmentType type;
+	
+	@Override
+	public String getPluginId() {
+		return DotNetBuildPlugin.PLUGIN_ID;
+	}
+	@Override
+	public String getPluginName() {
+		return DotNetBuildPlugin.PLUGIN_NAME;
+	}
+	@Override
+	public String getProjectConfigProfilePropertyName() {
+		return "buildEnvironment";
+	}
 	
 	@Override
 	public List<PropertyDescriptor> getPropertyDescriptors(Locale locale) {

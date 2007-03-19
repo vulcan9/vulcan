@@ -29,6 +29,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -48,6 +49,7 @@ import net.sourceforge.vulcan.dto.ComponentVersionDto;
 import net.sourceforge.vulcan.dto.Date;
 import net.sourceforge.vulcan.dto.NamedObject;
 import net.sourceforge.vulcan.dto.PluginConfigDto;
+import net.sourceforge.vulcan.dto.PluginProfileDto;
 import net.sourceforge.vulcan.dto.ProjectConfigDto;
 import net.sourceforge.vulcan.dto.SchedulerConfigDto;
 import net.sourceforge.vulcan.dto.StateManagerConfigDto;
@@ -62,6 +64,7 @@ import net.sourceforge.vulcan.scheduler.BuildDaemon;
 import net.sourceforge.vulcan.scheduler.ProjectScheduler;
 import net.sourceforge.vulcan.scheduler.Scheduler;
 
+import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.commons.lang.StringUtils;
 
 
@@ -432,11 +435,15 @@ public abstract class StateManagerImpl implements StateManager, ProjectManager {
 			writeLock.unlock();
 		}
 	}
-	public void updatePluginConfig(PluginConfigDto pluginConfig) throws PluginNotFoundException, StoreException {
+	public void updatePluginConfig(PluginConfigDto pluginConfig, Set<PluginProfileDto> renamedProfiles) throws PluginNotFoundException, StoreException {
 		try {
 			writeLock.lock();
 			pluginConfig.setLastModificationDate(new Date());
 			config.getPluginConfigs().put(pluginConfig.getPluginId(), pluginConfig);
+			
+			if (renamedProfiles != null) {
+				updateRenamedProfiles(renamedProfiles);
+			}
 		} finally {
 			writeLock.unlock();
 		}
@@ -746,5 +753,39 @@ public abstract class StateManagerImpl implements StateManager, ProjectManager {
 				itr.remove();
 			}
 		}
+	}
+	private void updateRenamedProfiles(Set<PluginProfileDto> renamedProfiles) {
+		final ProjectConfigDto[] projects = config.getProjects();
+		
+		for (PluginProfileDto profile : renamedProfiles) {
+			final String pluginId = profile.getPluginId();
+			
+			for (ProjectConfigDto project : projects) {
+				if (pluginId.equals(project.getBuildToolPluginId())) {
+					updateProfileNameIfNecessary(project.getBuildToolConfig(), profile);
+				}
+				
+				if (pluginId.equals(project.getRepositoryAdaptorPluginId())) {
+					updateProfileNameIfNecessary(project.getRepositoryAdaptorConfig(), profile);
+				}
+			}
+		}
+	}
+	private void updateProfileNameIfNecessary(PluginConfigDto buildToolConfig, PluginProfileDto profile) {
+		final String projectConfigProfilePropertyName = profile.getProjectConfigProfilePropertyName();
+		try {
+			final String projectSetting = (String) PropertyUtils.getProperty(
+					buildToolConfig, projectConfigProfilePropertyName);
+			
+			if (profile.getOldName().equals(projectSetting)) {
+				PropertyUtils.setProperty(
+						buildToolConfig, projectConfigProfilePropertyName, profile.getName());
+			}
+		} catch (RuntimeException e) {
+			throw e;
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+		
 	}
 }	
