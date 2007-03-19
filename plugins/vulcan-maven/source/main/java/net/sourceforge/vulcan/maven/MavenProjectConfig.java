@@ -33,7 +33,7 @@ public class MavenProjectConfig extends AntProjectConfig {
 	private String mavenHome = "Default";
 	
 	public MavenProjectConfig() {
-		setBuildScript("maven.xml");
+		setBuildScript("");
 	}
 	
 	@Override
@@ -48,6 +48,9 @@ public class MavenProjectConfig extends AntProjectConfig {
 	@Override
 	public List<PropertyDescriptor> getPropertyDescriptors(Locale locale) {
 		final List<PropertyDescriptor> pds = new ArrayList<PropertyDescriptor>();
+		
+		addProperty(pds, "buildScript", "MavenProjectConfig.pom.name",
+				"MavenProjectConfig.pom.text", locale);
 		
 		addProperty(pds, "targets", "MavenProjectConfig.goals.name",
 				"MavenProjectConfig.goals.text", locale);

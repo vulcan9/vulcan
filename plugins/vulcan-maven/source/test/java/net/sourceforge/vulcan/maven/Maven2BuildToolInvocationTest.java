@@ -20,6 +20,7 @@ package net.sourceforge.vulcan.maven;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import net.sourceforge.vulcan.ant.buildlistener.AntEventSummary;
@@ -35,6 +36,8 @@ public class Maven2BuildToolInvocationTest extends MavenBuildToolTestBase {
 	List<String> details = new ArrayList<String>();
 
 	List<String> errors = new ArrayList<String>();
+	List<String> fileNames = new ArrayList<String>();
+	List<Integer> lineNumbers = new ArrayList<Integer>();
 	
 	File logFile;
 	
@@ -53,8 +56,10 @@ public class Maven2BuildToolInvocationTest extends MavenBuildToolTestBase {
 		public void setPhase(String phase) {
 			fail("should not call this method");
 		}
-		public void reportError(String message, String arg1, Integer arg2, String arg3) {
+		public void reportError(String message, String file, Integer line, String arg3) {
 			errors.add(message);
+			fileNames.add(file);
+			lineNumbers.add(line);
 		}
 		public void reportWarning(String arg0, String arg1, Integer arg2, String arg3) {
 		}
@@ -67,6 +72,7 @@ public class Maven2BuildToolInvocationTest extends MavenBuildToolTestBase {
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
+		config.setBuildScript("");
 		tool = new MavenBuildTool(config, mavenConfig, null, mavenConfig.getMavenHomes()[1]);
 		logFile = File.createTempFile("vulcan-maven-junit-build", ".log");
 		logFile.deleteOnExit();
@@ -101,8 +107,29 @@ public class Maven2BuildToolInvocationTest extends MavenBuildToolTestBase {
 		} catch (BuildFailedException dontCare) {
 		}
 		
-		assertEquals(1, errors.size());
-		assertEquals("Compilation failure", errors.get(0));
+		assertEquals(2, errors.size());
+		assertEquals("source/main/java/Invalid.java", fileNames.get(0).replaceAll("\\\\", "/"));
+		assertTrue(errors.get(0).startsWith("cannot find symbol"));
+		assertEquals(3, lineNumbers.get(0).intValue());
+		assertEquals("source/main/java/Invalid.java", fileNames.get(1).replaceAll("\\\\", "/"));
+		assertTrue(errors.get(1).startsWith("cannot find symbol"));
+		assertEquals(6, lineNumbers.get(1).intValue());
+	}
+	
+	public void testSpecifyPomWithMissingDependency() throws Exception {
+		config.setBuildScript("pom-missing-dependency.xml");
+		config.setTargets("compile");
+		
+		try {
+			tool.buildProject(projectConfig, status, null, detailCallback);
+			fail("expected build to fail");
+		} catch (BuildFailedException dontCare) {
+		}
+		
+		assertEquals(2, errors.size());
+		Collections.sort(errors);
+		assertEquals("Missing artifact no.such.group:no-such-artifact:jar:1.0", errors.get(0));
+		assertEquals("Missing artifact no.such.group:other-no-such-artifact:jar:1.0", errors.get(1));
 	}
 	
 	void assertMessageLogged(String message) {

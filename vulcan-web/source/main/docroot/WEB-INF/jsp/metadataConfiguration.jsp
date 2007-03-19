@@ -24,8 +24,8 @@
 		<c:forEach items="${pluginConfigForm.allProperties}" var="desc">
 			<tr>
 				<jsp:element name="td">
-					<jsp:attribute name="title">${desc.shortDescription}</jsp:attribute>
-					<jsp:body>${desc.displayName}</jsp:body>
+					<jsp:attribute name="title"><c:out value="${desc.shortDescription}"/></jsp:attribute>
+					<jsp:body><c:out value="${desc.displayName}"/></jsp:body>
 				</jsp:element>
 				<td>
 					<c:choose>

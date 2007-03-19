@@ -207,12 +207,23 @@ public class MavenBuildTool extends AntBuildTool {
 		
 		if (maven2) {
 			jcb.setMainClassName(MAVEN2_LAUNCHER_MAIN_CLASS_NAME);
+			jcb.addArgument("--batch-mode");
 		} else {
 			jcb.setMainClassName(MAVEN1_LAUNCHER_MAIN_CLASS_NAME);
 		}
 		
 		if (antProjectConfig.isDebug()) {
 			jcb.addArgument("--debug");
+		}
+		
+		final String pomFile = antProjectConfig.getBuildScript();
+		if (isNotBlank(pomFile)) {
+			if (maven2) {
+				jcb.addArgument("-f");
+			} else {
+				jcb.addArgument("-p");
+			}
+			jcb.addArgument(pomFile);
 		}
 		
 		addProps(jcb, antConfig.getAntProperties(), true);
