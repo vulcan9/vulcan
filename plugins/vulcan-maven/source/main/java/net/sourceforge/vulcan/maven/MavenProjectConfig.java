@@ -25,12 +25,20 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import org.apache.commons.lang.ArrayUtils;
+
 import net.sourceforge.vulcan.ant.AntProjectConfig;
 import net.sourceforge.vulcan.dto.NamedObject;
 import net.sourceforge.vulcan.integration.ConfigChoice;
 
 public class MavenProjectConfig extends AntProjectConfig {
+	public static enum FailureMode { FailFast, FailAtEnd, FailNever };
+	
 	private String mavenHome = "Default";
+	private String[] profiles = ArrayUtils.EMPTY_STRING_ARRAY;
+	private FailureMode failureMode = FailureMode.FailFast;
+	private boolean nonRecursive;
+	private boolean offline;
 	
 	public MavenProjectConfig() {
 		setBuildScript("");
@@ -55,6 +63,12 @@ public class MavenProjectConfig extends AntProjectConfig {
 		addProperty(pds, "targets", "MavenProjectConfig.goals.name",
 				"MavenProjectConfig.goals.text", locale);
 		
+		addProperty(pds, "profiles", "MavenProjectConfig.profiles.name",
+				"MavenProjectConfig.profiles.text", locale);
+		
+		addProperty(pds, "failureMode", "MavenProjectConfig.failureMode.name",
+				"MavenProjectConfig.failureMode.text", locale);
+		
 		final MavenConfig globalConfig = getPlugin(MavenBuildPlugin.class).getConfiguration();
 		
 		NamedObject[] homes = globalConfig.getMavenHomes();
@@ -68,6 +82,12 @@ public class MavenProjectConfig extends AntProjectConfig {
 		
 		addProperty(pds, "javaHome", "AntProjectConfig.javaHome.name",
 				"AntProjectConfig.javaHome.text", locale, props);
+		
+		addProperty(pds, "nonRecursive", "MavenProjectConfig.nonRecursive.name",
+				"MavenProjectConfig.nonRecursive.text", locale);
+		
+		addProperty(pds, "offline", "MavenProjectConfig.offline.name",
+				"MavenProjectConfig.offline.text", locale);
 		
 		addProperty(pds, "debug", "AntProjectConfig.debug.name", "AntProjectConfig.debug.text", locale);
 		addProperty(pds, "antProperties", "MavenProjectConfig.mavenProperties.name",
@@ -95,5 +115,37 @@ public class MavenProjectConfig extends AntProjectConfig {
 	
 	public void setMavenHome(String mavenHome) {
 		this.mavenHome = mavenHome;
+	}
+	
+	public String[] getProfiles() {
+		return profiles;
+	}
+	
+	public void setProfiles(String[] profiles) {
+		this.profiles = profiles;
+	}
+	
+	public FailureMode getFailureMode() {
+		return failureMode;
+	}
+	
+	public void setFailureMode(FailureMode failureMode) {
+		this.failureMode = failureMode;
+	}
+	
+	public boolean isNonRecursive() {
+		return nonRecursive;
+	}
+	
+	public void setNonRecursive(boolean nonRecursive) {
+		this.nonRecursive = nonRecursive;
+	}
+	
+	public boolean isOffline() {
+		return offline;
+	}
+	
+	public void setOffline(boolean offline) {
+		this.offline = offline;
 	}
 }

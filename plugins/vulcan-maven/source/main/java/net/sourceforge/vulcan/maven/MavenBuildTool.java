@@ -34,7 +34,6 @@ import java.util.Collection;
 
 import net.sourceforge.vulcan.ant.AntBuildTool;
 import net.sourceforge.vulcan.ant.AntConfig;
-import net.sourceforge.vulcan.ant.AntProjectConfig;
 import net.sourceforge.vulcan.ant.JavaCommandBuilder;
 import net.sourceforge.vulcan.ant.JavaHome;
 import net.sourceforge.vulcan.ant.receiver.AntEventSource;
@@ -66,6 +65,7 @@ public class MavenBuildTool extends AntBuildTool {
 
 	final OutputStream stdErrStream = new ByteArrayOutputStream();
 	
+	final MavenProjectConfig mavenProjectConfig;
 	final MavenHome mavenHome;
 	
 	BuildDetailCallback callback;
@@ -80,8 +80,9 @@ public class MavenBuildTool extends AntBuildTool {
 	boolean maven2;
 	boolean maven1_1;
 	
-	public MavenBuildTool(AntProjectConfig projectConfig, AntConfig mavenConfig, JavaHome javaHome, MavenHome mavenHome) {
-		super(projectConfig, mavenConfig, javaHome);
+	public MavenBuildTool(MavenProjectConfig mavenProjectConfig, AntConfig mavenConfig, JavaHome javaHome, MavenHome mavenHome) {
+		super(mavenProjectConfig, mavenConfig, javaHome);
+		this.mavenProjectConfig = mavenProjectConfig;
 		this.mavenHome = mavenHome;
 	}
 
@@ -212,11 +213,11 @@ public class MavenBuildTool extends AntBuildTool {
 			jcb.setMainClassName(MAVEN1_LAUNCHER_MAIN_CLASS_NAME);
 		}
 		
-		if (antProjectConfig.isDebug()) {
+		if (mavenProjectConfig.isDebug()) {
 			jcb.addArgument("--debug");
 		}
 		
-		final String pomFile = antProjectConfig.getBuildScript();
+		final String pomFile = mavenProjectConfig.getBuildScript();
 		if (isNotBlank(pomFile)) {
 			if (maven2) {
 				jcb.addArgument("-f");
@@ -226,8 +227,40 @@ public class MavenBuildTool extends AntBuildTool {
 			jcb.addArgument(pomFile);
 		}
 		
+		final String activateProfiles = StringUtils.join(mavenProjectConfig.getProfiles(), ',');
+		if (isNotBlank(activateProfiles) && maven2) {
+			jcb.addArgument("-P");
+			jcb.addArgument(activateProfiles);
+		}
+		
+		if (maven2) {
+			String failureModeFlag = "";
+			switch (mavenProjectConfig.getFailureMode()) {
+				case FailFast:
+					failureModeFlag = "--fail-fast";
+					break;
+				case FailAtEnd:
+					failureModeFlag = "--fail-at-end";
+					break;
+				case FailNever:
+					failureModeFlag = "--fail-never";
+					break;
+				default:
+					throw new IllegalArgumentException("Uknown failure type " + mavenProjectConfig.getFailureMode());
+			}
+			
+			jcb.addArgument(failureModeFlag);
+		}
+		
+		if (mavenProjectConfig.isNonRecursive() && maven2) {
+			jcb.addArgument("--non-recursive");
+		}
+		
+		if (mavenProjectConfig.isOffline()) {
+			jcb.addArgument("--offline");
+		}
 		addProps(jcb, antConfig.getAntProperties(), true);
-		addProps(jcb, antProjectConfig.getAntProperties(), true);
+		addProps(jcb, mavenProjectConfig.getAntProperties(), true);
 
 		addVersionProperties(status);
 		
@@ -238,7 +271,7 @@ public class MavenBuildTool extends AntBuildTool {
 			eventSource.addSystemProperties(jcb);
 		}
 
-		final String[] goals = super.antProjectConfig.getTargets().split(" ");
+		final String[] goals = mavenProjectConfig.getTargets().split(" ");
 		for (String goal : goals) {
 			jcb.addArgument(goal);
 		}

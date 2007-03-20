@@ -1,6 +1,5 @@
 package org.apache.maven.monitor.event;
 
-import java.io.File;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
