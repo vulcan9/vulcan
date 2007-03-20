@@ -21,7 +21,6 @@ package net.sourceforge.vulcan.maven;
 import static net.sourceforge.vulcan.ant.AntBuildPlugin.addSystemJavaHomeIfMissing;
 import static org.apache.commons.lang.StringUtils.isNotBlank;
 import net.sourceforge.vulcan.BuildTool;
-import net.sourceforge.vulcan.ant.AntProjectConfig;
 import net.sourceforge.vulcan.ant.JavaHome;
 import net.sourceforge.vulcan.dto.BuildToolConfigDto;
 import net.sourceforge.vulcan.dto.PluginConfigDto;
@@ -61,9 +60,9 @@ public class MavenBuildPlugin extends PluginSupport
 	}
 	
 	public BuildTool createInstance(BuildToolConfigDto projectConfig) throws ConfigException {
-		final MavenProjectConfig antProjectConfig = (MavenProjectConfig)projectConfig;
+		final MavenProjectConfig mavenProjectConfig = (MavenProjectConfig)projectConfig;
 		
-		final String javaHomeName = antProjectConfig.getJavaHome();
+		final String javaHomeName = mavenProjectConfig.getJavaHome();
 		final JavaHome javaHome;
 		
 		if (isNotBlank(javaHomeName) && javaHomeName.startsWith("System")) {
@@ -81,10 +80,10 @@ public class MavenBuildPlugin extends PluginSupport
 
 		final MavenHome mavenHome = getSelectedEnvironment(
 				this.config.getMavenHomes(),
-				antProjectConfig.getMavenHome(),
+				mavenProjectConfig.getMavenHome(),
 				"maven.home.profile.missing");
 		
-		return mavenBuildToolFactory.createMavenBuildTool((AntProjectConfig) projectConfig, config, javaHome, mavenHome);
+		return mavenBuildToolFactory.createMavenBuildTool(mavenProjectConfig, config, javaHome, mavenHome);
 	}
 	public BuildToolConfigDto getDefaultConfig() {
 		return new MavenProjectConfig();

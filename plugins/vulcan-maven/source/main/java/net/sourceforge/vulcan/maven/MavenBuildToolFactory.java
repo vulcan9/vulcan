@@ -19,12 +19,11 @@
 package net.sourceforge.vulcan.maven;
 
 import net.sourceforge.vulcan.BuildTool;
-import net.sourceforge.vulcan.ant.AntProjectConfig;
 import net.sourceforge.vulcan.ant.JavaHome;
 
 public class MavenBuildToolFactory {
 
-	public BuildTool createMavenBuildTool(AntProjectConfig projectConfig, MavenConfig mavenConfig, JavaHome javaHome, MavenHome mavenHome) {
+	public BuildTool createMavenBuildTool(MavenProjectConfig projectConfig, MavenConfig mavenConfig, JavaHome javaHome, MavenHome mavenHome) {
 		return new MavenBuildTool(projectConfig, mavenConfig, javaHome, mavenHome);
 	}
 
