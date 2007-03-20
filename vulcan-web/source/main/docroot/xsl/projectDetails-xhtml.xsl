@@ -448,7 +448,7 @@
 			<li xmlns="http://www.w3.org/1999/xhtml">
 				<xsl:value-of select="$issueListHeader"/>
 				<ul xmlns="http://www.w3.org/1999/xhtml" class="issue-list">
-					<xsl:for-each select="$issues[count(. | key('issue-ids', @issue-id)[1]) = 1]">
+					<xsl:for-each select="$issues[generate-id() = generate-id(key('issue-ids', @issue-id)[1])]">
 						<xsl:sort select="@issue-id" order="ascending" data-type="number"/>
 						<li>
 							<xsl:call-template name="issue">
@@ -678,7 +678,7 @@
 			</thead>
 			<tbody>
 				<xsl:variable name="total" select="count(project)"/>
-				<xsl:for-each select="project[count(. | key('builds-by-message', message)[1]) = 1]">
+				<xsl:for-each select="project[generate-id() = generate-id(key('builds-by-message', message)[1])]">
 					<xsl:sort select="count(key('builds-by-message', message))" data-type="number" order="descending"/>
 					<xsl:variable name="count" select="count(key('builds-by-message', message))"/>
 					<tr>
