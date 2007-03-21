@@ -92,8 +92,8 @@ public class UdpEventSource extends SerializedEventSource {
 		final byte[] buffer = new byte[8192];
 		
 		try {
+			final DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
 			while (active) {
-				final DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
 				try {
 					socket.receive(packet);
 					
