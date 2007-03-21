@@ -68,6 +68,8 @@ public class ManagePluginActionTest extends MockApplicationContextStrutsTestCase
 		expect(manager.getPluginManager()).andReturn(mgr).anyTimes();
 		
 		PluginConfigStub.validateCalled = false;
+		PluginConfigStub.helpTopic = "fake topic";
+		PluginConfigStub.helpUrl = "fake url";
 	}
 	
 	public void testDelete() throws Exception {
@@ -290,6 +292,9 @@ public class ManagePluginActionTest extends MockApplicationContextStrutsTestCase
 		assertFalse(form.isProjectPlugin());
 		
 		assertEquals("Setup > Plugins > Mock Plugin", request.getAttribute("location"));
+		
+		assertEquals(config.getHelpUrl(), request.getAttribute("helpUrl"));
+		assertEquals(config.getHelpTopic(), request.getAttribute("helpTopic"));
 	}
 	public void testConfigurePluginBlankPasswordStaysBlank() throws Exception {
 		final PluginConfigForm form = new PluginConfigForm();
@@ -449,6 +454,9 @@ public class ManagePluginActionTest extends MockApplicationContextStrutsTestCase
 		assertTrue("PluginConfigDto.validate was not called", ((PluginConfigStub)form.getPluginConfig()).isValidateCalled());
 		
 		assertPropertyHasError("pluginConfig.value", "fake.error.key");
+		
+		assertEquals(cfg.getHelpUrl(), request.getAttribute("helpUrl"));
+		assertEquals(cfg.getHelpTopic(), request.getAttribute("helpTopic"));
 	}
 	public void testUpdateValidationErrors() throws Exception {
 		addRequestParameter("action", "Update");
@@ -503,6 +511,9 @@ public class ManagePluginActionTest extends MockApplicationContextStrutsTestCase
 		assertSame(form, request.getSession().getAttribute("pluginConfigForm"));
 		assertSame(projectForm, request.getSession().getAttribute("projectConfigForm"));
 		assertSame(form.getPluginConfig(), projectForm.getProjectConfig().getRepositoryAdaptorConfig());
+		
+		assertEquals(null, request.getAttribute("helpUrl"));
+		assertEquals(null, request.getAttribute("helpTopic"));
 	}
 	public void testBackGoesToProjectViewAtTopLevelSetsBuildTool() throws Exception {
 		addRequestParameter("action", "Back");
@@ -538,7 +549,8 @@ public class ManagePluginActionTest extends MockApplicationContextStrutsTestCase
 		addRequestParameter("focus", "pluginConfig.value");
 		
 		final PluginConfigForm form = new PluginConfigForm();
-		form.setPluginConfig(request, new PluginConfigStub(), false);
+		final PluginConfigStub cfg = new PluginConfigStub();
+		form.setPluginConfig(request, cfg, false);
 		form.setFocus("pluginConfig.value");
 		request.getSession().setAttribute("pluginConfigForm", form);
 		assertEquals("Setup > Plugins > Mock Plugin", request.getAttribute("location"));
@@ -553,6 +565,9 @@ public class ManagePluginActionTest extends MockApplicationContextStrutsTestCase
 		
 		assertSame(form, request.getSession().getAttribute("pluginConfigForm"));
 		assertEquals("pluginConfig", form.getFocus());
+		
+		assertEquals(cfg.getHelpUrl(), request.getAttribute("helpUrl"));
+		assertEquals(cfg.getHelpTopic(), request.getAttribute("helpTopic"));
 	}
 	public void testConfigureNestedObject() throws Exception {
 		addRequestParameter("action", "Configure");
@@ -561,7 +576,8 @@ public class ManagePluginActionTest extends MockApplicationContextStrutsTestCase
 		addRequestParameter("focus", "pluginConfig.obj");
 		
 		final PluginConfigForm form = new PluginConfigForm();
-		form.setPluginConfig(request, new PluginConfigStub(), false);
+		final PluginConfigStub cfg = new PluginConfigStub();
+		form.setPluginConfig(request, cfg, false);
 		request.getSession().setAttribute("pluginConfigForm", form);
 		
 		replay();
@@ -577,6 +593,9 @@ public class ManagePluginActionTest extends MockApplicationContextStrutsTestCase
 		assertEquals("foo", ((PluginConfigStub)form.getPluginConfig()).getValue());
 		assertEquals("pluginConfig.obj.nestedValue", form.getAllProperties().get(1).getName());
 		assertEquals("Setup > Plugins > Mock Plugin > Nested Object", request.getAttribute("location"));
+		
+		assertEquals(cfg.getHelpUrl(), request.getAttribute("helpUrl"));
+		assertEquals(cfg.getHelpTopic(), request.getAttribute("helpTopic"));
 	}
 	public void testConfigureNestedObjectBack() throws Exception {
 		addRequestParameter("action", "Back");
@@ -586,7 +605,8 @@ public class ManagePluginActionTest extends MockApplicationContextStrutsTestCase
 		
 		final PluginConfigForm form = new PluginConfigForm();
 		
-		form.setPluginConfig(request, new PluginConfigStub(), false);
+		final PluginConfigStub cfg = new PluginConfigStub();
+		form.setPluginConfig(request, cfg, false);
 		form.setFocus("pluginConfig.obj");
 		form.introspect(request);
 		assertEquals("Setup > Plugins > Mock Plugin > Nested Object", request.getAttribute("location"));
@@ -606,6 +626,8 @@ public class ManagePluginActionTest extends MockApplicationContextStrutsTestCase
 		assertEquals("foobar", ((PluginConfigStub)form.getPluginConfig()).getObj().getNestedValue());
 		assertEquals("pluginConfig", form.getFocus());
 		assertEquals("Setup > Plugins > Mock Plugin", request.getAttribute("location"));
+		assertEquals(cfg.getHelpUrl(), request.getAttribute("helpUrl"));
+		assertEquals(cfg.getHelpTopic(), request.getAttribute("helpTopic"));
 	}
 	public void testConfigureRenamableNestedObjectBack() throws Exception {
 		addRequestParameter("action", "Back");

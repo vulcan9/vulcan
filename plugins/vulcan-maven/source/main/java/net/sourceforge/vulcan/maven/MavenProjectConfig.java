@@ -52,7 +52,11 @@ public class MavenProjectConfig extends AntProjectConfig {
 	public String getPluginName() {
 		return MavenBuildPlugin.PLUGIN_NAME;
 	}
-	
+	@Override
+	public String getHelpTopic() {
+		return "MavenProjectConfiguration";
+	}
+
 	@Override
 	public List<PropertyDescriptor> getPropertyDescriptors(Locale locale) {
 		final List<PropertyDescriptor> pds = new ArrayList<PropertyDescriptor>();

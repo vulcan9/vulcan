@@ -45,7 +45,11 @@ public class FileSystemProjectConfigDto extends RepositoryAdaptorConfigDto {
 	public String getPluginName() {
 		return FileSystemPlugin.PLUGIN_NAME;
 	}
-	
+	@Override
+	public String getHelpTopic() {
+		return "FileSystemProjectConfiguration";
+	}
+
 	public String getSourceDirectory() {
 		return sourceDirectory;
 	}

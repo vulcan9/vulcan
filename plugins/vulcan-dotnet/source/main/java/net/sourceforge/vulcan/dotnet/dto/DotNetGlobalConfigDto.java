@@ -44,6 +44,11 @@ public class DotNetGlobalConfigDto extends DotNetBaseDto {
 	private String tagProperty = "RepositoryTag";
 	
 	@Override
+	public String getHelpTopic() {
+		return "DotNetConfiguration";
+	}
+	
+	@Override
 	public List<PropertyDescriptor> getPropertyDescriptors(Locale locale) {
 		final List<PropertyDescriptor> pds = new ArrayList<PropertyDescriptor>();
 		

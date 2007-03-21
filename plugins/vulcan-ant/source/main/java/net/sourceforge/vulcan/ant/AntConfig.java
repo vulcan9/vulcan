@@ -53,6 +53,10 @@ public class AntConfig extends PluginConfigDto {
 		return PLUGIN_NAME;
 	}
 	@Override
+	public String getHelpTopic() {
+		return "AntConfiguration";
+	}
+	@Override
 	public List<PropertyDescriptor> getPropertyDescriptors(Locale locale) {
 		final List<PropertyDescriptor> pds = new ArrayList<PropertyDescriptor>();
 		

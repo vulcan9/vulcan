@@ -467,8 +467,12 @@ public class ManageProjectConfigActionTest extends MockApplicationContextStrutsT
 		EasyMock.expect(manager.getProjectConfigNames()).andReturn(((List<String>)null));
 		EasyMock.expect(manager.getPluginManager()).andReturn(pluginMgr);
 		
+		final MockRACDto rac = new MockRACDto();
+		rac.helpTopic = "foo/bar.html";
+		rac.helpUrl = "http://example.com/";
+		
 		expect(pluginMgr.getRepositoryAdaptorDefaultConfig("com.example.plugin"))
-			.andReturn(new MockRACDto());
+			.andReturn(rac);
 		
 		replay();
 		
@@ -487,6 +491,9 @@ public class ManageProjectConfigActionTest extends MockApplicationContextStrutsT
 		assertTrue("Form should be forced dirty if projectConfig is dirty.", form.isDirty());
 		
 		assertEquals("pluginConfig.url", form.getAllProperties().get(0).getName());
+		
+		assertEquals(rac.helpUrl, request.getAttribute("helpUrl"));
+		assertEquals(rac.helpTopic, request.getAttribute("helpTopic"));
 	}
 	public void testConfigureRepositoryAdaptorPreviouslyConfigured() throws Exception {
 		final ProjectConfigForm form = new ProjectConfigForm();
@@ -856,7 +863,9 @@ public class ManageProjectConfigActionTest extends MockApplicationContextStrutsT
 	
 	public static class MockRACDto extends RepositoryAdaptorConfigDto {
 		String url;
-
+		String helpTopic;
+		String helpUrl;
+		
 		public String getUrl() {
 			return url;
 		}
@@ -865,6 +874,16 @@ public class ManageProjectConfigActionTest extends MockApplicationContextStrutsT
 			this.url = url;
 		}
 
+		@Override
+		public String getHelpTopic() {
+			return helpTopic;
+		}
+		
+		@Override
+		public String getHelpUrl() {
+			return helpUrl;
+		}
+		
 		@Override
 		public List<PropertyDescriptor> getPropertyDescriptors(Locale locale) {
 			try {

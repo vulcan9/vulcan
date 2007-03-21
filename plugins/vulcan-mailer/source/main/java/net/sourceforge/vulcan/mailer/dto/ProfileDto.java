@@ -49,6 +49,11 @@ public class ProfileDto extends PluginConfigDto {
 		return ConfigDto.PLUGIN_NAME;
 	}
 	@Override
+	public String getHelpTopic() {
+		return "MailProfileConfiguration";
+	}
+
+	@Override
 	public List<PropertyDescriptor> getPropertyDescriptors(Locale locale) {
 		final List<PropertyDescriptor> pds = new ArrayList<PropertyDescriptor>();
 

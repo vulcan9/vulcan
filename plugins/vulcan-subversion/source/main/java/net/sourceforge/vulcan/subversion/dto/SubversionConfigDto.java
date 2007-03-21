@@ -50,6 +50,10 @@ public class SubversionConfigDto extends RepositoryAdaptorConfigDto {
 		return PLUGIN_NAME;
 	}
 	@Override
+	public String getHelpTopic() {
+		return "SubversionRepositoryConfiguration";
+	}
+	@Override
 	public List<PropertyDescriptor> getPropertyDescriptors(Locale locale) {
 		final List<PropertyDescriptor> pds = new ArrayList<PropertyDescriptor>();
 

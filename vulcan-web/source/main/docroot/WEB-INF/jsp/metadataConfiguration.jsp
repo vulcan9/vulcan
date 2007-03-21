@@ -9,6 +9,11 @@
 	xmlns:v="http://vulcan.sourceforge.net/j2ee/jsp/tags">
 
 <html:xhtml/>
+<head>
+	<c:if test="${helpTopic != null}">
+		<meta name="helpTopic" id="helpTopic" content="${helpTopic}"/>
+	</c:if>
+</head>
 
 <body>
 

@@ -62,6 +62,10 @@ public class MavenHome extends PluginProfileDto {
 	public String getPluginName() {
 		return MavenBuildPlugin.PLUGIN_NAME;
 	}
+	@Override
+	public String getHelpTopic() {
+		return "MavenHomeConfiguration";
+	}
 
 	public String getDescription() {
 		return description;

@@ -45,6 +45,11 @@ public class CvsRepositoryProfileDto extends PluginProfileDto {
 	}
 	
 	@Override
+	public String getHelpTopic() {
+		return "CvsRepositoryProfileConfiguration";
+	}
+	
+	@Override
 	public List<PropertyDescriptor> getPropertyDescriptors(Locale locale) {
 		final List<PropertyDescriptor> pds = new ArrayList<PropertyDescriptor>();
 		

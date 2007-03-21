@@ -65,6 +65,10 @@ public class SubversionRepositoryProfileDto extends PluginProfileDto {
 	public String getPluginName() {
 		return SubversionConfigDto.PLUGIN_NAME;
 	}
+	@Override
+	public String getHelpTopic() {
+		return "SubversionRepositoryProfileConfiguration";
+	}
 	public String getRootUrl() {
 		return rootUrl;
 	}

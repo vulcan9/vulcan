@@ -175,6 +175,9 @@ public final class ManageProjectConfigAction extends BaseDispatchAction {
 		pluginForm.setProjectName(projectForm.getProjectConfig().getName());
 		pluginForm.setPluginConfig(request, config, projectForm.isDirty());
 		
+		request.setAttribute("helpUrl", config.getHelpUrl());
+		request.setAttribute("helpTopic", config.getHelpTopic());
+		
 		return mapping.findForward("configure");
 	}
 	public void setStore(Store store) {

@@ -110,6 +110,8 @@ public final class ManagePluginAction extends BaseDispatchAction {
 		final PluginConfigForm configForm = (PluginConfigForm) form;
 		
 		if (!validatePluginConfig(request, configForm)) {
+			setHelpAttributes(request, configForm);
+			
 			return mapping.findForward("configure");
 		}
 		
@@ -130,12 +132,14 @@ public final class ManagePluginAction extends BaseDispatchAction {
 		
 		if (configForm.isNested()) {
 			configForm.introspect(request);
+			setHelpAttributes(request, configForm);
 			return mapping.findForward("configure");
 		}
 		try {
 			final String pluginId = configForm.getPluginId();
 			final PluginConfigDto config = stateManager.getPluginManager().getPluginConfigInfo(pluginId);
 			configForm.setPluginConfig(request, config, false);
+			setHelpAttributes(request, configForm);
 			return mapping.findForward("configure");
 		} catch (PluginNotConfigurableException e) {
 			super.saveError(request, ActionMessages.GLOBAL_MESSAGE,
@@ -149,6 +153,8 @@ public final class ManagePluginAction extends BaseDispatchAction {
 		final PluginConfigForm configForm = (PluginConfigForm) form;
 
 		if (!validatePluginConfig(request, configForm)) {
+			setHelpAttributes(request, configForm);
+			
 			return mapping.findForward("configure");
 		}
 		
@@ -172,6 +178,9 @@ public final class ManagePluginAction extends BaseDispatchAction {
 		configForm.setFocus(focus);
 		
 		configForm.introspect(request);
+		
+		setHelpAttributes(request, configForm);
+		
 		return mapping.findForward("configure");
 	}
 	public final ActionForward add(ActionMapping mapping, ActionForm form,
@@ -203,6 +212,8 @@ public final class ManagePluginAction extends BaseDispatchAction {
 		
 		configForm.setFocus(target + "[" + i + "]");
 		configForm.introspect(request);
+		
+		setHelpAttributes(request, configForm);
 		
 		return mapping.findForward("configure");
 	}
@@ -290,5 +301,18 @@ public final class ManagePluginAction extends BaseDispatchAction {
 	
 			errors.add(propertyName, new ActionMessage(e.getKey(), e.getArgs()));
 		}
+	}
+	private void setHelpAttributes(HttpServletRequest request, PluginConfigForm configForm) {
+		final Object focusObject = configForm.getFocusObject();
+		final PluginConfigDto pluginConfig;
+		
+		if (focusObject instanceof PluginConfigDto) {
+			pluginConfig = (PluginConfigDto) focusObject;
+		} else {
+			pluginConfig = configForm.getPluginConfig();
+		}
+		
+		request.setAttribute("helpUrl", pluginConfig.getHelpUrl());
+		request.setAttribute("helpTopic", pluginConfig.getHelpTopic());
 	}
 }

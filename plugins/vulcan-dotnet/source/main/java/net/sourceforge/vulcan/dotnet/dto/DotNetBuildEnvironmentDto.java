@@ -47,7 +47,11 @@ public class DotNetBuildEnvironmentDto extends PluginProfileDto {
 	public String getProjectConfigProfilePropertyName() {
 		return "buildEnvironment";
 	}
-	
+	@Override
+	public String getHelpTopic() {
+		return "DotNetBuildEnvironmentConfiguration";
+	}
+
 	@Override
 	public List<PropertyDescriptor> getPropertyDescriptors(Locale locale) {
 		final List<PropertyDescriptor> pds = new ArrayList<PropertyDescriptor>();
@@ -69,6 +73,7 @@ public class DotNetBuildEnvironmentDto extends PluginProfileDto {
 		return description;
 	}
 
+	@Override
 	public String getName() {
 		return description;
 	}

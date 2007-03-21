@@ -87,6 +87,10 @@ public class DotNetProjectConfigDto extends AntProjectConfig {
 	public String getPluginName() {
 		return DotNetBuildPlugin.PLUGIN_NAME;
 	}
+	@Override
+	public String getHelpTopic() {
+		return "DotNetProjectConfiguration";
+	}
 
 	public BuildConfiguration getBuildConfiguration() {
 		return buildConfiguration;

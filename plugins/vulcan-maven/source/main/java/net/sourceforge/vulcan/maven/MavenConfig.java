@@ -36,6 +36,10 @@ public class MavenConfig extends AntConfig {
 	public String getPluginName() {
 		return MavenBuildPlugin.PLUGIN_NAME;
 	}
+	@Override
+	public String getHelpTopic() {
+		return "MavenConfiguration";
+	}
 
 	@Override
 	public List<PropertyDescriptor> getPropertyDescriptors(Locale locale) {
