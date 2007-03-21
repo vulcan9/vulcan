@@ -84,6 +84,11 @@ public class AntProjectConfig extends BuildToolConfigDto {
 	public String getPluginName() {
 		return AntConfig.PLUGIN_NAME;
 	}
+	@Override
+	public String getHelpTopic() {
+		return "AntProjectConfiguration";
+	}
+
 	public String getBuildScript() {
 		return buildScript;
 	}

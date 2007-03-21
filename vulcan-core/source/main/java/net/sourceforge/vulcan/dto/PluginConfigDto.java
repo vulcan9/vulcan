@@ -65,6 +65,27 @@ public abstract class PluginConfigDto extends BaseDto implements ApplicationCont
 	 */
 	public void validate() throws ValidationException {
 	}
+
+	/**
+	 * Subclasses should override this method to provide a URL to link
+	 * other than the standard Vulcan help.
+	 * 
+	 * @return null if standard documentation should be used.
+	 */
+	public String getHelpUrl() {
+		return null;
+	}
+	
+	/**
+	 * Subclasses should override this method to provide a relative URI
+	 * which will be appended to either the url provided by getHelpUrl()
+	 * or the standard documentation url.
+	 * 
+	 * @return null if no specific help is available.
+	 */
+	public String getHelpTopic() {
+		return null;
+	}
 	
 	public final Date getLastModificationDate() {
 		return lastModificationDate;

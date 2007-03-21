@@ -64,6 +64,10 @@ public class ConfigDto extends PluginConfigDto {
 	public String getPluginName() {
 		return PLUGIN_NAME;
 	}
+	@Override
+	public String getHelpTopic() {
+		return "MailConfiguration";
+	}
 	public String getSenderAddress() {
 		return senderAddress;
 	}

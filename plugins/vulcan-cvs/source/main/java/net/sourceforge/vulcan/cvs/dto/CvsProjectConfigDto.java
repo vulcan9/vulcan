@@ -70,6 +70,11 @@ public class CvsProjectConfigDto extends RepositoryAdaptorConfigDto {
 	public String getPluginName() {
 		return CvsConfigDto.PLUGIN_NAME;
 	}
+	@Override
+	public String getHelpTopic() {
+		return "CvsProjectConfiguration";
+	}
+
 	public String getBranch() {
 		return branch;
 	}

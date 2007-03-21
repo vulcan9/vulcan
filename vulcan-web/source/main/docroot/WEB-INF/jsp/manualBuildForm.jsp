@@ -11,6 +11,10 @@
 
 <html:xhtml/>
 
+<head>
+	<meta name="helpTopic" id="helpTopic" content="ManualBuild"/>
+</head>
+
 <body>
 
 <v:bubble styleClass="manualBuild">

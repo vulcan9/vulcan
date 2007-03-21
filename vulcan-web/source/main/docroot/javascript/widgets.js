@@ -300,21 +300,51 @@ function preventDefaultHandler(event) {
 	return false;
 }
 
-function launchWindowHandler(event) {
+function launchWindowHandler(event, href, launchMode, windowName) {
 	var target = getTarget(event);
 	var name;
 	
-	if (window.launchMode == "modeSame") {
+	if (href == null) {
+		href = target.href;
+	}
+	
+	if (launchMode == null) {
+		launchMode = window.launchMode;
+	}
+	
+	if (windowName == null) {
+		windowName = "vulcanExternal";
+	}
+	
+	if (launchMode == "modeSame") {
 		return true;
-	} else if (window.launchMode == "modeNew") {
-		name = "vulcanExternal" + new Date();
+	} else if (launchMode == "modeNew") {
+		name = windowName + new Date();
 	} else {
-		name = "vulcanExternal"
+		name = windowName;
 	}
 
-	window.open(target.href, name);
+	var width = screen.width * 4 / 5;
+	var height = screen.height * 4 / 5;
+	
+	window.open(href, name, "width=" + width + ",height=" + height
+		+ ",resizable=yes,scrollbars=yes,status=yes,location=yes,menubar=yes,titlebar=yes,toolbar=yes");
 	
 	return preventDefaultHandler(event);
+}
+
+function launchHelpHandler(event) {
+	var helpTopic = "GeneralHelp";
+	
+	var helpTopicMeta = document.getElementById('helpTopic');
+	if (helpTopicMeta) {
+		helpTopic = helpTopicMeta.getAttribute("content");
+	}
+
+	var target = getTarget(event);	
+	var href = target.href + helpTopic;
+	
+	return launchWindowHandler(event, href, "modePopup", "vulcanHelp");
 }
 
 function setDirtyHandler(event) {
@@ -352,11 +382,18 @@ function registerHandlerByTagNameAndClass(tagName, styleClass, eventType, handle
 	var elems = document.getElementsByTagName(tagName);
 	
 	for (var i=0; i<elems.length; i++) {
-		var cls = elems[i].getAttribute('class');
+		var cls;
+		
+		if (elems[i].className) {
+			cls = elems[i].className;
+		} else {
+			cls = elems[i].getAttribute('class');
+		}
+		
 		if (cls == null) {
 			cls = "";
 		}
-		
+
 		if (cls.match(new RegExp(styleClass))) {
 			customAddEventListener(elems[i], eventType, handler);
 		}
@@ -389,6 +426,8 @@ function registerHandlers() {
 		window.launchMode = windowLaunchMode;
 		registerHandlerByTagNameAndClass('a', 'external', 'click', launchWindowHandler);
 	}
+	
+	registerHandlerByTagNameAndClass('a', 'help', 'click', launchHelpHandler);
 }
 
 function getConfirmMessages() {

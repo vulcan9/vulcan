@@ -34,6 +34,9 @@ import net.sourceforge.vulcan.metadata.SvnRevision;
 @SvnRevision(id="$Id$", url="$HeadURL$")
 public class PluginConfigStub extends RepositoryAdaptorConfigDto {
 	public static boolean validateCalled;
+	public static String helpTopic;
+	public static String helpUrl;
+	
 	private String value;
 	private Boolean bool;
 	private NestedObject obj = new NestedObject();
@@ -76,6 +79,14 @@ public class PluginConfigStub extends RepositoryAdaptorConfigDto {
 	@Override
 	public String getPluginName() {
 		return "Mock Plugin";
+	}
+	@Override
+	public String getHelpTopic() {
+		return helpTopic;
+	}
+	@Override
+	public String getHelpUrl() {
+		return helpUrl;
 	}
 	@Override
 	public List<PropertyDescriptor> getPropertyDescriptors(Locale locale) {

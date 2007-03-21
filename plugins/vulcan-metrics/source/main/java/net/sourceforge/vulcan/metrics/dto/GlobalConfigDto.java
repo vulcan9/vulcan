@@ -39,6 +39,11 @@ public class GlobalConfigDto extends PluginConfigDto {
 		return XmlMetricsPlugin.PLUGIN_NAME;
 	}
 	@Override
+	public String getHelpTopic() {
+		return "XmlMetricsConfiguration";
+	}
+
+	@Override
 	public List<PropertyDescriptor> getPropertyDescriptors(Locale locale) {
 		final List<PropertyDescriptor> props = new ArrayList<PropertyDescriptor>();
 		

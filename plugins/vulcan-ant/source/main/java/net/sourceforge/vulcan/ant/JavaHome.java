@@ -59,6 +59,11 @@ public class JavaHome extends PluginProfileDto {
 		return "javaHome";
 	}
 	@Override
+	public String getHelpTopic() {
+		return "JavaHomeConfiguration";
+	}
+
+	@Override
 	public JavaHome copy() {
 		final JavaHome copy = (JavaHome) super.copy();
 		copy.setSystemProperties((String[]) ArrayUtils.clone(systemProperties));

@@ -70,6 +70,11 @@ public class SubversionProjectConfigDto extends RepositoryAdaptorConfigDto {
 	public String getPluginName() {
 		return SubversionConfigDto.PLUGIN_NAME;
 	}
+	@Override
+	public String getHelpTopic() {
+		return "SubversionProjectConfiguration";
+	}
+
 	public String getRepositoryProfile() {
 		return repositoryProfile;
 	}

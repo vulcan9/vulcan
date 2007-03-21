@@ -21,13 +21,13 @@
 		<forward name="about" path="/about.jsp"/>
 		<forward name="report" path="/buildHistoryReport.do"/>
 		
-		
 		<forward name="site" path="/site/"/>
 		<forward name="projectDetails" path="/WEB-INF/jsp/projectConfiguration.jsp"/>
 		<forward name="error" path="/WEB-INF/jsp/error.jsp"/>
 		<forward name="failure" path="/WEB-INF/jsp/error.jsp"/>
 		
 		<forward name="preferences" path="/preferences.jsp"/>
+		<forward name="help" path="http://code.google.com/p/vulcan/wiki/" redirect="true"/>
 		
 		<forward name="viewProjectStatus" path="/viewProjectStatus.do"/>
 		

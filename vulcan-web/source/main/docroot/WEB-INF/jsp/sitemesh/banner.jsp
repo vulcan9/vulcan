@@ -35,12 +35,23 @@
 
 <ul class="menu">
 	<li><html:link page="/" styleId="homeLink"><fmt:message key="link.home"/></html:link></li>
+
 	<c:if test="${stateManager.running}">
 		<li><html:link forward="report"><fmt:message key="link.report.build.history"/></html:link></li>
 		<li><html:link forward="manualBuildForm"><fmt:message key="link.build.manual"/></html:link></li>
 	</c:if>
+	
 	<li><html:link forward="preferences"><fmt:message key="link.preferences"/></html:link></li>
 	<li><html:link forward="setup"><fmt:message key="link.setup"/></html:link></li>
+	
+	<c:choose>
+		<c:when test="${helpUrl ne null}">
+			<li><a class="help" href="${helpUrl}"><fmt:message key="link.help"/></a></li>
+		</c:when>
+		<c:otherwise>
+			<li><html:link forward="help" styleClass="help" ><fmt:message key="link.help"/></html:link></li>
+		</c:otherwise>
+	</c:choose>
 </ul>
 
 
