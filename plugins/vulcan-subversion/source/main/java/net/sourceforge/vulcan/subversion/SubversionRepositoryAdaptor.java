@@ -191,7 +191,7 @@ public class SubversionRepositoryAdaptor extends PluginSupport implements Reposi
 					absolutePath,
 					svnRev,
 					svnRev,
-					true);
+					config.isRecursive());
 			
 			synchronized (byteCounters) {
 				byteCounters.put(projectName, eventHandler.getByteCount());
@@ -209,7 +209,7 @@ public class SubversionRepositoryAdaptor extends PluginSupport implements Reposi
 		
 		try {
 			final SVNRevision svnRev = SVNRevision.create(revision);
-			client.doUpdate(absolutePath, svnRev, true);
+			client.doUpdate(absolutePath, svnRev, config.isRecursive());
 			
 			configureBugtraqIfNecessary(absolutePath);
 		} catch (SVNCancelException e) {
