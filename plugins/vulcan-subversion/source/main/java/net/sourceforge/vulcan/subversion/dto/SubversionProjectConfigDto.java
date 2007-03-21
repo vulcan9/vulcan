@@ -32,6 +32,7 @@ import net.sourceforge.vulcan.subversion.SubversionPlugin;
 public class SubversionProjectConfigDto extends RepositoryAdaptorConfigDto {
 	private String repositoryProfile;
 	private String path;
+	private boolean recursive = true;
 	private boolean obtainBugtraqProperties;
 	
 	@Override
@@ -54,6 +55,8 @@ public class SubversionProjectConfigDto extends RepositoryAdaptorConfigDto {
 				locale, props);
 		
 		addProperty(pds, "path", "SubversionProjectConfigDto.path.name", "SubversionProjectConfigDto.path.description", locale);
+
+		addProperty(pds, "recursive", "SubversionProjectConfigDto.recursive.name", "SubversionProjectConfigDto.recursive.description", locale);
 		
 		addProperty(pds, "obtainBugtraqProperties", "SubversionProjectConfigDto.obtainBugtraqProperties.name", "SubversionProjectConfigDto.obtainBugtraqProperties.description", locale);
 		return pds;
@@ -86,6 +89,12 @@ public class SubversionProjectConfigDto extends RepositoryAdaptorConfigDto {
 	}
 	public void setPath(String path) {
 		this.path = path;
+	}
+	public boolean isRecursive() {
+		return recursive;
+	}
+	public void setRecursive(boolean recursive) {
+		this.recursive = recursive;
 	}
 	public boolean isObtainBugtraqProperties() {
 		return obtainBugtraqProperties;
