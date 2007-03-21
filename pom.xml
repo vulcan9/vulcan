@@ -81,9 +81,9 @@
 		</license>
 	</licenses>
 	<scm>
-		<connection>scm:svn:http://vulcan.googlecode.com/svn/</connection>
-		<developerConnection>scm:svn:https://vulcan.googlecode.com/svn/</developerConnection>
-		<url>http://vulcan.googlecode.com/svn/</url>
+		<connection>scm:svn:http://vulcan.googlecode.com/svn/trunk/</connection>
+		<developerConnection>scm:svn:https://vulcan.googlecode.com/svn/trunk/</developerConnection>
+		<url>http://vulcan.googlecode.com/svn/trunk/</url>
 	</scm>
 	
 	<build>

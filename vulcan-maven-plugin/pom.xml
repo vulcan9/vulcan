@@ -9,9 +9,9 @@
 	<url>http://vulcan.sourceforge.net</url>
 	
 	<scm>
-		<connection>scm:svn:http://vulcan.googlecode.com/svn/</connection>
-		<developerConnection>scm:svn:https://vulcan.googlecode.com/svn/</developerConnection>
-		<url>http://vulcan.googlecode.com/svn/</url>
+		<connection>scm:svn:http://vulcan.googlecode.com/svn/trunk/vulcan-maven-plugin/</connection>
+		<developerConnection>scm:svn:https://vulcan.googlecode.com/svn/trunk/vulcan-maven-plugin/</developerConnection>
+		<url>http://vulcan.googlecode.com/svn/trunk/vulcan-maven-plugin/</url>
 	</scm>
 	
 	<distributionManagement>
