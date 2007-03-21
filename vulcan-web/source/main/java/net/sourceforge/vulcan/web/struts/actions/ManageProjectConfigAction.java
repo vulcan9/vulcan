@@ -173,7 +173,7 @@ public final class ManageProjectConfigAction extends BaseDispatchAction {
 		
 		pluginForm.setProjectPlugin(true);
 		pluginForm.setProjectName(projectForm.getProjectConfig().getName());
-		pluginForm.setPluginConfig(request, config);
+		pluginForm.setPluginConfig(request, config, projectForm.isDirty());
 		
 		return mapping.findForward("configure");
 	}

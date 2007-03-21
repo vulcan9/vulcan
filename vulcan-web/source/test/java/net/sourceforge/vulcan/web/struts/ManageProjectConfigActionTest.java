@@ -484,6 +484,7 @@ public class ManageProjectConfigActionTest extends MockApplicationContextStrutsT
 		assertNotNull(form);
 		
 		assertTrue(form.isProjectPlugin());
+		assertTrue("Form should be forced dirty if projectConfig is dirty.", form.isDirty());
 		
 		assertEquals("pluginConfig.url", form.getAllProperties().get(0).getName());
 	}

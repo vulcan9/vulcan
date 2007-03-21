@@ -33,7 +33,7 @@ import net.sourceforge.vulcan.metadata.SvnRevision;
 
 @SvnRevision(id="$Id$", url="$HeadURL$")
 public class PluginConfigStub extends RepositoryAdaptorConfigDto {
-	private boolean validateCalled;
+	public static boolean validateCalled;
 	private String value;
 	private Boolean bool;
 	private NestedObject obj = new NestedObject();

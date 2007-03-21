@@ -221,6 +221,7 @@
 			<html:hidden property="createNew"/>
 			<html:hidden property="commit" value="true"/>
 			<html:hidden property="focus"/>
+			<html:hidden property="dirty" styleId="pendingChanges"/>
 		</td>
 	</tr>
 	</tbody>

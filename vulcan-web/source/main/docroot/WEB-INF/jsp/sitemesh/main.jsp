@@ -48,7 +48,11 @@
 		<jsp:attribute name="id">confirmMessage</jsp:attribute>
 		<jsp:attribute name="content"><fmt:message key="confirmation"/></jsp:attribute>
 	</jsp:element>
-	
+	<jsp:element name="meta">
+		<jsp:attribute name="name">confirmUnsavedChangesMessage</jsp:attribute>
+		<jsp:attribute name="id">confirmUnsavedChangesMessage</jsp:attribute>
+		<jsp:attribute name="content"><fmt:message key="confirmation.unsaved.changes"/></jsp:attribute>
+	</jsp:element>
 	<decorator:head/>
 </head>
 

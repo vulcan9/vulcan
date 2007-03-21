@@ -148,6 +148,7 @@ function moveUpRows(o) {
 		}
 	}
 	window.previousIndex = -1;
+	window.hasPendingChanges = true;
 }
 
 function moveDownRows(o) {
@@ -163,6 +164,7 @@ function moveDownRows(o) {
 		}
 	}
 	window.previousIndex = -1;
+	window.hasPendingChanges = true;
 }
 
 function addRow(o) {
@@ -193,6 +195,8 @@ function addRow(o) {
 	td = document.createElement('td');	
 	td.appendChild(input);
 	tr.appendChild(td);
+	
+	window.hasPendingChanges = true;
 }
 
 function removeRow(o) {
@@ -221,6 +225,8 @@ function removeRow(o) {
 			tr.parentNode.removeChild(tr);
 		}
 	}
+	
+	window.hasPendingChanges = true;
 }
 
 function checkRows(e) {
@@ -311,6 +317,28 @@ function launchWindowHandler(event) {
 	return preventDefaultHandler(event);
 }
 
+function setDirtyHandler(event) {
+	var target = getTarget(event);
+	
+	if (target && target.form) {
+		window.hasPendingChanges = true;
+	}
+}
+
+/**
+ * Prevent warnPendingChangesHandler from showing warning
+ * since the user is submitting the pending changes.
+ */
+function clearPendingChangesFlagHandler(event) {
+	window.hasPendingChanges = false;
+}
+
+function warnPendingChangesHandler(event) {
+	if (window.hasPendingChanges) {
+		event.returnValue = window.confirmUnsavedChangesMessage;
+	}
+}
+
 function registerHandler(type, value, handler) {
 	var inputs = document.getElementsByTagName('input');
 	for (var i=0; i<inputs.length; i++) {
@@ -343,6 +371,15 @@ function registerHandlers() {
 	registerHandler('button', 'Move Down', moveDownRows);
 	registerHandler('checkbox', null, checkRows);
 	registerHandler('radio', null, checkRows);
+	
+	var pendingChanges = document.getElementById('pendingChanges');
+	if (pendingChanges != null) {
+		registerHandlerByTagNameAndClass('input', '.*', 'change', setDirtyHandler);
+		registerHandlerByTagNameAndClass('form', '.*', 'submit', clearPendingChangesFlagHandler);
+		
+		window.hasPendingChanges = (pendingChanges.value == "true");
+	}
+	
 	registerHandlerByTagNameAndClass('a', 'confirm', 'click', confirmHandler);
 	registerHandlerByTagNameAndClass('label', '.*', 'mousedown', preventShiftClickTextSelectionHandler);
 	
@@ -354,11 +391,17 @@ function registerHandlers() {
 	}
 }
 
-function getConfirmMessage() {
-	var meta = document.getElementById('confirmMessage');
+function getConfirmMessages() {
+	var meta1 = document.getElementById('confirmMessage');
 	
-	if (meta) {
-		window.confirmMessage = meta.getAttribute('content');
+	if (meta1) {
+		window.confirmMessage = meta1.getAttribute('content');
+	}
+	
+	var meta2 = document.getElementById('confirmUnsavedChangesMessage');
+	
+	if (meta2) {
+		window.confirmUnsavedChangesMessage = meta2.getAttribute('content');
 	}
 }
 
@@ -371,4 +414,5 @@ function customAddEventListener(target, eventType, callback) {
 }
 
 customAddEventListener(window, 'load', registerHandlers);
-customAddEventListener(window, 'load', getConfirmMessage);
+customAddEventListener(window, 'load', getConfirmMessages);
+customAddEventListener(window, 'beforeunload', warnPendingChangesHandler);
