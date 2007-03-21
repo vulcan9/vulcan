@@ -455,6 +455,7 @@
 								<xsl:with-param name="text" select="@issue-id"/>
 							</xsl:call-template>
 						</li>
+						<xsl:text> </xsl:text>
 					</xsl:for-each>
 				</ul>
 			</li>
