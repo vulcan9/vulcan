@@ -87,16 +87,17 @@
 	</thead>
 	<tbody>
 	<c:forEach items="${stateManager.buildDaemons}" var="daemon">
+		<c:set var="isBuilding" value="${daemon.building}"/>
 		<tr>
 			<td>${daemon.name}</td>
 			<td>
-				<c:if test="${daemon.building}">
+				<c:if test="${isBuilding}">
 					${daemon.currentTarget.name}
 				</c:if>
 			</td>
 			<td>
 				<c:choose>
-					<c:when test="${daemon.building}">
+					<c:when test="${isBuilding}">
 						<c:set var="key" value="${daemon.phase}"/>
 						<c:if test="${key == null}">
 							<c:set var="key" value="build.phase.build"/>
@@ -114,7 +115,7 @@
 				</c:if>
 			</td>
 			<td>
-				<c:if test="${daemon.building}">
+				<c:if test="${isBuilding}">
 					<html:link forward="killBuild" paramId="daemonName"
 							paramName="daemon" paramProperty="name"
 							styleClass="confirm">
@@ -138,15 +139,16 @@
 		</tr>
 	</thead>
 	<tbody>
+		<c:set var="pendingTargets" value="${stateManager.buildManager.pendingTargets}"/>
 		<c:choose>
-			<c:when test="${empty stateManager.buildManager.pendingTargets}">
+			<c:when test="${empty pendingTargets}">
 				<tr>
 					<td colspan="2"><fmt:message key="label.empty"/></td>
 				</tr>
 			</c:when>
-			<c:when test="${not empty stateManager.buildManager.pendingTargets}">
+			<c:when test="${not empty pendingTargets}">
 				<c:set var="hasPending" value="false"/>
-				<c:forEach items="${stateManager.buildManager.pendingTargets}" var="status">
+				<c:forEach items="${pendingTargets}" var="status">
 					<tr>
 						<td>${status.name}</td>
 						<td>
@@ -173,7 +175,6 @@
 </table>
 </v:bubble>
 
-<c:if test="${stateManager.config.buildManagerConfig.enabled}">
 <v:bubble>
 <table class="schedulers">
 	<caption><fmt:message key="captions.schedulers"/></caption>
@@ -197,7 +198,6 @@
 	</tbody>
 </table>
 </v:bubble>
-</c:if>
 </div>
 </c:otherwise>
 </c:choose>

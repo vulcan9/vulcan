@@ -111,7 +111,7 @@ public abstract class BuildDaemonImpl extends AbstractScheduler implements Build
 			builder.abortCurrentBuild(false, requestUsername);
 		}
 	}
-	public synchronized String getPhase() {
+	public String getPhase() {
 		return phase;
 	}
 	public String getDetail() {
