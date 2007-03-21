@@ -6,7 +6,7 @@
 	
 	<parent>
 		<groupId>net.sourceforge.vulcan.plugins</groupId>
-		<artifactId>abstract-plugin</artifactId>
+		<artifactId>plugins</artifactId>
 		<version>0.9-SNAPSHOT</version>
 	</parent>
 	
