@@ -108,6 +108,7 @@
 					</c:otherwise>
 				</c:choose>
 				<html:hidden property="daemon"/>
+				<html:hidden property="dirty" styleId="pendingChanges"/>
 			</td>
 		</tr>
 		</tbody>

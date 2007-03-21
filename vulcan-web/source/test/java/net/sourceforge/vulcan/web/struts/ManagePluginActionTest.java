@@ -66,6 +66,8 @@ public class ManagePluginActionTest extends MockApplicationContextStrutsTestCase
 		expect(manager.getProjectConfigNames()).andReturn(null);
 		
 		expect(manager.getPluginManager()).andReturn(mgr).anyTimes();
+		
+		PluginConfigStub.validateCalled = false;
 	}
 	
 	public void testDelete() throws Exception {
@@ -328,7 +330,7 @@ public class ManagePluginActionTest extends MockApplicationContextStrutsTestCase
 		
 		final PluginConfigStub cfg = new PluginConfigStub();
 		cfg.setBool(true);
-		form.setPluginConfig(request, (PluginConfigDto) cfg.copy());
+		form.setPluginConfig(request, (PluginConfigDto) cfg.copy(), false);
 		request.getSession().setAttribute("pluginConfigForm", form);
 		
 		cfg.setValue("foo");
@@ -350,6 +352,42 @@ public class ManagePluginActionTest extends MockApplicationContextStrutsTestCase
 		assertFalse(formPluginConfig.getBool());
 		assertTrue(formPluginConfig.isValidateCalled());
 	}		
+	public void testUpdateNoChanges() throws Exception {
+		addRequestParameter("action", "Update");
+		addRequestParameter("pluginId", "a.b.c.plugin");
+		addRequestParameter("pluginConfig.value", "foo");
+		addRequestParameter("pluginConfig.password", PluginConfigForm.HIDDEN_PASSWORD_VALUE);
+		
+		final PluginConfigForm form = new PluginConfigForm();
+		form.setProjectPlugin(true);
+		
+		final PluginConfigStub cfg = new PluginConfigStub();
+		cfg.setBool(Boolean.FALSE);
+		cfg.setPassword("something");
+		cfg.setValue("foo");
+		
+		form.setPluginConfig(request, (PluginConfigDto) cfg.copy(), false);
+		request.getSession().setAttribute("pluginConfigForm", form);
+		
+		cfg.setValue("foo");
+ 		cfg.setPassword("something");
+ 		cfg.validate();
+ 		
+ 		replay();
+ 		
+ 		actionPerform();
+
+ 		verify();
+ 		
+ 		verifyForward("pluginList");
+	
+ 		assertSame(form, request.getSession().getAttribute("pluginConfigForm"));
+ 		final PluginConfigStub formPluginConfig = ((PluginConfigStub)form.getPluginConfig());
+		assertFalse(formPluginConfig.getBool());
+		assertTrue(formPluginConfig.isValidateCalled());
+		
+		assertPropertyHasError(ActionMessages.GLOBAL_MESSAGE, "warnings.no.change.made", getActionMessages("warnings"));
+	}		
  	public void testUpdateDontChangePassword() throws Exception {
  		addRequestParameter("action", "Update");
  		addRequestParameter("pluginId", "a.b.c.plugin");
@@ -363,7 +401,7 @@ public class ManagePluginActionTest extends MockApplicationContextStrutsTestCase
  		cfg.setBool(true);
  		cfg.setPassword("sompswrd");
  		
- 		form.setPluginConfig(request, (PluginConfigDto) cfg.copy());
+ 		form.setPluginConfig(request, (PluginConfigDto) cfg.copy(), false);
  		request.getSession().setAttribute("pluginConfigForm", form);
  		
  		cfg.setValue("foo");
@@ -395,7 +433,7 @@ public class ManagePluginActionTest extends MockApplicationContextStrutsTestCase
 		
 		final PluginConfigStub cfg = new PluginConfigStub();
 		cfg.setBool(true);
-		form.setPluginConfig(request, (PluginConfigDto) cfg.copy());
+		form.setPluginConfig(request, (PluginConfigDto) cfg.copy(), false);
 		request.getSession().setAttribute("pluginConfigForm", form);
 		
 		replay();
@@ -422,7 +460,7 @@ public class ManagePluginActionTest extends MockApplicationContextStrutsTestCase
 		
 		final PluginConfigStub cfg = new PluginConfigStub();
 		cfg.setBool(true);
-		form.setPluginConfig(request, (PluginConfigDto) cfg.copy());
+		form.setPluginConfig(request, (PluginConfigDto) cfg.copy(), false);
 		request.getSession().setAttribute("pluginConfigForm", form);
 		
 		replay();
@@ -447,7 +485,7 @@ public class ManagePluginActionTest extends MockApplicationContextStrutsTestCase
 		addRequestParameter("projectPlugin", "true");
 		
 		final PluginConfigForm form = new PluginConfigForm();
-		form.setPluginConfig(request, new PluginConfigStub());
+		form.setPluginConfig(request, new PluginConfigStub(), false);
 		request.getSession().setAttribute("pluginConfigForm", form);
 		
 		final ProjectConfigForm projectForm = new ProjectConfigForm();
@@ -473,7 +511,7 @@ public class ManagePluginActionTest extends MockApplicationContextStrutsTestCase
 		addRequestParameter("projectPlugin", "true");
 		
 		final PluginConfigForm form = new PluginConfigForm();
-		form.setPluginConfig(request, new MockBuildToolDto());
+		form.setPluginConfig(request, new MockBuildToolDto(), false);
 		request.getSession().setAttribute("pluginConfigForm", form);
 		
 		final ProjectConfigForm projectForm = new ProjectConfigForm();
@@ -500,7 +538,7 @@ public class ManagePluginActionTest extends MockApplicationContextStrutsTestCase
 		addRequestParameter("focus", "pluginConfig.value");
 		
 		final PluginConfigForm form = new PluginConfigForm();
-		form.setPluginConfig(request, new PluginConfigStub());
+		form.setPluginConfig(request, new PluginConfigStub(), false);
 		form.setFocus("pluginConfig.value");
 		request.getSession().setAttribute("pluginConfigForm", form);
 		assertEquals("Setup > Plugins > Mock Plugin", request.getAttribute("location"));
@@ -523,7 +561,7 @@ public class ManagePluginActionTest extends MockApplicationContextStrutsTestCase
 		addRequestParameter("focus", "pluginConfig.obj");
 		
 		final PluginConfigForm form = new PluginConfigForm();
-		form.setPluginConfig(request, new PluginConfigStub());
+		form.setPluginConfig(request, new PluginConfigStub(), false);
 		request.getSession().setAttribute("pluginConfigForm", form);
 		
 		replay();
@@ -548,7 +586,7 @@ public class ManagePluginActionTest extends MockApplicationContextStrutsTestCase
 		
 		final PluginConfigForm form = new PluginConfigForm();
 		
-		form.setPluginConfig(request, new PluginConfigStub());
+		form.setPluginConfig(request, new PluginConfigStub(), false);
 		form.setFocus("pluginConfig.obj");
 		form.introspect(request);
 		assertEquals("Setup > Plugins > Mock Plugin > Nested Object", request.getAttribute("location"));
@@ -580,7 +618,7 @@ public class ManagePluginActionTest extends MockApplicationContextStrutsTestCase
 		final PluginConfigStub pluginConfig = new PluginConfigStub();
 		pluginConfig.getRenameable().setName("a");
 		
-		form.setPluginConfig(request, pluginConfig);
+		form.setPluginConfig(request, pluginConfig, false);
 		form.setFocus("pluginConfig.renameable");
 		form.introspect(request);
 		
@@ -615,7 +653,7 @@ public class ManagePluginActionTest extends MockApplicationContextStrutsTestCase
 		final PluginConfigStub pluginConfig = new PluginConfigStub();
 		pluginConfig.getRenameable().setName("a");
 		
-		form.setPluginConfig(request, pluginConfig);
+		form.setPluginConfig(request, pluginConfig, false);
 		form.setFocus("pluginConfig.renameable");
 		form.introspect(request);
 		
@@ -646,7 +684,7 @@ public class ManagePluginActionTest extends MockApplicationContextStrutsTestCase
 		addRequestParameter("target", "pluginConfig.arr");
 		
 		final PluginConfigForm form = new PluginConfigForm();
-		form.setPluginConfig(request, new PluginConfigWithArray());
+		form.setPluginConfig(request, new PluginConfigWithArray(), false);
 		request.getSession().setAttribute("pluginConfigForm", form);
 		assertEquals("Setup > Plugins > Mock Plugin", request.getAttribute("location"));
 
@@ -676,7 +714,7 @@ public class ManagePluginActionTest extends MockApplicationContextStrutsTestCase
 		final PluginConfigWithArray pluginConfigWithArray = new PluginConfigWithArray();
 		pluginConfigWithArray.setArr(new NestedArrayElement[] {new NestedArrayElement(321) });
 		
-		form.setPluginConfig(request, pluginConfigWithArray);
+		form.setPluginConfig(request, pluginConfigWithArray, false);
 		request.getSession().setAttribute("pluginConfigForm", form);
 		
 		expect(mgr.createObject("a.b.c.plugin", NestedArrayElement.class.getName()))
@@ -711,7 +749,7 @@ public class ManagePluginActionTest extends MockApplicationContextStrutsTestCase
 				new NestedArrayElement(3)
 				});
 		
-		form.setPluginConfig(request, pluginConfigWithArray);
+		form.setPluginConfig(request, pluginConfigWithArray, false);
 		request.getSession().setAttribute("pluginConfigForm", form);
 		request.removeAttribute("location");
 		

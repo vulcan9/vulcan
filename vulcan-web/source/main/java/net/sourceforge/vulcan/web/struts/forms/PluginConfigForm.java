@@ -70,6 +70,7 @@ public final class PluginConfigForm extends ValidatorForm implements DispatchFor
 	
 	private transient FormFile pluginFile;
 	private transient PluginConfigDto pluginConfig;
+	private transient PluginConfigDto originalPluginConfig;
 	private transient List<PropertyDescriptor> propertyDescriptors = new ArrayList<PropertyDescriptor>();
 	private transient Set<PluginProfileDto> renamedProfiles = new HashSet<PluginProfileDto>();
 	
@@ -87,7 +88,8 @@ public final class PluginConfigForm extends ValidatorForm implements DispatchFor
 	
 	private List<String> availableProjects;
 	private List<String> location = new ArrayList<String>();
-	
+
+	private boolean forceDirty;
 	
 	public String getName() {
 		return pluginId;
@@ -213,12 +215,17 @@ public final class PluginConfigForm extends ValidatorForm implements DispatchFor
 	public void setPluginId(String pluginId) {
 		this.pluginId = pluginId;
 	}
-	public void setPluginConfig(HttpServletRequest request, PluginConfigDto pluginConfig) throws IntrospectionException, IllegalAccessException, InvocationTargetException, NoSuchMethodException, InstantiationException {
+	public void setPluginConfig(HttpServletRequest request, PluginConfigDto pluginConfig, boolean dirty) throws IntrospectionException, IllegalAccessException, InvocationTargetException, NoSuchMethodException, InstantiationException {
+		this.originalPluginConfig = (PluginConfigDto) pluginConfig.copy();
 		this.pluginConfig = (PluginConfigDto) pluginConfig.copy();
 		this.pluginId = this.pluginConfig.getPluginId();
 		this.renamedProfiles.clear();
 		
+		this.forceDirty = dirty;
 		introspect(request);
+	}
+	public boolean isDirty() {
+		return forceDirty || !originalPluginConfig.equals(pluginConfig);
 	}
 	public PluginConfigDto getPluginConfig() {
 		return pluginConfig;

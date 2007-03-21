@@ -33,7 +33,7 @@ public class PluginConfigFormTest extends MockApplicationContextStrutsTestCase {
 	PluginConfigForm form = new PluginConfigForm();
 	
 	public void testGetsBeanInfo() throws Exception {
-		form.setPluginConfig(request, new PluginConfigStub());
+		form.setPluginConfig(request, new PluginConfigStub(), false);
 		
 		final List<PropertyDescriptor> pds = form.getAllProperties();
 		assertNotNull(pds);
@@ -56,7 +56,7 @@ public class PluginConfigFormTest extends MockApplicationContextStrutsTestCase {
 	public void testFocusOnInnerBean() throws Exception {
 		PluginConfigStub config = new PluginConfigStub();
 		
-		form.setPluginConfig(request, config);
+		form.setPluginConfig(request, config, false);
 		
 		form.setFocus("pluginConfig.obj");
 
@@ -74,7 +74,7 @@ public class PluginConfigFormTest extends MockApplicationContextStrutsTestCase {
 		
 		form.setProjectPlugin(true);
 		form.setProjectName("My Dumb Project");
-		form.setPluginConfig(request, config);
+		form.setPluginConfig(request, config, false);
 		form.setFocus("pluginConfig.obj");
 
 		form.introspect(request);
@@ -94,7 +94,7 @@ public class PluginConfigFormTest extends MockApplicationContextStrutsTestCase {
 		
 		form.setServlet(actionServlet);
 		form.reset(null, request);
-		form.setPluginConfig(request, new PluginConfigStubWithProjectsChoice());
+		form.setPluginConfig(request, new PluginConfigStubWithProjectsChoice(), false);
 		form.introspect(request);
 		
 		verify();

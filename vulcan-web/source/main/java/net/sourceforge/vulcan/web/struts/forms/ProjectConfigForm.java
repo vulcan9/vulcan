@@ -41,7 +41,6 @@ import org.apache.struts.action.ActionErrors;
 import org.apache.struts.action.ActionMapping;
 import org.apache.struts.action.ActionMessage;
 
-//TODO: resolve serialization problems when projectConfig has nested PluginConfigDto from plugin class loader
 @SvnRevision(id="$Id$", url="$HeadURL$")
 public final class ProjectConfigForm extends ConfigForm {
 	private transient Store store;

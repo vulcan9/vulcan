@@ -171,6 +171,7 @@
 				<html:hidden property="projectPlugin"/>
 				<html:hidden property="focus"/>
 				<html:hidden property="target"/>
+				<html:hidden property="dirty" styleId="pendingChanges"/>
 			</td>
 		</tr>
 	</tbody>

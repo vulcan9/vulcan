@@ -113,9 +113,13 @@ public final class ManagePluginAction extends BaseDispatchAction {
 			return mapping.findForward("configure");
 		}
 		
-		stateManager.updatePluginConfig(configForm.getPluginConfig(), configForm.getRenamedProfiles());
-		
-		saveSuccessMessage(request);
+		if (configForm.isDirty()) {
+			stateManager.updatePluginConfig(configForm.getPluginConfig(), configForm.getRenamedProfiles());
+			saveSuccessMessage(request);
+		} else {
+			addMessage(request, "warnings", ActionMessages.GLOBAL_MESSAGE,
+					new ActionMessage("warnings.no.change.made"));
+		}
 		
 		return mapping.findForward("pluginList");
 	}
@@ -131,7 +135,7 @@ public final class ManagePluginAction extends BaseDispatchAction {
 		try {
 			final String pluginId = configForm.getPluginId();
 			final PluginConfigDto config = stateManager.getPluginManager().getPluginConfigInfo(pluginId);
-			configForm.setPluginConfig(request, config);
+			configForm.setPluginConfig(request, config, false);
 			return mapping.findForward("configure");
 		} catch (PluginNotConfigurableException e) {
 			super.saveError(request, ActionMessages.GLOBAL_MESSAGE,
