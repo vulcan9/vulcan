@@ -214,6 +214,10 @@ div.tables table {
 	width: 100%;
 }
 
+div.build-summary {
+	max-width: 640px;
+}
+
 div.projectCheckboxes {
 	-moz-column-width: 12em;
 }
