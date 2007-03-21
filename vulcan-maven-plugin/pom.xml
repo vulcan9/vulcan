@@ -8,6 +8,12 @@
 	<name>vulcan-maven-plugin</name>
 	<url>http://vulcan.sourceforge.net</url>
 	
+	<scm>
+		<connection>scm:svn:http://vulcan.googlecode.com/svn/</connection>
+		<developerConnection>scm:svn:https://vulcan.googlecode.com/svn/</developerConnection>
+		<url>http://vulcan.googlecode.com/svn/</url>
+	</scm>
+	
 	<distributionManagement>
 		<!--repository>
 			<id>repo1</id>
