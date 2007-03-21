@@ -33,7 +33,7 @@ public class SubversionProjectConfigDto extends RepositoryAdaptorConfigDto {
 	private String repositoryProfile;
 	private String path;
 	private boolean recursive = true;
-	private boolean obtainBugtraqProperties;
+	private boolean obtainBugtraqProperties = true;
 	
 	@Override
 	public List<PropertyDescriptor> getPropertyDescriptors(Locale locale) {
