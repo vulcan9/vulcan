@@ -21,6 +21,9 @@ package net.sourceforge.vulcan.cvs;
 import static net.sourceforge.vulcan.cvs.support.CvsDateFormat.format;
 import static net.sourceforge.vulcan.cvs.support.CvsDateFormat.parseDate;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -32,10 +35,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
-
-import java.io.File;
-import java.io.IOException;
-import java.io.OutputStream;
 
 import net.sourceforge.vulcan.RepositoryAdaptor;
 import net.sourceforge.vulcan.core.BuildDetailCallback;
@@ -131,9 +130,14 @@ public class CvsRepositoryAdaptor implements RepositoryAdaptor {
 		
 		final String combined = StringUtils.join(revisions.iterator(), ";");
 		
+		final String newestModificationString = logListener.getNewestModificationString();
+		if (newestModificationString == null) {
+			throw new RepositoryException("cvs.errors.rlog.failed", null, null);
+		}
+		
 		return new CvsAggregateRevisionTokenDto(
 				digester.digest(combined.getBytes()),
-				logListener.getNewestModificationString());
+				newestModificationString);
 	}
 
 	public ChangeLogDto getChangeLog(RevisionTokenDto first, RevisionTokenDto last, OutputStream diffOutputStream) throws RepositoryException {
