@@ -88,6 +88,7 @@
 					<map>
 						<entry key="buildManager" value-ref="buildManager"/>
 						<entry key="projectManager" value-ref="stateManager"/>
+						<entry key="eventHandler" value-ref="eventHandler"/>
 					</map>
 				</property>
 			</bean>
