@@ -26,8 +26,7 @@
 		</property>
 	</bean>
 	
-	<bean id="fileScanner" class="net.sourceforge.vulcan.metrics.scanner.ant.AntFileScanner">
-	</bean>
+	<bean id="fileScanner" class="net.sourceforge.vulcan.metrics.scanner.plexus.PlexusFileScanner"/>
 	
 	<bean id="messageSource" class="org.springframework.context.support.ResourceBundleMessageSource">
 		<property name="basenames">

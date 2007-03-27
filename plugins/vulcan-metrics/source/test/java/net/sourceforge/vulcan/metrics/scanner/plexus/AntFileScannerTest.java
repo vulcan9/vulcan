@@ -16,13 +16,13 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-package net.sourceforge.vulcan.metrics.scanner.ant;
+package net.sourceforge.vulcan.metrics.scanner.plexus;
 
 import junit.framework.TestCase;
 import net.sourceforge.vulcan.TestUtils;
 
 public class AntFileScannerTest extends TestCase {
-	AntFileScanner scanner = new AntFileScanner();
+	PlexusFileScanner scanner = new PlexusFileScanner();
 	
 	public void testScanNoIncludes() throws Exception {
 		final String[] matched = scanner.scanFiles(
