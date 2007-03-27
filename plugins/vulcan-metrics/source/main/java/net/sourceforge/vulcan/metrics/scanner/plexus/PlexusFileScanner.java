@@ -16,15 +16,15 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-package net.sourceforge.vulcan.metrics.scanner.ant;
+package net.sourceforge.vulcan.metrics.scanner.plexus;
 
 import java.io.File;
 
 import net.sourceforge.vulcan.metrics.scanner.FileScanner;
 
-import org.apache.tools.ant.DirectoryScanner;
+import org.codehaus.plexus.util.DirectoryScanner;
 
-public class AntFileScanner implements FileScanner {
+public class PlexusFileScanner implements FileScanner {
 	public String[] scanFiles(File rootDir, String[] includes, String[] excludes) {
 		if (includes.length == 0) {
 			return new String[0];
