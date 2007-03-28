@@ -21,9 +21,9 @@ package net.sourceforge.vulcan.maven.integration;
 import java.io.File;
 import java.io.IOException;
 
-import net.sourceforge.vulcan.core.ProjectBuildConfigurator;
+import net.sourceforge.vulcan.ProjectBuildConfigurator;
 import net.sourceforge.vulcan.exception.ConfigException;
-import net.sourceforge.vulcan.maven.MavenProjectConfigurator;
+import net.sourceforge.vulcan.maven.MavenProjectConfiguratorFactory;
 
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.artifact.repository.DefaultArtifactRepository;
@@ -36,12 +36,15 @@ import org.codehaus.plexus.PlexusContainerException;
 import org.codehaus.plexus.component.repository.exception.ComponentLookupException;
 import org.codehaus.plexus.embed.Embedder;
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
+import org.springframework.context.ApplicationContext;
 
-public class MavenIntegration {
-	private final Embedder embedder = new Embedder();
+public class MavenIntegration implements MavenProjectConfiguratorFactory {
+	private final Embedder embedder;
 	final ArtifactRepository artifactRepository;
 	
 	public MavenIntegration() throws PlexusContainerException, ComponentLookupException, IOException, XmlPullParserException {
+		embedder = new Embedder();
+		
 		final ClassLoader prev = Thread.currentThread().getContextClassLoader();
 		try {
 			Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
@@ -58,13 +61,13 @@ public class MavenIntegration {
 		artifactRepository = createLocalRepository(embedder, settings);
 	}
 	
-	public ProjectBuildConfigurator createProjectConfigurator(File buildSpecFile) throws ConfigException {
+	public ProjectBuildConfigurator createProjectConfigurator(File buildSpecFile, String mavenHomeProfileName, String goals, ApplicationContext applicationContext) throws ConfigException {
 		try {
 			final MavenProjectBuilder builder = (MavenProjectBuilder) embedder.lookup(MavenProjectBuilder.ROLE);
 
 			final MavenProject project = builder.build(buildSpecFile, artifactRepository, null);
 			
-			return new MavenProjectConfigurator(project);
+			return new MavenProjectConfigurator(project, mavenHomeProfileName, goals, applicationContext);
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}

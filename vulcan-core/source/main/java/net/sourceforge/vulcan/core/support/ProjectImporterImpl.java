@@ -18,15 +18,18 @@
  */
 package net.sourceforge.vulcan.core.support;
 
+import static org.apache.commons.lang.StringUtils.isBlank;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
 import net.sourceforge.vulcan.PluginManager;
-import net.sourceforge.vulcan.RepositoryAdaptor;
+import net.sourceforge.vulcan.ProjectBuildConfigurator;
+import net.sourceforge.vulcan.ProjectRepositoryConfigurator;
 import net.sourceforge.vulcan.StateManager;
-import net.sourceforge.vulcan.core.ProjectBuildConfigurator;
 import net.sourceforge.vulcan.core.ProjectImporter;
+import net.sourceforge.vulcan.core.Store;
 import net.sourceforge.vulcan.dto.PluginConfigDto;
 import net.sourceforge.vulcan.dto.ProjectConfigDto;
 import net.sourceforge.vulcan.exception.ConfigException;
@@ -43,27 +46,37 @@ import net.sourceforge.vulcan.metadata.SvnRevision;
 public class ProjectImporterImpl implements ProjectImporter {
 	private PluginManager pluginManager;
 	private StateManager stateManager;
+	private Store store;
 	
+	/*
+	 * TODO: check if file is a maven2 pom before attempting to process in maven plugin
+	 * TODO: handle maven exceptions like missing dependencies, missing parent, etc.
+	 */
 	public void createProjectsForUrl(String url) throws ConfigException, StoreException, DuplicateNameException {
-		final RepositoryAdaptor ra = createRepositoryAdaptorForUrl(url);
+		final ProjectConfigDto projectConfig = new ProjectConfigDto();
+		final ProjectRepositoryConfigurator repoConfigurator = createRepositoryAdaptorForUrl(projectConfig, url);
 		
-		final File buildSpecFile = downloadBuildSpecFile(ra);
+		final File buildSpecFile = downloadBuildSpecFile(repoConfigurator);
 
-		final ProjectBuildConfigurator buildConfigurator = createBuildToolConfigurator(buildSpecFile);
+		final ProjectBuildConfigurator buildConfigurator = createBuildToolConfigurator(projectConfig, buildSpecFile);
 		
-		final ProjectConfigDto projectConfig = ra.getProjectConfig();
-		
+		repoConfigurator.applyConfiguration(projectConfig);
 		buildConfigurator.applyConfiguration(projectConfig);
 		
 		if (buildConfigurator.isStandaloneProject()) {
-			ra.setNonRecursive();
+			repoConfigurator.setNonRecursive();
+		}
+		
+		if (isBlank(projectConfig.getWorkDir())) {
+			final String workDir = store.getWorkingCopyLocationPattern().replace("${projectName}", projectConfig.getName());
+			projectConfig.setWorkDir(workDir);
 		}
 		
 		try {
 			final PluginConfigDto pluginConfig = pluginManager.getPluginConfigInfo(
 					projectConfig.getRepositoryAdaptorPluginId());
 
-			ra.updateGlobalConfig(pluginConfig);
+			repoConfigurator.updateGlobalConfig(pluginConfig);
 		} catch (PluginNotConfigurableException ignore) {
 		} catch (PluginNotFoundException e) {
 			throw new RuntimeException(e);
@@ -80,29 +93,35 @@ public class ProjectImporterImpl implements ProjectImporter {
 		this.stateManager = stateManager;
 	}
 
+	public void setStore(Store store) {
+		this.store = store;
+	}
+	
 	protected File createTempFile() throws IOException {
 		return File.createTempFile("vulcan-new-project", ".tmp");
 	}
 
-	private RepositoryAdaptor createRepositoryAdaptorForUrl(String url) throws ConfigException {
+	private ProjectRepositoryConfigurator createRepositoryAdaptorForUrl(ProjectConfigDto projectConfig, String url) throws ConfigException {
 		final List<RepositoryAdaptorPlugin> repositoryPlugins = pluginManager.getPlugins(RepositoryAdaptorPlugin.class);
 		
 		for (RepositoryAdaptorPlugin plugin : repositoryPlugins) {
-			final RepositoryAdaptor instance = plugin.createInstanceForUrl(url);
-			if (instance != null) {
-				return instance;
+			final ProjectRepositoryConfigurator configurator = plugin.createProjectConfigurator(url);
+			if (configurator != null) {
+				projectConfig.setRepositoryAdaptorPluginId(plugin.getId());
+				return configurator;
 			}
 		}
 		
 		throw new ConfigException("errors.url.unsupported", null);
 	}
 	
-	private ProjectBuildConfigurator createBuildToolConfigurator(File buildSpecFile) throws ConfigException {
+	private ProjectBuildConfigurator createBuildToolConfigurator(ProjectConfigDto projectConfig, File buildSpecFile) throws ConfigException {
 		final List<BuildToolPlugin> buildToolPlugins = pluginManager.getPlugins(BuildToolPlugin.class);
 		
 		for (BuildToolPlugin plugin : buildToolPlugins) {
 			final ProjectBuildConfigurator configurator = plugin.createProjectConfigurator(buildSpecFile);
 			if (configurator != null) {
+				projectConfig.setBuildToolPluginId(plugin.getId());
 				return configurator;
 			}
 		}
@@ -110,7 +129,7 @@ public class ProjectImporterImpl implements ProjectImporter {
 		throw new ConfigException("errors.build.file.unsupported", null);
 	}
 	
-	private File downloadBuildSpecFile(final RepositoryAdaptor ra) throws RepositoryException, ConfigException {
+	private File downloadBuildSpecFile(ProjectRepositoryConfigurator ra) throws RepositoryException, ConfigException {
 		try {
 			final File tmpFile = createTempFile();
 			ra.download(tmpFile);

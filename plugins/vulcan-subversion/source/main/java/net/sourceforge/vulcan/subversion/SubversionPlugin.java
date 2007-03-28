@@ -20,6 +20,7 @@ package net.sourceforge.vulcan.subversion;
 
 import java.util.Map;
 
+import net.sourceforge.vulcan.ProjectRepositoryConfigurator;
 import net.sourceforge.vulcan.RepositoryAdaptor;
 import net.sourceforge.vulcan.StateManager;
 import net.sourceforge.vulcan.dto.PluginConfigDto;
@@ -52,8 +53,8 @@ public class SubversionPlugin
 	public RepositoryAdaptor createInstance(ProjectConfigDto projectConfig) throws ConfigException {
 		return new SubversionRepositoryAdaptor(this.config, projectConfig, (SubversionProjectConfigDto)projectConfig.getRepositoryAdaptorConfig(), stateManager);
 	}
-	public RepositoryAdaptor createInstanceForUrl(String url) throws ConfigException {
-		return SubversionRepositoryAdaptor.createInstance(url, config, stateManager);
+	public ProjectRepositoryConfigurator createProjectConfigurator(String url) throws ConfigException {
+		return SubversionProjectConfigurator.createInstance(url, this.config, this.ctx);
 	}
 	public RepositoryAdaptorConfigDto getDefaultConfig() {
 		return new SubversionProjectConfigDto();

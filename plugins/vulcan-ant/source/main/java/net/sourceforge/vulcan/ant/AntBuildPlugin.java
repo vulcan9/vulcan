@@ -31,7 +31,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 
 import net.sourceforge.vulcan.BuildTool;
-import net.sourceforge.vulcan.core.ProjectBuildConfigurator;
+import net.sourceforge.vulcan.ProjectBuildConfigurator;
 import net.sourceforge.vulcan.dto.BuildToolConfigDto;
 import net.sourceforge.vulcan.dto.PluginConfigDto;
 import net.sourceforge.vulcan.exception.ConfigException;

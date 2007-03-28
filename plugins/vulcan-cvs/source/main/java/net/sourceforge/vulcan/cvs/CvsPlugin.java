@@ -20,6 +20,7 @@ package net.sourceforge.vulcan.cvs;
 
 import java.util.Map;
 
+import net.sourceforge.vulcan.ProjectRepositoryConfigurator;
 import net.sourceforge.vulcan.RepositoryAdaptor;
 import net.sourceforge.vulcan.cvs.dto.CvsConfigDto;
 import net.sourceforge.vulcan.cvs.dto.CvsProjectConfigDto;
@@ -52,8 +53,7 @@ public class CvsPlugin extends PluginSupport
 		
 		return cvsRepositoryAdaptor;
 	}
-	public RepositoryAdaptor createInstanceForUrl(String url) throws ConfigException {
-		//TODO: implement
+	public ProjectRepositoryConfigurator createProjectConfigurator(String url) {
 		return null;
 	}
 	public RepositoryAdaptorConfigDto getDefaultConfig() {

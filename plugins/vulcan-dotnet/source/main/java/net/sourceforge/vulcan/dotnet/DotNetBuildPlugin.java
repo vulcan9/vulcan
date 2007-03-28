@@ -22,7 +22,7 @@ import java.io.File;
 
 import net.sourceforge.vulcan.BuildTool;
 import net.sourceforge.vulcan.PluginManager;
-import net.sourceforge.vulcan.core.ProjectBuildConfigurator;
+import net.sourceforge.vulcan.ProjectBuildConfigurator;
 import net.sourceforge.vulcan.dotnet.dto.DotNetBuildEnvironmentDto;
 import net.sourceforge.vulcan.dotnet.dto.DotNetGlobalConfigDto;
 import net.sourceforge.vulcan.dotnet.dto.DotNetProjectConfigDto;

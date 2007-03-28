@@ -22,7 +22,6 @@ import static net.sourceforge.vulcan.ant.AntBuildPlugin.addSystemJavaHomeIfMissi
 import static org.apache.commons.lang.StringUtils.isNotBlank;
 
 import java.io.File;
-import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -30,8 +29,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import net.sourceforge.vulcan.BuildTool;
+import net.sourceforge.vulcan.ProjectBuildConfigurator;
 import net.sourceforge.vulcan.ant.JavaHome;
-import net.sourceforge.vulcan.core.ProjectBuildConfigurator;
 import net.sourceforge.vulcan.dto.BuildToolConfigDto;
 import net.sourceforge.vulcan.dto.PluginConfigDto;
 import net.sourceforge.vulcan.exception.ConfigException;
@@ -51,15 +50,16 @@ public class MavenBuildPlugin extends PluginSupport
 	public static final String PLUGIN_ID = "net.sourceforge.vulcan.maven";
 	public static final String PLUGIN_NAME = "Apache Maven";
 	
-	ClassLoader integrationSupportParentClassLoader = ProjectBuildConfigurator.class.getClassLoader();
-	
 	MavenConfig config = new MavenConfig();
 	MavenBuildToolFactory mavenBuildToolFactory = new MavenBuildToolFactory();
 	
-	Object integrationSupport;
-	Method createProjectConfiguratorMethod;
+	MavenProjectConfiguratorFactory configuratorFactory;
 	
-	private ApplicationContext applicationContext;
+	String maven2HomeDirectory;
+	String maven2ProfileName;
+	String defaultGoals;
+	
+	ApplicationContext applicationContext;
 	
 	public void init() {
 		addSystemJavaHomeIfMissing(config, applicationContext);
@@ -104,65 +104,60 @@ public class MavenBuildPlugin extends PluginSupport
 	}
 	
 	public ProjectBuildConfigurator createProjectConfigurator(File buildSpecFile) throws ConfigException {
-		if (integrationSupport == null) {
-			createIntegrationSupport();
+		if (configuratorFactory == null) {
+			createConfigurationFactory();
 		}
 
-		try {
-			return (ProjectBuildConfigurator) createProjectConfiguratorMethod.invoke(
-					integrationSupport, new Object[] {buildSpecFile});
-		} catch (Exception e) {
-			if (e instanceof RuntimeException) {
-				throw (RuntimeException)e;
-			}
-			throw new RuntimeException(e);
-		}
+		return configuratorFactory.createProjectConfigurator(buildSpecFile, maven2ProfileName, defaultGoals, applicationContext);
 	}
 	
 	public MavenProjectConfig getDefaultConfig() {
 		return new MavenProjectConfig();
 	}
 	
+	public void setDefaultGoals(String defaultGoals) {
+		this.defaultGoals = defaultGoals;
+	}
+
 	public MavenConfig getConfiguration() {
 		return config;
 	}
+	
 	public void setConfiguration(PluginConfigDto config) {
 		this.config = (MavenConfig) config;
 		addSystemJavaHomeIfMissing(this.config, applicationContext);
 	}
 
-	void createIntegrationSupport() throws ConfigException {
+	void createConfigurationFactory() throws ConfigException {
 		// find maven2 home
-		String mavenHomeDirectory = null;
-		
 		for (MavenHome home : config.getMavenHomes()) {
 			if (MavenBuildTool.isMaven2(home.getDirectory())) {
-				mavenHomeDirectory = home.getDirectory();
+				maven2HomeDirectory = home.getDirectory();
+				maven2ProfileName = home.getDescription();
 				break;
 			}
 		}
 		
-		if (mavenHomeDirectory == null) {
+		if (maven2HomeDirectory == null) {
 			throw new ConfigException("maven.maven2.required", null);
 		}
 
 		// create classloader
 		final URLClassLoader classLoader = 
-			URLClassLoader.newInstance(createURLs(mavenHomeDirectory), integrationSupportParentClassLoader);
+			new PackageFilteringClassLoader(
+					createURLs(maven2HomeDirectory),
+					getClass().getClassLoader(),
+					MavenIntegration.class.getPackage().getName());
 		
-		// load integration class
+		// load integration provider
 		try {
-			integrationSupport = classLoader.loadClass(MavenIntegration.class.getName()).newInstance();
-			createProjectConfiguratorMethod = integrationSupport.getClass().getMethod(
-					"createProjectConfigurator", new Class[] {File.class});
+			configuratorFactory = (MavenProjectConfiguratorFactory) classLoader.loadClass(MavenIntegration.class.getName()).newInstance();
 		} catch (Exception e) {
 			if (e instanceof RuntimeException) {
 				throw (RuntimeException)e;
 			}
 			throw new RuntimeException(e);
 		}
-		
-		
 	}
 
 	@SuppressWarnings("unchecked")
@@ -186,6 +181,33 @@ public class MavenBuildPlugin extends PluginSupport
 			return urls;
 		} catch (MalformedURLException e) {
 			throw new RuntimeException(e);
+		}
+	}
+	
+	static class PackageFilteringClassLoader extends URLClassLoader {
+		private final String packageName;
+
+		public PackageFilteringClassLoader(URL[] urls, ClassLoader parent, String packageName) {
+			super(urls, parent);
+			this.packageName = packageName;
+		}
+
+		@Override
+		protected synchronized Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
+			if (!name.startsWith(packageName)) {
+				return super.loadClass(name, resolve);
+			}
+			
+			Class c = findLoadedClass(name);
+			if (c == null) {
+				c = findClass(name);
+			}
+			
+			if (resolve) {
+				resolveClass(c);
+			}
+
+			return c;
 		}
 	}
 }

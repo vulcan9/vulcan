@@ -18,10 +18,7 @@
  */
 package net.sourceforge.vulcan.subversion;
 
-import static org.apache.commons.lang.StringUtils.isNotBlank;
-
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
@@ -40,7 +37,6 @@ import net.sourceforge.vulcan.core.BuildDetailCallback;
 import net.sourceforge.vulcan.dto.ChangeLogDto;
 import net.sourceforge.vulcan.dto.ChangeSetDto;
 import net.sourceforge.vulcan.dto.Date;
-import net.sourceforge.vulcan.dto.PluginConfigDto;
 import net.sourceforge.vulcan.dto.ProjectConfigDto;
 import net.sourceforge.vulcan.dto.RepositoryTagDto;
 import net.sourceforge.vulcan.dto.RevisionTokenDto;
@@ -51,9 +47,6 @@ import net.sourceforge.vulcan.subversion.dto.SubversionConfigDto;
 import net.sourceforge.vulcan.subversion.dto.SubversionProjectConfigDto;
 import net.sourceforge.vulcan.subversion.dto.SubversionRepositoryProfileDto;
 
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.tmatesoft.svn.core.ISVNLogEntryHandler;
 import org.tmatesoft.svn.core.SVNCancelException;
 import org.tmatesoft.svn.core.SVNDirEntry;
@@ -62,13 +55,7 @@ import org.tmatesoft.svn.core.SVNException;
 import org.tmatesoft.svn.core.SVNLogEntry;
 import org.tmatesoft.svn.core.SVNNodeKind;
 import org.tmatesoft.svn.core.SVNURL;
-import org.tmatesoft.svn.core.auth.BasicAuthenticationManager;
-import org.tmatesoft.svn.core.internal.io.dav.DAVRepositoryFactory;
-import org.tmatesoft.svn.core.internal.io.fs.FSRepositoryFactory;
-import org.tmatesoft.svn.core.internal.io.svn.SVNRepositoryFactoryImpl;
-import org.tmatesoft.svn.core.internal.wc.DefaultSVNOptions;
 import org.tmatesoft.svn.core.io.SVNRepository;
-import org.tmatesoft.svn.core.io.SVNRepositoryFactory;
 import org.tmatesoft.svn.core.wc.ISVNEventHandler;
 import org.tmatesoft.svn.core.wc.SVNDiffClient;
 import org.tmatesoft.svn.core.wc.SVNEvent;
@@ -79,27 +66,11 @@ import org.tmatesoft.svn.core.wc.SVNRevision;
 import org.tmatesoft.svn.core.wc.SVNUpdateClient;
 import org.tmatesoft.svn.core.wc.SVNWCClient;
 
-public class SubversionRepositoryAdaptor extends PluginSupport implements RepositoryAdaptor {
-	static {
-		// Prefer Basic in case server offers to use NTLM first.
-		System.setProperty("svnkit.http.methods", "Basic");
-
-		// Enable support for various protocols.
-		FSRepositoryFactory.setup();
-		DAVRepositoryFactory.setup();
-		SVNRepositoryFactoryImpl.setup();
-	}
-	
-	private final Log log = LogFactory.getLog(getClass());
-	private final SubversionProjectConfigDto config;
-	private final SubversionRepositoryProfileDto profile;
-	private final SVNRepository svnRepository;
+public class SubversionRepositoryAdaptor extends SubversionSupport implements RepositoryAdaptor {
 	private final EventHandler eventHandler = new EventHandler();
-	private final ProjectConfigDto projectConfig;
 	private final String projectName;
 	private final Map<String, Long> byteCounters;
 	
-	final DefaultSVNOptions options;
 	final LineOfDevelopment lineOfDevelopment = new LineOfDevelopment();
 
 	private long revision = -1;
@@ -111,7 +82,7 @@ public class SubversionRepositoryAdaptor extends PluginSupport implements Reposi
 		this(globalConfig, projectConfig, config, stateManager, true);
 	}
 
-	SubversionRepositoryAdaptor(SubversionConfigDto globalConfig, ProjectConfigDto projectConfig, SubversionProjectConfigDto config, StateManager stateManager, boolean init) throws ConfigException {
+	protected SubversionRepositoryAdaptor(SubversionConfigDto globalConfig, ProjectConfigDto projectConfig, SubversionProjectConfigDto config, StateManager stateManager, boolean init) throws ConfigException {
 		this(
 			globalConfig,
 			projectConfig,
@@ -124,7 +95,7 @@ public class SubversionRepositoryAdaptor extends PluginSupport implements Reposi
 					"svn.profile.missing"));
 	}
 
-	SubversionRepositoryAdaptor(SubversionConfigDto globalConfig, ProjectConfigDto projectConfig, SubversionProjectConfigDto config, StateManager stateManager, boolean init, SubversionRepositoryProfileDto profile) throws ConfigException {
+	protected SubversionRepositoryAdaptor(SubversionConfigDto globalConfig, ProjectConfigDto projectConfig, SubversionProjectConfigDto config, StateManager stateManager, boolean init, SubversionRepositoryProfileDto profile) throws ConfigException {
 		this(
 			globalConfig,
 			projectConfig,
@@ -134,37 +105,18 @@ public class SubversionRepositoryAdaptor extends PluginSupport implements Reposi
 			createRepository(profile, init));
 	}
 
-	SubversionRepositoryAdaptor(SubversionConfigDto globalConfig, ProjectConfigDto projectConfig, SubversionProjectConfigDto config, StateManager stateManager, SubversionRepositoryProfileDto profile, SVNRepository svnRepository) throws ConfigException {
-		this.config = config;
-		this.stateManager = stateManager;
+	protected SubversionRepositoryAdaptor(SubversionConfigDto globalConfig, ProjectConfigDto projectConfig, SubversionProjectConfigDto config, StateManager stateManager, SubversionRepositoryProfileDto profile, SVNRepository svnRepository) throws ConfigException {
+		super(config, profile, svnRepository);
 		
-		this.projectConfig = projectConfig;
+		this.stateManager = stateManager;
 		this.projectName = projectConfig.getName();
-		this.profile = profile;
 		
 		if (globalConfig != null) {
 			this.byteCounters = globalConfig.getWorkingCopyByteCounts();
 		} else {
 			this.byteCounters = Collections.emptyMap();
 		}
-		
-		this.svnRepository = svnRepository;
-		
-		if (svnRepository == null) {
-			this.options = null;
-			return;
-		}
-		
-		if (StringUtils.isNotBlank(profile.getUsername())) {
-			svnRepository.setAuthenticationManager(
-					new BasicAuthenticationManager(
-							profile.getUsername(),
-							profile.getPassword()));
-		}
-		
-		this.options = new DefaultSVNOptions();
-		this.options.setAuthStorageEnabled(false);
-		
+
 		lineOfDevelopment.setPath(config.getPath());
 		lineOfDevelopment.setRepositoryRoot(profile.getRootUrl());
 		lineOfDevelopment.setTagFolderNames(new HashSet<String>(Arrays.asList(globalConfig.getTagFolderNames())));
@@ -189,29 +141,6 @@ public class SubversionRepositoryAdaptor extends PluginSupport implements Reposi
 		return new RevisionTokenDto(revision, "r" + revision);
 	}
 
-	public void download(File target) throws RepositoryException, IOException {
-		final OutputStream os = new FileOutputStream(target);
-		try {
-			svnRepository.getFile(config.getPath(), SVNRevision.HEAD.getNumber(), null, os);
-		} catch (SVNException e) {
-			throw new RepositoryException(e);
-		} finally {
-			os.close();
-		}
-	}
-	
-	public ProjectConfigDto getProjectConfig() {
-		return projectConfig;
-	}
-	
-	public void setNonRecursive() {
-		config.setRecursive(false);
-	}
-	
-	public void updateGlobalConfig(PluginConfigDto globalRaConfig) {
-		//TODO
-	}
-	
 	public void createWorkingCopy(File absolutePath, BuildDetailCallback buildDetailCallback) throws RepositoryException {
 		synchronized (byteCounters) {
 			if (byteCounters.containsKey(projectName)) {
@@ -321,7 +250,7 @@ public class SubversionRepositoryAdaptor extends PluginSupport implements Reposi
 		lineOfDevelopment.setAlternateTagName(tagName);
 	}
 	
-	List<ChangeSetDto> fetchChangeSets(final SVNRevision r1, final SVNRevision r2) throws RepositoryException {
+	protected List<ChangeSetDto> fetchChangeSets(final SVNRevision r1, final SVNRevision r2) throws RepositoryException {
 		final SVNLogClient logClient = new SVNLogClient(svnRepository.getAuthenticationManager(), options);
 		logClient.setEventHandler(eventHandler);
 		
@@ -375,18 +304,7 @@ public class SubversionRepositoryAdaptor extends PluginSupport implements Reposi
 		return changeSets;
 	}
 
-	boolean isFatal(SVNException e) {
-		final String message = e.getMessage();
-		
-		if (isNotBlank(message) && message.indexOf("does not exist in the repository or refers to an unrelated object") > 0) {
-			log.error("Got non-fatal subversion exception with code " + e.getErrorMessage().getErrorCode(), e);
-			return false;
-		}
-		
-		return true;
-	}
-
-	void fetchDifferences(final SVNRevision r1, final SVNRevision r2, OutputStream os) throws RepositoryException {
+	protected void fetchDifferences(final SVNRevision r1, final SVNRevision r2, OutputStream os) throws RepositoryException {
 		final SVNDiffClient diffClient = new SVNDiffClient(svnRepository.getAuthenticationManager(), options);
 
 		diffClient.setEventHandler(eventHandler);
@@ -409,26 +327,8 @@ public class SubversionRepositoryAdaptor extends PluginSupport implements Reposi
 		}
 	}
 	
-	SVNURL getCompleteSVNURL() throws SVNException {
+	protected SVNURL getCompleteSVNURL() throws SVNException {
 		return SVNURL.parseURIEncoded(lineOfDevelopment.getAbsoluteUrl());
-	}
-	
-	String combinePatterns(String logRegex, String messagePattern) {
-		final StringBuilder sb = new StringBuilder();
-		
-		if (isNotBlank(logRegex)) {
-			sb.append(logRegex);
-		}
-		
-		if (isNotBlank(messagePattern)) {
-			if (sb.length() > 0) {
-				sb.append('|');
-			}
-			
-			sb.append(messagePattern.replaceAll("%BUGID%", "(\\\\d+)"));
-		}
-		
-		return sb.toString();
 	}
 
 	@SuppressWarnings("unchecked")
@@ -497,20 +397,6 @@ public class SubversionRepositoryAdaptor extends PluginSupport implements Reposi
 			}
 		}
 	}
-	private static SVNRepository createRepository(SubversionRepositoryProfileDto profile, boolean init) throws ConfigException {
-		if (!init) {
-			return null;
-		}
-		
-		if (profile == null) {
-			throw new ConfigException("svn.profile.not.selected", null);
-		}
-		try {
-			return SVNRepositoryFactory.create(SVNURL.parseURIEncoded(profile.getRootUrl()));
-		} catch (Exception e) {
-			throw new RepositoryException(e);
-		}
-	}
 	
 	private static class EventHandler implements ISVNEventHandler {
 		private long previousByteCount = -1;
@@ -551,48 +437,5 @@ public class SubversionRepositoryAdaptor extends PluginSupport implements Reposi
 		void setPreviousByteCount(long previousByteCount) {
 			this.previousByteCount = previousByteCount;
 		}
-	}
-
-	static SubversionRepositoryAdaptor createInstance(String url, SubversionConfigDto globalConfig, StateManager stateManager) throws ConfigException {
-		try {
-			final SVNURL svnurl = SVNURL.parseURIEncoded(url);
-			final SVNRepository repo = SVNRepositoryFactory.create(svnurl);
-			
-			final SubversionProjectConfigDto raProjectConfig = new SubversionProjectConfigDto();
-			final ProjectConfigDto project = new ProjectConfigDto();
-			
-			final SubversionRepositoryProfileDto profile = findOrCreateProfile(repo, globalConfig, project, raProjectConfig, url);
-			
-			return new SubversionRepositoryAdaptor(globalConfig, project, raProjectConfig, stateManager, profile, repo);
-		} catch (SVNException e) {
-			return null;
-		}
-	}
-
-	static SubversionRepositoryProfileDto findOrCreateProfile(SVNRepository repo, SubversionConfigDto globalConfig, ProjectConfigDto project, SubversionProjectConfigDto raProjectConfig, String absoluteUrl) throws SVNException {
-		final String root = repo.getRepositoryRoot(true).toString();
-		
-		SubversionRepositoryProfileDto profile = 
-			getSelectedEnvironment(
-					globalConfig.getProfiles(),
-					new Visitor<SubversionRepositoryProfileDto>() {
-						public boolean isMatch(SubversionRepositoryProfileDto node) {
-							return node.getRootUrl().equals(root);
-						}
-					});
-		
-		if (profile == null) {
-			profile = new SubversionRepositoryProfileDto();
-			profile.setRootUrl(root);
-			profile.setDescription(root);
-		}
-		
-		project.setRepositoryAdaptorPluginId(SubversionConfigDto.PLUGIN_ID);
-		project.setRepositoryAdaptorConfig(raProjectConfig);
-
-		raProjectConfig.setRepositoryProfile(profile.getDescription());
-		raProjectConfig.setPath(absoluteUrl.substring(profile.getRootUrl().length()));
-		
-		return profile;
 	}
 }

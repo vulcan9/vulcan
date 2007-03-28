@@ -19,14 +19,11 @@
 package net.sourceforge.vulcan;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.OutputStream;
 import java.util.List;
 
 import net.sourceforge.vulcan.core.BuildDetailCallback;
 import net.sourceforge.vulcan.dto.ChangeLogDto;
-import net.sourceforge.vulcan.dto.PluginConfigDto;
-import net.sourceforge.vulcan.dto.ProjectConfigDto;
 import net.sourceforge.vulcan.dto.RepositoryTagDto;
 import net.sourceforge.vulcan.dto.RevisionTokenDto;
 import net.sourceforge.vulcan.exception.RepositoryException;
@@ -100,44 +97,4 @@ public interface RepositoryAdaptor {
 	 * navigate from a build outcome summary to the source code easily.
 	 */
 	String getRepositoryUrl();
-	
-	/**
-	 * This method will only be called when the instance was created for the purpose 
-	 * of creating a new project.  This method should obtain the contents of the resource
-	 * pointed to by the url used to construct this instance, and put them into the temp file
-	 * provided.  If the implementation does not support this operation,
-	 * it is acceptible to throw UnsupportedOperationException.
-	 */
-	void download(File target) throws RepositoryException, IOException;
-
-	/**
-	 * This method will only be called when the instance was created for the purpose
-	 * of creating a new project.  If the implementation does not support this operation,
-	 * it is acceptible to throw UnsupportedOperationException.  At a minumum,
-	 * <code>repositoryAdaptorPluginId</code> and <code>repositoryAdaptorConfig</code>
-	 * should be configured.
-	 * 
-	 * @return The instance of ProjectConfigDto which has been partially configured.
-	 */
-	ProjectConfigDto getProjectConfig();
-
-	/**
-	 * This method will only be called when the instance was created for the purpose
-	 * of creating a new project.  If the implementation does not support this operation,
-	 * it is acceptible to throw UnsupportedOperationException.
-	 *
-	 * If the implementation supports non-recursive mode (where folders nested under the
-	 * folder pointed to by this project are not checked out), this setting should be applied.
-	 */
-	void setNonRecursive();
-
-	/**
-	 * This method will only be called when the instance was created for the purpose
-	 * of creating a new project.  If the implementation does not support this operation,
-	 * it is acceptible to throw UnsupportedOperationException.
-	 * 
-	 * If the configuration for the created project requires changes to the global
-	 * configuration for this plugin, those changes should be applied here.
-	 */
-	void updateGlobalConfig(PluginConfigDto globalRaConfig);
 }
