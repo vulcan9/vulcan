@@ -27,10 +27,10 @@ import java.util.Locale;
 import net.sourceforge.vulcan.dto.PluginProfileDto;
 
 public class SubversionRepositoryProfileDto extends PluginProfileDto {
-	private String description;
-	private String rootUrl;
-	private String username;
-	private String password;
+	private String description = "";
+	private String rootUrl = "";
+	private String username = "";
+	private String password = "";
 	
 	@Override
 	public String getProjectConfigProfilePropertyName() {

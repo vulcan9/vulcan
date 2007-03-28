@@ -24,6 +24,7 @@
 	<bean name="projectImporter" class="net.sourceforge.vulcan.core.support.ProjectImporterImpl">
 		<property name="pluginManager" ref="pluginManager"/>
 		<property name="stateManager" ref="stateManager"/>
+		<property name="store" ref="store"/>
 	</bean>
 	
 	<bean name="eventPool" class="net.sourceforge.vulcan.spring.SpringEventPool">

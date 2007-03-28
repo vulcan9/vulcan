@@ -21,7 +21,7 @@ package net.sourceforge.vulcan.integration;
 import java.io.File;
 
 import net.sourceforge.vulcan.BuildTool;
-import net.sourceforge.vulcan.core.ProjectBuildConfigurator;
+import net.sourceforge.vulcan.ProjectBuildConfigurator;
 import net.sourceforge.vulcan.dto.BuildToolConfigDto;
 import net.sourceforge.vulcan.exception.ConfigException;
 import net.sourceforge.vulcan.metadata.SvnRevision;

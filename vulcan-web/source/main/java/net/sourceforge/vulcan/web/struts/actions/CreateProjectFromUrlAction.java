@@ -19,6 +19,7 @@
 package net.sourceforge.vulcan.web.struts.actions;
 
 import static net.sourceforge.vulcan.web.struts.actions.BaseDispatchAction.saveError;
+import static net.sourceforge.vulcan.web.struts.actions.BaseDispatchAction.saveSuccessMessage;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -48,6 +49,8 @@ public final class CreateProjectFromUrlAction extends Action {
 		
 		try {
 			projectImporter.createProjectsForUrl(url);
+			
+			saveSuccessMessage(request);
 		} catch (ConfigException e) {
 			saveError(request, ActionMessages.GLOBAL_MESSAGE,
 					new ActionMessage(e.getKey(), e.getArgs()));

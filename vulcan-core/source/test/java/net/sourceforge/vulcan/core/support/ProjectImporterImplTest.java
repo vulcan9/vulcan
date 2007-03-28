@@ -25,10 +25,11 @@ import java.util.List;
 
 import net.sourceforge.vulcan.EasyMockTestCase;
 import net.sourceforge.vulcan.PluginManager;
-import net.sourceforge.vulcan.RepositoryAdaptor;
+import net.sourceforge.vulcan.ProjectBuildConfigurator;
+import net.sourceforge.vulcan.ProjectRepositoryConfigurator;
 import net.sourceforge.vulcan.StateManager;
 import net.sourceforge.vulcan.TestUtils;
-import net.sourceforge.vulcan.core.ProjectBuildConfigurator;
+import net.sourceforge.vulcan.core.Store;
 import net.sourceforge.vulcan.dto.ProjectConfigDto;
 import net.sourceforge.vulcan.exception.ConfigException;
 import net.sourceforge.vulcan.exception.PluginNotConfigurableException;
@@ -45,27 +46,45 @@ public class ProjectImporterImplTest extends EasyMockTestCase {
 	
 	PluginManager pluginManager = createMock(PluginManager.class);
 	StateManager stateManager = createMock(StateManager.class);
+	Store store = createMock(Store.class);
 	
 	RepositoryAdaptorPlugin rap1 = createMock(RepositoryAdaptorPlugin.class);
 	RepositoryAdaptorPlugin rap2 = createMock(RepositoryAdaptorPlugin.class);
 	
-	RepositoryAdaptor ra = createMock(RepositoryAdaptor.class);
+	ProjectRepositoryConfigurator repoConfigurator = createMock(ProjectRepositoryConfigurator.class);
 	
 	BuildToolPlugin btp1 = createMock(BuildToolPlugin.class);
 	BuildToolPlugin btp2 = createMock(BuildToolPlugin.class);
 	
-	ProjectBuildConfigurator buildConfigurator = createMock(ProjectBuildConfigurator.class);
+	ProjectBuildConfigurator buildConfiguratorMock = createMock(ProjectBuildConfigurator.class);
+	ProjectBuildConfigurator buildConfigurator = new ProjectBuildConfigurator() {
+		public void applyConfiguration(ProjectConfigDto projectConfig) {
+			buildConfiguratorMock.applyConfiguration(projectConfig);
+			if (playback) {
+				projectConfig.setName(projectName);
+				projectConfig.setWorkDir(workDir);
+			}
+		}
+		public boolean isStandaloneProject() {
+			return buildConfiguratorMock.isStandaloneProject();
+		}
+	};
 	
 	List<RepositoryAdaptorPlugin> repositoryPlugins = Arrays.asList(rap1, rap2);
 	List<BuildToolPlugin> buildToolPlugins = Arrays.asList(btp1, btp2);
-	
-	ProjectConfigDto projectConfig = new ProjectConfigDto();
 	
 	String url = "http://localhost/";
 	
 	File tmpFile;
 	
 	IOException ioException = new IOException("foo");
+	
+	String defaultWorkDirPattern = "a workdir ${projectName} location";
+	
+	String projectName = "importedProject";
+	String workDir = null;
+	
+	boolean playback = false;
 	
 	@Override
 	protected void setUp() throws Exception {
@@ -75,16 +94,23 @@ public class ProjectImporterImplTest extends EasyMockTestCase {
 		
 		importer.setPluginManager(pluginManager);
 		importer.setStateManager(stateManager);
+		importer.setStore(store);
 		
-		projectConfig.setRepositoryAdaptorPluginId("fake.repo.id");
+		expect(store.getWorkingCopyLocationPattern()).andReturn(defaultWorkDirPattern).anyTimes();
 	}
 
+	@Override
+	public void replay() {
+		super.replay();
+		playback = true;
+	}
+	
 	public void trainNoRepositorySupportsUrl() throws Exception {
 		expect(pluginManager.getPlugins(RepositoryAdaptorPlugin.class))
 			.andReturn(repositoryPlugins);
 	
-		expect(rap1.createInstanceForUrl(url)).andReturn(null);
-		expect(rap2.createInstanceForUrl(url)).andReturn(null);
+		expect(rap1.createProjectConfigurator(url)).andReturn(null);
+		expect(rap2.createProjectConfigurator(url)).andReturn(null);
 	}
 	
 	@TrainingMethod("trainNoRepositorySupportsUrl")
@@ -101,9 +127,10 @@ public class ProjectImporterImplTest extends EasyMockTestCase {
 		expect(pluginManager.getPlugins(RepositoryAdaptorPlugin.class))
 			.andReturn(repositoryPlugins);
 
-		expect(rap1.createInstanceForUrl(url)).andReturn(ra);
+		expect(rap1.createProjectConfigurator(url)).andReturn(repoConfigurator);
+		expect(rap1.getId()).andReturn("a.fake.repo.plugin");
 		
-		ra.download(tmpFile);
+		repoConfigurator.download(tmpFile);
 		expectLastCall().andThrow(ioException);
 	}
 
@@ -123,9 +150,10 @@ public class ProjectImporterImplTest extends EasyMockTestCase {
 		expect(pluginManager.getPlugins(RepositoryAdaptorPlugin.class))
 			.andReturn(repositoryPlugins);
 
-		expect(rap1.createInstanceForUrl(url)).andReturn(ra);
+		expect(rap1.createProjectConfigurator(url)).andReturn(repoConfigurator);
+		expect(rap1.getId()).andReturn("a.fake.repo.plugin");
 		
-		ra.download(tmpFile);
+		repoConfigurator.download(tmpFile);
 		
 		expect(pluginManager.getPlugins(BuildToolPlugin.class))
 			.andReturn(buildToolPlugins);
@@ -148,31 +176,58 @@ public class ProjectImporterImplTest extends EasyMockTestCase {
 		expect(pluginManager.getPlugins(RepositoryAdaptorPlugin.class))
 			.andReturn(repositoryPlugins);
 	
-		expect(rap1.createInstanceForUrl(url)).andReturn(ra);
+		expect(rap1.createProjectConfigurator(url)).andReturn(repoConfigurator);
+		expect(rap1.getId()).andReturn("a.fake.repo.plugin");
 		
-		ra.download(tmpFile);
+		repoConfigurator.download(tmpFile);
 		
 		expect(pluginManager.getPlugins(BuildToolPlugin.class))
 			.andReturn(buildToolPlugins);
 		
 		expect(btp1.createProjectConfigurator(tmpFile)).andReturn(null);
 		expect(btp2.createProjectConfigurator(tmpFile)).andReturn(buildConfigurator);
+		expect(btp2.getId()).andReturn("a.fake.build.plugin");
 		
-		expect(ra.getProjectConfig()).andReturn(projectConfig);
+		final ProjectConfigDto projectConfig = new ProjectConfigDto();
 		
+		projectConfig.setRepositoryAdaptorPluginId("a.fake.repo.plugin");
+		projectConfig.setBuildToolPluginId("a.fake.build.plugin");
+		
+		repoConfigurator.applyConfiguration(projectConfig);
 		buildConfigurator.applyConfiguration(projectConfig);
 	}
 
 	public void trainSaves() throws Exception {
-		expect(pluginManager.getPluginConfigInfo("fake.repo.id"))
+		expect(pluginManager.getPluginConfigInfo("a.fake.repo.plugin"))
 			.andThrow(new PluginNotConfigurableException());
+
+		final ProjectConfigDto projectConfig = new ProjectConfigDto();
+		
+		projectConfig.setRepositoryAdaptorPluginId("a.fake.repo.plugin");
+		projectConfig.setBuildToolPluginId("a.fake.build.plugin");
+		projectConfig.setName(projectName);
+		projectConfig.setWorkDir("a workdir importedProject location");
+		
+		stateManager.addProjectConfig(projectConfig);
+	}
+	
+	public void trainSavesWithAlternateWorkDir() throws Exception {
+		expect(pluginManager.getPluginConfigInfo("a.fake.repo.plugin"))
+			.andThrow(new PluginNotConfigurableException());
+
+		final ProjectConfigDto projectConfig = new ProjectConfigDto();
+		
+		projectConfig.setRepositoryAdaptorPluginId("a.fake.repo.plugin");
+		projectConfig.setBuildToolPluginId("a.fake.build.plugin");
+		projectConfig.setName(projectName);
+		projectConfig.setWorkDir(workDir);
 		
 		stateManager.addProjectConfig(projectConfig);
 	}
 	
 	public void trainStandalone() throws Exception {
 		expect(buildConfigurator.isStandaloneProject()).andReturn(true);
-		ra.setNonRecursive();
+		repoConfigurator.setNonRecursive();
 	}
 	
 	@TrainingMethod("trainConfigures,trainStandalone,trainSaves")
@@ -186,6 +241,15 @@ public class ProjectImporterImplTest extends EasyMockTestCase {
 
 	@TrainingMethod("trainConfigures,trainNotStandalone,trainSaves")
 	public void testConfiguresAndSavesNotStandalone() throws Exception {
+		importer.createProjectsForUrl(url);
+	}
+
+	public void trainSetupAlternateWorkDir() throws Exception {
+		workDir = "alternate work dir";
+	}
+	
+	@TrainingMethod("trainSetupAlternateWorkDir,trainConfigures,trainNotStandalone,trainSavesWithAlternateWorkDir")
+	public void testConfiguresAndSavesBuildToolSetsWorkDir() throws Exception {
 		importer.createProjectsForUrl(url);
 	}
 }

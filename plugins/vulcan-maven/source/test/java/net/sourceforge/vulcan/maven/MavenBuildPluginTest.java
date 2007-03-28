@@ -52,12 +52,21 @@ public class MavenBuildPluginTest extends MavenBuildToolTestBase {
 	}
 	
 	public void testCreateIntegrationSupport() throws Exception {
-		plugin.createIntegrationSupport();
+		plugin.createConfigurationFactory();
 		
-		assertTrue(plugin.integrationSupport instanceof MavenIntegration);
+		assertNotNull(plugin.configuratorFactory);
 	}
 
 	public void testCreateProjectConfigurator() throws Exception {
 		assertNotNull(plugin.createProjectConfigurator(createFakePomFile()));
+	}
+	
+	public void testFilterPackage() throws Exception {
+		final URL[] urls = MavenBuildPlugin.createURLs(maven2Home);
+		
+		final ClassLoader ldr = new MavenBuildPlugin.PackageFilteringClassLoader(urls, getClass().getClassLoader(), "net.sourceforge.vulcan.maven.integration");
+		
+		assertNotSame(ldr.loadClass(MavenIntegration.class.getName()), MavenIntegration.class);
+		assertSame(ldr.loadClass(MavenBuildPlugin.class.getName()), MavenBuildPlugin.class);
 	}
 }

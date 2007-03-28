@@ -3,7 +3,10 @@
 	"http://www.springframework.org/dtd/spring-beans.dtd">
 <beans>
 	<bean name="plugin" class="net.sourceforge.vulcan.maven.MavenBuildPlugin"
-		init-method="init"/>
+			init-method="init">
+		
+		<property name="defaultGoals" value="install"/>
+	</bean>
 	
 	<bean id="messageSource" class="org.springframework.context.support.ResourceBundleMessageSource">
 		<property name="basenames">

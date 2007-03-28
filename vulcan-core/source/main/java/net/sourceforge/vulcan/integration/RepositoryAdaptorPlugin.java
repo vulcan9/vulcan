@@ -18,6 +18,7 @@
  */
 package net.sourceforge.vulcan.integration;
 
+import net.sourceforge.vulcan.ProjectRepositoryConfigurator;
 import net.sourceforge.vulcan.RepositoryAdaptor;
 import net.sourceforge.vulcan.dto.ProjectConfigDto;
 import net.sourceforge.vulcan.dto.RepositoryAdaptorConfigDto;
@@ -34,11 +35,14 @@ public interface RepositoryAdaptorPlugin extends Plugin {
 	RepositoryAdaptor createInstance(ProjectConfigDto projectConfig) throws ConfigException;
 	
 	/**
-	 * @return an instance of RepositoryAdaptor if the url is
+	 * @return an instance of ProjectRepositoryConfigurator if the url is
 	 * supported by this plugin; null otherwise.
-	 * @throws ConfigException 
+	 * @throws ConfigException If the url is supported but an error occurs
+	 * while creating the instance.
 	 */
-	RepositoryAdaptor createInstanceForUrl(String url) throws ConfigException;
+	ProjectRepositoryConfigurator createProjectConfigurator(String url) throws ConfigException;
 
 	RepositoryAdaptorConfigDto getDefaultConfig();
+
+	
 }

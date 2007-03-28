@@ -18,24 +18,17 @@
  */
 package net.sourceforge.vulcan.maven;
 
-import net.sourceforge.vulcan.core.ProjectBuildConfigurator;
-import net.sourceforge.vulcan.dto.ProjectConfigDto;
+import java.io.File;
 
-import org.apache.maven.project.MavenProject;
+import net.sourceforge.vulcan.ProjectBuildConfigurator;
+import net.sourceforge.vulcan.exception.ConfigException;
 
-public class MavenProjectConfigurator implements ProjectBuildConfigurator {
-	private final MavenProject project;
+import org.springframework.context.ApplicationContext;
 
-	public MavenProjectConfigurator(MavenProject project) {
-		this.project = project;
-	}
+public interface MavenProjectConfiguratorFactory {
 
-	public void applyConfiguration(ProjectConfigDto projectConfig) {
-		projectConfig.setName(project.getArtifactId());
-	}
-
-	public boolean isStandaloneProject() {
-		return false;
-	}
+	ProjectBuildConfigurator createProjectConfigurator(File buildSpecFile,
+			String mavenHomeProfileName, String goals,
+			ApplicationContext applicationContext) throws ConfigException;
 
 }
