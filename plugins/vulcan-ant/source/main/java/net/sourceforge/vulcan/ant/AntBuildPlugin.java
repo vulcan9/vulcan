@@ -21,6 +21,7 @@ package net.sourceforge.vulcan.ant;
 import static org.apache.commons.lang.StringUtils.isBlank;
 import static org.apache.commons.lang.StringUtils.isNotBlank;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -30,6 +31,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 
 import net.sourceforge.vulcan.BuildTool;
+import net.sourceforge.vulcan.core.ProjectBuildConfigurator;
 import net.sourceforge.vulcan.dto.BuildToolConfigDto;
 import net.sourceforge.vulcan.dto.PluginConfigDto;
 import net.sourceforge.vulcan.exception.ConfigException;
@@ -71,6 +73,9 @@ public class AntBuildPlugin extends PluginSupport
 			true);
 		
 		return new AntBuildTool(antProjectConfig, this.globalConfig, javaHome);
+	}
+	public ProjectBuildConfigurator createProjectConfigurator(File buildSpecFile) throws ConfigException {
+		return null;
 	}
 	public AntProjectConfig getDefaultConfig() {
 		return new AntProjectConfig();

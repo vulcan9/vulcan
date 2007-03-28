@@ -21,6 +21,11 @@
 	
 	<alias alias="projectManager" name="stateManager"/>
 	
+	<bean name="projectImporter" class="net.sourceforge.vulcan.core.support.ProjectImporterImpl">
+		<property name="pluginManager" ref="pluginManager"/>
+		<property name="stateManager" ref="stateManager"/>
+	</bean>
+	
 	<bean name="eventPool" class="net.sourceforge.vulcan.spring.SpringEventPool">
 		<property name="maxSize">
 			<value>20</value>

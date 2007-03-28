@@ -16,27 +16,26 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-package net.sourceforge.vulcan.integration;
+package net.sourceforge.vulcan.maven;
 
-import java.io.File;
-
-import net.sourceforge.vulcan.BuildTool;
 import net.sourceforge.vulcan.core.ProjectBuildConfigurator;
-import net.sourceforge.vulcan.dto.BuildToolConfigDto;
-import net.sourceforge.vulcan.exception.ConfigException;
-import net.sourceforge.vulcan.metadata.SvnRevision;
+import net.sourceforge.vulcan.dto.ProjectConfigDto;
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
-public interface BuildToolPlugin extends Plugin {
-	BuildTool createInstance(BuildToolConfigDto config) throws ConfigException;
-	BuildToolConfigDto getDefaultConfig();
-	
-	/**
-	 * @param buildSpecFile
-	 * @throws ConfigException If <code>buildSpecFile</code> is supported but
-	 * an error occurs while processing the file.
-	 * @return Null if the buildSpecFile is not recognized/supported, or an
-	 * instance of ProjectConfigurator if it is.
-	 */
-	ProjectBuildConfigurator createProjectConfigurator(File buildSpecFile) throws ConfigException;
+import org.apache.maven.project.MavenProject;
+
+public class MavenProjectConfigurator implements ProjectBuildConfigurator {
+	private final MavenProject project;
+
+	public MavenProjectConfigurator(MavenProject project) {
+		this.project = project;
+	}
+
+	public void applyConfiguration(ProjectConfigDto projectConfig) {
+		projectConfig.setName(project.getArtifactId());
+	}
+
+	public boolean isStandaloneProject() {
+		return false;
+	}
+
 }

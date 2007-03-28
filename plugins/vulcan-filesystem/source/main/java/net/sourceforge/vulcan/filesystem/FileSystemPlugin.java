@@ -22,6 +22,7 @@ import net.sourceforge.vulcan.RepositoryAdaptor;
 import net.sourceforge.vulcan.dto.ProjectConfigDto;
 import net.sourceforge.vulcan.dto.RepositoryAdaptorConfigDto;
 import net.sourceforge.vulcan.event.EventHandler;
+import net.sourceforge.vulcan.exception.ConfigException;
 import net.sourceforge.vulcan.exception.RepositoryException;
 import net.sourceforge.vulcan.filesystem.dto.FileSystemProjectConfigDto;
 import net.sourceforge.vulcan.integration.RepositoryAdaptorPlugin;
@@ -33,8 +34,13 @@ public class FileSystemPlugin
 
 	EventHandler eventHandler;
 	
-	public RepositoryAdaptor createInstance(ProjectConfigDto projectConfig, RepositoryAdaptorConfigDto config) throws RepositoryException {
-		return new FileSystemRepositoryAdaptor((FileSystemProjectConfigDto)config);
+	public RepositoryAdaptor createInstance(ProjectConfigDto projectConfig) throws RepositoryException {
+		return new FileSystemRepositoryAdaptor((FileSystemProjectConfigDto)projectConfig.getRepositoryAdaptorConfig());
+	}
+	
+	public RepositoryAdaptor createInstanceForUrl(String url) throws ConfigException {
+		// TODO implement
+		return null;
 	}
 	
 	public RepositoryAdaptorConfigDto getDefaultConfig() {

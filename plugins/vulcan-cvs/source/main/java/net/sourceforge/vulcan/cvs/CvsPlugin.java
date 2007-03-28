@@ -43,14 +43,18 @@ public class CvsPlugin extends PluginSupport
 	public CvsPlugin() {
 		setConfiguration(new CvsConfigDto());
 	}
-	public RepositoryAdaptor createInstance(ProjectConfigDto projectConfig, RepositoryAdaptorConfigDto config) throws ConfigException {
-		CvsProjectConfigDto cvsProjectConfig = (CvsProjectConfigDto) config;
+	public RepositoryAdaptor createInstance(ProjectConfigDto projectConfig) throws ConfigException {
+		CvsProjectConfigDto cvsProjectConfig = (CvsProjectConfigDto) projectConfig.getRepositoryAdaptorConfig();
 		final CvsRepositoryProfileDto env = getSelectedEnvironment(globalConfig.getProfiles(), cvsProjectConfig.getRepositoryProfile(),
 				"cvs.errors.profile.not.found");
 		
 		final CvsRepositoryAdaptor cvsRepositoryAdaptor = new CvsRepositoryAdaptor(globalConfig, env, cvsProjectConfig, projectConfig.getName());
 		
 		return cvsRepositoryAdaptor;
+	}
+	public RepositoryAdaptor createInstanceForUrl(String url) throws ConfigException {
+		//TODO: implement
+		return null;
 	}
 	public RepositoryAdaptorConfigDto getDefaultConfig() {
 		return new CvsProjectConfigDto();

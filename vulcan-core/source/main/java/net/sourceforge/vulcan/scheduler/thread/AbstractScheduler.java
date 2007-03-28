@@ -18,6 +18,7 @@
  */
 package net.sourceforge.vulcan.scheduler.thread;
 
+import java.lang.Thread.UncaughtExceptionHandler;
 import java.util.Date;
 
 import net.sourceforge.vulcan.dto.SchedulerConfigDto;
@@ -31,7 +32,7 @@ import org.apache.commons.logging.LogFactory;
 
 
 @SvnRevision(id="$Id$", url="$HeadURL$")
-public abstract class AbstractScheduler implements Scheduler {
+public abstract class AbstractScheduler implements Scheduler, UncaughtExceptionHandler {
 	protected final Log log = LogFactory.getLog(getClass());
 	
 	protected EventHandler eventHandler;
@@ -99,6 +100,8 @@ public abstract class AbstractScheduler implements Scheduler {
 			}
 		};
 		shutdown = false;
+		
+		thread.setUncaughtExceptionHandler(this);
 		thread.start();
 		running = true;
 	}
@@ -121,6 +124,15 @@ public abstract class AbstractScheduler implements Scheduler {
 		running = false;
 		if (interrupted) {
 			Thread.currentThread().interrupt();
+		}
+	}
+	
+	public synchronized void uncaughtException(Thread thread, Throwable e) {
+		log.error("Uncaught throwable in thread " + thread.getName(), e);
+		if (this.thread == thread) {
+			this.thread = null;
+			this.running = false;
+			this.shutdown = true;
 		}
 	}
 	

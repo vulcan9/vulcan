@@ -21,6 +21,7 @@
 		<li>
 			<fmt:message key="link.setup.project"/>
 			<ul>
+				<li><html:link forward="importProjectConfig"><fmt:message key="link.import.project"/></html:link></li>
 				<li><html:link forward="createProjectConfig"><fmt:message key="label.project.new"/></html:link></li>
 				<li><fmt:message key="label.projects"/>
 					<ul>

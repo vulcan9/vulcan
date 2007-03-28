@@ -40,6 +40,7 @@ import org.tmatesoft.svn.core.SVNException;
 import org.tmatesoft.svn.core.SVNNodeKind;
 import org.tmatesoft.svn.core.SVNURL;
 import org.tmatesoft.svn.core.internal.io.svn.SVNRepositoryImpl;
+import org.tmatesoft.svn.core.io.SVNRepository;
 
 public class SubversionRepositoryAdaptorTest extends TestCase {
 	SubversionRepositoryAdaptor r;
@@ -73,7 +74,7 @@ public class SubversionRepositoryAdaptorTest extends TestCase {
 		
 		repoConfig.setPath(path);
 		
-		r = new SubversionRepositoryAdaptor(globalConfig, projectConfig, repoConfig, null, new SVNRepositoryImpl(fakeURL, null) {
+		r = new SubversionRepositoryAdaptor(globalConfig, projectConfig, repoConfig, null, globalConfig.getProfiles()[0], new SVNRepositoryImpl(fakeURL, null) {
 			@Override
 			public Collection getDir(String path, long arg1, Map arg2, Collection arg3) throws SVNException {
 				if (path.equals(path)) {
@@ -104,7 +105,7 @@ public class SubversionRepositoryAdaptorTest extends TestCase {
 		final SVNURL fakeURL = SVNURL.parseURIEncoded("http://localhost");
 		repoConfig.setPath("a");
 		
-		r = new SubversionRepositoryAdaptor(globalConfig, projectConfig, repoConfig, null, new SVNRepositoryImpl(fakeURL, null) {
+		r = new SubversionRepositoryAdaptor(globalConfig, projectConfig, repoConfig, null, globalConfig.getProfiles()[0], new SVNRepositoryImpl(fakeURL, null) {
 			@Override
 			public SVNDirEntry info(String path, long revision) throws SVNException {
 				return null;
@@ -136,5 +137,64 @@ public class SubversionRepositoryAdaptorTest extends TestCase {
 		assertEquals("bug (\\d+)", r.combinePatterns("bug (\\d+)", null));
 		assertEquals("Bug-ID: (\\d+)", r.combinePatterns(null, "Bug-ID: %BUGID%"));
 		assertEquals("bug (\\d+)|Bug-ID: (\\d+)", r.combinePatterns("bug (\\d+)", "Bug-ID: %BUGID%"));
+	}
+
+	public void testCreateInstanceForUrlUnsupported() throws Exception {
+		assertNull(SubversionRepositoryAdaptor.createInstance("cvs:localhost:/cvsroot", null, null));
+	}
+	
+	public void testGetRepositoryProfileForUrlCreatesOnMissing() throws Exception {
+		SVNRepository fakeRepo = new FakeRepo("http://localhost/root");
+		ProjectConfigDto project = new ProjectConfigDto();
+		SubversionProjectConfigDto raProjectConfig = new SubversionProjectConfigDto();
+		
+		final SubversionRepositoryProfileDto profile =
+			SubversionRepositoryAdaptor.findOrCreateProfile(fakeRepo, globalConfig, project, raProjectConfig, "http://localhost/root/pom.xml");
+		
+		assertNotNull(profile);
+		
+		assertEquals("http://localhost/root", profile.getRootUrl());
+		assertEquals("http://localhost/root", profile.getDescription());
+		
+		assertEquals(SubversionConfigDto.PLUGIN_ID, project.getRepositoryAdaptorPluginId());
+		assertSame(raProjectConfig, project.getRepositoryAdaptorConfig());
+		assertEquals(profile.getDescription(), raProjectConfig.getRepositoryProfile());
+		assertEquals("/pom.xml", raProjectConfig.getPath());
+	}
+
+	
+	public void testGetRepositoryProfileForUrlReuseOnMatchRoot() throws Exception {
+		SVNRepository fakeRepo = new FakeRepo("http://localhost/svn");
+		ProjectConfigDto project = new ProjectConfigDto();
+		SubversionProjectConfigDto raProjectConfig = new SubversionProjectConfigDto();
+		
+		final SubversionRepositoryProfileDto profile =
+			SubversionRepositoryAdaptor.findOrCreateProfile(fakeRepo, globalConfig,
+					project, raProjectConfig, "http://localhost/svn/trunk/pom.xml");
+		
+		assertNotNull(profile);
+		assertSame(globalConfig.getProfiles()[0], profile);
+		
+		assertEquals("http://localhost/svn", profile.getRootUrl());
+		assertEquals("a", profile.getDescription());
+		
+		assertEquals(SubversionConfigDto.PLUGIN_ID, project.getRepositoryAdaptorPluginId());
+		assertSame(raProjectConfig, project.getRepositoryAdaptorConfig());
+		assertEquals("a", raProjectConfig.getRepositoryProfile());
+		assertEquals("/trunk/pom.xml", raProjectConfig.getPath());
+	}
+	
+	public static class FakeRepo extends SVNRepositoryImpl {
+		final String root;
+		
+		public FakeRepo(String root) {
+			super(null, null);
+			this.root = root;
+		}
+		@Override
+		public SVNURL getRepositoryRoot(boolean forceConnection) throws SVNException {
+			assertTrue("Expected true but was false", forceConnection);
+			return SVNURL.parseURIEncoded(root);
+		}
 	}
 }

@@ -38,11 +38,11 @@ import net.sourceforge.vulcan.Keys;
 import net.sourceforge.vulcan.TestUtils;
 import net.sourceforge.vulcan.core.BuildManager;
 import net.sourceforge.vulcan.core.ProjectDomBuilder;
+import net.sourceforge.vulcan.core.ProjectImporter;
 import net.sourceforge.vulcan.core.Store;
 import net.sourceforge.vulcan.event.EventHandler;
 import net.sourceforge.vulcan.event.EventPool;
 import net.sourceforge.vulcan.metadata.SvnRevision;
-import net.sourceforge.vulcan.web.MockWebApplicationContext;
 import net.sourceforge.vulcan.web.ServletTestCase;
 
 import org.apache.commons.lang.StringUtils;
@@ -58,13 +58,16 @@ import org.apache.struts.config.ModuleConfig;
 import org.apache.struts.upload.CommonsMultipartRequestHandler;
 import org.apache.struts.upload.FormFile;
 import org.apache.struts.util.ModuleUtils;
+import org.springframework.context.support.AbstractApplicationContext;
+import org.springframework.context.support.AbstractMessageSource;
 import org.springframework.web.context.WebApplicationContext;
+import org.springframework.web.context.support.StaticWebApplicationContext;
 
 @SvnRevision(id="$Id$", url="$HeadURL$")
 public abstract class MockApplicationContextStrutsTestCase extends EasyMockStrutsTestCase {
 	protected ActionForward resultForward;
 	protected final static Hashtable<String, Object> multipartElements = new Hashtable<String, Object>();
-	protected final MockWebApplicationContext wac = new MockWebApplicationContext();
+	protected final StaticWebApplicationContext wac = new StaticWebApplicationContext();
 
 	protected ServletTestCase.StateAndProjectManager manager;
 	protected BuildManager buildManager;
@@ -72,6 +75,7 @@ public abstract class MockApplicationContextStrutsTestCase extends EasyMockStrut
 	protected EventPool eventPool;
 	protected EventHandler eventHandler;
 	protected Store store;
+	protected ProjectImporter projectImporter;
 	
 	private boolean multipart;
 	
@@ -280,7 +284,7 @@ public abstract class MockApplicationContextStrutsTestCase extends EasyMockStrut
 	protected final <T> T defineWacSingleton(String beanName, Class<T> type) {
 		final T t = createMock(type);
 		
-		wac.registerSingleton(beanName, t);
+		wac.getBeanFactory().registerSingleton(beanName, t);
 		
 		return t;
 	}
@@ -293,6 +297,9 @@ public abstract class MockApplicationContextStrutsTestCase extends EasyMockStrut
 	}
 
 	private void initWac() {
+		((AbstractMessageSource)wac.getBean(AbstractApplicationContext.MESSAGE_SOURCE_BEAN_NAME))
+			.setUseCodeAsDefaultMessage(true);
+
 		manager = defineWacSingleton("stateManager",
 				ServletTestCase.StateAndProjectManager.class);
 		
@@ -303,6 +310,7 @@ public abstract class MockApplicationContextStrutsTestCase extends EasyMockStrut
 		eventPool = defineWacSingleton("eventPool", EventPool.class);
 		eventHandler = defineWacSingleton("eventHandler", EventHandler.class);
 		store = defineWacSingleton("store", Store.class);
+		projectImporter = defineWacSingleton("projectImporter", ProjectImporter.class);
 		
 		wac.refresh();
 	}

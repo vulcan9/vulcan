@@ -16,29 +16,32 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-package net.sourceforge.vulcan.integration;
+package net.sourceforge.vulcan.core;
 
-import net.sourceforge.vulcan.RepositoryAdaptor;
 import net.sourceforge.vulcan.dto.ProjectConfigDto;
-import net.sourceforge.vulcan.dto.RepositoryAdaptorConfigDto;
-import net.sourceforge.vulcan.exception.ConfigException;
 import net.sourceforge.vulcan.metadata.SvnRevision;
 
+/**
+ * Used by ProjectImporter to configure ProjectConfigDto and related plugin configuration.
+ */
 @SvnRevision(id="$Id$", url="$HeadURL$")
-public interface RepositoryAdaptorPlugin extends Plugin {
+public interface ProjectBuildConfigurator {
 	/**
-	 * @param projectConfig The top level configuration for the project
-	 * @return An instance of RepositoryAdaptor configured with the passed in data.
-	 * @throws ConfigException
+	 * Take settings and apply them to projectConfig.  Any settings can be applied, but
+	 * at a minimum, the following should be defined:
+	 * <ul>
+	 * 	<li>projectConfig.name</li>
+	 * 	<li>projectConfig.buildToolPluginId</li>
+	 *  <li>projectConfig.buildToolConfig</li>
+	 * </ul>
+	 * @param projectConfig The object onto which settings should be applied.
 	 */
-	RepositoryAdaptor createInstance(ProjectConfigDto projectConfig) throws ConfigException;
-	
-	/**
-	 * @return an instance of RepositoryAdaptor if the url is
-	 * supported by this plugin; null otherwise.
-	 * @throws ConfigException 
-	 */
-	RepositoryAdaptor createInstanceForUrl(String url) throws ConfigException;
+	void applyConfiguration(ProjectConfigDto projectConfig);
 
-	RepositoryAdaptorConfigDto getDefaultConfig();
+	/**
+	 * @return <code>true</code> if the project does not depend on nested files or folders.  This
+	 * will cause the repository adaptor to be configured in non-recursive mode.  For
+	 * almost all projects, the return value should be <code>false</code>.
+	 */
+	boolean isStandaloneProject();
 }

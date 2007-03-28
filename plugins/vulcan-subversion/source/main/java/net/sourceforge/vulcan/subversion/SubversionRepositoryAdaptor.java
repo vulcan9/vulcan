@@ -21,6 +21,7 @@ package net.sourceforge.vulcan.subversion;
 import static org.apache.commons.lang.StringUtils.isNotBlank;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
@@ -39,6 +40,7 @@ import net.sourceforge.vulcan.core.BuildDetailCallback;
 import net.sourceforge.vulcan.dto.ChangeLogDto;
 import net.sourceforge.vulcan.dto.ChangeSetDto;
 import net.sourceforge.vulcan.dto.Date;
+import net.sourceforge.vulcan.dto.PluginConfigDto;
 import net.sourceforge.vulcan.dto.ProjectConfigDto;
 import net.sourceforge.vulcan.dto.RepositoryTagDto;
 import net.sourceforge.vulcan.dto.RevisionTokenDto;
@@ -93,6 +95,7 @@ public class SubversionRepositoryAdaptor extends PluginSupport implements Reposi
 	private final SubversionRepositoryProfileDto profile;
 	private final SVNRepository svnRepository;
 	private final EventHandler eventHandler = new EventHandler();
+	private final ProjectConfigDto projectConfig;
 	private final String projectName;
 	private final Map<String, Long> byteCounters;
 	
@@ -104,32 +107,46 @@ public class SubversionRepositoryAdaptor extends PluginSupport implements Reposi
 	
 	private final StateManager stateManager;
 	
-	public SubversionRepositoryAdaptor(SubversionConfigDto repoConfig, ProjectConfigDto projectConfig, SubversionProjectConfigDto config, StateManager stateManager) throws ConfigException {
-		this(repoConfig, projectConfig, config, stateManager, true);
+	public SubversionRepositoryAdaptor(SubversionConfigDto globalConfig, ProjectConfigDto projectConfig, SubversionProjectConfigDto config, StateManager stateManager) throws ConfigException {
+		this(globalConfig, projectConfig, config, stateManager, true);
 	}
 
-	SubversionRepositoryAdaptor(SubversionConfigDto repoConfig, ProjectConfigDto projectConfig, SubversionProjectConfigDto config, StateManager stateManager, boolean init) throws ConfigException {
+	SubversionRepositoryAdaptor(SubversionConfigDto globalConfig, ProjectConfigDto projectConfig, SubversionProjectConfigDto config, StateManager stateManager, boolean init) throws ConfigException {
 		this(
-			repoConfig,
+			globalConfig,
 			projectConfig,
 			config,
 			stateManager,
-			createRepository(getSelectedEnvironment(
-									repoConfig.getProfiles(),
-									config.getRepositoryProfile(),
-									"svn.profile.missing"),
-									init));
+			init,
+			getSelectedEnvironment(
+					globalConfig.getProfiles(),
+					config.getRepositoryProfile(),
+					"svn.profile.missing"));
 	}
 
-	SubversionRepositoryAdaptor(SubversionConfigDto repoConfig, ProjectConfigDto projectConfig, SubversionProjectConfigDto config, StateManager stateManager, SVNRepository svnRepository) throws ConfigException {
+	SubversionRepositoryAdaptor(SubversionConfigDto globalConfig, ProjectConfigDto projectConfig, SubversionProjectConfigDto config, StateManager stateManager, boolean init, SubversionRepositoryProfileDto profile) throws ConfigException {
+		this(
+			globalConfig,
+			projectConfig,
+			config,
+			stateManager,
+			profile,
+			createRepository(profile, init));
+	}
+
+	SubversionRepositoryAdaptor(SubversionConfigDto globalConfig, ProjectConfigDto projectConfig, SubversionProjectConfigDto config, StateManager stateManager, SubversionRepositoryProfileDto profile, SVNRepository svnRepository) throws ConfigException {
 		this.config = config;
 		this.stateManager = stateManager;
+		
+		this.projectConfig = projectConfig;
 		this.projectName = projectConfig.getName();
-		this.byteCounters = repoConfig.getWorkingCopyByteCounts();
-		this.profile = getSelectedEnvironment(
-				repoConfig.getProfiles(),
-				config.getRepositoryProfile(),
-				"svn.profile.missing");
+		this.profile = profile;
+		
+		if (globalConfig != null) {
+			this.byteCounters = globalConfig.getWorkingCopyByteCounts();
+		} else {
+			this.byteCounters = Collections.emptyMap();
+		}
 		
 		this.svnRepository = svnRepository;
 		
@@ -150,7 +167,7 @@ public class SubversionRepositoryAdaptor extends PluginSupport implements Reposi
 		
 		lineOfDevelopment.setPath(config.getPath());
 		lineOfDevelopment.setRepositoryRoot(profile.getRootUrl());
-		lineOfDevelopment.setTagFolderNames(new HashSet<String>(Arrays.asList(repoConfig.getTagFolderNames())));
+		lineOfDevelopment.setTagFolderNames(new HashSet<String>(Arrays.asList(globalConfig.getTagFolderNames())));
 	}
 
 	public RevisionTokenDto getLatestRevision() throws RepositoryException {
@@ -172,6 +189,29 @@ public class SubversionRepositoryAdaptor extends PluginSupport implements Reposi
 		return new RevisionTokenDto(revision, "r" + revision);
 	}
 
+	public void download(File target) throws RepositoryException, IOException {
+		final OutputStream os = new FileOutputStream(target);
+		try {
+			svnRepository.getFile(config.getPath(), SVNRevision.HEAD.getNumber(), null, os);
+		} catch (SVNException e) {
+			throw new RepositoryException(e);
+		} finally {
+			os.close();
+		}
+	}
+	
+	public ProjectConfigDto getProjectConfig() {
+		return projectConfig;
+	}
+	
+	public void setNonRecursive() {
+		config.setRecursive(false);
+	}
+	
+	public void updateGlobalConfig(PluginConfigDto globalRaConfig) {
+		//TODO
+	}
+	
 	public void createWorkingCopy(File absolutePath, BuildDetailCallback buildDetailCallback) throws RepositoryException {
 		synchronized (byteCounters) {
 			if (byteCounters.containsKey(projectName)) {
@@ -511,5 +551,48 @@ public class SubversionRepositoryAdaptor extends PluginSupport implements Reposi
 		void setPreviousByteCount(long previousByteCount) {
 			this.previousByteCount = previousByteCount;
 		}
+	}
+
+	static SubversionRepositoryAdaptor createInstance(String url, SubversionConfigDto globalConfig, StateManager stateManager) throws ConfigException {
+		try {
+			final SVNURL svnurl = SVNURL.parseURIEncoded(url);
+			final SVNRepository repo = SVNRepositoryFactory.create(svnurl);
+			
+			final SubversionProjectConfigDto raProjectConfig = new SubversionProjectConfigDto();
+			final ProjectConfigDto project = new ProjectConfigDto();
+			
+			final SubversionRepositoryProfileDto profile = findOrCreateProfile(repo, globalConfig, project, raProjectConfig, url);
+			
+			return new SubversionRepositoryAdaptor(globalConfig, project, raProjectConfig, stateManager, profile, repo);
+		} catch (SVNException e) {
+			return null;
+		}
+	}
+
+	static SubversionRepositoryProfileDto findOrCreateProfile(SVNRepository repo, SubversionConfigDto globalConfig, ProjectConfigDto project, SubversionProjectConfigDto raProjectConfig, String absoluteUrl) throws SVNException {
+		final String root = repo.getRepositoryRoot(true).toString();
+		
+		SubversionRepositoryProfileDto profile = 
+			getSelectedEnvironment(
+					globalConfig.getProfiles(),
+					new Visitor<SubversionRepositoryProfileDto>() {
+						public boolean isMatch(SubversionRepositoryProfileDto node) {
+							return node.getRootUrl().equals(root);
+						}
+					});
+		
+		if (profile == null) {
+			profile = new SubversionRepositoryProfileDto();
+			profile.setRootUrl(root);
+			profile.setDescription(root);
+		}
+		
+		project.setRepositoryAdaptorPluginId(SubversionConfigDto.PLUGIN_ID);
+		project.setRepositoryAdaptorConfig(raProjectConfig);
+
+		raProjectConfig.setRepositoryProfile(profile.getDescription());
+		raProjectConfig.setPath(absoluteUrl.substring(profile.getRootUrl().length()));
+		
+		return profile;
 	}
 }

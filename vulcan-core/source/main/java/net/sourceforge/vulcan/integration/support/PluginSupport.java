@@ -25,28 +25,44 @@ import net.sourceforge.vulcan.exception.ConfigException;
 import org.apache.commons.lang.StringUtils;
 
 public abstract class PluginSupport {
+	protected static interface Visitor<T> {
+		boolean isMatch(T node);
+	}
 
 	protected static <T extends PluginProfileDto> T getSelectedEnvironment(T[] environments, String name,
 			String missingMessageKey) throws ConfigException {
 		return getSelectedEnvironment(environments, name, missingMessageKey, false);
 	}
 	
-	protected static <T extends PluginProfileDto> T getSelectedEnvironment(T[] environments, String name,
-			String missingMessageKey, boolean matchPartial) throws ConfigException {
+	protected static <T extends PluginProfileDto> T getSelectedEnvironment(T[] environments, final String name,
+			String missingMessageKey, final boolean matchPartial) throws ConfigException {
 		
 		if (StringUtils.isBlank(name)) {
 			return null;
 		}
 		
-		for (T dto : environments) {
-			if ((matchPartial && dto.getName().startsWith(name))
-				||name.equals(dto.getName())) {
-				return dto;
+		final T t = getSelectedEnvironment(environments, new Visitor<T>() {
+			public boolean isMatch(T node) {
+				if ((matchPartial && node.getName().startsWith(name))
+						||name.equals(node.getName())) {
+						return true;
+					}
+				return false;
 			}
+		});
+		
+		if (t == null && missingMessageKey != null) {
+			throw new ConfigException(missingMessageKey, new String[] {name});
 		}
 		
-		if (missingMessageKey != null) {
-			throw new ConfigException(missingMessageKey, new String[] {name});
+		return t;
+	}
+	
+	protected static <T extends PluginProfileDto> T getSelectedEnvironment(T[] environments, Visitor<T> visitor) {
+		for (T t : environments) {
+			if (visitor.isMatch(t)) {
+				return t;
+			}
 		}
 		
 		return null;

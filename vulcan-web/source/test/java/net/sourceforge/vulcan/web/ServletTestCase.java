@@ -31,7 +31,10 @@ import net.sourceforge.vulcan.StateManager;
 import net.sourceforge.vulcan.event.EventHandler;
 import net.sourceforge.vulcan.metadata.SvnRevision;
 
+import org.springframework.context.support.AbstractApplicationContext;
+import org.springframework.context.support.AbstractMessageSource;
 import org.springframework.web.context.WebApplicationContext;
+import org.springframework.web.context.support.StaticWebApplicationContext;
 
 import servletunit.HttpServletRequestSimulator;
 import servletunit.HttpServletResponseSimulator;
@@ -112,7 +115,7 @@ public abstract class ServletTestCase extends EasyMockTestCase {
 	
 	ByteArrayOutputStream os = new ByteArrayOutputStream();
 	
-	MockWebApplicationContext wac;
+	StaticWebApplicationContext wac;
 	StateManager mgr;
 	EventHandler eventHandler;
 	
@@ -121,17 +124,20 @@ public abstract class ServletTestCase extends EasyMockTestCase {
 	
 	@Override
 	public void setUp() throws Exception {
-		wac = new MockWebApplicationContext();
+		wac = new StaticWebApplicationContext();
+		
+		((AbstractMessageSource)wac.getBean(AbstractApplicationContext.MESSAGE_SOURCE_BEAN_NAME))
+			.setUseCodeAsDefaultMessage(true);
 		
 		servletContext.setAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE, wac);
 		
 		mgr = createStrictMock(StateAndProjectManager.class);
-		wac.registerSingleton(Keys.STATE_MANAGER, mgr);
+		wac.getBeanFactory().registerSingleton(Keys.STATE_MANAGER, mgr);
 		
-		wac.registerSingleton(Keys.EVENT_POOL, Boolean.TRUE);
+		wac.getBeanFactory().registerSingleton(Keys.EVENT_POOL, Boolean.TRUE);
 		
 		eventHandler = createStrictMock(EventHandler.class);
-		wac.registerSingleton(Keys.EVENT_HANDLER, eventHandler);
+		wac.getBeanFactory().registerSingleton(Keys.EVENT_HANDLER, eventHandler);
 	}
 
 	public interface StateAndProjectManager extends StateManager, ProjectManager {}

@@ -31,6 +31,7 @@ import net.sourceforge.vulcan.dto.ProjectStatusDto;
 import net.sourceforge.vulcan.exception.BuildFailedException;
 import net.sourceforge.vulcan.exception.ConfigException;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 
 public abstract class MavenBuildToolTestBase extends TestCase {
@@ -119,5 +120,43 @@ public abstract class MavenBuildToolTestBase extends TestCase {
 		
 		// clear any pending interrupts
 		Thread.interrupted();
+	}
+	
+	protected File createFakePomFile() throws Exception {
+		File file = File.createTempFile("vulcan-maven-test-pom", ".xml");
+		
+		file.deleteOnExit();
+	
+		FileUtils.writeStringToFile(file, createFakePomContents(), "UTF-8");
+
+		return file;
+	}
+
+	protected String createFakePomContents() {
+		StringBuffer sb = new StringBuffer();
+		
+		sb.append("<?xml version='1.0' encoding='UTF-8'?>" +
+						"<project xmlns='http://maven.apache.org/POM/4.0.0'" +
+						"xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'" + 
+						"xsi:schemaLocation='http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd'>" +
+						"<modelVersion>4.0.0</modelVersion>");
+		
+		sb.append("<packaging>").append("pom").append("</packaging>");
+		sb.append("<groupId>").append("com.example").append("</groupId>");
+		sb.append("<artifactId>").append("super-tool").append("</artifactId>");
+		sb.append("<version>").append("1.0").append("</version>");
+
+/*		sb.append("<parent>")
+			.append("<groupId>").append("com.example").append("</groupId>")
+			.append("<artifactId>").append("no-such-artifact").append("</artifactId>")
+			.append("<version>").append("1.0").append("</version>")
+		.append("</parent>");
+*/		
+		sb.append("<modules>")
+			.append("<module>").append("foo").append("</module>")
+		.append("</modules>");
+		
+		sb.append("</project>");
+		return sb.toString();
 	}
 }

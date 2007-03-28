@@ -20,15 +20,27 @@ package net.sourceforge.vulcan.maven;
 
 import static net.sourceforge.vulcan.ant.AntBuildPlugin.addSystemJavaHomeIfMissing;
 import static org.apache.commons.lang.StringUtils.isNotBlank;
+
+import java.io.File;
+import java.lang.reflect.Method;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLClassLoader;
+import java.util.ArrayList;
+import java.util.List;
+
 import net.sourceforge.vulcan.BuildTool;
 import net.sourceforge.vulcan.ant.JavaHome;
+import net.sourceforge.vulcan.core.ProjectBuildConfigurator;
 import net.sourceforge.vulcan.dto.BuildToolConfigDto;
 import net.sourceforge.vulcan.dto.PluginConfigDto;
 import net.sourceforge.vulcan.exception.ConfigException;
 import net.sourceforge.vulcan.integration.BuildToolPlugin;
 import net.sourceforge.vulcan.integration.ConfigurablePlugin;
 import net.sourceforge.vulcan.integration.support.PluginSupport;
+import net.sourceforge.vulcan.maven.integration.MavenIntegration;
 
+import org.apache.commons.io.FileUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -39,8 +51,13 @@ public class MavenBuildPlugin extends PluginSupport
 	public static final String PLUGIN_ID = "net.sourceforge.vulcan.maven";
 	public static final String PLUGIN_NAME = "Apache Maven";
 	
+	ClassLoader integrationSupportParentClassLoader = ProjectBuildConfigurator.class.getClassLoader();
+	
 	MavenConfig config = new MavenConfig();
 	MavenBuildToolFactory mavenBuildToolFactory = new MavenBuildToolFactory();
+	
+	Object integrationSupport;
+	Method createProjectConfiguratorMethod;
 	
 	private ApplicationContext applicationContext;
 	
@@ -85,7 +102,24 @@ public class MavenBuildPlugin extends PluginSupport
 		
 		return mavenBuildToolFactory.createMavenBuildTool(mavenProjectConfig, config, javaHome, mavenHome);
 	}
-	public BuildToolConfigDto getDefaultConfig() {
+	
+	public ProjectBuildConfigurator createProjectConfigurator(File buildSpecFile) throws ConfigException {
+		if (integrationSupport == null) {
+			createIntegrationSupport();
+		}
+
+		try {
+			return (ProjectBuildConfigurator) createProjectConfiguratorMethod.invoke(
+					integrationSupport, new Object[] {buildSpecFile});
+		} catch (Exception e) {
+			if (e instanceof RuntimeException) {
+				throw (RuntimeException)e;
+			}
+			throw new RuntimeException(e);
+		}
+	}
+	
+	public MavenProjectConfig getDefaultConfig() {
 		return new MavenProjectConfig();
 	}
 	
@@ -95,5 +129,63 @@ public class MavenBuildPlugin extends PluginSupport
 	public void setConfiguration(PluginConfigDto config) {
 		this.config = (MavenConfig) config;
 		addSystemJavaHomeIfMissing(this.config, applicationContext);
+	}
+
+	void createIntegrationSupport() throws ConfigException {
+		// find maven2 home
+		String mavenHomeDirectory = null;
+		
+		for (MavenHome home : config.getMavenHomes()) {
+			if (MavenBuildTool.isMaven2(home.getDirectory())) {
+				mavenHomeDirectory = home.getDirectory();
+				break;
+			}
+		}
+		
+		if (mavenHomeDirectory == null) {
+			throw new ConfigException("maven.maven2.required", null);
+		}
+
+		// create classloader
+		final URLClassLoader classLoader = 
+			URLClassLoader.newInstance(createURLs(mavenHomeDirectory), integrationSupportParentClassLoader);
+		
+		// load integration class
+		try {
+			integrationSupport = classLoader.loadClass(MavenIntegration.class.getName()).newInstance();
+			createProjectConfiguratorMethod = integrationSupport.getClass().getMethod(
+					"createProjectConfigurator", new Class[] {File.class});
+		} catch (Exception e) {
+			if (e instanceof RuntimeException) {
+				throw (RuntimeException)e;
+			}
+			throw new RuntimeException(e);
+		}
+		
+		
+	}
+
+	@SuppressWarnings("unchecked")
+	static URL[] createURLs(String mavenHomeDirectory) throws ConfigException {
+		final String[] extensions = new String[] {"jar"};
+
+		try {
+			final List<File> files = new ArrayList<File>();
+		
+			files.addAll(FileUtils.listFiles(new File(mavenHomeDirectory, "core"), extensions, true));
+			files.addAll(FileUtils.listFiles(new File(mavenHomeDirectory, "lib"), extensions, true));
+	
+			final URL[] urls = new URL[files.size() + 1];
+	
+			for (int i=0; i<files.size(); i++) {
+				urls[i] = files.get(i).toURL();
+			}
+
+			urls[urls.length - 1] = MavenBuildTool.getLocalClassPathEntry(MavenBuildPlugin.class, null).toURL();
+			
+			return urls;
+		} catch (MalformedURLException e) {
+			throw new RuntimeException(e);
+		}
 	}
 }

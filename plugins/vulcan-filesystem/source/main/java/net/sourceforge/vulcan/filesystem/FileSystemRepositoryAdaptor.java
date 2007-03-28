@@ -28,6 +28,8 @@ import net.sourceforge.vulcan.RepositoryAdaptor;
 import net.sourceforge.vulcan.core.BuildDetailCallback;
 import net.sourceforge.vulcan.dto.ChangeLogDto;
 import net.sourceforge.vulcan.dto.ChangeSetDto;
+import net.sourceforge.vulcan.dto.PluginConfigDto;
+import net.sourceforge.vulcan.dto.ProjectConfigDto;
 import net.sourceforge.vulcan.dto.RepositoryTagDto;
 import net.sourceforge.vulcan.dto.RevisionTokenDto;
 import net.sourceforge.vulcan.exception.RepositoryException;
@@ -42,6 +44,22 @@ public class FileSystemRepositoryAdaptor implements RepositoryAdaptor {
 		this.config = config;
 	}
 
+	public void download(File target) throws RepositoryException, IOException {
+		throw new UnsupportedOperationException("not implemented");
+	}
+
+	public ProjectConfigDto getProjectConfig() {
+		throw new UnsupportedOperationException("not implemented");
+	}
+	
+	public void setNonRecursive() {
+		throw new UnsupportedOperationException("not implemented");
+	}
+	
+	public void updateGlobalConfig(PluginConfigDto globalRaConfig) {
+		throw new UnsupportedOperationException("not implemented");
+	}
+	
 	public void createWorkingCopy(File targetDir, BuildDetailCallback buildDetailCallback) throws RepositoryException, InterruptedException {
 		final File sourceDir = new File(config.getSourceDirectory());
 		

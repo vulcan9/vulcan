@@ -49,6 +49,8 @@ import net.sourceforge.vulcan.cvs.support.JavaSecurityDigester;
 import net.sourceforge.vulcan.cvs.support.NewestRevisionsLogListener;
 import net.sourceforge.vulcan.dto.ChangeLogDto;
 import net.sourceforge.vulcan.dto.ChangeSetDto;
+import net.sourceforge.vulcan.dto.PluginConfigDto;
+import net.sourceforge.vulcan.dto.ProjectConfigDto;
 import net.sourceforge.vulcan.dto.RepositoryTagDto;
 import net.sourceforge.vulcan.dto.RevisionTokenDto;
 import net.sourceforge.vulcan.exception.RepositoryException;
@@ -184,6 +186,22 @@ public class CvsRepositoryAdaptor implements RepositoryAdaptor {
 		return names;
 	}
 	
+	public void download(File target) throws RepositoryException, IOException {
+		throw new UnsupportedOperationException("not implemented");
+	}
+
+	public ProjectConfigDto getProjectConfig() {
+		throw new UnsupportedOperationException("not implemented");
+	}
+	
+	public void setNonRecursive() {
+		throw new UnsupportedOperationException("not implemented");
+	}
+	
+	public void updateGlobalConfig(PluginConfigDto globalRaConfig) {
+		throw new UnsupportedOperationException("not implemented");
+	}
+
 	public void createWorkingCopy(File absolutePath, BuildDetailCallback buildDetailCallback) throws RepositoryException {
 		final Map<String, Long> counters = globalConfig.getWorkingCopyByteCounts();
 		long previousBytesCounted = -1;
