@@ -56,11 +56,22 @@ import org.springframework.core.io.Resource;
 @SvnRevision(id="$Id$", url="$HeadURL$")
 public class SpringPluginManagerTest extends EasyMockTestCase {
 	BuildEventPluginPublisher buildEventPluginPublisher = new BuildEventPluginPublisher();
-	SpringPluginManager mgr = new SpringPluginManager();
+	SpringPluginManager mgr = new SpringPluginManager() {
+		@SuppressWarnings("unchecked")
+		@Override
+		public synchronized <T extends Plugin> List<T> getPlugins(Class<T> type) {
+			if (fakePlugins != null) {
+				return (List<T>) fakePlugins;
+			}
+			return super.getPlugins(type);
+		}
+	};
 	DelegatingResourceBundleMessageSource loader = new DelegatingResourceBundleMessageSource();
 	
 	Store store = createMock(Store.class);
 	FactoryExpert expert = createStrictMock(FactoryExpert.class);
+	
+	List<Plugin> fakePlugins;
 	
 	@Override
 	public void setUp() throws Exception {
@@ -343,7 +354,7 @@ public class SpringPluginManagerTest extends EasyMockTestCase {
 		
 		assertEquals(2, mgr.plugins.size());
 		
-		final List<Plugin> plugins = mgr.getPlugins();
+		final List<Plugin> plugins = mgr.getPlugins(Plugin.class);
 		
 		assertNotNull(plugins);
 		

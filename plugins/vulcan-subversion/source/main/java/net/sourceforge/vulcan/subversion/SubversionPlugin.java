@@ -49,8 +49,11 @@ public class SubversionPlugin
 	public SubversionPlugin() {
 		setConfiguration(new SubversionConfigDto());
 	}
-	public RepositoryAdaptor createInstance(ProjectConfigDto projectConfig, RepositoryAdaptorConfigDto repoConfig) throws ConfigException {
-		return new SubversionRepositoryAdaptor(this.config, projectConfig, (SubversionProjectConfigDto)repoConfig, stateManager);
+	public RepositoryAdaptor createInstance(ProjectConfigDto projectConfig) throws ConfigException {
+		return new SubversionRepositoryAdaptor(this.config, projectConfig, (SubversionProjectConfigDto)projectConfig.getRepositoryAdaptorConfig(), stateManager);
+	}
+	public RepositoryAdaptor createInstanceForUrl(String url) throws ConfigException {
+		return SubversionRepositoryAdaptor.createInstance(url, config, stateManager);
 	}
 	public RepositoryAdaptorConfigDto getDefaultConfig() {
 		return new SubversionProjectConfigDto();

@@ -47,11 +47,20 @@ public interface PluginManager {
 	
 	public List<ComponentVersionDto> getPluginVersions();
 	
-	public List<Plugin> getRepositoryPlugins();
+	/**
+	 * @param Use: 
+	 * <ul>
+	 * 	<li>Plugin.class to get all plugins</li>
+	 * 	<li>RepositoryPlugin.class to get RepositoryPlugins</li>
+	 *  <li>etc.</li>
+	 * </ul>
+	 * @return List of plugins implementing the specified interface.
+	 */
+	public <T extends Plugin> List<T> getPlugins(Class<T> type);
+	
 	public RepositoryAdaptor createRepositoryAdaptor(String pluginId, ProjectConfigDto projectConfig) throws PluginNotFoundException, ConfigException;
 	public RepositoryAdaptorConfigDto getRepositoryAdaptorDefaultConfig(String pluginId) throws PluginNotFoundException;
 	
-	public List<Plugin> getBuildToolPlugins();
 	public BuildTool createBuildTool(String pluginId, BuildToolConfigDto buildToolConfig) throws PluginNotFoundException, ConfigException;
 	public BuildToolConfigDto getBuildToolDefaultConfig(String pluginId) throws PluginNotFoundException;
 	

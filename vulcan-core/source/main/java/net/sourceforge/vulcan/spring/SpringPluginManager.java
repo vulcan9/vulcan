@@ -26,7 +26,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -217,18 +216,44 @@ public class SpringPluginManager
 		 return Enum.valueOf(c, enumName);
 	}
 
-	public synchronized List<Plugin> getPlugins() {
-		final List<Plugin> list = new ArrayList<Plugin>();
+	@SuppressWarnings("unchecked")
+	public synchronized <T extends Plugin> List<T> getPlugins(Class<T> type) {
+		final List<T> list = new ArrayList<T>();
 
 		for (PluginState state : plugins.values()) {
-			list.add(state.plugin);
+			if (type.isAssignableFrom(state.plugin.getClass())) {
+				list.add((T)state.plugin);
+			}
 		}
-		Collections.sort(list, new Comparator<Plugin>() {
-			public int compare(Plugin o1, Plugin o2) {
+		
+		Collections.sort(list, new Comparator<T>() {
+			public int compare(T o1, T o2) {
 				return o1.getName().compareTo(o2.getName());
 			}
 		});
+		
 		return list;
+	}
+	
+	/**
+	 * Convenience method for JSP integration.
+	 */
+	public List<BuildToolPlugin> getBuildToolPlugins() {
+		return getPlugins(BuildToolPlugin.class);
+	}
+
+	/**
+	 * Convenience method for JSP integration.
+	 */
+	public List<RepositoryAdaptorPlugin> getRepositoryPlugins() {
+		return getPlugins(RepositoryAdaptorPlugin.class);
+	}
+	
+	/**
+	 * Convenience method for JSP integration.
+	 */
+	public List<BuildManagerObserverPlugin> getObserverPlugins() {
+		return getPlugins(BuildManagerObserverPlugin.class);
 	}
 	
 	public synchronized List<ComponentVersionDto> getPluginVersions() {
@@ -254,46 +279,14 @@ public class SpringPluginManager
 		return versions;
 	}
 	
-	public synchronized List<Plugin> getRepositoryPlugins() {
-		final List<Plugin> list = getPlugins();
-		
-		for (Iterator<Plugin> itr = list.iterator(); itr.hasNext();) {
-			final Plugin plugin = itr.next();
-			if (!(plugin instanceof RepositoryAdaptorPlugin)) {
-				itr.remove();
-			}
-		}
-		return list;
-	}
-	public List<Plugin> getBuildToolPlugins() {
-		final List<Plugin> list = getPlugins();
-		
-		for (Iterator<Plugin> itr = list.iterator(); itr.hasNext();) {
-			final Plugin plugin = itr.next();
-			if (!(plugin instanceof BuildToolPlugin)) {
-				itr.remove();
-			}
-		}
-		return list;
-	}
-	public List<Plugin> getObserverPlugins() {
-		final List<Plugin> list = getPlugins();
-		
-		for (Iterator<Plugin> itr = list.iterator(); itr.hasNext();) {
-			final Plugin plugin = itr.next();
-			if (!(plugin instanceof BuildManagerObserverPlugin)) {
-				itr.remove();
-			}
-		}
-		return list;
-	}
 	public RepositoryAdaptor createRepositoryAdaptor(String id, ProjectConfigDto projectConfig) throws PluginNotFoundException, ConfigException {
 		final PluginState state = findPluginState(id);
 		
 		final RepositoryAdaptorPlugin plugin = (RepositoryAdaptorPlugin) state.plugin;
 		
-		return plugin.createInstance(projectConfig, projectConfig.getRepositoryAdaptorConfig());
+		return plugin.createInstance(projectConfig);
 	}
+
 	public BuildTool createBuildTool(String id, BuildToolConfigDto buildToolConfig) throws PluginNotFoundException, ConfigException {
 		final PluginState state = findPluginState(id);
 		

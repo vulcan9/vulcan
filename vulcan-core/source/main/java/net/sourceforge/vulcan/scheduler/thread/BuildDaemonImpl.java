@@ -84,6 +84,7 @@ public abstract class BuildDaemonImpl extends AbstractScheduler implements Build
 					}
 				}
 			};
+			watchdog.setUncaughtExceptionHandler(this);
 			watchdog.start();
 		} else {
 			watchdog = null;

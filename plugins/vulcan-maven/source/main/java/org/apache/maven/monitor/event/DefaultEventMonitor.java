@@ -108,7 +108,7 @@ public class DefaultEventMonitor extends AbstractSelectiveEventMonitor {
 		}
 		
 		try {
-			final String longMessage = (String) cause.getClass().getMethod("getLongMessage", null).invoke(cause, null);
+			final String longMessage = (String) cause.getClass().getMethod("getLongMessage", (Class[])null).invoke(cause, (Object[])null);
 			return parseCompileFailuresFromFormattedMessage(target, longMessage);
 		} catch (Exception e) {
 		}

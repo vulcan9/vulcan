@@ -16,26 +16,17 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-package net.sourceforge.vulcan.web;
+package net.sourceforge.vulcan.core;
 
+import net.sourceforge.vulcan.exception.ConfigException;
+import net.sourceforge.vulcan.exception.DuplicateNameException;
+import net.sourceforge.vulcan.exception.StoreException;
 import net.sourceforge.vulcan.metadata.SvnRevision;
 
-import org.springframework.beans.BeansException;
-import org.springframework.context.support.AbstractApplicationContext;
-import org.springframework.context.support.AbstractMessageSource;
-import org.springframework.web.context.support.StaticWebApplicationContext;
-
-
 @SvnRevision(id="$Id$", url="$HeadURL$")
-@Deprecated
-public class MockWebApplicationContext extends StaticWebApplicationContext {
-	public MockWebApplicationContext() {
-		super();
-		
-		((AbstractMessageSource)super.getBean(AbstractApplicationContext.MESSAGE_SOURCE_BEAN_NAME))
-				.setUseCodeAsDefaultMessage(true);
-	}
-	public void registerSingleton(String beanName, Object bean) throws BeansException {
-		getBeanFactory().registerSingleton(beanName, bean);
-	}
+public interface ProjectImporter {
+
+	void createProjectsForUrl(String url) throws ConfigException,
+			StoreException, DuplicateNameException;
+
 }

@@ -185,10 +185,14 @@ public abstract class EasyMockTestCase extends TestCase {
 		final TrainingMethod trainingMethodAnn = testMethod.getAnnotation(TrainingMethod.class);
 		
 		if (trainingMethodAnn != null) {
+			final String trainingMethodNames[] = trainingMethodAnn.value().split(",");
+			
 			try {
-				final Method trainingMethod = c.getMethod(
-					trainingMethodAnn.value(), (Class[])null);
-				trainingMethod.invoke(instance, (Object[]) null);
+				for (String trainingMethodName : trainingMethodNames) {
+					final Method trainingMethod = c.getMethod(
+						trainingMethodName.trim(), (Class[])null);
+					trainingMethod.invoke(instance, (Object[]) null);
+				}
 				return true;
 			} catch (InvocationTargetException e) {
 				throw e.getCause();

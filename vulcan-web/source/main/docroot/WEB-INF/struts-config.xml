@@ -39,6 +39,7 @@
 		<forward name="configureScheduler" path="/admin/setup/manageSchedulerConfig.do?action=Edit"/>
 		<forward name="configureBuildDaemon" path="/admin/setup/manageBuildDaemonConfig.do?action=Edit&amp;amp;daemon=true"/>
 		<forward name="configurePlugin" path="/admin/setup/managePlugin.do?action=Configure"/>
+		<forward name="importProjectConfig" path="/admin/setup/importProjectForm.do"/>
 		<forward name="createProjectConfig" path="/admin/setup/manageProjectConfig.do?action=edit&amp;amp;createNew=true"/>
 		<forward name="createSchedulerConfig" path="/admin/setup/manageSchedulerConfig.do?action=edit&amp;amp;createNew=true"/>
 		<forward name="createBuildDaemonConfig" path="/admin/setup/manageBuildDaemonConfig.do?action=edit&amp;amp;createNew=true&amp;amp;daemon=true"/>
@@ -73,6 +74,16 @@
 		<action path="/admin/buildManagerControl"
 				type="org.springframework.web.struts.DelegatingActionProxy"
 				parameter="action">
+			<forward name="success" path="/admin/setup/"/>
+		</action>
+		
+		<action path="/admin/setup/importProjectForm"
+				type="org.apache.struts.actions.ForwardAction"
+				parameter="/WEB-INF/jsp/importProjectForm.jsp"/>
+		
+		<action path="/admin/setup/createProjectFromUrl"
+				type="org.springframework.web.struts.DelegatingActionProxy"
+				input="/WEB-INF/jsp/importProjectForm.jsp">
 			<forward name="success" path="/admin/setup/"/>
 		</action>
 		

@@ -215,7 +215,7 @@ public class BuildOutcomeCache {
 			return null;
 		}
 		
-		return findOutcomeByNumber(outcomeIds, buildNumber, buildNumber, new HashSet<Integer>());
+		return findOutcomeByNumber(outcomeIds, buildNumber, buildNumber, null);
 	}
 
 	private ProjectStatusDto findOutcomeByNumber(final List<UUID> outcomeIds, int buildNumber, int guess, Set<Integer> visitedIndexes) {
@@ -229,7 +229,7 @@ public class BuildOutcomeCache {
 			guess = 0;
 		}
 		
-		if (visitedIndexes.contains(guess)) {
+		if (visitedIndexes != null && visitedIndexes.contains(guess)) {
 			return null;
 		}
 		
@@ -240,6 +240,10 @@ public class BuildOutcomeCache {
 
 		if (delta == 0) {
 			return outcome;
+		}
+		
+		if (visitedIndexes == null) {
+			visitedIndexes = new HashSet<Integer>();
 		}
 		
 		visitedIndexes.add(guess);

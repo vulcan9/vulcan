@@ -133,6 +133,15 @@ public class MavenBuildTool extends AntBuildTool {
 		}
 	}
 	
+	public static boolean isMaven2(String directory) {
+		try {
+			getMavenHomeLibrary(directory, MAVEN2_LAUNCHER_PATH_PREFIX);
+			return true;
+		} catch (ConfigException e) {
+		}
+		return false;
+	}
+
 	@SuppressWarnings("unchecked")
 	public static File getMavenHomeLibrary(String mavenHome, String resourcePath) throws ConfigException {
 		if (StringUtils.isBlank(mavenHome)) {
