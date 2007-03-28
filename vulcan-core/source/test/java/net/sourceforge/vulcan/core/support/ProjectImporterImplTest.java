@@ -28,7 +28,6 @@ import net.sourceforge.vulcan.PluginManager;
 import net.sourceforge.vulcan.ProjectBuildConfigurator;
 import net.sourceforge.vulcan.ProjectRepositoryConfigurator;
 import net.sourceforge.vulcan.StateManager;
-import net.sourceforge.vulcan.TestUtils;
 import net.sourceforge.vulcan.core.Store;
 import net.sourceforge.vulcan.dto.ProjectConfigDto;
 import net.sourceforge.vulcan.exception.ConfigException;
@@ -90,7 +89,7 @@ public class ProjectImporterImplTest extends EasyMockTestCase {
 	protected void setUp() throws Exception {
 		super.setUp();
 		
-		tmpFile = TestUtils.resolveRelativeFile("pom.xml");
+		tmpFile = File.createTempFile("vulcan-ProjectImporterImplTest", ".tmp");
 		
 		importer.setPluginManager(pluginManager);
 		importer.setStateManager(stateManager);
@@ -144,6 +143,7 @@ public class ProjectImporterImplTest extends EasyMockTestCase {
 			assertEquals("errors.import.download", e.getKey());
 			assertEquals(ioException.getMessage(), e.getArgs()[0]);
 		}
+		assertFalse(tmpFile.exists());
 	}
 	
 	public void trainNoBuildToolSupportsFile() throws Exception {
@@ -170,6 +170,8 @@ public class ProjectImporterImplTest extends EasyMockTestCase {
 		} catch (ConfigException e) {
 			assertEquals("errors.build.file.unsupported", e.getKey());
 		}
+		
+		assertFalse(tmpFile.exists());
 	}
 	
 	public void trainConfigures() throws Exception {

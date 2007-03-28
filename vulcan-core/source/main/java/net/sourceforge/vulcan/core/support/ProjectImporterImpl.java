@@ -56,9 +56,15 @@ public class ProjectImporterImpl implements ProjectImporter {
 		final ProjectConfigDto projectConfig = new ProjectConfigDto();
 		final ProjectRepositoryConfigurator repoConfigurator = createRepositoryAdaptorForUrl(projectConfig, url);
 		
-		final File buildSpecFile = downloadBuildSpecFile(repoConfigurator);
-
-		final ProjectBuildConfigurator buildConfigurator = createBuildToolConfigurator(projectConfig, buildSpecFile);
+		File buildSpecFile = null;
+		final ProjectBuildConfigurator buildConfigurator;
+		
+		try {
+			buildSpecFile = downloadBuildSpecFile(repoConfigurator);
+			buildConfigurator = createBuildToolConfigurator(projectConfig, buildSpecFile);
+		} finally {
+			deleteIfPresent(buildSpecFile);
+		}
 		
 		repoConfigurator.applyConfiguration(projectConfig);
 		buildConfigurator.applyConfiguration(projectConfig);
@@ -130,12 +136,21 @@ public class ProjectImporterImpl implements ProjectImporter {
 	}
 	
 	private File downloadBuildSpecFile(ProjectRepositoryConfigurator ra) throws RepositoryException, ConfigException {
+		File tmpFile = null;
+		
 		try {
-			final File tmpFile = createTempFile();
+			tmpFile = createTempFile();
 			ra.download(tmpFile);
 			return tmpFile;
 		} catch (IOException e) {
+			deleteIfPresent(tmpFile);
 			throw new ConfigException("errors.import.download", new Object[] {e.getMessage()}, e);
+		}
+	}
+
+	private void deleteIfPresent(File file) {
+		if (file != null && !file.delete()) {
+			file.deleteOnExit();
 		}
 	}
 }
