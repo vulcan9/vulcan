@@ -67,9 +67,15 @@ public class SubversionProjectConfigurator extends SubversionSupport
 		try {
 			profile = findOrCreateProfile(repo, globalConfig, project, raProjectConfig, url);
 		} catch (SVNException e) {
-			//TODO: if this is because e.g. http://google.com is not an svn repo, ignore
-			//TODO: if this is because of a different error, report it
-			throw new RuntimeException(e);
+			final int errorCode = e.getErrorMessage().getErrorCode().getCode();
+			if (errorCode == 180001 || errorCode == 175002) {
+				// Erros which mean the url did not point to a Subversion repository.
+				// 18001: Unable to open an ra_local session to URL (happens with file protocol)
+				// 175002: RA layer request failed (happens with http/https protocols).
+				return null;
+			}
+			
+			throw new ConfigException("svn.error", new Object[] {e.getErrorMessage().getFullMessage()});
 		}
 		
 		raProjectConfig.setApplicationContext(appCtx);
@@ -85,7 +91,7 @@ public class SubversionProjectConfigurator extends SubversionSupport
 		try {
 			svnRepository.getFile(buildSpecPath, SVNRevision.HEAD.getNumber(), null, os);
 		} catch (SVNException e) {
-			throw new RepositoryException(e);
+			throw new RepositoryException("svn.error", new Object[] {e.getErrorMessage().getFullMessage()}, e);
 		} finally {
 			os.close();
 		}
