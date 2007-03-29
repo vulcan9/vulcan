@@ -34,7 +34,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import junit.framework.AssertionFailedError;
-import net.sourceforge.vulcan.Keys;
 import net.sourceforge.vulcan.TestUtils;
 import net.sourceforge.vulcan.core.BuildManager;
 import net.sourceforge.vulcan.core.ProjectDomBuilder;
@@ -43,6 +42,7 @@ import net.sourceforge.vulcan.core.Store;
 import net.sourceforge.vulcan.event.EventHandler;
 import net.sourceforge.vulcan.event.EventPool;
 import net.sourceforge.vulcan.metadata.SvnRevision;
+import net.sourceforge.vulcan.web.Keys;
 import net.sourceforge.vulcan.web.ServletTestCase;
 
 import org.apache.commons.lang.StringUtils;

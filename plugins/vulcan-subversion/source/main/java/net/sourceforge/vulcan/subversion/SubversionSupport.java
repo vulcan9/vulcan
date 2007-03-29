@@ -19,6 +19,10 @@
 package net.sourceforge.vulcan.subversion;
 
 import static org.apache.commons.lang.StringUtils.isNotBlank;
+
+import java.util.Map;
+
+import net.sourceforge.vulcan.dto.ProjectConfigDto;
 import net.sourceforge.vulcan.exception.ConfigException;
 import net.sourceforge.vulcan.exception.RepositoryException;
 import net.sourceforge.vulcan.integration.support.PluginSupport;
@@ -49,6 +53,10 @@ public abstract class SubversionSupport extends PluginSupport {
 		SVNRepositoryFactoryImpl.setup();
 	}
 	
+	protected static final String BUGTRAQ_LOGREGEX = "bugtraq:logregex";
+	protected static final String BUGTRAQ_MESSAGE = "bugtraq:message";
+	protected static final String BUGTRAQ_URL = "bugtraq:url";
+
 	protected final Log log = LogFactory.getLog(getClass());
 	protected final SubversionProjectConfigDto config;
 	protected final SubversionRepositoryProfileDto profile;
@@ -90,7 +98,7 @@ public abstract class SubversionSupport extends PluginSupport {
 		return true;
 	}
 
-	String combinePatterns(String logRegex, String messagePattern) {
+	protected String combinePatterns(String logRegex, String messagePattern) {
 		final StringBuilder sb = new StringBuilder();
 		
 		if (isNotBlank(logRegex)) {
@@ -106,6 +114,37 @@ public abstract class SubversionSupport extends PluginSupport {
 		}
 		
 		return sb.toString();
+	}
+
+	protected void configureBugtraq(final ProjectConfigDto projectConfig, final Map<String, String> bugtraqProps) {
+		final String logRegex = bugtraqProps.get(BUGTRAQ_LOGREGEX);
+		final String logRegex1;
+		final String logRegex2;
+	
+		if (isNotBlank(logRegex)) {
+			final String value = logRegex.replaceAll("\r", "");
+			final String[] patterns = value.split("\n");
+			
+			logRegex1 = patterns[0];
+			
+			if (patterns.length > 1) {
+				logRegex2 = patterns[1];
+			} else {
+				logRegex2 = "";
+			}
+		} else {
+			logRegex1 = "";
+			logRegex2 = "";
+		}
+		
+		String bugtraqUrl = bugtraqProps.get(BUGTRAQ_URL);
+		if (bugtraqUrl == null) {
+			bugtraqUrl = StringUtils.EMPTY;
+		}
+		
+		projectConfig.setBugtraqUrl(bugtraqUrl);
+		projectConfig.setBugtraqLogRegex1(combinePatterns(logRegex1, bugtraqProps.get(BUGTRAQ_MESSAGE)));
+		projectConfig.setBugtraqLogRegex2(logRegex2);
 	}
 
 	protected static SVNRepository createRepository(SubversionRepositoryProfileDto profile, boolean init) throws ConfigException {

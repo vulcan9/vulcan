@@ -18,12 +18,16 @@
  */
 package net.sourceforge.vulcan.subversion;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import junit.framework.TestCase;
 import net.sourceforge.vulcan.dto.ProjectConfigDto;
 import net.sourceforge.vulcan.subversion.dto.SubversionConfigDto;
 import net.sourceforge.vulcan.subversion.dto.SubversionProjectConfigDto;
 import net.sourceforge.vulcan.subversion.dto.SubversionRepositoryProfileDto;
 
+import org.tmatesoft.svn.core.ISVNDirEntryHandler;
 import org.tmatesoft.svn.core.SVNException;
 import org.tmatesoft.svn.core.SVNURL;
 import org.tmatesoft.svn.core.internal.io.svn.SVNRepositoryImpl;
@@ -33,6 +37,9 @@ public class SubversionProjectConfiguratorTest extends TestCase {
 	SubversionConfigDto globalConfig = new SubversionConfigDto();
 	SubversionProjectConfigDto repoConfig = new SubversionProjectConfigDto();
 	ProjectConfigDto projectConfig = new ProjectConfigDto();
+	SubversionRepositoryProfileDto profile = new SubversionRepositoryProfileDto();
+	
+	Map<String, String> bugtraqProps = new HashMap<String, String>();
 	
 	@Override
 	protected void setUp() throws Exception {
@@ -41,7 +48,6 @@ public class SubversionProjectConfiguratorTest extends TestCase {
 		repoConfig.setRepositoryProfile("a");
 		repoConfig.setPath("");
 		
-		SubversionRepositoryProfileDto profile = new SubversionRepositoryProfileDto();
 		profile.setDescription("a");
 		profile.setRootUrl("http://localhost/svn");
 		
@@ -53,7 +59,7 @@ public class SubversionProjectConfiguratorTest extends TestCase {
 	}
 	
 	public void testGetRepositoryProfileForUrlCreatesOnMissing() throws Exception {
-		SVNRepository fakeRepo = new FakeRepo("http://localhost/root");
+		SVNRepository fakeRepo = new FakeRepo("http://localhost/root", "");
 		ProjectConfigDto project = new ProjectConfigDto();
 		SubversionProjectConfigDto raProjectConfig = new SubversionProjectConfigDto();
 		
@@ -75,7 +81,7 @@ public class SubversionProjectConfiguratorTest extends TestCase {
 
 	
 	public void testGetRepositoryProfileForUrlReuseOnMatchRoot() throws Exception {
-		SVNRepository fakeRepo = new FakeRepo("http://localhost/svn");
+		SVNRepository fakeRepo = new FakeRepo("http://localhost/svn", "/trunk");
 		ProjectConfigDto project = new ProjectConfigDto();
 		SubversionProjectConfigDto raProjectConfig = new SubversionProjectConfigDto();
 		
@@ -104,7 +110,7 @@ public class SubversionProjectConfiguratorTest extends TestCase {
 		projectRaConfig.setPath("/trunk");
 		
 		final SubversionProjectConfigurator cfgr = new SubversionProjectConfigurator(
-				globalConfig, projectRaConfig, profile, null);
+				projectRaConfig, profile, null);
 		
 		cfgr.updateGlobalConfig(globalConfig);
 		
@@ -126,7 +132,7 @@ public class SubversionProjectConfiguratorTest extends TestCase {
 		projectRaConfig.setPath("/trunk");
 		
 		final SubversionProjectConfigurator cfgr = new SubversionProjectConfigurator(
-				globalConfig, projectRaConfig, profile1, null);
+				projectRaConfig, profile1, null);
 		
 		cfgr.updateGlobalConfig(globalConfig);
 		
@@ -134,17 +140,84 @@ public class SubversionProjectConfiguratorTest extends TestCase {
 		assertSame(profile2, globalConfig.getProfiles()[0]);
 	}
 	
-	public static class FakeRepo extends SVNRepositoryImpl {
-		final String root;
+	public void testApplyBugtraqPropsNull() throws Exception {
+		final SubversionProjectConfigurator cfgr = new SubversionProjectConfigurator(
+				repoConfig, profile, null, new FakeRepo(profile.getRootUrl(), repoConfig.getPath()));
 		
-		public FakeRepo(String root) {
+		cfgr.applyConfiguration(projectConfig);
+
+		assertEquals("", projectConfig.getBugtraqUrl());
+		assertEquals("", projectConfig.getBugtraqLogRegex1());
+		assertEquals("", projectConfig.getBugtraqLogRegex2());
+	}
+	
+	public void testApplyBugtraqProps() throws Exception {
+		final SubversionProjectConfigurator cfgr = new SubversionProjectConfigurator(
+				repoConfig, profile, null, new FakeRepo(profile.getRootUrl(), repoConfig.getPath()));
+	
+		bugtraqProps.put(SubversionSupport.BUGTRAQ_URL, "http://localhost");
+		bugtraqProps.put(SubversionSupport.BUGTRAQ_LOGREGEX, "bug (\\d+)");
+		
+		cfgr.applyConfiguration(projectConfig);
+
+		assertEquals("http://localhost", projectConfig.getBugtraqUrl());
+		assertEquals("bug (\\d+)", projectConfig.getBugtraqLogRegex1());
+		assertEquals("", projectConfig.getBugtraqLogRegex2());
+	}
+	
+	public void testApplyBugtraqPropsWithMessage() throws Exception {
+		final SubversionProjectConfigurator cfgr = new SubversionProjectConfigurator(
+				repoConfig, profile, null, new FakeRepo(profile.getRootUrl(), repoConfig.getPath()));
+	
+		bugtraqProps.put(SubversionSupport.BUGTRAQ_URL, "http://localhost");
+		bugtraqProps.put(SubversionSupport.BUGTRAQ_MESSAGE, "Bug: %BUGID%");
+		
+		cfgr.applyConfiguration(projectConfig);
+
+		assertEquals("http://localhost", projectConfig.getBugtraqUrl());
+		assertEquals("Bug: (\\d+)", projectConfig.getBugtraqLogRegex1());
+		assertEquals("", projectConfig.getBugtraqLogRegex2());
+	}
+	
+	public void testApplyBugtraqPropsAll() throws Exception {
+		final SubversionProjectConfigurator cfgr = new SubversionProjectConfigurator(
+				repoConfig, profile, null, new FakeRepo(profile.getRootUrl(), repoConfig.getPath()));
+	
+		bugtraqProps.put(SubversionSupport.BUGTRAQ_URL, "http://localhost");
+		bugtraqProps.put(SubversionSupport.BUGTRAQ_LOGREGEX, "[Ii]ssue \\d+\r\n\\d+");
+		bugtraqProps.put(SubversionSupport.BUGTRAQ_MESSAGE, "Bug: %BUGID%");
+		
+		cfgr.applyConfiguration(projectConfig);
+
+		assertEquals("http://localhost", projectConfig.getBugtraqUrl());
+		assertEquals("[Ii]ssue \\d+|Bug: (\\d+)", projectConfig.getBugtraqLogRegex1());
+		assertEquals("\\d+", projectConfig.getBugtraqLogRegex2());
+	}
+	
+	public class FakeRepo extends SVNRepositoryImpl {
+		final String root;
+		final String path;
+		
+		public FakeRepo(String root, String path) {
 			super(null, null);
 			this.root = root;
+			this.path = path;
 		}
 		@Override
 		public SVNURL getRepositoryRoot(boolean forceConnection) throws SVNException {
 			assertTrue("Expected true but was false", forceConnection);
 			return SVNURL.parseURIEncoded(root);
+		}
+		@Override
+		@SuppressWarnings("unchecked")
+		public long getDir(String path, long revision, Map properties, ISVNDirEntryHandler handler) throws SVNException {
+			assertEquals(this.path, path);
+			assertNull(handler);
+			assertNotNull(properties);
+			
+			properties.putAll(bugtraqProps);
+			
+			return 11;
 		}
 	}
 }

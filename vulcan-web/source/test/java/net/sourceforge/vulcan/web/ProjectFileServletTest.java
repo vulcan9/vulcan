@@ -26,7 +26,6 @@ import java.util.Date;
 
 import javax.servlet.ServletException;
 
-import net.sourceforge.vulcan.Keys;
 import net.sourceforge.vulcan.TestUtils;
 import net.sourceforge.vulcan.dto.ProjectConfigDto;
 import net.sourceforge.vulcan.exception.NoSuchProjectException;

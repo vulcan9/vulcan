@@ -16,12 +16,11 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-package net.sourceforge.vulcan;
+package net.sourceforge.vulcan.web;
 
 import net.sourceforge.vulcan.metadata.SvnRevision;
 
 @SvnRevision(id="$Id$", url="$HeadURL$")
-//TODO: move into web
 public interface Keys {
 	String STATE_MANAGER = "stateManager";
 	String PROJECT_MANAGER = "stateManager";

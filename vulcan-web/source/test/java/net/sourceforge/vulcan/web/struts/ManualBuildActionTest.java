@@ -23,7 +23,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import net.sourceforge.vulcan.Keys;
 import net.sourceforge.vulcan.RepositoryAdaptor;
 import net.sourceforge.vulcan.SimplePrincipal;
 import net.sourceforge.vulcan.core.DependencyBuildPolicy;
@@ -36,6 +35,7 @@ import net.sourceforge.vulcan.dto.RepositoryTagDto;
 import net.sourceforge.vulcan.exception.RepositoryException;
 import net.sourceforge.vulcan.metadata.SvnRevision;
 import net.sourceforge.vulcan.scheduler.BuildDaemon;
+import net.sourceforge.vulcan.web.Keys;
 import net.sourceforge.vulcan.web.struts.forms.ManualBuildForm;
 
 @SvnRevision(id="$Id$", url="$HeadURL$")
