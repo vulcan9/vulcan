@@ -20,11 +20,11 @@ package net.sourceforge.vulcan.web.struts.forms;
 
 import javax.servlet.http.HttpServletRequest;
 
-import net.sourceforge.vulcan.Keys;
 import net.sourceforge.vulcan.StateManager;
 import net.sourceforge.vulcan.dto.NameDto;
 import net.sourceforge.vulcan.dto.NamedObject;
 import net.sourceforge.vulcan.metadata.SvnRevision;
+import net.sourceforge.vulcan.web.Keys;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.struts.action.ActionErrors;

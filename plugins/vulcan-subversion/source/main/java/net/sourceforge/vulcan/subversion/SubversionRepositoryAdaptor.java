@@ -18,6 +18,7 @@
  */
 package net.sourceforge.vulcan.subversion;
 
+
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -26,6 +27,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -47,6 +49,7 @@ import net.sourceforge.vulcan.subversion.dto.SubversionConfigDto;
 import net.sourceforge.vulcan.subversion.dto.SubversionProjectConfigDto;
 import net.sourceforge.vulcan.subversion.dto.SubversionRepositoryProfileDto;
 
+import org.apache.commons.lang.StringUtils;
 import org.tmatesoft.svn.core.ISVNLogEntryHandler;
 import org.tmatesoft.svn.core.SVNCancelException;
 import org.tmatesoft.svn.core.SVNDirEntry;
@@ -353,37 +356,18 @@ public class SubversionRepositoryAdaptor extends SubversionSupport implements Re
 		}
 		
 		final ProjectConfigDto orig = stateManager.getProjectConfig(projectName);
-		final ProjectConfigDto projectConfig = (ProjectConfigDto) orig.copy();
 		
 		final SVNWCClient client = new SVNWCClient(svnRepository.getAuthenticationManager(), options);
 		
-		SVNPropertyData prop;
-		String logRegex = "";
-		String messagePattern = "";
+		final Map<String, String> bugtraqProps = new HashMap<String, String>();
 		
-		prop = client.doGetProperty(absolutePath, "bugtraq:url", SVNRevision.BASE, null, false);
-		if (prop != null) {
-			logRegex = prop.getValue();
-		}
+		getWorkingCopyProperty(client, absolutePath, BUGTRAQ_URL, bugtraqProps);
+		getWorkingCopyProperty(client, absolutePath, BUGTRAQ_MESSAGE, bugtraqProps);
+		getWorkingCopyProperty(client, absolutePath, BUGTRAQ_LOGREGEX, bugtraqProps);
 		
-		prop = client.doGetProperty(absolutePath, "bugtraq:message", SVNRevision.BASE, null, false);
-		if (prop != null) {
-			messagePattern = prop.getValue();
-		}
+		final ProjectConfigDto projectConfig = (ProjectConfigDto) orig.copy();
 		
-		projectConfig.setBugtraqUrl(combinePatterns(logRegex, messagePattern));
-		
-		prop = client.doGetProperty(absolutePath, "bugtraq:logregex", SVNRevision.BASE, null, false);
-		if (prop != null) {
-			final String value = prop.getValue().replaceAll("\r", "");
-			final String[] patterns = value.split("\n");
-			
-			projectConfig.setBugtraqLogRegex1(patterns[0]);
-			
-			if (patterns.length > 1) {
-				projectConfig.setBugtraqLogRegex2(patterns[1]);
-			}
-		}
+		configureBugtraq(projectConfig, bugtraqProps);
 		
 		if (!orig.equals(projectConfig)) {
 			try {
@@ -397,7 +381,20 @@ public class SubversionRepositoryAdaptor extends SubversionSupport implements Re
 			}
 		}
 	}
-	
+
+	private void getWorkingCopyProperty(final SVNWCClient client, File absolutePath, String propName, final Map<String, String> bugtraqProps) throws SVNException {
+		SVNPropertyData prop;
+		prop = client.doGetProperty(absolutePath, propName, SVNRevision.BASE, null, false);
+		bugtraqProps.put(propName, getValueIfNotNull(prop));
+	}
+
+	private String getValueIfNotNull(SVNPropertyData prop) {
+		if (prop != null) {
+			return prop.getValue();
+		}
+		return StringUtils.EMPTY;
+	}
+
 	private static class EventHandler implements ISVNEventHandler {
 		private long previousByteCount = -1;
 		private long byteCount = 0;

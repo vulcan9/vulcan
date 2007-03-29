@@ -22,6 +22,8 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.HashMap;
+import java.util.Map;
 
 import net.sourceforge.vulcan.ProjectRepositoryConfigurator;
 import net.sourceforge.vulcan.dto.PluginConfigDto;
@@ -33,6 +35,7 @@ import net.sourceforge.vulcan.subversion.dto.SubversionProjectConfigDto;
 import net.sourceforge.vulcan.subversion.dto.SubversionRepositoryProfileDto;
 
 import org.springframework.context.ApplicationContext;
+import org.tmatesoft.svn.core.ISVNDirEntryHandler;
 import org.tmatesoft.svn.core.SVNException;
 import org.tmatesoft.svn.core.SVNURL;
 import org.tmatesoft.svn.core.io.SVNRepository;
@@ -44,8 +47,13 @@ public class SubversionProjectConfigurator extends SubversionSupport
 
 	private final String buildSpecPath;
 
-	protected SubversionProjectConfigurator(SubversionConfigDto globalConfig, SubversionProjectConfigDto config, SubversionRepositoryProfileDto profile, String buildSpecPath) throws ConfigException {
-		super(config, profile, createRepository(profile, true));
+	protected SubversionProjectConfigurator(SubversionProjectConfigDto config, SubversionRepositoryProfileDto profile, String buildSpecPath) throws ConfigException {
+		this(config, profile, buildSpecPath, createRepository(profile, true));
+		
+	}
+	
+	protected SubversionProjectConfigurator(SubversionProjectConfigDto config, SubversionRepositoryProfileDto profile, String buildSpecPath, SVNRepository repository) throws ConfigException {
+		super(config, profile, repository);
 		this.buildSpecPath = buildSpecPath;
 	}
 	
@@ -83,7 +91,7 @@ public class SubversionProjectConfigurator extends SubversionSupport
 		
 		final String buildSpecPath = url.substring(profile.getRootUrl().length());
 		
-		return new SubversionProjectConfigurator(globalConfig, raProjectConfig, profile, buildSpecPath);
+		return new SubversionProjectConfigurator(raProjectConfig, profile, buildSpecPath);
 	}
 	
 	public void download(File target) throws RepositoryException, IOException {
@@ -100,9 +108,9 @@ public class SubversionProjectConfigurator extends SubversionSupport
 	public void applyConfiguration(ProjectConfigDto projectConfig) {
 		projectConfig.setRepositoryAdaptorConfig(config);
 		
-		//TODO: apply bugtraq props
+		applyBugtraqConfiguration(projectConfig);
 	}
-	
+
 	public void setNonRecursive() {
 		config.setRecursive(false);
 	}
@@ -169,4 +177,14 @@ public class SubversionProjectConfigurator extends SubversionSupport
 		}
 	}
 
+	private void applyBugtraqConfiguration(ProjectConfigDto projectConfig) {
+		final Map<String, String> properties = new HashMap<String, String>();
+		
+		try {
+			svnRepository.getDir(config.getPath(), SVNRevision.HEAD.getNumber(), properties, (ISVNDirEntryHandler)null);
+		} catch (SVNException e) {
+		}
+		
+		configureBugtraq(projectConfig, properties);
+	}
 }

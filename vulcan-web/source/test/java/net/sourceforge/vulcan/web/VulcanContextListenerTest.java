@@ -20,7 +20,6 @@ package net.sourceforge.vulcan.web;
 
 import javax.servlet.ServletContextEvent;
 
-import net.sourceforge.vulcan.Keys;
 import net.sourceforge.vulcan.event.Event;
 import net.sourceforge.vulcan.exception.StoreException;
 import net.sourceforge.vulcan.metadata.SvnRevision;

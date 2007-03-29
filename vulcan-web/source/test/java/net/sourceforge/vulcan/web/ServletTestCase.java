@@ -25,7 +25,6 @@ import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletOutputStream;
 
 import net.sourceforge.vulcan.EasyMockTestCase;
-import net.sourceforge.vulcan.Keys;
 import net.sourceforge.vulcan.ProjectManager;
 import net.sourceforge.vulcan.StateManager;
 import net.sourceforge.vulcan.event.EventHandler;

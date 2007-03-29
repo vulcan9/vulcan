@@ -19,7 +19,6 @@
 package net.sourceforge.vulcan.maven;
 
 import java.net.URL;
-import java.net.URLClassLoader;
 
 import net.sourceforge.vulcan.maven.integration.MavenIntegration;
 
