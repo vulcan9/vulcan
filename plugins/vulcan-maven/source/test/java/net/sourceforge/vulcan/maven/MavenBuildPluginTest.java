@@ -19,8 +19,13 @@
 package net.sourceforge.vulcan.maven;
 
 import java.net.URL;
+import java.util.Arrays;
+import java.util.List;
 
+import net.sourceforge.vulcan.ProjectBuildConfigurator;
+import net.sourceforge.vulcan.TestUtils;
 import net.sourceforge.vulcan.maven.integration.MavenIntegration;
+import net.sourceforge.vulcan.maven.integration.MavenProjectConfigurator;
 
 public class MavenBuildPluginTest extends MavenBuildToolTestBase {
 	MavenBuildPlugin plugin = new MavenBuildPlugin();
@@ -46,10 +51,6 @@ public class MavenBuildPluginTest extends MavenBuildToolTestBase {
 		assertNotNull(plugin.configuratorFactory);
 	}
 
-	public void testCreateProjectConfigurator() throws Exception {
-		assertNotNull(plugin.createProjectConfigurator(createFakePomFile()));
-	}
-	
 	public void testFilterPackage() throws Exception {
 		final URL[] urls = MavenBuildPlugin.createURLs(maven2Home);
 		
@@ -57,5 +58,56 @@ public class MavenBuildPluginTest extends MavenBuildToolTestBase {
 		
 		assertNotSame(ldr.loadClass(MavenIntegration.class.getName()), MavenIntegration.class);
 		assertSame(ldr.loadClass(MavenBuildPlugin.class.getName()), MavenBuildPlugin.class);
+	}
+	
+	public void testCreateProjectConfigurator() throws Exception {
+		assertNotNull(plugin.createProjectConfigurator(createFakePomFile()));
+	}
+	
+	public void testProjectConfiguratorModules() throws Exception {
+		final ProjectBuildConfigurator cfgr = plugin.createProjectConfigurator(
+				TestUtils.resolveRelativeFile("../pom.xml"));
+		
+		final List<String> urls = cfgr.getSubprojectUrls();
+		
+		assertEquals(8, urls.size());
+		
+		assertEquals("http://vulcan.googlecode.com/svn/trunk/plugins/vulcan-ant/pom.xml", urls.get(0));
+	}
+	
+	/* 
+	 * Not sure why this is done in the wild; for an example see
+	 * http://svn.apache.org/repos/asf/jakarta/commons/proper/collections/trunk/pom.xml r523782
+	 */
+	public void testConfiguratorDeletesMultipleScmPrefix() throws Exception {
+		final String normal = MavenProjectConfigurator.normalizeScmUrl("scm:svn:scm:svn:http://localhost/svn/trunk");
+		assertEquals("http://localhost/svn/trunk/", normal);
+	}
+	
+	public void testConfigureDependencies() throws Exception {
+		final ProjectBuildConfigurator cfgr = plugin.createProjectConfigurator(
+				TestUtils.resolveRelativeFile("pom.xml"));
+
+		cfgr.applyConfiguration(projectConfig, Arrays.asList("vulcan-core", "vulcan-test-utils"), false);
+		
+		assertEquals(2, projectConfig.getDependencies().length);
+	}
+	
+	public void testConfigureDependencyOnAncestors() throws Exception {
+		final ProjectBuildConfigurator cfgr = plugin.createProjectConfigurator(
+				TestUtils.resolveRelativeFile("pom.xml"));
+
+		cfgr.applyConfiguration(projectConfig, Arrays.asList("plugins", "vulcan"), false);
+		
+		assertEquals(2, projectConfig.getDependencies().length);
+	}
+
+	public void testConfigureDependencyOnPlugins() throws Exception {
+		final ProjectBuildConfigurator cfgr = plugin.createProjectConfigurator(
+				TestUtils.resolveRelativeFile("pom.xml"));
+
+		cfgr.applyConfiguration(projectConfig, Arrays.asList("vulcan-maven-plugin"), false);
+		
+		assertEquals(1, projectConfig.getDependencies().length);
 	}
 }

@@ -18,7 +18,7 @@
 <body>
 
 <v:bubble styleClass="">
-<form action="/vulcan/admin/setup/createProjectFromUrl.do" method="post">
+<html:form action="/admin/setup/createProjectFromUrl" method="post">
 <table>
 	<caption><fmt:message key="captions.import.project"/></caption>
 	<tbody>
@@ -27,17 +27,34 @@
 				<fmt:message key="label.project.url"/>
 			</td>
 			<td>
-				<input type="text" name="url"/>
+				<html:text property="url"/>
+			</td>
+		</tr>
+		<tr>
+			<td>
+				<fmt:message key="label.child.projects"/>
+			</td>
+			<td>
+				<ul class="metaDataOptions">
+					<li>
+						<html:radio property="createSubprojects" value="false" styleId="singleProject"/>
+						<label for="singleProject"><fmt:message key="label.child.projects.single"/></label>
+					</li>
+					<li>
+						<html:radio property="createSubprojects" value="true" styleId="multiProject"/>
+						<label for="multiProject"><fmt:message key="label.child.projects.multi"/></label>
+					</li>
+				</ul>
 			</td>
 		</tr>
 		<tr>
 			<td class="buttons" colspan="2">
-				<input type="submit" value="Import"/>
+				<html:submit value="Import"/>
 			</td>
 		</tr>
 	</tbody>
 </table>
-</form>
+</html:form>
 </v:bubble>
 
 <v:messages/>

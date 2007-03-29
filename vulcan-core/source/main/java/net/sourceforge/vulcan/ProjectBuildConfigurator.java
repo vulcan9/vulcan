@@ -18,6 +18,8 @@
  */
 package net.sourceforge.vulcan;
 
+import java.util.List;
+
 import net.sourceforge.vulcan.dto.ProjectConfigDto;
 import net.sourceforge.vulcan.metadata.SvnRevision;
 
@@ -35,13 +37,30 @@ public interface ProjectBuildConfigurator {
 	 *  <li>projectConfig.buildToolConfig</li>
 	 * </ul>
 	 * @param projectConfig The object onto which settings should be applied.
+	 * @param existingProjectNames List of existing project names.  This list is
+	 * provided for several reasons, including:
+	 * <ul>
+	 * 	<li>Configure dependencies for projecs which exist</li>
+	 * 	<li>Avoid a naming conflict when assigning a name to the new project</li> 
+	 * </ul>
+	 * @param createSubprojects TODO
 	 */
-	void applyConfiguration(ProjectConfigDto projectConfig);
+	void applyConfiguration(ProjectConfigDto projectConfig, List<String> existingProjectNames, boolean createSubprojects);
 
 	/**
+	 * This method will only be called when a separate project is being created for each
+	 * submodule.
+	 * 
 	 * @return <code>true</code> if the project does not depend on nested files or folders.  This
 	 * will cause the repository adaptor to be configured in non-recursive mode.  For
 	 * almost all projects, the return value should be <code>false</code>.
 	 */
 	boolean isStandaloneProject();
+
+	/**
+	 * @return List of scm urls pointing to sub-projects or modules included in this project.
+	 * This method is only called if the user opts to create a project for each sub-project/module
+	 * instead of building them as one large project.
+	 */
+	List<String> getSubprojectUrls();
 }
