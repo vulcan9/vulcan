@@ -41,16 +41,6 @@ public class MavenBuildPluginTest extends MavenBuildToolTestBase {
 		assertTrue(urls.length > 1);
 	}
 	
-	public void testClassLoaderCanSeeClass() throws Exception {
-		final URL[] urls = MavenBuildPlugin.createURLs(maven2Home);
-		
-		final ClassLoader cl = URLClassLoader.newInstance(urls, null);
-		
-		final Class<?> cls = cl.loadClass(MavenIntegration.class.getName());
-		
-		assertFalse(cls.equals(MavenIntegration.class));
-	}
-	
 	public void testCreateIntegrationSupport() throws Exception {
 		plugin.createConfigurationFactory();
 		
