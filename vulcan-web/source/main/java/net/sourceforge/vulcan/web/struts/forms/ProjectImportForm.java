@@ -16,17 +16,39 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-package net.sourceforge.vulcan.core;
+package net.sourceforge.vulcan.web.struts.forms;
 
-import net.sourceforge.vulcan.exception.ConfigException;
-import net.sourceforge.vulcan.exception.DuplicateNameException;
-import net.sourceforge.vulcan.exception.StoreException;
+import javax.servlet.http.HttpServletRequest;
+
 import net.sourceforge.vulcan.metadata.SvnRevision;
 
+import org.apache.struts.action.ActionMapping;
+import org.apache.struts.validator.ValidatorForm;
+
 @SvnRevision(id="$Id$", url="$HeadURL$")
-public interface ProjectImporter {
+public class ProjectImportForm extends ValidatorForm {
+	private String url;
+	private boolean createSubprojects;
+	
+	@Override
+	public void reset(ActionMapping mapping, HttpServletRequest request) {
+		super.reset(mapping, request);
+		createSubprojects = false;
+	}
 
-	void createProjectsForUrl(String url, boolean createSubprojects) throws ConfigException,
-			StoreException, DuplicateNameException;
+	public boolean isCreateSubprojects() {
+		return createSubprojects;
+	}
 
+	public void setCreateSubprojects(boolean createSubprojects) {
+		this.createSubprojects = createSubprojects;
+	}
+
+	public String getUrl() {
+		return url;
+	}
+
+	public void setUrl(String url) {
+		this.url = url;
+	}
 }

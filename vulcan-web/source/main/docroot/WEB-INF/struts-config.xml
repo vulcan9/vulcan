@@ -14,6 +14,7 @@
 		<form-bean name="importConfigFileForm" type="net.sourceforge.vulcan.web.struts.forms.ImportConfigFileForm"/>
 		<form-bean name="manualBuildForm" type="net.sourceforge.vulcan.web.struts.forms.ManualBuildForm"/>
 		<form-bean name="reportForm" type="net.sourceforge.vulcan.web.struts.forms.ReportForm"/>
+		<form-bean name="projectImportForm" type="net.sourceforge.vulcan.web.struts.forms.ProjectImportForm"/>
 	</form-beans>
 	
 	<global-forwards>
@@ -79,11 +80,14 @@
 		
 		<action path="/admin/setup/importProjectForm"
 				type="org.apache.struts.actions.ForwardAction"
-				parameter="/WEB-INF/jsp/importProjectForm.jsp"/>
+				parameter="/WEB-INF/jsp/importProjectForm.jsp"
+				name="projectImportForm"
+				validate="false"/>
 		
 		<action path="/admin/setup/createProjectFromUrl"
 				type="org.springframework.web.struts.DelegatingActionProxy"
-				input="/WEB-INF/jsp/importProjectForm.jsp">
+				input="/WEB-INF/jsp/importProjectForm.jsp"
+				name="projectImportForm">
 			<forward name="success" path="/admin/setup/"/>
 		</action>
 		

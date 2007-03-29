@@ -22,6 +22,7 @@ import static org.apache.commons.lang.StringUtils.isBlank;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import net.sourceforge.vulcan.PluginManager;
@@ -51,44 +52,80 @@ public class ProjectImporterImpl implements ProjectImporter {
 	/*
 	 * TODO: check if file is a maven2 pom before attempting to process in maven plugin
 	 * TODO: handle maven exceptions like missing dependencies, missing parent, etc.
+	 * TODO: allow build configurator to configure emails
+	 * TODO: specify "use existing," "overwrite," "report error" or "rename" for existing project names.
 	 */
-	public void createProjectsForUrl(String url) throws ConfigException, StoreException, DuplicateNameException {
-		final ProjectConfigDto projectConfig = new ProjectConfigDto();
-		final ProjectRepositoryConfigurator repoConfigurator = createRepositoryAdaptorForUrl(projectConfig, url);
+	public void createProjectsForUrl(String startUrl, boolean createSubprojects) throws ConfigException, StoreException, DuplicateNameException {
+		final List<RepositoryAdaptorPlugin> repositoryPlugins = pluginManager.getPlugins(RepositoryAdaptorPlugin.class);
+		final List<BuildToolPlugin> buildToolPlugins = pluginManager.getPlugins(BuildToolPlugin.class);
 		
-		File buildSpecFile = null;
-		final ProjectBuildConfigurator buildConfigurator;
+		final List<String> urls = new ArrayList<String>();
+		urls.add(startUrl);
 		
-		try {
-			buildSpecFile = downloadBuildSpecFile(repoConfigurator);
-			buildConfigurator = createBuildToolConfigurator(projectConfig, buildSpecFile);
-		} finally {
-			deleteIfPresent(buildSpecFile);
+		final List<ProjectConfigDto> newProjects = new ArrayList<ProjectConfigDto>();
+		final List<ProjectRepositoryConfigurator> repoConfigurators = new ArrayList<ProjectRepositoryConfigurator>();
+		
+		final List<String> existingProjectNames = new ArrayList<String>(stateManager.getProjectConfigNames());
+		
+		while (!urls.isEmpty()) {
+			final String url = urls.remove(0);
+			
+			final ProjectConfigDto projectConfig = new ProjectConfigDto();
+			final ProjectRepositoryConfigurator repoConfigurator = createRepositoryAdaptorForUrl(
+					repositoryPlugins, projectConfig, url);
+			
+			File buildSpecFile = null;
+			final ProjectBuildConfigurator buildConfigurator;
+			
+			try {
+				buildSpecFile = downloadBuildSpecFile(repoConfigurator);
+				buildConfigurator = createBuildToolConfigurator(buildToolPlugins, projectConfig, buildSpecFile);
+			} finally {
+				deleteIfPresent(buildSpecFile);
+			}
+			
+			buildConfigurator.applyConfiguration(projectConfig, existingProjectNames, createSubprojects);
+			repoConfigurator.applyConfiguration(projectConfig);
+			
+			if (createSubprojects && buildConfigurator.isStandaloneProject()) {
+				repoConfigurator.setNonRecursive();
+			}
+			
+			if (isBlank(projectConfig.getWorkDir())) {
+				final String workDir = store.getWorkingCopyLocationPattern().replace("${projectName}", projectConfig.getName());
+				projectConfig.setWorkDir(workDir);
+			}
+			
+			if (createSubprojects) {
+				final List<String> subprojectUrls = buildConfigurator.getSubprojectUrls();
+				if (subprojectUrls != null) {
+					urls.addAll(subprojectUrls);
+				}
+			}
+			
+			existingProjectNames.add(projectConfig.getName());
+			
+			newProjects.add(projectConfig);
+			repoConfigurators.add(repoConfigurator);
 		}
 		
-		repoConfigurator.applyConfiguration(projectConfig);
-		buildConfigurator.applyConfiguration(projectConfig);
-		
-		if (buildConfigurator.isStandaloneProject()) {
-			repoConfigurator.setNonRecursive();
-		}
-		
-		if (isBlank(projectConfig.getWorkDir())) {
-			final String workDir = store.getWorkingCopyLocationPattern().replace("${projectName}", projectConfig.getName());
-			projectConfig.setWorkDir(workDir);
-		}
-		
-		try {
-			final PluginConfigDto pluginConfig = pluginManager.getPluginConfigInfo(
-					projectConfig.getRepositoryAdaptorPluginId());
+		//TODO: stateManager should be aware that pluginConfig is being modified.
+		//TODO: this entire block should succeed or fail atomically.
+		for (int i=0; i<newProjects.size(); i++) {
+			final ProjectConfigDto projectConfig = newProjects.get(i);
+			try {
+				final PluginConfigDto pluginConfig = pluginManager.getPluginConfigInfo(
+						projectConfig.getRepositoryAdaptorPluginId());
+	
+				repoConfigurators.get(i).updateGlobalConfig(pluginConfig);
+			} catch (PluginNotConfigurableException ignore) {
+			} catch (PluginNotFoundException e) {
+				throw new RuntimeException(e);
+			}
 
-			repoConfigurator.updateGlobalConfig(pluginConfig);
-		} catch (PluginNotConfigurableException ignore) {
-		} catch (PluginNotFoundException e) {
-			throw new RuntimeException(e);
+			stateManager.addProjectConfig(projectConfig);
 		}
 		
-		stateManager.addProjectConfig(projectConfig);
 	}
 
 	public void setPluginManager(PluginManager pluginManager) {
@@ -107,9 +144,7 @@ public class ProjectImporterImpl implements ProjectImporter {
 		return File.createTempFile("vulcan-new-project", ".tmp");
 	}
 
-	private ProjectRepositoryConfigurator createRepositoryAdaptorForUrl(ProjectConfigDto projectConfig, String url) throws ConfigException {
-		final List<RepositoryAdaptorPlugin> repositoryPlugins = pluginManager.getPlugins(RepositoryAdaptorPlugin.class);
-		
+	private ProjectRepositoryConfigurator createRepositoryAdaptorForUrl(final List<RepositoryAdaptorPlugin> repositoryPlugins, ProjectConfigDto projectConfig, String url) throws ConfigException {
 		for (RepositoryAdaptorPlugin plugin : repositoryPlugins) {
 			final ProjectRepositoryConfigurator configurator = plugin.createProjectConfigurator(url);
 			if (configurator != null) {
@@ -121,9 +156,7 @@ public class ProjectImporterImpl implements ProjectImporter {
 		throw new ConfigException("errors.url.unsupported", null);
 	}
 	
-	private ProjectBuildConfigurator createBuildToolConfigurator(ProjectConfigDto projectConfig, File buildSpecFile) throws ConfigException {
-		final List<BuildToolPlugin> buildToolPlugins = pluginManager.getPlugins(BuildToolPlugin.class);
-		
+	private ProjectBuildConfigurator createBuildToolConfigurator(List<BuildToolPlugin> buildToolPlugins, ProjectConfigDto projectConfig, File buildSpecFile) throws ConfigException {
 		for (BuildToolPlugin plugin : buildToolPlugins) {
 			final ProjectBuildConfigurator configurator = plugin.createProjectConfigurator(buildSpecFile);
 			if (configurator != null) {

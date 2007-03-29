@@ -36,10 +36,20 @@ public class CreateProjectFromUrlActionTest extends MockApplicationContextStruts
 		setRequestPathInfo("/admin/setup/createProjectFromUrl.do");
 	}
 
+	public void testRequiredParams() throws Exception {
+		replay();
+		
+		actionPerform();
+		
+		verify();
+
+		assertPropertyHasError("url", "errors.required");
+	}
+	
 	public void testImportUrl() throws Exception {
 		addRequestParameter("url", "http://www.example.com");
 		
-		projectImporter.createProjectsForUrl("http://www.example.com");
+		projectImporter.createProjectsForUrl("http://www.example.com", false);
 		
 		replay();
 		
@@ -53,7 +63,7 @@ public class CreateProjectFromUrlActionTest extends MockApplicationContextStruts
 	public void testHandlesConfigException() throws Exception {
 		addRequestParameter("url", "http://www.example.com");
 		
-		projectImporter.createProjectsForUrl("http://www.example.com");
+		projectImporter.createProjectsForUrl("http://www.example.com", false);
 		expectLastCall().andThrow(new ConfigException("foo.bar", new Object[] {"a", "b"}));
 		
 		replay();
@@ -70,7 +80,7 @@ public class CreateProjectFromUrlActionTest extends MockApplicationContextStruts
 	public void testHandlesStoreException() throws Exception {
 		addRequestParameter("url", "http://www.example.com");
 		
-		projectImporter.createProjectsForUrl("http://www.example.com");
+		projectImporter.createProjectsForUrl("http://www.example.com", false);
 		expectLastCall().andThrow(new StoreException("a message", null));
 		
 		replay();

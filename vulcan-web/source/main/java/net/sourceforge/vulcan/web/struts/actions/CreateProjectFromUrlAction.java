@@ -28,6 +28,7 @@ import net.sourceforge.vulcan.core.ProjectImporter;
 import net.sourceforge.vulcan.exception.ConfigException;
 import net.sourceforge.vulcan.exception.StoreException;
 import net.sourceforge.vulcan.metadata.SvnRevision;
+import net.sourceforge.vulcan.web.struts.forms.ProjectImportForm;
 
 import org.apache.struts.action.Action;
 import org.apache.struts.action.ActionForm;
@@ -45,10 +46,10 @@ public final class CreateProjectFromUrlAction extends Action {
 	public ActionForward execute(ActionMapping mapping, ActionForm form,
 			HttpServletRequest request, HttpServletResponse response) throws Exception {
 		
-		final String url = request.getParameter("url");
+		final ProjectImportForm importForm = (ProjectImportForm) form;
 		
 		try {
-			projectImporter.createProjectsForUrl(url);
+			projectImporter.createProjectsForUrl(importForm.getUrl(), importForm.isCreateSubprojects());
 			
 			saveSuccessMessage(request);
 		} catch (ConfigException e) {

@@ -18,14 +18,26 @@
  */
 package net.sourceforge.vulcan.maven.integration;
 
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import net.sourceforge.vulcan.ProjectBuildConfigurator;
 import net.sourceforge.vulcan.dto.ProjectConfigDto;
 import net.sourceforge.vulcan.maven.MavenProjectConfig;
 
+import org.apache.maven.artifact.Artifact;
+import org.apache.maven.model.Dependency;
+import org.apache.maven.model.Scm;
 import org.apache.maven.project.MavenProject;
 import org.springframework.context.ApplicationContext;
 
 public class MavenProjectConfigurator implements ProjectBuildConfigurator {
+	private final static Pattern SCM_URL_PREFIX = Pattern.compile("^scm:\\w+:");
+	
 	private final MavenProject project;
 	private final String mavenHomeProfileName;
 	private final String goals;
@@ -38,18 +50,95 @@ public class MavenProjectConfigurator implements ProjectBuildConfigurator {
 		this.applicationContext = applicationContext;
 	}
 
-	public void applyConfiguration(ProjectConfigDto projectConfig) {
+	public void applyConfiguration(ProjectConfigDto projectConfig, List<String> existingProjectNames, boolean createSubprojects) {
 		final MavenProjectConfig mavenProjectConfig = new MavenProjectConfig();
 		mavenProjectConfig.setApplicationContext(applicationContext);
 		mavenProjectConfig.setTargets(goals);
 		mavenProjectConfig.setMavenHome(mavenHomeProfileName);
 		
+		if (createSubprojects) {
+			mavenProjectConfig.setNonRecursive(true);
+		}
+		
 		projectConfig.setName(project.getArtifactId());
 		projectConfig.setBuildToolConfig(mavenProjectConfig);
+		
+		final String[] vulcanDeps = findVulcanProjectDependencies(existingProjectNames);
+		
+		projectConfig.setDependencies(vulcanDeps);
 	}
 
 	public boolean isStandaloneProject() {
-		return false;
+		return "pom".equals(project.getPackaging());
 	}
 
+	@SuppressWarnings("unchecked")
+	public List<String> getSubprojectUrls() {
+		final List<String> moduleList = project.getModules();
+		final String[] moduleNames = moduleList.toArray(new String[moduleList.size()]);
+		
+		final String rootUrl = determineScmRootUrl();
+		
+		for (int i = 0; i < moduleNames.length; i++) {
+			moduleNames[i] = rootUrl + moduleNames[i] + "/pom.xml";
+		}
+		
+		return Arrays.asList(moduleNames);
+	}
+
+	public static String normalizeScmUrl(final String url) {
+		final StringBuilder sb = new StringBuilder(url);
+
+		if (!url.endsWith("/")) {
+			sb.append('/');
+		}
+
+		final Matcher matcher = SCM_URL_PREFIX.matcher(sb);
+		
+		while (matcher.find()) {
+			sb.delete(0, matcher.end());
+			matcher.reset();
+		}
+		
+		return sb.toString();
+	}
+
+	protected String determineScmRootUrl() {
+		final Scm scm = project.getScm();
+		if (scm == null) {
+			throw new IllegalStateException("Maven project " + project.getArtifactId() + " is missing scm information.");
+		}
+		
+		final String url = scm.getConnection();
+		return normalizeScmUrl(url);
+	}
+	
+	@SuppressWarnings("unchecked")
+	private String[] findVulcanProjectDependencies(List<String> existingProjectNames) {
+		final Set<String> vulcanDeps = new HashSet<String>();
+
+		final List<Dependency> deps = project.getDependencies();
+		for (Dependency dep : deps) {
+			if (existingProjectNames.contains(dep.getArtifactId())) {
+				vulcanDeps.add(dep.getArtifactId());
+			}
+		}
+		
+		final Set<Artifact> plugins = project.getPluginArtifacts();
+		for (Artifact artifact : plugins) {
+			if (existingProjectNames.contains(artifact.getArtifactId())) {
+				vulcanDeps.add(artifact.getArtifactId());
+			}
+		}
+		
+		MavenProject parent = project.getParent();
+		while (parent != null) {
+			if (existingProjectNames.contains(parent.getArtifactId())) {
+				vulcanDeps.add(parent.getArtifactId());
+			}
+			parent = parent.getParent();
+		}
+		
+		return vulcanDeps.toArray(new String[vulcanDeps.size()]);
+	}
 }

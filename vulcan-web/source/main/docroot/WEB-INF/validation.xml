@@ -44,6 +44,9 @@
 		<form name="importConfigFileForm">
 			<field property="configFile" depends="required"/>
 		</form>
+		<form name="projectImportForm">
+			<field property="url" depends="required"/>
+		</form>
 		<form name="reportForm">
 			<field property="projectNames" depends="required"/>
 			<field property="startIndex" depends="integer,validwhen">
