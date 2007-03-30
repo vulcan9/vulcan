@@ -11,7 +11,7 @@
 <html:xhtml/>
 <head>
 	<c:if test="${helpTopic != null}">
-		<meta name="helpTopic" id="helpTopic" content="${helpTopic}"/>
+		<meta name="helpTopic" content="${helpTopic}"/>
 	</c:if>
 </head>
 

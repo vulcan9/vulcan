@@ -37,7 +37,6 @@
 <c:import url="/xsl/projects.xsl" var="xslt"/>
 
 <v:bubble>
-	<form name="selectedProjects" action="#" method="post">
 	<x:transform xslt="${xslt}">
 		<x:param name="caption">
 			<fmt:message key="captions.projects.status"/>
@@ -70,7 +69,6 @@
 		<x:param name="sortOrder">${preferences.sortOrder}</x:param>
 		<c:import url="/projects.jsp"/>
 	</x:transform>
-	</form>
 </v:bubble>
 
 <v:bubble>

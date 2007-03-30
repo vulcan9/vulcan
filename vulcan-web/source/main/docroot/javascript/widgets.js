@@ -68,6 +68,18 @@ function eraseCookie(name) {
 	createCookie(name,"",-1);
 }
 
+function getMetaContent(name, defaultValue) {
+	var metas = document.getElementsByTagName("meta");
+	
+	for (var i=0;i<metas.length; i++) {
+		if (name == metas[i].getAttribute("name")) {
+			return metas[i].getAttribute("content");
+		}
+	}
+	
+	return defaultValue;
+}
+
 function drillDown(input, name) {
 	input.form.focus.value = name;
 }
@@ -334,17 +346,9 @@ function launchWindowHandler(event, href, launchMode, windowName) {
 }
 
 function launchHelpHandler(event) {
-	var helpTopic = "GeneralHelp";
-	
-	var helpTopicMeta = document.getElementById('helpTopic');
-	if (helpTopicMeta) {
-		helpTopic = helpTopicMeta.getAttribute("content");
-	}
-
 	var target = getTarget(event);	
-	var href = target.href + helpTopic;
 	
-	return launchWindowHandler(event, href, "modePopup", "vulcanHelp");
+	return launchWindowHandler(event, target.href, "modePopup", "vulcanHelp");
 }
 
 function setDirtyHandler(event) {
@@ -427,21 +431,20 @@ function registerHandlers() {
 		registerHandlerByTagNameAndClass('a', 'external', 'click', launchWindowHandler);
 	}
 	
-	registerHandlerByTagNameAndClass('a', 'help', 'click', launchHelpHandler);
+	var helpLink = document.getElementById("helpLink");
+	
+	if (helpLink) {
+		var helpTopic = getMetaContent("helpTopic", "GeneralHelp");
+
+		helpLink.href = helpLink.href + helpTopic;
+	
+		customAddEventListener(helpLink, 'click', launchHelpHandler);
+	}
 }
 
 function getConfirmMessages() {
-	var meta1 = document.getElementById('confirmMessage');
-	
-	if (meta1) {
-		window.confirmMessage = meta1.getAttribute('content');
-	}
-	
-	var meta2 = document.getElementById('confirmUnsavedChangesMessage');
-	
-	if (meta2) {
-		window.confirmUnsavedChangesMessage = meta2.getAttribute('content');
-	}
+	window.confirmMessage = getMetaContent("confirmMessage");
+	window.confirmUnsavedChangesMessage = getMetaContent("confirmUnsavedChangesMessage");
 }
 
 function customAddEventListener(target, eventType, callback) {

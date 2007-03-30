@@ -12,7 +12,7 @@
 <html:xhtml/>
 
 <head>
-	<meta name="helpTopic" id="helpTopic" content="ImportProject"/>
+	<meta name="helpTopic" content="ImportProject"/>
 </head>
 
 <body>
