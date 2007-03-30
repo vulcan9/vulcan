@@ -96,7 +96,7 @@ public class CvsRepositoryAdaptor implements RepositoryAdaptor {
 		
 		cvsRoot = CVSRoot.parse(props);
 		options.setCVSRoot(cvsRoot.toString());
-		
+
 		conn = ConnectionFactory.getConnection(cvsRoot);
 	
 		try {
@@ -270,7 +270,7 @@ public class CvsRepositoryAdaptor implements RepositoryAdaptor {
 		final RevisionTokenDto merged = new RevisionTokenDto(0l, "<many>");
 		final Map<String, ChangeSetDto> map = new HashMap<String, ChangeSetDto>();
 		
-		// add entries by key, mergine duplicate keys
+		// add entries by key, merging duplicate keys
 		for (ChangeSetDto e : entries) {
 			final String key = key(e);
 			
