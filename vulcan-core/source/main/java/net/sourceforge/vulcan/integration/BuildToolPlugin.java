@@ -20,6 +20,8 @@ package net.sourceforge.vulcan.integration;
 
 import java.io.File;
 
+import org.jdom.Document;
+
 import net.sourceforge.vulcan.BuildTool;
 import net.sourceforge.vulcan.ProjectBuildConfigurator;
 import net.sourceforge.vulcan.dto.BuildToolConfigDto;
@@ -33,10 +35,11 @@ public interface BuildToolPlugin extends Plugin {
 	
 	/**
 	 * @param buildSpecFile
+	 * @param xmlDocument 
 	 * @throws ConfigException If <code>buildSpecFile</code> is supported but
 	 * an error occurs while processing the file.
 	 * @return Null if the buildSpecFile is not recognized/supported, or an
 	 * instance of ProjectConfigurator if it is.
 	 */
-	ProjectBuildConfigurator createProjectConfigurator(File buildSpecFile) throws ConfigException;
+	ProjectBuildConfigurator createProjectConfigurator(File buildSpecFile, Document xmlDocument) throws ConfigException;
 }

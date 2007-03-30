@@ -30,6 +30,7 @@ import org.apache.maven.artifact.repository.DefaultArtifactRepository;
 import org.apache.maven.artifact.repository.layout.ArtifactRepositoryLayout;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.project.MavenProjectBuilder;
+import org.apache.maven.project.ProjectBuildingException;
 import org.apache.maven.settings.MavenSettingsBuilder;
 import org.apache.maven.settings.Settings;
 import org.codehaus.plexus.PlexusContainerException;
@@ -68,7 +69,9 @@ public class MavenIntegration implements MavenProjectConfiguratorFactory {
 			final MavenProject project = builder.build(buildSpecFile, artifactRepository, null);
 			
 			return new MavenProjectConfigurator(project, mavenHomeProfileName, goals, applicationContext);
-		} catch (Exception e) {
+		} catch (ProjectBuildingException e) {
+			throw new ConfigException("maven.maven2.load.error", new Object[] {e.getMessage()});
+		} catch (ComponentLookupException e) {
 			throw new RuntimeException(e);
 		}
 	}

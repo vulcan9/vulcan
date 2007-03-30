@@ -40,6 +40,7 @@ import net.sourceforge.vulcan.integration.support.PluginSupport;
 import net.sourceforge.vulcan.maven.integration.MavenIntegration;
 
 import org.apache.commons.io.FileUtils;
+import org.jdom.Document;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -49,6 +50,8 @@ public class MavenBuildPlugin extends PluginSupport
 	
 	public static final String PLUGIN_ID = "net.sourceforge.vulcan.maven";
 	public static final String PLUGIN_NAME = "Apache Maven";
+	
+	public static final String M2_POM_NS = "http://maven.apache.org/POM/4.0.0";
 	
 	MavenConfig config = new MavenConfig();
 	MavenBuildToolFactory mavenBuildToolFactory = new MavenBuildToolFactory();
@@ -103,7 +106,15 @@ public class MavenBuildPlugin extends PluginSupport
 		return mavenBuildToolFactory.createMavenBuildTool(mavenProjectConfig, config, javaHome, mavenHome);
 	}
 	
-	public ProjectBuildConfigurator createProjectConfigurator(File buildSpecFile) throws ConfigException {
+	public ProjectBuildConfigurator createProjectConfigurator(File buildSpecFile, Document xmlDocument) throws ConfigException {
+		if (xmlDocument == null) {
+			return null;
+		}
+		
+		if (!M2_POM_NS.equals(xmlDocument.getRootElement().getNamespace().getURI())) {
+			return null;
+		}
+		
 		if (configuratorFactory == null) {
 			createConfigurationFactory();
 		}
@@ -184,6 +195,13 @@ public class MavenBuildPlugin extends PluginSupport
 		}
 	}
 	
+	/**
+	 * ClassLoader forces classes in a specified package (or subpackage)to be loaded
+	 * by this instance instead of delegating to the parent first.  This allows classes
+	 * in the integration package to be loaded by the same instance that has the jars
+	 * in the Maven 2 home.  This is required to avoid packaging all of those jars, which
+	 * would increase the size of this plugin by nearly 2 megabytes.
+	 */
 	static class PackageFilteringClassLoader extends URLClassLoader {
 		private final String packageName;
 
@@ -197,6 +215,8 @@ public class MavenBuildPlugin extends PluginSupport
 			if (!name.startsWith(packageName)) {
 				return super.loadClass(name, resolve);
 			}
+			
+			// Against standard practie, do NOT delegate to parent first:
 			
 			Class c = findLoadedClass(name);
 			if (c == null) {

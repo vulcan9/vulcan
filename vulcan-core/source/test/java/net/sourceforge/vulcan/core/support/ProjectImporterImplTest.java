@@ -42,7 +42,7 @@ public class ProjectImporterImplTest extends EasyMockTestCase {
 	ProjectImporterImpl importer = new ProjectImporterImpl() {
 		@Override
 		protected File createTempFile() throws IOException {
-			return tmpFile;
+			return tmpFiles.remove(0);
 		}
 	};
 	
@@ -82,7 +82,10 @@ public class ProjectImporterImplTest extends EasyMockTestCase {
 	
 	String url = "http://localhost/";
 	
-	File tmpFile;
+	File tmpFile1;
+	File tmpFile2;
+	
+	List<File> tmpFiles = new ArrayList<File>();
 	
 	IOException ioException = new IOException("foo");
 	
@@ -97,7 +100,14 @@ public class ProjectImporterImplTest extends EasyMockTestCase {
 	protected void setUp() throws Exception {
 		super.setUp();
 		
-		tmpFile = File.createTempFile("vulcan-ProjectImporterImplTest", ".tmp");
+		tmpFile1 = File.createTempFile("vulcan-ProjectImporterImplTest", ".tmp");
+		tmpFile2 = File.createTempFile("vulcan-ProjectImporterImplTest", ".tmp");
+		
+		tmpFile1.deleteOnExit();
+		tmpFile2.deleteOnExit();
+		
+		tmpFiles.add(tmpFile1);
+		tmpFiles.add(tmpFile2);
 		
 		importer.setPluginManager(pluginManager);
 		importer.setStateManager(stateManager);
@@ -105,6 +115,11 @@ public class ProjectImporterImplTest extends EasyMockTestCase {
 		
 		expect(store.getWorkingCopyLocationPattern()).andReturn(defaultWorkDirPattern).anyTimes();
 		expect(stateManager.getProjectConfigNames()).andReturn(existingProjectNames).anyTimes();
+		
+		expect(btp1.getName()).andReturn("a name").anyTimes();
+		expect(btp2.getName()).andReturn("a name").anyTimes();
+		expect(rap1.getName()).andReturn("a name").anyTimes();
+		expect(rap2.getName()).andReturn("a name").anyTimes();
 	}
 
 	@Override
@@ -142,7 +157,7 @@ public class ProjectImporterImplTest extends EasyMockTestCase {
 		expect(rap1.createProjectConfigurator(url)).andReturn(repoConfigurator);
 		expect(rap1.getId()).andReturn("a.fake.repo.plugin");
 		
-		repoConfigurator.download(tmpFile);
+		repoConfigurator.download(tmpFile1);
 		expectLastCall().andThrow(ioException);
 	}
 
@@ -156,7 +171,7 @@ public class ProjectImporterImplTest extends EasyMockTestCase {
 			assertEquals("errors.import.download", e.getKey());
 			assertEquals(ioException.getMessage(), e.getArgs()[0]);
 		}
-		assertFalse(tmpFile.exists());
+		assertFalse(tmpFile1.exists());
 	}
 	
 	public void trainNoBuildToolSupportsFile() throws Exception {
@@ -168,10 +183,10 @@ public class ProjectImporterImplTest extends EasyMockTestCase {
 		expect(rap1.createProjectConfigurator(url)).andReturn(repoConfigurator);
 		expect(rap1.getId()).andReturn("a.fake.repo.plugin");
 		
-		repoConfigurator.download(tmpFile);
+		repoConfigurator.download(tmpFile1);
 		
-		expect(btp1.createProjectConfigurator(tmpFile)).andReturn(null);
-		expect(btp2.createProjectConfigurator(tmpFile)).andReturn(null);
+		expect(btp1.createProjectConfigurator(tmpFile1, null)).andReturn(null);
+		expect(btp2.createProjectConfigurator(tmpFile1, null)).andReturn(null);
 	}
 
 	@TrainingMethod("trainNoBuildToolSupportsFile")
@@ -183,7 +198,7 @@ public class ProjectImporterImplTest extends EasyMockTestCase {
 			assertEquals("errors.build.file.unsupported", e.getKey());
 		}
 		
-		assertFalse(tmpFile.exists());
+		assertFalse(tmpFile1.exists());
 	}
 	
 	public void trainConfigures() throws Exception {
@@ -193,13 +208,13 @@ public class ProjectImporterImplTest extends EasyMockTestCase {
 		expect(rap1.createProjectConfigurator(url)).andReturn(repoConfigurator);
 		expect(rap1.getId()).andReturn("a.fake.repo.plugin");
 		
-		repoConfigurator.download(tmpFile);
+		repoConfigurator.download(tmpFile1);
 		
 		expect(pluginManager.getPlugins(BuildToolPlugin.class))
 			.andReturn(buildToolPlugins);
 		
-		expect(btp1.createProjectConfigurator(tmpFile)).andReturn(null);
-		expect(btp2.createProjectConfigurator(tmpFile)).andReturn(buildConfigurator);
+		expect(btp1.createProjectConfigurator(tmpFile1, null)).andReturn(null);
+		expect(btp2.createProjectConfigurator(tmpFile1, null)).andReturn(buildConfigurator);
 		expect(btp2.getId()).andReturn("a.fake.build.plugin");
 		
 		final ProjectConfigDto projectConfig = new ProjectConfigDto();
@@ -291,9 +306,9 @@ public class ProjectImporterImplTest extends EasyMockTestCase {
 		
 		expect(rap1.getId()).andReturn("a.fake.repo.plugin");
 		
-		repoConfigurator.download(tmpFile);
+		repoConfigurator.download(tmpFile2);
 		
-		expect(btp1.createProjectConfigurator(tmpFile)).andReturn(buildConfigurator);
+		expect(btp1.createProjectConfigurator(tmpFile2, null)).andReturn(buildConfigurator);
 		expect(btp1.getId()).andReturn("a.fake.build.plugin");
 		
 		final ProjectConfigDto projectConfig = new ProjectConfigDto();
@@ -312,6 +327,16 @@ public class ProjectImporterImplTest extends EasyMockTestCase {
 	}
 	
 	public void trainSavesSubproject() throws Exception {
+		expect(pluginManager.getPluginConfigInfo("a.fake.repo.plugin"))
+			.andThrow(new PluginNotConfigurableException());
+	
+		final ProjectConfigDto projectConfig1 = new ProjectConfigDto();
+		
+		projectConfig1.setRepositoryAdaptorPluginId("a.fake.repo.plugin");
+		projectConfig1.setBuildToolPluginId("a.fake.build.plugin");
+		projectConfig1.setName(projectName);
+		projectConfig1.setWorkDir("a workdir importedProject location");
+		
 		PluginStub pluginConfig = new PluginStub();
 		
 		expect(pluginManager.getPluginConfigInfo("a.fake.repo.plugin"))
@@ -319,17 +344,17 @@ public class ProjectImporterImplTest extends EasyMockTestCase {
 		
 		repoConfigurator.updateGlobalConfig(pluginConfig);
 		
-		final ProjectConfigDto projectConfig = new ProjectConfigDto();
+		final ProjectConfigDto projectConfig2 = new ProjectConfigDto();
 		
-		projectConfig.setRepositoryAdaptorPluginId("a.fake.repo.plugin");
-		projectConfig.setBuildToolPluginId("a.fake.build.plugin");
-		projectConfig.setName(projectName);
-		projectConfig.setWorkDir("a workdir importedProject location");
+		projectConfig2.setRepositoryAdaptorPluginId("a.fake.repo.plugin");
+		projectConfig2.setBuildToolPluginId("a.fake.build.plugin");
+		projectConfig2.setName(projectName);
+		projectConfig2.setWorkDir("a workdir importedProject location");
 		
-		stateManager.addProjectConfig(projectConfig);
+		stateManager.addProjectConfig(projectConfig1, projectConfig2);
 	}
 	
-	@TrainingMethod("trainConfigures,trainGetSubprojects,trainSaves,trainSavesSubproject")
+	@TrainingMethod("trainConfigures,trainGetSubprojects,trainSavesSubproject")
 	public void testCreatesProjectsRecursivelyOnFlag() throws Exception {
 		importer.createProjectsForUrl(url, true);
 	}
