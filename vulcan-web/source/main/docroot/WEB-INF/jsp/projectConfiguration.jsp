@@ -14,7 +14,7 @@
 			<jsp:attribute name="src"><c:url value="/javascript/projectConfiguration.js"/></jsp:attribute>
 			<jsp:body/>
 		</jsp:element>
-		<meta name="helpTopic" id="helpTopic" content="ProjectConfiguration"/>
+		<meta name="helpTopic" content="ProjectConfiguration"/>
 	</head>
 <html:xhtml/>
 

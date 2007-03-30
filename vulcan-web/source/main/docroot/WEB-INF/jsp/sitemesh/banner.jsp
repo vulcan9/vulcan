@@ -49,7 +49,7 @@
 			<li><a class="help" href="${helpUrl}"><fmt:message key="link.help"/></a></li>
 		</c:when>
 		<c:otherwise>
-			<li><html:link forward="help" styleClass="help" ><fmt:message key="link.help"/></html:link></li>
+			<li><html:link forward="help" styleId="helpLink" ><fmt:message key="link.help"/></html:link></li>
 		</c:otherwise>
 	</c:choose>
 </ul>
