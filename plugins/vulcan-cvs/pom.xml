@@ -34,9 +34,9 @@
 	
 	<dependencies>
 		<dependency>
-			<groupId>org.netbeans</groupId>
+			<groupId>org.netbeans.lib</groupId>
 			<artifactId>cvsclient</artifactId>
-			<version>5.5</version>
+			<version>20060125</version>
 			<scope>compile</scope>
 		</dependency>
 	</dependencies>

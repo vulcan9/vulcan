@@ -34,9 +34,9 @@
 	
 	<dependencies>
 		<dependency>
-			<groupId>org.tmate</groupId>
+			<groupId>com.svnkit</groupId>
 			<artifactId>svnkit</artifactId>
-			<version>1.1.1</version>
+			<version>1.1.0</version>
 		</dependency>
 	</dependencies>
 </project>
