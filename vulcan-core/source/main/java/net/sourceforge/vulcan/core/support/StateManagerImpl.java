@@ -191,23 +191,25 @@ public abstract class StateManagerImpl implements StateManager, ProjectManager {
 			readLock.unlock();
 		}
 	}
-	public void addProjectConfig(ProjectConfigDto config) throws DuplicateNameException, StoreException {
+	public void addProjectConfig(ProjectConfigDto... configs) throws DuplicateNameException, StoreException {
 		try {
 			writeLock.lock();
 			final ProjectConfigDto[] previous = this.config.getProjects();
-			if (getConfigOrNull(config.getName(), previous) != null) {
-				throw new DuplicateNameException(config.getName());
+
+			final List<ProjectConfigDto> allConfigs = new ArrayList<ProjectConfigDto>(
+					Arrays.asList(previous));
+			
+			for (ProjectConfigDto config : configs) {
+				if (getConfigOrNull(config.getName(), previous) != null) {
+					throw new DuplicateNameException(config.getName());
+				}
+				
+				config.setLastModificationDate(new Date());
+				
+				allConfigs.add(config);
 			}
 			
-			config.setLastModificationDate(new Date());
-			
-			final ProjectConfigDto[] all = new ProjectConfigDto[previous.length + 1];
-			
-			System.arraycopy(previous, 0, all, 0, previous.length);
-				
-			all[previous.length] = config;
-				
-			projectsUpdated(all);
+			projectsUpdated(allConfigs.toArray(new ProjectConfigDto[allConfigs.size()]));
 			
 			save();
 		} finally {

@@ -43,17 +43,24 @@ import net.sourceforge.vulcan.integration.BuildToolPlugin;
 import net.sourceforge.vulcan.integration.RepositoryAdaptorPlugin;
 import net.sourceforge.vulcan.metadata.SvnRevision;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.jdom.Document;
+import org.jdom.JDOMException;
+import org.jdom.input.SAXBuilder;
+
 @SvnRevision(id="$Id$", url="$HeadURL$")
 public class ProjectImporterImpl implements ProjectImporter {
+	private final Log log = LogFactory.getLog(getClass());
+	
 	private PluginManager pluginManager;
 	private StateManager stateManager;
 	private Store store;
 	
 	/*
-	 * TODO: check if file is a maven2 pom before attempting to process in maven plugin
-	 * TODO: handle maven exceptions like missing dependencies, missing parent, etc.
-	 * TODO: allow build configurator to configure emails
+	 * TODO: allow build configurator to configure emails (?)
 	 * TODO: specify "use existing," "overwrite," "report error" or "rename" for existing project names.
+	 * TODO: allow build tool to specify relative path to project url (e.g. . for ./ant/build.xml).
 	 */
 	public void createProjectsForUrl(String startUrl, boolean createSubprojects) throws ConfigException, StoreException, DuplicateNameException {
 		final List<RepositoryAdaptorPlugin> repositoryPlugins = pluginManager.getPlugins(RepositoryAdaptorPlugin.class);
@@ -71,7 +78,7 @@ public class ProjectImporterImpl implements ProjectImporter {
 			final String url = urls.remove(0);
 			
 			final ProjectConfigDto projectConfig = new ProjectConfigDto();
-			final ProjectRepositoryConfigurator repoConfigurator = createRepositoryAdaptorForUrl(
+			final ProjectRepositoryConfigurator repoConfigurator = createRepositoryConfiguratorForUrl(
 					repositoryPlugins, projectConfig, url);
 			
 			File buildSpecFile = null;
@@ -79,7 +86,9 @@ public class ProjectImporterImpl implements ProjectImporter {
 			
 			try {
 				buildSpecFile = downloadBuildSpecFile(repoConfigurator);
-				buildConfigurator = createBuildToolConfigurator(buildToolPlugins, projectConfig, buildSpecFile);
+				final Document xmlDocument = tryParse(buildSpecFile);
+				buildConfigurator = createBuildToolConfigurator(
+						buildToolPlugins, projectConfig, buildSpecFile, xmlDocument);
 			} finally {
 				deleteIfPresent(buildSpecFile);
 			}
@@ -107,6 +116,8 @@ public class ProjectImporterImpl implements ProjectImporter {
 			
 			newProjects.add(projectConfig);
 			repoConfigurators.add(repoConfigurator);
+			
+			log.info("Configured project " + projectConfig.getName());
 		}
 		
 		//TODO: stateManager should be aware that pluginConfig is being modified.
@@ -122,10 +133,10 @@ public class ProjectImporterImpl implements ProjectImporter {
 			} catch (PluginNotFoundException e) {
 				throw new RuntimeException(e);
 			}
-
-			stateManager.addProjectConfig(projectConfig);
 		}
-		
+
+		stateManager.addProjectConfig(newProjects.toArray(new ProjectConfigDto[newProjects.size()]));
+		log.info("Successfully imported project(s) for URL " + startUrl);
 	}
 
 	public void setPluginManager(PluginManager pluginManager) {
@@ -144,10 +155,21 @@ public class ProjectImporterImpl implements ProjectImporter {
 		return File.createTempFile("vulcan-new-project", ".tmp");
 	}
 
-	private ProjectRepositoryConfigurator createRepositoryAdaptorForUrl(final List<RepositoryAdaptorPlugin> repositoryPlugins, ProjectConfigDto projectConfig, String url) throws ConfigException {
+	protected Document tryParse(File buildSpecFile) {
+		try {
+			return new SAXBuilder().build(buildSpecFile);
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		} catch (JDOMException e) {
+			return null;
+		}
+	}
+
+	private ProjectRepositoryConfigurator createRepositoryConfiguratorForUrl(final List<RepositoryAdaptorPlugin> repositoryPlugins, ProjectConfigDto projectConfig, String url) throws ConfigException {
 		for (RepositoryAdaptorPlugin plugin : repositoryPlugins) {
 			final ProjectRepositoryConfigurator configurator = plugin.createProjectConfigurator(url);
 			if (configurator != null) {
+				log.info("Using " + plugin.getName() + " to download " + url);
 				projectConfig.setRepositoryAdaptorPluginId(plugin.getId());
 				return configurator;
 			}
@@ -156,10 +178,12 @@ public class ProjectImporterImpl implements ProjectImporter {
 		throw new ConfigException("errors.url.unsupported", null);
 	}
 	
-	private ProjectBuildConfigurator createBuildToolConfigurator(List<BuildToolPlugin> buildToolPlugins, ProjectConfigDto projectConfig, File buildSpecFile) throws ConfigException {
+	private ProjectBuildConfigurator createBuildToolConfigurator(List<BuildToolPlugin> buildToolPlugins, ProjectConfigDto projectConfig, File buildSpecFile, Document xmlDocument) throws ConfigException {
 		for (BuildToolPlugin plugin : buildToolPlugins) {
-			final ProjectBuildConfigurator configurator = plugin.createProjectConfigurator(buildSpecFile);
+			final ProjectBuildConfigurator configurator = plugin.createProjectConfigurator(
+					buildSpecFile, xmlDocument);
 			if (configurator != null) {
+				log.info("Using " + plugin.getName() + " to configure project.");
 				projectConfig.setBuildToolPluginId(plugin.getId());
 				return configurator;
 			}

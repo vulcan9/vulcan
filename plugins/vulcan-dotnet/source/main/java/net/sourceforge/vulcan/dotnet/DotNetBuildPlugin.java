@@ -35,6 +35,7 @@ import net.sourceforge.vulcan.integration.ConfigurablePlugin;
 import net.sourceforge.vulcan.integration.support.PluginSupport;
 
 import org.apache.commons.lang.StringUtils;
+import org.jdom.Document;
 
 public class DotNetBuildPlugin extends PluginSupport implements BuildToolPlugin, ConfigurablePlugin {
 	public static final String PLUGIN_ID = "net.sourceforge.vulcan.dotnet";
@@ -72,7 +73,7 @@ public class DotNetBuildPlugin extends PluginSupport implements BuildToolPlugin,
 		throw new ConfigException("dotnet.config.nant.unsupported", null);
 	}
 
-	public ProjectBuildConfigurator createProjectConfigurator(File buildSpecFile) throws ConfigException {
+	public ProjectBuildConfigurator createProjectConfigurator(File buildSpecFile, Document xmlDocument) throws ConfigException {
 		// Not supported.
 		return null;
 	}

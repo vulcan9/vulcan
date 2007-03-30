@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.jdom.Document;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -74,7 +75,7 @@ public class AntBuildPlugin extends PluginSupport
 		
 		return new AntBuildTool(antProjectConfig, this.globalConfig, javaHome);
 	}
-	public ProjectBuildConfigurator createProjectConfigurator(File buildSpecFile) throws ConfigException {
+	public ProjectBuildConfigurator createProjectConfigurator(File buildSpecFile, Document xmlDocument) throws ConfigException {
 		return null;
 	}
 	public AntProjectConfig getDefaultConfig() {

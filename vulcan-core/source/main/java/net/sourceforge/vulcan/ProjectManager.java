@@ -35,7 +35,7 @@ public interface ProjectManager {
 
 	public ProjectConfigDto getProjectConfig(String name) throws NoSuchProjectException;
 
-	public void addProjectConfig(ProjectConfigDto config)
+	public void addProjectConfig(ProjectConfigDto... configs)
 			throws DuplicateNameException, StoreException;
 
 	public void updateProjectConfig(String oldName,

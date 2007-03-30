@@ -56,6 +56,15 @@ public class MavenConfig extends AntConfig {
 		return pds;
 	}
 	
+	@Override
+	public MavenConfig copy() {
+		final MavenConfig copy = (MavenConfig) super.copy();
+		
+		copy.setMavenHomes((MavenHome[]) copyArray(mavenHomes));
+		
+		return copy;
+	}
+	
 	public MavenHome[] getMavenHomes() {
 		return mavenHomes;
 	}
