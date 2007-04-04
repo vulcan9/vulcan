@@ -26,6 +26,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import net.sourceforge.vulcan.core.ProjectImporter;
 import net.sourceforge.vulcan.exception.ConfigException;
+import net.sourceforge.vulcan.exception.DuplicateNameException;
 import net.sourceforge.vulcan.exception.StoreException;
 import net.sourceforge.vulcan.metadata.SvnRevision;
 import net.sourceforge.vulcan.web.struts.forms.ProjectImportForm;
@@ -49,9 +50,18 @@ public final class CreateProjectFromUrlAction extends Action {
 		final ProjectImportForm importForm = (ProjectImportForm) form;
 		
 		try {
-			projectImporter.createProjectsForUrl(importForm.getUrl(), importForm.isCreateSubprojects());
+			projectImporter.createProjectsForUrl(
+					importForm.getUrl(),
+					importForm.isCreateSubprojects(),
+					importForm.parseNameCollisionResolutionMode(),
+					importForm.getSchedulerNames());
 			
 			saveSuccessMessage(request);
+		} catch (DuplicateNameException e) {
+			saveError(request, ActionMessages.GLOBAL_MESSAGE,
+					new ActionMessage("errors.duplicate.project.name", e.getName()));
+
+			return mapping.getInputForward();
 		} catch (ConfigException e) {
 			saveError(request, ActionMessages.GLOBAL_MESSAGE,
 					new ActionMessage(e.getKey(), e.getArgs()));

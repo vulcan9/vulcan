@@ -19,6 +19,7 @@
 package net.sourceforge.vulcan.core.support;
 
 import java.beans.PropertyDescriptor;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
@@ -233,6 +234,37 @@ public class StateManagerImplTest extends StateManagerTestBase
 		assertEquals(0, stateMgr.config.getProjects().length);
 		assertTrue(store.isCommitCalled());
 	}
+	public void testDeleteProjects() throws Exception {
+		final ProjectConfigDto a = createProjectDto("a");
+		final ProjectConfigDto b = createProjectDto("b");
+		final ProjectConfigDto c = createProjectDto("c");
+		stateMgr.config.setProjects(new ProjectConfigDto[] {a, b, c});
+		
+		store.setCommitCalled(false);
+
+		assertEquals(3, stateMgr.config.getProjects().length);
+		stateMgr.deleteProjectConfig(a.getName(), b.getName());
+		assertEquals(1, stateMgr.config.getProjects().length);
+		assertTrue(store.isCommitCalled());
+	}
+	public void testDeleteProjectsDoesNotThrowDependencyWhenBothAreDeleted() throws Exception {
+		final ProjectConfigDto a = createProjectDto("a");
+		final ProjectConfigDto b = createProjectDto("b");
+		final ProjectConfigDto c = createProjectDto("c");
+		
+		a.setDependencies(new String[] {"b"});
+		b.setDependencies(new String[] {"c"});
+		c.setDependencies(new String[] {});
+		
+		stateMgr.config.setProjects(new ProjectConfigDto[] {a, b, c});
+		
+		store.setCommitCalled(false);
+
+		assertEquals(3, stateMgr.config.getProjects().length);
+		stateMgr.deleteProjectConfig(a.getName(), b.getName(), c.getName());
+		assertEquals(0, stateMgr.config.getProjects().length);
+		assertTrue(store.isCommitCalled());
+	}
 	public void testDeleteProjectLeavesOthers() throws Exception {
 		final ProjectConfigDto a = createProjectDto("a");
 		final ProjectConfigDto b = createProjectDto("b");
@@ -260,21 +292,48 @@ public class StateManagerImplTest extends StateManagerTestBase
 	public void testDeleteProjectThrowsOnDependency() throws Exception {
 		final ProjectConfigDto a = createProjectDto("a");
 		final ProjectConfigDto b = createProjectDto("b");
-
+		final ProjectConfigDto c = createProjectDto("c");
+		
 		b.setDependencies(new String[] {"a"});
+		c.setDependencies(new String[] {"a"});
 		
 		stateMgr.addProjectConfig(a);
 		stateMgr.addProjectConfig(b);
+		stateMgr.addProjectConfig(c);
 		
 		try {
 			stateMgr.deleteProjectConfig(a.getName());
 			fail("expected exception");
 		} catch (ProjectNeedsDependencyException e) {
-			assertEquals(a.getName(), e.getProjectToDelete());
-			assertEquals(b.getName(), e.getDependantProject());
+			assertEquals(a.getName(), e.getProjectsToDelete()[0]);
+			assertTrue(Arrays.equals(new String[] {"b", "c"}, e.getDependantProjects()));
 		}
 		
-		assertEquals(2, stateMgr.config.getProjects().length);
+		assertEquals(3, stateMgr.config.getProjects().length);
+	}
+	public void testDeleteProjectsThrowsOnDependencyWithAllInfo() throws Exception {
+		final ProjectConfigDto a = createProjectDto("a");
+		final ProjectConfigDto b = createProjectDto("b");
+		final ProjectConfigDto c = createProjectDto("c");
+		final ProjectConfigDto d = createProjectDto("d");
+		
+		c.setDependencies(new String[] {"a"});
+		d.setDependencies(new String[] {"b"});
+		
+		stateMgr.addProjectConfig(a);
+		stateMgr.addProjectConfig(b);
+		stateMgr.addProjectConfig(c);
+		stateMgr.addProjectConfig(d);
+		
+		try {
+			stateMgr.deleteProjectConfig(a.getName(), b.getName());
+			fail("expected exception");
+		} catch (ProjectNeedsDependencyException e) {
+			assertTrue(Arrays.equals(new String[] {"a", "b"}, e.getProjectsToDelete()));
+			assertTrue(Arrays.equals(new String[] {"c", "d"}, e.getDependantProjects()));
+		}
+		
+		assertEquals(4, stateMgr.config.getProjects().length);
 	}
 	public void testUpdateProject() throws Exception {
 		final ProjectConfigDto a = createProjectDto("a");
