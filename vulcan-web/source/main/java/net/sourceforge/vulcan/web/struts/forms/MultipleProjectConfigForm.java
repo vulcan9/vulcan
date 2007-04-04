@@ -16,34 +16,31 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-package net.sourceforge.vulcan.exception;
+package net.sourceforge.vulcan.web.struts.forms;
 
-import static org.apache.commons.lang.StringUtils.join;
+import javax.servlet.http.HttpServletRequest;
+
 import net.sourceforge.vulcan.metadata.SvnRevision;
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
-public final class ProjectNeedsDependencyException extends Exception {
-	final String[] projectsToDelete;
-	final String[] dependantProjects;
+import org.apache.commons.lang.ArrayUtils;
+import org.apache.struts.action.ActionForm;
+import org.apache.struts.action.ActionMapping;
 
-	public ProjectNeedsDependencyException(
-			final String[] projectsToDelete,
-			final String[] dependantProjects) {
-		this.projectsToDelete = projectsToDelete;
-		this.dependantProjects = dependantProjects;
+@SvnRevision(id="$Id$", url="$HeadURL$")
+public class MultipleProjectConfigForm extends ActionForm {
+	private String[] projectNames;
+	
+	@Override
+	public void reset(ActionMapping mapping, HttpServletRequest request) {
+		super.reset(mapping, request);
+		projectNames = ArrayUtils.EMPTY_STRING_ARRAY;
 	}
-	public String[] getDependantProjects() {
-		return dependantProjects;
+	
+	public String[] getProjectNames() {
+		return projectNames;
 	}
-	public String[] getProjectsToDelete() {
-		return projectsToDelete;
-	}
-	public String getKey() {
-		return "messages.dependency.required";
-	}
-	public Object[] getArgs() {
-		return new Object[] {
-				join(dependantProjects, ", "),
-				join(projectsToDelete, ", ")};
+	
+	public void setProjectNames(String[] projectNames) {
+		this.projectNames = projectNames;
 	}
 }

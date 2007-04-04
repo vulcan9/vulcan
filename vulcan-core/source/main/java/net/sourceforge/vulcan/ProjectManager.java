@@ -41,7 +41,7 @@ public interface ProjectManager {
 	public void updateProjectConfig(String oldName,
 			ProjectConfigDto updatedConfig, boolean setLastModifiedDate) throws DuplicateNameException, NoSuchProjectException, StoreException;
 
-	public void deleteProjectConfig(String name)
+	public void deleteProjectConfig(String... names)
 			throws ProjectNeedsDependencyException, NoSuchProjectException, StoreException;
 
 	public ProjectConfigDto[] getProjectsForScheduler(String schedulerName);

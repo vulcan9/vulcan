@@ -422,8 +422,7 @@ table.build-messages tbody td {
 	font-size: smaller;
 	white-space: pre;
 }
-
-table.projectConfig {
+table.projectConfig, table.delete-projects {
 	width: 60em;
 }
 table.dynamicEdit {

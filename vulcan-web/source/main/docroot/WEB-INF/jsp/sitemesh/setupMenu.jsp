@@ -23,6 +23,7 @@
 			<ul>
 				<li><html:link forward="importProjectConfig"><fmt:message key="link.import.project"/></html:link></li>
 				<li><html:link forward="createProjectConfig"><fmt:message key="label.project.new"/></html:link></li>
+				<li><html:link forward="deleteProjects"><fmt:message key="label.delete.projects"/></html:link></li>
 				<li><fmt:message key="label.projects"/>
 					<ul>
 						<c:forEach items="${stateManager.config.projects}" var="project">

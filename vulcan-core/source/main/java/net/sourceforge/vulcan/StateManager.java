@@ -21,9 +21,8 @@ package net.sourceforge.vulcan;
 import java.util.List;
 import java.util.Set;
 
-import net.sourceforge.vulcan.dto.PluginProfileDto;
-import net.sourceforge.vulcan.dto.StateManagerConfigDto;
 import net.sourceforge.vulcan.dto.PluginConfigDto;
+import net.sourceforge.vulcan.dto.PluginProfileDto;
 import net.sourceforge.vulcan.dto.ProjectConfigDto;
 import net.sourceforge.vulcan.dto.SchedulerConfigDto;
 import net.sourceforge.vulcan.exception.DuplicateNameException;
@@ -37,14 +36,11 @@ import net.sourceforge.vulcan.scheduler.ProjectScheduler;
 
 @SvnRevision(id="$Id$", url="$HeadURL$")
 public interface StateManager {
-	@Deprecated
-	public StateManagerConfigDto getConfig();
-	
 	public List<String> getProjectConfigNames();
 	public ProjectConfigDto getProjectConfig(String name) throws NoSuchProjectException;
 	public void addProjectConfig(ProjectConfigDto... configs) throws DuplicateNameException, StoreException;
 	public void updateProjectConfig(String oldName, ProjectConfigDto updatedConfig, boolean setLastModifiedDate)	throws DuplicateNameException, NoSuchProjectException, StoreException;
-	public void deleteProjectConfig(String name) throws ProjectNeedsDependencyException, StoreException;
+	public void deleteProjectConfig(String... names) throws ProjectNeedsDependencyException, StoreException;
 	
 	public SchedulerConfigDto getSchedulerConfig(String name);
 	public ProjectConfigDto[] getProjectsForScheduler(String schedulerName);

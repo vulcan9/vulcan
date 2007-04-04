@@ -419,7 +419,9 @@ public class ManageProjectConfigActionTest extends MockApplicationContextStrutsT
 		addRequestParameter("action", "Delete Project");
 		
 		manager.deleteProjectConfig("my project");
-		EasyMock.expectLastCall().andThrow(new ProjectNeedsDependencyException("my project", "building block"));
+		EasyMock.expectLastCall().andThrow(new ProjectNeedsDependencyException(
+				new String[] {"my project"},
+				new String[] {"building block"}));
 		replay();
 		
 		actionPerform();

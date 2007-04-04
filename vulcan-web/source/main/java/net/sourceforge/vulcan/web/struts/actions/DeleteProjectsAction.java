@@ -18,35 +18,43 @@
  */
 package net.sourceforge.vulcan.web.struts.actions;
 
+import static net.sourceforge.vulcan.web.struts.actions.BaseDispatchAction.saveSuccessMessage;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import net.sourceforge.vulcan.StateManager;
+import net.sourceforge.vulcan.exception.ProjectNeedsDependencyException;
 import net.sourceforge.vulcan.metadata.SvnRevision;
+import net.sourceforge.vulcan.web.struts.forms.MultipleProjectConfigForm;
 
+import org.apache.struts.action.Action;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 
-
 @SvnRevision(id="$Id$", url="$HeadURL$")
-public final class BuildManagerControlAction extends BaseDispatchAction {
-	//TODO: use form so JSP isn't quite so stupid.
-	public ActionForward disable(ActionMapping mapping, ActionForm form,
-			HttpServletRequest request, HttpServletResponse response)
-			throws Exception {
+public final class DeleteProjectsAction extends Action {
+	private StateManager stateManager;
+	
+	@Override
+	public ActionForward execute(ActionMapping mapping, ActionForm form,
+			HttpServletRequest request, HttpServletResponse response) throws Exception {
 		
-		stateManager.getConfig().getBuildManagerConfig().setEnabled(false);
-		saveSuccessMessage(request);
-		
-		return mapping.findForward("success");
+		final MultipleProjectConfigForm configForm = (MultipleProjectConfigForm) form;
+
+		try {
+			stateManager.deleteProjectConfig(configForm.getProjectNames());
+			saveSuccessMessage(request);
+			return mapping.findForward("projectList");
+		} catch (ProjectNeedsDependencyException e) {
+			request.setAttribute("projectsWithDependents", e.getProjectsToDelete());
+			request.setAttribute("dependentProjects", e.getDependantProjects());
+			return mapping.getInputForward();
+		}
 	}
-	public ActionForward enable(ActionMapping mapping, ActionForm form,
-			HttpServletRequest request, HttpServletResponse response)
-			throws Exception {
-		
-		stateManager.getConfig().getBuildManagerConfig().setEnabled(true);
-		saveSuccessMessage(request);
-		
-		return mapping.findForward("success");
+
+	public void setStateManager(StateManager stateManager) {
+		this.stateManager = stateManager;
 	}
 }

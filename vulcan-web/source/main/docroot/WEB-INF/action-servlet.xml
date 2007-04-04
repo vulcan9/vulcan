@@ -63,10 +63,6 @@
 		</property>
 	</bean>
 	
-	<bean name="/admin/buildManagerControl"
-			class="net.sourceforge.vulcan.web.struts.actions.BuildManagerControlAction"
-			parent="baseDispatchAction"/>
-			
 	<bean name="/admin/setup/manageSchedulerConfig"
 			class="net.sourceforge.vulcan.web.struts.actions.ManageSchedulerConfigAction"
 			parent="baseDispatchAction">
@@ -77,6 +73,11 @@
 			class="net.sourceforge.vulcan.web.struts.actions.ManageProjectConfigAction"
 			parent="baseDispatchAction">
 		<property name="store" ref="store"/>
+	</bean>
+	
+	<bean name="/admin/setup/deleteProjects"
+			class="net.sourceforge.vulcan.web.struts.actions.DeleteProjectsAction">
+		<property name="stateManager" ref="stateManager"/>
 	</bean>
 	
 	<bean name="/admin/setup/createProjectFromUrl"

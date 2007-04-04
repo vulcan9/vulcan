@@ -18,60 +18,56 @@
  */
 package net.sourceforge.vulcan.web.struts;
 
-import net.sourceforge.vulcan.dto.BuildManagerConfigDto;
-import net.sourceforge.vulcan.dto.StateManagerConfigDto;
+import net.sourceforge.vulcan.exception.ProjectNeedsDependencyException;
 import net.sourceforge.vulcan.metadata.SvnRevision;
 
-
 @SvnRevision(id="$Id$", url="$HeadURL$")
-public class BuildManagerControlActionTest extends MockApplicationContextStrutsTestCase {
-	StateManagerConfigDto stateMgrConfig = new StateManagerConfigDto();
-	
+public class DeleteProjectsActionTest extends MockApplicationContextStrutsTestCase {
 	@Override
 	public void setUp() throws Exception {
 		super.setUp();
 		
-		setRequestPathInfo("/admin/buildManagerControl.do");
-		BuildManagerConfigDto mgrConfig = new BuildManagerConfigDto();
-		mgrConfig.setEnabled(true);
-		
-		stateMgrConfig.setBuildManagerConfig(mgrConfig);
+		setRequestPathInfo("/admin/setup/deleteProjects");
 	}
 	
-	public void testDisable() throws Exception {
-		addRequestParameter("action", "disable");
+	public void testDelete() throws Exception {
+		addRequestParameter("projectNames", new String[] {"a", "b"});
 		
-		expect(manager.getConfig())
-			.andReturn(stateMgrConfig);
+		manager.deleteProjectConfig("a", "b");
 		
 		replay();
 		
-		assertTrue(stateMgrConfig.getBuildManagerConfig().isEnabled());
 		actionPerform();
 		
 		verify();
 		
-		assertFalse(stateMgrConfig.getBuildManagerConfig().isEnabled());
-		
+		verifyNoActionErrors();
 		verifyActionMessages(new String[] {"messages.save.success"});
+		
+		verifyForward("projectList");
 	}
 
-	public void testEnable() throws Exception {
-		addRequestParameter("action", "Enable the manager");
+	public void testHandlesDependencyException() throws Exception {
+		addRequestParameter("projectNames", new String[] {"a", "b"});
 		
-		expect(manager.getConfig())
-			.andReturn(stateMgrConfig);
+		final ProjectNeedsDependencyException e = new ProjectNeedsDependencyException(
+				new String[] {"a"}, new String[] {"c"});
+		
+		manager.deleteProjectConfig("a", "b");
+		expectLastCall().andThrow(e);
 		
 		replay();
 		
-		stateMgrConfig.getBuildManagerConfig().setEnabled(false);
-		assertFalse(stateMgrConfig.getBuildManagerConfig().isEnabled());
 		actionPerform();
 		
 		verify();
 		
-		assertTrue(stateMgrConfig.getBuildManagerConfig().isEnabled());
+		verifyNoActionErrors();
+		verifyNoActionMessages();
 		
-		verifyActionMessages(new String[] {"messages.save.success"});
+		verifyInputForward();
+		
+		assertNotNull(request.getAttribute("projectsWithDependents"));
+		assertNotNull(request.getAttribute("dependentProjects"));
 	}
 }

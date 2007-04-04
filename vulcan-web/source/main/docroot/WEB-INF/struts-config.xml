@@ -15,6 +15,7 @@
 		<form-bean name="manualBuildForm" type="net.sourceforge.vulcan.web.struts.forms.ManualBuildForm"/>
 		<form-bean name="reportForm" type="net.sourceforge.vulcan.web.struts.forms.ReportForm"/>
 		<form-bean name="projectImportForm" type="net.sourceforge.vulcan.web.struts.forms.ProjectImportForm"/>
+		<form-bean name="multipleProjectConfigForm" type="net.sourceforge.vulcan.web.struts.forms.MultipleProjectConfigForm"/>
 	</form-beans>
 	
 	<global-forwards>
@@ -37,6 +38,7 @@
 		<forward name="importPlugin" path="/admin/setup/importPlugin.jsp"/>
 		<forward name="clearMessages" path="/admin/clearMessages.do"/>
 		<forward name="configureProject" path="/admin/setup/manageProjectConfig.do?action=Edit"/>
+		<forward name="deleteProjects" path="/admin/setup/deleteProjectsForm.do"/>
 		<forward name="configureScheduler" path="/admin/setup/manageSchedulerConfig.do?action=Edit"/>
 		<forward name="configureBuildDaemon" path="/admin/setup/manageBuildDaemonConfig.do?action=Edit&amp;amp;daemon=true"/>
 		<forward name="configurePlugin" path="/admin/setup/managePlugin.do?action=Configure"/>
@@ -72,12 +74,6 @@
 		<action path="/admin/clearMessages"
 				type="org.springframework.web.struts.DelegatingActionProxy"/>
 
-		<action path="/admin/buildManagerControl"
-				type="org.springframework.web.struts.DelegatingActionProxy"
-				parameter="action">
-			<forward name="success" path="/admin/setup/"/>
-		</action>
-		
 		<action path="/admin/setup/importProjectForm"
 				type="org.apache.struts.actions.ForwardAction"
 				parameter="/WEB-INF/jsp/importProjectForm.jsp"
@@ -100,6 +96,18 @@
 			<forward name="configure" path="/WEB-INF/jsp/metadataConfiguration.jsp"/>
 		</action>
 
+		<action path="/admin/setup/deleteProjectsForm"
+				type="org.apache.struts.actions.ForwardAction"
+				parameter="/WEB-INF/jsp/deleteProjectsForm.jsp"/>
+				
+		<action path="/admin/setup/deleteProjects"
+				type="org.springframework.web.struts.DelegatingActionProxy"
+				name="multipleProjectConfigForm"
+				validate="false"
+				input="/WEB-INF/jsp/deleteProjectsForm.jsp">
+			<forward name="projectList" path="/admin/setup/"/>
+		</action>
+		
 		<action path="/admin/setup/manageSchedulerConfig"
 				type="org.springframework.web.struts.DelegatingActionProxy"
 				name="schedulerConfigForm"

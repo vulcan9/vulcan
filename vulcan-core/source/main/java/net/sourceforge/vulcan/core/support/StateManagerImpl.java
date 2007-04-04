@@ -26,6 +26,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -246,18 +247,58 @@ public abstract class StateManagerImpl implements StateManager, ProjectManager {
 			writeLock.unlock();
 		}
 	}
-	public void deleteProjectConfig(String name) throws ProjectNeedsDependencyException, StoreException {
+	public void deleteProjectConfig(String... names) throws ProjectNeedsDependencyException, StoreException {
+		
 		try {
 			writeLock.lock();
 			
 			final ProjectConfigDto[] all = config.getProjects();
-			for (int i=0; i<all.length; i++) {
-				if (Arrays.asList(all[i].getDependencies()).contains(name)) {
-					throw new ProjectNeedsDependencyException(name, all[i].getName());
+			
+			final Set<String> deletedProjectNames = new HashSet<String>(
+					Arrays.asList(names));
+			
+			List<String> dependentProjectNames = null;
+			List<String> projectsWithDependencies = null;
+			
+			for (int i=0; i<names.length; i++) {
+				final String name = names[i];
+				
+				for (int j=0; j<all.length; j++) {
+					if (deletedProjectNames.contains(all[j].getName())) {
+						continue;
+					}
+					
+					if (Arrays.asList(all[j].getDependencies()).contains(name)) {
+						if (projectsWithDependencies == null) {
+							projectsWithDependencies = new ArrayList<String>();
+						}
+						if (!projectsWithDependencies.contains(name)) {
+							projectsWithDependencies.add(name);
+						}
+						
+						if (dependentProjectNames == null) {
+							dependentProjectNames = new ArrayList<String>();
+						}
+						if (!dependentProjectNames.contains(all[j].getName())) {
+							dependentProjectNames.add(all[j].getName());
+						}
+					}
 				}
 			}
-			final ProjectConfigDto[] projects = removeByName(name, all);
-			config.setProjects(projects);
+			
+			if (dependentProjectNames != null) {
+				throw new ProjectNeedsDependencyException(
+						projectsWithDependencies.toArray(new String[projectsWithDependencies.size()]), 
+						dependentProjectNames.toArray(new String[dependentProjectNames.size()]));	
+			}
+			
+			ProjectConfigDto[] prunedProjects = all;
+			
+			for (String projectName : names) {
+				prunedProjects = removeByName(projectName, prunedProjects);	
+			}
+			
+			config.setProjects(prunedProjects);
 			
 			save();
 		} finally {
