@@ -18,12 +18,15 @@
  */
 package net.sourceforge.vulcan.web.struts;
 
-import org.apache.struts.action.ActionMessages;
-
 import net.sourceforge.vulcan.RepositoryAdaptor;
+import net.sourceforge.vulcan.core.NameCollisionResolutionMode;
 import net.sourceforge.vulcan.exception.ConfigException;
+import net.sourceforge.vulcan.exception.DuplicateNameException;
 import net.sourceforge.vulcan.exception.StoreException;
 import net.sourceforge.vulcan.metadata.SvnRevision;
+
+import org.apache.commons.lang.ArrayUtils;
+import org.apache.struts.action.ActionMessages;
 
 @SvnRevision(id="$Id$", url="$HeadURL$")
 public class CreateProjectFromUrlActionTest extends MockApplicationContextStrutsTestCase {
@@ -44,12 +47,14 @@ public class CreateProjectFromUrlActionTest extends MockApplicationContextStruts
 		verify();
 
 		assertPropertyHasError("url", "errors.required");
+		assertPropertyHasError("nameCollisionResolutionMode", "errors.required");
 	}
 	
 	public void testImportUrl() throws Exception {
 		addRequestParameter("url", "http://www.example.com");
+		addRequestParameter("nameCollisionResolutionMode", NameCollisionResolutionMode.Abort.name());
 		
-		projectImporter.createProjectsForUrl("http://www.example.com", false);
+		projectImporter.createProjectsForUrl("http://www.example.com", false, NameCollisionResolutionMode.Abort, ArrayUtils.EMPTY_STRING_ARRAY);
 		
 		replay();
 		
@@ -57,13 +62,17 @@ public class CreateProjectFromUrlActionTest extends MockApplicationContextStruts
 		
 		verify();
 
+		verifyNoActionErrors();
+		
 		verifyForward("success");
 	}
 	
 	public void testHandlesConfigException() throws Exception {
 		addRequestParameter("url", "http://www.example.com");
+		addRequestParameter("nameCollisionResolutionMode", NameCollisionResolutionMode.UseExisting.name());
 		
-		projectImporter.createProjectsForUrl("http://www.example.com", false);
+		projectImporter.createProjectsForUrl("http://www.example.com", false, NameCollisionResolutionMode.UseExisting, ArrayUtils.EMPTY_STRING_ARRAY);
+		
 		expectLastCall().andThrow(new ConfigException("foo.bar", new Object[] {"a", "b"}));
 		
 		replay();
@@ -79,8 +88,9 @@ public class CreateProjectFromUrlActionTest extends MockApplicationContextStruts
 	
 	public void testHandlesStoreException() throws Exception {
 		addRequestParameter("url", "http://www.example.com");
+		addRequestParameter("nameCollisionResolutionMode", NameCollisionResolutionMode.Overwrite.name());
 		
-		projectImporter.createProjectsForUrl("http://www.example.com", false);
+		projectImporter.createProjectsForUrl("http://www.example.com", false, NameCollisionResolutionMode.Overwrite, ArrayUtils.EMPTY_STRING_ARRAY);
 		expectLastCall().andThrow(new StoreException("a message", null));
 		
 		replay();
@@ -93,4 +103,24 @@ public class CreateProjectFromUrlActionTest extends MockApplicationContextStruts
 		
 		assertPropertyHasError(ActionMessages.GLOBAL_MESSAGE, "messages.save.failure");
 	}
+	
+	public void testHandlesDuplicateNameException() throws Exception {
+		addRequestParameter("url", "http://www.example.com");
+		addRequestParameter("nameCollisionResolutionMode", NameCollisionResolutionMode.Abort.name());
+		
+		projectImporter.createProjectsForUrl("http://www.example.com", false, NameCollisionResolutionMode.Abort, ArrayUtils.EMPTY_STRING_ARRAY);
+		
+		expectLastCall().andThrow(new DuplicateNameException("scuba"));
+		
+		replay();
+		
+		actionPerform();
+		
+		verify();
+
+		verifyInputForward();
+		
+		assertPropertyHasError(ActionMessages.GLOBAL_MESSAGE, "errors.duplicate.project.name");
+	}
+
 }

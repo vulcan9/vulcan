@@ -18,19 +18,9 @@
  */
 package net.sourceforge.vulcan.core;
 
-import net.sourceforge.vulcan.exception.ConfigException;
-import net.sourceforge.vulcan.exception.DuplicateNameException;
-import net.sourceforge.vulcan.exception.StoreException;
 import net.sourceforge.vulcan.metadata.SvnRevision;
 
 @SvnRevision(id="$Id$", url="$HeadURL$")
-public interface ProjectImporter {
-
-	void createProjectsForUrl(
-			String url,
-			boolean createSubprojects,
-			NameCollisionResolutionMode nameCollisionResolutionMode,
-			String[] schedulerNames) throws ConfigException,
-			StoreException, DuplicateNameException;
-
+public enum NameCollisionResolutionMode {
+	Abort, UseExisting, Overwrite 
 }

@@ -46,6 +46,7 @@
 		</form>
 		<form name="projectImportForm">
 			<field property="url" depends="required"/>
+			<field property="nameCollisionResolutionMode" depends="required"/>
 		</form>
 		<form name="reportForm">
 			<field property="projectNames" depends="required"/>

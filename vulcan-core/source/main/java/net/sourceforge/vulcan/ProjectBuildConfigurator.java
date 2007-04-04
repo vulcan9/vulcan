@@ -43,7 +43,9 @@ public interface ProjectBuildConfigurator {
 	 * 	<li>Configure dependencies for projecs which exist</li>
 	 * 	<li>Avoid a naming conflict when assigning a name to the new project</li> 
 	 * </ul>
-	 * @param createSubprojects TODO
+	 * @param createSubprojects If set to <code>true</code>, the project should be
+	 * configured to only build the top level project and not any subprojects
+	 * which should be configured as separate projects.
 	 */
 	void applyConfiguration(ProjectConfigDto projectConfig, List<String> existingProjectNames, boolean createSubprojects);
 

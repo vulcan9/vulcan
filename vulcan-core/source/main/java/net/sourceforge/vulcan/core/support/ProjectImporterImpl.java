@@ -18,6 +18,7 @@
  */
 package net.sourceforge.vulcan.core.support;
 
+import static net.sourceforge.vulcan.core.NameCollisionResolutionMode.*;
 import static org.apache.commons.lang.StringUtils.isBlank;
 
 import java.io.File;
@@ -29,6 +30,7 @@ import net.sourceforge.vulcan.PluginManager;
 import net.sourceforge.vulcan.ProjectBuildConfigurator;
 import net.sourceforge.vulcan.ProjectRepositoryConfigurator;
 import net.sourceforge.vulcan.StateManager;
+import net.sourceforge.vulcan.core.NameCollisionResolutionMode;
 import net.sourceforge.vulcan.core.ProjectImporter;
 import net.sourceforge.vulcan.core.Store;
 import net.sourceforge.vulcan.dto.PluginConfigDto;
@@ -59,10 +61,9 @@ public class ProjectImporterImpl implements ProjectImporter {
 	
 	/*
 	 * TODO: allow build configurator to configure emails (?)
-	 * TODO: specify "use existing," "overwrite," "report error" or "rename" for existing project names.
 	 * TODO: allow build tool to specify relative path to project url (e.g. . for ./ant/build.xml).
 	 */
-	public void createProjectsForUrl(String startUrl, boolean createSubprojects) throws ConfigException, StoreException, DuplicateNameException {
+	public void createProjectsForUrl(String startUrl, boolean createSubprojects, NameCollisionResolutionMode nameCollisionResolutionMode, String[] schedulerNames) throws ConfigException, StoreException, DuplicateNameException {
 		final List<RepositoryAdaptorPlugin> repositoryPlugins = pluginManager.getPlugins(RepositoryAdaptorPlugin.class);
 		final List<BuildToolPlugin> buildToolPlugins = pluginManager.getPlugins(BuildToolPlugin.class);
 		
@@ -78,6 +79,8 @@ public class ProjectImporterImpl implements ProjectImporter {
 			final String url = urls.remove(0);
 			
 			final ProjectConfigDto projectConfig = new ProjectConfigDto();
+			projectConfig.setSchedulerNames(schedulerNames);
+			
 			final ProjectRepositoryConfigurator repoConfigurator = createRepositoryConfiguratorForUrl(
 					repositoryPlugins, projectConfig, url);
 			
@@ -93,17 +96,9 @@ public class ProjectImporterImpl implements ProjectImporter {
 				deleteIfPresent(buildSpecFile);
 			}
 			
-			buildConfigurator.applyConfiguration(projectConfig, existingProjectNames, createSubprojects);
-			repoConfigurator.applyConfiguration(projectConfig);
-			
-			if (createSubprojects && buildConfigurator.isStandaloneProject()) {
-				repoConfigurator.setNonRecursive();
-			}
-			
-			if (isBlank(projectConfig.getWorkDir())) {
-				final String workDir = store.getWorkingCopyLocationPattern().replace("${projectName}", projectConfig.getName());
-				projectConfig.setWorkDir(workDir);
-			}
+			final boolean shouldCreate = configureProject(
+					projectConfig, repoConfigurator, buildConfigurator,
+					existingProjectNames, nameCollisionResolutionMode, createSubprojects);
 			
 			if (createSubprojects) {
 				final List<String> subprojectUrls = buildConfigurator.getSubprojectUrls();
@@ -112,12 +107,16 @@ public class ProjectImporterImpl implements ProjectImporter {
 				}
 			}
 			
-			existingProjectNames.add(projectConfig.getName());
-			
-			newProjects.add(projectConfig);
-			repoConfigurators.add(repoConfigurator);
-			
-			log.info("Configured project " + projectConfig.getName());
+			if (shouldCreate) {
+				existingProjectNames.add(projectConfig.getName());
+				
+				newProjects.add(projectConfig);
+				repoConfigurators.add(repoConfigurator);
+				
+				log.info("Configured project " + projectConfig.getName());
+			} else {
+				log.info("Skipping project " + projectConfig.getName() + " because it already exists.");
+			}
 		}
 		
 		//TODO: stateManager should be aware that pluginConfig is being modified.
@@ -135,6 +134,7 @@ public class ProjectImporterImpl implements ProjectImporter {
 			}
 		}
 
+		//TODO: if projects are being overwritten, need to avoid DuplicateNameException here
 		stateManager.addProjectConfig(newProjects.toArray(new ProjectConfigDto[newProjects.size()]));
 		log.info("Successfully imported project(s) for URL " + startUrl);
 	}
@@ -155,6 +155,34 @@ public class ProjectImporterImpl implements ProjectImporter {
 		return File.createTempFile("vulcan-new-project", ".tmp");
 	}
 
+	/**
+	 * @return <code>true</code> if the project should be created, <code>false</code>
+	 * if it should be skipped due to a name collision.
+	 */
+	protected boolean configureProject(final ProjectConfigDto projectConfig, final ProjectRepositoryConfigurator repoConfigurator, final ProjectBuildConfigurator buildConfigurator, final List<String> existingProjectNames, NameCollisionResolutionMode nameCollisionResolutionMode, boolean createSubprojects) throws DuplicateNameException {
+		buildConfigurator.applyConfiguration(projectConfig, existingProjectNames, createSubprojects);
+		repoConfigurator.applyConfiguration(projectConfig);
+		
+		final boolean namingConflict = existingProjectNames.contains(projectConfig.getName());
+		
+		if (namingConflict && Abort == nameCollisionResolutionMode) {
+			throw new DuplicateNameException(projectConfig.getName());
+		} else if (namingConflict && UseExisting == nameCollisionResolutionMode) {
+			return false;
+		}
+		
+		if (createSubprojects && buildConfigurator.isStandaloneProject()) {
+			repoConfigurator.setNonRecursive();
+		}
+		
+		if (isBlank(projectConfig.getWorkDir())) {
+			final String workDir = store.getWorkingCopyLocationPattern().replace("${projectName}", projectConfig.getName());
+			projectConfig.setWorkDir(workDir);
+		}
+		
+		return true;
+	}
+	
 	protected Document tryParse(File buildSpecFile) {
 		try {
 			return new SAXBuilder().build(buildSpecFile);
