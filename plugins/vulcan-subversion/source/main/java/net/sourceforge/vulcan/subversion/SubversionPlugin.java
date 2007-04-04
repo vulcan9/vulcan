@@ -23,13 +23,13 @@ import java.util.Map;
 import net.sourceforge.vulcan.ProjectRepositoryConfigurator;
 import net.sourceforge.vulcan.RepositoryAdaptor;
 import net.sourceforge.vulcan.StateManager;
+import net.sourceforge.vulcan.core.ProjectNameChangeListener;
 import net.sourceforge.vulcan.dto.PluginConfigDto;
 import net.sourceforge.vulcan.dto.ProjectConfigDto;
 import net.sourceforge.vulcan.dto.RepositoryAdaptorConfigDto;
 import net.sourceforge.vulcan.event.EventHandler;
 import net.sourceforge.vulcan.exception.ConfigException;
 import net.sourceforge.vulcan.integration.ConfigurablePlugin;
-import net.sourceforge.vulcan.integration.ProjectNameAwarePlugin;
 import net.sourceforge.vulcan.integration.RepositoryAdaptorPlugin;
 import net.sourceforge.vulcan.subversion.dto.SubversionConfigDto;
 import net.sourceforge.vulcan.subversion.dto.SubversionProjectConfigDto;
@@ -39,7 +39,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 
 public class SubversionPlugin 
-		implements RepositoryAdaptorPlugin, ProjectNameAwarePlugin,
+		implements RepositoryAdaptorPlugin, ProjectNameChangeListener,
 			ConfigurablePlugin,	ApplicationContextAware {
 	
 	StateManager stateManager;

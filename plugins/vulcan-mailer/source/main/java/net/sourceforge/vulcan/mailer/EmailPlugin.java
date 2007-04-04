@@ -40,6 +40,7 @@ import javax.mail.internet.MimeMessage;
 import javax.xml.transform.TransformerException;
 
 import net.sourceforge.vulcan.core.ProjectDomBuilder;
+import net.sourceforge.vulcan.core.ProjectNameChangeListener;
 import net.sourceforge.vulcan.dto.PluginConfigDto;
 import net.sourceforge.vulcan.dto.ProjectConfigDto;
 import net.sourceforge.vulcan.dto.ProjectStatusDto;
@@ -67,7 +68,9 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.xml.sax.SAXException;
 
-public class EmailPlugin implements BuildManagerObserverPlugin, ConfigurablePlugin, ApplicationContextAware {
+public class EmailPlugin implements 
+		BuildManagerObserverPlugin, ConfigurablePlugin,
+		ProjectNameChangeListener, ApplicationContextAware {
 	ProjectDomBuilder projectDomBuilder;
 	EventHandler eventHandler;
 	MessageAssembler messageAssembler;
@@ -133,6 +136,19 @@ public class EmailPlugin implements BuildManagerObserverPlugin, ConfigurablePlug
 			Thread.currentThread().setContextClassLoader(prev);
 		}
 			
+	}
+	public synchronized void projectNameChanged(String oldName, String newName) {
+		final ProfileDto[] profiles = config.getProfiles();
+		
+		for (int i=0; i<profiles.length; i++) {
+			final String[] projects = profiles[i].getProjects();
+			for (int j=0; j<projects.length; j++) {
+				if (oldName.equals(projects[j])) {
+					projects[j] = newName;
+				}
+			}
+		}
+		hashProfiles();
 	}
 	public ProjectDomBuilder getProjectDomBuilder() {
 		return projectDomBuilder;

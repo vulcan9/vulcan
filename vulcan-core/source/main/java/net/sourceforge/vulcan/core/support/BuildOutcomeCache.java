@@ -31,6 +31,7 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
+import net.sourceforge.vulcan.core.ProjectNameChangeListener;
 import net.sourceforge.vulcan.core.Store;
 import net.sourceforge.vulcan.dto.ProjectStatusDto;
 import net.sourceforge.vulcan.event.ErrorEvent;
@@ -41,7 +42,7 @@ import net.sourceforge.vulcan.metadata.SvnRevision;
 import org.apache.commons.collections.map.LRUMap;
 
 @SvnRevision(id="$Id$", url="$HeadURL$")
-public class BuildOutcomeCache {
+public class BuildOutcomeCache implements ProjectNameChangeListener {
 	private final Lock readLock;
 	private final Lock writeLock;
 	
@@ -218,6 +219,29 @@ public class BuildOutcomeCache {
 		return findOutcomeByNumber(outcomeIds, buildNumber, buildNumber, null);
 	}
 
+	public void projectNameChanged(String oldName, String newName) {
+		try {
+			writeLock.lock();
+			
+			final List<UUID> ids = outcomeIDs.remove(oldName);
+			outcomeIDs.put(newName, ids);
+			
+			for (UUID uuid : ids) {
+				idToProjects.put(uuid, newName);
+			}
+			
+			for (ProjectStatusDto cachedOutcome : outcomes.values()) {
+				if (oldName.equals(cachedOutcome.getName())) {
+					cachedOutcome.setName(newName);
+				}
+			}
+			
+			latestOutcomes.put(newName, latestOutcomes.remove(oldName));
+		} finally {
+			writeLock.unlock();
+		}
+	}
+	
 	private ProjectStatusDto findOutcomeByNumber(final List<UUID> outcomeIds, int buildNumber, int guess, Set<Integer> visitedIndexes) {
 		final int numOutcomes = outcomeIds.size();
 

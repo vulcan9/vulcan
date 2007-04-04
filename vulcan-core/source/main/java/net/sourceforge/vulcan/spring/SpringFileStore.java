@@ -36,6 +36,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import net.sourceforge.vulcan.core.BeanEncoder;
+import net.sourceforge.vulcan.core.ProjectNameChangeListener;
 import net.sourceforge.vulcan.core.support.AbstractFileStore;
 import net.sourceforge.vulcan.dto.ProjectStatusDto;
 import net.sourceforge.vulcan.dto.StateManagerConfigDto;
@@ -58,7 +59,7 @@ import org.springframework.core.io.UrlResource;
 
 
 @SvnRevision(id="$Id$", url="$HeadURL$")
-public class SpringFileStore extends AbstractFileStore implements BeanFactoryAware {
+public class SpringFileStore extends AbstractFileStore implements BeanFactoryAware, ProjectNameChangeListener {
 	private BeanFactory beanFactory;
 	private BeanEncoder beanEncoder;
 	
@@ -167,6 +168,20 @@ public class SpringFileStore extends AbstractFileStore implements BeanFactoryAwa
 		removeUnusedResources(projectName, outcome);
 
 		return outcome;
+	}
+	public void projectNameChanged(String oldName, String newName) {
+		final File oldDir = new File(getProjectDir(oldName));
+		final File newDir = new File(getProjectDir(newName));
+		
+		if (oldDir.exists()) {
+			if (!oldDir.renameTo(newDir)) {
+				eventHandler.reportEvent(
+						new WarningEvent(
+								this,
+								"errors.store.project.rename",
+								new String[] { oldDir.getAbsolutePath(), newDir.getAbsolutePath() }));
+			}
+		}
 	}
 	public ProjectStatusDto createBuildOutcome(String projectName) {
 		final ProjectStatusDto status = new ProjectStatusDto();
@@ -318,19 +333,22 @@ public class SpringFileStore extends AbstractFileStore implements BeanFactoryAwa
 			}
 		}
 	}
+	private String getProjectDir(String projectName) {
+		return getProjectsRoot() + File.separator + projectName;
+	}
 	private File getOutcomeDir(String projectName) {
 		return new File(
-				getProjectsRoot() + File.separator + projectName,
+				getProjectDir(projectName),
 				"outcomes");
 	}
 	private File getChangeLogDir(String projectName) {
 		return new File(
-				getProjectsRoot() + File.separator + projectName,
+				getProjectDir(projectName),
 				"changelogs");
 	}
 	private File getBuildLogDir(String projectName) {
 		return new File(
-				getProjectsRoot() + File.separator + projectName,
+				getProjectDir(projectName),
 				"buildlogs");
 	}
 	/**

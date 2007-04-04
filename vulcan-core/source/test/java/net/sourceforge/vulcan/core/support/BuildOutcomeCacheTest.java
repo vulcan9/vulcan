@@ -227,6 +227,47 @@ public class BuildOutcomeCacheTest extends EasyMockTestCase {
 		}
 	}
 	
+	@TrainingMethod("trainInit")
+	public void testUpdatesStateWhenProjectRenamed() throws Exception {
+		cache.init();
+		
+		cache.projectNameChanged("myProject", "aNewProject");
+		
+		final ProjectStatusDto latestOutcome = cache.getLatestOutcome("aNewProject");
+		assertNotNull(latestOutcome);
+		assertEquals("aNewProject", latestOutcome.getName());
+	}
+	
+	public void trainUpdateStateWhenProjectRenamedLoadsNewName() throws Exception {
+		expect(store.getBuildOutcomeIDs()).andReturn(map);
+		expect(store.loadBuildOutcome("aNewProject", four)).andReturn(storedOutcomes.get(four));
+	}
+	
+	@TrainingMethod("trainUpdateStateWhenProjectRenamedLoadsNewName")
+	public void testUpdateStateWhenProjectRenamedLoadsNewName() throws Exception {
+		cache.init();
+		
+		cache.projectNameChanged("myProject", "aNewProject");
+		
+		final ProjectStatusDto outcome = cache.getOutcome(four);
+		assertNotNull(outcome);
+		assertEquals("aNewProject", outcome.getName());
+	}
+	
+	@TrainingMethod("trainInit")
+	public void testRenamesCachedOutcomesOnProjectRename() throws Exception {
+		cache.init();
+		
+		// cache with old name
+		cache.getOutcome(four);
+
+		cache.projectNameChanged("myProject", "aNewProject");
+		
+		final ProjectStatusDto outcome = cache.getOutcome(four);
+		assertNotNull(outcome);
+		assertEquals("aNewProject", outcome.getName());
+	}
+	
 	private void setBuildNumbers(int i, int j, int k, int l, int m) {
 		storedOutcomes.get(zero).setBuildNumber(i);
 		storedOutcomes.get(one).setBuildNumber(j);
