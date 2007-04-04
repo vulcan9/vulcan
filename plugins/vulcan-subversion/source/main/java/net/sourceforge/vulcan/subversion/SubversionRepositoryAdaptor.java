@@ -140,7 +140,35 @@ public class SubversionRepositoryAdaptor extends SubversionSupport implements Re
 					new String[] {path}, null);
 		}
 		
-		revision = info.getRevision();
+		final long lastChangedRevision = info.getRevision();
+		
+		/*
+		 *  Get the revision of the newest log entry for this path.
+		 *  See Issue 95 (http://code.google.com/p/vulcan/issues/detail?id=95).
+		 */
+		final SVNLogClient logClient = new SVNLogClient(
+				svnRepository.getAuthenticationManager(), options);
+		
+		final ISVNLogEntryHandler handler = new ISVNLogEntryHandler() {
+			public void handleLogEntry(SVNLogEntry logEntry) throws SVNException {
+				revision = logEntry.getRevision();
+			}
+		};
+		
+		try {
+			logClient.doLog(SVNURL.parseURIEncoded(profile.getRootUrl()),
+					new String[] {lineOfDevelopment.getComputedRelativePath()},
+					SVNRevision.HEAD, SVNRevision.HEAD, SVNRevision.create(lastChangedRevision),
+					true, false, 1, handler);
+		} catch (SVNException e) {
+			throw new RepositoryException(e);
+		}
+		
+		// If for some reason there were zero log entries, default to Last Changed Revision.
+		if (revision < 0) {
+			revision = lastChangedRevision;
+		}
+		
 		return new RevisionTokenDto(revision, "r" + revision);
 	}
 
@@ -270,7 +298,7 @@ public class SubversionRepositoryAdaptor extends SubversionSupport implements Re
 				}
 				
 				if (logEntryRevision == r1.getNumber()) {
-					/* The log message for r1 is in the previous build report.  Don't include it twice */ 
+					/* The log message for r1 is in the previous build report.  Don't include it twice. */ 
 					return;
 				}
 				
