@@ -20,22 +20,40 @@ package net.sourceforge.vulcan.web.struts.forms;
 
 import javax.servlet.http.HttpServletRequest;
 
+import net.sourceforge.vulcan.core.NameCollisionResolutionMode;
 import net.sourceforge.vulcan.metadata.SvnRevision;
 
+import org.apache.commons.lang.ArrayUtils;
 import org.apache.struts.action.ActionMapping;
 import org.apache.struts.validator.ValidatorForm;
 
 @SvnRevision(id="$Id$", url="$HeadURL$")
 public class ProjectImportForm extends ValidatorForm {
 	private String url;
+	private String nameCollisionResolutionMode;
+	private String[] schedulerNames;
 	private boolean createSubprojects;
 	
 	@Override
 	public void reset(ActionMapping mapping, HttpServletRequest request) {
 		super.reset(mapping, request);
+		schedulerNames = ArrayUtils.EMPTY_STRING_ARRAY;
 		createSubprojects = false;
 	}
 
+	public NameCollisionResolutionMode parseNameCollisionResolutionMode() {
+		return NameCollisionResolutionMode.valueOf(nameCollisionResolutionMode);
+	}
+
+	public String getNameCollisionResolutionMode() {
+		return nameCollisionResolutionMode;
+	}
+	
+	public void setNameCollisionResolutionMode(
+			String nameCollisionResolutionMode) {
+		this.nameCollisionResolutionMode = nameCollisionResolutionMode;
+	}
+	
 	public boolean isCreateSubprojects() {
 		return createSubprojects;
 	}
@@ -44,6 +62,14 @@ public class ProjectImportForm extends ValidatorForm {
 		this.createSubprojects = createSubprojects;
 	}
 
+	public String[] getSchedulerNames() {
+		return schedulerNames;
+	}
+	
+	public void setSchedulerNames(String[] schedulerNames) {
+		this.schedulerNames = schedulerNames;
+	}
+	
 	public String getUrl() {
 		return url;
 	}

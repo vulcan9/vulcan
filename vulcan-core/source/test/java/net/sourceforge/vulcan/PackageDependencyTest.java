@@ -72,8 +72,12 @@ public class PackageDependencyTest extends TestCase {
 		for (String name : abstractPackages) {
 			final JavaPackage pkg = jdepend.getPackage(name);
 			
-			if (pkg.getConcreteClassCount() == 3 && name.equals("net.sourceforge.vulcan.core")) {
-				// Waiver for ProjectBuilder.BuildPhase, DependencyBuildPolicy and WorkingCopyUpdateStrategy which are enums (not concrete classes)
+			if (pkg.getConcreteClassCount() == 4 && name.equals("net.sourceforge.vulcan.core")) {
+				/*
+				 * Waiver for ProjectBuilder.BuildPhase, DependencyBuildPolicy,
+				 * WorkingCopyUpdateStrategy and NameCollisionResolutionMode
+				 * which are enums (not concrete classes) 
+				 */
 				continue;
 			}
 			assertEquals(name + " should be abstract but has " + pkg.getConcreteClassCount() + " concrete classes", 1.0, pkg.abstractness(), 0.01);
