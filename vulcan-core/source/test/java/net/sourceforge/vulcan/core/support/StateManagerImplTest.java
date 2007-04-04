@@ -24,6 +24,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 
+import net.sourceforge.vulcan.core.ProjectNameChangeListener;
 import net.sourceforge.vulcan.dto.BuildManagerConfigDto;
 import net.sourceforge.vulcan.dto.BuildToolConfigDto;
 import net.sourceforge.vulcan.dto.Date;
@@ -160,6 +161,7 @@ public class StateManagerImplTest extends StateManagerTestBase
 		final ProjectConfigDto update = (ProjectConfigDto) a.copy();
 		update.setName("a+");
 		
+		stateMgr.setProjectNameChangeListeners(Arrays.<ProjectNameChangeListener>asList(pluginMgr));
 		pluginMgr.projectNameChanged(a.getName(), update.getName());
 		replay();
 		
@@ -368,7 +370,6 @@ public class StateManagerImplTest extends StateManagerTestBase
 		
 		d.setName("d");
 		
-		pluginMgr.projectNameChanged(a.getName(), d.getName());
 		replay();
 
 		stateMgr.updateProjectConfig(a.getName(), d, true);

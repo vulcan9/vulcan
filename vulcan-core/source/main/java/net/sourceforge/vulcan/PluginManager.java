@@ -22,6 +22,7 @@ import java.io.File;
 import java.io.InputStream;
 import java.util.List;
 
+import net.sourceforge.vulcan.core.ProjectNameChangeListener;
 import net.sourceforge.vulcan.dto.BuildToolConfigDto;
 import net.sourceforge.vulcan.dto.ComponentVersionDto;
 import net.sourceforge.vulcan.dto.PluginConfigDto;
@@ -36,7 +37,7 @@ import net.sourceforge.vulcan.integration.Plugin;
 import net.sourceforge.vulcan.metadata.SvnRevision;
 
 @SvnRevision(id="$Id$", url="$HeadURL$")
-public interface PluginManager {
+public interface PluginManager extends ProjectNameChangeListener {
 	public void init();
 	public void importPluginZip(InputStream in) throws StoreException, PluginLoadFailureException;
 	public void removePlugin(String id) throws StoreException, PluginNotFoundException;

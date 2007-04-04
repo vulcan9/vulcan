@@ -32,6 +32,7 @@ import java.util.Map;
 import net.sourceforge.vulcan.BuildTool;
 import net.sourceforge.vulcan.PluginManager;
 import net.sourceforge.vulcan.RepositoryAdaptor;
+import net.sourceforge.vulcan.core.ProjectNameChangeListener;
 import net.sourceforge.vulcan.core.Store;
 import net.sourceforge.vulcan.dto.BuildToolConfigDto;
 import net.sourceforge.vulcan.dto.ComponentVersionDto;
@@ -51,7 +52,6 @@ import net.sourceforge.vulcan.integration.BuildManagerObserverPlugin;
 import net.sourceforge.vulcan.integration.BuildToolPlugin;
 import net.sourceforge.vulcan.integration.ConfigurablePlugin;
 import net.sourceforge.vulcan.integration.Plugin;
-import net.sourceforge.vulcan.integration.ProjectNameAwarePlugin;
 import net.sourceforge.vulcan.integration.RepositoryAdaptorPlugin;
 import net.sourceforge.vulcan.metadata.SvnRevision;
 
@@ -70,7 +70,7 @@ import org.springframework.core.io.Resource;
 
 @SvnRevision(id="$Id$", url="$HeadURL$")
 public class SpringPluginManager 
-		implements PluginManager, ApplicationContextAware {
+		implements PluginManager, ApplicationContextAware, ProjectNameChangeListener {
 	final static Log log = LogFactory.getLog(SpringPluginManager.class);
 	
 	ApplicationContext ctx;
@@ -313,8 +313,8 @@ public class SpringPluginManager
 	}
 	public void projectNameChanged(String oldName, String newName) {
 		for (PluginState state : plugins.values()) {
-			if (state.plugin instanceof ProjectNameAwarePlugin) {
-				((ProjectNameAwarePlugin)state.plugin).projectNameChanged(oldName, newName);
+			if (state.plugin instanceof ProjectNameChangeListener) {
+				((ProjectNameChangeListener)state.plugin).projectNameChanged(oldName, newName);
 			}
 		}
 	}

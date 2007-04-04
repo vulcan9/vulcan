@@ -43,6 +43,7 @@ import net.sourceforge.vulcan.StateManager;
 import net.sourceforge.vulcan.core.BuildManager;
 import net.sourceforge.vulcan.core.DependencyBuildPolicy;
 import net.sourceforge.vulcan.core.DependencyGroup;
+import net.sourceforge.vulcan.core.ProjectNameChangeListener;
 import net.sourceforge.vulcan.core.Store;
 import net.sourceforge.vulcan.core.WorkingCopyUpdateStrategy;
 import net.sourceforge.vulcan.dto.BuildManagerConfigDto;
@@ -82,6 +83,8 @@ public abstract class StateManagerImpl implements StateManager, ProjectManager {
 	Map<SchedulerConfigDto, ProjectScheduler> schedulers = new HashMap<SchedulerConfigDto, ProjectScheduler>();
 	Map<SchedulerConfigDto, BuildDaemon> buildDaemons = new HashMap<SchedulerConfigDto, BuildDaemon>();
 
+	List<ProjectNameChangeListener> projectNameChangeListeners = new ArrayList<ProjectNameChangeListener>();
+	
 	/* Locks for State information */
 	final Lock readLock;
 	final Lock writeLock;
@@ -609,6 +612,10 @@ public abstract class StateManagerImpl implements StateManager, ProjectManager {
 	public void setStore(Store store) {
 		this.store = store;
 	}
+	public void setProjectNameChangeListeners(
+			List<ProjectNameChangeListener> projectNameChangeListeners) {
+		this.projectNameChangeListeners = projectNameChangeListeners;
+	}
 	public BuildManager getBuildManager() {
 		return buildManager;
 	}
@@ -742,7 +749,9 @@ public abstract class StateManagerImpl implements StateManager, ProjectManager {
 			}
 		}
 		
-		pluginManager.projectNameChanged(oldName, newName);
+		for (ProjectNameChangeListener listener : projectNameChangeListeners) {
+			listener.projectNameChanged(oldName, newName);
+		}
 	}
 	private void schedulerNameChanged(String oldName, String newName) {
 		final ProjectConfigDto[] projects = this.config.getProjects();

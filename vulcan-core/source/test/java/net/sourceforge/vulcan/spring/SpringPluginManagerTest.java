@@ -29,6 +29,7 @@ import java.util.List;
 
 import net.sourceforge.vulcan.EasyMockTestCase;
 import net.sourceforge.vulcan.MockApplicationContext;
+import net.sourceforge.vulcan.core.ProjectNameChangeListener;
 import net.sourceforge.vulcan.core.Store;
 import net.sourceforge.vulcan.core.BeanEncoder.FactoryExpert;
 import net.sourceforge.vulcan.dto.ComponentVersionDto;
@@ -43,7 +44,6 @@ import net.sourceforge.vulcan.integration.BuildManagerObserverPlugin;
 import net.sourceforge.vulcan.integration.ConfigurablePlugin;
 import net.sourceforge.vulcan.integration.Plugin;
 import net.sourceforge.vulcan.integration.PluginStub;
-import net.sourceforge.vulcan.integration.ProjectNameAwarePlugin;
 import net.sourceforge.vulcan.metadata.SvnRevision;
 
 import org.springframework.beans.BeansException;
@@ -202,7 +202,7 @@ public class SpringPluginManagerTest extends EasyMockTestCase {
 	static BuildCompletedEvent event = null;
 	static PluginConfigDto configBean = new PluginStub();
 	
-	public static class MockPlugin implements BuildManagerObserverPlugin, ProjectNameAwarePlugin {
+	public static class MockPlugin implements BuildManagerObserverPlugin, ProjectNameChangeListener {
 		String id;
 		public void setId(String id) {
 			this.id = id;

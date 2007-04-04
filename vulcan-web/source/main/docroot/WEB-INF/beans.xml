@@ -17,6 +17,13 @@
 		<property name="buildManager" ref="buildManager"/>
 		<property name="pluginManager" ref="pluginManager"/>
 		<property name="store" ref="store"/>
+		<property name="projectNameChangeListeners">
+			<list>
+				<ref bean="store"/>
+				<ref bean="buildOutcomeCache"/>
+				<ref bean="pluginManager"/>
+			</list>
+		</property>
 	</bean>
 	
 	<alias alias="projectManager" name="stateManager"/>

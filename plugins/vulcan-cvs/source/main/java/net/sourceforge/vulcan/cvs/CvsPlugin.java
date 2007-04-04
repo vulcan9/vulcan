@@ -22,6 +22,7 @@ import java.util.Map;
 
 import net.sourceforge.vulcan.ProjectRepositoryConfigurator;
 import net.sourceforge.vulcan.RepositoryAdaptor;
+import net.sourceforge.vulcan.core.ProjectNameChangeListener;
 import net.sourceforge.vulcan.cvs.dto.CvsConfigDto;
 import net.sourceforge.vulcan.cvs.dto.CvsProjectConfigDto;
 import net.sourceforge.vulcan.cvs.dto.CvsRepositoryProfileDto;
@@ -30,13 +31,12 @@ import net.sourceforge.vulcan.dto.ProjectConfigDto;
 import net.sourceforge.vulcan.dto.RepositoryAdaptorConfigDto;
 import net.sourceforge.vulcan.exception.ConfigException;
 import net.sourceforge.vulcan.integration.ConfigurablePlugin;
-import net.sourceforge.vulcan.integration.ProjectNameAwarePlugin;
 import net.sourceforge.vulcan.integration.RepositoryAdaptorPlugin;
 import net.sourceforge.vulcan.integration.support.PluginSupport;
 
 public class CvsPlugin extends PluginSupport
 		implements RepositoryAdaptorPlugin,
-			ProjectNameAwarePlugin,
+			ProjectNameChangeListener,
 			ConfigurablePlugin {
 	
 	private CvsConfigDto globalConfig;

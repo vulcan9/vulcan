@@ -534,6 +534,17 @@ public class SpringFileStoreTest extends EasyMockTestCase {
 		assertTrue(ids.get("fake").contains(u2));
 		assertTrue(ids.get("fakey").contains(u3));
 	}
+	public void testRenamesProjectDirOnProjectNameChanged() throws Exception {
+		final File dir1 = new File(projectsDir + File.separator + "old-fake", "outcomes");
+		final File dir2 = new File(projectsDir + File.separator + "new-fake", "outcomes");
+		
+		dir1.mkdirs();
+
+		store.projectNameChanged("old-fake", "new-fake");
+		
+		assertFalse(dir1.exists());
+		assertTrue(dir2.exists());
+	}
 	public void testCreateBuildOutcome() throws Exception {
 		ProjectStatusDto s = store.createBuildOutcome("myProject");
 		
