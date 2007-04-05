@@ -46,8 +46,9 @@ public interface ProjectRepositoryConfigurator {
 	 *  <li>projectConfig.repositoryAdaptorConfig</li>
 	 * </ul>
 	 * @param projectConfig The object onto which settings should be applied.
+	 * @param projectBasedirUrl The URL to the directory which should be checked out.
 	 */
-	void applyConfiguration(ProjectConfigDto projectConfig);
+	void applyConfiguration(ProjectConfigDto projectConfig, String projectBasedirUrl);
 	
 	/**
 	 * If the implementation supports non-recursive mode (where folders nested under the

@@ -39,6 +39,7 @@ public interface StateManager {
 	public List<String> getProjectConfigNames();
 	public ProjectConfigDto getProjectConfig(String name) throws NoSuchProjectException;
 	public void addProjectConfig(ProjectConfigDto... configs) throws DuplicateNameException, StoreException;
+	public void addOrReplaceProjectConfig(ProjectConfigDto... configs) throws StoreException;
 	public void updateProjectConfig(String oldName, ProjectConfigDto updatedConfig, boolean setLastModifiedDate)	throws DuplicateNameException, NoSuchProjectException, StoreException;
 	public void deleteProjectConfig(String... names) throws ProjectNeedsDependencyException, StoreException;
 	

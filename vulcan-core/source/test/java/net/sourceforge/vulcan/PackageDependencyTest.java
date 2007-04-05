@@ -95,9 +95,6 @@ public class PackageDependencyTest extends TestCase {
 		}
 	}
 	
-	//TODO: testDtoPackageHasNoEfferentDependencies
-	//TODO: testExceptionPackageHasNoEfferentDependencies
-	
 	@SuppressWarnings("unchecked")
 	public void assertNoAfferents(String packageName) {
 		final JavaPackage support = jdepend.getPackage(packageName);

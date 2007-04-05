@@ -68,6 +68,11 @@ public class MavenProjectConfigurator implements ProjectBuildConfigurator {
 		projectConfig.setDependencies(vulcanDeps);
 	}
 
+	public String getRelativePathToProjectBasedir() {
+		// Maven2 pom.xml is always in the top level directory.
+		return null;
+	}
+	
 	public boolean isStandaloneProject() {
 		return "pom".equals(project.getPackaging());
 	}

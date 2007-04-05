@@ -50,6 +50,15 @@ public interface ProjectBuildConfigurator {
 	void applyConfiguration(ProjectConfigDto projectConfig, List<String> existingProjectNames, boolean createSubprojects);
 
 	/**
+	 * If the build file that is being imported is nested in a subdirectory of the project root,
+	 * this method is used to obtain the relative path to the base directory which should be
+	 * checked out by the Repository Adaptor.
+	 * @return A String in the form "(../)*"; one or more levels of parent directories,
+	 * or <code>null</code> if the build file is in the base directory.
+	 */
+	String getRelativePathToProjectBasedir();
+	
+	/**
 	 * This method will only be called when a separate project is being created for each
 	 * submodule.
 	 * 

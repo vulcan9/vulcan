@@ -23,6 +23,8 @@ import static org.apache.commons.lang.StringUtils.isBlank;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -61,7 +63,6 @@ public class ProjectImporterImpl implements ProjectImporter {
 	
 	/*
 	 * TODO: allow build configurator to configure emails (?)
-	 * TODO: allow build tool to specify relative path to project url (e.g. . for ./ant/build.xml).
 	 */
 	public void createProjectsForUrl(String startUrl, boolean createSubprojects, NameCollisionResolutionMode nameCollisionResolutionMode, String[] schedulerNames) throws ConfigException, StoreException, DuplicateNameException {
 		final List<RepositoryAdaptorPlugin> repositoryPlugins = pluginManager.getPlugins(RepositoryAdaptorPlugin.class);
@@ -97,7 +98,7 @@ public class ProjectImporterImpl implements ProjectImporter {
 			}
 			
 			final boolean shouldCreate = configureProject(
-					projectConfig, repoConfigurator, buildConfigurator,
+					projectConfig, repoConfigurator, buildConfigurator, url,
 					existingProjectNames, nameCollisionResolutionMode, createSubprojects);
 			
 			if (createSubprojects) {
@@ -134,8 +135,7 @@ public class ProjectImporterImpl implements ProjectImporter {
 			}
 		}
 
-		//TODO: if projects are being overwritten, need to avoid DuplicateNameException here
-		stateManager.addProjectConfig(newProjects.toArray(new ProjectConfigDto[newProjects.size()]));
+		stateManager.addOrReplaceProjectConfig(newProjects.toArray(new ProjectConfigDto[newProjects.size()]));
 		log.info("Successfully imported project(s) for URL " + startUrl);
 	}
 
@@ -159,9 +159,13 @@ public class ProjectImporterImpl implements ProjectImporter {
 	 * @return <code>true</code> if the project should be created, <code>false</code>
 	 * if it should be skipped due to a name collision.
 	 */
-	protected boolean configureProject(final ProjectConfigDto projectConfig, final ProjectRepositoryConfigurator repoConfigurator, final ProjectBuildConfigurator buildConfigurator, final List<String> existingProjectNames, NameCollisionResolutionMode nameCollisionResolutionMode, boolean createSubprojects) throws DuplicateNameException {
+	protected boolean configureProject(final ProjectConfigDto projectConfig, final ProjectRepositoryConfigurator repoConfigurator, final ProjectBuildConfigurator buildConfigurator, String url, final List<String> existingProjectNames, NameCollisionResolutionMode nameCollisionResolutionMode, boolean createSubprojects) throws DuplicateNameException {
 		buildConfigurator.applyConfiguration(projectConfig, existingProjectNames, createSubprojects);
-		repoConfigurator.applyConfiguration(projectConfig);
+		
+		final String relativePath = buildConfigurator.getRelativePathToProjectBasedir();
+		final String projectBasedirUrl = computeProjectBasedirUrl(url, relativePath);
+		
+		repoConfigurator.applyConfiguration(projectConfig, projectBasedirUrl);
 		
 		final boolean namingConflict = existingProjectNames.contains(projectConfig.getName());
 		
@@ -183,6 +187,20 @@ public class ProjectImporterImpl implements ProjectImporter {
 		return true;
 	}
 	
+	protected String computeProjectBasedirUrl(String url, String relativePath) {
+		final StringBuilder sb = new StringBuilder(url);
+		sb.delete(sb.lastIndexOf("/") + 1, sb.length());
+		if (relativePath != null) {
+			sb.append(relativePath);
+		}
+		
+		try {
+			return new URI(sb.toString()).normalize().toString();
+		} catch (URISyntaxException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
 	protected Document tryParse(File buildSpecFile) {
 		try {
 			return new SAXBuilder().build(buildSpecFile);
