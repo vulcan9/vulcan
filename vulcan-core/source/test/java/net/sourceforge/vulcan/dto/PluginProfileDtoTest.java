@@ -92,4 +92,18 @@ public class PluginProfileDtoTest extends TestCase {
 		
 		assertFalse(dto.isRenamed());
 	}
+	
+	public void testEqualsAfterCheckpoint() throws Exception {
+		final PluginProfileDtoStub dto = new PluginProfileDtoStub();
+
+		dto.setName("old");
+		
+		final PluginProfileDtoStub copy = (PluginProfileDtoStub) dto.copy();
+		
+		assertEquals(dto, copy);
+		
+		dto.checkPoint();
+		
+		assertEquals(dto, copy);
+	}
 }
