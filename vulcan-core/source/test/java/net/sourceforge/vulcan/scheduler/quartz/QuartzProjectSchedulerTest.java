@@ -162,6 +162,21 @@ public class QuartzProjectSchedulerTest extends EasyMockTestCase {
 		verify();
 	}
 	
+	public void testConfigurationChangedPause() throws Exception {
+		final SchedulerConfigDto newConfig = (SchedulerConfigDto) config.copy();
+		newConfig.setPaused(true);
+		
+		sched.deleteJob(detail.getName(), detail.getGroup());
+		
+		expectLastCall().andReturn(true);
+		
+		replay();
+		
+		projectScheduler.configurationChanged(newConfig);
+		
+		verify();
+	}
+	
 	public void testConfigurationChangedSetCronExpr() throws Exception {
 		final SchedulerConfigDto newConfig = (SchedulerConfigDto) config.copy();
 		newConfig.setInterval(0);

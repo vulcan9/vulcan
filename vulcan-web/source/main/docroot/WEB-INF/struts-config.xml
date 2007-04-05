@@ -52,6 +52,7 @@
 		<!-- build manager forwards -->
 		<forward name="manualBuildForm" path="/buildmanagement/manualBuildForm.do"/>
 		<forward name="flushQueue" path="/buildmanagement/flushBuildQueue.do"/>
+		<forward name="toggleScheduler" path="/buildmanagement/toggleScheduler.do"/>
 		<forward name="killBuild" path="/buildmanagement/kill.do"/>
 	</global-forwards>
 
@@ -159,6 +160,9 @@
 			<forward name="chooseTags" path="/WEB-INF/jsp/chooseTags.jsp"/>
 		</action>
 		
+		<action path="/buildmanagement/toggleScheduler"
+				type="org.springframework.web.struts.DelegatingActionProxy"/>
+				
 		<action path="/buildmanagement/flushBuildQueue"
 				type="org.springframework.web.struts.DelegatingActionProxy"/>
 		

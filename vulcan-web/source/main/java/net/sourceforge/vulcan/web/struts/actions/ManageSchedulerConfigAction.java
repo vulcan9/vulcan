@@ -39,7 +39,7 @@ public final class ManageSchedulerConfigAction extends SchedulerConfigBaseAction
 	@Override
 	protected void updateSchedulerConfig(String originalName,
 			SchedulerConfigDto config) throws DuplicateNameException, StoreException {
-		stateManager.updateSchedulerConfig(originalName, config);
+		stateManager.updateSchedulerConfig(originalName, config, true);
 	}
 	
 	@Override
