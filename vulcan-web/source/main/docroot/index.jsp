@@ -80,7 +80,7 @@
 			<th><fmt:message key="th.build.daemon.project"/></th>
 			<th><fmt:message key="th.build.daemon.status"/></th>
 			<th><fmt:message key="th.build.daemon.detail"/></th>
-			<th><fmt:message key="th.build.daemon.control"/></th>
+			<th><fmt:message key="th.control"/></th>
 		</tr>
 	</thead>
 	<tbody>
@@ -180,16 +180,30 @@
 		<tr>
 			<th><fmt:message key="th.scheduler.name"/></th>
 			<th><fmt:message key="th.scheduler.timestamp"/></th>
+			<th><fmt:message key="th.control"/></th>
 		</tr>
 	</thead>
 	<tbody>
 	<fmt:message key="scheduler.timestamp.pattern" var="schedPattern"/>
 	<c:forEach items="${stateManager.schedulers}" var="sched">
+		<fmt:formatDate value="${sched.nextExecutionDate}" var="date" pattern="${schedPattern}"/>
 		<tr>
 			<td>${sched.name}</td>
 			<td>
-				<fmt:formatDate value="${sched.nextExecutionDate}" var="date" pattern="${schedPattern}"/>
-				<c:out value="${date}" default="(disabled)"/>
+				<c:out value="${date}" default="(paused)"/>
+			</td>
+			<td>
+				<html:link forward="toggleScheduler" paramId="schedulerName"
+							paramName="sched" paramProperty="name">
+					<c:choose>
+						<c:when test="${date ne null}">
+							<fmt:message key="label.pause.scheduler"/>
+						</c:when>
+						<c:otherwise>
+							<fmt:message key="label.unpause.scheduler"/>
+						</c:otherwise>
+					</c:choose>
+				</html:link>
 			</td>
 		</tr>
 	</c:forEach>

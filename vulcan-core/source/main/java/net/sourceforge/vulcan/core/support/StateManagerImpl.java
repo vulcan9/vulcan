@@ -360,7 +360,7 @@ public abstract class StateManagerImpl implements StateManager, ProjectManager {
 			writeLock.unlock();
 		}
 	}
-	public void updateSchedulerConfig(String oldName, SchedulerConfigDto updatedConfig) throws DuplicateNameException, StoreException {
+	public void updateSchedulerConfig(String oldName, SchedulerConfigDto updatedConfig, boolean save) throws DuplicateNameException, StoreException {
 		try {
 			writeLock.lock();
 			if (!oldName.equals(updatedConfig.getName())) {
@@ -369,7 +369,10 @@ public abstract class StateManagerImpl implements StateManager, ProjectManager {
 			final SchedulerConfigDto[] all = this.config.getSchedulers();
 			updateSchedulerConfig(oldName, updatedConfig, all, schedulers);
 			schedulesUpdated(all);
-			save();
+			
+			if (save) {
+				save();
+			}
 		} finally {
 			writeLock.unlock();
 		}

@@ -46,7 +46,7 @@ public interface StateManager {
 	public SchedulerConfigDto getSchedulerConfig(String name);
 	public ProjectConfigDto[] getProjectsForScheduler(String schedulerName);
 	public void addSchedulerConfig(SchedulerConfigDto config) throws DuplicateNameException, StoreException;
-	public void updateSchedulerConfig(String oldName, SchedulerConfigDto updatedConfig) throws DuplicateNameException, StoreException;
+	public void updateSchedulerConfig(String oldName, SchedulerConfigDto updatedConfig, boolean save) throws DuplicateNameException, StoreException;
 	public void deleteSchedulerConfig(String name);
 	
 	public SchedulerConfigDto getBuildDaemonConfig(String name);

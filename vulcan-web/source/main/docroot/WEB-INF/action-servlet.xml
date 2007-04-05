@@ -35,6 +35,11 @@
 		<property name="stateManager" ref="stateManager"/>
 	</bean>
 	
+	<bean name="/buildmanagement/toggleScheduler"
+			class="net.sourceforge.vulcan.web.struts.actions.ToggleSchedulerAction">
+		<property name="stateManager" ref="stateManager"/>
+	</bean>
+	
 	<bean name="/buildmanagement/kill"
 			class="net.sourceforge.vulcan.web.struts.actions.KillBuildAction">
 		<property name="stateManager" ref="stateManager"/>

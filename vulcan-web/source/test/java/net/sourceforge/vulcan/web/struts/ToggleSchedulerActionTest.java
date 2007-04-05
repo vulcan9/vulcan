@@ -16,39 +16,41 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-package net.sourceforge.vulcan.dto;
+package net.sourceforge.vulcan.web.struts;
 
+import net.sourceforge.vulcan.dto.SchedulerConfigDto;
 import net.sourceforge.vulcan.metadata.SvnRevision;
 
 @SvnRevision(id="$Id$", url="$HeadURL$")
-public class SchedulerConfigDto extends NameDto {
-	private long interval;
-	private long timeout;
-	private String cronExpression;
-	private boolean paused;
+public class ToggleSchedulerActionTest extends MockApplicationContextStrutsTestCase {
+	final SchedulerConfigDto config = new SchedulerConfigDto();
 	
-	public long getInterval() {
-		return interval;
+	@Override
+	public void setUp() throws Exception {
+		super.setUp();
+		
+		setRequestPathInfo("/buildmanagement/toggleScheduler.do");
 	}
-	public void setInterval(long interval) {
-		this.interval = interval;
-	}
-	public long getTimeout() {
-		return timeout;
-	}
-	public void setTimeout(long timeout) {
-		this.timeout = timeout;
-	}
-	public String getCronExpression() {
-		return cronExpression;
-	}
-	public void setCronExpression(String cronExpression) {
-		this.cronExpression = cronExpression;
-	}
-	public boolean isPaused() {
-		return paused;
-	}
-	public void setPaused(boolean paused) {
-		this.paused = paused;
+	
+	public void testToggle() throws Exception {
+		addRequestParameter("schedulerName", "scheddy");
+		
+		expect(manager.getSchedulerConfig("scheddy")).andReturn(config);
+		
+		SchedulerConfigDto copy = (SchedulerConfigDto) config.copy();
+		copy.setPaused(true);
+		
+		manager.updateSchedulerConfig("scheddy", copy, false);
+		
+		replay();
+		
+		actionPerform();
+		
+		verify();
+		
+		verifyNoActionMessages();
+		verifyNoActionErrors();
+		
+		verifyForward("dashboard");
 	}
 }

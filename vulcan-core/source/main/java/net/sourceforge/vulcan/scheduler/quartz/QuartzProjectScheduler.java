@@ -49,7 +49,9 @@ public class QuartzProjectScheduler implements ProjectScheduler {
 		
 		final String cronExpression = config.getCronExpression();
 		
-		if (!StringUtils.isBlank(cronExpression)) {
+		if (config.isPaused()) {
+			trigger = null;
+		} else if (!StringUtils.isBlank(cronExpression)) {
 			try {
 				trigger = new CronTrigger(
 					jobDetail.getName(),

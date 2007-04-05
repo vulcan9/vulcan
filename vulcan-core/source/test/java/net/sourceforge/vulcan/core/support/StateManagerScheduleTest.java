@@ -207,7 +207,7 @@ public class StateManagerScheduleTest extends StateManagerTestBase {
 		final SchedulerConfigDto clone = (SchedulerConfigDto)config.copy();
 		clone.setName("other");
 		
-		stateMgr.updateSchedulerConfig(config.getName(), clone);
+		stateMgr.updateSchedulerConfig(config.getName(), clone, true);
 		
 		assertSame(clone, configArg);
 		assertEquals(0, stopCallCount);
@@ -230,7 +230,7 @@ public class StateManagerScheduleTest extends StateManagerTestBase {
 		final SchedulerConfigDto clone = (SchedulerConfigDto)config.copy();
 		clone.setName("other");
 		
-		stateMgr.updateSchedulerConfig(config.getName(), clone);
+		stateMgr.updateSchedulerConfig(config.getName(), clone, true);
 
 		assertEquals("other", stateMgr.getProjectConfig("a").getSchedulerNames()[0]);
 	}
@@ -285,7 +285,7 @@ public class StateManagerScheduleTest extends StateManagerTestBase {
 		b.setName("a");
 		
 		try {
-			stateMgr.updateSchedulerConfig(oldName, b);
+			stateMgr.updateSchedulerConfig(oldName, b, true);
 			fail("expected exception");
 		} catch (DuplicateNameException e) {
 		}
