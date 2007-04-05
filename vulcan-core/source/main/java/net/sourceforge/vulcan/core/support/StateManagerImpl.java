@@ -196,6 +196,16 @@ public abstract class StateManagerImpl implements StateManager, ProjectManager {
 		}
 	}
 	public void addProjectConfig(ProjectConfigDto... configs) throws DuplicateNameException, StoreException {
+		addOrReplaceProjectConfig(true, configs);
+	}
+	public void addOrReplaceProjectConfig(ProjectConfigDto... configs) throws StoreException {
+		try {
+			addOrReplaceProjectConfig(false, configs);
+		} catch (DuplicateNameException e) {
+			throw new RuntimeException(e);
+		}
+	}
+	public void addOrReplaceProjectConfig(boolean throwOnDuplicate, ProjectConfigDto... configs) throws DuplicateNameException, StoreException {
 		try {
 			writeLock.lock();
 			final ProjectConfigDto[] previous = this.config.getProjects();
@@ -204,8 +214,15 @@ public abstract class StateManagerImpl implements StateManager, ProjectManager {
 					Arrays.asList(previous));
 			
 			for (ProjectConfigDto config : configs) {
-				if (getConfigOrNull(config.getName(), previous) != null) {
-					throw new DuplicateNameException(config.getName());
+				final NamedObject existingProject = getConfigOrNull(config.getName(), previous);
+				if (existingProject != null) {
+					if (throwOnDuplicate) {
+						throw new DuplicateNameException(config.getName());
+					} else {
+						if (!allConfigs.remove(existingProject)) {
+							throw new IllegalStateException();
+						}
+					}
 				}
 				
 				config.setLastModificationDate(new Date());
@@ -219,7 +236,6 @@ public abstract class StateManagerImpl implements StateManager, ProjectManager {
 		} finally {
 			writeLock.unlock();
 		}
-		
 	}
 	public void updateProjectConfig(String oldName, ProjectConfigDto updatedConfig, boolean setLastModifiedDate) throws DuplicateNameException, NoSuchProjectException, StoreException {
 		try {

@@ -144,7 +144,7 @@ public class SubversionProjectConfiguratorTest extends TestCase {
 		final SubversionProjectConfigurator cfgr = new SubversionProjectConfigurator(
 				repoConfig, profile, null, new FakeRepo(profile.getRootUrl(), repoConfig.getPath()));
 		
-		cfgr.applyConfiguration(projectConfig);
+		cfgr.applyConfiguration(projectConfig, "http://localhost/svn");
 
 		assertEquals("", projectConfig.getBugtraqUrl());
 		assertEquals("", projectConfig.getBugtraqLogRegex1());
@@ -158,7 +158,7 @@ public class SubversionProjectConfiguratorTest extends TestCase {
 		bugtraqProps.put(SubversionSupport.BUGTRAQ_URL, "http://localhost");
 		bugtraqProps.put(SubversionSupport.BUGTRAQ_LOGREGEX, "bug (\\d+)");
 		
-		cfgr.applyConfiguration(projectConfig);
+		cfgr.applyConfiguration(projectConfig, "http://localhost/svn");
 
 		assertEquals("http://localhost", projectConfig.getBugtraqUrl());
 		assertEquals("bug (\\d+)", projectConfig.getBugtraqLogRegex1());
@@ -172,7 +172,7 @@ public class SubversionProjectConfiguratorTest extends TestCase {
 		bugtraqProps.put(SubversionSupport.BUGTRAQ_URL, "http://localhost");
 		bugtraqProps.put(SubversionSupport.BUGTRAQ_MESSAGE, "Bug: %BUGID%");
 		
-		cfgr.applyConfiguration(projectConfig);
+		cfgr.applyConfiguration(projectConfig, "http://localhost/svn");
 
 		assertEquals("http://localhost", projectConfig.getBugtraqUrl());
 		assertEquals("Bug: (\\d+)", projectConfig.getBugtraqLogRegex1());
@@ -187,7 +187,7 @@ public class SubversionProjectConfiguratorTest extends TestCase {
 		bugtraqProps.put(SubversionSupport.BUGTRAQ_LOGREGEX, "[Ii]ssue \\d+\r\n\\d+");
 		bugtraqProps.put(SubversionSupport.BUGTRAQ_MESSAGE, "Bug: %BUGID%");
 		
-		cfgr.applyConfiguration(projectConfig);
+		cfgr.applyConfiguration(projectConfig, "http://localhost/svn");
 
 		assertEquals("http://localhost", projectConfig.getBugtraqUrl());
 		assertEquals("[Ii]ssue \\d+|Bug: (\\d+)", projectConfig.getBugtraqLogRegex1());

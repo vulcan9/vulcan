@@ -49,7 +49,6 @@ public class SubversionProjectConfigurator extends SubversionSupport
 
 	protected SubversionProjectConfigurator(SubversionProjectConfigDto config, SubversionRepositoryProfileDto profile, String buildSpecPath) throws ConfigException {
 		this(config, profile, buildSpecPath, createRepository(profile, true));
-		
 	}
 	
 	protected SubversionProjectConfigurator(SubversionProjectConfigDto config, SubversionRepositoryProfileDto profile, String buildSpecPath, SVNRepository repository) throws ConfigException {
@@ -105,7 +104,11 @@ public class SubversionProjectConfigurator extends SubversionSupport
 		}
 	}
 	
-	public void applyConfiguration(ProjectConfigDto projectConfig) {
+	public void applyConfiguration(ProjectConfigDto projectConfig, String projectBasedirUrl) {
+		final String relativeProjectBasedirUrl =
+			projectBasedirUrl.substring(profile.getRootUrl().length());
+		config.setPath(relativeProjectBasedirUrl);
+		
 		projectConfig.setRepositoryAdaptorConfig(config);
 		
 		applyBugtraqConfiguration(projectConfig);

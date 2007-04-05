@@ -53,7 +53,6 @@ public final class KillBuildAction extends Action {
 			return mapping.findForward("failure");
 		}
 
-		//TODO: if user tries to kill project "A", but "A" completes and the daemon is now building "B", we should not abort the build
 		daemon.abortCurrentBuild(ManualBuildAction.getRequestUsernameOrHostname(request));
 		
 		return mapping.findForward("dashboard");

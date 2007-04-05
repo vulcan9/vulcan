@@ -73,6 +73,9 @@ public class ProjectImporterImplTest extends EasyMockTestCase {
 				projectConfig.setWorkDir(workDir);
 			}
 		}
+		public String getRelativePathToProjectBasedir() {
+			return buildConfiguratorMock.getRelativePathToProjectBasedir();
+		}
 		public boolean isStandaloneProject() {
 			return buildConfiguratorMock.isStandaloneProject();
 		}
@@ -84,7 +87,8 @@ public class ProjectImporterImplTest extends EasyMockTestCase {
 	List<RepositoryAdaptorPlugin> repositoryPlugins = Arrays.asList(rap1, rap2);
 	List<BuildToolPlugin> buildToolPlugins = Arrays.asList(btp1, btp2);
 	
-	String url = "http://localhost/";
+	String url = "http://localhost/project/build_script.txt";
+	String projectUrl = "http://localhost/project/";
 	
 	File tmpFile1;
 	File tmpFile2;
@@ -228,11 +232,13 @@ public class ProjectImporterImplTest extends EasyMockTestCase {
 		
 		buildConfigurator.applyConfiguration(projectConfig, existingProjectNames, false);
 		
+		expect(buildConfigurator.getRelativePathToProjectBasedir()).andReturn(".");
+		
 		final ProjectConfigDto projectConfigWithName = (ProjectConfigDto) projectConfig.copy();
 		projectConfigWithName.setName(projectName);
 		projectConfigWithName.setWorkDir(workDir);
 		
-		repoConfigurator.applyConfiguration(projectConfigWithName);
+		repoConfigurator.applyConfiguration(projectConfigWithName, projectUrl);
 	}
 
 	public void trainSaves() throws Exception {
@@ -246,7 +252,7 @@ public class ProjectImporterImplTest extends EasyMockTestCase {
 		projectConfig.setName(projectName);
 		projectConfig.setWorkDir("a workdir importedProject location");
 		
-		stateManager.addProjectConfig(projectConfig);
+		stateManager.addOrReplaceProjectConfig(projectConfig);
 	}
 	
 	public void trainSavesWithAlternateWorkDir() throws Exception {
@@ -260,7 +266,7 @@ public class ProjectImporterImplTest extends EasyMockTestCase {
 		projectConfig.setName(projectName);
 		projectConfig.setWorkDir(workDir);
 		
-		stateManager.addProjectConfig(projectConfig);
+		stateManager.addOrReplaceProjectConfig(projectConfig);
 	}
 	
 	@TrainingMethod("trainConfigures,trainSaves")
@@ -324,7 +330,8 @@ public class ProjectImporterImplTest extends EasyMockTestCase {
 		updatedExistingProjectNames.add(projectName);
 		
 		buildConfigurator.applyConfiguration(projectConfig, updatedExistingProjectNames, true);
-		repoConfigurator.applyConfiguration((ProjectConfigDto)notNull());
+		expect(buildConfigurator.getRelativePathToProjectBasedir()).andReturn(null);
+		repoConfigurator.applyConfiguration((ProjectConfigDto)notNull(), (String)notNull());
 		
 		expect(buildConfigurator.isStandaloneProject()).andReturn(false);
 		expect(buildConfigurator.getSubprojectUrls()).andReturn(null);
@@ -355,7 +362,7 @@ public class ProjectImporterImplTest extends EasyMockTestCase {
 		projectConfig2.setName(projectName);
 		projectConfig2.setWorkDir("a workdir importedProject location");
 		
-		stateManager.addProjectConfig(projectConfig1, projectConfig2);
+		stateManager.addOrReplaceProjectConfig(projectConfig1, projectConfig2);
 	}
 	
 	@TrainingMethod("trainConfigures,trainGetSubprojects,trainSavesSubproject")
@@ -367,7 +374,8 @@ public class ProjectImporterImplTest extends EasyMockTestCase {
 	public void trainConfigureDontCare() throws Exception {
 		buildConfigurator.applyConfiguration((ProjectConfigDto)notNull(),
 				(List<String>) notNull(), eq(false));
-		repoConfigurator.applyConfiguration((ProjectConfigDto)notNull());
+		expect(buildConfigurator.getRelativePathToProjectBasedir()).andReturn(null);
+		repoConfigurator.applyConfiguration((ProjectConfigDto)notNull(), (String)notNull());
 	}
 	
 	@TrainingMethod("trainConfigureDontCare")
@@ -377,7 +385,7 @@ public class ProjectImporterImplTest extends EasyMockTestCase {
 		existingProjectNames = Arrays.asList(projectName);
 		
 		assertFalse(importer.configureProject(projectConfig, repoConfigurator, buildConfigurator,
-				existingProjectNames, NameCollisionResolutionMode.UseExisting, false));
+				url, existingProjectNames, NameCollisionResolutionMode.UseExisting, false));
 	}
 
 	@TrainingMethod("trainConfigureDontCare")
@@ -388,10 +396,36 @@ public class ProjectImporterImplTest extends EasyMockTestCase {
 		
 		try {
 			importer.configureProject(projectConfig, repoConfigurator, buildConfigurator,
-				existingProjectNames, NameCollisionResolutionMode.Abort, false);
+				url, existingProjectNames, NameCollisionResolutionMode.Abort, false);
 			fail("Expected exception");
 		} catch (DuplicateNameException e) {
 			assertEquals(projectName, e.getName());
 		}
+	}
+	
+	public void testComputePathParent() throws Exception {
+		assertEquals(
+				"http://localhost/foo/",
+				importer.computeProjectBasedirUrl("http://localhost/foo/bar/baz.xml", ".."));
+	}
+	public void testComputePathRelative() throws Exception {
+		assertEquals(
+				"http://localhost/foo/bar/",
+				importer.computeProjectBasedirUrl("http://localhost/foo/bar/baz.xml", "."));
+	}
+	public void testComputePathBlank() throws Exception {
+		assertEquals(
+				"http://localhost/foo/bar/",
+				importer.computeProjectBasedirUrl("http://localhost/foo/bar/baz.xml", ""));
+	}
+	public void testComputePathNull() throws Exception {
+		assertEquals(
+				"http://localhost/foo/bar/",
+				importer.computeProjectBasedirUrl("http://localhost/foo/bar/baz.xml", null));
+	}
+	public void testComputePathObscureProtocol() throws Exception {
+		assertEquals(
+				"pretzels://localhost/foo/bar/",
+				importer.computeProjectBasedirUrl("pretzels://localhost/foo/bar/baz.xml", null));
 	}
 }
