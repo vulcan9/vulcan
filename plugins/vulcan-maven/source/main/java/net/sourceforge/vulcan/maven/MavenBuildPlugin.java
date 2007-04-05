@@ -41,6 +41,7 @@ import net.sourceforge.vulcan.maven.integration.MavenIntegration;
 
 import org.apache.commons.io.FileUtils;
 import org.jdom.Document;
+import org.jdom.Element;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -111,8 +112,12 @@ public class MavenBuildPlugin extends PluginSupport
 			return null;
 		}
 		
-		if (!M2_POM_NS.equals(xmlDocument.getRootElement().getNamespace().getURI())) {
-			return null;
+		final Element rootNode = xmlDocument.getRootElement();
+		if (!M2_POM_NS.equals(rootNode.getNamespace().getURI())) {
+			final Element modelVersionNode = rootNode.getChild("modelVersion");
+			if (modelVersionNode == null || !"4.0.0".equals(modelVersionNode.getText())) {
+				return null;
+			}
 		}
 		
 		if (configuratorFactory == null) {
