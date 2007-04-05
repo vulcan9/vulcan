@@ -19,6 +19,9 @@
 package net.sourceforge.vulcan.dto;
 
 import static org.apache.commons.lang.ArrayUtils.EMPTY_STRING_ARRAY;
+
+import org.apache.commons.lang.StringUtils;
+
 import net.sourceforge.vulcan.metadata.SvnRevision;
 
 @SvnRevision(id="$Id$", url="$HeadURL$")
@@ -37,11 +40,11 @@ public class ProjectConfigDto extends NameDto {
 	String buildToolPluginId;
 	BuildToolConfigDto buildToolConfig;
 	
-	String workDir;
-	String sitePath;
-	String bugtraqUrl;
-	String bugtraqLogRegex1;
-	String bugtraqLogRegex2;
+	String workDir = StringUtils.EMPTY;
+	String sitePath = StringUtils.EMPTY;
+	String bugtraqUrl = StringUtils.EMPTY;
+	String bugtraqLogRegex1 = StringUtils.EMPTY;
+	String bugtraqLogRegex2 = StringUtils.EMPTY;
 	
 	boolean autoIncludeDependencies;
 	boolean buildOnDependencyFailure;
@@ -55,7 +58,7 @@ public class ProjectConfigDto extends NameDto {
 	UpdateStrategy updateStrategy = UpdateStrategy.CleanAlways;
 
 	/*
-	 * These properties arer not meant to be configured with a project.
+	 * These properties are not meant to be configured with a project.
 	 * They will not be persisted.
 	 */
 	String repositoryTagName;

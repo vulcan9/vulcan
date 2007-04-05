@@ -23,7 +23,9 @@ import net.sourceforge.vulcan.metadata.SvnRevision;
 @SvnRevision(id="$Id$", url="$HeadURL$")
 public abstract class PluginProfileDto extends PluginConfigDto implements NamedObject {
 	private String name;
-	private String oldName;
+	
+	// mark transient to exclude from EqualsBuilder.reflectionEquals.
+	private transient String oldName;
 	
 	/**
 	 * @return The name of the property, on the project-scope plugin configuration,
