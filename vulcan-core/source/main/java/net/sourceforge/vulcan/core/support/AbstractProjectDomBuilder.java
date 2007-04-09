@@ -359,7 +359,10 @@ public abstract class AbstractProjectDomBuilder implements ProjectDomBuilder {
 	private void addBasicContents(final Element root, ProjectStatusDto status, Locale locale, final DateFormat format) {
 		addChildNodeWithText(root, "name", status.getName());
 		
-		addChildNodeWithText(root, "build-number", status.getBuildNumber().toString());
+		final Integer buildNumber = status.getBuildNumber();
+		if (buildNumber != null) {
+			addChildNodeWithText(root, "build-number", buildNumber.toString());
+		}
 		
 		addChildNodeWithText(root, "update-type", status.getUpdateType().name());
 		

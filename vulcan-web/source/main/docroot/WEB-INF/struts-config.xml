@@ -15,6 +15,7 @@
 		<form-bean name="manualBuildForm" type="net.sourceforge.vulcan.web.struts.forms.ManualBuildForm"/>
 		<form-bean name="reportForm" type="net.sourceforge.vulcan.web.struts.forms.ReportForm"/>
 		<form-bean name="projectImportForm" type="net.sourceforge.vulcan.web.struts.forms.ProjectImportForm"/>
+		<form-bean name="projectStatusForm" type="net.sourceforge.vulcan.web.struts.forms.ProjectStatusForm"/>
 		<form-bean name="multipleProjectConfigForm" type="net.sourceforge.vulcan.web.struts.forms.MultipleProjectConfigForm"/>
 	</form-beans>
 	
@@ -58,7 +59,10 @@
 
 	<action-mappings>
 		<action path="/viewProjectStatus"
-				type="org.springframework.web.struts.DelegatingActionProxy"/>
+				type="org.springframework.web.struts.DelegatingActionProxy"
+				name="projectStatusForm"
+				validate="true"
+				input="/WEB-INF/jsp/error.jsp"/>
 		
 		<action path="/buildHistoryReport"
 				type="org.apache.struts.actions.ForwardAction"

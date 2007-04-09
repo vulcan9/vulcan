@@ -71,6 +71,8 @@ public abstract class StateManagerTestBase extends EasyMockTestCase
 			public ProjectConfigDto getTarget(BuildDaemonInfoDto buildDaemonInfo) {
 				return null;
 			}
+			public void registerBuildStatus(BuildDaemonInfoDto info, ProjectConfigDto currentTarget, ProjectStatusDto buildStatus) {
+			}
 			public void init(BuildManagerConfigDto mgrConfig) {
 				buildManagerConfig = mgrConfig;
 			}
@@ -97,7 +99,7 @@ public abstract class StateManagerTestBase extends EasyMockTestCase
 			public List<UUID> getAvailableStatusIdsInRange(Set<String> projectNames, Date begin, Date end) {
 				return null;
 			}
-			public Map<String, BuildDaemonInfoDto> getProjectsBeingBuilt() {
+			public Map<String, ProjectStatusDto> getProjectsBeingBuilt() {
 				return null;
 			}
 			public Map<String, ProjectStatusDto> getProjectStatus() {

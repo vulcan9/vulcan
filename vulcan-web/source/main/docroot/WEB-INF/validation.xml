@@ -48,6 +48,11 @@
 			<field property="url" depends="required"/>
 			<field property="nameCollisionResolutionMode" depends="required"/>
 		</form>
+		<form name="projectStatusForm">
+			<field property="projectName" depends="required"/>
+			<field property="buildNumber" depends="integer"/>
+			<field property="index" depends="integer"/>
+		</form>
 		<form name="reportForm">
 			<field property="projectNames" depends="required"/>
 			<field property="startIndex" depends="integer,validwhen">
