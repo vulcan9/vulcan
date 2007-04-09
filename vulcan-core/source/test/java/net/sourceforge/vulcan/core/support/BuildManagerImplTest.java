@@ -177,6 +177,18 @@ public class BuildManagerImplTest extends TestCase {
 		
 		assertEquals(null, mgr.getTarget(info3));
 	}
+	public void testRegisterStatus() throws Exception {
+		mgr.add(a);
+		assertSame(a, mgr.getTarget(info1));
+		
+		assertNotNull(mgr.getProjectsBeingBuilt().get(a.getName()));
+		
+		final ProjectStatusDto status = new ProjectStatusDto();
+		
+		mgr.registerBuildStatus(info1, a, status);
+		
+		assertSame(status, mgr.getProjectsBeingBuilt().get(a.getName()));
+	}
 	public void testGetTargetDoesNotAddNullToActive() throws Exception {
 		b.setDependencies(new String[] {"a"});
 		

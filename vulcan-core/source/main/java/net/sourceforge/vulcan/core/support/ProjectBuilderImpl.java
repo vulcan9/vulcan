@@ -114,9 +114,12 @@ public class ProjectBuilderImpl implements ProjectBuilder {
 		previousStatus = buildManager.getLatestStatus(currentTarget.getName());
 		
 		try {
-			createBuildStatus(currentTarget);
+			buildStatus = createBuildStatus(currentTarget);
+			
+			buildManager.registerBuildStatus(info, currentTarget, buildStatus);
 			
 			buildProject(currentTarget);
+			buildStatus.setStatus(Status.PASS);
 		} catch (ConfigException e) {
 			buildStatus.setStatus(Status.ERROR);
 			buildStatus.setMessageKey(e.getKey());
@@ -219,21 +222,23 @@ public class ProjectBuilderImpl implements ProjectBuilder {
 	public void setDeleteFailureSleepTime(long deleteFailureSleepTime) {
 		this.deleteFailureSleepTime = deleteFailureSleepTime;
 	}
-	protected void createBuildStatus(ProjectConfigDto currentTarget) {
-		buildStatus = store.createBuildOutcome(currentTarget.getName());
+	protected ProjectStatusDto createBuildStatus(ProjectConfigDto currentTarget) {
+		final ProjectStatusDto status = store.createBuildOutcome(currentTarget.getName());
 		
 		if (previousStatus == null || previousStatus.getBuildNumber() == null) {
-			buildStatus.setBuildNumber(0);
+			status.setBuildNumber(0);
 		} else {
-			buildStatus.setBuildNumber(previousStatus.getBuildNumber() + 1);
+			status.setBuildNumber(previousStatus.getBuildNumber() + 1);
 		}
 		
-		buildStatus.setStartDate(new Date());
-		buildStatus.setRequestedBy(currentTarget.getRequestedBy());
-		buildStatus.setScheduledBuild(currentTarget.isScheduledBuild());
-		buildStatus.setStatus(Status.PASS);
-		buildStatus.setErrors(errors);
-		buildStatus.setWarnings(warnings);
+		status.setStartDate(new Date());
+		status.setRequestedBy(currentTarget.getRequestedBy());
+		status.setScheduledBuild(currentTarget.isScheduledBuild());
+		status.setStatus(Status.BUILDING);
+		status.setErrors(errors);
+		status.setWarnings(warnings);
+		
+		return status;
 	}
 	protected void buildProject(final ProjectConfigDto currentTarget) throws Exception {
 		if (StringUtils.isBlank(currentTarget.getWorkDir())) {

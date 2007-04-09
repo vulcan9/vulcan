@@ -76,7 +76,7 @@ public class BuildManagerImpl implements BuildManager {
 	final List<Target> queue = new ArrayList<Target>();
 	final List<ProjectConfigDto> activeBuilds = new ArrayList<ProjectConfigDto>();
 	final Map<BuildDaemonInfoDto, Target> activeDaemons = new HashMap<BuildDaemonInfoDto, Target>();
-	final Map<String, BuildDaemonInfoDto> projectsBeingBuilt = new HashMap<String, BuildDaemonInfoDto>();
+	final Map<String, ProjectStatusDto> projectsBeingBuilt = new HashMap<String, ProjectStatusDto>();
 	
 	public BuildManagerImpl() {
 		final ReadWriteLock lock = new ReentrantReadWriteLock();
@@ -113,6 +113,20 @@ public class BuildManagerImpl implements BuildManager {
 		}
 	}
 
+	public void registerBuildStatus(BuildDaemonInfoDto info, ProjectConfigDto target, ProjectStatusDto buildStatus) {
+		try {
+			writeLock.lock();
+
+			if (!activeDaemons.containsKey(info)) {
+				throw new IllegalStateException(info + " is not building a project.");
+			}
+			
+			projectsBeingBuilt.put(target.getName(), buildStatus);
+		} finally {
+			writeLock.unlock();
+		}
+	}
+	
 	public void add(DependencyGroup dg) throws AlreadyScheduledException {
 		if (dg.isEmpty()) {
 			throw new IllegalArgumentException("DepenedencyGroup has no targets.");
@@ -196,7 +210,11 @@ public class BuildManagerImpl implements BuildManager {
 		return cache.getOutcomeByBuildNumber(projectName, buildNumber);
 	}
 	public List<UUID> getAvailableStatusIds(String projectName) {
-		return Collections.unmodifiableList(cache.getOutcomeIds(projectName));
+		final List<UUID> outcomeIds = cache.getOutcomeIds(projectName);
+		if (outcomeIds == null) {
+			return null;
+		}
+		return Collections.unmodifiableList(outcomeIds);
 	}
 	public List<UUID> getAvailableStatusIdsInRange(Set<String> projectNames, java.util.Date begin, java.util.Date end) {
 		final List<UUID> all = new ArrayList<UUID>();
@@ -226,10 +244,10 @@ public class BuildManagerImpl implements BuildManager {
 	public Map<String, ProjectStatusDto> getProjectStatus() {
 		return cache.getLatestOutcomes();
 	}
-	public Map<String, BuildDaemonInfoDto> getProjectsBeingBuilt() {
+	public Map<String, ProjectStatusDto> getProjectsBeingBuilt() {
 		try {
 			readLock.lock();
-			return new HashMap<String, BuildDaemonInfoDto>(projectsBeingBuilt);
+			return new HashMap<String, ProjectStatusDto>(projectsBeingBuilt);
 		} finally {
 			readLock.unlock();
 		}
@@ -376,7 +394,7 @@ public class BuildManagerImpl implements BuildManager {
 				}
 				activeBuilds.add(config);
 				activeDaemons.put(buildDaemonInfo, tgt);
-				projectsBeingBuilt.put(targetName, buildDaemonInfo);
+				projectsBeingBuilt.put(targetName, new ProjectStatusDto());
 			}
 			return config;
 		} catch (PendingDependencyException e) {

@@ -139,11 +139,12 @@ public class ProjectBuilderTest extends EasyMockTestCase {
 			return logFile;
 		}
 		@Override
-		protected void createBuildStatus(ProjectConfigDto currentTarget) {
-			super.createBuildStatus(currentTarget);
+		protected ProjectStatusDto createBuildStatus(ProjectConfigDto currentTarget) {
+			final ProjectStatusDto projectStatusDto = super.createBuildStatus(currentTarget);
 			if (suppressStartDate) {
-				buildStatus.setStartDate(null);
+				projectStatusDto.setStartDate(null);
 			}
+			return projectStatusDto;
 		}
 		@Override
 		protected void determineUpdateType(ProjectConfigDto currentTarget) {
@@ -211,6 +212,10 @@ public class ProjectBuilderTest extends EasyMockTestCase {
 		expect(ra.getRepositoryUrl()).andReturn("http://localhost").anyTimes();
 		expect(projectMgr.getPluginModificationDate((String)anyObject())).andReturn(null).anyTimes();
 
+		mgr.registerBuildStatus((BuildDaemonInfoDto)notNull(), (ProjectConfigDto)notNull(),
+				(ProjectStatusDto)notNull());
+		expectLastCall().anyTimes();
+		
 		info.setHostname(InetAddress.getLocalHost());
 		info.setName("mock");
 
@@ -220,7 +225,7 @@ public class ProjectBuilderTest extends EasyMockTestCase {
 		
 		buildToolStatus.setName("a name");
 		buildToolStatus.setRevision(rev0);
-		buildToolStatus.setStatus(Status.PASS);
+		buildToolStatus.setStatus(Status.BUILDING);
 		buildToolStatus.setTagName("trunk");
 		buildToolStatus.setId(id);
 		buildToolStatus.setDiffId(id);
@@ -236,9 +241,8 @@ public class ProjectBuilderTest extends EasyMockTestCase {
 		project = new ProjectConfigDto();
 		project.setName("foo");
 
-		assertNull(builder.buildStatus);
-		builder.createBuildStatus(project);
-		assertNotNull(builder.buildStatus.getStartDate());
+		ProjectStatusDto status = builder.createBuildStatus(project);
+		assertNotNull(status.getStartDate());
 	}
 	
 	public void testKillProjectDuringBuild() throws Throwable {
@@ -389,8 +393,7 @@ public class ProjectBuilderTest extends EasyMockTestCase {
 		project.setWorkDir("a");
 		project.setRequestedBy("Deborah");
 
-		expect(projectMgr
-		.getRepositoryAdaptor(project)).andReturn(ra);
+		expect(projectMgr.getRepositoryAdaptor(project)).andReturn(ra);
 
 		expect(ra.getTagName()).andReturn("trunk");
 		expect(ra.getLatestRevision()).andReturn(rev0);
@@ -882,6 +885,8 @@ public class ProjectBuilderTest extends EasyMockTestCase {
 		previousStatus.setCompletionDate(new Date(1));
 		expect(mgr.getLatestStatus(project.getName())).andReturn(previousStatus);
 
+		mgr.registerBuildStatus(eq(info), eq(project), (ProjectStatusDto)notNull());
+		
 		expect(projectMgr.getRepositoryAdaptor(project)).andReturn(ra);
 
 		expect(ra.getTagName()).andReturn("trunk");

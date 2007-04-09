@@ -37,6 +37,13 @@ public interface BuildManager {
 	
 	ProjectConfigDto getTarget(BuildDaemonInfoDto buildDaemonInfo);
 
+	/**
+	 * Register an instance of ProjectStatusDto which can be updated as the build proceeds.
+	 * This instance can be referenced during the build to obtain up-to-date information
+	 * about the outcome while the build is executing.
+	 */
+	void registerBuildStatus(BuildDaemonInfoDto info, ProjectConfigDto currentTarget, ProjectStatusDto buildStatus);
+
 	void add(DependencyGroup dg) throws AlreadyScheduledException;
 
 	void targetCompleted(BuildDaemonInfoDto info, ProjectConfigDto currentTarget, ProjectStatusDto buildStatus);
@@ -63,7 +70,7 @@ public interface BuildManager {
 	 */
 	List<UUID> getAvailableStatusIdsInRange(Set<String> projectNames, Date begin, Date end);
 
-	Map<String, BuildDaemonInfoDto> getProjectsBeingBuilt();
+	Map<String, ProjectStatusDto> getProjectsBeingBuilt();
 
 	Map<String, ProjectStatusDto> getProjectStatus();
 }

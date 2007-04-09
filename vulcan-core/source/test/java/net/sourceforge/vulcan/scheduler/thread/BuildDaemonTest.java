@@ -113,6 +113,10 @@ public class BuildDaemonTest extends EasyMockTestCase {
 		expect(mgr.getTarget(info)).andReturn(project);
 		expect(mgr.getLatestStatus(null)).andReturn(null).anyTimes();
 
+		mgr.registerBuildStatus((BuildDaemonInfoDto)notNull(),
+				(ProjectConfigDto)notNull(), (ProjectStatusDto)notNull());
+		
+
 		mgr.targetCompleted(
 				(BuildDaemonInfoDto) anyObject(),
 				(ProjectConfigDto) anyObject(),
@@ -167,7 +171,10 @@ public class BuildDaemonTest extends EasyMockTestCase {
 		expect(mgr.getTarget(info)).andReturn(project);
 
 		expect(mgr.getLatestStatus(null)).andReturn(null).anyTimes();
-		
+
+		mgr.registerBuildStatus((BuildDaemonInfoDto)notNull(),
+				(ProjectConfigDto)notNull(), (ProjectStatusDto)notNull());
+
 		mgr.targetCompleted(
 				(BuildDaemonInfoDto) anyObject(),
 				(ProjectConfigDto) anyObject(),
@@ -188,7 +195,12 @@ public class BuildDaemonTest extends EasyMockTestCase {
 		final ProjectConfigDto project = new ProjectConfigDto();
 
 		expect(mgr.getTarget(info)).andReturn(project);
+
 		expect(mgr.getLatestStatus(null)).andReturn(null).anyTimes();
+		
+		mgr.registerBuildStatus((BuildDaemonInfoDto)notNull(),
+				(ProjectConfigDto)notNull(), (ProjectStatusDto)notNull());
+		
 		
 		mgr.targetCompleted(
 				(BuildDaemonInfoDto) anyObject(),
@@ -219,7 +231,11 @@ public class BuildDaemonTest extends EasyMockTestCase {
 
 		expect(mgr.getTarget(info)).andReturn(project);
 		expect(mgr.getLatestStatus(null)).andReturn(null).anyTimes();
+
+		mgr.registerBuildStatus((BuildDaemonInfoDto)notNull(),
+				(ProjectConfigDto)notNull(), (ProjectStatusDto)notNull());
 		
+
 		mgr.targetCompleted(
 				(BuildDaemonInfoDto) anyObject(),
 				(ProjectConfigDto) anyObject(),

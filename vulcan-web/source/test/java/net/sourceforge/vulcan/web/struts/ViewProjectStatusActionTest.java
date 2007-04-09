@@ -18,18 +18,16 @@
  */
 package net.sourceforge.vulcan.web.struts;
 
+import java.io.ByteArrayInputStream;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import java.io.ByteArrayInputStream;
-import java.net.URL;
-
 import javax.xml.transform.Result;
 
-import net.sourceforge.vulcan.dto.BuildDaemonInfoDto;
 import net.sourceforge.vulcan.dto.ProjectConfigDto;
 import net.sourceforge.vulcan.dto.ProjectStatusDto;
 import net.sourceforge.vulcan.exception.NoSuchProjectException;
@@ -75,9 +73,9 @@ public class ViewProjectStatusActionTest extends MockApplicationContextStrutsTes
 		
 		verify();
 		
-		verifyForward("failure");
+		verifyInputForward();
 		
-		assertPropertyHasError(ActionMessages.GLOBAL_MESSAGE, "errors.request.invalid");
+		assertPropertyHasError("projectName", "errors.required");
 	}
 	public void testNoProject() throws Exception {
 		manager.getProjectConfig("some project");
@@ -105,19 +103,19 @@ public class ViewProjectStatusActionTest extends MockApplicationContextStrutsTes
 		
 		verify();
 		
-		verifyForward("failure");
+		verifyInputForward();
 		
-		assertPropertyHasError(ActionMessages.GLOBAL_MESSAGE, "errors.request.invalid");
+		assertPropertyHasError("index", "errors.integer");
 	}
 	public void testEmptyStatus() throws Exception {
 		manager.getProjectConfig("some project");
 		expectLastCall().andReturn(new ProjectConfigDto());
 
-		buildManager.getAvailableStatusIds("some project");
-		expectLastCall().andReturn(Collections.emptyList());
-
 		buildManager.getProjectsBeingBuilt();
 		expectLastCall().andReturn(Collections.emptyMap());
+		
+		buildManager.getAvailableStatusIds("some project");
+		expectLastCall().andReturn(Collections.emptyList());
 
 		addRequestParameter("projectName", "some project");
 		
@@ -134,14 +132,14 @@ public class ViewProjectStatusActionTest extends MockApplicationContextStrutsTes
 		manager.getProjectConfig("some project");
 		expectLastCall().andReturn(new ProjectConfigDto());
 
+		buildManager.getProjectsBeingBuilt();
+		expectLastCall().andReturn(Collections.emptyMap());
+
 		buildManager.getAvailableStatusIds("some project");
 		expectLastCall().andReturn(ids);
 
 		buildManager.getStatus(ids.get(ids.size()-1));
 		expectLastCall().andReturn(null);
-
-		buildManager.getProjectsBeingBuilt();
-		expectLastCall().andReturn(Collections.emptyMap());
 
 		addRequestParameter("projectName", "some project");
 		
@@ -158,11 +156,11 @@ public class ViewProjectStatusActionTest extends MockApplicationContextStrutsTes
 		manager.getProjectConfig("some project");
 		expectLastCall().andReturn(new ProjectConfigDto());
 
-		buildManager.getAvailableStatusIds("some project");
-		expectLastCall().andReturn(null);
-
 		buildManager.getProjectsBeingBuilt();
 		expectLastCall().andReturn(Collections.emptyMap());
+
+		buildManager.getAvailableStatusIds("some project");
+		expectLastCall().andReturn(null);
 
 		addRequestParameter("projectName", "some project");
 		
@@ -179,39 +177,15 @@ public class ViewProjectStatusActionTest extends MockApplicationContextStrutsTes
 		manager.getProjectConfig("some project");
 		expectLastCall().andReturn(new ProjectConfigDto());
 
-		buildManager.getAvailableStatusIds("some project");
-		expectLastCall().andReturn(null);
-
 		buildManager.getProjectsBeingBuilt();
-		expectLastCall().andReturn(Collections.singletonMap("some project", new BuildDaemonInfoDto()));
-
-		addRequestParameter("projectName", "some project");
+		expectLastCall().andReturn(Collections.singletonMap("some project", status));
 		
-		replay();
-		
-		actionPerform();
-		
-		verify();
-		
-		assertPropertyHasError(ActionMessages.GLOBAL_MESSAGE, "errors.status.not.available");
-		assertEquals(Boolean.TRUE, request.getAttribute("currentlyBuilding"));
-	}
-	public void testGetXml() throws Exception {
-		manager.getProjectConfig("some project");
-		expectLastCall().andReturn(new ProjectConfigDto());
-
 		buildManager.getAvailableStatusIds("some project");
 		expectLastCall().andReturn(ids);
 
-		buildManager.getStatus(ids.get(ids.size()-1));
-		expectLastCall().andReturn(status);
-
-		buildManager.getProjectsBeingBuilt();
-		expectLastCall().andReturn(Collections.emptyMap());
-		
 		projectDomBuilder.createProjectDocument(status, request.getLocale());
 		expectLastCall().andReturn(dom);
-		
+
 		addRequestParameter("projectName", "some project");
 		
 		replay();
@@ -219,16 +193,104 @@ public class ViewProjectStatusActionTest extends MockApplicationContextStrutsTes
 		actionPerform();
 		
 		verify();
-		
+
 		assertEquals("application/xml", response.getContentType());
 		
-		assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?><project>  <prev-index>1</prev-index></project>",
+		assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?><project>  <prev-index>2</prev-index></project>",
+				response.getWriterBuffer().toString().trim()
+					.replaceAll("\n", "").replaceAll("\r", ""));
+	}
+	public void testCurrentlyBuildingShowsNewest() throws Exception {
+		manager.getProjectConfig("some project");
+		expectLastCall().andReturn(new ProjectConfigDto());
+
+		buildManager.getProjectsBeingBuilt();
+		expectLastCall().andReturn(Collections.singletonMap("some project", status));
+		
+		buildManager.getAvailableStatusIds("some project");
+		expectLastCall().andReturn(ids);
+
+		projectDomBuilder.createProjectDocument(status, request.getLocale());
+		expectLastCall().andReturn(dom);
+
+		addRequestParameter("projectName", "some project");
+		
+		replay();
+		
+		actionPerform();
+		
+		verify();
+
+		assertEquals("application/xml", response.getContentType());
+		
+		assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?><project>  <prev-index>2</prev-index></project>",
+				response.getWriterBuffer().toString().trim()
+					.replaceAll("\n", "").replaceAll("\r", ""));
+	}
+	public void testGetByIndexCurrentlyBuilding() throws Exception {
+		manager.getProjectConfig("some project");
+		expectLastCall().andReturn(new ProjectConfigDto());
+
+		buildManager.getProjectsBeingBuilt();
+		expectLastCall().andReturn(Collections.singletonMap("some project", status));
+		
+		buildManager.getAvailableStatusIds("some project");
+		expectLastCall().andReturn(ids);
+
+		projectDomBuilder.createProjectDocument(status, request.getLocale());
+		expectLastCall().andReturn(dom);
+
+		addRequestParameter("projectName", "some project");
+		addRequestParameter("index", Integer.toString(ids.size()));
+		
+		replay();
+		
+		actionPerform();
+		
+		verify();
+
+		assertEquals("application/xml", response.getContentType());
+		
+		assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?><project>  <prev-index>2</prev-index></project>",
+				response.getWriterBuffer().toString().trim()
+					.replaceAll("\n", "").replaceAll("\r", ""));
+	}
+	public void testGetByBuildNumberCurrentlyBuilding() throws Exception {
+		manager.getProjectConfig("some project");
+		expectLastCall().andReturn(new ProjectConfigDto());
+
+		buildManager.getProjectsBeingBuilt();
+		expectLastCall().andReturn(Collections.singletonMap("some project", status));
+		
+		buildManager.getAvailableStatusIds("some project");
+		expectLastCall().andReturn(Collections.emptyList());
+
+		projectDomBuilder.createProjectDocument(status, request.getLocale());
+		expectLastCall().andReturn(dom);
+
+		addRequestParameter("projectName", "some project");
+		addRequestParameter("buildNumber", "3343");
+		
+		status.setBuildNumber(3343);
+		
+		replay();
+		
+		actionPerform();
+		
+		verify();
+
+		assertEquals("application/xml", response.getContentType());
+		
+		assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?><project />",
 				response.getWriterBuffer().toString().trim()
 					.replaceAll("\n", "").replaceAll("\r", ""));
 	}
 	public void testGetOldStatus() throws Exception {
 		manager.getProjectConfig("some project");
 		expectLastCall().andReturn(new ProjectConfigDto());
+
+		buildManager.getProjectsBeingBuilt();
+		expectLastCall().andReturn(Collections.emptyMap());
 		
 		buildManager.getAvailableStatusIds("some project");
 		expectLastCall().andReturn(ids);
@@ -254,11 +316,45 @@ public class ViewProjectStatusActionTest extends MockApplicationContextStrutsTes
 				response.getWriterBuffer().toString().trim()
 					.replaceAll("\n", "").replaceAll("\r", ""));
 	}
+	public void testGetOldStatusHasNextIndexWhenCurrentlyBuilding() throws Exception {
+		manager.getProjectConfig("some project");
+		expectLastCall().andReturn(new ProjectConfigDto());
+
+		buildManager.getProjectsBeingBuilt();
+		expectLastCall().andReturn(Collections.singletonMap("some project", status));
+		
+		buildManager.getAvailableStatusIds("some project");
+		expectLastCall().andReturn(ids);
+		
+		buildManager.getStatus(ids.get(2));
+		expectLastCall().andReturn(status);
+
+		projectDomBuilder.createProjectDocument(status, request.getLocale());
+		expectLastCall().andReturn(dom);
+		
+		addRequestParameter("projectName", "some project");
+		addRequestParameter("index", "2");
+		
+		replay();
+		
+		actionPerform();
+		
+		verify();
+		
+		assertEquals("application/xml", response.getContentType());
+		
+		assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?><project>  <prev-index>1</prev-index>  <next-index>3</next-index></project>",
+				response.getWriterBuffer().toString().trim()
+					.replaceAll("\n", "").replaceAll("\r", ""));
+	}
 	public void testGetStatusByBuildNumber() throws Exception {
 		status.setId(ids.get(1));
 		
 		manager.getProjectConfig("some project");
 		expectLastCall().andReturn(new ProjectConfigDto());
+
+		buildManager.getProjectsBeingBuilt();
+		expectLastCall().andReturn(Collections.emptyMap());
 		
 		buildManager.getAvailableStatusIds("some project");
 		expectLastCall().andReturn(ids);
@@ -287,6 +383,9 @@ public class ViewProjectStatusActionTest extends MockApplicationContextStrutsTes
 	public void testGetDiff() throws Exception {
 		manager.getProjectConfig("some project");
 		expectLastCall().andReturn(new ProjectConfigDto());
+
+		buildManager.getProjectsBeingBuilt();
+		expectLastCall().andReturn(Collections.emptyMap());
 		
 		buildManager.getAvailableStatusIds("some project");
 		expectLastCall().andReturn(ids);
@@ -318,6 +417,9 @@ public class ViewProjectStatusActionTest extends MockApplicationContextStrutsTes
 	public void testGetBuildLog() throws Exception {
 		manager.getProjectConfig("some project");
 		expectLastCall().andReturn(new ProjectConfigDto());
+
+		buildManager.getProjectsBeingBuilt();
+		expectLastCall().andReturn(Collections.emptyMap());
 		
 		buildManager.getAvailableStatusIds("some project");
 		expectLastCall().andReturn(ids);
@@ -349,6 +451,9 @@ public class ViewProjectStatusActionTest extends MockApplicationContextStrutsTes
 	public void testGetOldStatusIndexOutOfBounds() throws Exception {
 		manager.getProjectConfig("some project");
 		expectLastCall().andReturn(new ProjectConfigDto());
+
+		buildManager.getProjectsBeingBuilt();
+		expectLastCall().andReturn(Collections.emptyMap());
 		
 		buildManager.getAvailableStatusIds("some project");
 		expectLastCall().andReturn(ids);
@@ -365,7 +470,7 @@ public class ViewProjectStatusActionTest extends MockApplicationContextStrutsTes
 		assertPropertyHasError(ActionMessages.GLOBAL_MESSAGE, "errors.request.invalid");
 	}
 	public void testTransform() throws Exception {
-		final Map<String, BuildDaemonInfoDto> empty = Collections.emptyMap();
+		final Map<String, ProjectStatusDto> empty = Collections.emptyMap();
 		trainForTransform(empty, "xhtml");
 
 		addRequestParameter("projectName", "some project");
@@ -379,26 +484,8 @@ public class ViewProjectStatusActionTest extends MockApplicationContextStrutsTes
 		
 		assertEquals("text/html", response.getContentType());
 	}
-
-	public void testTransformCurrentlyBuilding() throws Exception {
-		projectConfig.setBugtraqUrl("http://localhost");
-		
-		trainForTransform(Collections.singletonMap("some project", new BuildDaemonInfoDto()), "xhtml");
-		
-		addRequestParameter("projectName", "some project");
-		addRequestParameter("transform", "xhtml");
-		
-		replay();
-		
-		actionPerform();
-		
-		verify();
-		
-		assertEquals("text/html", response.getContentType());
-		assertNotNull("dom should have added flag", dom.getRootElement().getChild("currently-building"));
-	}
 	public void testTransformBadFormatType() throws Exception {
-		final Map<String, BuildDaemonInfoDto> empty = Collections.emptyMap();
+		final Map<String, ProjectStatusDto> empty = Collections.emptyMap();
 		trainForTransform(empty, "nonesuch");
 
 		expectLastCall().andThrow(new NoSuchTransformFormatException());
@@ -416,14 +503,17 @@ public class ViewProjectStatusActionTest extends MockApplicationContextStrutsTes
 		assertPropertyHasError(ActionMessages.GLOBAL_MESSAGE, "errors.transform.not.found");
 	}
 	
-	private void trainForTransform(Map<String, BuildDaemonInfoDto> projectsBeingBuilt, String transormType) throws Exception {
+	private void trainForTransform(Map<String, ProjectStatusDto> projectsBeingBuilt, String transormType) throws Exception {
 		expect(manager.getProjectConfig("some project")).andReturn(projectConfig);
+
+		buildManager.getProjectsBeingBuilt();
+		expectLastCall().andReturn(projectsBeingBuilt);
 
 		expect(buildManager.getAvailableStatusIds("some project")).andReturn(ids);
 
-		expect(buildManager.getStatus(ids.get(ids.size()-1))).andReturn(status);
-		
-		expect(buildManager.getProjectsBeingBuilt()).andReturn(projectsBeingBuilt);
+		if (!projectsBeingBuilt.containsKey("some project")) {
+			expect(buildManager.getStatus(ids.get(ids.size()-1))).andReturn(status);
+		}
 		
 		expect(projectDomBuilder.createProjectDocument(status, request.getLocale()))
 			.andReturn(dom);
