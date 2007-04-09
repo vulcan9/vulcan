@@ -27,6 +27,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.jdom.Document;
+import org.jdom.Element;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -75,8 +76,34 @@ public class AntBuildPlugin extends PluginSupport
 		
 		return new AntBuildTool(antProjectConfig, this.globalConfig, javaHome);
 	}
-	public ProjectBuildConfigurator createProjectConfigurator(File buildSpecFile, Document xmlDocument) throws ConfigException {
-		return null;
+	public ProjectBuildConfigurator createProjectConfigurator(String url, File buildSpecFile, Document xmlDocument) throws ConfigException {
+		if (xmlDocument == null) {
+			return null;
+		}
+		
+		final Element root = xmlDocument.getRootElement();
+		
+		if (!"".equals(root.getNamespaceURI())) {
+			return null;
+		}
+		
+		if (url.endsWith(".build")) {
+			// probably a NAnt project.
+			return null;
+		}
+		
+		if (!"project".equals(root.getName())) {
+			return null;
+		}
+		
+		final String projectName = root.getAttributeValue("name");
+		final String basedir = root.getAttributeValue("basedir");
+		
+		if (projectName == null) {
+			return null;
+		}
+		
+		return new AntProjectBuildConfigurator(applicationContext, projectName, basedir, url);
 	}
 	public AntProjectConfig getDefaultConfig() {
 		return new AntProjectConfig();

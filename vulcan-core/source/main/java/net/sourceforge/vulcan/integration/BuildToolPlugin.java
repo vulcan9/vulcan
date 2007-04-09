@@ -34,12 +34,14 @@ public interface BuildToolPlugin extends Plugin {
 	BuildToolConfigDto getDefaultConfig();
 	
 	/**
-	 * @param buildSpecFile
-	 * @param xmlDocument 
+	 * @param url The scm repository url used to download <code>buildSpecFile</code>.
+	 * @param buildSpecFile A temporary file containing the contents of the build specification.
+	 * @param xmlDocument If the contents of buildSpecFile are well-formed XML, a Document containing
+	 * the parsed contents.  <code>null</code> otherwise.
 	 * @throws ConfigException If <code>buildSpecFile</code> is supported but
 	 * an error occurs while processing the file.
-	 * @return Null if the buildSpecFile is not recognized/supported, or an
+	 * @return <code>null</code> if the buildSpecFile is not recognized/supported, or an
 	 * instance of ProjectConfigurator if it is.
 	 */
-	ProjectBuildConfigurator createProjectConfigurator(File buildSpecFile, Document xmlDocument) throws ConfigException;
+	ProjectBuildConfigurator createProjectConfigurator(String url, File buildSpecFile, Document xmlDocument) throws ConfigException;
 }

@@ -20,8 +20,13 @@ package net.sourceforge.vulcan.ant;
 
 import junit.framework.TestCase;
 
+import org.jdom.Document;
+import org.jdom.Element;
+import org.jdom.Namespace;
+
 public class AntBuildPluginTest extends TestCase {
 	AntBuildPlugin plugin = new AntBuildPlugin();
+	Document doc = new Document();
 	
 	public void testStartsWithSystemJavaHome() throws Exception {
 		plugin.init();
@@ -64,5 +69,41 @@ public class AntBuildPluginTest extends TestCase {
 		assertEquals(1, cfg.getJavaHomes().length);
 		assertEquals(JavaHome.SYSTEM_DESC, cfg.getJavaHomes()[0].getDescription());
 		assertEquals(JavaHome.SYSTEM_HOME, cfg.getJavaHomes()[0].getJavaHome());
+	}
+	
+	public void testCreateConfiguratorNullDoc() throws Exception {
+		assertNull(plugin.createProjectConfigurator(null, null, null));
+	}
+	
+	public void testCreateConfiguratorEmptyDoc() throws Exception {
+		doc.addContent(new Element("unrelated-thing"));
+		
+		assertNull(plugin.createProjectConfigurator("", null, doc));
+	}
+	
+	public void testCreateConfiguratorUnrelatedNamespace() throws Exception {
+		final Element project = new Element("project");
+		project.setNamespace(Namespace.getNamespace("http://example.com/unrelated_namespace"));
+		
+		doc.addContent(project);
+		assertNull(plugin.createProjectConfigurator(null, null, doc));
+	}
+
+	public void testCreateConfiguratorEndsWithDotBuild() throws Exception {
+		// NAnt projects use similar document structure, but filenames typically end with .build
+		// These should be ignored by this plugin
+		final Element project = new Element("project");
+		project.setAttribute("name", "foo");
+		
+		doc.addContent(project);
+		assertNull(plugin.createProjectConfigurator("http://example.com/svn/foo.build", null, doc));
+	}
+	
+	public void testCreateConfigurator() throws Exception {
+		final Element project = new Element("project");
+		project.setAttribute("name", "foo");
+		
+		doc.addContent(project);
+		assertNotNull(plugin.createProjectConfigurator("", null, doc));
 	}
 }

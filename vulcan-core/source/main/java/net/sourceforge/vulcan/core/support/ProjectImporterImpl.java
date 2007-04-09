@@ -61,9 +61,6 @@ public class ProjectImporterImpl implements ProjectImporter {
 	private StateManager stateManager;
 	private Store store;
 	
-	/*
-	 * TODO: allow build configurator to configure emails (?)
-	 */
 	public void createProjectsForUrl(String startUrl, boolean createSubprojects, NameCollisionResolutionMode nameCollisionResolutionMode, String[] schedulerNames) throws ConfigException, StoreException, DuplicateNameException {
 		final List<RepositoryAdaptorPlugin> repositoryPlugins = pluginManager.getPlugins(RepositoryAdaptorPlugin.class);
 		final List<BuildToolPlugin> buildToolPlugins = pluginManager.getPlugins(BuildToolPlugin.class);
@@ -92,7 +89,7 @@ public class ProjectImporterImpl implements ProjectImporter {
 				buildSpecFile = downloadBuildSpecFile(repoConfigurator);
 				final Document xmlDocument = tryParse(buildSpecFile);
 				buildConfigurator = createBuildToolConfigurator(
-						buildToolPlugins, projectConfig, buildSpecFile, xmlDocument);
+						buildToolPlugins, projectConfig, url, buildSpecFile, xmlDocument);
 			} finally {
 				deleteIfPresent(buildSpecFile);
 			}
@@ -195,7 +192,16 @@ public class ProjectImporterImpl implements ProjectImporter {
 		}
 		
 		try {
-			return new URI(sb.toString()).normalize().toString();
+			final String normalized = new URI(sb.toString()).normalize().toString();
+			
+			if (url.startsWith("file:///") && !normalized.startsWith("///")) {
+				/* Special case for file protocol.
+				 * URI.normalize eats the extra slashes at the begining.
+				 * This behavior does not seem to be documented in the JavaDoc for URI.
+				 */
+				return "file:///" + normalized.substring(6);
+			}
+			return normalized;
 		} catch (URISyntaxException e) {
 			throw new RuntimeException(e);
 		}
@@ -224,10 +230,10 @@ public class ProjectImporterImpl implements ProjectImporter {
 		throw new ConfigException("errors.url.unsupported", null);
 	}
 	
-	private ProjectBuildConfigurator createBuildToolConfigurator(List<BuildToolPlugin> buildToolPlugins, ProjectConfigDto projectConfig, File buildSpecFile, Document xmlDocument) throws ConfigException {
+	private ProjectBuildConfigurator createBuildToolConfigurator(List<BuildToolPlugin> buildToolPlugins, ProjectConfigDto projectConfig, String url, File buildSpecFile, Document xmlDocument) throws ConfigException {
 		for (BuildToolPlugin plugin : buildToolPlugins) {
 			final ProjectBuildConfigurator configurator = plugin.createProjectConfigurator(
-					buildSpecFile, xmlDocument);
+					url, buildSpecFile, xmlDocument);
 			if (configurator != null) {
 				log.info("Using " + plugin.getName() + " to configure project.");
 				projectConfig.setBuildToolPluginId(plugin.getId());

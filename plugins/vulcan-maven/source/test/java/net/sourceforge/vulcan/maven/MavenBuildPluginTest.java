@@ -65,13 +65,13 @@ public class MavenBuildPluginTest extends MavenBuildToolTestBase {
 	
 	public void testCreateProjectConfigurator() throws Exception {
 		final File pomFile = createFakePomFile();
-		assertNotNull(plugin.createProjectConfigurator(pomFile, new SAXBuilder().build(pomFile)));
+		assertNotNull(plugin.createProjectConfigurator(null, pomFile, new SAXBuilder().build(pomFile)));
 	}
 	
 	public void testProjectConfiguratorModules() throws Exception {
 		final File pomFile = TestUtils.resolveRelativeFile("../pom.xml");
 		final ProjectBuildConfigurator cfgr = plugin.createProjectConfigurator(
-				pomFile, new SAXBuilder().build(pomFile));
+				null, pomFile, new SAXBuilder().build(pomFile));
 		
 		final List<String> urls = cfgr.getSubprojectUrls();
 		
@@ -92,7 +92,7 @@ public class MavenBuildPluginTest extends MavenBuildToolTestBase {
 	public void testConfigureDependencies() throws Exception {
 		final File pomFile = TestUtils.resolveRelativeFile("pom.xml");
 		final ProjectBuildConfigurator cfgr = plugin.createProjectConfigurator(
-				pomFile, new SAXBuilder().build(pomFile));
+				null, pomFile, new SAXBuilder().build(pomFile));
 
 		cfgr.applyConfiguration(projectConfig, Arrays.asList("vulcan-core", "vulcan-test-utils"), false);
 		
@@ -103,7 +103,7 @@ public class MavenBuildPluginTest extends MavenBuildToolTestBase {
 		final File pomFile = TestUtils.resolveRelativeFile("pom.xml");
 		
 		final ProjectBuildConfigurator cfgr = plugin.createProjectConfigurator(
-				pomFile, new SAXBuilder().build(pomFile));
+				null, pomFile, new SAXBuilder().build(pomFile));
 
 		cfgr.applyConfiguration(projectConfig, Arrays.asList("plugins", "vulcan"), false);
 		
@@ -114,7 +114,7 @@ public class MavenBuildPluginTest extends MavenBuildToolTestBase {
 		final File pomFile = TestUtils.resolveRelativeFile("pom.xml");
 		
 		final ProjectBuildConfigurator cfgr = plugin.createProjectConfigurator(
-				pomFile, new SAXBuilder().build(pomFile));
+				null, pomFile, new SAXBuilder().build(pomFile));
 
 		cfgr.applyConfiguration(projectConfig, Arrays.asList("vulcan-maven-plugin"), false);
 		

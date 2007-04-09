@@ -107,7 +107,7 @@ public class MavenBuildPlugin extends PluginSupport
 		return mavenBuildToolFactory.createMavenBuildTool(mavenProjectConfig, config, javaHome, mavenHome);
 	}
 	
-	public ProjectBuildConfigurator createProjectConfigurator(File buildSpecFile, Document xmlDocument) throws ConfigException {
+	public ProjectBuildConfigurator createProjectConfigurator(String url, File buildSpecFile, Document xmlDocument) throws ConfigException {
 		if (xmlDocument == null) {
 			return null;
 		}

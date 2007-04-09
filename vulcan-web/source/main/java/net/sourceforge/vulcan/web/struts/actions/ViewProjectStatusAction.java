@@ -71,7 +71,11 @@ public final class ViewProjectStatusAction extends ProjectReportBaseAction {
 		int index = -1;
 		
 		if (currentlyBuilding && statusForm.shouldDisplayLatest()) {
-			index = ids.size();
+			if (ids == null) {
+				index = 0;
+			} else {
+				index = ids.size();
+			}
 		} else if (statusForm.isBuildNumberSpecified()) {
 			final int buildNumber = Integer.valueOf(statusForm.getBuildNumber());
 			
