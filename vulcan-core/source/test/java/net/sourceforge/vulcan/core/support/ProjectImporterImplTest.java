@@ -193,8 +193,8 @@ public class ProjectImporterImplTest extends EasyMockTestCase {
 		
 		repoConfigurator.download(tmpFile1);
 		
-		expect(btp1.createProjectConfigurator(tmpFile1, null)).andReturn(null);
-		expect(btp2.createProjectConfigurator(tmpFile1, null)).andReturn(null);
+		expect(btp1.createProjectConfigurator(url, tmpFile1, null)).andReturn(null);
+		expect(btp2.createProjectConfigurator(url, tmpFile1, null)).andReturn(null);
 	}
 
 	@TrainingMethod("trainNoBuildToolSupportsFile")
@@ -221,8 +221,8 @@ public class ProjectImporterImplTest extends EasyMockTestCase {
 		expect(pluginManager.getPlugins(BuildToolPlugin.class))
 			.andReturn(buildToolPlugins);
 		
-		expect(btp1.createProjectConfigurator(tmpFile1, null)).andReturn(null);
-		expect(btp2.createProjectConfigurator(tmpFile1, null)).andReturn(buildConfigurator);
+		expect(btp1.createProjectConfigurator(url, tmpFile1, null)).andReturn(null);
+		expect(btp2.createProjectConfigurator(url, tmpFile1, null)).andReturn(buildConfigurator);
 		expect(btp2.getId()).andReturn("a.fake.build.plugin");
 		
 		final ProjectConfigDto projectConfig = new ProjectConfigDto();
@@ -318,7 +318,7 @@ public class ProjectImporterImplTest extends EasyMockTestCase {
 		
 		repoConfigurator.download(tmpFile2);
 		
-		expect(btp1.createProjectConfigurator(tmpFile2, null)).andReturn(buildConfigurator);
+		expect(btp1.createProjectConfigurator("http://localhost/a-sub-project", tmpFile2, null)).andReturn(buildConfigurator);
 		expect(btp1.getId()).andReturn("a.fake.build.plugin");
 		
 		final ProjectConfigDto projectConfig = new ProjectConfigDto();
@@ -427,5 +427,10 @@ public class ProjectImporterImplTest extends EasyMockTestCase {
 		assertEquals(
 				"pretzels://localhost/foo/bar/",
 				importer.computeProjectBasedirUrl("pretzels://localhost/foo/bar/baz.xml", null));
+	}
+	public void testComputePathAdjacentSlashesAtRoot() throws Exception {
+		assertEquals(
+				"file:///tmp/dir/",
+				importer.computeProjectBasedirUrl("file:///tmp/dir/nested/nant.build", ".."));
 	}
 }

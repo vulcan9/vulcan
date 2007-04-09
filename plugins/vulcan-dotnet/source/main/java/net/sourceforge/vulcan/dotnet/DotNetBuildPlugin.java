@@ -73,7 +73,7 @@ public class DotNetBuildPlugin extends PluginSupport implements BuildToolPlugin,
 		throw new ConfigException("dotnet.config.nant.unsupported", null);
 	}
 
-	public ProjectBuildConfigurator createProjectConfigurator(File buildSpecFile, Document xmlDocument) throws ConfigException {
+	public ProjectBuildConfigurator createProjectConfigurator(String url, File buildSpecFile, Document xmlDocument) throws ConfigException {
 		// Not supported.
 		return null;
 	}
