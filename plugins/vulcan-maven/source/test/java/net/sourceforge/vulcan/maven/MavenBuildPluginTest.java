@@ -94,7 +94,7 @@ public class MavenBuildPluginTest extends MavenBuildToolTestBase {
 		final ProjectBuildConfigurator cfgr = plugin.createProjectConfigurator(
 				null, pomFile, new SAXBuilder().build(pomFile));
 
-		cfgr.applyConfiguration(projectConfig, Arrays.asList("vulcan-core", "vulcan-test-utils"), false);
+		cfgr.applyConfiguration(projectConfig, null, Arrays.asList("vulcan-core", "vulcan-test-utils"), false);
 		
 		assertEquals(2, projectConfig.getDependencies().length);
 	}
@@ -105,7 +105,7 @@ public class MavenBuildPluginTest extends MavenBuildToolTestBase {
 		final ProjectBuildConfigurator cfgr = plugin.createProjectConfigurator(
 				null, pomFile, new SAXBuilder().build(pomFile));
 
-		cfgr.applyConfiguration(projectConfig, Arrays.asList("plugins", "vulcan"), false);
+		cfgr.applyConfiguration(projectConfig, null, Arrays.asList("plugins", "vulcan"), false);
 		
 		assertEquals(2, projectConfig.getDependencies().length);
 	}
@@ -116,7 +116,7 @@ public class MavenBuildPluginTest extends MavenBuildToolTestBase {
 		final ProjectBuildConfigurator cfgr = plugin.createProjectConfigurator(
 				null, pomFile, new SAXBuilder().build(pomFile));
 
-		cfgr.applyConfiguration(projectConfig, Arrays.asList("vulcan-maven-plugin"), false);
+		cfgr.applyConfiguration(projectConfig, null, Arrays.asList("vulcan-maven-plugin"), false);
 		
 		assertEquals(1, projectConfig.getDependencies().length);
 	}

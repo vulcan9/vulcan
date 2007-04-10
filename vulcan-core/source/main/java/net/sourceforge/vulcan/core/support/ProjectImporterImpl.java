@@ -157,12 +157,12 @@ public class ProjectImporterImpl implements ProjectImporter {
 	 * if it should be skipped due to a name collision.
 	 */
 	protected boolean configureProject(final ProjectConfigDto projectConfig, final ProjectRepositoryConfigurator repoConfigurator, final ProjectBuildConfigurator buildConfigurator, String url, final List<String> existingProjectNames, NameCollisionResolutionMode nameCollisionResolutionMode, boolean createSubprojects) throws DuplicateNameException {
-		buildConfigurator.applyConfiguration(projectConfig, existingProjectNames, createSubprojects);
-		
 		final String relativePath = buildConfigurator.getRelativePathToProjectBasedir();
-		final String projectBasedirUrl = computeProjectBasedirUrl(url, relativePath);
+		final PathInfo pathInfo = computeProjectBasedirUrl(url, relativePath);
 		
-		repoConfigurator.applyConfiguration(projectConfig, projectBasedirUrl);
+		buildConfigurator.applyConfiguration(projectConfig, pathInfo.getBuildSpecPath(), existingProjectNames, createSubprojects);
+
+		repoConfigurator.applyConfiguration(projectConfig, pathInfo.getProjectBasedirUrl());
 		
 		final boolean namingConflict = existingProjectNames.contains(projectConfig.getName());
 		
@@ -184,7 +184,9 @@ public class ProjectImporterImpl implements ProjectImporter {
 		return true;
 	}
 	
-	protected String computeProjectBasedirUrl(String url, String relativePath) {
+	protected PathInfo computeProjectBasedirUrl(String url, String relativePath) {
+		final PathInfo pathInfo = new PathInfo();
+		
 		final StringBuilder sb = new StringBuilder(url);
 		sb.delete(sb.lastIndexOf("/") + 1, sb.length());
 		if (relativePath != null) {
@@ -192,16 +194,20 @@ public class ProjectImporterImpl implements ProjectImporter {
 		}
 		
 		try {
-			final String normalized = new URI(sb.toString()).normalize().toString();
+			String normalized = new URI(sb.toString()).normalize().toString();
 			
 			if (url.startsWith("file:///") && !normalized.startsWith("///")) {
 				/* Special case for file protocol.
 				 * URI.normalize eats the extra slashes at the begining.
 				 * This behavior does not seem to be documented in the JavaDoc for URI.
 				 */
-				return "file:///" + normalized.substring(6);
+				normalized = "file:///" + normalized.substring(6);
 			}
-			return normalized;
+			
+			pathInfo.setProjectBasedirUrl(normalized);
+			pathInfo.setBuildSpecPath(url.substring(normalized.length()));
+			
+			return pathInfo;
 		} catch (URISyntaxException e) {
 			throw new RuntimeException(e);
 		}
@@ -217,6 +223,23 @@ public class ProjectImporterImpl implements ProjectImporter {
 		}
 	}
 
+	protected static class PathInfo {
+		private String projectBasedirUrl;
+		private String buildSpecPath;
+		
+		public String getBuildSpecPath() {
+			return buildSpecPath;
+		}
+		public void setBuildSpecPath(String buildSpecPath) {
+			this.buildSpecPath = buildSpecPath;
+		}
+		public String getProjectBasedirUrl() {
+			return projectBasedirUrl;
+		}
+		public void setProjectBasedirUrl(String projectBasedirUrl) {
+			this.projectBasedirUrl = projectBasedirUrl;
+		}
+	}
 	private ProjectRepositoryConfigurator createRepositoryConfiguratorForUrl(final List<RepositoryAdaptorPlugin> repositoryPlugins, ProjectConfigDto projectConfig, String url) throws ConfigException {
 		for (RepositoryAdaptorPlugin plugin : repositoryPlugins) {
 			final ProjectRepositoryConfigurator configurator = plugin.createProjectConfigurator(url);

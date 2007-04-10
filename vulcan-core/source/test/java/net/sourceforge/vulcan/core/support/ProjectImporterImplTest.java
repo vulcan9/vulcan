@@ -18,14 +18,14 @@
  */
 package net.sourceforge.vulcan.core.support;
 
+import static org.easymock.EasyMock.anyBoolean;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-
-import org.apache.commons.lang.ArrayUtils;
 
 import net.sourceforge.vulcan.EasyMockTestCase;
 import net.sourceforge.vulcan.PluginManager;
@@ -34,6 +34,7 @@ import net.sourceforge.vulcan.ProjectRepositoryConfigurator;
 import net.sourceforge.vulcan.StateManager;
 import net.sourceforge.vulcan.core.NameCollisionResolutionMode;
 import net.sourceforge.vulcan.core.Store;
+import net.sourceforge.vulcan.core.support.ProjectImporterImpl.PathInfo;
 import net.sourceforge.vulcan.dto.ProjectConfigDto;
 import net.sourceforge.vulcan.exception.ConfigException;
 import net.sourceforge.vulcan.exception.DuplicateNameException;
@@ -41,6 +42,8 @@ import net.sourceforge.vulcan.exception.PluginNotConfigurableException;
 import net.sourceforge.vulcan.integration.BuildToolPlugin;
 import net.sourceforge.vulcan.integration.PluginStub;
 import net.sourceforge.vulcan.integration.RepositoryAdaptorPlugin;
+
+import org.apache.commons.lang.ArrayUtils;
 
 public class ProjectImporterImplTest extends EasyMockTestCase {
 	ProjectImporterImpl importer = new ProjectImporterImpl() {
@@ -66,8 +69,8 @@ public class ProjectImporterImplTest extends EasyMockTestCase {
 	
 	ProjectBuildConfigurator buildConfiguratorMock = createMock(ProjectBuildConfigurator.class);
 	ProjectBuildConfigurator buildConfigurator = new ProjectBuildConfigurator() {
-		public void applyConfiguration(ProjectConfigDto projectConfig, List<String> existingProjectNames, boolean createSubprojects) {
-			buildConfiguratorMock.applyConfiguration(projectConfig, existingProjectNames, false);
+		public void applyConfiguration(ProjectConfigDto projectConfig, String buildSpecRelativePath, List<String> existingProjectNames, boolean createSubprojects) {
+			buildConfiguratorMock.applyConfiguration(projectConfig, buildSpecRelativePath, existingProjectNames, createSubprojects);
 			if (playback) {
 				projectConfig.setName(projectName);
 				projectConfig.setWorkDir(workDir);
@@ -230,9 +233,9 @@ public class ProjectImporterImplTest extends EasyMockTestCase {
 		projectConfig.setRepositoryAdaptorPluginId("a.fake.repo.plugin");
 		projectConfig.setBuildToolPluginId("a.fake.build.plugin");
 		
-		buildConfigurator.applyConfiguration(projectConfig, existingProjectNames, false);
-		
 		expect(buildConfigurator.getRelativePathToProjectBasedir()).andReturn(".");
+		
+		buildConfigurator.applyConfiguration(eq(projectConfig), eq("build_script.txt"), eq(existingProjectNames), anyBoolean());
 		
 		final ProjectConfigDto projectConfigWithName = (ProjectConfigDto) projectConfig.copy();
 		projectConfigWithName.setName(projectName);
@@ -329,8 +332,10 @@ public class ProjectImporterImplTest extends EasyMockTestCase {
 		final List<String> updatedExistingProjectNames = new ArrayList<String>(existingProjectNames);
 		updatedExistingProjectNames.add(projectName);
 		
-		buildConfigurator.applyConfiguration(projectConfig, updatedExistingProjectNames, true);
 		expect(buildConfigurator.getRelativePathToProjectBasedir()).andReturn(null);
+
+		buildConfigurator.applyConfiguration(eq(projectConfig), eq("a-sub-project"), eq(updatedExistingProjectNames), eq(true));
+		
 		repoConfigurator.applyConfiguration((ProjectConfigDto)notNull(), (String)notNull());
 		
 		expect(buildConfigurator.isStandaloneProject()).andReturn(false);
@@ -373,7 +378,7 @@ public class ProjectImporterImplTest extends EasyMockTestCase {
 	@SuppressWarnings("unchecked")
 	public void trainConfigureDontCare() throws Exception {
 		buildConfigurator.applyConfiguration((ProjectConfigDto)notNull(),
-				(List<String>) notNull(), eq(false));
+				(String)anyObject(), (List<String>) notNull(), eq(false));
 		expect(buildConfigurator.getRelativePathToProjectBasedir()).andReturn(null);
 		repoConfigurator.applyConfiguration((ProjectConfigDto)notNull(), (String)notNull());
 	}
@@ -404,33 +409,43 @@ public class ProjectImporterImplTest extends EasyMockTestCase {
 	}
 	
 	public void testComputePathParent() throws Exception {
-		assertEquals(
+		assertPathInfoEquals(
 				"http://localhost/foo/",
+				"bar/baz.xml",
 				importer.computeProjectBasedirUrl("http://localhost/foo/bar/baz.xml", ".."));
 	}
 	public void testComputePathRelative() throws Exception {
-		assertEquals(
+		assertPathInfoEquals(
 				"http://localhost/foo/bar/",
+				"baz.xml",
 				importer.computeProjectBasedirUrl("http://localhost/foo/bar/baz.xml", "."));
 	}
 	public void testComputePathBlank() throws Exception {
-		assertEquals(
+		assertPathInfoEquals(
 				"http://localhost/foo/bar/",
+				"baz.xml",
 				importer.computeProjectBasedirUrl("http://localhost/foo/bar/baz.xml", ""));
 	}
 	public void testComputePathNull() throws Exception {
-		assertEquals(
+		assertPathInfoEquals(
 				"http://localhost/foo/bar/",
+				"baz.xml",
 				importer.computeProjectBasedirUrl("http://localhost/foo/bar/baz.xml", null));
 	}
 	public void testComputePathObscureProtocol() throws Exception {
-		assertEquals(
+		assertPathInfoEquals(
 				"pretzels://localhost/foo/bar/",
+				"baz.xml",
 				importer.computeProjectBasedirUrl("pretzels://localhost/foo/bar/baz.xml", null));
 	}
 	public void testComputePathAdjacentSlashesAtRoot() throws Exception {
-		assertEquals(
+		assertPathInfoEquals(
 				"file:///tmp/dir/",
+				"nested/nant.build",
 				importer.computeProjectBasedirUrl("file:///tmp/dir/nested/nant.build", ".."));
+	}
+	private static void assertPathInfoEquals(String expectedBasedirUrl, String expectedBuildSpecPath, PathInfo info) {
+		assertEquals(expectedBasedirUrl, info.getProjectBasedirUrl());
+		assertEquals(expectedBuildSpecPath, info.getBuildSpecPath());
 	}
 }

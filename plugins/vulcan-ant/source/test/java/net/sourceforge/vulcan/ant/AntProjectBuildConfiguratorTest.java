@@ -26,44 +26,20 @@ public class AntProjectBuildConfiguratorTest extends TestCase {
 	ProjectConfigDto config = new ProjectConfigDto();
 	
 	public void testBasic() throws Exception {
-		cfgr = new AntProjectBuildConfigurator(null, "project name", null, "http://example.com/svn/build.xml");
+		cfgr = new AntProjectBuildConfigurator(null, "project name", null);
 		
-		cfgr.applyConfiguration(config, null, false);
+		cfgr.applyConfiguration(config, null, null, false);
 		
 		assertEquals("project name", config.getName());
 		assertNotNull(config.getBuildToolConfig());
 	}
 
-	public void testAlternateFilename() throws Exception {
-		cfgr = new AntProjectBuildConfigurator(null, "project name", ".", "http://example.com/svn/ant.xml");
+	public void testUsesSpecifiedFilename() throws Exception {
+		cfgr = new AntProjectBuildConfigurator(null, "project name", ".");
 		
-		cfgr.applyConfiguration(config, null, false);
+		cfgr.applyConfiguration(config, "ant.xml", null, false);
 
 		AntProjectConfig buildConfig = (AntProjectConfig) config.getBuildToolConfig();
 		assertEquals("ant.xml", buildConfig.getBuildScript());
-	}
-
-	public void testNested() throws Exception {
-		cfgr = new AntProjectBuildConfigurator(null, "project name", "..", "http://example.com/svn/ant/build.xml");
-		
-		cfgr.applyConfiguration(config, null, false);
-
-		AntProjectConfig buildConfig = (AntProjectConfig) config.getBuildToolConfig();
-		assertEquals("ant/build.xml", buildConfig.getBuildScript());
-	}
-
-	public void testWorkAroundWeirdURINormalizationBehavior() throws Exception {
-		/* new URI("file:///tmp/foo/../").normalize results in:
-		 * 	"file:/tmp/foo/"
-		 * instead of
-		 *  "file:///tmp/foo/"
-		 */
-		
-		cfgr = new AntProjectBuildConfigurator(null, "project name", "..", "file:///tmp/ant/build.xml");
-		
-		cfgr.applyConfiguration(config, null, false);
-
-		AntProjectConfig buildConfig = (AntProjectConfig) config.getBuildToolConfig();
-		assertEquals("ant/build.xml", buildConfig.getBuildScript());
 	}
 }
