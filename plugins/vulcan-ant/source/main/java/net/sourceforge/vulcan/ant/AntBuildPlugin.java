@@ -103,7 +103,7 @@ public class AntBuildPlugin extends PluginSupport
 			return null;
 		}
 		
-		return new AntProjectBuildConfigurator(applicationContext, projectName, basedir, url);
+		return new AntProjectBuildConfigurator(applicationContext, projectName, basedir);
 	}
 	public AntProjectConfig getDefaultConfig() {
 		return new AntProjectConfig();

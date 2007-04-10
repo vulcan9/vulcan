@@ -50,7 +50,7 @@ public class MavenProjectConfigurator implements ProjectBuildConfigurator {
 		this.applicationContext = applicationContext;
 	}
 
-	public void applyConfiguration(ProjectConfigDto projectConfig, List<String> existingProjectNames, boolean createSubprojects) {
+	public void applyConfiguration(ProjectConfigDto projectConfig, String buildSpecRelativePath, List<String> existingProjectNames, boolean createSubprojects) {
 		final MavenProjectConfig mavenProjectConfig = new MavenProjectConfig();
 		mavenProjectConfig.setApplicationContext(applicationContext);
 		mavenProjectConfig.setTargets(goals);
