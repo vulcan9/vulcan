@@ -25,7 +25,8 @@
 				<c:choose>
 					<c:when test="${status != null}">
 						<status>${status.status}</status>
-						<c:if test="${status.status eq 'BUILDING'}">
+						<c:if test="${status.status eq 'BUILDING' and projectStatus[project.name] ne null}">
+							<previous-status>${projectStatus[project.name].status}</previous-status>
 						</c:if>
 						<c:choose>
 							<c:when test="${status.completionDate ne null}">
