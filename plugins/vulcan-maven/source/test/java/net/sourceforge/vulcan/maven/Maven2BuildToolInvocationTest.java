@@ -57,11 +57,13 @@ public class Maven2BuildToolInvocationTest extends MavenBuildToolTestBase {
 			fail("should not call this method");
 		}
 		public void reportError(String message, String file, Integer line, String arg3) {
+			System.err.println(message);
 			errors.add(message);
 			fileNames.add(file);
 			lineNumbers.add(line);
 		}
 		public void reportWarning(String arg0, String arg1, Integer arg2, String arg3) {
+			System.err.println(arg0);
 		}
 	};
 

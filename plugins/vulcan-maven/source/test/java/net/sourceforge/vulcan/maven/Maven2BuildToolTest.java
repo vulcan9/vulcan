@@ -43,7 +43,6 @@ public class Maven2BuildToolTest extends MavenBuildToolTestBase {
 				Pattern.compile("^classworlds.*jar$").matcher(launcher.getName()).matches());
 		
 		assertEquals("boot", launcher.getParentFile().getName());
-		assertEquals("core", launcher.getParentFile().getParentFile().getName());
 	}
 	
 	public void testConfigure() throws Exception {
