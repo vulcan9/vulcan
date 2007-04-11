@@ -183,8 +183,7 @@ public class MavenBuildPlugin extends PluginSupport
 		try {
 			final List<File> files = new ArrayList<File>();
 		
-			files.addAll(FileUtils.listFiles(new File(mavenHomeDirectory, "core"), extensions, true));
-			files.addAll(FileUtils.listFiles(new File(mavenHomeDirectory, "lib"), extensions, true));
+			files.addAll(FileUtils.listFiles(new File(mavenHomeDirectory), extensions, true));
 	
 			final URL[] urls = new URL[files.size() + 1];
 	

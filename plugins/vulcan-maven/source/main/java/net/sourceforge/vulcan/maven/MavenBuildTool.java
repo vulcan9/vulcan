@@ -59,7 +59,14 @@ public class MavenBuildTool extends AntBuildTool {
 	static final String MAVEN1_LAUNCHER_MAIN_CLASS_NAME = "com.werken.forehead.Forehead";
 	static final String MAVEN1_ENDORSED_DIR = "lib" + File.separator + "endorsed";
 	
-	static final String MAVEN2_BOOT_DIR = "core" + File.separator + "boot";
+	/*
+	 * In maven-2.0.6, the boot jar is in boot.
+	 */
+	static final String MAVEN2_BOOT_DIR = "boot";
+	/*
+	 * Prior to maven-2.0.6, the boot jar was in core/boot.
+	 */
+	static final String MAVEN2_ALTERNATE_BOOT_DIR = "core" + File.separator + "boot";
 	static final String MAVEN2_LAUNCHER_PATH_PREFIX = "classworlds";
 	static final String MAVEN2_LAUNCHER_MAIN_CLASS_NAME = "org.codehaus.classworlds.Launcher";
 
@@ -154,6 +161,10 @@ public class MavenBuildTool extends AntBuildTool {
 		}
 		
 		File lib = new File(mavenHome, MAVEN2_BOOT_DIR);
+		
+		if (!lib.isDirectory()) {
+			lib = new File(mavenHome, MAVEN2_ALTERNATE_BOOT_DIR);
+		}
 		
 		if (!lib.isDirectory()) {
 			lib = new File(mavenHome, "lib");	
@@ -374,6 +385,8 @@ public class MavenBuildTool extends AntBuildTool {
 	
 		maven1_1 = true;
 		
+		boolean maven_2_0_6 = false;
+		
 		try {
 			String line;
 			
@@ -381,11 +394,18 @@ public class MavenBuildTool extends AntBuildTool {
 				writer.write(line);
 				writer.write("\n");
 				
+				if ("main is org.apache.maven.cli.MavenCli from plexus.core".equals(line)) {
+					maven_2_0_6 = true;
+				}
+				
 				if ("+tools.jar".equals(line)) {
 					writer.write("+vulcan-ant.jar\n");
 					writer.write("+vulcan-maven.jar\n");
 				} else if ("[plexus.core]".equals(line)) {
 					writer.write("load ${vulcan-ant.jar}\n");
+					if (maven_2_0_6) {
+						writer.write("load ${vulcan-maven.jar}\n");
+					}
 				} else if ("[plexus.core.maven]".equals(line)) {
 					writer.write("load ${vulcan-maven.jar}\n");
 				} else if (line.contains("${tools.jar}")) {
