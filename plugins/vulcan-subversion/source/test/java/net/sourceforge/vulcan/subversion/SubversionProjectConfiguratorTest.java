@@ -151,6 +151,17 @@ public class SubversionProjectConfiguratorTest extends TestCase {
 		assertEquals("", projectConfig.getBugtraqLogRegex2());
 	}
 	
+	public void testApplyBugtraqPropsDoesNotOverwriteWhenNull() throws Exception {
+		final SubversionProjectConfigurator cfgr = new SubversionProjectConfigurator(
+				repoConfig, profile, null, new FakeRepo(profile.getRootUrl(), repoConfig.getPath()));
+
+		projectConfig.setBugtraqUrl("something manually configured.");
+		
+		cfgr.applyConfiguration(projectConfig, "http://localhost/svn");
+
+		assertEquals("something manually configured.", projectConfig.getBugtraqUrl());
+	}
+	
 	public void testApplyBugtraqProps() throws Exception {
 		final SubversionProjectConfigurator cfgr = new SubversionProjectConfigurator(
 				repoConfig, profile, null, new FakeRepo(profile.getRootUrl(), repoConfig.getPath()));
