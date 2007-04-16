@@ -142,9 +142,11 @@ public abstract class SubversionSupport extends PluginSupport {
 			bugtraqUrl = StringUtils.EMPTY;
 		}
 		
-		projectConfig.setBugtraqUrl(bugtraqUrl);
-		projectConfig.setBugtraqLogRegex1(combinePatterns(logRegex1, bugtraqProps.get(BUGTRAQ_MESSAGE)));
-		projectConfig.setBugtraqLogRegex2(logRegex2);
+		if (isNotBlank(bugtraqUrl)) {
+			projectConfig.setBugtraqUrl(bugtraqUrl);
+			projectConfig.setBugtraqLogRegex1(combinePatterns(logRegex1, bugtraqProps.get(BUGTRAQ_MESSAGE)));
+			projectConfig.setBugtraqLogRegex2(logRegex2);
+		}
 	}
 
 	protected static SVNRepository createRepository(SubversionRepositoryProfileDto profile, boolean init) throws ConfigException {
