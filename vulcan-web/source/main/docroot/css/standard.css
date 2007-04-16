@@ -219,7 +219,7 @@ div.build-summary {
 }
 
 div.projectCheckboxes {
-	-moz-column-width: 12em;
+	-moz-column-width: 18em;
 }
 div.projectCheckboxes li {
 	white-space: nowrap;
