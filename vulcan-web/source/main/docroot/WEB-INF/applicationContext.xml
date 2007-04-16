@@ -8,6 +8,10 @@
 <beans>
 	<import resource="beans.xml"/>
 	
+	<bean name="restRequestDetector" class="net.sourceforge.vulcan.web.struts.UserAgentRestRequestDetector">
+		<property name="restRepsonseForwardName" value="restResponse"/>
+	</bean>
+	
 	<bean id="mbeanServer" class="net.sourceforge.vulcan.spring.mbean.MbeanServerLocator">
 		<property name="jndiName" value="java:comp/env/jmx/runtime"/>
 	</bean>

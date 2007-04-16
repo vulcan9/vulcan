@@ -52,6 +52,7 @@ import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.apache.struts.action.ActionMessage;
 import org.apache.struts.action.ActionMessages;
+import org.apache.struts.action.InvalidCancelException;
 import org.apache.struts.action.RequestProcessor;
 import org.apache.struts.config.ForwardConfig;
 import org.apache.struts.config.ModuleConfig;
@@ -134,7 +135,7 @@ public abstract class MockApplicationContextStrutsTestCase extends EasyMockStrut
 			@Override
 			protected boolean processValidate(HttpServletRequest request,
 					HttpServletResponse response, ActionForm form,
-					ActionMapping mapping) throws IOException, ServletException {
+					ActionMapping mapping) throws IOException, ServletException, InvalidCancelException {
 				
 				boolean result = super.processValidate(request, response, form, mapping);
 				

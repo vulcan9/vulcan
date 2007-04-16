@@ -75,6 +75,7 @@ public final class ManualBuildAction extends Action {
 		final List<ProjectConfigDto> projects = new ArrayList<ProjectConfigDto>();
 		
 		for (String target : buildForm.getTargets()) {
+			//TODO: handle ProjectNotFoundException
 			projects.add(projectManager.getProjectConfig(target));
 		}
 		

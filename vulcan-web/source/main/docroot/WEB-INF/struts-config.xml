@@ -25,9 +25,12 @@
 		<forward name="report" path="/buildHistoryReport.do"/>
 		
 		<forward name="site" path="/site/"/>
+		
+		<!-- internal forwards -->
 		<forward name="projectDetails" path="/WEB-INF/jsp/projectConfiguration.jsp"/>
 		<forward name="error" path="/WEB-INF/jsp/error.jsp"/>
 		<forward name="failure" path="/WEB-INF/jsp/error.jsp"/>
+		<forward name="restResponse" path="/WEB-INF/jsp/restResponse.jsp"/>
 		
 		<forward name="preferences" path="/preferences.jsp"/>
 		<forward name="help" path="http://code.google.com/p/vulcan/wiki/" redirect="true"/>
@@ -174,7 +177,7 @@
 				type="org.springframework.web.struts.DelegatingActionProxy"/>
 	</action-mappings>
 	
-	<controller contentType="" />
+	<controller contentType="" processorClass="net.sourceforge.vulcan.web.struts.RestRequestProcessor"/>
 	
 	<plug-in className="org.apache.struts.validator.ValidatorPlugIn">
 		<set-property property="pathnames" value="/WEB-INF/validator-rules.xml,/WEB-INF/validation.xml" />

@@ -6,7 +6,7 @@
 	xmlns:c="http://java.sun.com/jsp/jstl/core"
 	xmlns:fmt="http://java.sun.com/jsp/jstl/fmt"
 	xmlns:spring="http://www.springframework.org/tags"
-	xmlns:html="http://jakarta.apache.org/struts/tags-html"
+	xmlns:html="http://struts.apache.org/tags-html"
 	xmlns:v="http://vulcan.sourceforge.net/j2ee/jsp/tags">
 
 <jsp:directive.page session="false"/>
