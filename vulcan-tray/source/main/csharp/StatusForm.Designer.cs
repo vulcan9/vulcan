@@ -198,7 +198,6 @@ namespace SourceForge.Vulcan.Tray
 			this.MinimumSize = new System.Drawing.Size(766, 300);
 			this.Name = "StatusForm";
 			this.Text = "Vulcan Status";
-			this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.onClosing);
 			this.Load += new System.EventHandler(this.onLoad);
 			((System.ComponentModel.ISupportInitialize)(this.dataGrid)).EndInit();
 			((System.ComponentModel.ISupportInitialize)(this.xmlDataSet)).EndInit();

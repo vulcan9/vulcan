@@ -17,6 +17,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 using System;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Security;
 using System.Windows.Forms;
@@ -48,6 +49,13 @@ namespace SourceForge.Vulcan.Tray
 			MenuItem fileMenu = new MenuItem("File", new MenuItem[] { settingsMenuItem, separatorMenuItem, exitMenuItem });
 			MainMenu mainMenu = new MainMenu(new MenuItem[] {fileMenu});
 			this.Menu = mainMenu;
+
+			// .NET 1.1 compat
+                        EventInfo formClosingEvent = GetType().GetEvent("FormClosing");
+                        if (formClosingEvent != null)
+                        {
+                                formClosingEvent.AddEventHandler(this, new FormClosingEventHandler(this.onClosing));
+			}
 			
 			InitializeComponent();
 
