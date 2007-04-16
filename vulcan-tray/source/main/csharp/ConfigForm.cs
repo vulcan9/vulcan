@@ -16,6 +16,7 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
+using System.Reflection;
 using System.Windows.Forms;
 
 namespace SourceForge.Vulcan.Tray
@@ -27,6 +28,13 @@ namespace SourceForge.Vulcan.Tray
 		public ConfigForm(Preferences preferences)
 		{
 			this.preferences = preferences.Clone();
+
+                        // .NET 1.1 compat
+                        EventInfo formClosingEvent = GetType().GetEvent("FormClosing");
+                        if (formClosingEvent != null)
+                        {
+                                formClosingEvent.AddEventHandler(this, new FormClosingEventHandler(this.onClosing));
+                        }
 			
 			InitializeComponent();
 

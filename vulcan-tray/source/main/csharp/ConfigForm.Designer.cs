@@ -146,7 +146,6 @@ namespace SourceForge.Vulcan.Tray
 			this.Name = "ConfigForm";
 			this.ShowInTaskbar = false;
 			this.Text = "VulcanTray Settings";
-			this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.onClosing);
 			((System.ComponentModel.ISupportInitialize)(this.pollingInterval)).EndInit();
 			this.ResumeLayout(false);
 			this.PerformLayout();
