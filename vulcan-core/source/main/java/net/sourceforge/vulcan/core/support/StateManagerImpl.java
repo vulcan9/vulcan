@@ -218,10 +218,9 @@ public abstract class StateManagerImpl implements StateManager, ProjectManager {
 				if (existingProject != null) {
 					if (throwOnDuplicate) {
 						throw new DuplicateNameException(config.getName());
-					} else {
-						if (!allConfigs.remove(existingProject)) {
-							throw new IllegalStateException();
-						}
+					}
+					if (!allConfigs.remove(existingProject)) {
+						throw new IllegalStateException();
 					}
 				}
 				
