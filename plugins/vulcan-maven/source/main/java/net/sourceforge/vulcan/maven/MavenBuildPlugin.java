@@ -188,10 +188,10 @@ public class MavenBuildPlugin extends PluginSupport
 			final URL[] urls = new URL[files.size() + 1];
 	
 			for (int i=0; i<files.size(); i++) {
-				urls[i] = files.get(i).toURL();
+				urls[i] = files.get(i).toURI().toURL();
 			}
 
-			urls[urls.length - 1] = MavenBuildTool.getLocalClassPathEntry(MavenBuildPlugin.class, null).toURL();
+			urls[urls.length - 1] = MavenBuildTool.getLocalClassPathEntry(MavenBuildPlugin.class, null).toURI().toURL();
 			
 			return urls;
 		} catch (MalformedURLException e) {
