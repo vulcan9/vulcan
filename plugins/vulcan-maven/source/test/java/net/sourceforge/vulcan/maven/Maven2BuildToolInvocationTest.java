@@ -57,13 +57,11 @@ public class Maven2BuildToolInvocationTest extends MavenBuildToolTestBase {
 			fail("should not call this method");
 		}
 		public void reportError(String message, String file, Integer line, String arg3) {
-			System.err.println(message);
 			errors.add(message);
 			fileNames.add(file);
 			lineNumbers.add(line);
 		}
 		public void reportWarning(String arg0, String arg1, Integer arg2, String arg3) {
-			System.err.println(arg0);
 		}
 	};
 
@@ -86,6 +84,22 @@ public class Maven2BuildToolInvocationTest extends MavenBuildToolTestBase {
 	
 	public void testGetsEvents() throws Exception {
 		config.setTargets("clean");
+
+		tool.getEventSource().addEventListener(listener);
+		
+		assertEquals(0, events.size());
+		
+		tool.buildProject(projectConfig, status, null, detailCallback);
+		
+		assertTrue(events.size() > 0);
+		
+		assertTrue("Did not receive enough events", details.size() > 1);
+		assertEquals("clean:clean", details.get(details.size() - 2));
+		assertEquals(null, details.get(details.size() - 1));
+	}
+	
+	public void testDoubleSpace() throws Exception {
+		config.setTargets("clean  clean");
 
 		tool.getEventSource().addEventListener(listener);
 		
