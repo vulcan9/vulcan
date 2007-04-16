@@ -6,7 +6,7 @@
 	xmlns:c="http://java.sun.com/jsp/jstl/core"
 	xmlns:x="http://java.sun.com/jsp/jstl/xml"
 	xmlns:fmt="http://java.sun.com/jsp/jstl/fmt"
-	xmlns:html="http://jakarta.apache.org/struts/tags-html"
+	xmlns:html="http://struts.apache.org/tags-html"
 	xmlns:v="http://vulcan.sourceforge.net/j2ee/jsp/tags">
 
 <html:xhtml/>
