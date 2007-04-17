@@ -291,7 +291,7 @@ public class MavenBuildTool extends AntBuildTool {
 			eventSource.addSystemProperties(jcb);
 		}
 
-		final String[] goals = mavenProjectConfig.getTargets().split("\\W+");
+		final String[] goals = mavenProjectConfig.getTargets().split("[ \t]+");
 		for (String goal : goals) {
 			jcb.addArgument(goal);
 		}
