@@ -96,7 +96,8 @@ public class CvsRepositoryAdaptor implements RepositoryAdaptor {
 		
 		cvsRoot = CVSRoot.parse(props);
 		options.setCVSRoot(cvsRoot.toString());
-
+		options.setVeryQuiet(true);
+		
 		conn = ConnectionFactory.getConnection(cvsRoot);
 	
 		try {
@@ -198,12 +199,13 @@ public class CvsRepositoryAdaptor implements RepositoryAdaptor {
 		final CheckoutCommand cmd = new CheckoutCommand();
 		final CheckoutListener listener = new CheckoutListener(buildDetailCallback, previousBytesCounted);
 
-		cmd.setModule(config.getModule());
-		cmd.setCheckoutByRevision(tag);
-		
-		client.setLocalPath(absolutePath.getPath());
+		client.setLocalPath(absolutePath.getParent());
 		client.getEventManager().addCVSListener(listener);
 		
+		cmd.setModule(config.getModule());
+		cmd.setCheckoutByRevision(tag);
+		cmd.setCheckoutDirectory(absolutePath.getName());
+
 		executeCvsCommand(client, cmd);
 		
 		synchronized (counters) {
