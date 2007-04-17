@@ -360,7 +360,7 @@ public class ProjectBuilderImpl implements ProjectBuilder {
 			previousOutcome = null;
 		}
 		
-		final RevisionTokenDto currentRev = ra.getLatestRevision();
+		final RevisionTokenDto currentRev = ra.getLatestRevision(previousRevision);
 		
 		buildStatus.setRevision(currentRev);
 		buildStatus.setTagName(tagName);

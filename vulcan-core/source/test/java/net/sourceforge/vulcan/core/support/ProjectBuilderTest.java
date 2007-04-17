@@ -256,7 +256,7 @@ public class ProjectBuilderTest extends EasyMockTestCase {
 
 		expect(ra.getTagName()).andReturn("trunk");
 		expect(mgr.getLatestStatus("foo")).andReturn(null);
-		expect(ra.getLatestRevision()).andReturn(rev1);
+		expect(ra.getLatestRevision(null)).andReturn(rev1);
 		
 		ra.createWorkingCopy(new File(project.getWorkDir()).getAbsoluteFile(), buildDetailCallback);
 		
@@ -317,7 +317,7 @@ public class ProjectBuilderTest extends EasyMockTestCase {
 		expect(projectMgr.getRepositoryAdaptor(project)).andReturn(ra);
 
 		expect(ra.getTagName()).andReturn("trunk");
-		expect(ra.getLatestRevision()).andReturn(rev0);
+		expect(ra.getLatestRevision(rev0)).andReturn(rev0);
 		
 		expect(mgr.getLatestStatus("foo")).andReturn(previousStatus);
 		
@@ -336,7 +336,7 @@ public class ProjectBuilderTest extends EasyMockTestCase {
 		expect(projectMgr.getRepositoryAdaptor(project)).andReturn(ra);
 
 		expect(ra.getTagName()).andReturn("trunk");
-		expect(ra.getLatestRevision()).andReturn(rev0);
+		expect(ra.getLatestRevision(null)).andReturn(rev0);
 
 		ra.createWorkingCopy(new File("a").getAbsoluteFile(), buildDetailCallback);
 
@@ -366,7 +366,7 @@ public class ProjectBuilderTest extends EasyMockTestCase {
 		.getRepositoryAdaptor(project)).andReturn(ra);
 
 		expect(ra.getTagName()).andReturn("trunk");
-		expect(ra.getLatestRevision()).andReturn(rev0);
+		expect(ra.getLatestRevision(null)).andReturn(rev0);
 		
 		expect(mgr.getLatestStatus(project.getName())).andReturn(((ProjectStatusDto) null));
 
@@ -396,7 +396,7 @@ public class ProjectBuilderTest extends EasyMockTestCase {
 		expect(projectMgr.getRepositoryAdaptor(project)).andReturn(ra);
 
 		expect(ra.getTagName()).andReturn("trunk");
-		expect(ra.getLatestRevision()).andReturn(rev0);
+		expect(ra.getLatestRevision(null)).andReturn(rev0);
 		
 		expect(mgr.getLatestStatus(project.getName())).andReturn(((ProjectStatusDto) null));
 
@@ -439,7 +439,7 @@ public class ProjectBuilderTest extends EasyMockTestCase {
 				.getRepositoryAdaptor(project)).andReturn(ra);
 
 		expect(ra.getTagName()).andReturn("trunk");
-		expect(ra.getLatestRevision()).andReturn(rev0);
+		expect(ra.getLatestRevision(null)).andReturn(rev0);
 		
 		expect(mgr.getLatestStatus(project.getName())).andReturn(((ProjectStatusDto) null));
 
@@ -474,11 +474,10 @@ public class ProjectBuilderTest extends EasyMockTestCase {
 		project.setName("a name");
 		project.setWorkDir("a");
 		
-		expect(projectMgr
-		.getRepositoryAdaptor(project)).andReturn(ra);
+		expect(projectMgr.getRepositoryAdaptor(project)).andReturn(ra);
 
 		expect(ra.getTagName()).andReturn("trunk");
-		expect(ra.getLatestRevision()).andReturn(rev1);
+		expect(ra.getLatestRevision(rev0)).andReturn(rev1);
 		
 		final ProjectStatusDto prevStatus = new ProjectStatusDto();
 		prevStatus.setRevision(rev0);
@@ -521,7 +520,7 @@ public class ProjectBuilderTest extends EasyMockTestCase {
 		.getRepositoryAdaptor(project)).andReturn(ra);
 
 		expect(ra.getTagName()).andReturn("trunk");
-		expect(ra.getLatestRevision()).andReturn(rev1);
+		expect(ra.getLatestRevision(rev0)).andReturn(rev1);
 		
 		final ProjectStatusDto prevStatus = new ProjectStatusDto();
 		prevStatus.setRevision(rev0);
@@ -562,7 +561,7 @@ public class ProjectBuilderTest extends EasyMockTestCase {
 		.getRepositoryAdaptor(project)).andReturn(ra);
 
 		expect(ra.getTagName()).andReturn("trunk");
-		expect(ra.getLatestRevision()).andReturn(rev1);
+		expect(ra.getLatestRevision(rev0)).andReturn(rev1);
 		
 		final ProjectStatusDto prevStatus = new ProjectStatusDto();
 		prevStatus.setLastKnownRevision(rev0);
@@ -605,7 +604,7 @@ public class ProjectBuilderTest extends EasyMockTestCase {
 		.getRepositoryAdaptor(project)).andReturn(ra);
 
 		ra.setTagName("rc1");
-		expect(ra.getLatestRevision()).andReturn(rev1);
+		expect(ra.getLatestRevision(rev0)).andReturn(rev1);
 		
 		final ProjectStatusDto prevStatus = new ProjectStatusDto();
 		prevStatus.setRevision(rev0);
@@ -639,7 +638,7 @@ public class ProjectBuilderTest extends EasyMockTestCase {
 		.getRepositoryAdaptor(project)).andReturn(ra);
 
 		expect(ra.getTagName()).andReturn("trunk");
-		expect(ra.getLatestRevision()).andReturn(rev0);
+		expect(ra.getLatestRevision(null)).andReturn(rev0);
 		
 		expect(mgr.getLatestStatus(project.getName())).andReturn(((ProjectStatusDto) null));
 
@@ -675,7 +674,7 @@ public class ProjectBuilderTest extends EasyMockTestCase {
 		.getRepositoryAdaptor(project)).andReturn(ra);
 
 		expect(ra.getTagName()).andReturn("trunk");
-		expect(ra.getLatestRevision()).andReturn(rev0);
+		expect(ra.getLatestRevision(null)).andReturn(rev0);
 		
 		expect(mgr.getLatestStatus(project.getName())).andReturn(((ProjectStatusDto) null));
 
@@ -724,7 +723,7 @@ public class ProjectBuilderTest extends EasyMockTestCase {
 		.getRepositoryAdaptor(project)).andReturn(ra);
 
 		expect(ra.getTagName()).andReturn("trunk");
-		expect(ra.getLatestRevision()).andReturn(rev0);
+		expect(ra.getLatestRevision(null)).andReturn(rev0);
 		
 		expect(mgr.getLatestStatus(project.getName())).andReturn(((ProjectStatusDto) null));
 
@@ -745,7 +744,7 @@ public class ProjectBuilderTest extends EasyMockTestCase {
 		.getRepositoryAdaptor(project)).andReturn(ra);
 
 		expect(ra.getTagName()).andReturn("trunk");
-		expect(ra.getLatestRevision()).andReturn(rev0);
+		expect(ra.getLatestRevision(rev0)).andReturn(rev0);
 		
 		expect(mgr.getLatestStatus(project.getName())).andReturn(previousStatus);
 
@@ -779,7 +778,7 @@ public class ProjectBuilderTest extends EasyMockTestCase {
 		.getRepositoryAdaptor(project)).andReturn(ra);
 
 		expect(ra.getTagName()).andReturn("trunk");
-		expect(ra.getLatestRevision()).andReturn(rev0);
+		expect(ra.getLatestRevision(rev0)).andReturn(rev0);
 		
 		final UUID depId = UUID.randomUUID(); 
 		previousStatus.setDependencyIds(Collections.singletonMap("dep",
@@ -820,7 +819,7 @@ public class ProjectBuilderTest extends EasyMockTestCase {
 		expect(projectMgr.getRepositoryAdaptor(project)).andReturn(ra);
 
 		expect(ra.getTagName()).andReturn("trunk");
-		expect(ra.getLatestRevision()).andReturn(rev0);
+		expect(ra.getLatestRevision(rev0)).andReturn(rev0);
 		
 		final UUID depId = UUID.randomUUID(); 
 		previousStatus.setDependencyIds(Collections.singletonMap("dep",
@@ -850,7 +849,7 @@ public class ProjectBuilderTest extends EasyMockTestCase {
 		expect(projectMgr.getRepositoryAdaptor(project)).andReturn(ra);
 
 		expect(ra.getTagName()).andReturn("trunk");
-		expect(ra.getLatestRevision()).andReturn(rev0);
+		expect(ra.getLatestRevision(rev0)).andReturn(rev0);
 
 		ra.createWorkingCopy(new File("a").getAbsoluteFile(), buildDetailCallback);
 		
@@ -890,7 +889,7 @@ public class ProjectBuilderTest extends EasyMockTestCase {
 		expect(projectMgr.getRepositoryAdaptor(project)).andReturn(ra);
 
 		expect(ra.getTagName()).andReturn("trunk");
-		expect(ra.getLatestRevision()).andReturn(rev0);
+		expect(ra.getLatestRevision(rev0)).andReturn(rev0);
 		expect(ra.getRepositoryUrl()).andReturn("http://localhost");
 		
 		expect(projectMgr.getPluginModificationDate("a.b.c.RepoPlugin")).andReturn(new Date(0));

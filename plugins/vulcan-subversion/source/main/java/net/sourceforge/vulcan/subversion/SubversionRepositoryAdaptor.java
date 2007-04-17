@@ -125,7 +125,7 @@ public class SubversionRepositoryAdaptor extends SubversionSupport implements Re
 		lineOfDevelopment.setTagFolderNames(new HashSet<String>(Arrays.asList(globalConfig.getTagFolderNames())));
 	}
 
-	public RevisionTokenDto getLatestRevision() throws RepositoryException {
+	public RevisionTokenDto getLatestRevision(RevisionTokenDto previousRevision) throws RepositoryException {
 		final String path = lineOfDevelopment.getComputedRelativePath();
 		final SVNDirEntry info;
 		
