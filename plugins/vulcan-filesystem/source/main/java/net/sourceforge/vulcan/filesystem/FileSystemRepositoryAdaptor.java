@@ -64,7 +64,7 @@ public class FileSystemRepositoryAdaptor implements RepositoryAdaptor {
 		}
 	}
 	
-	public RevisionTokenDto getLatestRevision() throws RepositoryException, InterruptedException {
+	public RevisionTokenDto getLatestRevision(RevisionTokenDto previousRevision) throws RepositoryException, InterruptedException {
 		return new RevisionTokenDto(System.currentTimeMillis());
 	}
 	

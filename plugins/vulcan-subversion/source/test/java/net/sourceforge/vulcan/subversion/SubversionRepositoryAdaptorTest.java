@@ -113,7 +113,7 @@ public class SubversionRepositoryAdaptorTest extends TestCase {
 		});
 		
 		try {
-			r.getLatestRevision();
+			r.getLatestRevision(null);
 			fail("expected exception");
 		} catch (RepositoryException e) {
 			assertEquals("svn.path.not.exist", e.getKey());

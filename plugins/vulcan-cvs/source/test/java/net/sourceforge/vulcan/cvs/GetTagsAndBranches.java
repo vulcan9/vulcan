@@ -31,8 +31,10 @@ public class GetTagsAndBranches {
 		final CvsRepositoryProfileDto profile = new CvsRepositoryProfileDto();
 		final CvsProjectConfigDto projectConfig = new CvsProjectConfigDto();
 		
+		//profile.setHost("springframework.cvs.sourceforge.net");
 		profile.setHost("gtkpod.cvs.sourceforge.net");
 		profile.setProtocol("pserver");
+		//profile.setRepositoryPath("/cvsroot/springframework");
 		profile.setRepositoryPath("/cvsroot/gtkpod");
 		profile.setUsername("anonymous");
 		profile.setPassword("");

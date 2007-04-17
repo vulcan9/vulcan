@@ -39,7 +39,8 @@ public class GetLatestRevision {
 		
 		final CvsRepositoryAdaptor repo = new CvsRepositoryAdaptor(new CvsConfigDto(), profile, projectConfig, null);
 		
-		CvsAggregateRevisionTokenDto rev = repo.getLatestRevision();
+		CvsAggregateRevisionTokenDto rev = repo.getLatestRevision(
+				new CvsAggregateRevisionTokenDto("previous hash", "2007/04/16 21:57:57"));
 
 		System.out.println("Latest modification: " + rev.getLabel());
 		System.out.println("Aggregate hash of head revisions: " + rev.getDigest());
