@@ -53,7 +53,7 @@ public class Checkout {
 		
 		repo.createWorkingCopy(file, new BuildDetailCallback() {
 			public void setDetail(String msg) {
-				System.out.println(msg);
+				//System.out.println(msg);
 			}
 			public void setPhase(String arg0) {
 			}
