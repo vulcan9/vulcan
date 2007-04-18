@@ -211,7 +211,7 @@
 				<xsl:apply-templates select="/project/status"/>
 			</h1>
 	
-			<h3><xsl:apply-templates select="/project/message"/></h3>
+			<h3 class="build-outcome-message"><xsl:apply-templates select="/project/message"/></h3>
 	
 			<xsl:apply-templates select="/project/build-reason"/>
 			
@@ -445,7 +445,7 @@
 	<xsl:template name="issue-list">
 		<xsl:param name="issues" select="//issue"/>
 		<xsl:if test="$issues">
-			<li xmlns="http://www.w3.org/1999/xhtml">
+			<li xmlns="http://www.w3.org/1999/xhtml" class="issue-list">
 				<xsl:value-of select="$issueListHeader"/>
 				<ul xmlns="http://www.w3.org/1999/xhtml" class="issue-list">
 					<xsl:for-each select="$issues[generate-id() = generate-id(key('issue-ids', @issue-id)[1])]">

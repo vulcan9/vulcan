@@ -116,6 +116,10 @@ span.error, span.warning, span.message {
 	padding-left: 20px;
 }
 
+h3.build-outcome-message, li.issue-list {
+	max-width: 500px;
+}
+
 div.build-nav a {
 	margin-left: 5px;
 	margin-right: 5px;
@@ -123,7 +127,6 @@ div.build-nav a {
 div.file-upload {
 	padding: 10px;
 }
-
 
 .diff, .log {
 	position: absolute;
@@ -212,10 +215,6 @@ div.buildHistoryReport table, div.buildHistoryReport caption {
 
 div.tables table {
 	width: 100%;
-}
-
-div.build-summary {
-	max-width: 640px;
 }
 
 div.projectCheckboxes {
