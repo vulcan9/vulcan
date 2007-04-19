@@ -82,15 +82,15 @@
 								<c:choose>
 									<c:when test="${reportForm.dateMode}">
 										<html:multibox property="projectNames" value="${projectName}"
-											styleId="target${projectName}"/>
+											styleId="target_${v:mangle(projectName)}"/>
 									</c:when>
 									<c:otherwise>
 										<html:radio property="projectNames" value="${projectName}"
-											styleId="target${projectName}"/>
+											styleId="target_${v:mangle(projectName)}"/>
 									</c:otherwise>
 								</c:choose>
 								<jsp:element name="label">
-									<jsp:attribute name="for">target${projectName}</jsp:attribute>
+									<jsp:attribute name="for">target_${v:mangle(projectName)}</jsp:attribute>
 									<jsp:body>${projectName}</jsp:body>
 								</jsp:element>
 							</li>

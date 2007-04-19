@@ -66,9 +66,9 @@
 					<c:forEach items="${stateManager.projectConfigNames}" var="projectName">
 						<li>
 							<html:multibox property="targets" value="${projectName}"
-								styleId="target${projectName}"/>
+								styleId="target_${v:mangle(projectName)}"/>
 							<jsp:element name="label">
-								<jsp:attribute name="for">target${projectName}</jsp:attribute>
+								<jsp:attribute name="for">target_${v:mangle(projectName)}</jsp:attribute>
 								<jsp:body>${projectName}</jsp:body>
 							</jsp:element>
 						</li>
