@@ -32,6 +32,7 @@ import net.sourceforge.vulcan.core.support.DependencyGroupImpl;
 import net.sourceforge.vulcan.dto.ProjectConfigDto;
 import net.sourceforge.vulcan.dto.ProjectStatusDto;
 import net.sourceforge.vulcan.dto.RepositoryTagDto;
+import net.sourceforge.vulcan.exception.NoSuchProjectException;
 import net.sourceforge.vulcan.exception.RepositoryException;
 import net.sourceforge.vulcan.metadata.SvnRevision;
 import net.sourceforge.vulcan.scheduler.BuildDaemon;
@@ -108,6 +109,23 @@ public class ManualBuildActionTest extends MockApplicationContextStrutsTestCase 
 		verifyNoActionErrors();
 		
 		verifyForward("dashboard");
+	}
+	public void testProjectNotFound() throws Exception {
+		addRequestParameter("targets", new String[] {"nonesuch"});
+		
+		expect(manager.getProjectConfig("nonesuch")).andThrow(new NoSuchProjectException("nonesuch"));
+		
+		replay();
+		
+		actionPerform();
+		
+		verify();
+		
+		verifyNoActionMessages();
+		
+		verifyInputForward();
+		
+		assertPropertyHasError("targets", "errors.no.such.project");
 	}
 	public void testWakesUpBuildDaemon() throws Exception {
 		BuildDaemon bd1 = createMock(BuildDaemon.class);

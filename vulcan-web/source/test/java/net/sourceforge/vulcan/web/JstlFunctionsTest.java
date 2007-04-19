@@ -18,11 +18,22 @@
  */
 package net.sourceforge.vulcan.web;
 
+import java.util.Arrays;
+import java.util.Collections;
+
 import junit.framework.TestCase;
 import net.sourceforge.vulcan.metadata.SvnRevision;
 
+import org.apache.struts.Globals;
+import org.apache.struts.action.ActionErrors;
+import org.apache.struts.action.ActionMessage;
+
+import servletunit.HttpServletRequestSimulator;
+import servletunit.ServletContextSimulator;
+
 @SvnRevision(id="$Id$", url="$HeadURL$")
 public class JstlFunctionsTest extends TestCase {
+	final HttpServletRequestSimulator request = new HttpServletRequestSimulator(new ServletContextSimulator());
 	
 	public void testMangleSpace() throws Exception {
 		assertEquals("full_throttle", JstlFunctions.mangle("full throttle"));
@@ -32,5 +43,18 @@ public class JstlFunctionsTest extends TestCase {
 	}
 	public void testBrackets() throws Exception {
 		assertEquals("fullThrottle_0_", JstlFunctions.mangle("fullThrottle[0]"));
+	}
+	public void testGetPropList() throws Exception {
+		ActionErrors errors = new ActionErrors();
+		errors.add("a", new ActionMessage("foo"));
+		errors.add("a", new ActionMessage("bar"));
+		errors.add("b", new ActionMessage("baz"));
+		
+		request.setAttribute(Globals.ERROR_KEY, errors);
+		
+		assertEquals(Arrays.asList("a", "b"), JstlFunctions.getActionErrorPropertyList(request));
+	}
+	public void testGetPropListNull() throws Exception {
+		assertEquals(Collections.emptyList(), JstlFunctions.getActionErrorPropertyList(request));
 	}
 }

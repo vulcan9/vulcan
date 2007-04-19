@@ -62,7 +62,8 @@ public class RestRequestProcessorTest extends MockApplicationContextStrutsTestCa
 			
 			final ActionErrors errors = new ActionErrors();
 			if (!formIsValid) {
-				errors.add("", new ActionMessage(""));
+				errors.add("a", new ActionMessage("c"));
+				errors.add("b", new ActionMessage("d"));
 			}
 			return errors;
 		}

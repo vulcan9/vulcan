@@ -32,5 +32,18 @@
 			<div id="${vulcan:mangle('no spaces in an id value')}"/>
 		</example>
 	</function>
+
+	<function>
+		<name>getActionErrorPropertyList</name>
+		<function-class>net.sourceforge.vulcan.web.JstlFunctions</function-class>
+		<function-signature>java.util.List getActionErrorPropertyList(javax.servlet.http.HttpServletRequest)</function-signature>
+	</function>
+		
+	<function>
+		<name>setStatus</name>
+		<function-class>net.sourceforge.vulcan.web.JstlFunctions</function-class>
+		<function-signature>void setStatus(javax.servlet.http.HttpServletResponse, int)</function-signature>
+	</function>
+	
 	
 </taglib>

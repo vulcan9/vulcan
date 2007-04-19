@@ -36,6 +36,7 @@ import net.sourceforge.vulcan.dto.ProjectConfigDto;
 import net.sourceforge.vulcan.dto.ProjectStatusDto;
 import net.sourceforge.vulcan.dto.RepositoryTagDto;
 import net.sourceforge.vulcan.exception.ConfigException;
+import net.sourceforge.vulcan.exception.NoSuchProjectException;
 import net.sourceforge.vulcan.metadata.SvnRevision;
 import net.sourceforge.vulcan.scheduler.BuildDaemon;
 import net.sourceforge.vulcan.web.struts.forms.ManualBuildForm;
@@ -73,10 +74,15 @@ public final class ManualBuildAction extends Action {
 		}
 		
 		final List<ProjectConfigDto> projects = new ArrayList<ProjectConfigDto>();
-		
+
 		for (String target : buildForm.getTargets()) {
-			//TODO: handle ProjectNotFoundException
-			projects.add(projectManager.getProjectConfig(target));
+			try {
+				projects.add(projectManager.getProjectConfig(target));
+			} catch (NoSuchProjectException e) {
+				BaseDispatchAction.saveError(request, "targets",
+						new ActionMessage("errors.no.such.project", new String[] {target}));
+				return mapping.getInputForward();
+			}
 		}
 		
 		final DependencyBuildPolicy policy =
