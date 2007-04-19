@@ -134,9 +134,9 @@
 					<c:if test="${projectConfigForm.config.name != projectName}">
 						<li>
 							<html:multibox property="config.dependencies" value="${projectName}"
-								styleId="dep${projectName}"/>
+								styleId="dep_${v:mangle(projectName)}"/>
 							<jsp:element name="label">
-								<jsp:attribute name="for">dep${projectName}</jsp:attribute>
+								<jsp:attribute name="for">dep_${v:mangle(projectName)}</jsp:attribute>
 								<jsp:body>${projectName}</jsp:body>
 							</jsp:element>
 						</li>
@@ -196,9 +196,9 @@
 				<c:forEach items="${stateManager.config.schedulers}" var="scheduler">
 					<li>
 						<html:multibox property="config.schedulerNames" value="${scheduler.name}"
-							styleId="sched${scheduler.name}"/>
+							styleId="sched_${v:mangle(scheduler.name)}"/>
 						<jsp:element name="label">
-							<jsp:attribute name="for">sched${scheduler.name}</jsp:attribute>
+							<jsp:attribute name="for">sched_${v:mangle(scheduler.name)}</jsp:attribute>
 							<jsp:body>${scheduler.name}</jsp:body>
 						</jsp:element>
 					</li>

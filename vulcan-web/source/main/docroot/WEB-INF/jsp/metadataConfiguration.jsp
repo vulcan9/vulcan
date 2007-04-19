@@ -59,9 +59,9 @@
 								<ul class="metaDataOptions">
 									<li>
 										<html:radio property="${desc.name}" value="${choice}"
-											styleId="radio.${desc.name}.${choice}"/>
+											styleId="radio.${v:mangle(desc.name)}.${choice}"/>
 										<jsp:element name="label">
-											<jsp:attribute name="for">radio.${desc.name}.${choice}</jsp:attribute>
+											<jsp:attribute name="for">radio.${v:mangle(desc.name)}.${choice}</jsp:attribute>
 											<jsp:body>${choice}</jsp:body>
 										</jsp:element>
 									</li>
@@ -149,9 +149,9 @@
 								<ul class="metaDataOptions">
 									<li>
 										<html:multibox property="${desc.name}" value="${choice}"
-											styleId="radio.${desc.name}.${choice}"/>
+											styleId="radio.${v:mangle(desc.name)}.${v:mangle(choice)}"/>
 										<jsp:element name="label">
-											<jsp:attribute name="for">radio.${desc.name}.${choice}</jsp:attribute>
+											<jsp:attribute name="for">radio.${v:mangle(desc.name)}.${v:mangle(choice)}</jsp:attribute>
 											<jsp:body>${choice}</jsp:body>
 										</jsp:element>
 									</li>

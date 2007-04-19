@@ -19,4 +19,18 @@
 		<name>messages</name>
 		<path>/WEB-INF/tags/messages.tag</path>
 	</tag-file>
+	
+	<function>
+		<name>mangle</name>
+		<description>
+			Transform a string into a new string which complies with xhtml specifications
+			such that the return value is suitable for use as an id attribute.
+		</description>
+		<function-class>net.sourceforge.vulcan.web.JstlFunctions</function-class>
+		<function-signature>java.lang.String mangle(java.lang.String)</function-signature>
+		<example>
+			<div id="${vulcan:mangle('no spaces in an id value')}"/>
+		</example>
+	</function>
+	
 </taglib>
