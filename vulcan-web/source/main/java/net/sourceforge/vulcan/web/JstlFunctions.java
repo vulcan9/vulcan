@@ -18,11 +18,41 @@
  */
 package net.sourceforge.vulcan.web;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import net.sourceforge.vulcan.metadata.SvnRevision;
+
+import org.apache.struts.Globals;
+import org.apache.struts.action.ActionMessages;
 
 @SvnRevision(id="$Id$", url="$HeadURL$")
 public abstract class JstlFunctions {
 	public static String mangle(String s) {
 		return s.replaceAll("[ +\\[\\]]", "_");
 	}
+	
+	public static void setStatus(HttpServletResponse response, int code) {
+		response.setStatus(code);
+	}
+	
+	@SuppressWarnings("unchecked")
+	public static List<String> getActionErrorPropertyList(HttpServletRequest request) {
+		final List<String> errorList = new ArrayList<String>();
+		
+		final ActionMessages errors = (ActionMessages) request.getAttribute(Globals.ERROR_KEY);
+		if (errors != null) {
+			Iterator<String> itr = errors.properties();
+			while (itr.hasNext()) {
+				errorList.add(itr.next());
+			}
+		}
+		
+		return errorList;
+	}
+
 }

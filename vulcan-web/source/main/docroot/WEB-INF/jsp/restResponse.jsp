@@ -4,24 +4,21 @@
 	xmlns:jsp="http://java.sun.com/JSP/Page"
 	xmlns:c="http://java.sun.com/jsp/jstl/core"
 	xmlns:fmt="http://java.sun.com/jsp/jstl/fmt"
-	xmlns:html="http://struts.apache.org/tags-html">
+	xmlns:html="http://struts.apache.org/tags-html"
+	xmlns:v="http://vulcan.sourceforge.net/j2ee/jsp/tags">
 
 	<jsp:directive.page contentType="application/xml" session="false"/>
 	
-	<html:messages message="true" id="msg">
-		<message>${msg}</message>
-	</html:messages>
-
-	<html:messages name="warnings" id="msg">
-		<warning>${msg}</warning>
-	</html:messages>
-
-	<html:messages name="org.apache.struts.action.ERROR" id="msg">
-		<error>${msg}</error>
-	</html:messages>
+	<c:set var="keys" value="${v:getActionErrorPropertyList(pageContext.request)}"/>
 	
-	<html:messages property="org.apache.struts.action.GLOBAL_MESSAGE" id="msg">
-		<error>${msg}</error>
-	</html:messages>
+	<c:if test="${not empty keys}">
+		${v:setStatus(pageContext.response, 400)}
+	</c:if>
+	
+	<c:forEach var="prop" items="${keys}">
+		<html:messages id="msg" property="${prop}">
+			<error request-parameter="${prop}">${msg}</error>
+		</html:messages>
+	</c:forEach>
 
 </rest-response>
