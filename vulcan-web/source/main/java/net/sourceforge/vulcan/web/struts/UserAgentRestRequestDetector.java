@@ -39,7 +39,7 @@ public class UserAgentRestRequestDetector implements RestRequestDetector {
 	public boolean isRestRequest(HttpServletRequest request) {
 		final String userAgent = request.getHeader("User-Agent");
 		if (isNotBlank(userAgent)) {
-			if (userAgent.contains("Mozil la")) {
+			if (userAgent.contains("Mozilla")) {
 				return false;
 			}
 		}
