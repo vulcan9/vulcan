@@ -444,6 +444,12 @@ public class ProjectImporterImplTest extends EasyMockTestCase {
 				"nested/nant.build",
 				importer.computeProjectBasedirUrl("file:///tmp/dir/nested/nant.build", ".."));
 	}
+	public void testComputePathCvs() throws Exception {
+		assertPathInfoEquals(
+				":pserver:anon@localhost:/cvsroot:some_module/",
+				"nested/build.xml",
+				importer.computeProjectBasedirUrl(":pserver:anon@localhost:/cvsroot:some_module/nested/build.xml", ".."));
+	}
 	private static void assertPathInfoEquals(String expectedBasedirUrl, String expectedBuildSpecPath, PathInfo info) {
 		assertEquals(expectedBasedirUrl, info.getProjectBasedirUrl());
 		assertEquals(expectedBuildSpecPath, info.getBuildSpecPath());

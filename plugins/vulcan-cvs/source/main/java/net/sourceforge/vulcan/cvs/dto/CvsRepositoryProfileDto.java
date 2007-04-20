@@ -57,7 +57,7 @@ public class CvsRepositoryProfileDto extends PluginProfileDto {
 		
 		final Map<String, Object> props = new HashMap<String, Object>();
 		props.put(ATTR_CHOICE_TYPE, ConfigChoice.INLINE);
-		props.put(ATTR_AVAILABLE_CHOICES, Arrays.asList(new String[] {"pserver", "ext", "extssh"}));
+		props.put(ATTR_AVAILABLE_CHOICES, Arrays.asList(new String[] {"local", "fork", "server", "pserver", "ext", "extssh"}));
 
 		addProperty(pds, "protocol", "CvsRepositoryProfileDto.protocol.name", "CvsRepositoryProfileDto.protocol.description", locale,
 				props);
