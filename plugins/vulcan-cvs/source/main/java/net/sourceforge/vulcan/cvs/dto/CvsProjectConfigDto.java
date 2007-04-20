@@ -34,6 +34,7 @@ public class CvsProjectConfigDto extends RepositoryAdaptorConfigDto {
 	private String repositoryProfile;
 	private String module;
 	private String branch;
+	private boolean recursive = true;
 	
 	@Override
 	public List<PropertyDescriptor> getPropertyDescriptors(Locale locale) {
@@ -55,7 +56,7 @@ public class CvsProjectConfigDto extends RepositoryAdaptorConfigDto {
 				locale, props);
 		addProperty(pds, "module", "CvsProjectConfigDto.module.name", "CvsProjectConfigDto.module.description", locale);
 		addProperty(pds, "branch", "CvsProjectConfigDto.branch.name", "CvsProjectConfigDto.branch.description", locale);
-		
+		addProperty(pds, "recursive", "CvsProjectConfigDto.recursive.name", "CvsProjectConfigDto.recursive.description", locale);
 		return pds;
 	}
 	@Override
@@ -92,5 +93,11 @@ public class CvsProjectConfigDto extends RepositoryAdaptorConfigDto {
 	}
 	public void setModule(String path) {
 		this.module = path;
+	}
+	public boolean isRecursive() {
+		return recursive;
+	}
+	public void setRecursive(boolean recursive) {
+		this.recursive = recursive;
 	}
 }

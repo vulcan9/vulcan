@@ -21,6 +21,9 @@ package net.sourceforge.vulcan.cvs;
 import static net.sourceforge.vulcan.cvs.support.CvsDateFormat.format;
 import static net.sourceforge.vulcan.cvs.support.CvsDateFormat.parseDate;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -30,12 +33,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import java.util.Set;
-
-import java.io.File;
-import java.io.IOException;
-import java.io.OutputStream;
 
 import net.sourceforge.vulcan.RepositoryAdaptor;
 import net.sourceforge.vulcan.core.BuildDetailCallback;
@@ -54,51 +52,24 @@ import net.sourceforge.vulcan.dto.RepositoryTagDto;
 import net.sourceforge.vulcan.dto.RevisionTokenDto;
 import net.sourceforge.vulcan.exception.RepositoryException;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
-import org.netbeans.lib.cvsclient.CVSRoot;
 import org.netbeans.lib.cvsclient.Client;
 import org.netbeans.lib.cvsclient.admin.StandardAdminHandler;
-import org.netbeans.lib.cvsclient.command.Command;
-import org.netbeans.lib.cvsclient.command.CommandAbortedException;
-import org.netbeans.lib.cvsclient.command.CommandException;
-import org.netbeans.lib.cvsclient.command.GlobalOptions;
 import org.netbeans.lib.cvsclient.command.checkout.CheckoutCommand;
 import org.netbeans.lib.cvsclient.command.log.RlogCommand;
 import org.netbeans.lib.cvsclient.command.update.UpdateCommand;
-import org.netbeans.lib.cvsclient.commandLine.BasicListener;
-import org.netbeans.lib.cvsclient.connection.AuthenticationException;
-import org.netbeans.lib.cvsclient.connection.Connection;
-import org.netbeans.lib.cvsclient.connection.ConnectionFactory;
-import org.netbeans.lib.cvsclient.event.FileAddedEvent;
 
-public class CvsRepositoryAdaptor implements RepositoryAdaptor {
+public class CvsRepositoryAdaptor extends CvsSupport implements RepositoryAdaptor {
 	private final Digester digester = new JavaSecurityDigester("MD5");
-	private final GlobalOptions options = new GlobalOptions();
-	private final CvsConfigDto globalConfig;
-	private final CvsRepositoryProfileDto profile;
-	private final CvsProjectConfigDto config;
 	private final String projectName;
-	private final Connection conn;
 	
-	private String tag = "HEAD";
 	private Set<String> symbolicNames;
 	
 	public CvsRepositoryAdaptor(CvsConfigDto globalConfig, CvsRepositoryProfileDto profile, CvsProjectConfigDto config, String projectName) throws RepositoryException {
-		this.globalConfig = globalConfig;
-		this.profile = profile;
-		this.config = config;
+		super(globalConfig, profile, config);
 		this.projectName = projectName;
 		
-		conn = createConnection(profile);
-	
-		try {
-			conn.open();
-		} catch (CommandAbortedException e) {
-			throw new RepositoryException(e);
-		} catch (AuthenticationException e) {
-			throw new RepositoryException(e);			
-		}
+		openConnection();
 	}
 
 	public CvsAggregateRevisionTokenDto getLatestRevision(RevisionTokenDto previousRevision) throws RepositoryException {
@@ -180,7 +151,7 @@ public class CvsRepositoryAdaptor implements RepositoryAdaptor {
 			}
 		}
 		
-		final Client client = new Client(conn, new StandardAdminHandler());
+		final Client client = new Client(connection, new StandardAdminHandler());
 		final CheckoutCommand cmd = new CheckoutCommand();
 		final CheckoutListener listener = new CheckoutListener(buildDetailCallback, previousBytesCounted);
 
@@ -190,7 +161,8 @@ public class CvsRepositoryAdaptor implements RepositoryAdaptor {
 		cmd.setModule(config.getModule());
 		cmd.setCheckoutByRevision(tag);
 		cmd.setCheckoutDirectory(absolutePath.getName());
-
+		cmd.setRecursive(config.isRecursive());
+		
 		executeCvsCommand(client, cmd);
 		
 		synchronized (counters) {
@@ -199,10 +171,11 @@ public class CvsRepositoryAdaptor implements RepositoryAdaptor {
 	}
 
 	public void updateWorkingCopy(File absolutePath, BuildDetailCallback buildDetailCallback) throws RepositoryException {
-		final Client client = new Client(conn, new StandardAdminHandler());
+		final Client client = new Client(connection, new StandardAdminHandler());
 		final UpdateCommand cmd = new UpdateCommand();
 
 		client.setLocalPath(absolutePath.getPath());
+		cmd.setRecursive(config.isRecursive());
 		
 		executeCvsCommand(client, cmd);
 	}
@@ -219,99 +192,14 @@ public class CvsRepositoryAdaptor implements RepositoryAdaptor {
 		this.tag = tagName;
 	}
 
-	/**
-	 * This method begins a non-recursive checkout of a given module
-	 * to a temp directory in order to discover the name of a versioned
-	 * file in the module.
-	 * <br>
-	 * CVS does not seem to have a concept of listing files remotely
-	 * without having or creating a working copy locally.  This method
-	 * starts to create a working copy, but aborts after the first file
-	 * is discovered.
-	 * <br>
-	 * This method creates its own connection because the abort will
-	 * leave the connection in an unusable state, which would cause
-	 * subsequent operations to fail. 
-	 */
-	private String findFile(String module) throws RepositoryException {
-		final Connection tmpConn = createConnection(profile);
-		
-		final Client client = new Client(tmpConn, new StandardAdminHandler());
-		final CheckoutCommand cmd = new CheckoutCommand();
-		
-		final File tmpDir = createTmpDir();
-		final String[] paths = new String[1];
-		
-		try {
-			client.setLocalPath(tmpDir.getParent());
-			
-			client.getEventManager().addCVSListener(new BasicListener() {
-				@Override
-				public void fileAdded(FileAddedEvent e) {
-					paths[0] = e.getFilePath();
-					
-					// we have a file, abort the superfluous operation.
-					client.abort();
-				}
-			});
-			
-			cmd.setModule(config.getModule());
-			cmd.setCheckoutByRevision(tag);
-			cmd.setCheckoutDirectory(tmpDir.getName());
-			cmd.setRecursive(false);
-			
-			client.executeCommand(cmd, options);
-		} catch (CommandAbortedException e) {
-			// ignore.
-		} catch (CommandException e) {
-			throw new RepositoryException(e);
-		} catch (AuthenticationException e) {
-			throw new RepositoryException(e);
-		} finally {
-			try {
-				FileUtils.deleteDirectory(tmpDir);
-			} catch (IOException e) {
-				throw new RepositoryException(e);
-			}
-		}
-		
-		if (paths[0] == null) {
-			/* No file was found.  return the module itself.
-			 * This will result in a much slower rlog operation
-			 * because it will fetch information on everything
-			 * instead of the single file.
-			 */
-			return module;
-		}
-		
-		return module + "/" + new File(paths[0]).getName();
-	}
-
-	private File createTmpDir() throws RepositoryException {
-		final File tmpDir;
-		try {
-			tmpDir = File.createTempFile("vulcan-cvs-", null);
-		} catch (IOException e) {
-			throw new RepositoryException(e);
-		}
-		
-		tmpDir.delete();
-		
-		if (!tmpDir.mkdir()) {
-			throw new RepositoryException("cvs.errors.cannot.create.tmp.dir",
-					new Object[] {tmpDir.getPath()}, null);
-		}
-		
-		return tmpDir;
-	}
-
 	private CvsAggregateRevisionTokenDto getLatestRevision(String path, CvsAggregateRevisionTokenDto previousRevision) throws RepositoryException {
 		final List<String> revisions = new ArrayList<String>();
 		final NewestRevisionsLogListener logListener = new NewestRevisionsLogListener(revisions);
-		final Client client = new Client(conn, new StandardAdminHandler());
+		final Client client = new Client(connection, new StandardAdminHandler());
 		final RlogCommand cmd = new RlogCommand();
 
 		cmd.setModule(path);
+		cmd.setRecursive(config.isRecursive());
 		
 		if ("HEAD" != tag) {
 			cmd.setRevisionFilter(tag);
@@ -344,26 +232,15 @@ public class CvsRepositoryAdaptor implements RepositoryAdaptor {
 				newestModificationString);
 	}
 
-	private void executeCvsCommand(Client client, Command cmd) throws RepositoryException {
-		try {
-			client.executeCommand(cmd, options);
-		} catch (CommandAbortedException e) {
-			throw new RepositoryException(e);
-		} catch (CommandException e) {
-			throw new RepositoryException(e);
-		} catch (AuthenticationException e) {
-			throw new RepositoryException(e);
-		}
-	}
-	
 	private ChangeLogDto doChangeLogs(final CvsAggregateRevisionTokenDto cvsFirstRev, final CvsAggregateRevisionTokenDto cvsLastRev) throws RepositoryException {
 		final ChangeLogListener logListener = new ChangeLogListener();
-		final Client client = new Client(conn, new StandardAdminHandler());
+		final Client client = new Client(connection, new StandardAdminHandler());
 		final RlogCommand cmd = new RlogCommand();
 
 		cmd.setModule(config.getModule());
 		cmd.setDateFilter(cvsFirstRev.toString() + "<" + adjustLastRevision(cvsLastRev));
 		cmd.setRevisionFilter(tag);
+		cmd.setRecursive(config.isRecursive());
 		
 		client.getEventManager().addCVSListener(logListener);
 		
@@ -420,23 +297,5 @@ public class CvsRepositoryAdaptor implements RepositoryAdaptor {
 		Date d = parseDate(cvsLastRev.getLabel());
 		
 		return format(new Date(d.getTime() + 1000));
-	}
-
-	private Connection createConnection(CvsRepositoryProfileDto profile) {
-		final Properties props = new Properties();
-		
-		props.setProperty("method", profile.getProtocol());
-		props.setProperty("hostname", profile.getHost());
-		props.setProperty("port", "2401");	// use default
-		props.setProperty("username", profile.getUsername());
-		props.setProperty("password", profile.getPassword());
-		props.setProperty("repository", profile.getRepositoryPath());
-		
-		final CVSRoot cvsRoot = CVSRoot.parse(props);
-		
-		options.setCVSRoot(cvsRoot.toString());
-		options.setVeryQuiet(true);
-
-		return ConnectionFactory.getConnection(cvsRoot);
 	}
 }

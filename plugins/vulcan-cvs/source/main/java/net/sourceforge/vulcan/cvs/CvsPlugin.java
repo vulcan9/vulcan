@@ -20,8 +20,10 @@ package net.sourceforge.vulcan.cvs;
 
 import java.util.Map;
 
-import net.sourceforge.vulcan.ProjectRepositoryConfigurator;
-import net.sourceforge.vulcan.RepositoryAdaptor;
+import org.springframework.beans.BeansException;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
+
 import net.sourceforge.vulcan.core.ProjectNameChangeListener;
 import net.sourceforge.vulcan.cvs.dto.CvsConfigDto;
 import net.sourceforge.vulcan.cvs.dto.CvsProjectConfigDto;
@@ -37,14 +39,16 @@ import net.sourceforge.vulcan.integration.support.PluginSupport;
 public class CvsPlugin extends PluginSupport
 		implements RepositoryAdaptorPlugin,
 			ProjectNameChangeListener,
-			ConfigurablePlugin {
+			ConfigurablePlugin,
+			ApplicationContextAware {
 	
 	private CvsConfigDto globalConfig;
+	private ApplicationContext applicationContext;
 	
 	public CvsPlugin() {
 		setConfiguration(new CvsConfigDto());
 	}
-	public RepositoryAdaptor createInstance(ProjectConfigDto projectConfig) throws ConfigException {
+	public CvsRepositoryAdaptor createInstance(ProjectConfigDto projectConfig) throws ConfigException {
 		CvsProjectConfigDto cvsProjectConfig = (CvsProjectConfigDto) projectConfig.getRepositoryAdaptorConfig();
 		final CvsRepositoryProfileDto env = getSelectedEnvironment(globalConfig.getProfiles(), cvsProjectConfig.getRepositoryProfile(),
 				"cvs.errors.profile.not.found");
@@ -53,8 +57,8 @@ public class CvsPlugin extends PluginSupport
 		
 		return cvsRepositoryAdaptor;
 	}
-	public ProjectRepositoryConfigurator createProjectConfigurator(String url, String username, String password) throws ConfigException {
-		return null;
+	public CvsProjectConfigurator createProjectConfigurator(String url, String username, String password) throws ConfigException {
+		return CvsProjectConfigurator.createInstance(applicationContext, globalConfig, url, username, password);
 	}
 	public RepositoryAdaptorConfigDto getDefaultConfig() {
 		return new CvsProjectConfigDto();
@@ -78,5 +82,8 @@ public class CvsPlugin extends PluginSupport
 	}
 	public void setConfiguration(PluginConfigDto config) {
 		this.globalConfig = (CvsConfigDto) config;
+	}
+	public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+		this.applicationContext = applicationContext;
 	}
 }

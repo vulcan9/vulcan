@@ -187,7 +187,9 @@ public class ProjectImporterImpl implements ProjectImporter {
 	protected PathInfo computeProjectBasedirUrl(String url, String relativePath) {
 		final PathInfo pathInfo = new PathInfo();
 		
-		final StringBuilder sb = new StringBuilder(url);
+		final int pathIndex = url.lastIndexOf(':') + 1;
+		
+		final StringBuilder sb = new StringBuilder(url.substring(pathIndex));
 		sb.delete(sb.lastIndexOf("/") + 1, sb.length());
 		if (relativePath != null) {
 			sb.append(relativePath);
@@ -201,11 +203,12 @@ public class ProjectImporterImpl implements ProjectImporter {
 				 * URI.normalize eats the extra slashes at the begining.
 				 * This behavior does not seem to be documented in the JavaDoc for URI.
 				 */
-				normalized = "file:///" + normalized.substring(6);
+				normalized = "//" + normalized;
 			}
 			
-			pathInfo.setProjectBasedirUrl(normalized);
-			pathInfo.setBuildSpecPath(url.substring(normalized.length()));
+			final String baseUrl = url.substring(0, pathIndex) + normalized;
+			pathInfo.setProjectBasedirUrl(baseUrl);
+			pathInfo.setBuildSpecPath(url.substring(baseUrl.length()));
 			
 			return pathInfo;
 		} catch (URISyntaxException e) {
