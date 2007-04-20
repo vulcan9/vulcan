@@ -22,6 +22,8 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -120,7 +122,7 @@ public class SubversionProjectConfigurator extends SubversionSupport
 	
 	public void updateGlobalConfig(PluginConfigDto globalRaConfig) {
 		final SubversionConfigDto globalConfig = (SubversionConfigDto) globalRaConfig;
-		if (findProfileByRootUrl(globalConfig, profile.getRootUrl()) != null) {
+		if (findProfileByUrlPrefix(globalConfig, profile.getRootUrl()) != null) {
 			return;
 		}
 		
@@ -135,14 +137,18 @@ public class SubversionProjectConfigurator extends SubversionSupport
 	}
 	
 	protected static SubversionRepositoryProfileDto findOrCreateProfile(SVNRepository repo, SubversionConfigDto globalConfig, ProjectConfigDto project, SubversionProjectConfigDto raProjectConfig, String absoluteUrl) throws SVNException {
-		final String root = repo.getRepositoryRoot(true).toString();
-		
-		SubversionRepositoryProfileDto profile = findProfileByRootUrl(globalConfig, root);
+		SubversionRepositoryProfileDto profile = findProfileByUrlPrefix(globalConfig, absoluteUrl);
 		
 		if (profile == null) {
+			final String root = repo.getRepositoryRoot(true).toString();
+			
 			profile = new SubversionRepositoryProfileDto();
 			profile.setRootUrl(root);
-			profile.setDescription(root);
+			try {
+				profile.setDescription(new URL(root).getHost());
+			} catch (MalformedURLException e) {
+				profile.setDescription(root);
+			}
 		}
 		
 		project.setRepositoryAdaptorPluginId(SubversionConfigDto.PLUGIN_ID);
@@ -160,7 +166,7 @@ public class SubversionProjectConfigurator extends SubversionSupport
 		return profile;
 	}
 
-	protected static SubversionRepositoryProfileDto findProfileByRootUrl(SubversionConfigDto globalConfig, final String root) {
+	protected static SubversionRepositoryProfileDto findProfileByUrlPrefix(SubversionConfigDto globalConfig, final String root) {
 		SubversionRepositoryProfileDto profile = 
 			getSelectedEnvironment(
 					globalConfig.getProfiles(),
@@ -172,11 +178,11 @@ public class SubversionProjectConfigurator extends SubversionSupport
 		private final String root;
 
 		protected RootUrlMatcher(String root) {
-			this.root = root;
+			this.root = root.toLowerCase();
 		}
 
 		public boolean isMatch(SubversionRepositoryProfileDto node) {
-			return node.getRootUrl().equals(root);
+			return root.startsWith(node.getRootUrl().toLowerCase());
 		}
 	}
 

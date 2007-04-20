@@ -38,7 +38,9 @@ public interface RepositoryAdaptor {
 	 * the project path.  However, for file based repositories, a more complex operation must
 	 * be carried out to dertermine if any one member has been updated, or if new members have
 	 * been added.
-	 * @param previousRevision TODO
+	 * @param previousRevision If this project has been checked out before, the instance of
+	 * RevisionTokenDto previously returned.  This is provided to allow implementations to
+	 * optimize the range in which changes are searched.
 	 */
 	RevisionTokenDto getLatestRevision(RevisionTokenDto previousRevision) throws RepositoryException, InterruptedException;
 
