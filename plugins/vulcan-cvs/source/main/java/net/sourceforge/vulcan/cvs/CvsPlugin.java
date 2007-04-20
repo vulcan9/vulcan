@@ -53,7 +53,7 @@ public class CvsPlugin extends PluginSupport
 		
 		return cvsRepositoryAdaptor;
 	}
-	public ProjectRepositoryConfigurator createProjectConfigurator(String url) {
+	public ProjectRepositoryConfigurator createProjectConfigurator(String url, String username, String password) throws ConfigException {
 		return null;
 	}
 	public RepositoryAdaptorConfigDto getDefaultConfig() {

@@ -16,21 +16,24 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-package net.sourceforge.vulcan.core;
+package net.sourceforge.vulcan.exception;
 
-import net.sourceforge.vulcan.exception.ConfigException;
-import net.sourceforge.vulcan.exception.DuplicateNameException;
-import net.sourceforge.vulcan.exception.StoreException;
 import net.sourceforge.vulcan.metadata.SvnRevision;
 
 @SvnRevision(id="$Id$", url="$HeadURL$")
-public interface ProjectImporter {
-
-	void createProjectsForUrl(
-			String url,
-			String username,
-			String password,
-			boolean createSubprojects, NameCollisionResolutionMode nameCollisionResolutionMode, String[] schedulerNames) throws ConfigException,
-			StoreException, DuplicateNameException;
-
+public class AuthenticationRequiredRepositoryException extends RepositoryException {
+	private final String suggestedUsername;
+	
+	public AuthenticationRequiredRepositoryException() {
+		this(null);
+	}
+	
+	public AuthenticationRequiredRepositoryException(String suggestedUsername) {
+		super("messages.repository.authentication.required", null, null);
+		this.suggestedUsername = suggestedUsername;
+	}
+	
+	public String getSuggestedUsername() {
+		return suggestedUsername;
+	}
 }

@@ -145,14 +145,14 @@ public class ProjectImporterImplTest extends EasyMockTestCase {
 		expect(pluginManager.getPlugins(BuildToolPlugin.class))
 			.andReturn(buildToolPlugins);
 
-		expect(rap1.createProjectConfigurator(url)).andReturn(null);
-		expect(rap2.createProjectConfigurator(url)).andReturn(null);
+		expect(rap1.createProjectConfigurator(url, null, null)).andReturn(null);
+		expect(rap2.createProjectConfigurator(url, null, null)).andReturn(null);
 	}
 	
 	@TrainingMethod("trainNoRepositorySupportsUrl")
 	public void testNoRepositorySupportsUrl() throws Exception {
 		try {
-			importer.createProjectsForUrl(url, false, NameCollisionResolutionMode.Abort, ArrayUtils.EMPTY_STRING_ARRAY);
+			importer.createProjectsForUrl(url, null, null, false, NameCollisionResolutionMode.Abort, ArrayUtils.EMPTY_STRING_ARRAY);
 			fail("Expected exception");
 		} catch (ConfigException e) {
 			assertEquals("errors.url.unsupported", e.getKey());
@@ -165,7 +165,7 @@ public class ProjectImporterImplTest extends EasyMockTestCase {
 		expect(pluginManager.getPlugins(BuildToolPlugin.class))
 			.andReturn(buildToolPlugins);
 
-		expect(rap1.createProjectConfigurator(url)).andReturn(repoConfigurator);
+		expect(rap1.createProjectConfigurator(url, null, null)).andReturn(repoConfigurator);
 		expect(rap1.getId()).andReturn("a.fake.repo.plugin");
 		
 		repoConfigurator.download(tmpFile1);
@@ -175,7 +175,7 @@ public class ProjectImporterImplTest extends EasyMockTestCase {
 	@TrainingMethod("trainWrapsIOExceptionDuringDownload")
 	public void testWrapsIOExceptionDuringDownload() throws Exception {
 		try {
-			importer.createProjectsForUrl(url, false, NameCollisionResolutionMode.Abort, ArrayUtils.EMPTY_STRING_ARRAY);
+			importer.createProjectsForUrl(url, null, null, false, NameCollisionResolutionMode.Abort, ArrayUtils.EMPTY_STRING_ARRAY);
 			fail("Expected exception");
 		} catch (ConfigException e) {
 			assertSame(ioException, e.getCause());
@@ -191,7 +191,7 @@ public class ProjectImporterImplTest extends EasyMockTestCase {
 		expect(pluginManager.getPlugins(BuildToolPlugin.class))
 			.andReturn(buildToolPlugins);
 
-		expect(rap1.createProjectConfigurator(url)).andReturn(repoConfigurator);
+		expect(rap1.createProjectConfigurator(url, null, null)).andReturn(repoConfigurator);
 		expect(rap1.getId()).andReturn("a.fake.repo.plugin");
 		
 		repoConfigurator.download(tmpFile1);
@@ -203,7 +203,7 @@ public class ProjectImporterImplTest extends EasyMockTestCase {
 	@TrainingMethod("trainNoBuildToolSupportsFile")
 	public void testNoBuildToolSupportsFile() throws Exception {
 		try {
-			importer.createProjectsForUrl(url, false, NameCollisionResolutionMode.Abort, ArrayUtils.EMPTY_STRING_ARRAY);
+			importer.createProjectsForUrl(url, null, null, false, NameCollisionResolutionMode.Abort, ArrayUtils.EMPTY_STRING_ARRAY);
 			fail("expected exception");
 		} catch (ConfigException e) {
 			assertEquals("errors.build.file.unsupported", e.getKey());
@@ -216,7 +216,7 @@ public class ProjectImporterImplTest extends EasyMockTestCase {
 		expect(pluginManager.getPlugins(RepositoryAdaptorPlugin.class))
 			.andReturn(repositoryPlugins);
 	
-		expect(rap1.createProjectConfigurator(url)).andReturn(repoConfigurator);
+		expect(rap1.createProjectConfigurator(url, null, null)).andReturn(repoConfigurator);
 		expect(rap1.getId()).andReturn("a.fake.repo.plugin");
 		
 		repoConfigurator.download(tmpFile1);
@@ -274,7 +274,7 @@ public class ProjectImporterImplTest extends EasyMockTestCase {
 	
 	@TrainingMethod("trainConfigures,trainSaves")
 	public void testConfiguresAndSaves() throws Exception {
-		importer.createProjectsForUrl(url, false, NameCollisionResolutionMode.Abort, ArrayUtils.EMPTY_STRING_ARRAY);
+		importer.createProjectsForUrl(url, null, null, false, NameCollisionResolutionMode.Abort, ArrayUtils.EMPTY_STRING_ARRAY);
 	}
 	
 	public void trainStandalone() throws Exception {
@@ -286,7 +286,7 @@ public class ProjectImporterImplTest extends EasyMockTestCase {
 	
 	@TrainingMethod("trainConfigures,trainStandalone,trainSaves")
 	public void testConfiguresAndSavesStandalone() throws Exception {
-		importer.createProjectsForUrl(url, true, NameCollisionResolutionMode.Abort, ArrayUtils.EMPTY_STRING_ARRAY);
+		importer.createProjectsForUrl(url, null, null, true, NameCollisionResolutionMode.Abort, ArrayUtils.EMPTY_STRING_ARRAY);
 	}
 
 	public void trainNotStandalone() throws Exception {
@@ -296,7 +296,7 @@ public class ProjectImporterImplTest extends EasyMockTestCase {
 
 	@TrainingMethod("trainConfigures,trainNotStandalone,trainSaves")
 	public void testConfiguresAndSavesNotStandalone() throws Exception {
-		importer.createProjectsForUrl(url, true, NameCollisionResolutionMode.Abort, ArrayUtils.EMPTY_STRING_ARRAY);
+		importer.createProjectsForUrl(url, null, null, true, NameCollisionResolutionMode.Abort, ArrayUtils.EMPTY_STRING_ARRAY);
 	}
 
 	public void trainSetupAlternateWorkDir() throws Exception {
@@ -305,7 +305,7 @@ public class ProjectImporterImplTest extends EasyMockTestCase {
 	
 	@TrainingMethod("trainSetupAlternateWorkDir,trainConfigures,trainNotStandalone,trainSavesWithAlternateWorkDir")
 	public void testConfiguresAndSavesBuildToolSetsWorkDir() throws Exception {
-		importer.createProjectsForUrl(url, true, NameCollisionResolutionMode.Abort, ArrayUtils.EMPTY_STRING_ARRAY);
+		importer.createProjectsForUrl(url, null, null, true, NameCollisionResolutionMode.Abort, ArrayUtils.EMPTY_STRING_ARRAY);
 	}
 	
 	public void trainGetSubprojects() throws Exception {
@@ -314,7 +314,7 @@ public class ProjectImporterImplTest extends EasyMockTestCase {
 		expect(buildConfigurator.getSubprojectUrls()).andReturn(
 				Collections.singletonList("http://localhost/a-sub-project"));
 		
-		expect(rap1.createProjectConfigurator("http://localhost/a-sub-project")).andReturn(
+		expect(rap1.createProjectConfigurator("http://localhost/a-sub-project", null, null)).andReturn(
 				repoConfigurator);
 		
 		expect(rap1.getId()).andReturn("a.fake.repo.plugin");
@@ -372,7 +372,7 @@ public class ProjectImporterImplTest extends EasyMockTestCase {
 	
 	@TrainingMethod("trainConfigures,trainGetSubprojects,trainSavesSubproject")
 	public void testCreatesProjectsRecursivelyOnFlag() throws Exception {
-		importer.createProjectsForUrl(url, true, NameCollisionResolutionMode.Overwrite, ArrayUtils.EMPTY_STRING_ARRAY);
+		importer.createProjectsForUrl(url, null, null, true, NameCollisionResolutionMode.Overwrite, ArrayUtils.EMPTY_STRING_ARRAY);
 	}
 	
 	@SuppressWarnings("unchecked")

@@ -24,21 +24,30 @@ import net.sourceforge.vulcan.core.NameCollisionResolutionMode;
 import net.sourceforge.vulcan.metadata.SvnRevision;
 
 import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.struts.action.ActionMapping;
 import org.apache.struts.validator.ValidatorForm;
 
 @SvnRevision(id="$Id$", url="$HeadURL$")
 public class ProjectImportForm extends ValidatorForm {
 	private String url;
+	
 	private String nameCollisionResolutionMode;
 	private String[] schedulerNames;
 	private boolean createSubprojects;
+	
+	private boolean authenticationRequired;
+	private String username;
+	private String password;
 	
 	@Override
 	public void reset(ActionMapping mapping, HttpServletRequest request) {
 		super.reset(mapping, request);
 		schedulerNames = ArrayUtils.EMPTY_STRING_ARRAY;
+		username = StringUtils.EMPTY;
+		password = StringUtils.EMPTY;
 		createSubprojects = false;
+		authenticationRequired = false;
 	}
 
 	public NameCollisionResolutionMode parseNameCollisionResolutionMode() {
@@ -76,5 +85,29 @@ public class ProjectImportForm extends ValidatorForm {
 
 	public void setUrl(String url) {
 		this.url = url;
+	}
+	
+	public boolean isAuthenticationRequired() {
+		return authenticationRequired;
+	}
+	
+	public void setAuthenticationRequired(boolean authenticationRequired) {
+		this.authenticationRequired = authenticationRequired;
+	}
+
+	public String getPassword() {
+		return password;
+	}
+
+	public void setPassword(String password) {
+		this.password = password;
+	}
+
+	public String getUsername() {
+		return username;
+	}
+
+	public void setUsername(String username) {
+		this.username = username;
 	}
 }
