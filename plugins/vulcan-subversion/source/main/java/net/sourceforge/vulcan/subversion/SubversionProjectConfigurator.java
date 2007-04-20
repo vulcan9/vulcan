@@ -18,6 +18,8 @@
  */
 package net.sourceforge.vulcan.subversion;
 
+import static org.apache.commons.lang.StringUtils.isNotBlank;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -30,6 +32,7 @@ import java.util.Map;
 import net.sourceforge.vulcan.ProjectRepositoryConfigurator;
 import net.sourceforge.vulcan.dto.PluginConfigDto;
 import net.sourceforge.vulcan.dto.ProjectConfigDto;
+import net.sourceforge.vulcan.exception.AuthenticationRequiredRepositoryException;
 import net.sourceforge.vulcan.exception.ConfigException;
 import net.sourceforge.vulcan.exception.RepositoryException;
 import net.sourceforge.vulcan.subversion.dto.SubversionConfigDto;
@@ -40,6 +43,7 @@ import org.springframework.context.ApplicationContext;
 import org.tmatesoft.svn.core.ISVNDirEntryHandler;
 import org.tmatesoft.svn.core.SVNException;
 import org.tmatesoft.svn.core.SVNURL;
+import org.tmatesoft.svn.core.auth.BasicAuthenticationManager;
 import org.tmatesoft.svn.core.io.SVNRepository;
 import org.tmatesoft.svn.core.io.SVNRepositoryFactory;
 import org.tmatesoft.svn.core.wc.SVNRevision;
@@ -58,7 +62,7 @@ public class SubversionProjectConfigurator extends SubversionSupport
 		this.buildSpecPath = buildSpecPath;
 	}
 	
-	public static SubversionProjectConfigurator createInstance(String url, SubversionConfigDto globalConfig, ApplicationContext appCtx) throws ConfigException {
+	public static SubversionProjectConfigurator createInstance(String url, String username, String password, SubversionConfigDto globalConfig, ApplicationContext appCtx) throws ConfigException {
 		final SVNURL svnurl;
 		final SVNRepository repo;
 		
@@ -74,7 +78,7 @@ public class SubversionProjectConfigurator extends SubversionSupport
 		
 		final SubversionRepositoryProfileDto profile;
 		try {
-			profile = findOrCreateProfile(repo, globalConfig, project, raProjectConfig, url);
+			profile = findOrCreateProfile(repo, globalConfig, project, raProjectConfig, url, username, password);
 		} catch (SVNException e) {
 			final int errorCode = e.getErrorMessage().getErrorCode().getCode();
 			if (errorCode == 180001 || errorCode == 175002) {
@@ -82,6 +86,10 @@ public class SubversionProjectConfigurator extends SubversionSupport
 				// 18001: Unable to open an ra_local session to URL (happens with file protocol)
 				// 175002: RA layer request failed (happens with http/https protocols).
 				return null;
+			}
+			
+			if (errorCode == 170001) {
+				throw new AuthenticationRequiredRepositoryException();
 			}
 			
 			throw new ConfigException("svn.error", new Object[] {e.getErrorMessage().getFullMessage()});
@@ -136,19 +144,30 @@ public class SubversionProjectConfigurator extends SubversionSupport
 		globalConfig.setProfiles(profiles);
 	}
 	
-	protected static SubversionRepositoryProfileDto findOrCreateProfile(SVNRepository repo, SubversionConfigDto globalConfig, ProjectConfigDto project, SubversionProjectConfigDto raProjectConfig, String absoluteUrl) throws SVNException {
+	protected static SubversionRepositoryProfileDto findOrCreateProfile(SVNRepository repo, SubversionConfigDto globalConfig, ProjectConfigDto project, SubversionProjectConfigDto raProjectConfig, String absoluteUrl, String username, String password) throws SVNException {
 		SubversionRepositoryProfileDto profile = findProfileByUrlPrefix(globalConfig, absoluteUrl);
 		
 		if (profile == null) {
+			if (isNotBlank(username)) {
+				repo.setAuthenticationManager(
+						new BasicAuthenticationManager(
+								username,
+								password));
+			}
+			
 			final String root = repo.getRepositoryRoot(true).toString();
 			
 			profile = new SubversionRepositoryProfileDto();
 			profile.setRootUrl(root);
+			profile.setUsername(username);
+			profile.setPassword(password);
+			
 			try {
 				profile.setDescription(new URL(root).getHost());
 			} catch (MalformedURLException e) {
 				profile.setDescription(root);
 			}
+
 		}
 		
 		project.setRepositoryAdaptorPluginId(SubversionConfigDto.PLUGIN_ID);

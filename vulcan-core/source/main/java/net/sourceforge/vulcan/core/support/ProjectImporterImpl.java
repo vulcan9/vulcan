@@ -61,7 +61,7 @@ public class ProjectImporterImpl implements ProjectImporter {
 	private StateManager stateManager;
 	private Store store;
 	
-	public void createProjectsForUrl(String startUrl, boolean createSubprojects, NameCollisionResolutionMode nameCollisionResolutionMode, String[] schedulerNames) throws ConfigException, StoreException, DuplicateNameException {
+	public void createProjectsForUrl(String startUrl, String username, String password, boolean createSubprojects, NameCollisionResolutionMode nameCollisionResolutionMode, String[] schedulerNames) throws ConfigException, StoreException, DuplicateNameException {
 		final List<RepositoryAdaptorPlugin> repositoryPlugins = pluginManager.getPlugins(RepositoryAdaptorPlugin.class);
 		final List<BuildToolPlugin> buildToolPlugins = pluginManager.getPlugins(BuildToolPlugin.class);
 		
@@ -80,7 +80,7 @@ public class ProjectImporterImpl implements ProjectImporter {
 			projectConfig.setSchedulerNames(schedulerNames);
 			
 			final ProjectRepositoryConfigurator repoConfigurator = createRepositoryConfiguratorForUrl(
-					repositoryPlugins, projectConfig, url);
+					repositoryPlugins, projectConfig, url, username, password);
 			
 			File buildSpecFile = null;
 			final ProjectBuildConfigurator buildConfigurator;
@@ -240,9 +240,9 @@ public class ProjectImporterImpl implements ProjectImporter {
 			this.projectBasedirUrl = projectBasedirUrl;
 		}
 	}
-	private ProjectRepositoryConfigurator createRepositoryConfiguratorForUrl(final List<RepositoryAdaptorPlugin> repositoryPlugins, ProjectConfigDto projectConfig, String url) throws ConfigException {
+	private ProjectRepositoryConfigurator createRepositoryConfiguratorForUrl(final List<RepositoryAdaptorPlugin> repositoryPlugins, ProjectConfigDto projectConfig, String url, String username, String password) throws ConfigException {
 		for (RepositoryAdaptorPlugin plugin : repositoryPlugins) {
-			final ProjectRepositoryConfigurator configurator = plugin.createProjectConfigurator(url);
+			final ProjectRepositoryConfigurator configurator = plugin.createProjectConfigurator(url, username, password);
 			if (configurator != null) {
 				log.info("Using " + plugin.getName() + " to download " + url);
 				projectConfig.setRepositoryAdaptorPluginId(plugin.getId());

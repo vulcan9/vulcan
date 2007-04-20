@@ -40,7 +40,7 @@ public interface RepositoryAdaptorPlugin extends Plugin {
 	 * @throws ConfigException If the url is supported but an error occurs
 	 * while creating the instance.
 	 */
-	ProjectRepositoryConfigurator createProjectConfigurator(String url) throws ConfigException;
+	ProjectRepositoryConfigurator createProjectConfigurator(String url, String username, String password) throws ConfigException;
 
 	RepositoryAdaptorConfigDto getDefaultConfig();
 

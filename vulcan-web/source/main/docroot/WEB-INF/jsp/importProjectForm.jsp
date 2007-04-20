@@ -33,6 +33,24 @@
 				</html:messages>
 			</td>
 		</tr>
+		<c:if test="${projectImportForm.authenticationRequired}">
+		<tr>
+			<td>
+				<fmt:message key="label.username"/>
+			</td>
+			<td>
+				<html:text property="username"/>
+			</td>
+		</tr>
+		<tr>
+			<td>
+				<fmt:message key="label.password"/>
+			</td>
+			<td>
+				<html:password property="password" value=""/>
+			</td>
+		</tr>
+		</c:if>
 		<tr>
 			<td>
 				<fmt:message key="label.child.projects"/>
@@ -96,6 +114,7 @@
 		<tr>
 			<td class="buttons" colspan="2">
 				<html:submit value="Import"/>
+				<html:hidden property="authenticationRequired"/>
 			</td>
 		</tr>
 	</tbody>

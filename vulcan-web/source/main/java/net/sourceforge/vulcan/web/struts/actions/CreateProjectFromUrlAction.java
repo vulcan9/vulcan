@@ -20,11 +20,13 @@ package net.sourceforge.vulcan.web.struts.actions;
 
 import static net.sourceforge.vulcan.web.struts.actions.BaseDispatchAction.saveError;
 import static net.sourceforge.vulcan.web.struts.actions.BaseDispatchAction.saveSuccessMessage;
+import static org.apache.commons.lang.StringUtils.isNotBlank;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import net.sourceforge.vulcan.core.ProjectImporter;
+import net.sourceforge.vulcan.exception.AuthenticationRequiredRepositoryException;
 import net.sourceforge.vulcan.exception.ConfigException;
 import net.sourceforge.vulcan.exception.DuplicateNameException;
 import net.sourceforge.vulcan.exception.StoreException;
@@ -52,6 +54,8 @@ public final class CreateProjectFromUrlAction extends Action {
 		try {
 			projectImporter.createProjectsForUrl(
 					importForm.getUrl(),
+					importForm.getUsername(),
+					importForm.getPassword(),
 					importForm.isCreateSubprojects(),
 					importForm.parseNameCollisionResolutionMode(),
 					importForm.getSchedulerNames());
@@ -61,6 +65,17 @@ public final class CreateProjectFromUrlAction extends Action {
 			saveError(request, ActionMessages.GLOBAL_MESSAGE,
 					new ActionMessage("errors.duplicate.project.name", e.getName()));
 
+			return mapping.getInputForward();
+		} catch (AuthenticationRequiredRepositoryException e) {
+			saveError(request, ActionMessages.GLOBAL_MESSAGE,
+					new ActionMessage(e.getKey()));
+
+			importForm.setAuthenticationRequired(true);
+			final String suggestedUsername = e.getSuggestedUsername();
+			if (isNotBlank(suggestedUsername)) {
+				importForm.setUsername(suggestedUsername);
+			}
+			
 			return mapping.getInputForward();
 		} catch (ConfigException e) {
 			saveError(request, ActionMessages.GLOBAL_MESSAGE,

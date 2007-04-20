@@ -55,7 +55,7 @@ public class SubversionProjectConfiguratorTest extends TestCase {
 	}
 	
 	public void testCreateInstanceForUrlUnsupported() throws Exception {
-		assertNull(SubversionProjectConfigurator.createInstance("cvs:localhost:/cvsroot", null, null));
+		assertNull(SubversionProjectConfigurator.createInstance("cvs:localhost:/cvsroot", null, null, null, null));
 	}
 	
 	public void testGetRepositoryProfileForUrlCreatesOnMissing() throws Exception {
@@ -64,14 +64,15 @@ public class SubversionProjectConfiguratorTest extends TestCase {
 		SubversionProjectConfigDto raProjectConfig = new SubversionProjectConfigDto();
 		
 		final SubversionRepositoryProfileDto profile =
-			SubversionProjectConfigurator.findOrCreateProfile(fakeRepo, globalConfig, project, raProjectConfig, "http://localhost/root/pom.xml");
+			SubversionProjectConfigurator.findOrCreateProfile(fakeRepo, globalConfig, project, raProjectConfig,
+					"http://localhost/root/pom.xml", "kelly", "p@ssw0rd");
 		
 		assertNotNull(profile);
 		
 		assertEquals("http://localhost/root", profile.getRootUrl());
-		assertEquals("http://localhost/root", profile.getDescription());
-		assertEquals("", profile.getUsername());
-		assertEquals("", profile.getPassword());
+		assertEquals("localhost", profile.getDescription());
+		assertEquals("kelly", profile.getUsername());
+		assertEquals("p@ssw0rd", profile.getPassword());
 		
 		assertEquals(SubversionConfigDto.PLUGIN_ID, project.getRepositoryAdaptorPluginId());
 		assertSame(raProjectConfig, project.getRepositoryAdaptorConfig());
@@ -79,7 +80,6 @@ public class SubversionProjectConfiguratorTest extends TestCase {
 		assertEquals("", raProjectConfig.getPath());
 	}
 
-	
 	public void testGetRepositoryProfileForUrlReuseOnMatchRoot() throws Exception {
 		SVNRepository fakeRepo = new FakeRepo("http://localhost/svn", "/trunk");
 		ProjectConfigDto project = new ProjectConfigDto();
@@ -87,7 +87,7 @@ public class SubversionProjectConfiguratorTest extends TestCase {
 		
 		final SubversionRepositoryProfileDto profile =
 			SubversionProjectConfigurator.findOrCreateProfile(fakeRepo, globalConfig,
-					project, raProjectConfig, "http://localhost/svn/trunk/pom.xml");
+					project, raProjectConfig, "http://localhost/svn/trunk/pom.xml", null, null);
 		
 		assertNotNull(profile);
 		assertSame(globalConfig.getProfiles()[0], profile);

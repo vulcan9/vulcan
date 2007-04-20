@@ -53,8 +53,8 @@ public class SubversionPlugin
 	public RepositoryAdaptor createInstance(ProjectConfigDto projectConfig) throws ConfigException {
 		return new SubversionRepositoryAdaptor(this.config, projectConfig, (SubversionProjectConfigDto)projectConfig.getRepositoryAdaptorConfig(), stateManager);
 	}
-	public ProjectRepositoryConfigurator createProjectConfigurator(String url) throws ConfigException {
-		return SubversionProjectConfigurator.createInstance(url, this.config, this.ctx);
+	public ProjectRepositoryConfigurator createProjectConfigurator(String url, String username, String password) throws ConfigException {
+		return SubversionProjectConfigurator.createInstance(url, username, password, this.config, this.ctx);
 	}
 	public RepositoryAdaptorConfigDto getDefaultConfig() {
 		return new SubversionProjectConfigDto();
