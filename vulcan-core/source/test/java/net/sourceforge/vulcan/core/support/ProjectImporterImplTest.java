@@ -412,43 +412,71 @@ public class ProjectImporterImplTest extends EasyMockTestCase {
 		assertPathInfoEquals(
 				"http://localhost/foo/",
 				"bar/baz.xml",
-				importer.computeProjectBasedirUrl("http://localhost/foo/bar/baz.xml", ".."));
+				importer.computeProjectBasedirUrl("http://localhost/foo/bar/baz.xml", "..", true));
 	}
 	public void testComputePathRelative() throws Exception {
 		assertPathInfoEquals(
 				"http://localhost/foo/bar/",
 				"baz.xml",
-				importer.computeProjectBasedirUrl("http://localhost/foo/bar/baz.xml", "."));
+				importer.computeProjectBasedirUrl("http://localhost/foo/bar/baz.xml", ".", true));
 	}
 	public void testComputePathBlank() throws Exception {
 		assertPathInfoEquals(
 				"http://localhost/foo/bar/",
 				"baz.xml",
-				importer.computeProjectBasedirUrl("http://localhost/foo/bar/baz.xml", ""));
+				importer.computeProjectBasedirUrl("http://localhost/foo/bar/baz.xml", "", true));
 	}
 	public void testComputePathNull() throws Exception {
 		assertPathInfoEquals(
 				"http://localhost/foo/bar/",
 				"baz.xml",
-				importer.computeProjectBasedirUrl("http://localhost/foo/bar/baz.xml", null));
+				importer.computeProjectBasedirUrl("http://localhost/foo/bar/baz.xml", null, true));
 	}
 	public void testComputePathObscureProtocol() throws Exception {
 		assertPathInfoEquals(
 				"pretzels://localhost/foo/bar/",
 				"baz.xml",
-				importer.computeProjectBasedirUrl("pretzels://localhost/foo/bar/baz.xml", null));
+				importer.computeProjectBasedirUrl("pretzels://localhost/foo/bar/baz.xml", null, true));
 	}
 	public void testComputePathAdjacentSlashesAtRoot() throws Exception {
 		assertPathInfoEquals(
 				"file:///tmp/dir/",
 				"nested/nant.build",
-				importer.computeProjectBasedirUrl("file:///tmp/dir/nested/nant.build", ".."));
+				importer.computeProjectBasedirUrl("file:///tmp/dir/nested/nant.build", "..", true));
 	}
 	public void testComputePathCvs() throws Exception {
 		assertPathInfoEquals(
 				":pserver:anon@localhost:/cvsroot:some_module/",
 				"nested/build.xml",
-				importer.computeProjectBasedirUrl(":pserver:anon@localhost:/cvsroot:some_module/nested/build.xml", ".."));
+				importer.computeProjectBasedirUrl(":pserver:anon@localhost:/cvsroot:some_module/nested/build.xml", "..", true));
+	}
+	public void testMakeAbsoluteAlreadyAbsolute() throws Exception {
+		List<String> urls = new ArrayList<String>(Arrays.asList("http://example.com/module/build.xml"));
+		
+		importer.makeAbsolute("http://example.com/", urls);
+		
+		assertEquals(Arrays.asList("http://example.com/module/build.xml"), urls);
+	}
+	public void testMakeAbsoluteAlreadyAbsoluteCvs() throws Exception {
+		List<String> urls = new ArrayList<String>(Arrays.asList(":ext:foo:/bar:baz"));
+		
+		importer.makeAbsolute(":ext:foo:/bar:baz", urls);
+		
+		assertEquals(Arrays.asList(":ext:foo:/bar:baz"), urls);
+	}
+	public void testMakeAbsolute() throws Exception {
+		List<String> urls = new ArrayList<String>(Arrays.asList("../foo.xml"));
+		
+		importer.makeAbsolute("http://example.com/nested/build.xml", urls);
+		
+		assertEquals(Arrays.asList("http://example.com/foo.xml"), urls);
+	}
+	public void testMakeAbsoluteCvs() throws Exception {
+		List<String> urls = new ArrayList<String>(Arrays.asList("../subproject/pom.xml"));
+		
+		importer.makeAbsolute(":ext:foo:/bar:module/parent/pom.xml", urls);
+		
+		assertEquals(Arrays.asList(":ext:foo:/bar:module/subproject/pom.xml"), urls);
 	}
 	private static void assertPathInfoEquals(String expectedBasedirUrl, String expectedBuildSpecPath, PathInfo info) {
 		assertEquals(expectedBasedirUrl, info.getProjectBasedirUrl());

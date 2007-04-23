@@ -18,7 +18,8 @@
  */
 package net.sourceforge.vulcan.core.support;
 
-import static net.sourceforge.vulcan.core.NameCollisionResolutionMode.*;
+import static net.sourceforge.vulcan.core.NameCollisionResolutionMode.Abort;
+import static net.sourceforge.vulcan.core.NameCollisionResolutionMode.UseExisting;
 import static org.apache.commons.lang.StringUtils.isBlank;
 
 import java.io.File;
@@ -47,6 +48,7 @@ import net.sourceforge.vulcan.integration.BuildToolPlugin;
 import net.sourceforge.vulcan.integration.RepositoryAdaptorPlugin;
 import net.sourceforge.vulcan.metadata.SvnRevision;
 
+import org.apache.commons.collections.set.ListOrderedSet;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jdom.Document;
@@ -65,7 +67,7 @@ public class ProjectImporterImpl implements ProjectImporter {
 		final List<RepositoryAdaptorPlugin> repositoryPlugins = pluginManager.getPlugins(RepositoryAdaptorPlugin.class);
 		final List<BuildToolPlugin> buildToolPlugins = pluginManager.getPlugins(BuildToolPlugin.class);
 		
-		final List<String> urls = new ArrayList<String>();
+		final ListOrderedSet urls = new ListOrderedSet();
 		urls.add(startUrl);
 		
 		final List<ProjectConfigDto> newProjects = new ArrayList<ProjectConfigDto>();
@@ -74,7 +76,7 @@ public class ProjectImporterImpl implements ProjectImporter {
 		final List<String> existingProjectNames = new ArrayList<String>(stateManager.getProjectConfigNames());
 		
 		while (!urls.isEmpty()) {
-			final String url = urls.remove(0);
+			final String url = (String) urls.remove(0);
 			
 			final ProjectConfigDto projectConfig = new ProjectConfigDto();
 			projectConfig.setSchedulerNames(schedulerNames);
@@ -100,6 +102,9 @@ public class ProjectImporterImpl implements ProjectImporter {
 			
 			if (createSubprojects) {
 				final List<String> subprojectUrls = buildConfigurator.getSubprojectUrls();
+				
+				makeAbsolute(url, subprojectUrls);
+				
 				if (subprojectUrls != null) {
 					urls.addAll(subprojectUrls);
 				}
@@ -158,7 +163,7 @@ public class ProjectImporterImpl implements ProjectImporter {
 	 */
 	protected boolean configureProject(final ProjectConfigDto projectConfig, final ProjectRepositoryConfigurator repoConfigurator, final ProjectBuildConfigurator buildConfigurator, String url, final List<String> existingProjectNames, NameCollisionResolutionMode nameCollisionResolutionMode, boolean createSubprojects) throws DuplicateNameException {
 		final String relativePath = buildConfigurator.getRelativePathToProjectBasedir();
-		final PathInfo pathInfo = computeProjectBasedirUrl(url, relativePath);
+		final PathInfo pathInfo = computeProjectBasedirUrl(url, relativePath, true);
 		
 		buildConfigurator.applyConfiguration(projectConfig, pathInfo.getBuildSpecPath(), existingProjectNames, createSubprojects);
 
@@ -184,7 +189,7 @@ public class ProjectImporterImpl implements ProjectImporter {
 		return true;
 	}
 	
-	protected PathInfo computeProjectBasedirUrl(String url, String relativePath) {
+	protected PathInfo computeProjectBasedirUrl(String url, String relativePath, boolean computeBuildSpecPath) {
 		final PathInfo pathInfo = new PathInfo();
 		
 		final int pathIndex = url.lastIndexOf(':') + 1;
@@ -208,7 +213,10 @@ public class ProjectImporterImpl implements ProjectImporter {
 			
 			final String baseUrl = url.substring(0, pathIndex) + normalized;
 			pathInfo.setProjectBasedirUrl(baseUrl);
-			pathInfo.setBuildSpecPath(url.substring(baseUrl.length()));
+			
+			if (computeBuildSpecPath) {
+				pathInfo.setBuildSpecPath(url.substring(baseUrl.length()));
+			}
 			
 			return pathInfo;
 		} catch (URISyntaxException e) {
@@ -223,6 +231,22 @@ public class ProjectImporterImpl implements ProjectImporter {
 			throw new RuntimeException(e);
 		} catch (JDOMException e) {
 			return null;
+		}
+	}
+
+	protected void makeAbsolute(String startUrl, List<String> subprojectUrls) {
+		if (subprojectUrls == null) {
+			return;
+		}
+		
+		for (int i=0; i<subprojectUrls.size(); i++) {
+			final String url = subprojectUrls.get(i);
+			if (url.indexOf(':') < 0) {
+				final PathInfo pathInfo = computeProjectBasedirUrl(startUrl, url, false);
+				
+				subprojectUrls.remove(i);
+				subprojectUrls.add(i, pathInfo.getProjectBasedirUrl());
+			}
 		}
 	}
 

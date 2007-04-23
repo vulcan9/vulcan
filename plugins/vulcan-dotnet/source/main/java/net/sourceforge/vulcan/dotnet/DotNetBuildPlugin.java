@@ -18,6 +18,8 @@
  */
 package net.sourceforge.vulcan.dotnet;
 
+import static net.sourceforge.vulcan.dotnet.dto.DotNetBuildEnvironmentDto.DotNetEnvironmentType.MSBuild;
+
 import java.io.File;
 
 import net.sourceforge.vulcan.BuildTool;
@@ -26,6 +28,7 @@ import net.sourceforge.vulcan.ProjectBuildConfigurator;
 import net.sourceforge.vulcan.dotnet.dto.DotNetBuildEnvironmentDto;
 import net.sourceforge.vulcan.dotnet.dto.DotNetGlobalConfigDto;
 import net.sourceforge.vulcan.dotnet.dto.DotNetProjectConfigDto;
+import net.sourceforge.vulcan.dotnet.dto.DotNetBuildEnvironmentDto.DotNetEnvironmentType;
 import net.sourceforge.vulcan.dto.BuildToolConfigDto;
 import net.sourceforge.vulcan.dto.PluginConfigDto;
 import net.sourceforge.vulcan.exception.ConfigException;
@@ -36,14 +39,21 @@ import net.sourceforge.vulcan.integration.support.PluginSupport;
 
 import org.apache.commons.lang.StringUtils;
 import org.jdom.Document;
+import org.jdom.Element;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 
-public class DotNetBuildPlugin extends PluginSupport implements BuildToolPlugin, ConfigurablePlugin {
+public class DotNetBuildPlugin extends PluginSupport implements
+		BuildToolPlugin, ConfigurablePlugin, ApplicationContextAware {
 	public static final String PLUGIN_ID = "net.sourceforge.vulcan.dotnet";
 	public static final String PLUGIN_NAME = ".NET";
 
+	public static final String MSBUILD_NAMESPACE_URI = "http://schemas.microsoft.com/developer/msbuild/2003";
+	
 	private PluginManager pluginManager;
 	
 	private DotNetGlobalConfigDto globalConfig = new DotNetGlobalConfigDto();
+	private ApplicationContext applicationContext;
 	
 	public BuildTool createInstance(BuildToolConfigDto config) throws ConfigException {
 		final DotNetProjectConfigDto dotNetProjectConfig = (DotNetProjectConfigDto) config;
@@ -66,7 +76,7 @@ public class DotNetBuildPlugin extends PluginSupport implements BuildToolPlugin,
 			throw new RuntimeException(e);
 		}
 
-		if (DotNetBuildEnvironmentDto.DotNetEnvironmentType.MSBuild.equals(buildEnv.getType())) {
+		if (MSBuild.equals(buildEnv.getType())) {
 			return new MSBuildTool(globalConfig, dotNetProjectConfig, buildEnv, dir);
 		}
 		
@@ -74,10 +84,17 @@ public class DotNetBuildPlugin extends PluginSupport implements BuildToolPlugin,
 	}
 
 	public ProjectBuildConfigurator createProjectConfigurator(String url, File buildSpecFile, Document xmlDocument) throws ConfigException {
-		// Not supported.
+		if (isMSBuildFile(url, buildSpecFile, xmlDocument)) {
+			final MSBuildProjectConfigurator cfgr = new MSBuildProjectConfigurator();
+			cfgr.setApplicationContext(applicationContext);
+			cfgr.setUrl(url);
+			cfgr.setBuildEnvironment(findBuildEnvironmentByType(MSBuild));
+			cfgr.setDocument(xmlDocument);
+			return cfgr;
+		}
 		return null;
 	}
-	
+
 	public DotNetGlobalConfigDto getConfiguration() {
 		return globalConfig;
 	}
@@ -96,6 +113,10 @@ public class DotNetBuildPlugin extends PluginSupport implements BuildToolPlugin,
 
 	public String getName() {
 		return PLUGIN_NAME;
+	}
+
+	public void setApplicationContext(ApplicationContext applicationContext) {
+		this.applicationContext = applicationContext;
 	}
 
 	public void setPluginManager(PluginManager pluginManager) {
@@ -118,5 +139,25 @@ public class DotNetBuildPlugin extends PluginSupport implements BuildToolPlugin,
 		}
 		
 		throw new ConfigException("dotnet.config.environment.not.available", new String[] {desc});
+	}
+
+	private boolean isMSBuildFile(String url, File buildSpecFile, Document xmlDocument) {
+		if (xmlDocument != null) {
+			final Element root = xmlDocument.getRootElement();
+			if ("Project".equals(root.getName())
+					&& MSBUILD_NAMESPACE_URI.equals(root.getNamespaceURI())) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	private String findBuildEnvironmentByType(DotNetEnvironmentType envType) {
+		for (DotNetBuildEnvironmentDto env : globalConfig.getBuildEnvironments()) {
+			if (envType == env.getType()) {
+				return env.getDescription();
+			}
+		}
+		return null;
 	}
 }

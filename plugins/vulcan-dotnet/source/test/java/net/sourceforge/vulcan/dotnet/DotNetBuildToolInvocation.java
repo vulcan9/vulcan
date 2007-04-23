@@ -124,7 +124,7 @@ public class DotNetBuildToolInvocation extends TestCase {
 			
 			assertTrue(error.getFile() != null && error.getFile().length() > 0);
 			assertEquals(Integer.valueOf(9), error.getLineNumber());
-			assertEquals(null, error.getCode());
+			assertEquals("", error.getCode());
 		}
 	}
 	
