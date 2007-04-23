@@ -24,15 +24,23 @@ import junit.framework.TestCase;
 import net.sourceforge.vulcan.PluginManager;
 import net.sourceforge.vulcan.dotnet.dto.DotNetBuildEnvironmentDto;
 import net.sourceforge.vulcan.dotnet.dto.DotNetProjectConfigDto;
+import net.sourceforge.vulcan.dto.ProjectConfigDto;
 import net.sourceforge.vulcan.exception.ConfigException;
 
 import org.easymock.EasyMock;
+import org.jdom.Document;
+import org.jdom.Element;
+import org.jdom.Namespace;
 
 public class DotNetBuildPluginTest extends TestCase {
 	PluginManager pluginManager = EasyMock.createMock(PluginManager.class);
 	
 	DotNetBuildPlugin plugin = new DotNetBuildPlugin();
 	DotNetProjectConfigDto projectConfig = new DotNetProjectConfigDto();
+	ProjectConfigDto cfg = new ProjectConfigDto();
+	
+	Document xmlDocument = new Document();
+	Element projectElement = new Element("Project", Namespace.getNamespace("http://schemas.microsoft.com/developer/msbuild/2003"));
 	
 	@Override
 	protected void setUp() throws Exception {
@@ -86,5 +94,13 @@ public class DotNetBuildPluginTest extends TestCase {
 		} catch (ConfigException e) {
 			assertEquals("dotnet.config.nant.unsupported", e.getKey());
 		}
+	}
+	public void testCreateConfiguratorForProjFile() throws Exception {
+		xmlDocument.addContent(projectElement);
+		
+		final MSBuildProjectConfigurator cfgr = (MSBuildProjectConfigurator) 
+			plugin.createProjectConfigurator(":pserver:anon@localhost:/cvsroot:module/subdir/Foo.Bar.Baz.csproj", null, xmlDocument);
+		
+		assertNotNull(cfgr);
 	}
 }
