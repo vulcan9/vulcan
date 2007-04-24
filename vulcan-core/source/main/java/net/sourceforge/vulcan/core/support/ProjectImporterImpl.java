@@ -75,8 +75,8 @@ public class ProjectImporterImpl implements ProjectImporter {
 		
 		final List<String> existingProjectNames = new ArrayList<String>(stateManager.getProjectConfigNames());
 		
-		while (!urls.isEmpty()) {
-			final String url = (String) urls.remove(0);
+		for (int i=0; i<urls.size(); i++) {
+			final String url = (String) urls.get(i);
 			
 			final ProjectConfigDto projectConfig = new ProjectConfigDto();
 			projectConfig.setSchedulerNames(schedulerNames);
@@ -173,7 +173,9 @@ public class ProjectImporterImpl implements ProjectImporter {
 		
 		if (namingConflict && Abort == nameCollisionResolutionMode) {
 			throw new DuplicateNameException(projectConfig.getName());
-		} else if (namingConflict && UseExisting == nameCollisionResolutionMode) {
+		}
+		
+		if (namingConflict && UseExisting == nameCollisionResolutionMode) {
 			return false;
 		}
 		
@@ -186,7 +188,7 @@ public class ProjectImporterImpl implements ProjectImporter {
 			projectConfig.setWorkDir(workDir);
 		}
 		
-		return true;
+		return buildConfigurator.shouldCreate();
 	}
 	
 	protected PathInfo computeProjectBasedirUrl(String url, String relativePath, boolean computeBuildSpecPath) {

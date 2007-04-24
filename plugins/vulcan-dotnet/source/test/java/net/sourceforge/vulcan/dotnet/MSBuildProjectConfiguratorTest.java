@@ -88,15 +88,4 @@ public class MSBuildProjectConfiguratorTest extends TestCase {
 		
 		assertEquals(expected, cfgr.getSubprojectUrls());
 	}
-
-	public void testGetSubprojectsExcludesExisting() throws Exception {
-		existingProjectNames.add("Com.Example.Foo.Bar");
-		
-		cfgr.applyConfiguration(projectConfig, "build/script.xml", existingProjectNames, true);
-
-		final List<String> expected = Arrays.asList(
-				"../Com.Example.Other.Thing/Com.Example.Other.Thing.csproj");
-		
-		assertEquals(expected, cfgr.getSubprojectUrls());
-	}
 }

@@ -85,6 +85,9 @@ public class ProjectImporterImplTest extends EasyMockTestCase {
 		public List<String> getSubprojectUrls() {
 			return buildConfiguratorMock.getSubprojectUrls();
 		}
+		public boolean shouldCreate() {
+			return true;
+		}
 	};
 	
 	List<RepositoryAdaptorPlugin> repositoryPlugins = Arrays.asList(rap1, rap2);

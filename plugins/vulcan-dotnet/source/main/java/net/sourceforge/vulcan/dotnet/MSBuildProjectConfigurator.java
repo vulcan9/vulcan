@@ -36,7 +36,9 @@ public class MSBuildProjectConfigurator implements ProjectBuildConfigurator {
 	private Document document;
 	private String url;
 	
-	private List<String> importedProjectPaths;
+	private List<String> subprojectUrls;
+	private String relativePathToProjectBasedir;
+	private boolean shouldCreate = true;
 	
 	public void applyConfiguration(ProjectConfigDto projectConfig,
 			String buildSpecRelativePath, List<String> existingProjectNames,
@@ -51,16 +53,14 @@ public class MSBuildProjectConfigurator implements ProjectBuildConfigurator {
 		projectConfig.setBuildToolConfig(dotNetConfig);
 		
 		if (createSubprojects) {
-			findImportedProjectPaths(document);
+			if (subprojectUrls == null) {
+				findImportedProjectPaths(document);
+			}
 			
 			final List<String> dependencyNames = new ArrayList<String>();
 			
-			for (Iterator<String> itr = importedProjectPaths.iterator(); itr.hasNext(); ) {
+			for (Iterator<String> itr = subprojectUrls.iterator(); itr.hasNext(); ) {
 				final String name = getProjectName(itr.next());
-				
-				if (existingProjectNames.contains(name)) {
-					itr.remove();
-				}
 				
 				dependencyNames.add(name);
 			}
@@ -70,13 +70,29 @@ public class MSBuildProjectConfigurator implements ProjectBuildConfigurator {
 	}
 
 	public String getRelativePathToProjectBasedir() {
-		return null;
+		return relativePathToProjectBasedir;
 	}
 
+	public void setRelativePathToProjectBasedir(String relativePathToProjectBasedir) {
+		this.relativePathToProjectBasedir = relativePathToProjectBasedir;
+	}
+	
 	public List<String> getSubprojectUrls() {
-		return importedProjectPaths;
+		return subprojectUrls;
 	}
 
+	public void setSubprojectUrls(List<String> subprojectUrls) {
+		this.subprojectUrls = subprojectUrls;
+	}
+	
+	public boolean shouldCreate() {
+		return shouldCreate;
+	}
+	
+	public void setShouldCreate(boolean shouldCreate) {
+		this.shouldCreate = shouldCreate;
+	}
+	
 	public boolean isStandaloneProject() {
 		return false;
 	}
@@ -118,14 +134,14 @@ public class MSBuildProjectConfigurator implements ProjectBuildConfigurator {
 		final Element root = xmlDocument.getRootElement();
 		final List<Element> itemGroups = root.getChildren("ItemGroup", root.getNamespace());
 		
-		importedProjectPaths = new ArrayList<String>();
+		subprojectUrls = new ArrayList<String>();
 		
 		for (Element e : itemGroups) {
 			final List<Element> projectReferences = e.getChildren("ProjectReference", root.getNamespace());
 			
 			for (Element projRef : projectReferences) {
 				final String path = projRef.getAttributeValue("Include");
-				importedProjectPaths.add(path.replaceAll("\\\\", "/"));
+				subprojectUrls.add(path.replaceAll("\\\\", "/"));
 			}
 		}
 	}

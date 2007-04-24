@@ -19,9 +19,11 @@
 package net.sourceforge.vulcan.dotnet;
 
 import java.io.File;
+import java.util.Arrays;
 
 import junit.framework.TestCase;
 import net.sourceforge.vulcan.PluginManager;
+import net.sourceforge.vulcan.TestUtils;
 import net.sourceforge.vulcan.dotnet.dto.DotNetBuildEnvironmentDto;
 import net.sourceforge.vulcan.dotnet.dto.DotNetProjectConfigDto;
 import net.sourceforge.vulcan.dto.ProjectConfigDto;
@@ -102,5 +104,40 @@ public class DotNetBuildPluginTest extends TestCase {
 			plugin.createProjectConfigurator(":pserver:anon@localhost:/cvsroot:module/subdir/Foo.Bar.Baz.csproj", null, xmlDocument);
 		
 		assertNotNull(cfgr);
+		assertTrue(cfgr.shouldCreate());
+	}
+	public void testCreateConfiguratorForSln() throws Exception {
+		File buildSpecFile = TestUtils.resolveRelativeFile("source/test/test-solutions/simple.sln");
+		
+		final MSBuildProjectConfigurator cfgr = (MSBuildProjectConfigurator)
+			plugin.createProjectConfigurator(
+				"http://localhost/svn/simple.sln", buildSpecFile, null);
+		
+		assertNotNull(cfgr);
+		
+		assertEquals(".", cfgr.getRelativePathToProjectBasedir());
+		assertEquals(
+				Arrays.asList(
+						"Com.Example.Project/Com.Example.Project.csproj",
+						"Com.Example.Project.Tests/Com.Example.Project.Tests.csproj"),
+				cfgr.getSubprojectUrls());
+		assertFalse(cfgr.shouldCreate());
+	}
+	public void testCreateConfiguratorForSlnNested() throws Exception {
+		File buildSpecFile = TestUtils.resolveRelativeFile("source/test/test-solutions/nested.sln");
+		
+		final MSBuildProjectConfigurator cfgr = (MSBuildProjectConfigurator)
+			plugin.createProjectConfigurator(
+				"http://localhost/svn/project/data/solutions/nested.sln", buildSpecFile, null);
+		
+		assertNotNull(cfgr);
+		
+		assertEquals("../../", cfgr.getRelativePathToProjectBasedir());
+		assertEquals(
+				Arrays.asList(
+						"../Com.Example.Project/Com.Example.Project.csproj",
+						"../../Tests/Com.Example.Project.Tests/Com.Example.Project.Tests.csproj"),
+				cfgr.getSubprojectUrls());
+		assertFalse(cfgr.shouldCreate());
 	}
 }

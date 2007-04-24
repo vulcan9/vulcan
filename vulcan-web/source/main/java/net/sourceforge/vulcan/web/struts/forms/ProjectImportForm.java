@@ -46,7 +46,6 @@ public class ProjectImportForm extends ValidatorForm {
 		schedulerNames = ArrayUtils.EMPTY_STRING_ARRAY;
 		username = StringUtils.EMPTY;
 		password = StringUtils.EMPTY;
-		createSubprojects = false;
 		authenticationRequired = false;
 	}
 
