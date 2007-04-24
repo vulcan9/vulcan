@@ -71,6 +71,14 @@ public interface ProjectBuildConfigurator {
 	boolean isStandaloneProject();
 
 	/**
+	 * This method will be called to determine if the specified configuration should not
+	 * be imported as a Vulcan project.  In most cases <code>true</code> should be returned.
+	 * If the imported URL should only be used to import other project URLs, <code>false</code>
+	 * should be returned.
+	 */
+	boolean shouldCreate();
+	
+	/**
 	 * @return List of scm urls pointing to sub-projects or modules included in this project.
 	 * This method is only called if the user opts to create a project for each sub-project/module
 	 * instead of building them as one large project.

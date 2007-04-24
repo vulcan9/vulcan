@@ -55,6 +55,10 @@ public class AntProjectBuildConfigurator implements ProjectBuildConfigurator {
 		return null;
 	}
 
+	public boolean shouldCreate() {
+		return true;
+	}
+	
 	public boolean isStandaloneProject() {
 		return false;
 	}

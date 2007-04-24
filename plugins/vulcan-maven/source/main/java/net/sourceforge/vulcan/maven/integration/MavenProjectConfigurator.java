@@ -77,6 +77,10 @@ public class MavenProjectConfigurator implements ProjectBuildConfigurator {
 		return "pom".equals(project.getPackaging());
 	}
 
+	public boolean shouldCreate() {
+		return true;
+	}
+
 	@SuppressWarnings("unchecked")
 	public List<String> getSubprojectUrls() {
 		final List<String> moduleList = project.getModules();

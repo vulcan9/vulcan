@@ -21,6 +21,11 @@ package net.sourceforge.vulcan.dotnet;
 import static net.sourceforge.vulcan.dotnet.dto.DotNetBuildEnvironmentDto.DotNetEnvironmentType.MSBuild;
 
 import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import net.sourceforge.vulcan.BuildTool;
 import net.sourceforge.vulcan.PluginManager;
@@ -37,6 +42,7 @@ import net.sourceforge.vulcan.integration.BuildToolPlugin;
 import net.sourceforge.vulcan.integration.ConfigurablePlugin;
 import net.sourceforge.vulcan.integration.support.PluginSupport;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jdom.Document;
 import org.jdom.Element;
@@ -49,6 +55,9 @@ public class DotNetBuildPlugin extends PluginSupport implements
 	public static final String PLUGIN_NAME = ".NET";
 
 	public static final String MSBUILD_NAMESPACE_URI = "http://schemas.microsoft.com/developer/msbuild/2003";
+	
+	private static final Pattern SOLUTION_PROJECT_PATTERN = Pattern.compile("^Project.* = \".+\", \"(.+)\",", Pattern.MULTILINE);
+	private static final Pattern PARENT_DIR_PATTERN = Pattern.compile("^(../)+");
 	
 	private PluginManager pluginManager;
 	
@@ -92,6 +101,13 @@ public class DotNetBuildPlugin extends PluginSupport implements
 			cfgr.setDocument(xmlDocument);
 			return cfgr;
 		}
+		
+		final ProjectBuildConfigurator solutionConfigurator = tryParseSolution(url, buildSpecFile, xmlDocument);
+		
+		if (solutionConfigurator != null) {
+			return solutionConfigurator;
+		}
+		
 		return null;
 	}
 
@@ -149,9 +165,70 @@ public class DotNetBuildPlugin extends PluginSupport implements
 				return true;
 			}
 		}
+		
 		return false;
 	}
 	
+	private ProjectBuildConfigurator tryParseSolution(String url, File buildSpecFile, Document xmlDocument) {
+		final String contents;
+		
+		try {
+			contents = FileUtils.readFileToString(buildSpecFile, "UTF-8");
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+		
+		if (contents.contains("Microsoft Visual Studio Solution File")) {
+			final List<String> projectPaths = parseProjectPaths(contents);
+			
+			final MSBuildProjectConfigurator cfgr = new MSBuildProjectConfigurator();
+			cfgr.setApplicationContext(applicationContext);
+			cfgr.setUrl(url);
+			cfgr.setBuildEnvironment(findBuildEnvironmentByType(MSBuild));
+			cfgr.setSubprojectUrls(projectPaths);
+			cfgr.setRelativePathToProjectBasedir(findLongestRelativePath(projectPaths));
+			cfgr.setShouldCreate(false);
+			
+			return cfgr;
+		}
+		
+		return null;
+	}
+	
+	private String findLongestRelativePath(List<String> projectPaths) {
+		String longest = ".";
+		
+		for (String path : projectPaths) {
+			final Matcher matcher = PARENT_DIR_PATTERN.matcher(path);
+			if (matcher.find()) {
+				final String parents = matcher.group();
+				if (parents.length() > longest.length()) {
+					longest = parents;
+				}
+			}
+		}
+		
+		return longest;
+	}
+
+	private List<String> parseProjectPaths(String contents) {
+		final List<String> paths = new ArrayList<String>();
+		
+		final Pattern pattern = SOLUTION_PROJECT_PATTERN;
+		
+		final Matcher matcher = pattern.matcher(contents);
+		while (matcher.find()) {
+			final String projectPath = matcher.group(1).replaceAll("\\\\", "/");
+			
+			if ("Solution Items".equals(projectPath)) {
+				continue;
+			}
+			paths.add(projectPath);
+		}
+
+		return paths;
+	}
+
 	private String findBuildEnvironmentByType(DotNetEnvironmentType envType) {
 		for (DotNetBuildEnvironmentDto env : globalConfig.getBuildEnvironments()) {
 			if (envType == env.getType()) {
