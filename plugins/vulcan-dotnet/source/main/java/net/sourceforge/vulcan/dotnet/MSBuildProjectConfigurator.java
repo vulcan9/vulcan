@@ -66,6 +66,8 @@ public class MSBuildProjectConfigurator implements ProjectBuildConfigurator {
 			}
 			
 			projectConfig.setDependencies(dependencyNames.toArray(new String[dependencyNames.size()]));
+		} else {
+			shouldCreate = true;
 		}
 	}
 

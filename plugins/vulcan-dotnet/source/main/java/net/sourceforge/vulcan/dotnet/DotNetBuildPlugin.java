@@ -220,7 +220,7 @@ public class DotNetBuildPlugin extends PluginSupport implements
 		while (matcher.find()) {
 			final String projectPath = matcher.group(1).replaceAll("\\\\", "/");
 			
-			if ("Solution Items".equals(projectPath)) {
+			if (!projectPath.toLowerCase().endsWith("proj")) {
 				continue;
 			}
 			paths.add(projectPath);

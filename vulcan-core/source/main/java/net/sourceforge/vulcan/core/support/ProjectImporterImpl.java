@@ -118,7 +118,7 @@ public class ProjectImporterImpl implements ProjectImporter {
 				
 				log.info("Configured project " + projectConfig.getName());
 			} else {
-				log.info("Skipping project " + projectConfig.getName() + " because it already exists.");
+				log.info("Skipping project " + projectConfig.getName());
 			}
 		}
 		
