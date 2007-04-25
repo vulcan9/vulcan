@@ -20,6 +20,8 @@
 </head>
 <body>
 
+<v:messages/>
+
 <v:bubble styleClass="buildHistoryReportForm">
 <html:form action="/viewProjectBuildHistory" method="post">
 <table class="buildHistoryReportForm">
@@ -27,24 +29,40 @@
 	<tbody>
 		<tr>
 			<td rowspan="3"><fmt:message key="label.range"/></td>
-			<td colspan="3">
-				<html:radio property="rangeType" value="all" styleId="rangeAll"/>
-				<label for="rangeAll"><fmt:message key="label.range.include.all"/></label>
-			</td>
-		</tr>
-		<tr>
 			<td>
 				<html:radio property="rangeType" value="date" styleId="rangeByDate"/>
 				<label for="rangeByDate"><fmt:message key="label.range.by.date"/></label>
+				<ul class="dateRanges">
+					<li>
+						<html:radio property="dateRangeSelector" value="today" styleId="dateRangeToday"/>
+						<label for="dateRangeToday"><fmt:message key="label.range.date.today"/></label>
+					</li>
+					<li>
+						<html:radio property="dateRangeSelector" value="weekToDate" styleId="dateRangeWeekToDate"/>
+						<label for="dateRangeWeekToDate"><fmt:message key="label.range.date.week.to.date"/></label>
+					</li>
+					<li>
+						<html:radio property="dateRangeSelector" value="monthToDate" styleId="dateRangeMonthToDate"/>
+						<label for="dateRangeMonthToDate"><fmt:message key="label.range.date.month.to.date"/></label>
+					</li>
+					<li>
+						<html:radio property="dateRangeSelector" value="yearToDate" styleId="dateRangeYearToDate"/>
+						<label for="dateRangeYearToDate"><fmt:message key="label.range.date.year.to.date"/></label>
+					</li>
+					<li>
+						<html:radio property="dateRangeSelector" value="specific" styleId="dateRangeSpecific"/>
+						<label for="dateRangeSpecific"><fmt:message key="label.range.date.specific"/></label>
+					</li>
+				</ul>
 			</td>
-			<td>
+			<td class="dateInputs">
 				<fmt:message key="label.date.start"/>
 				<html:text property="startDate" styleClass="buildNumber"/>
 				<html:messages property="startDate" id="msg">
 					<span class="error">${msg}</span>
 				</html:messages>
 			</td>
-			<td>
+			<td class="dateInputs">
 				<fmt:message key="label.date.end"/>
 				<html:text property="endDate" styleClass="buildNumber"/>
 				<html:messages property="endDate" id="msg">
@@ -70,6 +88,12 @@
 				<html:messages property="endIndex" id="msg">
 					<span class="error">${msg}</span>
 				</html:messages>
+			</td>
+		</tr>
+		<tr>
+			<td colspan="3">
+				<html:radio property="rangeType" value="all" styleId="rangeAll"/>
+				<label for="rangeAll"><fmt:message key="label.range.include.all"/></label>
 			</td>
 		</tr>
 		<tr>
@@ -143,9 +167,6 @@
 		<tr>
 			<td class="buttons" colspan="4">
 				<html:submit property="action" value="Submit"/>
-				<html:messages property="org.apache.struts.action.GLOBAL_MESSAGE" id="msg">
-					<span class="error">${msg}</span>
-				</html:messages>
 			</td>
 		</tr>
 	</tbody>

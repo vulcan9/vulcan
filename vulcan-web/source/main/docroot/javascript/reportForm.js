@@ -16,26 +16,39 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-function ReportForm(form, radioName) {
+function ReportForm(form) {
 	this.form = form;
-	this.radioName = radioName;
 	this.visibleControls = new Object();
 	
 	this.radioChanged = ReportForm.prototype.radioChanged.bind(this);
 }
 
 ReportForm.prototype.initialize = function() {
-	var inputs = this.form[this.radioName];
+	customAddEventListener(this.form["startDate"], "focus", this.dateRangeFocus);
+	customAddEventListener(this.form["endDate"], "focus", this.dateRangeFocus);
 	
+	var inputs = this.form["rangeType"];
+
 	for (var i=0; i<inputs.length; i++) {
 		customAddEventListener(inputs[i], "change", this.radioChanged);
 	}
+
+	var inputs = this.form["dateRangeSelector"];
+	var target = new Object();
+	
+	for (var i=0; i<inputs.length; i++) {
+		customAddEventListener(inputs[i], "change", this.dateRangeChanged);
+		if (inputs[i].checked) {
+			target.target = inputs[i];
+		}
+	}
 	
 	this.radioChanged();
+	this.dateRangeChanged(target);
 }
 
 ReportForm.prototype.radioChanged = function() {
-	var radios = this.form[this.radioName];
+	var radios = this.form["rangeType"];
 	
 	for (var i=0; i<radios.length; i++) {
 		var inputs = findAncestorByTagName(radios[i], "tr").getElementsByTagName("input");
@@ -48,6 +61,41 @@ ReportForm.prototype.radioChanged = function() {
 	}
 }
 
+ReportForm.prototype.dateRangeChanged = function(event) {
+	var target = getTarget(event);
+	var startInput = target.form["startDate"];
+	var endInput = target.form["endDate"];
+
+	var now = new Date();
+	
+	var start = startInput.value;
+	var end = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
+	
+	switch (target.value) {
+		case "today":
+			start = now;
+			break;
+		case "weekToDate":
+			start = new Date(now.getFullYear(), now.getMonth(), now.getDate() - now.getDay());
+			break;
+		case "monthToDate":
+			start = new Date(now.getFullYear(), now.getMonth(), 1);
+			break;
+		case "yearToDate":
+			start = new Date(now.getFullYear(), 0, 1);
+			break;
+		case "default":
+			return;
+	}
+	
+	startInput.value = (start.getMonth()+1) + "/" + start.getDate() + "/" + start.getFullYear();
+	endInput.value = (end.getMonth()+1) + "/" + end.getDate() + "/" + end.getFullYear();
+}
+
+ReportForm.prototype.dateRangeFocus = function() {
+	document.getElementById("dateRangeSpecific").checked = true;
+}
+
 function getSelectedValue(radios) {
 	for (var i=0; i<radios.length; i++) {
 		if (radios[i].checked) {
@@ -58,12 +106,12 @@ function getSelectedValue(radios) {
 }
 
 function registerReportEventHandlers(e) {
-	window.reportForm = new ReportForm(document.getElementById("reportForm"), "rangeType");
+	window.reportForm = new ReportForm(document.getElementById("reportForm"));
 	window.reportForm.defaultRadioChanged = window.reportForm.radioChanged;
 	window.reportForm.radioChanged = (function() {
 		this.defaultRadioChanged();
 		
-		var value = getSelectedValue(this.form[this.radioName]);
+		var value = getSelectedValue(this.form["rangeType"]);
 		
 		if (value == "index") {
 			type = "radio";

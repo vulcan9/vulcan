@@ -35,7 +35,7 @@ import org.apache.struts.validator.ValidatorForm;
 public class ReportForm extends ValidatorForm {
 	private final DateFormat format = new SimpleDateFormat("MM/dd/yyyy");
 	
-	private String rangeType = "all";
+	private String rangeType = "date";
 	private String startDate;
 	private String endDate;
 	private String startIndex;
@@ -43,13 +43,20 @@ public class ReportForm extends ValidatorForm {
 	private String transform;
 	private String[] projectNames;
 	private String[] omitTypes;
+
+	/*
+	 * This property is only supplied so it is remembered.
+	 * startDate and endDate will be populated by javascript,
+	 * and only those values will be used to select the range.
+	 */
+	private String dateRangeSelector = "today";
 	
 	private boolean download;
 	
 	@Override
 	public void reset(ActionMapping mapping, HttpServletRequest request) {
 		super.reset(mapping, request);
-		rangeType = "all";
+		rangeType = "date";
 		projectNames = EMPTY_STRING_ARRAY;
 		omitTypes = EMPTY_STRING_ARRAY;
 		download = false;
@@ -145,6 +152,12 @@ public class ReportForm extends ValidatorForm {
 	}
 	public void setDownload(boolean download) {
 		this.download = download;
+	}
+	public String getDateRangeSelector() {
+		return dateRangeSelector;
+	}
+	public void setDateRangeSelector(String dateRangeSelector) {
+		this.dateRangeSelector = dateRangeSelector;
 	}
 	private Date parseDate(final String string) {
 		synchronized(format) {

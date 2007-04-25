@@ -274,13 +274,18 @@ ul.modified-paths {
 }
 
 ul.options,ul.projectBuildOptions,div.projectCheckboxes ul,
-ul.metaDataOptions,ul.object-array,ul.primitive-array {
+ul.metaDataOptions,ul.object-array,ul.primitive-array,
+ul.dateRanges {
 	list-style: none;
 	padding-left: 0;
 	padding-right: 10px;
 	margin-left: 0;
 	margin-right: 10px;
 	margin-top: 0;
+}
+
+ul.dateRanges li {
+	padding-left: 2em;
 }
 
 ul.options li {
@@ -479,6 +484,9 @@ td.build-number {
 	text-align: center;
 }
 
+td.dateInputs {
+	vertical-align: bottom;
+}
 
 div.tables th,div.tables td {
 	text-align: center;
@@ -499,7 +507,7 @@ select.transform {
 }
 
 input.buildNumber {
-	width: 4em;
+	width: 8em;
 	margin-left: 1em;
 }
 

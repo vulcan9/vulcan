@@ -47,7 +47,7 @@ function createCookie(name,value,days) {
 	document.cookie = name+"="+value+expires+"; path=/";
 }
 
-function readCookie(name) {
+function readCookie(name, defaultValue) {
 	var nameEQ = name + "=";
 	var ca = document.cookie.split(';');
 	for(var i=0;i < ca.length;i++)
@@ -61,7 +61,7 @@ function readCookie(name) {
 			return c.substring(nameEQ.length,c.length);
 		}
 	}
-	return null;
+	return defaultValue;
 }
 
 function eraseCookie(name) {
@@ -424,7 +424,7 @@ function registerHandlers() {
 	registerHandlerByTagNameAndClass('a', 'confirm', 'click', confirmHandler);
 	registerHandlerByTagNameAndClass('label', '.*', 'mousedown', preventShiftClickTextSelectionHandler);
 	
-	var windowLaunchMode = readCookie("VULCAN_windowMode");
+	var windowLaunchMode = readCookie("VULCAN_windowMode", "modePopup");
 	
 	if (windowLaunchMode) {
 		window.launchMode = windowLaunchMode;
