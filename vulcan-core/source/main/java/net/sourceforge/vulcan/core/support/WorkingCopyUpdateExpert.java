@@ -33,9 +33,6 @@ import net.sourceforge.vulcan.dto.ProjectConfigDto.UpdateStrategy;
 import net.sourceforge.vulcan.dto.ProjectStatusDto.UpdateType;
 import net.sourceforge.vulcan.metadata.SvnRevision;
 
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.filefilter.FalseFileFilter;
-import org.apache.commons.io.filefilter.TrueFileFilter;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -57,7 +54,16 @@ class WorkingCopyUpdateExpert {
 			return Full;
 		}
 		
-		if (FileUtils.listFiles(workDir, TrueFileFilter.INSTANCE, FalseFileFilter.INSTANCE).isEmpty()) {
+		final File[] files = workDir.listFiles();
+		
+		if (files == null) {
+			log.error("Failed to list contents of " + workDir.getAbsolutePath() +
+					" probably due to insufficient permissions.  Attempting to perform a full build of " +
+					currentTarget.getName());
+			return Full;
+		}
+		
+		if (files.length == 0) {
 			log.info("Performing full build of " + currentTarget.getName() + " even though incremental " +
 					"build was requested because work directory is empty.");
 			
