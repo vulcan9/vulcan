@@ -57,4 +57,7 @@ public class JstlFunctionsTest extends TestCase {
 	public void testGetPropListNull() throws Exception {
 		assertEquals(Collections.emptyList(), JstlFunctions.getActionErrorPropertyList(request));
 	}
+	public void testEncode() throws Exception {
+		assertEquals("a%20b%3F", JstlFunctions.encode("a b?"));
+	}
 }

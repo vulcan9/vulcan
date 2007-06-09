@@ -17,6 +17,15 @@
 
 
 <html:xhtml/>
+
+<head>
+	<title>
+		<fmt:message key="header.directory.listing">
+			<fmt:param value="${fileListPath}"/>
+		</fmt:message>
+	</title>
+</head>
+
 <body>
 	<fmt:message key="header.directory.listing">
 		<fmt:param value="${fileListPath}"/>
