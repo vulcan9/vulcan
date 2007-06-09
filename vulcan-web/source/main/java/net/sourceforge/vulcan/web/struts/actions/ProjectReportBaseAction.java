@@ -38,6 +38,7 @@ import net.sourceforge.vulcan.core.Store;
 import net.sourceforge.vulcan.dto.ProjectConfigDto;
 import net.sourceforge.vulcan.exception.NoSuchTransformFormatException;
 import net.sourceforge.vulcan.metadata.SvnRevision;
+import net.sourceforge.vulcan.web.JstlFunctions;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.struts.action.Action;
@@ -93,7 +94,7 @@ public abstract class ProjectReportBaseAction extends Action {
 			buf.append('/');	
 		}
 		
-		buf.append(projectConfig.getName());
+		buf.append(JstlFunctions.encode(projectConfig.getName()));
 		buf.append('/');
 		
 		String sitePath = projectConfig.getSitePath();

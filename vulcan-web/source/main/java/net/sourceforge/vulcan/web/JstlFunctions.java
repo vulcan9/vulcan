@@ -22,6 +22,9 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -36,6 +39,15 @@ public abstract class JstlFunctions {
 		return s.replaceAll("[ +\\[\\]]", "_");
 	}
 	
+	public static String encode(String s) {
+		try {
+			// replace + with %20 because + is only appropriate for query strings, not for paths.
+			return URLEncoder.encode(s, "UTF-8").replaceAll("\\+", "%20");
+		} catch (UnsupportedEncodingException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
 	public static void setStatus(HttpServletResponse response, int code) {
 		response.setStatus(code);
 	}
