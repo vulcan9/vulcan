@@ -42,7 +42,12 @@ public class ShellBuildPlugin extends PluginSupport
 	public BuildTool createInstance(BuildToolConfigDto config)
 			throws ConfigException {
 		
-		return new ShellBuildTool(globalConfig, (ShellProjectConfig)config);
+		final ShellBuildTool tool = new ShellBuildTool();
+		
+		tool.setGlobalConfig(globalConfig);
+		tool.setProjectPluginConfig((ShellProjectConfig) config);
+		
+		return tool;
 	}
 
 	public ProjectBuildConfigurator createProjectConfigurator(String url,
