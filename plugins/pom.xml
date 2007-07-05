@@ -29,6 +29,7 @@
 		<module>vulcan-mailer</module>
 		<module>vulcan-maven</module>
 		<module>vulcan-metrics</module>
+		<module>vulcan-shell</module>
 		<module>vulcan-subversion</module>
 	</modules>
 	
