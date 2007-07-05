@@ -44,7 +44,7 @@ import org.apache.struts.actions.DispatchAction;
 @SvnRevision(id="$Id$", url="$HeadURL$")
 public abstract class BaseDispatchAction extends DispatchAction {
 	private Log auditLog;
-	private Set actionsToAudit;
+	private Set<String> actionsToAudit;
 	protected StateManager stateManager;
 	
 	@Override
@@ -78,7 +78,7 @@ public abstract class BaseDispatchAction extends DispatchAction {
 		this.auditLog = auditLog;
 	}
 	
-	public void setActionsToAudit(Set actionsToAudit) {
+	public void setActionsToAudit(Set<String> actionsToAudit) {
 		this.actionsToAudit = actionsToAudit;
 	}
 	

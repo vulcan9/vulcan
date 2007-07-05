@@ -123,7 +123,7 @@
 			<plugin>
 				<artifactId>maven-surefire-plugin</artifactId>
 				<configuration>
-					<!-- Need to specify emtpy excludes to prevent default
+					<!-- Need to specify empty excludes to prevent default
 						exclude *Abstract*Test.java from omitting valid tests. -->
 					<excludes/>
 				</configuration>

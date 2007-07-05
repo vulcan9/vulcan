@@ -108,6 +108,7 @@ public class CvsProjectConfigurator extends CvsSupport implements ProjectReposit
 		return new CvsProjectConfigurator(globalConfig, profile, projectConfig, cvsRoot, file, newProfile);
 	}
 	
+	@SuppressWarnings("unchecked")
 	public void download(File target) throws RepositoryException, IOException {
 		openConnection();
 		
@@ -129,12 +130,12 @@ public class CvsProjectConfigurator extends CvsSupport implements ProjectReposit
 			
 			client.executeCommand(cmd, options);
 			
-			final Collection files = FileUtils.listFiles(exportDir, null, false);
+			final Collection<File> files = FileUtils.listFiles(exportDir, null, false);
 			if (files.size() != 1) {
 				throw new RepositoryException("cvs.erorrs.export.failed", new Object[] {files.size()}, null);
 			}
 			
-			final File source = (File) files.iterator().next();
+			final File source = files.iterator().next();
 			if (!source.renameTo(target)) {
 				FileUtils.copyFile(source, target);
 			}

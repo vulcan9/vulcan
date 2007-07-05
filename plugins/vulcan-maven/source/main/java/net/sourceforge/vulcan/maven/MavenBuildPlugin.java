@@ -200,7 +200,7 @@ public class MavenBuildPlugin extends PluginSupport
 	}
 	
 	/**
-	 * ClassLoader forces classes in a specified package (or subpackage)to be loaded
+	 * ClassLoader forces classes in a specified package (or sub-package)to be loaded
 	 * by this instance instead of delegating to the parent first.  This allows classes
 	 * in the integration package to be loaded by the same instance that has the jars
 	 * in the Maven 2 home.  This is required to avoid packaging all of those jars, which
@@ -220,9 +220,9 @@ public class MavenBuildPlugin extends PluginSupport
 				return super.loadClass(name, resolve);
 			}
 			
-			// Against standard practie, do NOT delegate to parent first:
+			// Against standard practice, do NOT delegate to parent first:
 			
-			Class c = findLoadedClass(name);
+			Class<?> c = findLoadedClass(name);
 			if (c == null) {
 				c = findClass(name);
 			}

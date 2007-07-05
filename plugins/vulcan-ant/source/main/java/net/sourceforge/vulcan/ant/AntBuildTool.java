@@ -326,7 +326,7 @@ public class AntBuildTool implements BuildTool {
 		return launcher;
 	}
 	
-	public static File getLocalClassPathEntry(Class cls, ClassLoader ldr) throws ConfigException {
+	public static File getLocalClassPathEntry(Class<?> cls, ClassLoader ldr) throws ConfigException {
 		if (ldr == null) {
 			ldr = cls.getClassLoader();
 		}
