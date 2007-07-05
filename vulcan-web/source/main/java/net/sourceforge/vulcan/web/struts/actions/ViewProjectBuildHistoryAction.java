@@ -41,6 +41,7 @@ import org.apache.struts.action.ActionMessage;
 import org.apache.struts.action.ActionMessages;
 import org.jdom.Document;
 
+//TODO: long-running reports may cause denial of service in dashboard...
 @SvnRevision(id="$Id$", url="$HeadURL$")
 public final class ViewProjectBuildHistoryAction extends ProjectReportBaseAction {
 	private String filename;

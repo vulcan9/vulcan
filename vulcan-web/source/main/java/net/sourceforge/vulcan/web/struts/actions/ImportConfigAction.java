@@ -65,7 +65,7 @@ public class ImportConfigAction extends Action {
 	public void setAuditLog(Log auditLog) {
 		this.auditLog = auditLog;
 	}
-	public void setActionsToAudit(Set actionsToAudit) {
+	public void setActionsToAudit(Set<String> actionsToAudit) {
 	}
 	public void setEventHandler(EventHandler eventHandler) {
 		this.eventHandler = eventHandler;

@@ -383,7 +383,7 @@ public final class PluginConfigForm extends ValidatorForm implements DispatchFor
 		return false;
 	}
 	private void populateEnumChoices(String propertyName, Class<?> c) {
-		final Enum[] values;
+		final Enum<?>[] values;
 		
 		try {
 			final Method m = c.getMethod("values", (Class[])null);

@@ -151,7 +151,7 @@ public final class SpringBeanXmlEncoder implements BeanEncoder {
 		} else if (object instanceof Object[]) {
 			encodeList(node, Arrays.asList((Object[])object));
 		} else if (object instanceof Map) {
-			encodeMap(node, (Map)object);
+			encodeMap(node, (Map<?,?>)object);
 		} else if (object instanceof UUID) {
 			encodeUUID(node, (UUID)object);
 		} else {
@@ -226,7 +226,7 @@ public final class SpringBeanXmlEncoder implements BeanEncoder {
 			propertyNode.addContent(new Element("null"));
 			return;
 		} else if (object instanceof Enum) {
-			encodeEnum(propertyNode, (Enum)object);
+			encodeEnum(propertyNode, (Enum<?>)object);
 			return;
 		}
 		

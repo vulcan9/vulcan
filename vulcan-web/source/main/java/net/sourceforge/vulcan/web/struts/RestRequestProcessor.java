@@ -108,6 +108,7 @@ public class RestRequestProcessor extends RequestProcessor {
 			delegate.addForwardConfig(config);
 		}
 		@Override
+		@SuppressWarnings("unchecked")
 		public ExceptionConfig findException(Class type) {
 			return delegate.findException(type);
 		}
