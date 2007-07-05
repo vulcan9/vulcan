@@ -75,7 +75,7 @@ public class MavenBuildPluginTest extends MavenBuildToolTestBase {
 		
 		final List<String> urls = cfgr.getSubprojectUrls();
 		
-		assertEquals(8, urls.size());
+		assertEquals(9, urls.size());
 		
 		assertEquals("http://vulcan.googlecode.com/svn/trunk/plugins/vulcan-ant/pom.xml", urls.get(0));
 	}
