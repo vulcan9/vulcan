@@ -68,6 +68,11 @@ public class ShellBuildToolConfig extends PluginConfigDto {
 		return ShellBuildPlugin.PLUGIN_NAME;
 	}
 
+	@Override
+	public String getHelpTopic() {
+		return "ShellConfiguration";
+	}
+	
 	public String getBuildNumberVariableName() {
 		return buildNumberVariableName;
 	}
