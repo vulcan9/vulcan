@@ -63,6 +63,11 @@ public class ShellProjectConfig extends BuildToolConfigDto {
 		return ShellBuildPlugin.PLUGIN_NAME;
 	}
 
+	@Override
+	public String getHelpTopic() {
+		return "ShellProjectConfiguration";
+	}
+	
 	public String[] getArguments() {
 		return arguments;
 	}
