@@ -39,6 +39,8 @@ public abstract class DotNetBuildToolBase extends AntBuildTool {
 	protected final DotNetBuildEnvironmentDto buildEnv;
 	protected final File pluginDir;
 
+	private String propertySwitch;
+	
 	public DotNetBuildToolBase(DotNetGlobalConfigDto globalConfig, DotNetProjectConfigDto dotNetProjectConfig, DotNetBuildEnvironmentDto buildEnv, File pluginDir) {
 		super(dotNetProjectConfig, null, new UdpEventSource(new ByteSerializer()));
 		
@@ -58,10 +60,12 @@ public abstract class DotNetBuildToolBase extends AntBuildTool {
 
 		final DotNetGlobalConfigDto.GlobalBuildConfiguration globalConfiguration = globalConfig.getBuildConfiguration();
 		
+		final String prefix = propertySwitch + ":Configuration=";
+		
 		if (!buildConfiguration.equals(DotNetProjectConfigDto.BuildConfiguration.Inherit)) {
-			args.add("/p:Configuration=" + buildConfiguration.name());
+			args.add(prefix + buildConfiguration.name());
 		} else if (globalConfiguration != null && !globalConfiguration.equals(DotNetGlobalConfigDto.GlobalBuildConfiguration.Unspecified)) {
-			args.add("/p:Configuration=" + globalConfiguration.name());
+			args.add(prefix + globalConfiguration.name());
 		}
 	}
 
@@ -96,12 +100,17 @@ public abstract class DotNetBuildToolBase extends AntBuildTool {
 		for (Map.Entry<String, String> e : antProps.entrySet()) {
 			final StringBuilder sb = new StringBuilder();
 			
-			sb.append("/p:");
+			sb.append(propertySwitch);
+			sb.append(":");
 			sb.append(e.getKey());
 			sb.append("=");
 			sb.append(e.getValue());
 			
 			args.add(sb.toString());
 		}
+	}
+	
+	protected void setPropertySwitch(String propertySwitch) {
+		this.propertySwitch = propertySwitch;
 	}
 }

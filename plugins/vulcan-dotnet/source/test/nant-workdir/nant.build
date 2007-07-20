@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<project name="test-build" default="default_build" xmlns="http://nant.sf.net/schemas/nant.xsd">
+	<target name="default_build">
+	</target>
+
+	<target name="fail">
+		<fail>Failed because you asked me to.</fail>
+	</target>
+	
+	<target name="echo">
+		<property name="BuildNumber" value=""/>
+		<property name="ProjectRevision" value=""/>
+		<property name="RepositoryRevision" value=""/>
+		<property name="ProjectTag" value=""/>
+		<property name="Configuration" value=""/>
+		<property name="Foo" value=""/>
+		<property name="Bar" value=""/>
+		
+		<echo level="Warning" message="Build Number: ${BuildNumber}
+Revision: ${ProjectRevision}
+NumericRevision: ${RepositoryRevision}
+ProjectTag: ${ProjectTag}
+Configuration: ${Configuration}
+Foo: ${Foo}
+Bar: ${Bar}"/>
+	</target>
+	
+	<target name="compile-syntax-errors">
+		<echo level="Error" message="foo"/>
+		<csc
+			target="library"
+			output="SyntaxErrors.dll">
+
+			<sources failonempty="true">
+				<include name="SyntaxErrors.cs"/>
+			</sources>
+		</csc>
+	</target>
+</project>
+

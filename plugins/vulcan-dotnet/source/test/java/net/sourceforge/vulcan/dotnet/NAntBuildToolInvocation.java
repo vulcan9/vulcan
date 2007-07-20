@@ -36,7 +36,7 @@ import net.sourceforge.vulcan.exception.ConfigException;
 
 import org.apache.commons.io.FileUtils;
 
-public class DotNetBuildToolInvocation extends TestCase {
+public class NAntBuildToolInvocation extends TestCase {
 	DotNetBuildToolBase tool;
 	
 	DotNetProjectConfigDto dotNetProjectConfig = new DotNetProjectConfigDto();
@@ -73,11 +73,12 @@ public class DotNetBuildToolInvocation extends TestCase {
 	protected void setUp() throws Exception {
 		super.setUp();
 		
-		buildEnv.setLocation("msbuild.exe");
+		buildEnv.setLocation("c:\\program files\\nant-0.85-rc4\\bin\\nant.exe");
+		buildEnv.setType(DotNetBuildEnvironmentDto.DotNetEnvironmentType.NAnt);
 		
-		projectConfig.setWorkDir("source/test/msbuild-workdir");
+		projectConfig.setWorkDir("source/test/nant-workdir");
 		
-		tool = new MSBuildTool(globalConfig, dotNetProjectConfig, buildEnv, new File("target/vulcan-plugin-includes"));
+		tool = new NAntBuildTool(globalConfig, dotNetProjectConfig, buildEnv, new File("target/assemblies"));
 		
 		buildLog = File.createTempFile("vulcan-dotnet-unit-test", ".txt");
 		buildLog.delete();
@@ -88,7 +89,6 @@ public class DotNetBuildToolInvocation extends TestCase {
 		globalConfig.setRevisionProperty("");
 		globalConfig.setNumericRevisionProperty("");
 		globalConfig.setTagProperty("");
-
 	}
 	
 	public void testDefaultTarget() throws Exception {
@@ -103,33 +103,24 @@ public class DotNetBuildToolInvocation extends TestCase {
 	}
 	
 	public void testFailure() throws Exception {
-		dotNetProjectConfig.setTargets("Fail");
+		dotNetProjectConfig.setTargets("fail");
 		
 		try {
 			tool.buildProject(projectConfig, status, buildLog, detailCallback);
 			fail("expected exception");
 		} catch (BuildFailedException e) {
-			assertEquals("Fail", e.getTarget());
-			assertEquals("Build FAILED.", e.getMessage());
+			assertEquals("fail", e.getTarget());
+			assertTrue(e.getMessage().endsWith("Failed because you asked me to."));
 			
 			assertEquals(2, targets.size());
 			
-			assertEquals("Fail", targets.get(0));
+			assertEquals("fail", targets.get(0));
 			assertEquals(null, targets.get(1));
-			
-			assertEquals(1, errors.size());
-			
-			final BuildMessageDto error = errors.get(0);
-			assertEquals("You can't do that on television.", error.getMessage());
-			
-			assertTrue(error.getFile() != null && error.getFile().length() > 0);
-			assertEquals(Integer.valueOf(9), error.getLineNumber());
-			assertEquals("", error.getCode());
 		}
 	}
 	
 	public void testFailsOnManyProjectFilesNoneSpecified() throws Exception {
-		final File otherFile = new File(projectConfig.getWorkDir(), "other.proj");
+		final File otherFile = new File(projectConfig.getWorkDir(), "other.build");
 		FileUtils.touch(otherFile);
 
 		try {
@@ -145,10 +136,10 @@ public class DotNetBuildToolInvocation extends TestCase {
 	}
 	
 	public void testSpecifyProjectFile() throws Exception {
-		final File otherFile = new File(projectConfig.getWorkDir(), "other.proj");
+		final File otherFile = new File(projectConfig.getWorkDir(), "other.build");
 		FileUtils.touch(otherFile);
 
-		dotNetProjectConfig.setBuildScript("msbuild.proj");
+		dotNetProjectConfig.setBuildScript("nant.build");
 
 		try {
 			tool.buildProject(projectConfig, status, buildLog, detailCallback);
@@ -256,17 +247,20 @@ public class DotNetBuildToolInvocation extends TestCase {
 			String expectedBuildNumber, String expectedRevision,
 			String expectedNumericRevision, String expectedTag, String expectedConfiguration, String expectedFoo, String expectedBar)
 			throws BuildFailedException, ConfigException {
-		dotNetProjectConfig.setTargets("Echo");
+		dotNetProjectConfig.setTargets("echo");
 		
 		tool.buildProject(projectConfig, status, buildLog, detailCallback);
 		
-		assertEquals(1, warnings.size());
+		assertTrue(warnings.size() > 0);
+		
+		final BuildMessageDto warning = warnings.get(warnings.size() - 1);
+		
 		assertEquals("Build Number: " + expectedBuildNumber +
 				";Revision: " + expectedRevision +
 				";NumericRevision: " + expectedNumericRevision +
 				";ProjectTag: " + expectedTag +
 				";Configuration: " + expectedConfiguration +
 				";Foo: " + expectedFoo +
-				";Bar: " + expectedBar, warnings.get(0).getMessage().replaceAll("\r", "").replaceAll("\n", ";"));
+				";Bar: " + expectedBar, warning.getMessage().replaceAll("\r", "").replaceAll("\n", ";"));
 	}
 }

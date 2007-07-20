@@ -18,7 +18,7 @@
  */
 package net.sourceforge.vulcan.dotnet;
 
-import static net.sourceforge.vulcan.dotnet.dto.DotNetBuildEnvironmentDto.DotNetEnvironmentType.MSBuild;
+import static net.sourceforge.vulcan.dotnet.dto.DotNetBuildEnvironmentDto.DotNetEnvironmentType.*;
 
 import java.io.File;
 import java.io.IOException;
@@ -55,6 +55,7 @@ public class DotNetBuildPlugin extends PluginSupport implements
 	public static final String PLUGIN_NAME = ".NET";
 
 	public static final String MSBUILD_NAMESPACE_URI = "http://schemas.microsoft.com/developer/msbuild/2003";
+	public static final String NANT_NAMESPACE_URI = "http://nant.sf.net/schemas/nant.xsd";
 	
 	private static final Pattern SOLUTION_PROJECT_PATTERN = Pattern.compile("^Project.* = \".+\", \"(.+)\",", Pattern.MULTILINE);
 	private static final Pattern PARENT_DIR_PATTERN = Pattern.compile("^(../)+");
@@ -80,7 +81,6 @@ public class DotNetBuildPlugin extends PluginSupport implements
 		
 		try {
 			dir = pluginManager.getPluginDirectory(PLUGIN_ID);
-			
 		} catch (PluginNotFoundException e) {
 			throw new RuntimeException(e);
 		}
@@ -89,16 +89,27 @@ public class DotNetBuildPlugin extends PluginSupport implements
 			return new MSBuildTool(globalConfig, dotNetProjectConfig, buildEnv, dir);
 		}
 		
-		throw new ConfigException("dotnet.config.nant.unsupported", null);
+		return new NAntBuildTool(globalConfig, dotNetProjectConfig, buildEnv, dir);
 	}
 
 	public ProjectBuildConfigurator createProjectConfigurator(String url, File buildSpecFile, Document xmlDocument) throws ConfigException {
 		if (isMSBuildFile(url, buildSpecFile, xmlDocument)) {
-			final MSBuildProjectConfigurator cfgr = new MSBuildProjectConfigurator();
+			final DotNetProjectConfigurator cfgr = new DotNetProjectConfigurator();
 			cfgr.setApplicationContext(applicationContext);
 			cfgr.setUrl(url);
 			cfgr.setBuildEnvironment(findBuildEnvironmentByType(MSBuild));
 			cfgr.setDocument(xmlDocument);
+			return cfgr;
+		}
+		
+		if (isNAntBuildFile(url, buildSpecFile, xmlDocument)) {
+			final DotNetProjectConfigurator cfgr = new DotNetProjectConfigurator();
+			cfgr.setApplicationContext(applicationContext);
+			cfgr.setUrl(url);
+			cfgr.setBuildEnvironment(findBuildEnvironmentByType(NAnt));
+			cfgr.setDocument(xmlDocument);
+			cfgr.setDeclaredProjectName(xmlDocument.getRootElement().getAttributeValue("name"));
+			
 			return cfgr;
 		}
 		
@@ -156,7 +167,20 @@ public class DotNetBuildPlugin extends PluginSupport implements
 		
 		throw new ConfigException("dotnet.config.environment.not.available", new String[] {desc});
 	}
-
+	
+	private boolean isNAntBuildFile(String url, File buildSpecFile, Document xmlDocument) {
+		if (xmlDocument != null) {
+			final Element root = xmlDocument.getRootElement();
+			if ("project".equals(root.getName())
+					&& NANT_NAMESPACE_URI.equals(root.getNamespaceURI())
+					&& StringUtils.isNotBlank(root.getAttributeValue("name"))) {
+				return true;
+			}
+		}
+		
+		return false;
+	}
+	
 	private boolean isMSBuildFile(String url, File buildSpecFile, Document xmlDocument) {
 		if (xmlDocument != null) {
 			final Element root = xmlDocument.getRootElement();
@@ -181,7 +205,7 @@ public class DotNetBuildPlugin extends PluginSupport implements
 		if (contents.contains("Microsoft Visual Studio Solution File")) {
 			final List<String> projectPaths = parseProjectPaths(contents);
 			
-			final MSBuildProjectConfigurator cfgr = new MSBuildProjectConfigurator();
+			final DotNetProjectConfigurator cfgr = new DotNetProjectConfigurator();
 			cfgr.setApplicationContext(applicationContext);
 			cfgr.setUrl(url);
 			cfgr.setBuildEnvironment(findBuildEnvironmentByType(MSBuild));
