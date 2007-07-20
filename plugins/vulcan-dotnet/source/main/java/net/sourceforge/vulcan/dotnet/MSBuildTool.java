@@ -52,6 +52,8 @@ public class MSBuildTool extends DotNetBuildToolBase  {
 
 	MSBuildTool(DotNetGlobalConfigDto globalConfig, DotNetProjectConfigDto dotNetProjectConfig, DotNetBuildEnvironmentDto buildEnv, File pluginDir) {
 		super(globalConfig, dotNetProjectConfig, buildEnv, pluginDir);
+		
+		setPropertySwitch("/p");
 	}
 	
 	@Override

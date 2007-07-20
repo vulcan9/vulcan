@@ -29,7 +29,7 @@ import org.jdom.Document;
 import org.jdom.Element;
 
 public class MSBuildProjectConfiguratorTest extends TestCase {
-	MSBuildProjectConfigurator cfgr = new MSBuildProjectConfigurator();
+	DotNetProjectConfigurator cfgr = new DotNetProjectConfigurator();
 	
 	Document doc = new Document();
 

@@ -73,11 +73,11 @@
 			<sources failonempty="true">
 				<include name="${assembly.info.file}"/>
 				<include name="source/main/csharp/ListenerBase/*.cs"/>
-				<include name="source/main/csharp/NantListener/*.cs"/>
+				<include name="source/main/csharp/NantBuildListener/*.cs"/>
 			</sources>
 
 			<references>
-				<include name="NAnt.Core.dll"/>
+				<include name="${nant::get-base-directory()}/NAnt.Core.dll"/>
 			</references>
 		</csc>
 	</target>

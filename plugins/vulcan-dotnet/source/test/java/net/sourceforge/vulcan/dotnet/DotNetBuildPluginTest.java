@@ -42,11 +42,14 @@ public class DotNetBuildPluginTest extends TestCase {
 	ProjectConfigDto cfg = new ProjectConfigDto();
 	
 	Document xmlDocument = new Document();
-	Element projectElement = new Element("Project", Namespace.getNamespace("http://schemas.microsoft.com/developer/msbuild/2003"));
+	Element msbuildProjectElement = new Element("Project", Namespace.getNamespace("http://schemas.microsoft.com/developer/msbuild/2003"));
+	Element nantProjectElement = new Element("project", Namespace.getNamespace("http://nant.sf.net/schemas/nant.xsd"));
 	
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
+		
+		nantProjectElement.setAttribute("name", "nant-project");
 		
 		plugin.setPluginManager(pluginManager);
 		
@@ -90,26 +93,22 @@ public class DotNetBuildPluginTest extends TestCase {
 	public void testNAntUnsupported() throws Exception {
 		projectConfig.setBuildEnvironment("myNantBuild");
 		
-		try {
-			plugin.createInstance(projectConfig);
-			fail("expected exception");
-		} catch (ConfigException e) {
-			assertEquals("dotnet.config.nant.unsupported", e.getKey());
-		}
+		assertNotNull(plugin.createInstance(projectConfig));
 	}
 	public void testCreateConfiguratorForProjFile() throws Exception {
-		xmlDocument.addContent(projectElement);
+		xmlDocument.addContent(msbuildProjectElement);
 		
-		final MSBuildProjectConfigurator cfgr = (MSBuildProjectConfigurator) 
+		final DotNetProjectConfigurator cfgr = (DotNetProjectConfigurator) 
 			plugin.createProjectConfigurator(":pserver:anon@localhost:/cvsroot:module/subdir/Foo.Bar.Baz.csproj", null, xmlDocument);
 		
 		assertNotNull(cfgr);
 		assertTrue(cfgr.shouldCreate());
+		assertEquals("myMsBuild", cfgr.getBuildEnvironment());
 	}
 	public void testCreateConfiguratorForSln() throws Exception {
 		File buildSpecFile = TestUtils.resolveRelativeFile("source/test/test-solutions/simple.sln");
 		
-		final MSBuildProjectConfigurator cfgr = (MSBuildProjectConfigurator)
+		final DotNetProjectConfigurator cfgr = (DotNetProjectConfigurator)
 			plugin.createProjectConfigurator(
 				"http://localhost/svn/simple.sln", buildSpecFile, null);
 		
@@ -126,7 +125,7 @@ public class DotNetBuildPluginTest extends TestCase {
 	public void testCreateConfiguratorForSlnNested() throws Exception {
 		File buildSpecFile = TestUtils.resolveRelativeFile("source/test/test-solutions/nested.sln");
 		
-		final MSBuildProjectConfigurator cfgr = (MSBuildProjectConfigurator)
+		final DotNetProjectConfigurator cfgr = (DotNetProjectConfigurator)
 			plugin.createProjectConfigurator(
 				"http://localhost/svn/project/data/solutions/nested.sln", buildSpecFile, null);
 		
@@ -140,4 +139,16 @@ public class DotNetBuildPluginTest extends TestCase {
 				cfgr.getSubprojectUrls());
 		assertFalse(cfgr.shouldCreate());
 	}
+	public void testCreateConfiguratorForNant() throws Exception {
+		xmlDocument.addContent(nantProjectElement);
+		
+		final DotNetProjectConfigurator cfgr = (DotNetProjectConfigurator) 
+			plugin.createProjectConfigurator(":pserver:anon@localhost:/cvsroot:module/subdir/nant.build", null, xmlDocument);
+		
+		assertNotNull(cfgr);
+		assertTrue(cfgr.shouldCreate());
+		assertEquals("nant-project", cfgr.getDeclaredProjectName());
+		assertEquals("myNantBuild", cfgr.getBuildEnvironment());
+	}
+
 }

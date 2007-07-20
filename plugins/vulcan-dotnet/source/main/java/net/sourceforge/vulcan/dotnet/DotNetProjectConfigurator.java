@@ -26,11 +26,12 @@ import net.sourceforge.vulcan.ProjectBuildConfigurator;
 import net.sourceforge.vulcan.dotnet.dto.DotNetProjectConfigDto;
 import net.sourceforge.vulcan.dto.ProjectConfigDto;
 
+import org.apache.commons.lang.StringUtils;
 import org.jdom.Document;
 import org.jdom.Element;
 import org.springframework.context.ApplicationContext;
 
-public class MSBuildProjectConfigurator implements ProjectBuildConfigurator {
+public class DotNetProjectConfigurator implements ProjectBuildConfigurator {
 	private ApplicationContext applicationContext;
 	private String buildEnvironment;
 	private Document document;
@@ -38,6 +39,7 @@ public class MSBuildProjectConfigurator implements ProjectBuildConfigurator {
 	
 	private List<String> subprojectUrls;
 	private String relativePathToProjectBasedir;
+	private String declaredProjectName;
 	private boolean shouldCreate = true;
 	
 	public void applyConfiguration(ProjectConfigDto projectConfig,
@@ -99,6 +101,14 @@ public class MSBuildProjectConfigurator implements ProjectBuildConfigurator {
 		return false;
 	}
 
+	public String getDeclaredProjectName() {
+		return declaredProjectName;
+	}
+	
+	public void setDeclaredProjectName(String declaredProjectName) {
+		this.declaredProjectName = declaredProjectName;
+	}
+	
 	public ApplicationContext getApplicationContext() {
 		return applicationContext;
 	}
@@ -149,6 +159,10 @@ public class MSBuildProjectConfigurator implements ProjectBuildConfigurator {
 	}
 
 	private String getProjectName(String url) {
+		if (StringUtils.isNotBlank(declaredProjectName)) {
+			return declaredProjectName;
+		}
+		
 		final int lastSlash = url.lastIndexOf('/');
 		if (lastSlash > 0) {
 			url = url.substring(lastSlash + 1);
