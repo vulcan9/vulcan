@@ -303,15 +303,26 @@ public abstract class AbstractProjectDomBuilder implements ProjectDomBuilder {
 		for (ChangeSetDto changes : changeSetDtos) {
 			final Element changeSet = new Element("change-set");
 			
-			changeSet.setAttribute("author", changes.getAuthor());
-			changeSet.setAttribute("revision", changes.getRevision().toString());
-
-			final Element timestampNode = addChildNodeWithText(changeSet, "timestamp", dateFormat.format(changes.getTimestamp()));
-			timestampNode.setAttribute("millis", Long.toString(changes.getTimestamp().getTime()));
-
-			linkifyCommitMessage(changeSet, changes, status.getName());
+			if (changes.getAuthor() != null) {
+				changeSet.setAttribute("author", changes.getAuthor());
+			}
 			
-			addModifiedPaths(changeSet, changes.getModifiedPaths());
+			if (changes.getRevision() != null) {
+				changeSet.setAttribute("revision", changes.getRevision().toString());
+			}
+			
+			if (changes.getTimestamp() != null) {
+				final Element timestampNode = addChildNodeWithText(changeSet, "timestamp", dateFormat.format(changes.getTimestamp()));
+				timestampNode.setAttribute("millis", Long.toString(changes.getTimestamp().getTime()));
+			}
+			
+			if (changes.getMessage() != null) {
+				linkifyCommitMessage(changeSet, changes, status.getName());
+			}
+			
+			if (changes.getModifiedPaths() != null) {
+				addModifiedPaths(changeSet, changes.getModifiedPaths());
+			}
 			
 			changeSets.addContent(changeSet);
 		}
