@@ -424,6 +424,38 @@ public class AbstractProjectDomBuilderTest extends EasyMockTestCase {
 		assertEquals("/other/stuff", ((Element) modifiedPaths.getChildren().get(1)).getText());
 		verify();
 	}
+	public void testChangeSetNullData() throws Exception {
+		replay();
+
+		final ChangeLogDto changeLog = new ChangeLogDto();
+		final ChangeSetDto changeSet = new ChangeSetDto();
+		
+		changeSet.setAuthor(null);
+		changeSet.setRevision(null);
+		changeSet.setTimestamp(null);
+		changeSet.setMessage(null);
+		changeSet.setModifiedPaths(null);
+		
+		changeLog.setChangeSets(Collections.singletonList(changeSet));
+		
+		projectStatus.setChangeLog(changeLog);
+		
+		final Document doc = doCall();
+
+		final Element root = doc.getRootElement();
+		
+		final Element logs = root.getChild("change-sets");
+		
+		assertNotNull(logs);
+		
+		assertEquals(1, logs.getContentSize());
+		
+		final Element child = logs.getChild("change-set");
+
+		assertNotNull(child);
+		
+		verify();
+	}
 	public void testMetrics() throws Exception {
 		messages.put("a.b", "a metric");
 		replay();
