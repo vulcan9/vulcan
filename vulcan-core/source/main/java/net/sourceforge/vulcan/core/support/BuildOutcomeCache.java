@@ -224,6 +224,11 @@ public class BuildOutcomeCache implements ProjectNameChangeListener {
 			writeLock.lock();
 			
 			final List<UUID> ids = outcomeIDs.remove(oldName);
+			
+			if (ids == null || ids.isEmpty()) {
+				return;
+			}
+			
 			outcomeIDs.put(newName, ids);
 			
 			for (UUID uuid : ids) {

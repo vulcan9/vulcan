@@ -238,6 +238,16 @@ public class BuildOutcomeCacheTest extends EasyMockTestCase {
 		assertEquals("aNewProject", latestOutcome.getName());
 	}
 	
+	@TrainingMethod("trainInit")
+	public void testRenameProjectNoHistory() throws Exception {
+		cache.init();
+		
+		cache.projectNameChanged("neverBuiltProject", "aNewProject");
+		
+		final ProjectStatusDto latestOutcome = cache.getLatestOutcome("aNewProject");
+		assertNull(latestOutcome);
+	}
+	
 	public void trainUpdateStateWhenProjectRenamedLoadsNewName() throws Exception {
 		expect(store.getBuildOutcomeIDs()).andReturn(map);
 		expect(store.loadBuildOutcome("aNewProject", four)).andReturn(storedOutcomes.get(four));
