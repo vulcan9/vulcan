@@ -19,7 +19,9 @@
 package net.sourceforge.vulcan.metrics.dom;
 
 import java.io.File;
+import java.io.StringReader;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jdom.Document;
@@ -27,12 +29,16 @@ import org.jdom.Element;
 import org.jdom.input.SAXBuilder;
 
 public class DomBuilder {
-	private final Log log = LogFactory.getLog(DomBuilder.class);
+	private static Log log = LogFactory.getLog(DomBuilder.class);
 	private final Document doc = new Document();
 	private final Element root = new Element("merged-root");
 	
 	public DomBuilder() {
 		doc.addContent(root);
+	}
+	
+	public Document getMergedDocument() {
+		return doc;
 	}
 	
 	public void merge(File xmlFile) {
@@ -41,7 +47,11 @@ public class DomBuilder {
 		}
 		
 		try {
-			final Document xmlDoc = new SAXBuilder().build(xmlFile);
+			final String xml = FileUtils.readFileToString(xmlFile, "UTF-8");
+			
+			final String xmlWithDoctype = fixNonStandardXml(xml);
+			
+			final Document xmlDoc = new SAXBuilder().build(new StringReader(xmlWithDoctype));
 
 			merge(xmlDoc);
 		} catch (Exception e) {
@@ -52,12 +62,24 @@ public class DomBuilder {
 	void merge(Document xmlDoc) {
 		root.addContent(xmlDoc.detachRootElement());
 	}
-
-	public Document getMergedDocument() {
-		return doc;
+	
+	static void setLog(Log log)
+	{
+		DomBuilder.log = log;
 	}
 	
 	private void warn(Exception e) {
 		log.error("error", e);
+	}
+
+	/**
+	 * @return XML with non-standard entities removed.
+	 */
+	private String fixNonStandardXml(String xml) {
+		if (xml.contains("&nbsp;")) {
+			return xml.replaceAll("&nbsp;", "");
+		}
+		
+		return xml;
 	}
 }

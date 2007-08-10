@@ -6,8 +6,11 @@
 
 	<xsl:variable name="junitCount" select="count(//testcase)"/>
 	<xsl:variable name="nunitCount" select="count(//test-case[@executed='True'])"/>
+	<xsl:variable name="seleniumCount" select="count(//html/body/table/tr/td/table/tbody/tr[@class='status_passed' or @class='status_failed'])"/>
+	<xsl:variable name="seleniumSuiteName" select="//html/body/table/tr/td/table/thead/tr[contains(@class, 'title')]/td/text()"/>
+	
 	<xsl:variable name="ignored" select="count(//test-case[@executed='False'])"/>
-	<xsl:variable name="total" select="$junitCount + $nunitCount"/>
+	<xsl:variable name="total" select="$junitCount + $nunitCount + $seleniumCount"/>
 	
 	<xsl:template match="/">
 		<metrics>
@@ -20,7 +23,8 @@
 						<xsl:value-of select="
 							count(//testcase/failure) +
 							count(//testcase/error) +
-							count(//test-case[@success='False'])"/>
+							count(//test-case[@success='False']) +
+							count(//html/body/table/tr/td/table/tbody/tr[@class='status_failed'])"/>
 					</xsl:attribute>
 				</metric>
 				
@@ -35,6 +39,8 @@
 				<xsl:call-template name="list-failures">
 					<xsl:with-param name="nodes" select="//test-case[@success='False']"/>
 				</xsl:call-template>
+				
+				<xsl:call-template name="list-failures-selenium"/>
 			</xsl:if>
 			<xsl:if test="$ignored != 0">
 				<metric key="vulcan.metrics.tests.ignored">
@@ -57,6 +63,16 @@
 					<xsl:text>.</xsl:text>
 				</xsl:if>
 				<xsl:value-of select="@name"/>
+			</test-failure>
+		</xsl:for-each>
+	</xsl:template>
+	
+	<xsl:template name="list-failures-selenium">
+		<xsl:for-each select="//html/body/table/tr/td/table/tbody/tr[@class='status_failed']/td/a">
+			<test-failure>
+				<xsl:value-of select="$seleniumSuiteName"/>
+				<xsl:text>:</xsl:text>
+				<xsl:value-of select="."/>
 			</test-failure>
 		</xsl:for-each>
 	</xsl:template>
