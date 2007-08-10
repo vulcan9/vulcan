@@ -18,12 +18,14 @@
  */
 package net.sourceforge.vulcan.metrics.dom;
 
-import junit.framework.TestCase;
+import net.sourceforge.vulcan.EasyMockTestCase;
+import net.sourceforge.vulcan.TestUtils;
 
+import org.apache.commons.logging.Log;
 import org.jdom.Document;
 import org.jdom.Element;
 
-public class DomBuilderTest extends TestCase {
+public class DomBuilderTest extends EasyMockTestCase {
 	DomBuilder builder = new DomBuilder();
 	
 	public void testEmpty() throws Exception {
@@ -44,5 +46,18 @@ public class DomBuilderTest extends TestCase {
 		builder.merge(new Document(new Element("root")));
 		
 		assertEquals(2, builder.getMergedDocument().getRootElement().getChildren().size());
+	}
+	public void testLoadSeleniumSuite() throws Exception {
+		Log log = createMock(Log.class);
+		
+		expect(log.isDebugEnabled()).andReturn(false);
+		
+		DomBuilder.setLog(log);
+		
+		replay();
+		
+		builder.merge(TestUtils.resolveRelativeFile("source/test/xml/SampleSeleniumReport.html"));
+		
+		verify();
 	}
 }
