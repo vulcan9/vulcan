@@ -176,6 +176,7 @@ public final class ManualBuildAction extends Action {
 		final List<String> projectNames = new ArrayList<String>();
 		final List<List<RepositoryTagDto>> tags = new ArrayList<List<RepositoryTagDto>>();
 		final List<String> selectedTags = new ArrayList<String>();
+		final List<String> workDirOverrides = new ArrayList<String>();
 		
 		for (ProjectConfigDto target : targets) {
 			final String projectName = target.getName();
@@ -196,9 +197,10 @@ public final class ManualBuildAction extends Action {
 			setPreviouslySelectedTag(selectedTags, projectName, projectTags);
 			
 			tags.add(projectTags);
+			workDirOverrides.add(target.getWorkDir());
 		}
 		
-		buildForm.populateTagChoices(projectNames, tags, dg);
+		buildForm.populateTagChoices(projectNames, tags, workDirOverrides, dg);
 		buildForm.setSelectedTags(selectedTags.toArray(new String[selectedTags.size()]));
 	}
 

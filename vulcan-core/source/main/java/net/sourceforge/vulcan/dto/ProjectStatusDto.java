@@ -36,6 +36,7 @@ public class ProjectStatusDto extends NameDto {
 	
 	public enum UpdateType { Full, Incremental };
 	
+	private String workDir;
 	private Status status;
 	private String messageKey;
 	private Object[] messageArgs;
@@ -68,7 +69,6 @@ public class ProjectStatusDto extends NameDto {
 	private String tagName;
 	private String repositoryUrl;
 	
-	
 	private boolean isStatusChanged;
 	
 	private boolean isScheduledBuild;
@@ -81,6 +81,12 @@ public class ProjectStatusDto extends NameDto {
 	private List<MetricDto> metrics;
 	private List<TestFailureDto> testFailures;
 	
+	public String getWorkDir() {
+		return workDir;
+	}
+	public void setWorkDir(String workDir) {
+		this.workDir = workDir;
+	}
 	public Integer getBuildNumber() {
 		return buildNumber;
 	}

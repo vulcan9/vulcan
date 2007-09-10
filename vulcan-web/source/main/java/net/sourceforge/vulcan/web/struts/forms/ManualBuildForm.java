@@ -32,6 +32,7 @@ import net.sourceforge.vulcan.dto.ProjectConfigDto;
 import net.sourceforge.vulcan.dto.RepositoryTagDto;
 import net.sourceforge.vulcan.metadata.SvnRevision;
 
+import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.struts.action.ActionErrors;
 import org.apache.struts.action.ActionMapping;
@@ -53,20 +54,27 @@ public class ManualBuildForm extends ValidatorForm {
 	private List<String> projectNames = Collections.emptyList();
 	private List<List<RepositoryTagDto>> availableTags = Collections.emptyList();
 	private String[] selectedTags;
+	private String[] workDirOverrides;
 	private transient DependencyGroup dependencyGroup;
 	
 	public ManualBuildForm() {
 		reset(null, null);
 	}
-	public void populateTagChoices(List<String> projectNames, List<List<RepositoryTagDto>> availableTags, DependencyGroup dependencyGroup) {
+	public void populateTagChoices(List<String> projectNames, List<List<RepositoryTagDto>> availableTags, List<String> workDirOverrides, DependencyGroup dependencyGroup) {
 		this.projectNames = projectNames;
 		this.availableTags = availableTags;
 		this.dependencyGroup = dependencyGroup;
+		if (workDirOverrides != null) {
+			this.workDirOverrides = workDirOverrides.toArray(new String[workDirOverrides.size()]);
+		} else {
+			this.workDirOverrides = ArrayUtils.EMPTY_STRING_ARRAY;
+		}
 	}
 	public void applyTagNamesOnTargets() {
 		final Map<String, String> projectNamesToTagNames = new HashMap<String, String>();
+		final Map<String, String> projectNamesToWorkDirs = new HashMap<String, String>();
 		
-		if (projectNames.size() != selectedTags.length) {
+		if (projectNames.size() != selectedTags.length || projectNames.size() != workDirOverrides.length) {
 			throw new IllegalStateException();
 		}
 		
@@ -80,11 +88,16 @@ public class ManualBuildForm extends ValidatorForm {
 			}
 			
 			projectNamesToTagNames.put(projectNames.get(i), tagName);
+			projectNamesToWorkDirs.put(projectNames.get(i), workDirOverrides[i]);
 		}
 		
 		final List<ProjectConfigDto> pendingProjects = dependencyGroup.getPendingProjects();
 		for (ProjectConfigDto config : pendingProjects) {
 			config.setRepositoryTagName(projectNamesToTagNames.get(config.getName()));
+			final String workDirOverride = projectNamesToWorkDirs.get(config.getName());
+			if (StringUtils.isNotBlank(workDirOverride)) {
+				config.setWorkDir(workDirOverride);
+			}
 		}
 	}
 
@@ -157,6 +170,12 @@ public class ManualBuildForm extends ValidatorForm {
 	}
 	public void setSelectedTags(String[] selectedTags) {
 		this.selectedTags = selectedTags;
+	}
+	public String[] getWorkDirOverrides() {
+		return workDirOverrides;
+	}
+	public void setWorkDirOverrides(String[] workDirOverrides) {
+		this.workDirOverrides = workDirOverrides;
 	}
 	public String getUpdateStrategy() {
 		return updateStrategy;

@@ -138,7 +138,7 @@ public abstract class AbstractProjectDomBuilder implements ProjectDomBuilder {
 		}
 		return doc;
 	}
-	public void transform(Document document, URL projectSiteURL, URL viewProjectStatusURL, URL issueTrackerURL, int index, Locale locale, String format, Result result) throws SAXException, IOException, TransformerException, NoSuchTransformFormatException {
+	public void transform(Document document, URL projectSiteURL, URL viewProjectStatusURL, URL issueTrackerURL, Locale locale, String format, Result result) throws SAXException, IOException, TransformerException, NoSuchTransformFormatException {
 		final Transformer transformer = createTransformer(format);
 		
 		applyParameters(transformer, locale);
@@ -152,7 +152,6 @@ public abstract class AbstractProjectDomBuilder implements ProjectDomBuilder {
 			transformer.setParameter("issueTrackerURL", issueTrackerURL.toExternalForm());	
 		}
 		
-		transformer.setParameter("index", new Integer(index));
 		transformer.transform(new JDOMSource(document), result);
 	}
 	public void setProjectManager(ProjectManager projectManager) {

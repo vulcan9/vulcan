@@ -84,7 +84,7 @@ public abstract class ProjectReportBaseAction extends Action {
 	public void setProjectManager(ProjectManager projectManager) {
 		this.projectManager = projectManager;
 	}
-	protected URL getSiteBaseURL(ActionMapping mapping, HttpServletRequest request, ProjectConfigDto projectConfig) throws MalformedURLException {
+	protected URL getSiteBaseURL(ActionMapping mapping, HttpServletRequest request, ProjectConfigDto projectConfig, int buildNumber) throws MalformedURLException {
 		final StringBuffer buf = new StringBuffer();
 		
 		final String forwardPath = mapping.findForward("site").getPath();
@@ -95,6 +95,8 @@ public abstract class ProjectReportBaseAction extends Action {
 		}
 		
 		buf.append(JstlFunctions.encode(projectConfig.getName()));
+		buf.append('/');
+		buf.append(buildNumber);
 		buf.append('/');
 		
 		String sitePath = projectConfig.getSitePath();
@@ -124,7 +126,7 @@ public abstract class ProjectReportBaseAction extends Action {
 		
 		out.output(document, writer);
 	}
-	protected ActionForward sendDocument(Document doc, String transform, ProjectConfigDto projectConfig, int index, ActionMapping mapping, HttpServletRequest request, HttpServletResponse response) throws IOException, MalformedURLException, SAXException, TransformerException {
+	protected ActionForward sendDocument(Document doc, String transform, ProjectConfigDto projectConfig, int buildNumber, ActionMapping mapping, HttpServletRequest request, HttpServletResponse response) throws IOException, MalformedURLException, SAXException, TransformerException {
 		final PrintWriter writer = response.getWriter();
 	
 		if (StringUtils.isBlank(transform)) {
@@ -149,7 +151,7 @@ public abstract class ProjectReportBaseAction extends Action {
 					projectSiteUrl = null;
 					issueTrackerUrl = null;
 				} else {
-					projectSiteUrl = getSiteBaseURL(mapping, request, projectConfig);
+					projectSiteUrl = getSiteBaseURL(mapping, request, projectConfig, buildNumber);
 					issueTrackerUrl = projectConfig.getBugtraqUrl();
 				}
 				
@@ -161,7 +163,7 @@ public abstract class ProjectReportBaseAction extends Action {
 				
 				projectDomBuilder.transform(doc,
 						projectSiteUrl, projectStatusUrl, issueTrackerURL,
-						index, request.getLocale(), transform, new StreamResult(writer));
+						request.getLocale(), transform, new StreamResult(writer));
 				writer.close();
 			} catch (NoSuchTransformFormatException e) {
 				BaseDispatchAction.saveError(request, ActionMessages.GLOBAL_MESSAGE,

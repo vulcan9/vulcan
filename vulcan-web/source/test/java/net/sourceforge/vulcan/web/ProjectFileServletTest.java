@@ -28,6 +28,7 @@ import javax.servlet.ServletException;
 
 import net.sourceforge.vulcan.TestUtils;
 import net.sourceforge.vulcan.dto.ProjectConfigDto;
+import net.sourceforge.vulcan.dto.ProjectStatusDto;
 import net.sourceforge.vulcan.exception.NoSuchProjectException;
 import net.sourceforge.vulcan.metadata.SvnRevision;
 
@@ -46,16 +47,17 @@ public class ProjectFileServletTest extends ServletTestCase {
 	
 	ProjectFileServlet servlet = new ProjectFileServlet() {
 		@Override
-		protected File getFile(ProjectConfigDto projectConfig, String pathInfo, boolean includeProjectName) {
+		protected File getFile(String workDir, String pathInfo, boolean stripProjectName) {
 			if (fakeFile != null) {
 				return fakeFile;
 			}
-			return super.getFile(projectConfig, pathInfo, includeProjectName);
+			return super.getFile(projectConfig.getWorkDir(), pathInfo, stripProjectName);
 		}
 	};
 
 	ProjectConfigDto projectConfig = new ProjectConfigDto();
-
+	ProjectStatusDto latestStatus = new ProjectStatusDto();
+	
 	boolean buggy;
 	boolean inputStreamCloseBuggy;
 	boolean inputStreamClosed;
@@ -105,6 +107,8 @@ public class ProjectFileServletTest extends ServletTestCase {
 		
 		projectConfig.setName("myProject");
 		projectConfig.setWorkDir(TEST_DIR.getCanonicalPath());
+		
+		latestStatus.setBuildNumber(3351);
 		
 		servlet.setCacheEnabled(true);
 	}
@@ -198,6 +202,44 @@ public class ProjectFileServletTest extends ServletTestCase {
 		
 		assertEquals("/myApp", redirect);
 	}
+	public void testRedirectsOnMissingBuildNumber() throws Exception {
+		servlet.init(servletConfig);
+		
+		request.setRequestURI("/myApp/site/myProject");
+		request.setPathInfo("/myProject");
+		
+		expect(mgr.getProjectConfig("myProject")).andReturn(projectConfig);
+		expect(buildManager.getLatestStatus("myProject")).andReturn(latestStatus);
+		
+		replay();
+		
+		assertEquals(null, redirect);
+		
+		servlet.doGet(request, response);
+		
+		assertEquals("/myApp/site/myProject/3351/", redirect);
+		
+		verify();
+	}
+	public void testRedirectsOnMissingBuildNumberWithTrailingPath() throws Exception {
+		servlet.init(servletConfig);
+		
+		request.setRequestURI("/myApp/site/myProject/file.txt");
+		request.setPathInfo("/myProject/file.txt");
+		
+		expect(mgr.getProjectConfig("myProject")).andReturn(projectConfig);
+		expect(buildManager.getLatestStatus("myProject")).andReturn(latestStatus);
+		
+		replay();
+		
+		assertEquals(null, redirect);
+		
+		servlet.doGet(request, response);
+		
+		assertEquals("/myApp/site/myProject/3351/file.txt", redirect);
+		
+		verify();
+	}
 	public void test404OnMissingProject() throws Exception {
 		servlet.init(servletConfig);
 		
@@ -243,12 +285,29 @@ public class ProjectFileServletTest extends ServletTestCase {
 		
 		assertEquals(404, response.getStatusCode());
 	}
+	public void test404OnNoSuchBuild() throws Exception {
+		servlet.init(servletConfig);
+		
+		request.setPathInfo("/myProject/555/none");
+		
+		expect(mgr.getProjectConfig("myProject")).andReturn(projectConfig);
+		expect(buildManager.getStatusByBuildNumber("myProject", 555)).andReturn(null);
+		
+		replay();
+		
+		servlet.doGet(request, response);
+		
+		verify();
+
+		assertEquals(404, response.getStatusCode());
+	}
 	public void test404OnNoSuchFile() throws Exception {
 		servlet.init(servletConfig);
 		
-		request.setPathInfo("/myProject/none");
+		request.setPathInfo("/myProject/5/none");
 		
 		expect(mgr.getProjectConfig("myProject")).andReturn(projectConfig);
+		expect(buildManager.getStatusByBuildNumber("myProject", 5)).andReturn(latestStatus);
 		
 		replay();
 		
@@ -272,9 +331,10 @@ public class ProjectFileServletTest extends ServletTestCase {
 		
 		servlet.init(servletConfig);
 		
-		request.setPathInfo("/myProject/youcantreadthis");
+		request.setPathInfo("/myProject/38/youcantreadthis");
 		
 		expect(mgr.getProjectConfig("myProject")).andReturn(projectConfig);
+		expect(buildManager.getStatusByBuildNumber("myProject", 38)).andReturn(latestStatus);
 		
 		replay();
 		
@@ -290,9 +350,10 @@ public class ProjectFileServletTest extends ServletTestCase {
 
 		servlet.init(servletConfig);
 		
-		request.setPathInfo("/myProject/file.txt");
+		request.setPathInfo("/myProject/42/file.txt");
 		
 		expect(mgr.getProjectConfig("myProject")).andReturn(projectConfig);
+		expect(buildManager.getStatusByBuildNumber("myProject", 42)).andReturn(latestStatus);
 		
 		replay();
 		
@@ -345,9 +406,10 @@ public class ProjectFileServletTest extends ServletTestCase {
 		
 		servlet.init(servletConfig);
 		
-		request.setPathInfo("/myProject/file.txt");
+		request.setPathInfo("/myProject/38/file.txt");
 		
 		expect(mgr.getProjectConfig("myProject")).andReturn(projectConfig);
+		expect(buildManager.getStatusByBuildNumber("myProject", 38)).andReturn(latestStatus);
 		
 		replay();
 		
@@ -366,9 +428,10 @@ public class ProjectFileServletTest extends ServletTestCase {
 		
 		servlet.init(servletConfig);
 		
-		request.setPathInfo("/myProject/file.txt");
+		request.setPathInfo("/myProject/38/file.txt");
 		
 		expect(mgr.getProjectConfig("myProject")).andReturn(projectConfig);
+		expect(buildManager.getStatusByBuildNumber("myProject", 38)).andReturn(latestStatus);
 		
 		replay();
 		
@@ -387,9 +450,10 @@ public class ProjectFileServletTest extends ServletTestCase {
 		
 		servlet.init(servletConfig);
 		
-		request.setPathInfo("/myProject/file.txt");
+		request.setPathInfo("/myProject/99/file.txt");
 		
 		expect(mgr.getProjectConfig("myProject")).andReturn(projectConfig);
+		expect(buildManager.getStatusByBuildNumber("myProject", 99)).andReturn(latestStatus);
 		
 		replay();
 		
@@ -407,9 +471,10 @@ public class ProjectFileServletTest extends ServletTestCase {
 		
 		servlet.init(servletConfig);
 		
-		request.setPathInfo("/myProject/subdir/nosuchfile.txt");
+		request.setPathInfo("/myProject/102/subdir/nosuchfile.txt");
 		
 		expect(mgr.getProjectConfig("myProject")).andReturn(projectConfig);
+		expect(buildManager.getStatusByBuildNumber("myProject", 102)).andReturn(latestStatus);
 		
 		replay();
 		
@@ -417,16 +482,17 @@ public class ProjectFileServletTest extends ServletTestCase {
 		
 		verify();
 		
-		assertEquals("/myApp/site/myProject/subdir/", redirect);
+		assertEquals("/myApp/site/myProject/102/subdir/", redirect);
 		assertEquals(0, response.getStatusCode());
 	}
 	public void testRedirectsToNestedFolderOnFallback() throws Exception {
 		servlet.init(servletConfig);
 		
-		request.setPathInfo("/myProject/subdir/nosuchdubdir/nosuchfile.txt");
+		request.setPathInfo("/myProject/77/subdir/nosuchdubdir/nosuchfile.txt");
 		request.addParameter("fallback", "");
 		
 		expect(mgr.getProjectConfig("myProject")).andReturn(projectConfig);
+		expect(buildManager.getStatusByBuildNumber("myProject", 77)).andReturn(latestStatus);
 		
 		replay();
 		
@@ -434,7 +500,7 @@ public class ProjectFileServletTest extends ServletTestCase {
 		
 		verify();
 
-		assertEquals("/myApp/site/myProject/subdir/", redirect);
+		assertEquals("/myApp/site/myProject/77/subdir/", redirect);
 		assertEquals(0, response.getStatusCode());
 	}
 	public void testSendsRedirectOnMissingWhenEqualsProjectSite() throws Exception {
@@ -442,9 +508,10 @@ public class ProjectFileServletTest extends ServletTestCase {
 		
 		servlet.init(servletConfig);
 		
-		request.setPathInfo("/myProject/subdir/foo/bar/baz.html");
+		request.setPathInfo("/myProject/6765/subdir/foo/bar/baz.html");
 		
 		expect(mgr.getProjectConfig("myProject")).andReturn(projectConfig);
+		expect(buildManager.getStatusByBuildNumber("myProject", 6765)).andReturn(latestStatus);
 		
 		replay();
 		
@@ -453,16 +520,17 @@ public class ProjectFileServletTest extends ServletTestCase {
 		verify();
 		
 		assertEquals(0, response.getStatusCode());
-		assertEquals("/myApp/site/myProject/subdir/", redirect);
+		assertEquals("/myApp/site/myProject/6765/subdir/", redirect);
 	}
 	public void testSendsRedirectOnDirListingNoSlash() throws Exception {
-		request.setRequestURI("/myApp/myProject");
+		request.setRequestURI("/myApp/myProject/5432");
 		
 		servlet.init(servletConfig);
 		
-		request.setPathInfo("/myProject");
+		request.setPathInfo("/myProject/5432");
 		
 		expect(mgr.getProjectConfig("myProject")).andReturn(projectConfig);
+		expect(buildManager.getStatusByBuildNumber("myProject", 5432)).andReturn(latestStatus);
 		
 		replay();
 		
@@ -470,14 +538,15 @@ public class ProjectFileServletTest extends ServletTestCase {
 		
 		verify();
 		
-		assertEquals("/myApp/myProject/", redirect);
+		assertEquals("/myApp/myProject/5432/", redirect);
 	}
 	public void testSendsDirListing() throws Exception {
 		servlet.init(servletConfig);
 		
-		request.setPathInfo("/myProject/subdir/");
+		request.setPathInfo("/myProject/22/subdir/");
 		
 		expect(mgr.getProjectConfig("myProject")).andReturn(projectConfig);
+		expect(buildManager.getStatusByBuildNumber("myProject", 22)).andReturn(latestStatus);
 		
 		replay();
 		
@@ -485,7 +554,7 @@ public class ProjectFileServletTest extends ServletTestCase {
 		
 		verify();
 		
-		assertEquals("/myProject/subdir/", request.getAttribute(Keys.DIR_PATH));
+		assertEquals("/myProject/22/subdir/", request.getAttribute(Keys.DIR_PATH));
 		File[] files = (File[]) request.getAttribute(Keys.FILE_LIST);
 		assertNotNull(files);
 

@@ -19,7 +19,7 @@
 	<caption><fmt:message key="captions.choose.tags"/></caption>
 	<tbody>
 		<tr>
-			<td colspan="2">
+			<td colspan="3">
 				<span class="description"><fmt:message key="label.choose.tags.description"/></span>
 				<html:hidden property="chooseTags" value="true"/>
 			</td>
@@ -27,7 +27,8 @@
 		<c:forEach items="${manualBuildForm.projectNames}" var="projectName" varStatus="loopStatus">
 			<c:set var="projectErrorPresent" value="false"/>
 			<tr>
-				<td>${projectName}</td>
+				<td rowspan="2"><strong>${projectName}</strong></td>
+				<td>Tag</td>
 				<td>
 					<html:messages property="${projectName}" id="msg">
 						<c:set var="projectErrorPresent" value="true"/>
@@ -52,9 +53,15 @@
 					</c:if>
 				</td>
 			</tr>
+			<tr>
+				<td><fmt:message key="label.working.copy.directory"/></td>
+				<td>
+					<html:text property="workDirOverrides" value="${manualBuildForm.workDirOverrides[loopStatus.index]}"/>
+				</td>
+			</tr>
 		</c:forEach>
 		<tr>
-			<td class="buttons" colspan="2">
+			<td class="buttons" colspan="3">
 				<c:if test="${not errorPresent}">
 					<html:submit property="action" value="Build"/>
 				</c:if>

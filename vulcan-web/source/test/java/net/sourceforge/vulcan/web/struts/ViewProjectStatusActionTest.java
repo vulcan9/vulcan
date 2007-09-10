@@ -54,6 +54,7 @@ public class ViewProjectStatusActionTest extends MockApplicationContextStrutsTes
 		
 		dom.setRootElement(new Element("project"));
 		status.setName("some project");
+		status.setBuildNumber(12);
 		
 		ids.add(UUID.randomUUID());
 		ids.add(UUID.randomUUID());
@@ -523,8 +524,8 @@ public class ViewProjectStatusActionTest extends MockApplicationContextStrutsTes
 				(URL)anyObject(),
 				(URL)anyObject(),
 				(URL)anyObject(),
-				anyInt(),
 				eq(request.getLocale()),
-				eq(transormType), (Result)anyObject());
+				eq(transormType),
+				(Result)anyObject());
 	}
 }
