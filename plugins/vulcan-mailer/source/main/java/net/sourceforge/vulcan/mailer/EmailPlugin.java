@@ -306,7 +306,6 @@ public class EmailPlugin implements
 				projectSiteURL,
 				statusURL,
 				trackerURL,
-				0,
 				locale,
 				"xhtml",
 				xhtmlResult);
