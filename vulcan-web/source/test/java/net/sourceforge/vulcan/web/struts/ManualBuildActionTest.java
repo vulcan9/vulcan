@@ -60,6 +60,9 @@ public class ManualBuildActionTest extends MockApplicationContextStrutsTestCase 
 		projects[0].setName("a");
 		projects[1].setName("b");
 		
+		projects[0].setWorkDir("work/a");
+		projects[1].setWorkDir("work/b");
+		
 		tags1.add(createFakeTag("rc1"));
 		tags1.add(createFakeTag("rc2"));
 		tags1.add(createFakeTag("rc3"));
@@ -388,6 +391,10 @@ public class ManualBuildActionTest extends MockApplicationContextStrutsTestCase 
 		final String[] selectedTags = form.getSelectedTags();
 		assertEquals("rc2", selectedTags[0]);
 		assertEquals("2.0", selectedTags[1]);
+		
+		final String[] workDirOverrides = form.getWorkDirOverrides();
+		assertEquals("work/a", workDirOverrides[0]);
+		assertEquals("work/b", workDirOverrides[1]);
 	}
 	public void testChooseTagsReportsRepositoryError() throws Exception {
 		addRequestParameter("targets", new String[] {"a"});
@@ -441,12 +448,52 @@ public class ManualBuildActionTest extends MockApplicationContextStrutsTestCase 
 		final ManualBuildForm form = new ManualBuildForm();
 		form.setServlet(getActionServlet());
 		
-		form.populateTagChoices(Arrays.asList(new String[] {"a", "b"}), null, withoutTagNames);
+		form.populateTagChoices(Arrays.asList(new String[] {"a", "b"}), null, null, withoutTagNames);
 		
 		request.getSession().setAttribute("manualBuildForm", form);
 		
 		addRequestParameter("chooseTags", "true");
 		addRequestParameter("selectedTags", new String[] {"trunk", "rc1"});
+		addRequestParameter("workDirOverrides", new String[] {"", ""});
+		addRequestParameter("targets", new String[] {"a", "b"});
+		
+		buildManager.add(dg);
+		
+		replay();
+		
+		actionPerform();
+		
+		verifyNoActionMessages();
+		verifyNoActionErrors();
+		
+		verifyForward("dashboard");
+		
+		verify();
+	}
+	public void testOverrideWorkDir() throws Exception {
+		final DependencyGroupImpl withoutTagNames = new DependencyGroupImpl();
+		
+		withoutTagNames.addTarget(projects[0]);
+		withoutTagNames.addTarget(projects[1]);
+		
+		final DependencyGroupImpl dg = new DependencyGroupImpl();
+		final ProjectConfigDto target = (ProjectConfigDto) projects[1].copy();
+		target.setWorkDir("another/location");
+		
+		dg.addTarget(projects[0]);
+		dg.addTarget(target);
+		dg.setName(request.getRemoteHost());
+		
+		final ManualBuildForm form = new ManualBuildForm();
+		form.setServlet(getActionServlet());
+		
+		form.populateTagChoices(Arrays.asList(new String[] {"a", "b"}), null, null, withoutTagNames);
+		
+		request.getSession().setAttribute("manualBuildForm", form);
+		
+		addRequestParameter("chooseTags", "true");
+		addRequestParameter("selectedTags", new String[] {"", ""});
+		addRequestParameter("workDirOverrides", new String[] {projects[0].getWorkDir(), "another/location"});
 		addRequestParameter("targets", new String[] {"a", "b"});
 		
 		buildManager.add(dg);

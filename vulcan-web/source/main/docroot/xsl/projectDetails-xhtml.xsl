@@ -4,8 +4,6 @@
 	<xsl:output method="xml" version="1.0"
 		encoding="UTF-8" omit-xml-declaration="no"/>
 	
-	<xsl:param name="index"/>
-		
 	<xsl:param name="title"/>
 	<xsl:param name="projectSiteURL"/>
 	<xsl:param name="viewProjectStatusURL"/>

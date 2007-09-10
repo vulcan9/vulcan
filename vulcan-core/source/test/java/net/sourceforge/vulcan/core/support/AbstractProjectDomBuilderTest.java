@@ -817,7 +817,7 @@ public class AbstractProjectDomBuilderTest extends EasyMockTestCase {
 		final Document doc = new Document();
 		final Result result = new StreamResult(new StringWriter());
 
-		builder.transform(doc, new URL("http://localhost"), null, null, 0, null, "text", result);
+		builder.transform(doc, new URL("http://localhost"), null, null, null, "text", result);
 		
 		assertTrue(transResult instanceof StreamResult);
 		assertTrue(transSource instanceof JDOMSource);

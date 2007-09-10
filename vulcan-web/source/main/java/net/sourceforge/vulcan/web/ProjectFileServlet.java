@@ -41,11 +41,14 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import net.sourceforge.vulcan.ProjectManager;
+import net.sourceforge.vulcan.core.BuildManager;
 import net.sourceforge.vulcan.dto.ProjectConfigDto;
+import net.sourceforge.vulcan.dto.ProjectStatusDto;
 import net.sourceforge.vulcan.exception.NoSuchProjectException;
 import net.sourceforge.vulcan.metadata.SvnRevision;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.WebApplicationContextUtils;
 
@@ -56,7 +59,15 @@ public class ProjectFileServlet extends HttpServlet {
 		HTTP_DATE_FORMAT.setTimeZone(TimeZone.getTimeZone("GMT"));
 	}
 
+	private class PathInfo {
+		String projectName;
+		int buildNumber;
+		int secondSlash;
+		int thirdSlash;
+	}
+	
 	ProjectManager projectManager;
+	BuildManager buildManager;
 	boolean cacheEnabled;
 	
 	@Override
@@ -67,6 +78,7 @@ public class ProjectFileServlet extends HttpServlet {
 			.getRequiredWebApplicationContext(config.getServletContext());
 		
 		projectManager = (ProjectManager) wac.getBean(Keys.PROJECT_MANAGER);
+		buildManager = (BuildManager) wac.getBean(Keys.BUILD_MANAGER);
 	}
 	
 	public boolean isCacheEnabled() {
@@ -86,9 +98,9 @@ public class ProjectFileServlet extends HttpServlet {
 			return;
 		}
 		
-		final String projectName = getProjectName(pathInfo);
-
-		if (isBlank(projectName)) {
+		final PathInfo projPathInfo = getProjectNameAndBuildNumber(pathInfo);
+		
+		if (isBlank(projPathInfo.projectName)) {
 			response.sendRedirect(request.getContextPath());
 			return;
 		}
@@ -96,17 +108,39 @@ public class ProjectFileServlet extends HttpServlet {
 		final ProjectConfigDto projectConfig;
 		
 		try {
-			projectConfig = projectManager.getProjectConfig(projectName);
+			projectConfig = projectManager.getProjectConfig(projPathInfo.projectName);
 		} catch (NoSuchProjectException e) {
 			response.sendError(HttpServletResponse.SC_NOT_FOUND);
 			return;
 		}
 		
-		final File file = getFile(projectConfig, pathInfo, true);
+		final String requestURI = request.getRequestURI();
+		
+		if (projPathInfo.buildNumber < 0) {
+			redirectWithBuildNumber(response, projPathInfo, requestURI);
+			return;
+		}
+		
+		final ProjectStatusDto buildOutcome = buildManager.getStatusByBuildNumber(projPathInfo.projectName, projPathInfo.buildNumber);
+		
+		if (buildOutcome == null) {
+			response.sendError(HttpServletResponse.SC_NOT_FOUND, "No such build " + projPathInfo.buildNumber + " for project Project.");
+			return;
+		}
+		
+		final String workDir;
+		
+		if (StringUtils.isNotBlank(buildOutcome.getWorkDir())) {
+			workDir = buildOutcome.getWorkDir();
+		} else {
+			workDir = projectConfig.getWorkDir();
+		}
+		
+		final File file = getFile(workDir, pathInfo, true);
 		
 		if (!file.exists()) {
-			if (shouldFallback(request, projectConfig, file)) {
-				response.sendRedirect(getFallbackParentPath(request, projectConfig));
+			if (shouldFallback(request, workDir, projectConfig.getSitePath(), file)) {
+				response.sendRedirect(getFallbackParentPath(request, workDir));
 				return;
 			}
 			response.sendError(HttpServletResponse.SC_NOT_FOUND);
@@ -116,7 +150,7 @@ public class ProjectFileServlet extends HttpServlet {
 			return;
 		} else if (file.isDirectory()) {
 			if (!pathInfo.endsWith("/")) {
-				response.sendRedirect(request.getRequestURI() + "/");
+				response.sendRedirect(requestURI + "/");
 				return;
 			}
 			
@@ -179,30 +213,77 @@ public class ProjectFileServlet extends HttpServlet {
 		}
 	}
 
-	protected String getProjectName(String pathInfo) {
+	protected PathInfo getProjectNameAndBuildNumber(String pathInfo) {
+		final PathInfo info = new PathInfo();
+		
 		int secondSlash = pathInfo.indexOf('/', 1);
+		int thirdSlash = -1;
 		
 		if (secondSlash < 0) {
 			secondSlash = pathInfo.length();
+		} else {
+			thirdSlash = pathInfo.indexOf('/', secondSlash + 1);
+		}
+
+		if (thirdSlash < 0) {
+			thirdSlash = pathInfo.length();	
 		}
 		
-		return pathInfo.substring(1, secondSlash);
+		info.secondSlash = secondSlash;
+		info.thirdSlash = thirdSlash;
+		
+		info.projectName = pathInfo.substring(1, secondSlash);
+		info.buildNumber = -1;
+		
+		if (thirdSlash > secondSlash) {
+			try {
+				info.buildNumber = Integer.valueOf(pathInfo.substring(secondSlash + 1, thirdSlash));
+			} catch (NumberFormatException e) {
+			}
+		}
+		
+		return info;
 	}
 	
-	protected File getFile(ProjectConfigDto projectConfig, String pathInfo, boolean stripProjectName) {
+	protected File getFile(String workDir, String pathInfo, boolean stripProjectName) {
 		if (stripProjectName) {
 			int secondSlash = pathInfo.indexOf('/', 1);
 			
 			if (secondSlash < 0) {
-				return new File(projectConfig.getWorkDir());
+				return new File(workDir);
 			}
 			
-			pathInfo = pathInfo.substring(secondSlash);
+			int thirdSlash = pathInfo.indexOf('/', secondSlash + 1);
+			
+			if (thirdSlash < 0) {
+				return new File(workDir);
+			}
+			
+			pathInfo = pathInfo.substring(thirdSlash);
 		}
 		
-		return new File(projectConfig.getWorkDir(), pathInfo);
+		return new File(workDir, pathInfo);
 	}
 	
+	private void redirectWithBuildNumber(HttpServletResponse response, final PathInfo projPathInfo, final String requestURI) throws IOException {
+		final ProjectStatusDto latestStatus = buildManager.getLatestStatus(projPathInfo.projectName);
+		
+		final int projectNameIndex = requestURI.indexOf(projPathInfo.projectName);
+		
+		final StringBuilder sb = new StringBuilder(requestURI.substring(0, projectNameIndex));
+		sb.append(projPathInfo.projectName);
+		sb.append("/");
+		sb.append(latestStatus.getBuildNumber());
+		sb.append("/");
+		
+		int endProjectName = projectNameIndex + projPathInfo.projectName.length() + 1;
+		if (endProjectName < requestURI.length()) {
+			sb.append(requestURI.substring(endProjectName));
+		}
+		
+		response.sendRedirect(sb.toString());
+	}
+
 	private File[] getDirectoryListing(final File file) throws IOException {
 		final File[] files = file.listFiles();
 		
@@ -225,10 +306,10 @@ public class ProjectFileServlet extends HttpServlet {
 		return files;
 	}
 
-	private String getFallbackParentPath(HttpServletRequest request, ProjectConfigDto projectConfig) {
+	private String getFallbackParentPath(HttpServletRequest request, String workDir) {
 		final StringBuilder pathInfo = new StringBuilder(request.getPathInfo());
 		
-		while (!getFile(projectConfig, pathInfo.toString(), true).exists()) {
+		while (!getFile(workDir, pathInfo.toString(), true).exists()) {
 			pathInfo.delete(pathInfo.lastIndexOf("/"), pathInfo.length());
 		}
 		
@@ -296,16 +377,16 @@ public class ProjectFileServlet extends HttpServlet {
 	 * @return true if request parameter "fallback" is specified,
 	 * or the requested path matches the default ProjectConfigDto.SitePath.
 	 */
-	private boolean shouldFallback(HttpServletRequest request, ProjectConfigDto projectConfig, File file) {
+	private boolean shouldFallback(HttpServletRequest request, String workDir, String sitePath, File file) {
 		if (request.getParameter("fallback") != null) {
 			return true;
 		}
 		
-		if (isBlank(projectConfig.getSitePath())) {
+		if (isBlank(sitePath)) {
 			return false;
 		}
 		
-		final File siteFile = getFile(projectConfig, projectConfig.getSitePath(), false);
+		final File siteFile = getFile(workDir, sitePath, false);
 		
 		return file.equals(siteFile);
 	}

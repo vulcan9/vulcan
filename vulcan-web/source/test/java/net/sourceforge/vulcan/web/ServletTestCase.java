@@ -27,6 +27,7 @@ import javax.servlet.ServletOutputStream;
 import net.sourceforge.vulcan.EasyMockTestCase;
 import net.sourceforge.vulcan.ProjectManager;
 import net.sourceforge.vulcan.StateManager;
+import net.sourceforge.vulcan.core.BuildManager;
 import net.sourceforge.vulcan.event.EventHandler;
 import net.sourceforge.vulcan.metadata.SvnRevision;
 
@@ -76,6 +77,10 @@ public abstract class ServletTestCase extends EasyMockTestCase {
 			httpErrorCode = error;
 		}
 		@Override
+		public void sendError(int sc, String msg) throws IOException {
+			httpErrorCode = sc;
+		}
+		@Override
 		public void sendRedirect(String path) throws IOException {
 			redirect = path;
 		}
@@ -116,6 +121,7 @@ public abstract class ServletTestCase extends EasyMockTestCase {
 	
 	StaticWebApplicationContext wac;
 	StateManager mgr;
+	BuildManager buildManager;
 	EventHandler eventHandler;
 	
 	Throwable loggedThrowable;
@@ -132,6 +138,9 @@ public abstract class ServletTestCase extends EasyMockTestCase {
 		
 		mgr = createStrictMock(StateAndProjectManager.class);
 		wac.getBeanFactory().registerSingleton(Keys.STATE_MANAGER, mgr);
+		
+		buildManager = createStrictMock(BuildManager.class);
+		wac.getBeanFactory().registerSingleton(Keys.BUILD_MANAGER, buildManager);
 		
 		wac.getBeanFactory().registerSingleton(Keys.EVENT_POOL, Boolean.TRUE);
 		

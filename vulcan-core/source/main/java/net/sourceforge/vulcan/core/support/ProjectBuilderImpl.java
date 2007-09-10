@@ -234,6 +234,7 @@ public class ProjectBuilderImpl implements ProjectBuilder {
 		status.setStartDate(new Date());
 		status.setRequestedBy(currentTarget.getRequestedBy());
 		status.setScheduledBuild(currentTarget.isScheduledBuild());
+		status.setWorkDir(currentTarget.getWorkDir());
 		status.setStatus(Status.BUILDING);
 		status.setErrors(errors);
 		status.setWarnings(warnings);

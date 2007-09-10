@@ -24,6 +24,7 @@ import net.sourceforge.vulcan.metadata.SvnRevision;
 public interface Keys {
 	String STATE_MANAGER = "stateManager";
 	String PROJECT_MANAGER = "stateManager";
+	String BUILD_MANAGER = "buildManager";
 	String EVENT_POOL = "eventPool";
 	String EVENT_HANDLER = "eventHandler";
 	
