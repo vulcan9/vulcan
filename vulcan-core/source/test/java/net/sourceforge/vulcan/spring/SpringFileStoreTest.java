@@ -146,20 +146,8 @@ public class SpringFileStoreTest extends EasyMockTestCase {
 		// should delete temp file
 		assertEquals(beforeCount, FileUtils.listFiles(configFile.getParentFile(), new PrefixFileFilter("config"), FalseFileFilter.INSTANCE).size());
 	}
-	public void testGetConfigRootWin32() {
-		System.setProperty("os.name", "Windows XP");
-		final String expectedPath = System.getProperty("user.home") + File.separator + "Application Data";
-		
-		assertEquals(expectedPath, SpringFileStore.getAppDataDir().getPath());
-	}
-	public void testGetConfigRootOther() {
-		System.setProperty("os.name", "Linux");
-		final String expectedPath = System.getProperty("user.home");
-		
-		assertEquals(expectedPath, SpringFileStore.getAppDataDir().getPath());
-	}
 	public void testCreatesNestedPath() throws Exception {
-		final File parent = new File(SpringFileStore.getAppDataDir(), "vulcan-junit");
+		final File parent = new File(System.getProperty("user.home"), "vulcan-junit");
 		final File root = new File(parent, "config-dir");
 
 		tryToDelete(root);
@@ -169,7 +157,7 @@ public class SpringFileStoreTest extends EasyMockTestCase {
 			assertFalse(parent.isDirectory());
 			assertFalse(root.isDirectory());
 			
-			store.setConfigRoot("${user.home}/vulcan-junit/config-dir");
+			store.setConfigRoot(System.getProperty("user.home") + "/vulcan-junit/config-dir");
 			store.init();
 			
 			assertTrue(parent.isDirectory());

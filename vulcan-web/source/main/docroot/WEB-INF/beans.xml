@@ -6,6 +6,12 @@
 	$HeadURL$
 -->
 <beans>
+	<!-- This will replace values with System Properties where applicable: -->
+	<bean id="placeholderConfig" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+		<property name="ignoreUnresolvablePlaceholders" value="true"/>
+		<property name="location" value="WEB-INF/application.properties"/>
+	</bean>
+
 	<bean class="net.sourceforge.vulcan.spring.mbean.VulcanManager">
 		<property name="stateManager" ref="stateManager"/>
 	</bean>
@@ -56,13 +62,12 @@
 			init-method="init">
 		<property name="eventHandler" ref="eventHandler"/>
 		<property name="configRoot">
-			<value>${user.home}/vulcan</value>
+			<value>${vulcan.home}</value>
 		</property>
 		<property name="workingCopyLocationPattern">
-			<value>work/${projectName}</value>
+			<value>${default.build.directory}</value>
 		</property>
 		<property name="beanEncoder" ref="beanEncoder"/>
-		<property name="maxBuildLogsPerProject"><value>10</value></property>
 	</bean>
 
 	<bean id="buildOutcomeCache" class="net.sourceforge.vulcan.core.support.BuildOutcomeCache" init-method="init">
