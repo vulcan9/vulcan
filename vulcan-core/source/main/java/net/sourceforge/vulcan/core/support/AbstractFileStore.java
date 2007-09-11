@@ -59,7 +59,6 @@ public abstract class AbstractFileStore implements Store {
 	protected String workingCopyLocationPattern;
 	protected File configRoot;
 	protected EventHandler eventHandler;
-	private int maxBuildLogsPerProject;
 	
 	public final void init() {
 		if (!configRoot.exists()) {
@@ -186,14 +185,7 @@ public abstract class AbstractFileStore implements Store {
 		return plugins.toArray(new PluginMetaDataDto[plugins.size()]);
 	}
 	public final void setConfigRoot(String root) {
-		final File rootDir;
-		if (root.startsWith("${user.home}")) {
-			root = root.substring(13);
-			rootDir = new File(getAppDataDir(), root);
-		} else {
-			rootDir = new File(root);
-		}
-		configRoot = rootDir;
+		configRoot = new File(root);
 	}
 	public final String getConfigRoot() {
 		return configRoot.getPath();
@@ -226,24 +218,11 @@ public abstract class AbstractFileStore implements Store {
 	public final File getProjectsRoot() {
 		return new File(getConfigRoot(), "projects");
 	}
-	public int getMaxBuildLogsPerProject() {
-		return maxBuildLogsPerProject;
-	}
-	public void setMaxBuildLogsPerProject(int maxBuildLogsPerProject) {
-		this.maxBuildLogsPerProject = maxBuildLogsPerProject;
-	}
 	public EventHandler getEventHandler() {
 		return eventHandler;
 	}
 	public void setEventHandler(EventHandler errorHandler) {
 		this.eventHandler = errorHandler;
-	}
-	public final static File getAppDataDir() {
-		final File home = new File(System.getProperty("user.home"));
-		if (System.getProperty("os.name").startsWith("Windows")) {
-			return new File(home, "Application Data");
-		}
-		return home;
 	}
 	@SuppressWarnings("unchecked")
 	final URL[] getJars(File dir) {
