@@ -43,6 +43,7 @@
 	
 	<li><html:link forward="preferences"><fmt:message key="link.preferences"/></html:link></li>
 	<li><html:link forward="setup"><fmt:message key="link.setup"/></html:link></li>
+	<li><html:link forward="about"><fmt:message key="link.about"/></html:link></li>
 	
 	<c:choose>
 		<c:when test="${helpUrl ne null}">
