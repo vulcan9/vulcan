@@ -35,7 +35,7 @@ import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
-import net.sourceforge.vulcan.core.Store;
+import net.sourceforge.vulcan.core.ConfigurationStore;
 import net.sourceforge.vulcan.dto.PluginMetaDataDto;
 import net.sourceforge.vulcan.event.ErrorEvent;
 import net.sourceforge.vulcan.event.EventHandler;
@@ -55,7 +55,7 @@ import org.apache.commons.io.filefilter.SuffixFileFilter;
 
 
 @SvnRevision(id="$Id$", url="$HeadURL$")
-public abstract class AbstractFileStore implements Store {
+public abstract class AbstractFileStore implements ConfigurationStore {
 	protected String workingCopyLocationPattern;
 	protected File configRoot;
 	protected EventHandler eventHandler;

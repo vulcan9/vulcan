@@ -7,7 +7,7 @@
 -->
 <beans>
 	<bean name="projectReportBaseAction" abstract="true">
-		<property name="store" ref="store"/>
+		<property name="configurationStore" ref="configurationStore"/>
 		<property name="buildManager" ref="buildManager"/>
 		<property name="projectManager" ref="stateManager"/>
 		<property name="projectDomBuilder" ref="projectDomBuilder"/>
@@ -77,7 +77,7 @@
 	<bean name="/admin/setup/manageProjectConfig"
 			class="net.sourceforge.vulcan.web.struts.actions.ManageProjectConfigAction"
 			parent="baseDispatchAction">
-		<property name="store" ref="store"/>
+		<property name="configurationStore" ref="configurationStore"/>
 	</bean>
 	
 	<bean name="/admin/setup/deleteProjects"
@@ -92,7 +92,7 @@
 
 	<bean name="/admin/viewConfig"
 			class="net.sourceforge.vulcan.web.struts.actions.ViewConfigAction">
-		<property name="store" ref="store"/>
+		<property name="configurationStore" ref="configurationStore"/>
 		<property name="filename" value="vulcan-config.xml"/>
 	</bean>
 	
@@ -100,7 +100,7 @@
 			class="net.sourceforge.vulcan.web.struts.actions.ImportConfigAction"
 			parent="baseDispatchAction">
 		<property name="eventHandler" ref="eventHandler"/>
-		<property name="store" ref="store"/>
+		<property name="configurationStore" ref="configurationStore"/>
 	</bean>
 	
 	<bean name="/admin/setup/manageBuildDaemonConfig"

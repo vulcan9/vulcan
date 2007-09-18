@@ -23,7 +23,7 @@ import java.io.OutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import net.sourceforge.vulcan.core.Store;
+import net.sourceforge.vulcan.core.ConfigurationStore;
 
 import org.apache.struts.action.Action;
 import org.apache.struts.action.ActionForm;
@@ -31,7 +31,7 @@ import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 
 public class ViewConfigAction extends Action {
-	private Store store;
+	private ConfigurationStore configurationStore;
 	private String filename;
 	
 	@Override
@@ -40,12 +40,12 @@ public class ViewConfigAction extends Action {
 			response.setHeader("Content-Disposition", "attachment; filename=" + filename);
 		}
 		
-		response.setContentType(store.getExportMimeType());
+		response.setContentType(configurationStore.getExportMimeType());
 		
 		final OutputStream os = response.getOutputStream();
 		
 		try {
-			store.exportConfiguration(os);
+			configurationStore.exportConfiguration(os);
 		} finally {
 			os.close();
 		}
@@ -53,8 +53,8 @@ public class ViewConfigAction extends Action {
 		return null;
 	}
 	
-	public void setStore(Store store) {
-		this.store = store;
+	public void setConfigurationStore(ConfigurationStore store) {
+		this.configurationStore = store;
 	}
 	public void setFilename(String filename) {
 		this.filename = filename;

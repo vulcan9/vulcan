@@ -33,7 +33,7 @@ import net.sourceforge.vulcan.BuildTool;
 import net.sourceforge.vulcan.PluginManager;
 import net.sourceforge.vulcan.RepositoryAdaptor;
 import net.sourceforge.vulcan.core.ProjectNameChangeListener;
-import net.sourceforge.vulcan.core.Store;
+import net.sourceforge.vulcan.core.ConfigurationStore;
 import net.sourceforge.vulcan.dto.BuildToolConfigDto;
 import net.sourceforge.vulcan.dto.ComponentVersionDto;
 import net.sourceforge.vulcan.dto.PluginConfigDto;
@@ -75,7 +75,7 @@ public class SpringPluginManager
 	
 	ApplicationContext ctx;
 	
-	Store store;
+	ConfigurationStore configurationStore;
 	EventHandler eventHandler;
 	BuildEventPluginPublisher buildEventPluginPublisher;
 	DelegatingResourceBundleMessageSource messageSource;
@@ -148,7 +148,7 @@ public class SpringPluginManager
 		
 		importBundledPlugins();
 		
-		final PluginMetaDataDto[] plugins = store.getPluginConfigs();
+		final PluginMetaDataDto[] plugins = configurationStore.getPluginConfigs();
 		
 		for (int i=0; i<plugins.length; i++) {
 			try {
@@ -170,13 +170,13 @@ public class SpringPluginManager
 	}
 
 	public synchronized void importPluginZip(InputStream in) throws StoreException, PluginLoadFailureException {
-		final PluginMetaDataDto pluginConfig = store.extractPlugin(in);
+		final PluginMetaDataDto pluginConfig = configurationStore.extractPlugin(in);
 		createPlugin(pluginConfig, true);
 	}
 	public synchronized void removePlugin(String id) throws StoreException, PluginNotFoundException {
 		destroyPlugin(id);
 		
-		store.deletePlugin(id);
+		configurationStore.deletePlugin(id);
 	}
 	public synchronized File getPluginDirectory(String id) throws PluginNotFoundException {
 		return findPluginState(id).pluginConfig.getDirectory();
@@ -318,11 +318,11 @@ public class SpringPluginManager
 			}
 		}
 	}
-	public Store getStore() {
-		return store;
+	public ConfigurationStore getConfigurationStore() {
+		return configurationStore;
 	}
-	public void setStore(Store store) {
-		this.store = store;
+	public void setConfigurationStore(ConfigurationStore store) {
+		this.configurationStore = store;
 	}
 	public String getPluginBeanName() {
 		return pluginBeanName;
@@ -391,7 +391,7 @@ public class SpringPluginManager
 		} catch (Exception e) {
 			if (deleteOnFailure) {
 				try {
-					store.deletePlugin(id);
+					configurationStore.deletePlugin(id);
 				} catch (Exception e1) {
 					eventHandler.reportEvent(new ErrorEvent(
 							this, "PluginManager.delete.failed", new Object[] {id}, e1));
@@ -433,7 +433,7 @@ public class SpringPluginManager
 		
 		for (Resource r : resources) {
 			try {
-				store.extractPlugin(r.getInputStream());
+				configurationStore.extractPlugin(r.getInputStream());
 			} catch (DuplicatePluginIdException ignore) {
 				// This happens when plugin is up to date.
 			} catch (Exception e) {

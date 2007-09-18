@@ -85,7 +85,7 @@ public class BuildManagerImplTest extends TestCase {
 		b.setName("b");
 		c.setName("c");
 
-		cache.setStore(new StoreStub(null) {
+		cache.setBuildOutcomeStore(new StoreStub(null) {
 			@Override
 			public ProjectStatusDto loadBuildOutcome(String projectName, UUID id) {
 				if (id == null) {

@@ -29,7 +29,7 @@ import java.util.Set;
 import java.util.UUID;
 
 import net.sourceforge.vulcan.EasyMockTestCase;
-import net.sourceforge.vulcan.core.Store;
+import net.sourceforge.vulcan.core.BuildOutcomeStore;
 import net.sourceforge.vulcan.dto.ProjectStatusDto;
 
 import org.easymock.IAnswer;
@@ -37,7 +37,7 @@ import org.easymock.IAnswer;
 public class BuildOutcomeCacheTest extends EasyMockTestCase {
 	BuildOutcomeCache cache = new BuildOutcomeCache();
 	
-	Store store = createMock(Store.class);
+	BuildOutcomeStore store = createMock(BuildOutcomeStore.class);
 	
 	Map<String, List<UUID>> map = new HashMap<String, List<UUID>>();
 	Map<UUID, ProjectStatusDto> storedOutcomes = new HashMap<UUID, ProjectStatusDto>();
@@ -52,7 +52,7 @@ public class BuildOutcomeCacheTest extends EasyMockTestCase {
 	protected void setUp() throws Exception {
 		super.setUp();
 		
-		cache.setStore(store);
+		cache.setBuildOutcomeStore(store);
 		cache.setCacheSize(10);
 		
 		storedOutcomes.put(zero, new ProjectStatusDto());

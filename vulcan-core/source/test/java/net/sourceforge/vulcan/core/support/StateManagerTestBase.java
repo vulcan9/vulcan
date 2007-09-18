@@ -64,7 +64,7 @@ public abstract class StateManagerTestBase extends EasyMockTestCase
 	public void setUp() {
 		stateManagerConfig.setBuildManagerConfig(new BuildManagerConfigDto());
 		
-		stateMgr.setStore(store);
+		stateMgr.setConfigurationStore(store);
 		stateMgr.setBuildManager(new BuildManager() {
 			public void add(DependencyGroup dg) {
 			}

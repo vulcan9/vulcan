@@ -203,7 +203,8 @@ public class ProjectBuilderTest extends EasyMockTestCase {
 	public void setUp() throws Exception {
 		checkOrder(false);
 		
-		builder.setStore(store);
+		builder.setConfigurationStore(store);
+		builder.setBuildOutcomeStore(store);
 		builder.setBuildManager(mgr);
 		builder.setProjectManager(projectMgr);
 

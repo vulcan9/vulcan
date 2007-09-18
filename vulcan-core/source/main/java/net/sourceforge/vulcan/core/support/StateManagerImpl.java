@@ -44,7 +44,7 @@ import net.sourceforge.vulcan.core.BuildManager;
 import net.sourceforge.vulcan.core.DependencyBuildPolicy;
 import net.sourceforge.vulcan.core.DependencyGroup;
 import net.sourceforge.vulcan.core.ProjectNameChangeListener;
-import net.sourceforge.vulcan.core.Store;
+import net.sourceforge.vulcan.core.ConfigurationStore;
 import net.sourceforge.vulcan.core.WorkingCopyUpdateStrategy;
 import net.sourceforge.vulcan.dto.BuildManagerConfigDto;
 import net.sourceforge.vulcan.dto.ComponentVersionDto;
@@ -73,7 +73,7 @@ import org.apache.commons.lang.StringUtils;
 @SvnRevision(id="$Id$", url="$HeadURL$")
 public abstract class StateManagerImpl implements StateManager, ProjectManager {
 	/* Dependencies */
-	Store store;
+	ConfigurationStore configurationStore;
 	BuildManager buildManager;
 	PluginManager pluginManager;
 	
@@ -100,7 +100,7 @@ public abstract class StateManagerImpl implements StateManager, ProjectManager {
 		try {
 			writeLock.lock();
 			
-			config = store.loadConfiguration();
+			config = configurationStore.loadConfiguration();
 			
 			applyPluginConfigurations();
 			
@@ -157,7 +157,7 @@ public abstract class StateManagerImpl implements StateManager, ProjectManager {
 	public void save() throws StoreException {
 		try {
 			readLock.lock();
-			store.storeConfiguration(this.config);
+			configurationStore.storeConfiguration(this.config);
 		} finally {
 			readLock.unlock();
 		}
@@ -624,11 +624,11 @@ public abstract class StateManagerImpl implements StateManager, ProjectManager {
 			readLock.unlock();
 		}
 	}
-	public Store getStore() {
-		return store;
+	public ConfigurationStore getConfigurationStore() {
+		return configurationStore;
 	}
-	public void setStore(Store store) {
-		this.store = store;
+	public void setConfigurationStore(ConfigurationStore store) {
+		this.configurationStore = store;
 	}
 	public void setProjectNameChangeListeners(
 			List<ProjectNameChangeListener> projectNameChangeListeners) {

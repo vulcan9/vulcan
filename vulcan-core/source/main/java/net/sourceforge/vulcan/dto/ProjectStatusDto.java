@@ -61,7 +61,7 @@ public class ProjectStatusDto extends NameDto {
 	 * the current revision will not be fetched
 	 * from the repository and therefore will
 	 * be null.  In those cases this property
-	 * carries the revision from prevsious builds
+	 * carries the revision from previous builds
 	 * forward.
 	 */
 	private RevisionTokenDto lastKnownRevision;

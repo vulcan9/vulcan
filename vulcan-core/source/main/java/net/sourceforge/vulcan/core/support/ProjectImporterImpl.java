@@ -35,7 +35,7 @@ import net.sourceforge.vulcan.ProjectRepositoryConfigurator;
 import net.sourceforge.vulcan.StateManager;
 import net.sourceforge.vulcan.core.NameCollisionResolutionMode;
 import net.sourceforge.vulcan.core.ProjectImporter;
-import net.sourceforge.vulcan.core.Store;
+import net.sourceforge.vulcan.core.ConfigurationStore;
 import net.sourceforge.vulcan.dto.PluginConfigDto;
 import net.sourceforge.vulcan.dto.ProjectConfigDto;
 import net.sourceforge.vulcan.exception.ConfigException;
@@ -61,7 +61,7 @@ public class ProjectImporterImpl implements ProjectImporter {
 	
 	private PluginManager pluginManager;
 	private StateManager stateManager;
-	private Store store;
+	private ConfigurationStore configurationStore;
 	
 	public void createProjectsForUrl(String startUrl, String username, String password, boolean createSubprojects, NameCollisionResolutionMode nameCollisionResolutionMode, String[] schedulerNames) throws ConfigException, StoreException, DuplicateNameException {
 		final List<RepositoryAdaptorPlugin> repositoryPlugins = pluginManager.getPlugins(RepositoryAdaptorPlugin.class);
@@ -149,8 +149,8 @@ public class ProjectImporterImpl implements ProjectImporter {
 		this.stateManager = stateManager;
 	}
 
-	public void setStore(Store store) {
-		this.store = store;
+	public void setConfigurationStore(ConfigurationStore store) {
+		this.configurationStore = store;
 	}
 	
 	protected File createTempFile() throws IOException {
@@ -184,7 +184,7 @@ public class ProjectImporterImpl implements ProjectImporter {
 		}
 		
 		if (isBlank(projectConfig.getWorkDir())) {
-			final String workDir = store.getWorkingCopyLocationPattern().replace("${projectName}", projectConfig.getName());
+			final String workDir = configurationStore.getWorkingCopyLocationPattern().replace("${projectName}", projectConfig.getName());
 			projectConfig.setWorkDir(workDir);
 		}
 		

@@ -97,6 +97,7 @@
 					<include>**/*.conf</include>
 					<include>**/*.xml</include>
 					<include>**/*.xsl</include>
+					<include>**/*.sql</include>
 				</includes>
 			</resource>
 		</resources>
@@ -108,6 +109,7 @@
 					<include>**/*.conf</include>
 					<include>**/*.xml</include>
 					<include>**/*.xsl</include>
+					<include>**/*.sql</include>
 				</includes>
 			</testResource>
 		</testResources>
@@ -254,6 +256,11 @@
 			<dependency>
 				<groupId>org.springframework</groupId>
 				<artifactId>spring-web</artifactId>
+				<version>1.2.9</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework</groupId>
+				<artifactId>spring-jdbc</artifactId>
 				<version>1.2.9</version>
 			</dependency>
 			<dependency>

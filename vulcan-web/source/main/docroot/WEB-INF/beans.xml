@@ -22,10 +22,10 @@
 		
 		<property name="buildManager" ref="buildManager"/>
 		<property name="pluginManager" ref="pluginManager"/>
-		<property name="store" ref="store"/>
+		<property name="configurationStore" ref="configurationStore"/>
 		<property name="projectNameChangeListeners">
 			<list>
-				<ref bean="store"/>
+				<ref bean="configurationStore"/>
 				<ref bean="buildOutcomeCache"/>
 				<ref bean="pluginManager"/>
 			</list>
@@ -37,7 +37,7 @@
 	<bean name="projectImporter" class="net.sourceforge.vulcan.core.support.ProjectImporterImpl">
 		<property name="pluginManager" ref="pluginManager"/>
 		<property name="stateManager" ref="stateManager"/>
-		<property name="store" ref="store"/>
+		<property name="configurationStore" ref="configurationStore"/>
 	</bean>
 	
 	<bean name="eventPool" class="net.sourceforge.vulcan.spring.SpringEventPool">
@@ -58,7 +58,7 @@
 		<property name="factoryExpert" ref="factoryExpert"/>
 	</bean>
 
-	<bean id="store" class="net.sourceforge.vulcan.spring.SpringFileStore"
+	<bean id="configurationStore" class="net.sourceforge.vulcan.spring.SpringFileStore"
 			init-method="init">
 		<property name="eventHandler" ref="eventHandler"/>
 		<property name="configRoot">
@@ -69,9 +69,9 @@
 		</property>
 		<property name="beanEncoder" ref="beanEncoder"/>
 	</bean>
-
+	
 	<bean id="buildOutcomeCache" class="net.sourceforge.vulcan.core.support.BuildOutcomeCache" init-method="init">
-		<property name="store" ref="store"/>
+		<property name="buildOutcomeStore" ref="buildOutcomeStore"/>
 		<property name="eventHandler" ref="eventHandler"/>
 		<property name="cacheSize" value="5000"/>
 	</bean>
@@ -84,7 +84,7 @@
 	<bean id="pluginManager" name="pluginManager" class="net.sourceforge.vulcan.spring.SpringPluginManager"
 			init-method="init" destroy-method="shutdown">
 		<property name="buildEventPluginPublisher" ref="buildEventPluginPublisher"/>
-		<property name="store" ref="store"/>
+		<property name="configurationStore" ref="configurationStore"/>
 		<property name="eventHandler" ref="eventHandler"/>
 		<property name="messageSource" ref="messageSource"/>
 		<property name="factoryExpert" ref="factoryExpert"/>
@@ -127,7 +127,8 @@
 	
 	<bean id="projectBuilder" class="net.sourceforge.vulcan.core.support.ProjectBuilderImpl" singleton="false"
 			init-method="init">
-		<property name="store" ref="store"/>
+		<property name="configurationStore" ref="configurationStore"/>
+		<property name="buildOutcomeStore" ref="buildOutcomeStore"/>
 		<property name="buildManager" ref="buildManager"/>
 		<property name="projectManager" ref="stateManager"/>
 		<property name="deleteDirectoryAttempts" value="2"/>
