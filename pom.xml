@@ -127,7 +127,9 @@
 				<configuration>
 					<!-- Need to specify empty excludes to prevent default
 						exclude *Abstract*Test.java from omitting valid tests. -->
-					<excludes/>
+					<excludes>
+						<exclude>please/dont/exclude/my/tests/if/i/wanted/them/excluded/i/would/make/them/abstract/k/thx</exclude>
+					</excludes>
 				</configuration>
 			</plugin>
 			
