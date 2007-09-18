@@ -28,7 +28,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-import net.sourceforge.vulcan.core.Store;
+import net.sourceforge.vulcan.core.BuildOutcomeStore;
+import net.sourceforge.vulcan.core.ConfigurationStore;
 import net.sourceforge.vulcan.dto.PluginMetaDataDto;
 import net.sourceforge.vulcan.dto.ProjectStatusDto;
 import net.sourceforge.vulcan.dto.StateManagerConfigDto;
@@ -36,7 +37,7 @@ import net.sourceforge.vulcan.exception.StoreException;
 import net.sourceforge.vulcan.metadata.SvnRevision;
 
 @SvnRevision(id="$Id$", url="$HeadURL$")
-public class StoreStub implements Store {
+public class StoreStub implements ConfigurationStore, BuildOutcomeStore {
 	StateManagerConfigDto stateManagerConfig;
 	boolean commitCalled;
 	
@@ -116,6 +117,12 @@ public class StoreStub implements Store {
 	public void importConfiguration(InputStream is) throws StoreException, IOException {
 	}
 	public boolean isWorkingCopyLocationInvalid(String location) {
+		return false;
+	}
+	public boolean buildLogExists(String projectName, UUID diffId) {
+		return false;
+	}
+	public boolean diffExists(String projectName, UUID diffId) {
 		return false;
 	}
 }

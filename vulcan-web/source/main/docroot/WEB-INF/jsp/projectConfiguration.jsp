@@ -39,7 +39,7 @@
 		<td colspan="2">
 			<html:text property="config.workDir" styleId="txtWorkDir"/>
 			<input type="hidden" name="defaultWorkDirPattern" id="defaultWorkDirPattern"
-				value="${stateManager.store.workingCopyLocationPattern}"/>
+				value="${stateManager.configurationStore.workingCopyLocationPattern}"/>
 			<html:messages property="config.workDir" id="msg">
 				<span class="error">${msg}</span>
 			</html:messages>

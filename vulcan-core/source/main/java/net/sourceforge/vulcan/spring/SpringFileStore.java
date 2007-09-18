@@ -195,6 +195,16 @@ public class SpringFileStore extends AbstractFileStore implements BeanFactoryAwa
 		
 		return status;
 	}
+	public boolean buildLogExists(String projectName, UUID id) {
+		final File buildLog = new File(getBuildLogDir(projectName), id.toString());
+		
+		return checkFile(buildLog);
+	}
+	public boolean diffExists(String projectName, UUID id) {
+		final File buildLog = new File(getChangeLogDir(projectName), id.toString());
+		
+		return checkFile(buildLog);
+	}
 	public OutputStream getChangeLogOutputStream(String projectName, UUID diffId) throws StoreException {
 		final File dir = getChangeLogDir(projectName);
 		
@@ -355,18 +365,15 @@ public class SpringFileStore extends AbstractFileStore implements BeanFactoryAwa
 	 * Delete empty/missing build log / unified diff references. 
 	 */
 	private void removeUnusedResources(String projectName, final ProjectStatusDto outcome) {
-		if (outcome.getBuildLogId() != null) {
-			final File buildLog = new File(getBuildLogDir(projectName), outcome.getBuildLogId().toString());
-			
-			if (checkFile(buildLog) == false) {
+		final UUID id = outcome.getBuildLogId();
+		if (id != null) {
+			if (!buildLogExists(projectName, id)) {
 				outcome.setBuildLogId(null);
 			}
 		}
 		
 		if (outcome.getDiffId() != null) {
-			final File diff = new File(getChangeLogDir(projectName), outcome.getDiffId().toString());
-			
-			if (checkFile(diff) == false) {
+			if (!diffExists(projectName, outcome.getDiffId())) {
 				outcome.setDiffId(null);
 			}
 		}

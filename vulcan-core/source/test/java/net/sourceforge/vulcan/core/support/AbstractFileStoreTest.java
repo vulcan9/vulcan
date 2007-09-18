@@ -21,31 +21,22 @@ package net.sourceforge.vulcan.core.support;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
-import net.sourceforge.vulcan.dto.ProjectStatusDto;
+import junit.framework.TestCase;
 import net.sourceforge.vulcan.dto.StateManagerConfigDto;
 import net.sourceforge.vulcan.exception.StoreException;
 import net.sourceforge.vulcan.metadata.SvnRevision;
-import junit.framework.TestCase;
 
 @SvnRevision(id="$Id$", url="$HeadURL$")
 public class AbstractFileStoreTest extends TestCase {
 	AbstractFileStore store = new AbstractFileStore() {
-		public ProjectStatusDto createBuildOutcome(String projectName) {
-			return null;
-		}
 		public void exportConfiguration(OutputStream os) throws StoreException, IOException {
 		}
 		public InputStream getBuildLogInputStream(String projectName, UUID buildLogId) throws StoreException {
 			return null;
 		}
 		public OutputStream getBuildLogOutputStream(String projectName, UUID buildLogId) throws StoreException {
-			return null;
-		}
-		public Map<String, List<UUID>> getBuildOutcomeIDs() {
 			return null;
 		}
 		public InputStream getChangeLogInputStream(String projectName, UUID diffId) throws StoreException {
@@ -59,16 +50,16 @@ public class AbstractFileStoreTest extends TestCase {
 		}
 		public void importConfiguration(InputStream is) throws StoreException, IOException {
 		}
-		public ProjectStatusDto loadBuildOutcome(String projectName, UUID id) throws StoreException {
-			return null;
-		}
 		public StateManagerConfigDto loadConfiguration() throws StoreException {
 			return null;
 		}
-		public UUID storeBuildOutcome(ProjectStatusDto outcome) throws StoreException {
-			return null;
-		}
 		public void storeConfiguration(StateManagerConfigDto config) throws StoreException {
+		}
+		public boolean buildLogExists(String projectName, UUID diffId) {
+			return false;
+		}
+		public boolean diffExists(String projectName, UUID diffId) {
+			return false;
 		}
 	};
 	

@@ -23,7 +23,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import net.sourceforge.vulcan.StateManager;
-import net.sourceforge.vulcan.core.Store;
+import net.sourceforge.vulcan.core.ConfigurationStore;
 import net.sourceforge.vulcan.dto.PluginConfigDto;
 import net.sourceforge.vulcan.dto.ProjectConfigDto;
 import net.sourceforge.vulcan.exception.ProjectNeedsDependencyException;
@@ -40,7 +40,7 @@ import org.apache.struts.action.ActionMessages;
 
 @SvnRevision(id="$Id$", url="$HeadURL$")
 public final class ManageProjectConfigAction extends BaseDispatchAction {
-	private Store store;
+	private ConfigurationStore configurationStore;
 	
 	public ActionForward edit(ActionMapping mapping, ActionForm form,
 			HttpServletRequest request, HttpServletResponse response)
@@ -56,7 +56,7 @@ public final class ManageProjectConfigAction extends BaseDispatchAction {
 			project = stateManager.getProjectConfig(configForm.getConfig().getName());
 		}
 		
-		configForm.setStore(store);
+		configForm.setStore(configurationStore);
 		configForm.populate(project, false);
 		
 		return mapping.findForward("projectDetails");
@@ -74,7 +74,7 @@ public final class ManageProjectConfigAction extends BaseDispatchAction {
 		project.setName(name);
 		project.setWorkDir(workDir);
 		
-		configForm.setStore(store);
+		configForm.setStore(configurationStore);
 		configForm.populate(project, false);
 		configForm.setCreateNew(true);
 		
@@ -180,8 +180,8 @@ public final class ManageProjectConfigAction extends BaseDispatchAction {
 		
 		return mapping.findForward("configure");
 	}
-	public void setStore(Store store) {
-		this.store = store;
+	public void setConfigurationStore(ConfigurationStore store) {
+		this.configurationStore = store;
 	}
 	private PluginConfigForm getOrCreatePluginForm(ActionMapping mapping, HttpServletRequest request) {
 		final HttpSession session = request.getSession();

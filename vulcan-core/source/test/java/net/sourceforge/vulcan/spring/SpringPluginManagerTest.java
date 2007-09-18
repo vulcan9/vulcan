@@ -30,7 +30,7 @@ import java.util.List;
 import net.sourceforge.vulcan.EasyMockTestCase;
 import net.sourceforge.vulcan.MockApplicationContext;
 import net.sourceforge.vulcan.core.ProjectNameChangeListener;
-import net.sourceforge.vulcan.core.Store;
+import net.sourceforge.vulcan.core.ConfigurationStore;
 import net.sourceforge.vulcan.core.BeanEncoder.FactoryExpert;
 import net.sourceforge.vulcan.dto.ComponentVersionDto;
 import net.sourceforge.vulcan.dto.PluginConfigDto;
@@ -68,14 +68,14 @@ public class SpringPluginManagerTest extends EasyMockTestCase {
 	};
 	DelegatingResourceBundleMessageSource loader = new DelegatingResourceBundleMessageSource();
 	
-	Store store = createMock(Store.class);
+	ConfigurationStore store = createMock(ConfigurationStore.class);
 	FactoryExpert expert = createStrictMock(FactoryExpert.class);
 	
 	List<Plugin> fakePlugins;
 	
 	@Override
 	public void setUp() throws Exception {
-		mgr.setStore(store);
+		mgr.setConfigurationStore(store);
 		
 		mgr.setPluginBeanName("plugin");
 		mgr.setMessageSource(loader);

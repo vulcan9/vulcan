@@ -34,7 +34,7 @@ import javax.xml.transform.stream.StreamResult;
 import net.sourceforge.vulcan.ProjectManager;
 import net.sourceforge.vulcan.core.BuildManager;
 import net.sourceforge.vulcan.core.ProjectDomBuilder;
-import net.sourceforge.vulcan.core.Store;
+import net.sourceforge.vulcan.core.ConfigurationStore;
 import net.sourceforge.vulcan.dto.ProjectConfigDto;
 import net.sourceforge.vulcan.exception.NoSuchTransformFormatException;
 import net.sourceforge.vulcan.metadata.SvnRevision;
@@ -55,16 +55,16 @@ import org.xml.sax.SAXException;
 
 @SvnRevision(id="$Id$", url="$HeadURL$")
 public abstract class ProjectReportBaseAction extends Action {
-	protected Store store;
+	protected ConfigurationStore configurationStore;
 	protected BuildManager buildManager;
 	protected ProjectDomBuilder projectDomBuilder;
 	protected ProjectManager projectManager;
 	
-	public Store getStore() {
-		return store;
+	public ConfigurationStore getConfigurationStore() {
+		return configurationStore;
 	}
-	public void setStore(Store store) {
-		this.store = store;
+	public void setConfigurationStore(ConfigurationStore store) {
+		this.configurationStore = store;
 	}
 	public BuildManager getBuildManager() {
 		return buildManager;

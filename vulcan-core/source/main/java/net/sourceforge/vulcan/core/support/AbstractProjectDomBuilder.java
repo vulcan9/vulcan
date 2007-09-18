@@ -306,8 +306,8 @@ public abstract class AbstractProjectDomBuilder implements ProjectDomBuilder {
 				changeSet.setAttribute("author", changes.getAuthor());
 			}
 			
-			if (changes.getRevision() != null) {
-				changeSet.setAttribute("revision", changes.getRevision().toString());
+			if (changes.getRevisionLabel() != null) {
+				changeSet.setAttribute("revision", changes.getRevisionLabel().toString());
 			}
 			
 			if (changes.getTimestamp() != null) {

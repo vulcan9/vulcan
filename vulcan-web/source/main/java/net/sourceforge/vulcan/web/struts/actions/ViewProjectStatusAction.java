@@ -166,7 +166,7 @@ public final class ViewProjectStatusAction extends ProjectReportBaseAction {
 		if (status != null) {
 			UUID diffId = status.getDiffId();
 			try {
-				is = store.getChangeLogInputStream(status.getName(), diffId);
+				is = configurationStore.getChangeLogInputStream(status.getName(), diffId);
 			} catch (StoreException e) {
 				is = null;
 			}
@@ -180,7 +180,7 @@ public final class ViewProjectStatusAction extends ProjectReportBaseAction {
 		if (status != null) {
 			UUID logId = status.getBuildLogId();
 			try {
-				is = store.getBuildLogInputStream(status.getName(), logId);
+				is = configurationStore.getBuildLogInputStream(status.getName(), logId);
 			} catch (StoreException e) {
 				is = null;
 			}

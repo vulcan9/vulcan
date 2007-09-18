@@ -250,6 +250,22 @@ public class ViewProjectBuildHistoryActionTest extends MockApplicationContextStr
 		assertEquals("application/xml", response.getContentType());
 		assertEquals("attachment; filename=vulcan-build-history.xml", response.getHeader("Content-Disposition"));
 	}		
+	public void testIncludeAllHandlesNull() throws Exception {
+		addRequestParameter("download", "true");
+		addRequestParameter("projectNames", "Trundle");
+		addRequestParameter("rangeType", "all");
+		
+		buildManager.getAvailableStatusIds("Trundle");
+		expectLastCall().andReturn(null);
+		
+		replay();
+		
+		actionPerform();
+		
+		verifyActionErrors(new String[] {"errors.no.history"});
+		
+		verify();
+	}		
 	public void testOmitSkipAndError() throws Exception {
 		addRequestParameter("download", "true");
 		addRequestParameter("projectNames", "Trundle");

@@ -94,7 +94,6 @@
 	</c:if>
 		<li><html:link forward="importConfig"><fmt:message key="link.import.config"/></html:link></li>
 		<li><html:link forward="viewConfig"><fmt:message key="link.view.config"/></html:link></li>
-		<li><html:link forward="about"><fmt:message key="link.about"/></html:link></li>
 	</ul>
 </div>
 </v:bubble>

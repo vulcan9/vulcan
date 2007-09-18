@@ -36,9 +36,10 @@ import javax.servlet.http.HttpServletResponse;
 import junit.framework.AssertionFailedError;
 import net.sourceforge.vulcan.TestUtils;
 import net.sourceforge.vulcan.core.BuildManager;
+import net.sourceforge.vulcan.core.BuildOutcomeStore;
 import net.sourceforge.vulcan.core.ProjectDomBuilder;
 import net.sourceforge.vulcan.core.ProjectImporter;
-import net.sourceforge.vulcan.core.Store;
+import net.sourceforge.vulcan.core.ConfigurationStore;
 import net.sourceforge.vulcan.event.EventHandler;
 import net.sourceforge.vulcan.event.EventPool;
 import net.sourceforge.vulcan.metadata.SvnRevision;
@@ -75,7 +76,8 @@ public abstract class MockApplicationContextStrutsTestCase extends EasyMockStrut
 	protected ProjectDomBuilder projectDomBuilder;
 	protected EventPool eventPool;
 	protected EventHandler eventHandler;
-	protected Store store;
+	protected ConfigurationStore configurationStore;
+	protected BuildOutcomeStore buildOutcomeStore;
 	protected ProjectImporter projectImporter;
 	
 	private boolean multipart;
@@ -310,7 +312,8 @@ public abstract class MockApplicationContextStrutsTestCase extends EasyMockStrut
 		projectDomBuilder = defineWacSingleton("projectDomBuilder", ProjectDomBuilder.class);
 		eventPool = defineWacSingleton("eventPool", EventPool.class);
 		eventHandler = defineWacSingleton("eventHandler", EventHandler.class);
-		store = defineWacSingleton("store", Store.class);
+		configurationStore = defineWacSingleton("configurationStore", ConfigurationStore.class);
+		buildOutcomeStore = defineWacSingleton("buildOutcomeStore", BuildOutcomeStore.class);
 		projectImporter = defineWacSingleton("projectImporter", ProjectImporter.class);
 		
 		wac.refresh();

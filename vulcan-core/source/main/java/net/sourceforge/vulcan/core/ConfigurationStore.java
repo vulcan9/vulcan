@@ -21,18 +21,15 @@ package net.sourceforge.vulcan.core;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 import net.sourceforge.vulcan.dto.PluginMetaDataDto;
-import net.sourceforge.vulcan.dto.ProjectStatusDto;
 import net.sourceforge.vulcan.dto.StateManagerConfigDto;
 import net.sourceforge.vulcan.exception.StoreException;
 import net.sourceforge.vulcan.metadata.SvnRevision;
 
 @SvnRevision(id="$Id$", url="$HeadURL$")
-public interface Store {
+public interface ConfigurationStore {
 	StateManagerConfigDto loadConfiguration() throws StoreException;
 	void storeConfiguration(StateManagerConfigDto config) throws StoreException;
 
@@ -55,16 +52,13 @@ public interface Store {
 	 */
 	boolean isWorkingCopyLocationInvalid(String location);
 	
-	UUID storeBuildOutcome(ProjectStatusDto outcome) throws StoreException;
-	ProjectStatusDto loadBuildOutcome(String projectName, UUID id) throws StoreException;
-	Map<String, List<UUID>> getBuildOutcomeIDs();
-	
 	PluginMetaDataDto[] getPluginConfigs();
 	PluginMetaDataDto extractPlugin(InputStream is) throws StoreException;
 	void deletePlugin(String id) throws StoreException;
 
-	ProjectStatusDto createBuildOutcome(String projectName);
-
+	boolean diffExists(String projectName, UUID diffId);
+	boolean buildLogExists(String projectName, UUID diffId);
+	
 	OutputStream getChangeLogOutputStream(String projectName, UUID diffId) throws StoreException;
 	InputStream getChangeLogInputStream(String projectName, UUID diffId) throws StoreException;
 	OutputStream getBuildLogOutputStream(String projectName, UUID buildLogId) throws StoreException;

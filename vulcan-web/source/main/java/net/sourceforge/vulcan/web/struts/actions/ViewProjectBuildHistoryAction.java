@@ -70,7 +70,10 @@ public final class ViewProjectBuildHistoryAction extends ProjectReportBaseAction
 			ids = new ArrayList<UUID>();
 			
 			for (String name : projectNames) {
-				ids.addAll(buildManager.getAvailableStatusIds(name));
+				final List<UUID> idsForProject = buildManager.getAvailableStatusIds(name);
+				if (idsForProject != null) {
+					ids.addAll(idsForProject);
+				}
 			}
 			
 			fromLabel = "0";

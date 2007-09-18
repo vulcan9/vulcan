@@ -31,8 +31,8 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
+import net.sourceforge.vulcan.core.BuildOutcomeStore;
 import net.sourceforge.vulcan.core.ProjectNameChangeListener;
-import net.sourceforge.vulcan.core.Store;
 import net.sourceforge.vulcan.dto.ProjectStatusDto;
 import net.sourceforge.vulcan.event.ErrorEvent;
 import net.sourceforge.vulcan.event.EventHandler;
@@ -63,7 +63,7 @@ public class BuildOutcomeCache implements ProjectNameChangeListener {
 	 */
 	final Map<UUID, String> idToProjects = new HashMap<UUID, String>();
 	
-	Store store;
+	BuildOutcomeStore buildOutcomeStore;
 	EventHandler eventHandler;
 	
 	public BuildOutcomeCache() {
@@ -82,7 +82,7 @@ public class BuildOutcomeCache implements ProjectNameChangeListener {
 		writeLock.lock();
 		
 		try {
-			outcomeIDs = store.getBuildOutcomeIDs();
+			outcomeIDs = buildOutcomeStore.getBuildOutcomeIDs();
 			
 			for (Entry<String, List<UUID>> e : outcomeIDs.entrySet()) {
 				final List<UUID> ids = e.getValue();
@@ -183,7 +183,7 @@ public class BuildOutcomeCache implements ProjectNameChangeListener {
 		final String projectName = idToProjects.get(id);
 		
 		try {
-			final ProjectStatusDto status = store.loadBuildOutcome(projectName, id);
+			final ProjectStatusDto status = buildOutcomeStore.loadBuildOutcome(projectName, id);
 			
 			if (status.getBuildNumber() == null) {
 				// Legacy: build number was not introduced until several
@@ -300,14 +300,14 @@ public class BuildOutcomeCache implements ProjectNameChangeListener {
 		return findOutcomeByNumber(outcomeIds, buildNumber, nextGuess, visitedIndexes);
 	}
 
-	public Store getStore() {
-		return store;
+	public BuildOutcomeStore getBuildOutcomeStore() {
+		return buildOutcomeStore;
 	}
-
-	public void setStore(Store store) {
-		this.store = store;
+	
+	public void setBuildOutcomeStore(BuildOutcomeStore buildOutcomeStore) {
+		this.buildOutcomeStore = buildOutcomeStore;
 	}
-
+	
 	public EventHandler getEventHandler() {
 		return eventHandler;
 	}
@@ -336,7 +336,7 @@ public class BuildOutcomeCache implements ProjectNameChangeListener {
 	}
 	
 	private void store(String name, ProjectStatusDto statusDto) throws StoreException {
-		final UUID id = store.storeBuildOutcome(statusDto);
+		final UUID id = buildOutcomeStore.storeBuildOutcome(statusDto);
 		latestOutcomes.put(name, id);
 		outcomes.put(id, statusDto);
 		

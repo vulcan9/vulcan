@@ -83,7 +83,8 @@ public class BuildDaemonTest extends EasyMockTestCase {
 		config.setName("mock");
 
 		builderStub.setBuildManager(mgr);
-		builderStub.setStore(store);
+		builderStub.setConfigurationStore(store);
+		builderStub.setBuildOutcomeStore(store);
 		
 		bd.setBuildManager(mgr);
 

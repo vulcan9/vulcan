@@ -51,7 +51,7 @@ public class ManageProjectConfigActionTest extends MockApplicationContextStrutsT
 
 		pluginMgr = createStrictMock(PluginManager.class);
 		
-		expect(store.isWorkingCopyLocationInvalid((String)anyObject())).andAnswer(new IAnswer<Boolean>() {
+		expect(configurationStore.isWorkingCopyLocationInvalid((String)anyObject())).andAnswer(new IAnswer<Boolean>() {
 			public Boolean answer() throws Throwable {
 				final String arg = (String)EasyMock.getCurrentArguments()[0];
 				if (arg != null && arg.indexOf("invalid") >= 0) {
@@ -194,7 +194,7 @@ public class ManageProjectConfigActionTest extends MockApplicationContextStrutsT
 		
 		ProjectConfigForm form = new ProjectConfigForm();
 		form.populate(config, false);
-		form.setStore(store);
+		form.setStore(configurationStore);
 		
 		request.getSession().setAttribute("projectConfigForm", form);
 		
@@ -258,7 +258,7 @@ public class ManageProjectConfigActionTest extends MockApplicationContextStrutsT
 		
 		ProjectConfigForm form = new ProjectConfigForm();
 		form.populate(config, false);
-		form.setStore(store);
+		form.setStore(configurationStore);
 		
 		request.getSession().setAttribute("projectConfigForm", form);
 		
@@ -282,7 +282,7 @@ public class ManageProjectConfigActionTest extends MockApplicationContextStrutsT
 		
 		ProjectConfigForm form = new ProjectConfigForm();
 		form.populate(config, false);
-		form.setStore(store);
+		form.setStore(configurationStore);
 		
 		request.getSession().setAttribute("projectConfigForm", form);
 		
@@ -306,7 +306,7 @@ public class ManageProjectConfigActionTest extends MockApplicationContextStrutsT
 
 		ProjectConfigForm form = new ProjectConfigForm();
 		form.populate(config, false);
-		form.setStore(store);
+		form.setStore(configurationStore);
 		
 		request.getSession().setAttribute("projectConfigForm", form);
 		
@@ -329,7 +329,7 @@ public class ManageProjectConfigActionTest extends MockApplicationContextStrutsT
 
 		ProjectConfigForm form = new ProjectConfigForm();
 		form.populate(config, false);
-		form.setStore(store);
+		form.setStore(configurationStore);
 		
 		request.getSession().setAttribute("projectConfigForm", form);
 		
@@ -352,7 +352,7 @@ public class ManageProjectConfigActionTest extends MockApplicationContextStrutsT
 
 		ProjectConfigForm form = new ProjectConfigForm();
 		form.populate(config, false);
-		form.setStore(store);
+		form.setStore(configurationStore);
 		
 		request.getSession().setAttribute("projectConfigForm", form);
 		
@@ -381,7 +381,7 @@ public class ManageProjectConfigActionTest extends MockApplicationContextStrutsT
 		
 		ProjectConfigForm form = new ProjectConfigForm();
 		form.populate(config, false);
-		form.setStore(store);
+		form.setStore(configurationStore);
 		
 		request.getSession().setAttribute("projectConfigForm", form);
 		
@@ -438,7 +438,7 @@ public class ManageProjectConfigActionTest extends MockApplicationContextStrutsT
 		
 		ProjectConfigForm form = new ProjectConfigForm();
 		form.populate(config, false);
-		form.setStore(store);
+		form.setStore(configurationStore);
 		
 		request.getSession().setAttribute("projectConfigForm", form);
 		
@@ -600,7 +600,7 @@ public class ManageProjectConfigActionTest extends MockApplicationContextStrutsT
 		projectConfigDto.setRepositoryAdaptorConfig(pluginConfigDto);
 		projectConfigDto.setRepositoryAdaptorPluginId("com.example.plugin");
 		form.populate(projectConfigDto, false);
-		form.setStore(store);
+		form.setStore(configurationStore);
 		request.getSession().setAttribute("projectConfigForm", form);
 		
 		addRequestParameter("config.repositoryAdaptorPluginId", "com.example.other");
@@ -625,7 +625,7 @@ public class ManageProjectConfigActionTest extends MockApplicationContextStrutsT
 		projectConfigDto.setRepositoryAdaptorConfig(pluginConfigDto);
 		projectConfigDto.setRepositoryAdaptorPluginId("com.example.plugin");
 		form.populate(projectConfigDto, false);
-		form.setStore(store);
+		form.setStore(configurationStore);
 		request.getSession().setAttribute("projectConfigForm", form);
 		
 		addRequestParameter("config.repositoryAdaptorPluginId", "");
@@ -798,7 +798,7 @@ public class ManageProjectConfigActionTest extends MockApplicationContextStrutsT
 		projectConfigDto.setBuildToolPluginId("com.example.build.plugin");
 		
 		form.populate(projectConfigDto, false);
-		form.setStore(store);
+		form.setStore(configurationStore);
 		request.getSession().setAttribute("projectConfigForm", form);
 		
 		addRequestParameter("config.buildToolPluginId", "com.example.build.plugin.other");
@@ -825,7 +825,7 @@ public class ManageProjectConfigActionTest extends MockApplicationContextStrutsT
 		projectConfigDto.setName("name");
 
 		form.populate(projectConfigDto, false);
-		form.setStore(store);
+		form.setStore(configurationStore);
 		request.getSession().setAttribute("projectConfigForm", form);
 		
 		addRequestParameter("config.buildToolPluginId", "");
@@ -858,7 +858,7 @@ public class ManageProjectConfigActionTest extends MockApplicationContextStrutsT
 
 	private void initializeForm() {
 		ProjectConfigForm form = new ProjectConfigForm();
-		form.setStore(store);
+		form.setStore(configurationStore);
 		
 		request.getSession().setAttribute("projectConfigForm", form);
 	}

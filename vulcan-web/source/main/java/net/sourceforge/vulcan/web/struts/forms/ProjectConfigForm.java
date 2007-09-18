@@ -28,7 +28,7 @@ import java.net.URL;
 
 import javax.servlet.http.HttpServletRequest;
 
-import net.sourceforge.vulcan.core.Store;
+import net.sourceforge.vulcan.core.ConfigurationStore;
 import net.sourceforge.vulcan.dto.BuildToolConfigDto;
 import net.sourceforge.vulcan.dto.NamedObject;
 import net.sourceforge.vulcan.dto.ProjectConfigDto;
@@ -43,7 +43,7 @@ import org.apache.struts.action.ActionMessage;
 
 @SvnRevision(id="$Id$", url="$HeadURL$")
 public final class ProjectConfigForm extends ConfigForm {
-	private transient Store store;
+	private transient ConfigurationStore store;
 	
 	String previousRepositoryAdaptorPluginId;
 	String previousBuildToolPluginId;
@@ -61,7 +61,7 @@ public final class ProjectConfigForm extends ConfigForm {
 	public void setFocus(String focus) {
 		this.focus = focus;
 	}
-	public void setStore(Store store) {
+	public void setStore(ConfigurationStore store) {
 		this.store = store;
 	}
 	public ProjectConfigDto getProjectConfig() {

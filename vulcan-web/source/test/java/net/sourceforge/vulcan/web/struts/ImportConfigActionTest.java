@@ -56,7 +56,7 @@ public class ImportConfigActionTest extends MockApplicationContextStrutsTestCase
 		manager.shutdown();
 		manager.start();
 		
-		store.importConfiguration(is);
+		configurationStore.importConfiguration(is);
 
 		replay();
 		
@@ -79,7 +79,7 @@ public class ImportConfigActionTest extends MockApplicationContextStrutsTestCase
 		
 		expectLastCall().andThrow(new RuntimeException("your config sucks."));
 		
-		store.importConfiguration(is);
+		configurationStore.importConfiguration(is);
 
 		eventHandler.reportEvent((Event) anyObject());
 		

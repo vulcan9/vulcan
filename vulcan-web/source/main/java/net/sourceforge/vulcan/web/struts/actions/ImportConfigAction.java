@@ -24,7 +24,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import net.sourceforge.vulcan.StateManager;
-import net.sourceforge.vulcan.core.Store;
+import net.sourceforge.vulcan.core.ConfigurationStore;
 import net.sourceforge.vulcan.event.ErrorEvent;
 import net.sourceforge.vulcan.event.EventHandler;
 import net.sourceforge.vulcan.web.struts.forms.ImportConfigFileForm;
@@ -39,7 +39,7 @@ public class ImportConfigAction extends Action {
 	private Log auditLog;
 	private EventHandler eventHandler;
 	private StateManager stateManager;
-	private Store store;
+	private ConfigurationStore configurationStore;
 	
 	@Override
 	public ActionForward execute(ActionMapping mapping, ActionForm form, HttpServletRequest request, HttpServletResponse response) throws Exception {
@@ -47,7 +47,7 @@ public class ImportConfigAction extends Action {
 		
 		stateManager.shutdown();
 		
-		store.importConfiguration(fileForm.getConfigFile().getInputStream());
+		configurationStore.importConfiguration(fileForm.getConfigFile().getInputStream());
 		
 		if (auditLog.isInfoEnabled()) {
 			auditLog.info(BaseDispatchAction.createAuditMessage(request, "import", "vulcan-configuration", null, null));
@@ -75,7 +75,7 @@ public class ImportConfigAction extends Action {
 		this.stateManager = stateManager;
 	}
 	
-	public void setStore(Store store) {
-		this.store = store;
+	public void setConfigurationStore(ConfigurationStore store) {
+		this.configurationStore = store;
 	}
 }

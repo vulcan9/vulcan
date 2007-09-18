@@ -36,8 +36,9 @@ import net.sourceforge.vulcan.ProjectManager;
 import net.sourceforge.vulcan.RepositoryAdaptor;
 import net.sourceforge.vulcan.core.BuildDetailCallback;
 import net.sourceforge.vulcan.core.BuildManager;
+import net.sourceforge.vulcan.core.BuildOutcomeStore;
 import net.sourceforge.vulcan.core.ProjectBuilder;
-import net.sourceforge.vulcan.core.Store;
+import net.sourceforge.vulcan.core.ConfigurationStore;
 import net.sourceforge.vulcan.dto.BuildDaemonInfoDto;
 import net.sourceforge.vulcan.dto.BuildMessageDto;
 import net.sourceforge.vulcan.dto.Date;
@@ -64,7 +65,8 @@ public class ProjectBuilderImpl implements ProjectBuilder {
 	private final WorkingCopyUpdateExpert workingCopyUpdateExpert = new WorkingCopyUpdateExpert();
 	private final ProjectRebuildExpert projectRebuildExpert = new ProjectRebuildExpert(workingCopyUpdateExpert);
 	
-	private Store store;
+	private ConfigurationStore configurationStore;
+	private BuildOutcomeStore buildOutcomeStore;
 	private ProjectManager projectManager;
 	private BuildManager buildManager;
 	private int deleteDirectoryAttempts = 1;
@@ -198,11 +200,17 @@ public class ProjectBuilderImpl implements ProjectBuilder {
 		return killing;
 	}
 
-	public Store getStore() {
-		return store;
+	public ConfigurationStore getConfigurationStore() {
+		return configurationStore;
 	}
-	public void setStore(Store store) {
-		this.store = store;
+	public void setConfigurationStore(ConfigurationStore store) {
+		this.configurationStore = store;
+	}
+	public BuildOutcomeStore getBuildOutcomeStore() {
+		return buildOutcomeStore;
+	}
+	public void setBuildOutcomeStore(BuildOutcomeStore buildOutcomeStore) {
+		this.buildOutcomeStore = buildOutcomeStore;
 	}
 	public BuildManager getBuildManager() {
 		return buildManager;
@@ -223,7 +231,7 @@ public class ProjectBuilderImpl implements ProjectBuilder {
 		this.deleteFailureSleepTime = deleteFailureSleepTime;
 	}
 	protected ProjectStatusDto createBuildStatus(ProjectConfigDto currentTarget) {
-		final ProjectStatusDto status = store.createBuildOutcome(currentTarget.getName());
+		final ProjectStatusDto status = buildOutcomeStore.createBuildOutcome(currentTarget.getName());
 		
 		if (previousStatus == null || previousStatus.getBuildNumber() == null) {
 			status.setBuildNumber(0);
@@ -281,7 +289,7 @@ public class ProjectBuilderImpl implements ProjectBuilder {
 						!alternateTag && 
 						!previousRevision.equals(buildStatus.getRevision())) {
 					final OutputStream diffOutputStream =
-						store.getChangeLogOutputStream(currentTarget.getName(), buildStatus.getDiffId());
+						configurationStore.getChangeLogOutputStream(currentTarget.getName(), buildStatus.getDiffId());
 						
 					buildStatus.setChangeLog(ra.getChangeLog(previousRevision, buildStatus.getRevision(), diffOutputStream));
 				}
@@ -400,7 +408,7 @@ public class ProjectBuilderImpl implements ProjectBuilder {
 				return;
 			}
 			
-			final OutputStream os = store.getBuildLogOutputStream(target.getName(), buildStatus.getBuildLogId());
+			final OutputStream os = configurationStore.getBuildLogOutputStream(target.getName(), buildStatus.getBuildLogId());
 			
 			try {
 				IOUtils.copy(is, os);

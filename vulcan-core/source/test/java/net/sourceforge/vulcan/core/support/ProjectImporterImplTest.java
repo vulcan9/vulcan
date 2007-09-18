@@ -33,7 +33,7 @@ import net.sourceforge.vulcan.ProjectBuildConfigurator;
 import net.sourceforge.vulcan.ProjectRepositoryConfigurator;
 import net.sourceforge.vulcan.StateManager;
 import net.sourceforge.vulcan.core.NameCollisionResolutionMode;
-import net.sourceforge.vulcan.core.Store;
+import net.sourceforge.vulcan.core.ConfigurationStore;
 import net.sourceforge.vulcan.core.support.ProjectImporterImpl.PathInfo;
 import net.sourceforge.vulcan.dto.ProjectConfigDto;
 import net.sourceforge.vulcan.exception.ConfigException;
@@ -55,7 +55,7 @@ public class ProjectImporterImplTest extends EasyMockTestCase {
 	
 	PluginManager pluginManager = createMock(PluginManager.class);
 	StateManager stateManager = createMock(StateManager.class);
-	Store store = createMock(Store.class);
+	ConfigurationStore store = createMock(ConfigurationStore.class);
 	
 	RepositoryAdaptorPlugin rap1 = createMock(RepositoryAdaptorPlugin.class);
 	RepositoryAdaptorPlugin rap2 = createMock(RepositoryAdaptorPlugin.class);
@@ -125,7 +125,7 @@ public class ProjectImporterImplTest extends EasyMockTestCase {
 		
 		importer.setPluginManager(pluginManager);
 		importer.setStateManager(stateManager);
-		importer.setStore(store);
+		importer.setConfigurationStore(store);
 		
 		expect(store.getWorkingCopyLocationPattern()).andReturn(defaultWorkDirPattern).anyTimes();
 		expect(stateManager.getProjectConfigNames()).andReturn(existingProjectNames).anyTimes();

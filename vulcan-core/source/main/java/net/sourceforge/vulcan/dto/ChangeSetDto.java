@@ -22,7 +22,7 @@ import net.sourceforge.vulcan.metadata.SvnRevision;
 
 @SvnRevision(id="$Id$", url="$HeadURL$")
 public class ChangeSetDto extends BaseDto {
-	private RevisionTokenDto revision;
+	private String revisionLabel;
 	private String author;
 	private Date timestamp;
 	private String message;
@@ -46,11 +46,19 @@ public class ChangeSetDto extends BaseDto {
 	public void setModifiedPaths(String[] modifiedPaths) {
 		this.modifiedPaths = modifiedPaths;
 	}
+	@Deprecated
 	public RevisionTokenDto getRevision() {
-		return revision;
+		return new RevisionTokenDto(0l, revisionLabel);
 	}
+	@Deprecated
 	public void setRevision(RevisionTokenDto revision) {
-		this.revision = revision;
+		this.revisionLabel = revision.getLabel();
+	}
+	public String getRevisionLabel() {
+		return revisionLabel;
+	}
+	public void setRevisionLabel(String revisionLabel) {
+		this.revisionLabel = revisionLabel;
 	}
 	public Date getTimestamp() {
 		return timestamp;

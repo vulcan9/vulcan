@@ -396,7 +396,7 @@ public class ViewProjectStatusActionTest extends MockApplicationContextStrutsTes
 		buildManager.getStatus(ids.get(1));
 		expectLastCall().andReturn(status);
 
-		store.getChangeLogInputStream("some project", status.getDiffId());
+		configurationStore.getChangeLogInputStream("some project", status.getDiffId());
 		expectLastCall().andReturn(new ByteArrayInputStream("hello".getBytes()));
 		
 		addRequestParameter("projectName", "some project");
@@ -430,7 +430,7 @@ public class ViewProjectStatusActionTest extends MockApplicationContextStrutsTes
 		buildManager.getStatus(ids.get(1));
 		expectLastCall().andReturn(status);
 
-		store.getBuildLogInputStream("some project", status.getBuildLogId());
+		configurationStore.getBuildLogInputStream("some project", status.getBuildLogId());
 		expectLastCall().andReturn(new ByteArrayInputStream("hello".getBytes()));
 		
 		addRequestParameter("projectName", "some project");

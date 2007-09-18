@@ -36,8 +36,8 @@ public class ViewConfigActionTest extends MockApplicationContextStrutsTestCase {
 	}
 	
 	public void testView() throws Exception {
-		EasyMock.expect(store.getExportMimeType()).andReturn("application/xml");
-		store.exportConfiguration((OutputStream) notNull());
+		EasyMock.expect(configurationStore.getExportMimeType()).andReturn("application/xml");
+		configurationStore.exportConfiguration((OutputStream) notNull());
 		
 		replay();
 		
@@ -54,8 +54,8 @@ public class ViewConfigActionTest extends MockApplicationContextStrutsTestCase {
 	public void testDownload() throws Exception {
 		addRequestParameter("download", "true");
 		
-		EasyMock.expect(store.getExportMimeType()).andReturn("application/xml");
-		store.exportConfiguration((OutputStream) notNull());
+		EasyMock.expect(configurationStore.getExportMimeType()).andReturn("application/xml");
+		configurationStore.exportConfiguration((OutputStream) notNull());
 		
 		replay();
 		
