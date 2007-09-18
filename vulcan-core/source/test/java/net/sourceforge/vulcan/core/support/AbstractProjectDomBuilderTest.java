@@ -392,7 +392,7 @@ public class AbstractProjectDomBuilderTest extends EasyMockTestCase {
 		final ChangeSetDto changeSet = new ChangeSetDto();
 		
 		changeSet.setAuthor("jane");
-		changeSet.setRevision(projectStatus.getRevision());
+		changeSet.setRevisionLabel(projectStatus.getRevision().getLabel());
 		changeSet.setTimestamp(new Date(date.getTime() + 1000000));
 		changeSet.setMessage("fixed every bug ever in the entire project");
 		changeSet.setModifiedPaths(new String[] {"/a/file", "/other/stuff"});
@@ -431,7 +431,7 @@ public class AbstractProjectDomBuilderTest extends EasyMockTestCase {
 		final ChangeSetDto changeSet = new ChangeSetDto();
 		
 		changeSet.setAuthor(null);
-		changeSet.setRevision(null);
+		changeSet.setRevisionLabel(null);
 		changeSet.setTimestamp(null);
 		changeSet.setMessage(null);
 		changeSet.setModifiedPaths(null);
@@ -515,7 +515,7 @@ public class AbstractProjectDomBuilderTest extends EasyMockTestCase {
 		final ChangeSetDto changeSet = new ChangeSetDto();
 		
 		changeSet.setAuthor("jane");
-		changeSet.setRevision(projectStatus.getRevision());
+		changeSet.setRevisionLabel(projectStatus.getRevision().getLabel());
 		changeSet.setTimestamp(new Date(date.getTime() + 1000000));
 		changeSet.setMessage("fixed every bug including bug 4352, issue 12, bug #54, bug: 51 and bug:#5443.  And stuff.");
 		changeSet.setModifiedPaths(new String[] {"/a/file", "/other/stuff"});
@@ -552,7 +552,7 @@ public class AbstractProjectDomBuilderTest extends EasyMockTestCase {
 		final ChangeSetDto changeSet = new ChangeSetDto();
 		
 		changeSet.setAuthor("jane");
-		changeSet.setRevision(projectStatus.getRevision());
+		changeSet.setRevisionLabel(projectStatus.getRevision().getLabel());
 		changeSet.setTimestamp(new Date(date.getTime() + 1000000));
 		changeSet.setMessage("fixed every bug including bug 4352, issue 12, bug #54, bug: 51 and bug:#5443.  And stuff.");
 		changeSet.setModifiedPaths(new String[] {"/a/file", "/other/stuff"});
@@ -602,7 +602,7 @@ public class AbstractProjectDomBuilderTest extends EasyMockTestCase {
 		final ChangeSetDto changeSet = new ChangeSetDto();
 		
 		changeSet.setAuthor("jane");
-		changeSet.setRevision(projectStatus.getRevision());
+		changeSet.setRevisionLabel(projectStatus.getRevision().getLabel());
 		changeSet.setTimestamp(new Date(date.getTime() + 1000000));
 		changeSet.setMessage("Used new feature found at http://www.example.com Bug# 27172\nWorks great.");
 		changeSet.setModifiedPaths(new String[] {"/a/file", "/other/stuff"});
@@ -648,7 +648,7 @@ public class AbstractProjectDomBuilderTest extends EasyMockTestCase {
 		final ChangeSetDto changeSet = new ChangeSetDto();
 		
 		changeSet.setAuthor("jane");
-		changeSet.setRevision(projectStatus.getRevision());
+		changeSet.setRevisionLabel(projectStatus.getRevision().getLabel());
 		changeSet.setTimestamp(new Date(date.getTime() + 1000000));
 		changeSet.setMessage("Used new feature found at http://www.example.com.");
 		changeSet.setModifiedPaths(new String[] {"/a/file", "/other/stuff"});
@@ -696,7 +696,7 @@ public class AbstractProjectDomBuilderTest extends EasyMockTestCase {
 		final ChangeSetDto changeSet = new ChangeSetDto();
 		
 		changeSet.setAuthor("jane");
-		changeSet.setRevision(projectStatus.getRevision());
+		changeSet.setRevisionLabel(projectStatus.getRevision().getLabel());
 		changeSet.setTimestamp(new Date(date.getTime() + 1000000));
 		changeSet.setMessage("Used new feature (see http://www.example.com)." +
 				"  Also https://www.example.com...");

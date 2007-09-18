@@ -52,7 +52,11 @@ public class ChangeSetDto extends BaseDto {
 	}
 	@Deprecated
 	public void setRevision(RevisionTokenDto revision) {
-		this.revisionLabel = revision.getLabel();
+		if (revision == null) {
+			this.revisionLabel = null;
+		} else {
+			this.revisionLabel = revision.getLabel();
+		}
 	}
 	public String getRevisionLabel() {
 		return revisionLabel;
