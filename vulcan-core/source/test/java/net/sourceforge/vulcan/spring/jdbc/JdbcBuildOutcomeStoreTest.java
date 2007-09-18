@@ -321,6 +321,15 @@ public class JdbcBuildOutcomeStoreTest extends TestCase {
 		assertPersistence();
 	}
 	
+	public void testRenameProjectUpdatesTable() throws Exception {
+		assertPersistence();
+
+		store.projectNameChanged(outcome.getName(), "new name");
+		outcome.setName("new name");
+		
+		assertPersistence(store.loadBuildOutcome("unused param", outcome.getId()));
+	}
+	
 	private void assertPersistence() throws StoreException {
 		if (!initCalled) {
 			store.init();
@@ -333,6 +342,10 @@ public class JdbcBuildOutcomeStoreTest extends TestCase {
 		
 		final JdbcBuildOutcomeDto loadedOutcome = store.loadBuildOutcome(outcome.getName(), outcome.getId());
 		
+		assertPersistence(loadedOutcome);
+	}
+
+	private void assertPersistence(final JdbcBuildOutcomeDto loadedOutcome) {
 		loadedOutcome.setPrimaryKey(0);
 		
 		final String expectedString = outcome.toString().replaceAll("@[^\\[]+", "");

@@ -31,6 +31,7 @@ import javax.sql.DataSource;
 
 import net.sourceforge.vulcan.core.BuildOutcomeStore;
 import net.sourceforge.vulcan.core.ConfigurationStore;
+import net.sourceforge.vulcan.core.ProjectNameChangeListener;
 import net.sourceforge.vulcan.dto.ProjectStatusDto;
 import net.sourceforge.vulcan.exception.StoreException;
 import net.sourceforge.vulcan.metadata.SvnRevision;
@@ -44,7 +45,7 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 @SvnRevision(id="$Id$", url="$HeadURL$")
-public class JdbcBuildOutcomeStore implements BuildOutcomeStore {
+public class JdbcBuildOutcomeStore implements BuildOutcomeStore, ProjectNameChangeListener {
 	private static final Log log = LogFactory.getLog(JdbcBuildOutcomeStore.class);
 	private final Set<String> projectNames = new HashSet<String>();
 	
@@ -54,6 +55,7 @@ public class JdbcBuildOutcomeStore implements BuildOutcomeStore {
 	private Resource createScript;
 	
 	/* Helpers */
+	private JdbcTemplate jdbcTemplate;
 	private BuildQuery buildQuery;
 	private DependencyQuery dependencyQuery;
 	private BuildMessagesQuery buildMessagesQuery;
@@ -68,6 +70,7 @@ public class JdbcBuildOutcomeStore implements BuildOutcomeStore {
 	private ChangeSetInserter changeSetInserter;
 	
 	public void init() {
+		jdbcTemplate = new JdbcTemplate(dataSource);
 		buildQuery = new BuildQuery(dataSource);
 		dependencyQuery = new DependencyQuery(dataSource);
 		buildMessagesQuery = new BuildMessagesQuery(dataSource);
@@ -181,6 +184,11 @@ public class JdbcBuildOutcomeStore implements BuildOutcomeStore {
 		return outcome.getId();
 	}
 
+	public void projectNameChanged(String oldName, String newName) {
+		jdbcTemplate.update("update project_names set name=? where name=?",
+				new Object[] {newName, oldName});
+	}
+	
 	public ConfigurationStore getConfigurationStore() {
 		return configurationStore;
 	}
