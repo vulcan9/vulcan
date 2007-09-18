@@ -26,6 +26,7 @@
 		<property name="projectNameChangeListeners">
 			<list>
 				<ref bean="configurationStore"/>
+				<ref bean="buildOutcomeStore"/>
 				<ref bean="buildOutcomeCache"/>
 				<ref bean="pluginManager"/>
 			</list>

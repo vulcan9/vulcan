@@ -20,7 +20,7 @@ create table builds (
 	message_arg_2 varchar,
 	message_arg_3 varchar,
 	
-	build_reason_key varchar not null,
+	build_reason_key varchar,
 	build_reason_arg_0 varchar,
 	build_reason_arg_1 varchar,
 	build_reason_arg_2 varchar,
