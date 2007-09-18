@@ -42,6 +42,7 @@ import net.sourceforge.vulcan.exception.StoreException;
 
 import org.apache.commons.io.FileUtils;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 
@@ -116,6 +117,19 @@ public class JdbcBuildOutcomeStoreTest extends TestCase {
 	
 	public void testSaveSimple() throws Exception {
 		assertPersistence();
+	}
+
+	public void testThrowsStoreException() throws Exception {
+		store.init();
+
+		outcome.setBuildNumber(null);
+
+		try {
+			store.storeBuildOutcome(outcome);
+			fail("Expected exception");
+		} catch (StoreException e) {
+			assertTrue(e.getCause() instanceof DataAccessException);
+		}
 	}
 
 	public void testSaveTwoReusesProjectName() throws Exception {

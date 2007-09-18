@@ -143,10 +143,46 @@ public class JdbcBuildOutcomeStore implements BuildOutcomeStore, ProjectNameChan
 	}
 
 	public UUID storeBuildOutcome(ProjectStatusDto outcome)	throws StoreException {
+		try {
+			return storeBuildOutcomeInternal(outcome);
+		} catch (DataAccessException e) {
+			throw new StoreException(e);
+		}
+	}
+
+	public void projectNameChanged(String oldName, String newName) {
+		jdbcTemplate.update("update project_names set name=? where name=?",
+				new Object[] {newName, oldName});
+	}
+	
+	public ConfigurationStore getConfigurationStore() {
+		return configurationStore;
+	}
+	
+	public void setConfigurationStore(ConfigurationStore configurationStore) {
+		this.configurationStore = configurationStore;
+	}
+	
+	public DataSource getDataSource() {
+		return dataSource;
+	}
+
+	public void setDataSource(DataSource dataSource) {
+		this.dataSource = dataSource;
+	}
+
+	public Resource getCreateScript() {
+		return createScript;
+	}
+	
+	public void setCreateScript(Resource createScript) {
+		this.createScript = createScript;
+	}
+	
+	private UUID storeBuildOutcomeInternal(ProjectStatusDto outcome) {
 		final String projectName = outcome.getName();
 		
 		if (!projectNames.contains(projectName)) {
-			final JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
 			jdbcTemplate.update("insert into project_names (name) values (?)", new Object[] {projectName});
 			projectNames.add(projectName);
 		}
@@ -184,35 +220,6 @@ public class JdbcBuildOutcomeStore implements BuildOutcomeStore, ProjectNameChan
 		return outcome.getId();
 	}
 
-	public void projectNameChanged(String oldName, String newName) {
-		jdbcTemplate.update("update project_names set name=? where name=?",
-				new Object[] {newName, oldName});
-	}
-	
-	public ConfigurationStore getConfigurationStore() {
-		return configurationStore;
-	}
-	
-	public void setConfigurationStore(ConfigurationStore configurationStore) {
-		this.configurationStore = configurationStore;
-	}
-	
-	public DataSource getDataSource() {
-		return dataSource;
-	}
-
-	public void setDataSource(DataSource dataSource) {
-		this.dataSource = dataSource;
-	}
-
-	public Resource getCreateScript() {
-		return createScript;
-	}
-	
-	public void setCreateScript(Resource createScript) {
-		this.createScript = createScript;
-	}
-	
 	private void createTables(final JdbcTemplate jdbcTemplate) {
 		final String script;
 		
