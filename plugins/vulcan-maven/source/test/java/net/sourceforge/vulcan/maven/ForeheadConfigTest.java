@@ -62,6 +62,10 @@ public class ForeheadConfigTest extends MavenBuildToolTestBase {
 	public void testConfigureMaven2_0_6() throws Exception {
 		tool.configureLaunchFile(getClass().getResourceAsStream("resources/m2.0.6-vanilla.conf"), os);
 		
-		assertEquals(expectedMaven2_0_6_Config, os.toString());
+		assertEquals(clean(expectedMaven2_0_6_Config), clean(os.toString()));
+	}
+
+	private String clean(String string) {
+		return string.replaceAll("\\r", "").trim();
 	}
 }
