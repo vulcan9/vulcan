@@ -23,7 +23,9 @@ import static net.sourceforge.vulcan.core.NameCollisionResolutionMode.UseExistin
 import static org.apache.commons.lang.StringUtils.isBlank;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -33,9 +35,9 @@ import net.sourceforge.vulcan.PluginManager;
 import net.sourceforge.vulcan.ProjectBuildConfigurator;
 import net.sourceforge.vulcan.ProjectRepositoryConfigurator;
 import net.sourceforge.vulcan.StateManager;
+import net.sourceforge.vulcan.core.ConfigurationStore;
 import net.sourceforge.vulcan.core.NameCollisionResolutionMode;
 import net.sourceforge.vulcan.core.ProjectImporter;
-import net.sourceforge.vulcan.core.ConfigurationStore;
 import net.sourceforge.vulcan.dto.PluginConfigDto;
 import net.sourceforge.vulcan.dto.ProjectConfigDto;
 import net.sourceforge.vulcan.exception.ConfigException;
@@ -228,7 +230,12 @@ public class ProjectImporterImpl implements ProjectImporter {
 
 	protected Document tryParse(File buildSpecFile) {
 		try {
-			return new SAXBuilder().build(buildSpecFile);
+			final InputStream inputStream = new FileInputStream(buildSpecFile);
+			try {
+				return new SAXBuilder().build(inputStream);
+			} finally {
+				inputStream.close();
+			}
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		} catch (JDOMException e) {
