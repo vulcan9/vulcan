@@ -82,7 +82,7 @@ public abstract class PluginSupport {
 		
 		final String detail;
 		
-		if (previousBytesCounted < 0) {
+		if (previousBytesCounted <= 0) {
 			detail = toUnits(bytesCounted) + " so far";
 		} else {
 			long percent = bytesCounted * 100 / previousBytesCounted;

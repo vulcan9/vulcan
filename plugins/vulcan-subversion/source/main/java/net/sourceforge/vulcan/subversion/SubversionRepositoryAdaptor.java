@@ -19,9 +19,6 @@
 package net.sourceforge.vulcan.subversion;
 
 
-import java.io.File;
-import java.io.IOException;
-import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -32,6 +29,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.OutputStream;
 
 import net.sourceforge.vulcan.RepositoryAdaptor;
 import net.sourceforge.vulcan.StateManager;
@@ -50,6 +51,12 @@ import net.sourceforge.vulcan.subversion.dto.SubversionProjectConfigDto;
 import net.sourceforge.vulcan.subversion.dto.SubversionRepositoryProfileDto;
 
 import org.apache.commons.lang.StringUtils;
+import org.tigris.subversion.javahl.ClientException;
+import org.tigris.subversion.javahl.Notify2;
+import org.tigris.subversion.javahl.NotifyAction;
+import org.tigris.subversion.javahl.NotifyInformation;
+import org.tigris.subversion.javahl.Revision;
+import org.tigris.subversion.javahl.SVNClient;
 import org.tmatesoft.svn.core.ISVNLogEntryHandler;
 import org.tmatesoft.svn.core.SVNCancelException;
 import org.tmatesoft.svn.core.SVNDirEntry;
@@ -62,11 +69,9 @@ import org.tmatesoft.svn.core.io.SVNRepository;
 import org.tmatesoft.svn.core.wc.ISVNEventHandler;
 import org.tmatesoft.svn.core.wc.SVNDiffClient;
 import org.tmatesoft.svn.core.wc.SVNEvent;
-import org.tmatesoft.svn.core.wc.SVNEventAction;
 import org.tmatesoft.svn.core.wc.SVNLogClient;
 import org.tmatesoft.svn.core.wc.SVNPropertyData;
 import org.tmatesoft.svn.core.wc.SVNRevision;
-import org.tmatesoft.svn.core.wc.SVNUpdateClient;
 import org.tmatesoft.svn.core.wc.SVNWCClient;
 
 public class SubversionRepositoryAdaptor extends SubversionSupport implements RepositoryAdaptor {
@@ -75,11 +80,14 @@ public class SubversionRepositoryAdaptor extends SubversionSupport implements Re
 	private final Map<String, Long> byteCounters;
 	
 	final LineOfDevelopment lineOfDevelopment = new LineOfDevelopment();
-
+	final SVNClient client = new SVNClient();
+	
 	private long revision = -1;
 	private long diffStartRevision = -1;
 	
 	private final StateManager stateManager;
+	
+	boolean canceling = false;
 	
 	public SubversionRepositoryAdaptor(SubversionConfigDto globalConfig, ProjectConfigDto projectConfig, SubversionProjectConfigDto config, StateManager stateManager) throws ConfigException {
 		this(globalConfig, projectConfig, config, stateManager, true);
@@ -123,6 +131,8 @@ public class SubversionRepositoryAdaptor extends SubversionSupport implements Re
 		lineOfDevelopment.setPath(config.getPath());
 		lineOfDevelopment.setRepositoryRoot(profile.getRootUrl());
 		lineOfDevelopment.setTagFolderNames(new HashSet<String>(Arrays.asList(globalConfig.getTagFolderNames())));
+		
+		client.notification2(eventHandler);
 	}
 
 	public RevisionTokenDto getLatestRevision(RevisionTokenDto previousRevision) throws RepositoryException {
@@ -181,16 +191,11 @@ public class SubversionRepositoryAdaptor extends SubversionSupport implements Re
 		
 		eventHandler.setBuildDetailCallback(buildDetailCallback);
 		
-		final SVNUpdateClient client = new SVNUpdateClient(svnRepository.getAuthenticationManager(), options);
-		client.setEventHandler(eventHandler);
-		
 		try {
-			final SVNRevision svnRev = SVNRevision.create(revision);
-			client.doCheckout(
-					getCompleteSVNURL(),
-					absolutePath,
-					svnRev,
-					svnRev,
+			client.checkout(
+					getCompleteSVNURL().toString(),
+					absolutePath.toString(),
+					Revision.getInstance(revision),
 					config.isRecursive());
 			
 			synchronized (byteCounters) {
@@ -198,22 +203,21 @@ public class SubversionRepositoryAdaptor extends SubversionSupport implements Re
 			}
 			
 			configureBugtraqIfNecessary(absolutePath);
-		} catch (SVNCancelException e) {
+		} catch (ClientException e) {
+			if (!canceling) {
+				throw new RepositoryException(e);
+			}
 		} catch (SVNException e) {
 			throw new RepositoryException(e);
 		}
 	}
 	public void updateWorkingCopy(File absolutePath, BuildDetailCallback buildDetailCallback) throws RepositoryException {
-		final SVNUpdateClient client = new SVNUpdateClient(svnRepository.getAuthenticationManager(), options);
-		client.setEventHandler(eventHandler);
-		
 		try {
-			final SVNRevision svnRev = SVNRevision.create(revision);
-			client.doUpdate(absolutePath, svnRev, config.isRecursive());
-			
-			configureBugtraqIfNecessary(absolutePath);
-		} catch (SVNCancelException e) {
-		} catch (SVNException e) {
+			client.update(absolutePath.toString(), Revision.getInstance(revision), config.isRecursive());
+		} catch (ClientException e) {
+			if (!canceling) {
+				throw new RepositoryException(e);
+			}
 			throw new RepositoryException(e);
 		}
 	}
@@ -304,7 +308,7 @@ public class SubversionRepositoryAdaptor extends SubversionSupport implements Re
 				
 				final ChangeSetDto changeSet = new ChangeSetDto();
 				
-				changeSet.setRevision(new RevisionTokenDto(logEntryRevision, "r" + logEntryRevision));
+				changeSet.setRevisionLabel("r" + logEntryRevision);
 				changeSet.setAuthor(logEntry.getAuthor());
 				changeSet.setMessage(logEntry.getMessage());
 				changeSet.setTimestamp(new Date(logEntry.getDate().getTime()));
@@ -423,31 +427,30 @@ public class SubversionRepositoryAdaptor extends SubversionSupport implements Re
 		return StringUtils.EMPTY;
 	}
 
-	private static class EventHandler implements ISVNEventHandler {
+	private class EventHandler implements ISVNEventHandler, Notify2 {
 		private long previousByteCount = -1;
 		private long byteCount = 0;
 		private BuildDetailCallback buildDetailCallback;
-		private File previousFile;
 		
-		public void handleEvent(SVNEvent event, double progress) throws SVNException {
-			final SVNEventAction action = event.getAction();
-			if (action == SVNEventAction.UPDATE_ADD || action == SVNEventAction.UPDATE_COMPLETED) {
-				if (previousFile != null) {
-					byteCount += previousFile.length();
-					previousFile = null;
-				}
-			}
-			
-			if (action == SVNEventAction.UPDATE_ADD) {
-				if (event.getNodeKind() == SVNNodeKind.DIR) {
-					byteCount += 1024;
-				} else if (event.getNodeKind() == SVNNodeKind.FILE) {
-					previousFile = event.getFile();
-				}
-				
+		public void onNotify(NotifyInformation info) {
+			if (info.getAction() == NotifyAction.update_add) {
+				byteCount += new File(info.getPath()).length();
 				PluginSupport.setWorkingCopyProgress(buildDetailCallback, byteCount, previousByteCount);
 			}
+			
+			if (Thread.interrupted()) {
+				try {
+					client.cancelOperation();
+					canceling = true;
+				} catch (ClientException e) {
+					log.error("Error canceling svn operation", e);
+				}
+			}
 		}
+		
+		public void handleEvent(SVNEvent event, double progress) throws SVNException {
+		}
+		
 		public void checkCancelled() throws SVNCancelException {
 			if (Thread.interrupted()) {
 				throw new SVNCancelException();
