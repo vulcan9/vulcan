@@ -22,6 +22,7 @@ import java.io.File;
 
 import net.sourceforge.vulcan.core.BuildDetailCallback;
 import net.sourceforge.vulcan.integration.support.PluginSupport;
+import net.sourceforge.vulcan.integration.support.PluginSupport.ProgressUnit;
 
 import org.netbeans.lib.cvsclient.commandLine.BasicListener;
 import org.netbeans.lib.cvsclient.event.FileAddedEvent;
@@ -42,7 +43,7 @@ public class CheckoutListener extends BasicListener {
 		
 		bytesCounted += file.length();
 		
-		PluginSupport.setWorkingCopyProgress(buildDetailCallback, bytesCounted, previousBytesCounted);
+		PluginSupport.setWorkingCopyProgress(buildDetailCallback, bytesCounted, previousBytesCounted, ProgressUnit.Bytes);
 	}
 
 	public long getBytesCounted() {

@@ -256,7 +256,7 @@ public class CvsRepositoryAdaptor extends CvsSupport implements RepositoryAdapto
 	}
 
 	private List<ChangeSetDto> groupChangeLogs(List<ChangeSetDto> entries) {
-		final RevisionTokenDto merged = new RevisionTokenDto(0l, "<many>");
+		final String revisionLabel = "<many>";
 		final Map<String, ChangeSetDto> map = new HashMap<String, ChangeSetDto>();
 		
 		// add entries by key, merging duplicate keys
@@ -265,7 +265,7 @@ public class CvsRepositoryAdaptor extends CvsSupport implements RepositoryAdapto
 			
 			if (map.containsKey(key)) {
 				final ChangeSetDto m = map.get(key);
-				m.setRevision(merged);
+				m.setRevisionLabel(revisionLabel);
 				
 				final Set<String> paths = new HashSet<String>(Arrays.asList(m.getModifiedPaths()));
 				paths.addAll(Arrays.asList(e.getModifiedPaths()));
