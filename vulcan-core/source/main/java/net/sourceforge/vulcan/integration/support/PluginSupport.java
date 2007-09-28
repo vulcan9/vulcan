@@ -25,6 +25,38 @@ import net.sourceforge.vulcan.exception.ConfigException;
 import org.apache.commons.lang.StringUtils;
 
 public abstract class PluginSupport {
+	public static enum ProgressUnit {
+		Bytes {
+			@Override
+			String toUnits(long bytes) {
+				long amount;
+				String unit;
+				
+				if (bytes > 1024 * 1024) {
+					amount = bytes / (1024 * 1024);
+					unit = "mb";
+				} else if (bytes > 1024) {
+					amount = bytes / 1024;
+					unit = "kb";
+				} else {
+					amount = bytes;
+					unit = "bytes";
+				}
+				
+				return amount + " " + unit;
+			}			
+		},
+		
+		Files {
+			@Override
+			String toUnits(long amount) {
+				return amount + " files";
+			}
+		};
+		
+		abstract String toUnits(long amount);
+	}
+	
 	protected static interface Visitor<T> {
 		boolean isMatch(T node);
 	}
@@ -71,10 +103,11 @@ public abstract class PluginSupport {
 	/**
 	 * Set the details message during RepositoryAdaptor.createWorkingCopy()
 	 * @param buildDetailCallback
-	 * @param bytesCounted Bytes checked out so far.
-	 * @param previousBytesCounted Total bytes checked out during last build, or -1 if not available.
+	 * @param unitsCounted Bytes checked out so far.
+	 * @param previousUnitsCounted Total bytes checked out during last build, or -1 if not available.
+	 * @param progressUnit Units used to measure progress.
 	 */
-	public static void setWorkingCopyProgress(BuildDetailCallback buildDetailCallback, long bytesCounted, long previousBytesCounted)
+	public static void setWorkingCopyProgress(BuildDetailCallback buildDetailCallback, long unitsCounted, long previousUnitsCounted, ProgressUnit progressUnit)
 	{
 		if (buildDetailCallback == null) {
 			return;
@@ -82,35 +115,18 @@ public abstract class PluginSupport {
 		
 		final String detail;
 		
-		if (previousBytesCounted <= 0) {
-			detail = toUnits(bytesCounted) + " so far";
+		if (previousUnitsCounted <= 0) {
+			detail = progressUnit.toUnits(unitsCounted) + " so far";
 		} else {
-			long percent = bytesCounted * 100 / previousBytesCounted;
+			long percent = unitsCounted * 100 / previousUnitsCounted;
 			
 			if (percent > 100) {
-				detail = "100%+ (" + toUnits(bytesCounted - previousBytesCounted) + " more than last time)";
+				detail = "100%+ (" + progressUnit.toUnits(unitsCounted - previousUnitsCounted) + " more than last time)";
 			} else {
 				detail = percent + "% (est.)";
 			}
 		}
 		
 		buildDetailCallback.setDetail(detail);
-	}
-	private static String toUnits(long bytes) {
-		long amount;
-		String unit;
-		
-		if (bytes > 1024 * 1024) {
-			amount = bytes / (1024 * 1024);
-			unit = "mb";
-		} else if (bytes > 1024) {
-			amount = bytes / 1024;
-			unit = "kb";
-		} else {
-			amount = bytes;
-			unit = "bytes";
-		}
-		
-		return amount + " " + unit;
 	}
 }
