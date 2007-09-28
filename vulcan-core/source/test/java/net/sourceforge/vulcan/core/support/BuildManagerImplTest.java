@@ -847,6 +847,51 @@ public class BuildManagerImplTest extends TestCase {
 		assertEquals("a", event.getArgs()[0]);
 	}
 	
+	public void testGetStatusByBuildNumber() throws Exception {
+		int buildNumber = 5545;
+		ProjectStatusDto status = new ProjectStatusDto();
+		
+		status.setName(a.getName());
+		status.setBuildNumber(buildNumber);
+		cache.store(status);
+		
+		assertSame(status, mgr.getStatusByBuildNumber(a.getName(), buildNumber));
+	}
+	
+	public void testGetStatusByBuildNumberWhenBuilding() throws Exception {
+		int buildNumber = 5545;
+		ProjectStatusDto status = new ProjectStatusDto();
+		
+		status.setName(a.getName());
+		status.setBuildNumber(buildNumber);
+
+		dg.addTarget(a);
+
+		mgr.add(dg);
+
+		assertSame(a, mgr.getTarget(info1));
+		mgr.registerBuildStatus(info1, a, status);
+		
+		assertSame(status, mgr.getStatusByBuildNumber(a.getName(), buildNumber));
+	}
+	
+	public void testGetStatusByBuildNumberWhenBuildingNoMatch() throws Exception {
+		int buildNumber = 5545;
+		ProjectStatusDto status = new ProjectStatusDto();
+		
+		status.setName(a.getName());
+		status.setBuildNumber(buildNumber);
+
+		dg.addTarget(a);
+
+		mgr.add(dg);
+
+		assertSame(a, mgr.getTarget(info1));
+		mgr.registerBuildStatus(info1, a, status);
+		
+		assertEquals(null, mgr.getStatusByBuildNumber(a.getName(), buildNumber + 1));
+	}
+	
 	private ProjectStatusDto createFakeStatus(ProjectConfigDto config, RevisionTokenDto rev, Status status1, String key, Object[] args, ChangeLogDto changeLog) {
 		final ProjectStatusDto st = new ProjectStatusDto();
 		st.setName(config.getName());
