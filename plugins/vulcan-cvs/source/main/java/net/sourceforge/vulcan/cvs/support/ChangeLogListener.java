@@ -27,7 +27,6 @@ import java.util.regex.Pattern;
 
 import net.sourceforge.vulcan.dto.ChangeSetDto;
 import net.sourceforge.vulcan.dto.Date;
-import net.sourceforge.vulcan.dto.RevisionTokenDto;
 
 import org.netbeans.lib.cvsclient.command.log.LogInformation;
 
@@ -64,7 +63,7 @@ public class ChangeLogListener extends LogListener {
 		}
 		
 		if (message.startsWith("revision") && !readingMessage) {
-			currentEntry.setRevision(new RevisionTokenDto(0l, message.substring(9)));
+			currentEntry.setRevisionLabel(message.substring(9));
 		} else if (readingMessage) {
 			if (msgBuf.length() > 0) {
 				msgBuf.append("\n");
