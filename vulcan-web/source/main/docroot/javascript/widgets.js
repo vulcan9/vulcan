@@ -101,6 +101,7 @@ function getTarget(event) {
 	
 	return this;
 }
+
 function findAncestorByTagName(node, tagName) {
 	if (node.tagName.toLowerCase() == tagName) {
 		return node;
