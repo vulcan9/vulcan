@@ -309,9 +309,6 @@ public class BuildManagerImpl implements BuildManager {
 				passed = false;
 		}
 		
-		if (!outcome.getStatus().equals(Status.UP_TO_DATE)) {
-			fireBuildCompleted(info, config, outcome);
-		}
 
 		try {
 			writeLock.lock();
@@ -326,6 +323,10 @@ public class BuildManagerImpl implements BuildManager {
 			}
 		} finally {
 			writeLock.unlock();
+		}
+		
+		if (!outcome.getStatus().equals(Status.UP_TO_DATE)) {
+			fireBuildCompleted(info, config, outcome);
 		}
 	}
 
