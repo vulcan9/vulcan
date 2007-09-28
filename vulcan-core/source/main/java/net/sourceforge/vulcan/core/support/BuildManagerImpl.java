@@ -207,7 +207,19 @@ public class BuildManagerImpl implements BuildManager {
 		return cache.getOutcome(id);
 	}
 	public ProjectStatusDto getStatusByBuildNumber(String projectName, int buildNumber) {
-		return cache.getOutcomeByBuildNumber(projectName, buildNumber);
+		ProjectStatusDto status = cache.getOutcomeByBuildNumber(projectName, buildNumber);
+		
+		if (status != null) {
+			return status;
+		}
+		
+		status = getProjectsBeingBuilt().get(projectName);
+		
+		if (status != null && status.getBuildNumber() == buildNumber) {
+			return status;
+		}
+		
+		return null;
 	}
 	public List<UUID> getAvailableStatusIds(String projectName) {
 		final List<UUID> outcomeIds = cache.getOutcomeIds(projectName);
