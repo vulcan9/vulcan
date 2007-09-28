@@ -23,8 +23,6 @@ import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 
 import net.sourceforge.vulcan.StateManager;
-import net.sourceforge.vulcan.event.ErrorEvent;
-import net.sourceforge.vulcan.event.EventHandler;
 import net.sourceforge.vulcan.metadata.SvnRevision;
 
 import org.springframework.web.context.WebApplicationContext;
@@ -32,27 +30,20 @@ import org.springframework.web.context.support.WebApplicationContextUtils;
 
 @SvnRevision(id="$Id$", url="$HeadURL$")
 public final class VulcanContextListener implements ServletContextListener {
+	WebApplicationContext wac;
 	StateManager stateManager;
 	
 	public void contextInitialized(ServletContextEvent event) {
 		final ServletContext context = event.getServletContext();
 		
-		final WebApplicationContext wac =
-			WebApplicationContextUtils
+		wac = WebApplicationContextUtils
 				.getRequiredWebApplicationContext(context);
 		
 		stateManager = (StateManager) wac.getBean(Keys.STATE_MANAGER, StateManager.class);	
 		
 		context.setAttribute(Keys.STATE_MANAGER, stateManager);
 		context.setAttribute(Keys.EVENT_POOL, wac.getBean(Keys.EVENT_POOL));
-		
-		try {
-			stateManager.start();
-		} catch (Exception e) {
-			final EventHandler eventHandler = (EventHandler) wac.getBean(Keys.EVENT_HANDLER, EventHandler.class);
-			
-			eventHandler.reportEvent(new ErrorEvent(this, "errors.load.failure", new String[] {e.getMessage()}, e));
-		}
+		context.setAttribute("buildOutcomeConverter", wac.getBean("buildOutcomeConverter"));
 	}
 
 	public void contextDestroyed(ServletContextEvent event) {

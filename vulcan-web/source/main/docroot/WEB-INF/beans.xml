@@ -187,6 +187,14 @@
 			</map>
 		</property>
 	</bean>
+
+	<bean id="buildOutcomeConverter" class="net.sourceforge.vulcan.core.conversion.BuildOutcomeConverter"
+			init-method="convertOldBuildOutcomes">
+		<property name="buildOutcomeStore" ref="buildOutcomeStore"/>
+		<property name="fileStore" ref="configurationStore"/>
+		<property name="eventHandler" ref="eventHandler"/>
+		<property name="stateManager" ref="stateManager"/>
+	</bean>
 	
 	<bean id="messageSource" class="net.sourceforge.vulcan.spring.DelegatingResourceBundleMessageSource">
 		<property name="basenames">
