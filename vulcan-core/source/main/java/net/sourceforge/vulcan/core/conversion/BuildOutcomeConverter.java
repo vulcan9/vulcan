@@ -85,14 +85,21 @@ public class BuildOutcomeConverter {
 	}
 	
 	public boolean isRunning() {
-		return converter.isRunning();
+		return converter != null && converter.isRunning();
 	}
 	
 	public int getConvertedCount() {
+		if (converter == null) {
+			return 0;
+		}
 		return converter.getConvertedCount();
 	}
 	
 	public int getTotalCount() {
+		if (converter == null) {
+			return 0;
+		}
+		
 		return converter.getTotalCount();
 	}
 	
