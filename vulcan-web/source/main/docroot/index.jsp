@@ -28,8 +28,17 @@
 <body>
 
 <c:choose>
-<c:when test="${not stateManager.running}">
+<c:when test="${not stateManager.running and not buildOutcomeConverter.running}">
 	<v:bubble styleClass="error"><span class="error"><fmt:message key="errors.not.running"/></span></v:bubble>
+</c:when>
+<c:when test="${buildOutcomeConverter.running}">
+	<c:set var="pctComplete" value="${buildOutcomeConverter.convertedCount * 100 / buildOutcomeConverter.totalCount}"/>
+	<v:bubble styleClass="warning">
+		<span class="warning">
+			Vulcan is converting build history to a new storage layer 
+			(<fmt:formatNumber value="${pctComplete}" maxFractionDigits="0"/>% complete).
+		</span>
+	</v:bubble>
 </c:when>
 <c:otherwise>
 <div class="tables">

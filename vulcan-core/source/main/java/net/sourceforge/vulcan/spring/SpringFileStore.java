@@ -148,6 +148,19 @@ public class SpringFileStore extends AbstractFileStore implements BeanFactoryAwa
 		
 		return id;
 	}
+	public synchronized void archiveBuildOutcome(String projectName, UUID id, boolean success) {
+		final File dir = new File(
+				getProjectDir(projectName),
+				"converted-outcomes" + File.separator + (success ? "success" : "failures"));
+		
+		if (!dir.exists()) {
+			dir.mkdirs();
+		}
+
+		final File oldFile = new File(getOutcomeDir(projectName), id.toString());
+		
+		oldFile.renameTo(new File(dir, id.toString()));
+	}
 	public synchronized ProjectStatusDto loadBuildOutcome(String projectName, UUID id) throws StoreException {
 		final File file = new File(getOutcomeDir(projectName), id.toString());
 		
