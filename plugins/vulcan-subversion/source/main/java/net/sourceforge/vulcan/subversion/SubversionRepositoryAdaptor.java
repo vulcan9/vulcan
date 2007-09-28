@@ -19,6 +19,9 @@
 package net.sourceforge.vulcan.subversion;
 
 
+import java.io.File;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -29,10 +32,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import java.io.File;
-import java.io.IOException;
-import java.io.OutputStream;
 
 import net.sourceforge.vulcan.RepositoryAdaptor;
 import net.sourceforge.vulcan.StateManager;
@@ -185,7 +184,7 @@ public class SubversionRepositoryAdaptor extends SubversionSupport implements Re
 	public void createWorkingCopy(File absolutePath, BuildDetailCallback buildDetailCallback) throws RepositoryException {
 		synchronized (byteCounters) {
 			if (byteCounters.containsKey(projectName)) {
-				eventHandler.setPreviousByteCount(byteCounters.get(projectName).longValue());
+				eventHandler.setPreviousFileCount(byteCounters.get(projectName).longValue());
 			}
 		}
 		
@@ -199,7 +198,7 @@ public class SubversionRepositoryAdaptor extends SubversionSupport implements Re
 					config.isRecursive());
 			
 			synchronized (byteCounters) {
-				byteCounters.put(projectName, eventHandler.getByteCount());
+				byteCounters.put(projectName, eventHandler.getFileCount());
 			}
 			
 			configureBugtraqIfNecessary(absolutePath);
@@ -428,14 +427,14 @@ public class SubversionRepositoryAdaptor extends SubversionSupport implements Re
 	}
 
 	private class EventHandler implements ISVNEventHandler, Notify2 {
-		private long previousByteCount = -1;
-		private long byteCount = 0;
+		private long previousFileCount = -1;
+		private long fileCount = 0;
 		private BuildDetailCallback buildDetailCallback;
 		
 		public void onNotify(NotifyInformation info) {
 			if (info.getAction() == NotifyAction.update_add) {
-				byteCount += new File(info.getPath()).length();
-				PluginSupport.setWorkingCopyProgress(buildDetailCallback, byteCount, previousByteCount);
+				fileCount += new File(info.getPath()).length();
+				PluginSupport.setWorkingCopyProgress(buildDetailCallback, fileCount, previousFileCount, ProgressUnit.Files);
 			}
 			
 			if (Thread.interrupted()) {
@@ -459,11 +458,11 @@ public class SubversionRepositoryAdaptor extends SubversionSupport implements Re
 		void setBuildDetailCallback(BuildDetailCallback buildDetailCallback) {
 			this.buildDetailCallback = buildDetailCallback;
 		}
-		long getByteCount() {
-			return byteCount;
+		long getFileCount() {
+			return fileCount;
 		}
-		void setPreviousByteCount(long previousByteCount) {
-			this.previousByteCount = previousByteCount;
+		void setPreviousFileCount(long previousByteCount) {
+			this.previousFileCount = previousByteCount;
 		}
 	}
 }
