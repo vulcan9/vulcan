@@ -21,18 +21,21 @@ package net.sourceforge.vulcan.cvs.dto;
 import junit.framework.TestCase;
 
 public class CvsAggregateRevisionTokenDtoTest extends TestCase {
+	@SuppressWarnings("deprecation")
 	public void testEquals() throws Exception {
 		CvsAggregateRevisionTokenDto r1 = new CvsAggregateRevisionTokenDto("1234", "1900/10/22 05:24:52");
 		CvsAggregateRevisionTokenDto r2 = new CvsAggregateRevisionTokenDto("1234", "2006/10/22 05:24:52");
 		
 		assertEquals(r1, r2);
 	}
+	@SuppressWarnings("deprecation")
 	public void testNotEquals() throws Exception {
 		CvsAggregateRevisionTokenDto r1 = new CvsAggregateRevisionTokenDto("1234", "2006/10/22 05:24:52");
 		CvsAggregateRevisionTokenDto r2 = new CvsAggregateRevisionTokenDto("5678", "2006/10/22 05:24:52");
 		
 		assertFalse(r1.equals(r2));
 	}
+	@SuppressWarnings("deprecation")
 	public void testCreate() throws Exception {
 		CvsAggregateRevisionTokenDto r = new CvsAggregateRevisionTokenDto("1234", "2006/10/22 05:24:52");
 		

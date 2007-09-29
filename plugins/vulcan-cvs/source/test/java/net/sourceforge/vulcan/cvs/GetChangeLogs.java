@@ -18,15 +18,15 @@
  */
 package net.sourceforge.vulcan.cvs;
 
-import org.apache.commons.lang.StringUtils;
-
 import net.sourceforge.vulcan.cvs.dto.CvsConfigDto;
 import net.sourceforge.vulcan.cvs.dto.CvsProjectConfigDto;
 import net.sourceforge.vulcan.cvs.dto.CvsRepositoryProfileDto;
-import net.sourceforge.vulcan.cvs.dto.CvsAggregateRevisionTokenDto;
 import net.sourceforge.vulcan.dto.ChangeLogDto;
 import net.sourceforge.vulcan.dto.ChangeSetDto;
+import net.sourceforge.vulcan.dto.RevisionTokenDto;
 import net.sourceforge.vulcan.exception.RepositoryException;
+
+import org.apache.commons.lang.StringUtils;
 
 public class GetChangeLogs {
 	public static void main(String[] args) throws RepositoryException {
@@ -42,11 +42,8 @@ public class GetChangeLogs {
 		
 		final CvsRepositoryAdaptor repo = new CvsRepositoryAdaptor(new CvsConfigDto(), profile, projectConfig, null);
 		
-		//CvsAggregateRevisionTokenDto first = new CvsAggregateRevisionTokenDto("xxx", "2006/10/21 10:21:53");
-		//CvsAggregateRevisionTokenDto head = new CvsAggregateRevisionTokenDto("xxx", "2006/10/22 05:24:52");
-		
-		CvsAggregateRevisionTokenDto first = new CvsAggregateRevisionTokenDto("xxx", "2006/10/22 05:24:52");
-		CvsAggregateRevisionTokenDto head = new CvsAggregateRevisionTokenDto("xxx", "2006/11/09 07:49:24");
+		RevisionTokenDto first = new RevisionTokenDto(20061022052422l, "2006/10/22 05:24:52");
+		RevisionTokenDto head = new RevisionTokenDto(20061109074924l, "2006/11/09 07:49:24");
 		
 		final ChangeLogDto changeLog = repo.getChangeLog(first, head, System.err);
 		
