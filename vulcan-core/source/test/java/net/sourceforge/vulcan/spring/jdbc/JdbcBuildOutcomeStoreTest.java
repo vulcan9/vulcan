@@ -23,6 +23,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.UUID;
 
 import junit.framework.TestCase;
@@ -44,14 +45,13 @@ import org.apache.commons.io.FileUtils;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.datasource.DriverManagerDataSource;
+import org.springframework.jdbc.datasource.SingleConnectionDataSource;
 
 public class JdbcBuildOutcomeStoreTest extends TestCase {
 	private String dbPath = TestUtils.resolveRelativePath("target/test-db/builds");
 	
 	JdbcBuildOutcomeStore store = new JdbcBuildOutcomeStore();
-	DriverManagerDataSource dataSource = new DriverManagerDataSource();
-	
+	SingleConnectionDataSource dataSource = new SingleConnectionDataSource();
 	JdbcBuildOutcomeDto outcome = new JdbcBuildOutcomeDto();
 	
 	boolean initCalled = false;
@@ -63,10 +63,15 @@ public class JdbcBuildOutcomeStoreTest extends TestCase {
 	protected void setUp() throws Exception {
 		super.setUp();
 		
+		final Properties props = new Properties();
+		props.setProperty("autocommit", "false");
+
 		dataSource.setDriverClassName("org.hsqldb.jdbcDriver");
 		dataSource.setUrl("jdbc:hsqldb:file:" + dbPath);
 		dataSource.setUsername("sa");
 		dataSource.setPassword("");
+		dataSource.setConnectionProperties(props);
+		dataSource.setAutoCommit(false);
 		
 		store.setConfigurationStore(new StoreStub(null) {
 			@Override
@@ -78,6 +83,8 @@ public class JdbcBuildOutcomeStoreTest extends TestCase {
 				return buildLogExistsFlag;
 			}
 		});
+		
+		
 		store.setDataSource(dataSource);
 		store.setCreateScript(new ClassPathResource("net/sourceforge/vulcan/resources/create_tables.sql"));
 
@@ -342,6 +349,24 @@ public class JdbcBuildOutcomeStoreTest extends TestCase {
 		outcome.setName("new name");
 		
 		assertPersistence(store.loadBuildOutcome(outcome.getId()));
+	}
+	
+	public void testDoesNotCacheProjectNameOnFailure() throws Exception {
+		store.init();
+		initCalled = true;
+		
+		outcome.setBuildNumber(null);
+		
+		try {
+			store.storeBuildOutcome(outcome);
+			fail("Expected exception");
+		} catch (StoreException e) {
+		}
+
+		dataSource.getConnection().rollback();
+		
+		outcome.setBuildNumber(33);
+		assertPersistence();
 	}
 	
 	private void assertPersistence() throws StoreException {
