@@ -183,7 +183,7 @@ public class BuildOutcomeCache implements ProjectNameChangeListener {
 		final String projectName = idToProjects.get(id);
 		
 		try {
-			final ProjectStatusDto status = buildOutcomeStore.loadBuildOutcome(projectName, id);
+			final ProjectStatusDto status = buildOutcomeStore.loadBuildOutcome(id);
 			
 			if (status.getBuildNumber() == null) {
 				// Legacy: build number was not introduced until several

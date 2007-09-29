@@ -30,6 +30,7 @@ import java.io.OutputStream;
 
 import net.sourceforge.vulcan.core.BuildOutcomeStore;
 import net.sourceforge.vulcan.core.ConfigurationStore;
+import net.sourceforge.vulcan.dto.BuildOutcomeQueryDto;
 import net.sourceforge.vulcan.dto.PluginMetaDataDto;
 import net.sourceforge.vulcan.dto.ProjectStatusDto;
 import net.sourceforge.vulcan.dto.StateManagerConfigDto;
@@ -85,7 +86,10 @@ public class StoreStub implements ConfigurationStore, BuildOutcomeStore {
 		outcome.setId(id);
 		return id;
 	}
-	public ProjectStatusDto loadBuildOutcome(String projectName, UUID id) {
+	public ProjectStatusDto loadBuildOutcome(UUID id) {
+		return null;
+	}
+	public List<ProjectStatusDto> loadBuildSummaries(BuildOutcomeQueryDto query) {
 		return null;
 	}
 	public Map<String, List<UUID>> getBuildOutcomeIDs() {

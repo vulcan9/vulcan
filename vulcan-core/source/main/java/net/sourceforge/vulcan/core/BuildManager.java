@@ -68,6 +68,7 @@ public interface BuildManager {
 	 * @param end exclusive upper bound.
 	 * @return Build IDs for project within specified Date range.
 	 */
+	@Deprecated
 	List<UUID> getAvailableStatusIdsInRange(Set<String> projectNames, Date begin, Date end);
 
 	Map<String, ProjectStatusDto> getProjectsBeingBuilt();

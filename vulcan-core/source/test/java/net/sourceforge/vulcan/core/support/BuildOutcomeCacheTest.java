@@ -72,14 +72,15 @@ public class BuildOutcomeCacheTest extends EasyMockTestCase {
 	
 	public void trainInit() throws Exception {
 		expect(store.getBuildOutcomeIDs()).andReturn(map);
-		expect(store.loadBuildOutcome((String)notNull(), (UUID)notNull())).andAnswer(new IAnswer<ProjectStatusDto>() {
+		expect(store.loadBuildOutcome((UUID)notNull())).andAnswer(new IAnswer<ProjectStatusDto>() {
 			public ProjectStatusDto answer() throws Throwable {
-				final UUID id = (UUID) getCurrentArguments()[1];
+				final UUID id = (UUID) getCurrentArguments()[0];
 				
 				return storedOutcomes.get(id);
 			}
 		}).anyTimes();
 	}
+	
 	@TrainingMethod("trainInit")
 	public void testInit() throws Exception {
 		cache.init();		
@@ -250,7 +251,7 @@ public class BuildOutcomeCacheTest extends EasyMockTestCase {
 	
 	public void trainUpdateStateWhenProjectRenamedLoadsNewName() throws Exception {
 		expect(store.getBuildOutcomeIDs()).andReturn(map);
-		expect(store.loadBuildOutcome("aNewProject", four)).andReturn(storedOutcomes.get(four));
+		expect(store.loadBuildOutcome(four)).andReturn(storedOutcomes.get(four));
 	}
 	
 	@TrainingMethod("trainUpdateStateWhenProjectRenamedLoadsNewName")

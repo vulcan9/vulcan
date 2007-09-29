@@ -341,7 +341,7 @@ public class JdbcBuildOutcomeStoreTest extends TestCase {
 		store.projectNameChanged(outcome.getName(), "new name");
 		outcome.setName("new name");
 		
-		assertPersistence(store.loadBuildOutcome("unused param", outcome.getId()));
+		assertPersistence(store.loadBuildOutcome(outcome.getId()));
 	}
 	
 	private void assertPersistence() throws StoreException {
@@ -354,7 +354,7 @@ public class JdbcBuildOutcomeStoreTest extends TestCase {
 		
 		store.storeBuildOutcome(outcome);
 		
-		final JdbcBuildOutcomeDto loadedOutcome = store.loadBuildOutcome(outcome.getName(), outcome.getId());
+		final JdbcBuildOutcomeDto loadedOutcome = store.loadBuildOutcome(outcome.getId());
 		
 		assertPersistence(loadedOutcome);
 	}
