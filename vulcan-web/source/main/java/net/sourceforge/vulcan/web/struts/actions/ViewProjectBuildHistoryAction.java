@@ -18,17 +18,18 @@
  */
 package net.sourceforge.vulcan.web.struts.actions;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.UUID;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import net.sf.json.JSONArray;
+import net.sourceforge.vulcan.core.BuildOutcomeStore;
+import net.sourceforge.vulcan.dto.BuildOutcomeQueryDto;
 import net.sourceforge.vulcan.dto.ProjectStatusDto;
 import net.sourceforge.vulcan.dto.ProjectStatusDto.Status;
 import net.sourceforge.vulcan.metadata.SvnRevision;
@@ -41,84 +42,61 @@ import org.apache.struts.action.ActionMessage;
 import org.apache.struts.action.ActionMessages;
 import org.jdom.Document;
 
-//TODO: long-running reports may cause denial of service in dashboard...
 @SvnRevision(id="$Id$", url="$HeadURL$")
 public final class ViewProjectBuildHistoryAction extends ProjectReportBaseAction {
+	private BuildOutcomeStore buildOutcomeStore;
 	private String filename;
 	
 	@Override
 	public ActionForward execute(ActionMapping mapping, ActionForm form, HttpServletRequest request, HttpServletResponse response) throws Exception {
 		final ReportForm reportForm = (ReportForm) form;
-		final List<UUID> ids;
 		final Object fromLabel;
 		final Object toLabel;
 		
 		final String[] projectNames = reportForm.getProjectNames();
+		final BuildOutcomeQueryDto query = new BuildOutcomeQueryDto();
+		query.setProjectNames(new HashSet<String>(Arrays.asList(projectNames)));
 		
 		if (reportForm.isDateMode()) {
 			final Date from = reportForm.getStartDateAsDate();
 			final Date to = reportForm.getEndDateAsDate();
 			
-			ids = buildManager.getAvailableStatusIdsInRange(
-					new HashSet<String>(Arrays.asList(projectNames)),
-					from,
-					to);
+			query.setMinDate(from);
+			query.setMaxDate(to);
 			
 			fromLabel = from;
 			toLabel = to;
 		} else if (reportForm.isIncludeAll()) {
-			ids = new ArrayList<UUID>();
-			
-			for (String name : projectNames) {
-				final List<UUID> idsForProject = buildManager.getAvailableStatusIds(name);
-				if (idsForProject != null) {
-					ids.addAll(idsForProject);
-				}
-			}
-			
 			fromLabel = "0";
-
-			if (projectNames.length > 1) {
-				toLabel="*";
-			} else {
-				toLabel = Integer.toString(ids.size());
-			}
+			toLabel="*";
 		} else {
-			final int startIndex = reportForm.getStartIndexAsInt();
-			final int endIndex = reportForm.getEndIndexAsInt();
+			final int minBuildNumber = reportForm.getMinBuildNumberAsInt();
+			final int maxBuildNumber = reportForm.getMaxBuildNumberAsInt();
 			
-			final List<UUID> allIds = buildManager.getAvailableStatusIds(projectNames[0]);
+			query.setMinBuildNumber(minBuildNumber);
+			query.setMaxBuildNumber(maxBuildNumber);
 			
-			if (allIds == null || allIds.isEmpty()) {
-				ids = null;
-			} else if (endIndex >= allIds.size()) {
-				BaseDispatchAction.saveError(request, "endIndex",
-						new ActionMessage("errors.out.of.range", new Object[] { allIds.size() -1 }));
-				return mapping.getInputForward();
-			} else {
-				ids = allIds.subList(startIndex, endIndex+1);
-			}
-			
-			fromLabel = Integer.toString(startIndex);
-			toLabel = Integer.toString(endIndex);
+			fromLabel = Integer.toString(minBuildNumber);
+			toLabel = Integer.toString(maxBuildNumber);
 		}
 		
-		if (ids == null || ids.isEmpty()) {
+		final Set<Status> statuses = new HashSet<Status>();
+		statuses.addAll(Arrays.asList(Status.values()));
+		statuses.removeAll(parseOmittedTypes(reportForm.getOmitTypes()));
+		
+		query.setStatuses(statuses);
+		
+		final List<ProjectStatusDto> outcomes = buildOutcomeStore.loadBuildSummaries(query);
+		
+		if (outcomes.isEmpty()) {
 			BaseDispatchAction.saveError(request, ActionMessages.GLOBAL_MESSAGE,
 					new ActionMessage("errors.no.history"));
 			return mapping.getInputForward();
 		}
 		
-		final Set<Status> omittedTypes = parseOmittedTypes(reportForm.getOmitTypes());
-		
-		final List<ProjectStatusDto> outcomes = new ArrayList<ProjectStatusDto>();
-		
-		for (UUID id : ids) {
-			final ProjectStatusDto outcome = buildManager.getStatus(id);
-			
-			if (!omittedTypes.contains(outcome.getStatus())) {
-				outcomes.add(outcome);	
-			}
+		if ("json".equals(reportForm.getTransform())) {
+			prepareBuildHistoryForCharts(request, outcomes);
+			return mapping.findForward("charts");
 		}
 		
 		final Document doc = projectDomBuilder.createProjectSummaries(outcomes, fromLabel, toLabel, request.getLocale());
@@ -132,6 +110,15 @@ public final class ViewProjectBuildHistoryAction extends ProjectReportBaseAction
 	
 	public void setFilename(String filename) {
 		this.filename = filename;
+	}
+	
+	public void setBuildOutcomeStore(BuildOutcomeStore buildOutcomeStore) {
+		this.buildOutcomeStore = buildOutcomeStore;
+	}
+	
+	private void prepareBuildHistoryForCharts(HttpServletRequest request, final List<ProjectStatusDto> outcomes) {
+		final String data = JSONArray.fromObject(outcomes).toString();
+		request.setAttribute("jsonBuildHistory", data.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;"));
 	}
 	
 	private Set<Status> parseOmittedTypes(String[] typeStrings) {

@@ -38,8 +38,8 @@ public class ReportForm extends ValidatorForm {
 	private String rangeType = "date";
 	private String startDate;
 	private String endDate;
-	private String startIndex;
-	private String endIndex;
+	private String minBuildNumber;
+	private String maxBuildNumber;
 	private String transform;
 	private String[] projectNames;
 	private String[] omitTypes;
@@ -71,8 +71,8 @@ public class ReportForm extends ValidatorForm {
 		}
 		
 		if (isRangeMode()) {
-			if (getStartIndexAsInt() > getEndIndexAsInt()) {
-				errors.add("startIndex", new ActionMessage("errors.out.of.order"));
+			if (getMinBuildNumberAsInt() > getMaxBuildNumberAsInt()) {
+				errors.add("minBuildNumber", new ActionMessage("errors.out.of.order"));
 			}
 		}
 		
@@ -105,17 +105,17 @@ public class ReportForm extends ValidatorForm {
 	public void setEndDate(String endDate) {
 		this.endDate = endDate;
 	}
-	public String getStartIndex() {
-		return startIndex;
+	public String getMinBuildNumber() {
+		return minBuildNumber;
 	}
-	public void setStartIndex(String startIndex) {
-		this.startIndex = startIndex;
+	public void setMinBuildNumber(String startIndex) {
+		this.minBuildNumber = startIndex;
 	}
-	public String getEndIndex() {
-		return endIndex;
+	public String getMaxBuildNumber() {
+		return maxBuildNumber;
 	}
-	public void setEndIndex(String endIndex) {
-		this.endIndex = endIndex;
+	public void setMaxBuildNumber(String endIndex) {
+		this.maxBuildNumber = endIndex;
 	}
 	public String[] getProjectNames() {
 		return projectNames;
@@ -135,11 +135,11 @@ public class ReportForm extends ValidatorForm {
 	public void setTransform(String transform) {
 		this.transform = transform;
 	}
-	public int getStartIndexAsInt() {
-		return Integer.parseInt(startIndex);
+	public int getMinBuildNumberAsInt() {
+		return Integer.parseInt(minBuildNumber);
 	}
-	public int getEndIndexAsInt() {
-		return Integer.parseInt(endIndex);
+	public int getMaxBuildNumberAsInt() {
+		return Integer.parseInt(maxBuildNumber);
 	}
 	public Date getStartDateAsDate() {
 		return parseDate(startDate);

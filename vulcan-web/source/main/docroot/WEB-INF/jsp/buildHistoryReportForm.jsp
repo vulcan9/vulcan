@@ -77,14 +77,14 @@
 			</td>
 			<td>
 				<fmt:message key="label.index.start"/>
-				<html:text property="startIndex" styleClass="buildNumber"/>
+				<html:text property="minBuildNumber" styleClass="buildNumber"/>
 				<html:messages property="startIndex" id="msg">
 					<span class="error">${msg}</span>
 				</html:messages>
 			</td>
 			<td>
 				<fmt:message key="label.index.end"/>
-				<html:text property="endIndex" styleClass="buildNumber"/>
+				<html:text property="maxBuildNumber" styleClass="buildNumber"/>
 				<html:messages property="endIndex" id="msg">
 					<span class="error">${msg}</span>
 				</html:messages>
@@ -147,6 +147,7 @@
 				<html:select property="transform" styleClass="transform">
 					<html:option value="xhtml">XHTML</html:option>
 					<html:option value="">XML</html:option>
+					<html:option value="json">Graphs and Charts</html:option>
 				</html:select>
 				<ul class="metaDataOptions">
 					<li>

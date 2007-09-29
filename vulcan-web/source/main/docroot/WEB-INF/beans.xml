@@ -74,7 +74,7 @@
 	<bean id="buildOutcomeCache" class="net.sourceforge.vulcan.core.support.BuildOutcomeCache" init-method="init">
 		<property name="buildOutcomeStore" ref="buildOutcomeStore"/>
 		<property name="eventHandler" ref="eventHandler"/>
-		<property name="cacheSize" value="5000"/>
+		<property name="cacheSize" value="500"/>
 	</bean>
 	
 	<bean id="buildManager" class="net.sourceforge.vulcan.core.support.BuildManagerImpl">
