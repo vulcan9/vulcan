@@ -77,7 +77,9 @@
 		<action path="/viewProjectBuildHistory"
 				type="org.springframework.web.struts.DelegatingActionProxy"
 				name="reportForm"
-				input="/WEB-INF/jsp/buildHistoryReportForm.jsp"/>
+				input="/WEB-INF/jsp/buildHistoryReportForm.jsp">
+			<forward name="charts" path="/WEB-INF/jsp/charts.jsp"/>
+		</action>
 		
 		<action path="/admin/clearMessages"
 				type="org.springframework.web.struts.DelegatingActionProxy"/>

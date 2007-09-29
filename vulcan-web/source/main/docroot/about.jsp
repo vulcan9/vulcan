@@ -80,9 +80,19 @@ see <html:link page="/COPYING">GPL Version 2 License</html:link>.
 			<td><a href="http://cglib.sourceforge.net/">http://cglib.sourceforge.net/</a></td>
 		</tr>
 		<tr>
+			<td>EZMorph</td>
+			<td><a href="http://www.apache.org/licenses/LICENSE-2.0">Apache Public License, Versoin 2.0</a></td>
+			<td><a href="http://ezmorph.sourceforge.net/">http://ezmorph.sourceforge.net/</a></td>
+		</tr>
+		<tr>
 			<td>Ganymed SSH2</td>
 			<td><a href="http://www.ganymed.ethz.ch/ssh2/LICENSE.txt">Ganymed Open Source License</a> [BSD Style]</td>
 			<td><a href="http://www.ganymed.ethz.ch/ssh2/">http://www.ganymed.ethz.ch/ssh2/</a></td>
+		</tr>
+		<tr>
+			<td>HSQLDB</td>
+			<td><a href="http://hsqldb.org/web/hsqlLicense.html">Hypersonic Group / HSQL Development Group</a></td>
+			<td><a href="http://hsqldb.org/">http://hsqldb.org/</a></td>
 		</tr>
 		<tr>
 			<td>Jakarta Commons</td>
@@ -115,6 +125,11 @@ see <html:link page="/COPYING">GPL Version 2 License</html:link>.
 			<td><a href="http://www.jdom.org/">http://www.jdom.org</a></td>
 		</tr>
 		<tr>
+			<td>Json-lib</td>
+			<td><a href="http://www.apache.org/licenses/LICENSE-2.0">Apache Public License, Versoin 2.0</a></td>
+			<td><a href="http://json-lib.sourceforge.net/">http://json-lib.sourceforge.net/</a></td>
+		</tr>
+		<tr>
 			<td>JUG (Java UUID Generator)</td>
 			<td><a href="http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html">LGPL 2.1</a></td>
 			<td><a href="http://docs.safehaus.org/display/JUG/Home">http://docs.safehaus.org/display/JUG/Home</a></td>
@@ -125,6 +140,11 @@ see <html:link page="/COPYING">GPL Version 2 License</html:link>.
 			<td><a href="http://logging.apache.org/log4j/docs/index.html">http://logging.apache.org/log4j/docs/index.html</a></td>
 		</tr>
 		<tr>
+			<td>MochiKit</td>
+			<td><a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a></td>
+			<td><a href="http://mochikit.com/">http://mochikit.com/</a></td>
+		</tr>
+		<tr>
 			<td>Netbeans CVS Client</td>
 			<td><a href="http://www.netbeans.org/cddl.html">Common Development and Distribution License</a></td>
 			<td><a href="http://javacvs.netbeans.org/">http://javacvs.netbeans.org/</a></td>
@@ -133,6 +153,11 @@ see <html:link page="/COPYING">GPL Version 2 License</html:link>.
 			<td>Plexus Utils</td>
 			<td><a href="http://www.apache.org/licenses/LICENSE-2.0">Apache Public License, Versoin 2.0</a></td>
 			<td><a href="http://plexus.codehaus.org/plexus-utils/">http://plexus.codehaus.org/plexus-utils/</a></td>
+		</tr>
+		<tr>
+			<td>PlotKit</td>
+			<td><a href="http://www.opensource.org/licenses/bsd-license.php">BSD License</a></td>
+			<td><a href="http://www.liquidx.net/plotkit/">http://www.liquidx.net/plotkit/</a></td>
 		</tr>
 		<tr>
 			<td>Quartz</td>

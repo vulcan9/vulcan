@@ -27,15 +27,6 @@ Function.prototype.bind = function(object) {
   }
 }
 
-Array.prototype.contains = function(e) {
-	for (var i=0; i<this.length; i++) {
-		if (e == this[i]) {
-			return true;
-		}
-	}
-	return false;
-}
-
 function createCookie(name,value,days) {
 	if (days)
 	{
@@ -101,7 +92,6 @@ function getTarget(event) {
 	
 	return this;
 }
-
 function findAncestorByTagName(node, tagName) {
 	if (node.tagName.toLowerCase() == tagName) {
 		return node;
