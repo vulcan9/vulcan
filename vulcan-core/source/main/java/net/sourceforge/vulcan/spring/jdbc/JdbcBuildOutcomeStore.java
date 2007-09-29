@@ -187,11 +187,12 @@ public class JdbcBuildOutcomeStore implements BuildOutcomeStore, ProjectNameChan
 	}
 	
 	private UUID storeBuildOutcomeInternal(ProjectStatusDto outcome) {
+		boolean nameAdded = false;
 		final String projectName = outcome.getName();
 		
 		if (!projectNames.contains(projectName)) {
 			jdbcTemplate.update("insert into project_names (name) values (?)", new Object[] {projectName});
-			projectNames.add(projectName);
+			nameAdded = true;
 		}
 		
 		buildInserter.insert(outcome);
@@ -222,6 +223,10 @@ public class JdbcBuildOutcomeStore implements BuildOutcomeStore, ProjectNameChan
 		
 		if (outcome.getChangeLog() != null && outcome.getChangeLog().getChangeSets() != null) {
 			changeSetInserter.insert(primaryKey, outcome.getChangeLog().getChangeSets());
+		}
+		
+		if (nameAdded) {
+			projectNames.add(projectName);
 		}
 		
 		return outcome.getId();
