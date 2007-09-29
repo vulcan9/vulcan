@@ -20,6 +20,7 @@
 	<bean name="/viewProjectBuildHistory"
 			class="net.sourceforge.vulcan.web.struts.actions.ViewProjectBuildHistoryAction"
 			parent="projectReportBaseAction">
+		<property name="buildOutcomeStore" ref="buildOutcomeStore"/>
 		<property name="filename" value="vulcan-build-history.xml"/>
 	</bean>
 	

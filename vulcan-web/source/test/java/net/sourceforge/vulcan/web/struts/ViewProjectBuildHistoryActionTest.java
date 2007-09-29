@@ -19,11 +19,14 @@
 package net.sourceforge.vulcan.web.struts;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.UUID;
 
+import net.sourceforge.vulcan.dto.BuildOutcomeQueryDto;
 import net.sourceforge.vulcan.dto.ProjectStatusDto;
 import net.sourceforge.vulcan.dto.ProjectStatusDto.Status;
 import net.sourceforge.vulcan.metadata.SvnRevision;
@@ -36,8 +39,10 @@ import org.jdom.Element;
 @SvnRevision(id="$Id$", url="$HeadURL$")
 public class ViewProjectBuildHistoryActionTest extends MockApplicationContextStrutsTestCase {
 	ProjectStatusDto status = new ProjectStatusDto();
+	List<ProjectStatusDto> results = Collections.nCopies(2, status);
 	Document dom = new Document();
 	List<UUID> ids = new ArrayList<UUID>();
+	BuildOutcomeQueryDto query = new BuildOutcomeQueryDto();
 	
 	@Override
 	public void setUp() throws Exception {
@@ -51,6 +56,8 @@ public class ViewProjectBuildHistoryActionTest extends MockApplicationContextStr
 		ids.add(UUID.randomUUID());
 		ids.add(UUID.randomUUID());
 		ids.add(UUID.randomUUID());
+		
+		query.setStatuses(new HashSet<Status>(Arrays.asList(Status.values())));
 	}
 	
 	public void testBlankName() throws Exception {
@@ -67,51 +74,17 @@ public class ViewProjectBuildHistoryActionTest extends MockApplicationContextStr
 		
 		assertPropertyHasError("projectNames", "errors.required");
 	}
-	public void testHighOutOfRange() throws Exception {
+	public void testNoDataFound() throws Exception {
 		addRequestParameter("projectNames", "some project");
 		addRequestParameter("rangeType", "index");
-		addRequestParameter("startIndex", "0");
-		addRequestParameter("endIndex", "35");
+		addRequestParameter("minBuildNumber", "0");
+		addRequestParameter("maxBuildNumber", "2");
 
-		buildManager.getAvailableStatusIds("some project");
-		EasyMock.expectLastCall().andReturn(ids);
-
-		replay();
+		query.setMinBuildNumber(0);
+		query.setMaxBuildNumber(2);
+		query.setProjectNames(Collections.singleton("some project"));
 		
-		actionPerform();
-		
-		verify();
-		
-		verifyInputForward();
-		
-		assertPropertyHasError("endIndex", "errors.out.of.range");
-	}
-	public void testNullIds() throws Exception {
-		addRequestParameter("projectNames", "some project");
-		addRequestParameter("rangeType", "index");
-		addRequestParameter("startIndex", "0");
-		addRequestParameter("endIndex", "2");
-
-		buildManager.getAvailableStatusIds("some project");
-		EasyMock.expectLastCall().andReturn(null);
-
-		replay();
-		
-		actionPerform();
-		
-		verify();
-		
-		verifyInputForward();
-		
-		assertPropertyHasError(ActionMessages.GLOBAL_MESSAGE, "errors.no.history");
-	}
-	public void testEmptyIds() throws Exception {
-		addRequestParameter("projectNames", "some project");
-		addRequestParameter("rangeType", "index");
-		addRequestParameter("startIndex", "0");
-		addRequestParameter("endIndex", "2");
-
-		buildManager.getAvailableStatusIds("some project");
+		buildOutcomeStore.loadBuildSummaries(query);
 		EasyMock.expectLastCall().andReturn(Collections.emptyList());
 
 		replay();
@@ -122,24 +95,6 @@ public class ViewProjectBuildHistoryActionTest extends MockApplicationContextStr
 		
 		verifyInputForward();
 		
-		assertPropertyHasError(ActionMessages.GLOBAL_MESSAGE, "errors.no.history");
-	}
-	public void testEmptyIdsByDateRange() throws Exception {
-		addRequestParameter("projectNames", "Trundle");
-		addRequestParameter("rangeType", "date");
-		addRequestParameter("startDate", "06/6/2002");
-		addRequestParameter("endDate", "06/6/2003");
-		
-		buildManager.getAvailableStatusIdsInRange(Collections.singleton("Trundle"), new Date(1023336000000L), new Date(1054872000000L));
-		EasyMock.expectLastCall().andReturn(Collections.emptyList());
-		
-		replay();
-		
-		actionPerform();
-		
-		verify();
-
-		verifyInputForward();
 		assertPropertyHasError(ActionMessages.GLOBAL_MESSAGE, "errors.no.history");
 	}
 	public void testBlankByDate() throws Exception {
@@ -168,14 +123,14 @@ public class ViewProjectBuildHistoryActionTest extends MockApplicationContextStr
 
 		verifyInputForward();
 		
-		assertPropertyHasError("startIndex", "errors.required");
-		assertPropertyHasError("endIndex", "errors.required");
+		assertPropertyHasError("minBuildNumber", "errors.required");
+		assertPropertyHasError("maxBuildNumber", "errors.required");
 	}
 	public void testIndicesOutOfOrder() throws Exception {
 		addRequestParameter("projectNames", "some project");
 		addRequestParameter("rangeType", "index");
-		addRequestParameter("startIndex", "2");
-		addRequestParameter("endIndex", "0");
+		addRequestParameter("minBuildNumber", "2");
+		addRequestParameter("maxBuildNumber", "0");
 
 		replay();
 		
@@ -185,25 +140,23 @@ public class ViewProjectBuildHistoryActionTest extends MockApplicationContextStr
 		
 		verifyInputForward();
 		
-		assertPropertyHasError("startIndex", "errors.out.of.order");
+		assertPropertyHasError("minBuildNumber", "errors.out.of.order");
 	}
 	public void testGetsSummaries() throws Exception {
 		addRequestParameter("projectNames", "Trundle");
 		addRequestParameter("rangeType", "index");
-		addRequestParameter("startIndex", "1");
-		addRequestParameter("endIndex", "2");
+		addRequestParameter("minBuildNumber", "1");
+		addRequestParameter("maxBuildNumber", "2");
 		addRequestParameter("download", "false");
 		
-		buildManager.getAvailableStatusIds("Trundle");
-		EasyMock.expectLastCall().andReturn(ids);
+		query.setMinBuildNumber(1);
+		query.setMaxBuildNumber(2);
+		query.setProjectNames(Collections.singleton("Trundle"));
 		
-		buildManager.getStatus(ids.get(1));
-		EasyMock.expectLastCall().andReturn(status);
+		buildOutcomeStore.loadBuildSummaries(query);
+		EasyMock.expectLastCall().andReturn(results);
 		
-		buildManager.getStatus(ids.get(2));
-		EasyMock.expectLastCall().andReturn(status);
-		
-		projectDomBuilder.createProjectSummaries(Collections.nCopies(2, status),
+		projectDomBuilder.createProjectSummaries(results,
 				"1", "2", request.getLocale());
 		
 		EasyMock.expectLastCall().andReturn(dom);
@@ -222,20 +175,13 @@ public class ViewProjectBuildHistoryActionTest extends MockApplicationContextStr
 		addRequestParameter("projectNames", "Trundle");
 		addRequestParameter("rangeType", "all");
 		
-		buildManager.getAvailableStatusIds("Trundle");
-		expectLastCall().andReturn(ids);
+		query.setProjectNames(Collections.singleton("Trundle"));
 		
-		buildManager.getStatus(ids.get(0));
-		expectLastCall().andReturn(status);
+		buildOutcomeStore.loadBuildSummaries(query);
+		EasyMock.expectLastCall().andReturn(results);
 		
-		buildManager.getStatus(ids.get(1));
-		expectLastCall().andReturn(status);
-		
-		buildManager.getStatus(ids.get(2));
-		expectLastCall().andReturn(status);
-
-		projectDomBuilder.createProjectSummaries(Collections.nCopies(3, status),
-				"0", "3", request.getLocale());
+		projectDomBuilder.createProjectSummaries(results,
+				"0", "*", request.getLocale());
 		
 		expectLastCall().andReturn(dom);
 		
@@ -250,42 +196,20 @@ public class ViewProjectBuildHistoryActionTest extends MockApplicationContextStr
 		assertEquals("application/xml", response.getContentType());
 		assertEquals("attachment; filename=vulcan-build-history.xml", response.getHeader("Content-Disposition"));
 	}		
-	public void testIncludeAllHandlesNull() throws Exception {
-		addRequestParameter("download", "true");
-		addRequestParameter("projectNames", "Trundle");
-		addRequestParameter("rangeType", "all");
-		
-		buildManager.getAvailableStatusIds("Trundle");
-		expectLastCall().andReturn(null);
-		
-		replay();
-		
-		actionPerform();
-		
-		verifyActionErrors(new String[] {"errors.no.history"});
-		
-		verify();
-	}		
 	public void testOmitSkipAndError() throws Exception {
 		addRequestParameter("download", "true");
 		addRequestParameter("projectNames", "Trundle");
 		addRequestParameter("rangeType", "all");
 		addRequestParameter("omitTypes", new String[] {"ERROR", "SKIP"});
 		
-		buildManager.getAvailableStatusIds("Trundle");
-		expectLastCall().andReturn(ids);
+		query.setStatuses(new HashSet<Status>(Arrays.asList(Status.PASS, Status.FAIL, Status.BUILDING, Status.UP_TO_DATE, Status.IN_QUEUE)));
+		query.setProjectNames(Collections.singleton("Trundle"));
 		
-		buildManager.getStatus(ids.get(0));
-		expectLastCall().andReturn(createFakeStatus(Status.PASS));
+		buildOutcomeStore.loadBuildSummaries(query);
+		EasyMock.expectLastCall().andReturn(results);
 		
-		buildManager.getStatus(ids.get(1));
-		expectLastCall().andReturn(createFakeStatus(Status.SKIP));
-		
-		buildManager.getStatus(ids.get(2));
-		expectLastCall().andReturn(createFakeStatus(Status.ERROR));
-
-		projectDomBuilder.createProjectSummaries(Collections.singletonList(createFakeStatus(Status.PASS)),
-				"0", "3", request.getLocale());
+		projectDomBuilder.createProjectSummaries(results,
+				"0", "*", request.getLocale());
 		
 		expectLastCall().andReturn(dom);
 		
@@ -305,19 +229,12 @@ public class ViewProjectBuildHistoryActionTest extends MockApplicationContextStr
 		addRequestParameter("projectNames", new String[] {"Trundle", "Other"});
 		addRequestParameter("rangeType", "all");
 		
-		buildManager.getAvailableStatusIds("Trundle");
-		expectLastCall().andReturn(ids.subList(0, 1));
-
-		buildManager.getAvailableStatusIds("Other");
-		expectLastCall().andReturn(ids.subList(1, 2));
+		query.setProjectNames(new HashSet<String>(Arrays.asList("Trundle", "Other")));
 		
-		buildManager.getStatus(ids.get(0));
-		expectLastCall().andReturn(status);
+		buildOutcomeStore.loadBuildSummaries(query);
+		EasyMock.expectLastCall().andReturn(results);
 		
-		buildManager.getStatus(ids.get(1));
-		expectLastCall().andReturn(status);
-		
-		projectDomBuilder.createProjectSummaries(Collections.nCopies(2, status),
+		projectDomBuilder.createProjectSummaries(results,
 				"0", "*", request.getLocale());
 		
 		expectLastCall().andReturn(dom);
@@ -358,19 +275,14 @@ public class ViewProjectBuildHistoryActionTest extends MockApplicationContextStr
 		final Date start = new Date(1023336000000L);
 		final Date end = new Date(1054872000000L);
 		
-		buildManager.getAvailableStatusIdsInRange(Collections.singleton("Trundle"), start, end);
-		EasyMock.expectLastCall().andReturn(ids);
+		query.setProjectNames(Collections.singleton("Trundle"));
+		query.setMinDate(start);
+		query.setMaxDate(end);
 		
-		buildManager.getStatus(ids.get(0));
-		EasyMock.expectLastCall().andReturn(status);
+		buildOutcomeStore.loadBuildSummaries(query);
+		EasyMock.expectLastCall().andReturn(results);
 		
-		buildManager.getStatus(ids.get(1));
-		EasyMock.expectLastCall().andReturn(status);
-		
-		buildManager.getStatus(ids.get(2));
-		EasyMock.expectLastCall().andReturn(status);
-		
-		projectDomBuilder.createProjectSummaries(Collections.nCopies(3, status),
+		projectDomBuilder.createProjectSummaries(results,
 				start, end, request.getLocale());
 		EasyMock.expectLastCall().andReturn(dom);
 		
@@ -384,12 +296,5 @@ public class ViewProjectBuildHistoryActionTest extends MockApplicationContextStr
 		
 		assertEquals("application/xml", response.getContentType());
 	}
-	private ProjectStatusDto createFakeStatus(Status result) {
-		final ProjectStatusDto copy = (ProjectStatusDto) status.copy();
-		
-		copy.setStatus(result);
-		
-		return copy;
-	}		
 }
 
