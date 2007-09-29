@@ -32,6 +32,7 @@ import javax.sql.DataSource;
 import net.sourceforge.vulcan.core.BuildOutcomeStore;
 import net.sourceforge.vulcan.core.ConfigurationStore;
 import net.sourceforge.vulcan.core.ProjectNameChangeListener;
+import net.sourceforge.vulcan.dto.BuildOutcomeQueryDto;
 import net.sourceforge.vulcan.dto.ProjectStatusDto;
 import net.sourceforge.vulcan.exception.StoreException;
 import net.sourceforge.vulcan.metadata.SvnRevision;
@@ -121,7 +122,7 @@ public class JdbcBuildOutcomeStore implements BuildOutcomeStore, ProjectNameChan
 		return query.executeForMap();
 	}
 
-	public JdbcBuildOutcomeDto loadBuildOutcome(String projectName, UUID id) throws StoreException {
+	public JdbcBuildOutcomeDto loadBuildOutcome(UUID id) throws StoreException {
 		final JdbcBuildOutcomeDto dto = buildQuery.queryForBuild(id);
 		
 		dto.setDependencyIds(dependencyQuery.queryForDependencyMap(dto.getPrimaryKey()));
@@ -142,6 +143,12 @@ public class JdbcBuildOutcomeStore implements BuildOutcomeStore, ProjectNameChan
 		return dto;
 	}
 
+	public List<ProjectStatusDto> loadBuildSummaries(BuildOutcomeQueryDto query) {
+		final BuildHistoryQuery historyQuery = new BuildHistoryQuery(dataSource, query);
+		
+		return historyQuery.queryForHistory();
+	}
+	
 	public UUID storeBuildOutcome(ProjectStatusDto outcome)	throws StoreException {
 		try {
 			return storeBuildOutcomeInternal(outcome);

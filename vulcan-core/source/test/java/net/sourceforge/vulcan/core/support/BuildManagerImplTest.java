@@ -87,11 +87,11 @@ public class BuildManagerImplTest extends TestCase {
 
 		cache.setBuildOutcomeStore(new StoreStub(null) {
 			@Override
-			public ProjectStatusDto loadBuildOutcome(String projectName, UUID id) {
+			public ProjectStatusDto loadBuildOutcome(UUID id) {
 				if (id == null) {
 					throw new AssertionFailedError("should never call this with null UUID");
 				}
-				return super.loadBuildOutcome(projectName, id);
+				return super.loadBuildOutcome(id);
 			}
 		});
 		

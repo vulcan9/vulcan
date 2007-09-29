@@ -24,6 +24,7 @@ import java.util.UUID;
 
 import org.springframework.transaction.annotation.Transactional;
 
+import net.sourceforge.vulcan.dto.BuildOutcomeQueryDto;
 import net.sourceforge.vulcan.dto.ProjectStatusDto;
 import net.sourceforge.vulcan.exception.StoreException;
 import net.sourceforge.vulcan.metadata.SvnRevision;
@@ -35,7 +36,9 @@ public interface BuildOutcomeStore {
 	@Transactional(readOnly=false, rollbackFor=StoreException.class)
 	UUID storeBuildOutcome(ProjectStatusDto outcome) throws StoreException;
 	
-	ProjectStatusDto loadBuildOutcome(String projectName, UUID id) throws StoreException;
+	ProjectStatusDto loadBuildOutcome(UUID id) throws StoreException;
+	
+	List<ProjectStatusDto> loadBuildSummaries(BuildOutcomeQueryDto query);
 	
 	Map<String, List<UUID>> getBuildOutcomeIDs();
 	
