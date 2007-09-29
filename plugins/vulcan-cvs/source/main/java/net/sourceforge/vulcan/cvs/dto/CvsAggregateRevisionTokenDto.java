@@ -26,6 +26,7 @@ import net.sourceforge.vulcan.dto.RevisionTokenDto;
  * revisions to determine if anything has changed when comparing
  * to another aggregate revision.
  */
+@Deprecated
 public class CvsAggregateRevisionTokenDto extends RevisionTokenDto {
 	private String digest;
 

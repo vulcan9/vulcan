@@ -37,14 +37,11 @@ import java.util.Set;
 
 import net.sourceforge.vulcan.RepositoryAdaptor;
 import net.sourceforge.vulcan.core.BuildDetailCallback;
-import net.sourceforge.vulcan.cvs.dto.CvsAggregateRevisionTokenDto;
 import net.sourceforge.vulcan.cvs.dto.CvsConfigDto;
 import net.sourceforge.vulcan.cvs.dto.CvsProjectConfigDto;
 import net.sourceforge.vulcan.cvs.dto.CvsRepositoryProfileDto;
 import net.sourceforge.vulcan.cvs.support.ChangeLogListener;
 import net.sourceforge.vulcan.cvs.support.CheckoutListener;
-import net.sourceforge.vulcan.cvs.support.Digester;
-import net.sourceforge.vulcan.cvs.support.JavaSecurityDigester;
 import net.sourceforge.vulcan.cvs.support.NewestRevisionsLogListener;
 import net.sourceforge.vulcan.dto.ChangeLogDto;
 import net.sourceforge.vulcan.dto.ChangeSetDto;
@@ -52,7 +49,6 @@ import net.sourceforge.vulcan.dto.RepositoryTagDto;
 import net.sourceforge.vulcan.dto.RevisionTokenDto;
 import net.sourceforge.vulcan.exception.RepositoryException;
 
-import org.apache.commons.lang.StringUtils;
 import org.netbeans.lib.cvsclient.Client;
 import org.netbeans.lib.cvsclient.admin.StandardAdminHandler;
 import org.netbeans.lib.cvsclient.command.checkout.CheckoutCommand;
@@ -60,7 +56,6 @@ import org.netbeans.lib.cvsclient.command.log.RlogCommand;
 import org.netbeans.lib.cvsclient.command.update.UpdateCommand;
 
 public class CvsRepositoryAdaptor extends CvsSupport implements RepositoryAdaptor {
-	private final Digester digester = new JavaSecurityDigester("MD5");
 	private final String projectName;
 	
 	private Set<String> symbolicNames;
@@ -72,13 +67,12 @@ public class CvsRepositoryAdaptor extends CvsSupport implements RepositoryAdapto
 		openConnection();
 	}
 
-	public CvsAggregateRevisionTokenDto getLatestRevision(RevisionTokenDto previousRevision) throws RepositoryException {
-		final CvsAggregateRevisionTokenDto prevRev = (CvsAggregateRevisionTokenDto) previousRevision;
+	public RevisionTokenDto getLatestRevision(RevisionTokenDto previousRevision) throws RepositoryException {
 		// first, check to see if there are any changes since the previous revision
 		if (previousRevision != null) {
-			if (getLatestRevision(config.getModule(), prevRev) == prevRev) {
+			if (getLatestRevision(config.getModule(), previousRevision) == previousRevision) {
 				// no changes, short circuit.
-				return prevRev;
+				return previousRevision;
 			}
 		}
 		
@@ -87,9 +81,6 @@ public class CvsRepositoryAdaptor extends CvsSupport implements RepositoryAdapto
 	}
 
 	public ChangeLogDto getChangeLog(RevisionTokenDto first, RevisionTokenDto last, OutputStream diffOutputStream) throws RepositoryException {
-		final CvsAggregateRevisionTokenDto cvsFirstRev = (CvsAggregateRevisionTokenDto) first;
-		final CvsAggregateRevisionTokenDto cvsLastRev = (CvsAggregateRevisionTokenDto) last;
-
 		try {
 			// "cvs rdiff -u" does not seem to be supported by netbeans-cvslib at this time.
 			diffOutputStream.close();
@@ -97,7 +88,7 @@ public class CvsRepositoryAdaptor extends CvsSupport implements RepositoryAdapto
 			throw new RepositoryException(e);
 		}
 		
-		final ChangeLogDto changeLog = doChangeLogs(cvsFirstRev, cvsLastRev);
+		final ChangeLogDto changeLog = doChangeLogs(first, last);
 		
 		return changeLog;
 	}
@@ -192,7 +183,7 @@ public class CvsRepositoryAdaptor extends CvsSupport implements RepositoryAdapto
 		this.tag = tagName;
 	}
 
-	private CvsAggregateRevisionTokenDto getLatestRevision(String path, CvsAggregateRevisionTokenDto previousRevision) throws RepositoryException {
+	private RevisionTokenDto getLatestRevision(String path, RevisionTokenDto previousRevision) throws RepositoryException {
 		final List<String> revisions = new ArrayList<String>();
 		final NewestRevisionsLogListener logListener = new NewestRevisionsLogListener(revisions);
 		final Client client = new Client(connection, new StandardAdminHandler());
@@ -217,8 +208,6 @@ public class CvsRepositoryAdaptor extends CvsSupport implements RepositoryAdapto
 		
 		Collections.sort(revisions);
 		
-		final String combined = StringUtils.join(revisions.iterator(), ";");
-		
 		final String newestModificationString = logListener.getNewestModificationString();
 		if (newestModificationString == null) {
 			if (previousRevision != null) {
@@ -227,18 +216,22 @@ public class CvsRepositoryAdaptor extends CvsSupport implements RepositoryAdapto
 			throw new RepositoryException("cvs.errors.rlog.failed", null, null);
 		}
 		
-		return new CvsAggregateRevisionTokenDto(
-				digester.digest(combined.getBytes()),
+		return new RevisionTokenDto(
+				toLong(newestModificationString),
 				newestModificationString);
 	}
 
-	private ChangeLogDto doChangeLogs(final CvsAggregateRevisionTokenDto cvsFirstRev, final CvsAggregateRevisionTokenDto cvsLastRev) throws RepositoryException {
+	private static Long toLong(String newestModificationDateString) {
+		return Long.valueOf(newestModificationDateString.replaceAll("\\D", ""));
+	}
+	
+	private ChangeLogDto doChangeLogs(final RevisionTokenDto first, final RevisionTokenDto last) throws RepositoryException {
 		final ChangeLogListener logListener = new ChangeLogListener();
 		final Client client = new Client(connection, new StandardAdminHandler());
 		final RlogCommand cmd = new RlogCommand();
 
 		cmd.setModule(config.getModule());
-		cmd.setDateFilter(cvsFirstRev.toString() + "<" + adjustLastRevision(cvsLastRev));
+		cmd.setDateFilter(first.toString() + "<" + adjustLastRevision(last));
 		cmd.setRevisionFilter(tag);
 		cmd.setRecursive(config.isRecursive());
 		
@@ -291,10 +284,10 @@ public class CvsRepositoryAdaptor extends CvsSupport implements RepositoryAdapto
 		return e.getAuthor() + ":" + e.getMessage();
 	}
 	
-	/* When fetching changelog, CVS sometimes returns logs on the same end date,
+	/* When fetching change log, CVS sometimes returns logs on the same end date,
 		and other times not.  Add one second to the date as a hack. */
-	private String adjustLastRevision(final CvsAggregateRevisionTokenDto cvsLastRev) {
-		Date d = parseDate(cvsLastRev.getLabel());
+	private String adjustLastRevision(final RevisionTokenDto lastRev) {
+		Date d = parseDate(lastRev.getLabel());
 		
 		return format(new Date(d.getTime() + 1000));
 	}

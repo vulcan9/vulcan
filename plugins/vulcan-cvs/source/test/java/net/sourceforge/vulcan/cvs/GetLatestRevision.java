@@ -21,7 +21,7 @@ package net.sourceforge.vulcan.cvs;
 import net.sourceforge.vulcan.cvs.dto.CvsConfigDto;
 import net.sourceforge.vulcan.cvs.dto.CvsProjectConfigDto;
 import net.sourceforge.vulcan.cvs.dto.CvsRepositoryProfileDto;
-import net.sourceforge.vulcan.cvs.dto.CvsAggregateRevisionTokenDto;
+import net.sourceforge.vulcan.dto.RevisionTokenDto;
 import net.sourceforge.vulcan.exception.RepositoryException;
 
 public class GetLatestRevision {
@@ -39,10 +39,10 @@ public class GetLatestRevision {
 		
 		final CvsRepositoryAdaptor repo = new CvsRepositoryAdaptor(new CvsConfigDto(), profile, projectConfig, null);
 		
-		CvsAggregateRevisionTokenDto rev = repo.getLatestRevision(
-				new CvsAggregateRevisionTokenDto("previous hash", "2007/04/16 21:57:57"));
+		RevisionTokenDto rev = repo.getLatestRevision(
+				//new RevisionTokenDto(20070416215757l, "2007/06/24 04:44:07"));
+				new RevisionTokenDto(20070624044407l, "2007/06/24 04:44:07"));
 
 		System.out.println("Latest modification: " + rev.getLabel());
-		System.out.println("Aggregate hash of head revisions: " + rev.getDigest());
 	}
 }
