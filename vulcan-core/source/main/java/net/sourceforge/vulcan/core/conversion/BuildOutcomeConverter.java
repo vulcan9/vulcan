@@ -164,7 +164,6 @@ public class BuildOutcomeConverter {
 			for (UUID id : allIds) {
 				convert(id);
 				i++;
-				//wac.getServletContext().setAttribute("superSpecialMessage", i + " out of " + allIds.size() + " converted.");
 			}
 			
 			startStateManager();
