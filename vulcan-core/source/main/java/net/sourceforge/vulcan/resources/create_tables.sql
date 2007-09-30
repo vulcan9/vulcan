@@ -48,7 +48,7 @@ create table builds (
 	
 	requested_by varchar(256),
 	
-	update_type varchar(12) not null,
+	update_type varchar(12),
 	
 	constraint uniq_project_build_number unique (project_id, build_number),
 	constraint uniq_uuid unique (uuid),

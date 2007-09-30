@@ -148,6 +148,20 @@ public class JdbcBuildOutcomeStoreTest extends TestCase {
 		assertPersistence();
 	}
 	
+	public void testSaveGeneratesIdOnNull() throws Exception {
+		store.init();
+		
+		outcome.setId(null);
+		outcome.setStatus(Status.SKIP);
+		outcome.setUpdateType(null);
+		
+		final UUID id = store.storeBuildOutcome(outcome);
+		
+		assertSame(id, outcome.getId());
+		
+		assertPersistence(store.loadBuildOutcome(id));
+	}
+	
 	public void testSaveOptionalColumns() throws Exception {
 		outcome.setUpdateType(UpdateType.Incremental);
 		outcome.setWorkDir("a work dir");
