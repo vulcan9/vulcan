@@ -195,6 +195,10 @@ public class JdbcBuildOutcomeStore implements BuildOutcomeStore, ProjectNameChan
 			nameAdded = true;
 		}
 		
+		if (outcome.getId() == null) {
+			outcome.setId(generateTimeBasedUUID());
+		}
+		
 		buildInserter.insert(outcome);
 		
 		final Map<String, UUID> depMap = outcome.getDependencyIds();

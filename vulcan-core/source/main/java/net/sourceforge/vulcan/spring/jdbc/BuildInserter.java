@@ -23,6 +23,7 @@ import java.sql.Types;
 import javax.sql.DataSource;
 
 import net.sourceforge.vulcan.dto.ProjectStatusDto;
+import net.sourceforge.vulcan.dto.ProjectStatusDto.UpdateType;
 
 import org.springframework.jdbc.core.SqlParameter;
 import org.springframework.jdbc.object.SqlUpdate;
@@ -93,6 +94,8 @@ class BuildInserter extends SqlUpdate {
 		final Object[] buildReasonArgs = dto.getBuildReasonArgs();
 		final int numBuildReasonArgs = buildReasonArgs != null ? buildReasonArgs.length : 0;
 		
+		final UpdateType updateType = dto.getUpdateType();
+		
 		Object[] params = new Object[] {
 			dto.getName(),
 			dto.getId().toString(),
@@ -110,7 +113,7 @@ class BuildInserter extends SqlUpdate {
 			dto.getStartDate(),
 			dto.getCompletionDate(),
 			dto.getBuildNumber(),
-			dto.getUpdateType().toString(),
+			updateType != null ? updateType.toString() : null,
 			dto.getWorkDir(),
 			revision,
 			revisionLabel,

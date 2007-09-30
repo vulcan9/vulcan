@@ -320,7 +320,6 @@ public class BuildManagerImpl implements BuildManager {
 			default:
 				passed = false;
 		}
-		
 
 		try {
 			writeLock.lock();

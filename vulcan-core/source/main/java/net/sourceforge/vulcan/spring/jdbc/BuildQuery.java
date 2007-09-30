@@ -32,6 +32,7 @@ import net.sourceforge.vulcan.dto.Date;
 import net.sourceforge.vulcan.dto.ProjectStatusDto;
 import net.sourceforge.vulcan.dto.RevisionTokenDto;
 
+import org.apache.commons.lang.StringUtils;
 import org.springframework.jdbc.core.SqlParameter;
 import org.springframework.jdbc.object.MappingSqlQuery;
 
@@ -76,7 +77,6 @@ class BuildQuery extends MappingSqlQuery {
 		dto.setId(UUID.fromString(rs.getString("uuid")));
 		
 		dto.setStatus(ProjectStatusDto.Status.valueOf(rs.getString("status")));
-		dto.setUpdateType(ProjectStatusDto.UpdateType.valueOf(rs.getString("update_type")));
 		dto.setMessageKey(rs.getString("message_key"));
 		dto.setBuildReasonKey(rs.getString("build_reason_key"));
 		dto.setStartDate(new Date(rs.getTimestamp("start_date").getTime()));
@@ -89,6 +89,13 @@ class BuildQuery extends MappingSqlQuery {
 		dto.setStatusChanged(rs.getBoolean("status_changed"));
 		dto.setRequestedBy(rs.getString("requested_by"));
 		
+		final String updateTypeString = rs.getString("update_type");
+		if (!rs.wasNull() && StringUtils.isNotEmpty(updateTypeString)) {
+			dto.setUpdateType(ProjectStatusDto.UpdateType.valueOf(updateTypeString));
+		} else {
+			dto.setUpdateType(null);
+		}
+
 		final Integer lastGoodBuildNumber = rs.getInt("last_good_build_number");
 		if (!rs.wasNull()) {
 			dto.setLastGoodBuildNumber(lastGoodBuildNumber);
