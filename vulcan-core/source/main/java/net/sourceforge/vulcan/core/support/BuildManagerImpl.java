@@ -420,6 +420,11 @@ public class BuildManagerImpl implements BuildManager {
 
 		statusDto.setCompletionDate(now);
 
+		if (statusDto.getStartDate() == null) {
+			// SKIP outcomes won't have a start date set.
+			statusDto.setStartDate(now);
+		}
+		
 		if (statusDto.getBuildNumber() == null) {
 			if (prev == null) {
 				statusDto.setBuildNumber(0);
