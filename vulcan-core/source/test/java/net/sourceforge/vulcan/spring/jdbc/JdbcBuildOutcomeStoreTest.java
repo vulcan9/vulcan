@@ -234,9 +234,17 @@ public class JdbcBuildOutcomeStoreTest extends TestCase {
 	}
 	
 	public void testSaveDependencies() throws Exception {
-		final String depName = outcome.getName();
-		final UUID depId = outcome.getId();
+		final String depName1 = outcome.getName();
+		final UUID depId1 = outcome.getId();
 		
+		assertPersistence();
+		
+		outcome.setName("service");
+		outcome.setId(UUID.randomUUID());
+
+		final String depName2 = outcome.getName();
+		final UUID depId2 = outcome.getId();
+
 		assertPersistence();
 		
 		outcome.setName("ui");
@@ -244,7 +252,8 @@ public class JdbcBuildOutcomeStoreTest extends TestCase {
 		
 		final HashMap<String, UUID> depMap = new HashMap<String, UUID>();
 		outcome.setDependencyIds(depMap);
-		depMap.put(depName, depId);
+		depMap.put(depName1, depId1);
+		depMap.put(depName2, depId2);
 		
 		assertPersistence();
 	}
