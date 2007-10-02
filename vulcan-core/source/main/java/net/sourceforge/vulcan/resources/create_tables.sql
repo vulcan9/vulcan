@@ -58,9 +58,10 @@ create table builds (
 );
 
 create table build_dependencies (
-	build_id integer not null primary key,
+	build_id integer not null,
 	dependency_build_id integer not null,
 	
+	constraint pk_build_dependencies primary key (build_id, dependency_build_id),
 	constraint fk_dependency_build_id foreign key (build_id) references builds (id),
 	constraint fk_dependency_id_build_id foreign key (dependency_build_id) references builds (id)
 );

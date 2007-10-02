@@ -96,8 +96,8 @@ public class BuildManagerImpl implements BuildManager {
 				buildManagerConfig.setProjectStatus(null);
 			} catch (StoreException e) {
 				eventHandler.reportEvent(
-						new ErrorEvent(this, "messages.save.failure",
-								new String[] {e.getMessage()}, e));
+						new ErrorEvent(this, "messages.save.failure.build",
+								new String[] {"", e.getMessage()}, e));
 			}
 		}
 	}
@@ -365,8 +365,8 @@ public class BuildManagerImpl implements BuildManager {
 			cache.store(outcome);
 		} catch (StoreException e) {
 			eventHandler.reportEvent(
-					new ErrorEvent(this, "messages.save.failure",
-							new String[] {e.getMessage()}, e));
+					new ErrorEvent(this, "messages.save.failure.build",
+							new String[] {outcome.getName(), e.getMessage()}, e));
 		}
 	}
 

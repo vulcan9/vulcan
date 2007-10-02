@@ -79,7 +79,7 @@ public class BuildOutcomeConverter {
 			}
 		});
 		
-		converter = new Converter(allIds, idsToProjectNames, fileStore, buildOutcomeStore);
+		converter = new Converter(allIds, idsToProjectNames);
 		
 		converter.start();
 	}
@@ -147,15 +147,11 @@ public class BuildOutcomeConverter {
 		private final Log log = LogFactory.getLog(Converter.class);
 		private final List<UUID> allIds;
 		private final Map<UUID, String> idsToProjectNames;
-		private final SpringFileStore fileStore;
-		private final BuildOutcomeStore buildOutcomeStore;
 		private final Set<UUID> converted = new HashSet<UUID>();
 		
-		public Converter(List<UUID> allIds, Map<UUID, String> idsToProjectNames, SpringFileStore fileStore, BuildOutcomeStore buildOutcomeStore) {
+		public Converter(List<UUID> allIds, Map<UUID, String> idsToProjectNames) {
 			this.allIds = allIds;
 			this.idsToProjectNames = idsToProjectNames;
-			this.fileStore = fileStore;
-			this.buildOutcomeStore = buildOutcomeStore;
 		}
 
 		@Override
