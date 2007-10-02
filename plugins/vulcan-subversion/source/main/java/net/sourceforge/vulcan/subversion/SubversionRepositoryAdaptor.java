@@ -433,7 +433,7 @@ public class SubversionRepositoryAdaptor extends SubversionSupport implements Re
 		
 		public void onNotify(NotifyInformation info) {
 			if (info.getAction() == NotifyAction.update_add) {
-				fileCount += new File(info.getPath()).length();
+				fileCount++;
 				PluginSupport.setWorkingCopyProgress(buildDetailCallback, fileCount, previousFileCount, ProgressUnit.Files);
 			}
 			
