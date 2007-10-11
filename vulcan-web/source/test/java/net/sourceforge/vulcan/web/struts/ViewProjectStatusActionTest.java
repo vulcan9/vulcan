@@ -18,7 +18,6 @@
  */
 package net.sourceforge.vulcan.web.struts;
 
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.net.URL;
 import java.util.ArrayList;
