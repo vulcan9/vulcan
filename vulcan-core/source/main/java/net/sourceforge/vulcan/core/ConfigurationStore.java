@@ -18,6 +18,7 @@
  */
 package net.sourceforge.vulcan.core;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -59,9 +60,6 @@ public interface ConfigurationStore {
 	boolean diffExists(String projectName, UUID diffId);
 	boolean buildLogExists(String projectName, UUID diffId);
 	
-	OutputStream getChangeLogOutputStream(String projectName, UUID diffId) throws StoreException;
-	InputStream getChangeLogInputStream(String projectName, UUID diffId) throws StoreException;
-	OutputStream getBuildLogOutputStream(String projectName, UUID buildLogId) throws StoreException;
-	InputStream getBuildLogInputStream(String projectName, UUID buildLogId) throws StoreException;
-	
+	File getChangeLog(String projectName, UUID diffId) throws StoreException;
+	File getBuildLog(String projectName, UUID diffId) throws StoreException;
 }

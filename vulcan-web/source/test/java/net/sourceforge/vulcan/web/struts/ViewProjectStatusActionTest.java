@@ -19,6 +19,7 @@
 package net.sourceforge.vulcan.web.struts;
 
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -28,6 +29,7 @@ import java.util.UUID;
 
 import javax.xml.transform.Result;
 
+import net.sourceforge.vulcan.TestUtils;
 import net.sourceforge.vulcan.dto.ProjectConfigDto;
 import net.sourceforge.vulcan.dto.ProjectStatusDto;
 import net.sourceforge.vulcan.exception.NoSuchProjectException;
@@ -46,6 +48,8 @@ public class ViewProjectStatusActionTest extends MockApplicationContextStrutsTes
 	List<UUID> ids = new ArrayList<UUID>();
 	ProjectConfigDto projectConfig = new ProjectConfigDto();
 
+	File helloFile = new File("");
+	
 	@Override
 	public void setUp() throws Exception {
 		super.setUp();
@@ -396,8 +400,8 @@ public class ViewProjectStatusActionTest extends MockApplicationContextStrutsTes
 		buildManager.getStatus(ids.get(1));
 		expectLastCall().andReturn(status);
 
-		configurationStore.getChangeLogInputStream("some project", status.getDiffId());
-		expectLastCall().andReturn(new ByteArrayInputStream("hello".getBytes()));
+		configurationStore.getChangeLog("some project", status.getDiffId());
+		expectLastCall().andReturn(TestUtils.resolveRelativeFile("source/test/servlet/file.txt"));
 		
 		addRequestParameter("projectName", "some project");
 		addRequestParameter("index", "1");
@@ -411,7 +415,7 @@ public class ViewProjectStatusActionTest extends MockApplicationContextStrutsTes
 		
 		assertEquals("text/plain", response.getContentType());
 		
-		assertEquals("hello",
+		assertEquals("sometext",
 				response.getWriterBuffer().toString().trim()
 					.replaceAll("\n", "").replaceAll("\r", ""));
 	}
@@ -430,8 +434,8 @@ public class ViewProjectStatusActionTest extends MockApplicationContextStrutsTes
 		buildManager.getStatus(ids.get(1));
 		expectLastCall().andReturn(status);
 
-		configurationStore.getBuildLogInputStream("some project", status.getBuildLogId());
-		expectLastCall().andReturn(new ByteArrayInputStream("hello".getBytes()));
+		configurationStore.getBuildLog("some project", status.getBuildLogId());
+		expectLastCall().andReturn(TestUtils.resolveRelativeFile("source/test/servlet/file.txt"));
 		
 		addRequestParameter("projectName", "some project");
 		addRequestParameter("index", "1");
@@ -445,7 +449,7 @@ public class ViewProjectStatusActionTest extends MockApplicationContextStrutsTes
 		
 		assertEquals("text/plain", response.getContentType());
 		
-		assertEquals("hello",
+		assertEquals("sometext",
 				response.getWriterBuffer().toString().trim()
 					.replaceAll("\n", "").replaceAll("\r", ""));
 	}

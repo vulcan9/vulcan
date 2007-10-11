@@ -18,15 +18,14 @@
  */
 package net.sourceforge.vulcan.core.support;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 
 import net.sourceforge.vulcan.core.BuildOutcomeStore;
 import net.sourceforge.vulcan.core.ConfigurationStore;
@@ -75,12 +74,6 @@ public class StoreStub implements ConfigurationStore, BuildOutcomeStore {
 	public PluginMetaDataDto[] getPluginConfigs() {
 		return null;
 	}
-	public OutputStream getBuildLogOutputStream(String projectConfig, UUID buildLogId) {
-		return null;
-	}
-	public InputStream getBuildLogInputStream(String projectName, UUID buildLogId) {
-		return null;
-	}
 	public UUID storeBuildOutcome(ProjectStatusDto outcome) {
 		final UUID id = UUID.randomUUID();
 		outcome.setId(id);
@@ -102,16 +95,12 @@ public class StoreStub implements ConfigurationStore, BuildOutcomeStore {
 		dto.setDiffId(dto.getId());
 		return dto;
 	}
-	public InputStream getChangeLogInputStream(String string, UUID diffId) throws StoreException {
+	public File getBuildLog(String projectName, UUID diffId)
+			throws StoreException {
 		return null;
 	}
-	public OutputStream getChangeLogOutputStream(String projectName, UUID diffId) throws StoreException {
-		return new ByteArrayOutputStream() {
-			@Override
-			public boolean equals(Object obj) {
-				return toString().equals(obj.toString());
-			}
-		};
+	public File getChangeLog(String projectName, UUID diffId) throws StoreException {
+		return null;
 	}
 	public void exportConfiguration(OutputStream os) {
 	}

@@ -19,8 +19,6 @@
 package net.sourceforge.vulcan.spring;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -41,8 +39,6 @@ import net.sourceforge.vulcan.core.support.AbstractFileStore;
 import net.sourceforge.vulcan.dto.ProjectStatusDto;
 import net.sourceforge.vulcan.dto.StateManagerConfigDto;
 import net.sourceforge.vulcan.event.WarningEvent;
-import net.sourceforge.vulcan.exception.CannotCreateDirectoryException;
-import net.sourceforge.vulcan.exception.ResourceNotFoundException;
 import net.sourceforge.vulcan.exception.StoreException;
 import net.sourceforge.vulcan.metadata.SvnRevision;
 
@@ -66,7 +62,7 @@ public class SpringFileStore extends AbstractFileStore implements BeanFactoryAwa
 	public synchronized StateManagerConfigDto loadConfiguration() throws StoreException {
 		final Resource configResource = getConfigurationResource();
 		
-		final BeanFactory beanFactory = new XmlBeanFactory(configResource, this.beanFactory);
+		final XmlBeanFactory beanFactory = new XmlBeanFactory(configResource, this.beanFactory);
 		
 		return (StateManagerConfigDto) beanFactory.getBean("configuration");
 	}
@@ -123,30 +119,6 @@ public class SpringFileStore extends AbstractFileStore implements BeanFactoryAwa
 		} catch (IOException e) {
 			throw new StoreException("Error comparing config files", e);
 		}
-	}
-	public synchronized UUID storeBuildOutcome(ProjectStatusDto outcome) throws StoreException {
-		UUID id = outcome.getId();
-		
-		if (id == null || id.version() != 1) {
-			id = generateTimeBasedUUID();
-			outcome.setId(id);
-		}
-		
-		removeUnusedResources(outcome.getName(), outcome);
-		
-		beanEncoder.reset();
-		beanEncoder.addBean("build-outcome", outcome);
-		
-		final File outcomeDir = getOutcomeDir(outcome.getName());
-		
-		if (!outcomeDir.isDirectory() && !outcomeDir.mkdirs()) {
-			throw new CannotCreateDirectoryException(outcomeDir);
-		}
-		
-		final File file = new File(outcomeDir, id.toString());
-		writeBeanConfig(file);
-		
-		return id;
 	}
 	public synchronized void archiveBuildOutcome(String projectName, UUID id, boolean success) {
 		final File dir = new File(
@@ -211,64 +183,31 @@ public class SpringFileStore extends AbstractFileStore implements BeanFactoryAwa
 	public boolean buildLogExists(String projectName, UUID id) {
 		final File buildLog = new File(getBuildLogDir(projectName), id.toString());
 		
-		return checkFile(buildLog);
+		return deleteFileIfEmpty(buildLog);
 	}
 	public boolean diffExists(String projectName, UUID id) {
 		final File buildLog = new File(getChangeLogDir(projectName), id.toString());
 		
-		return checkFile(buildLog);
+		return deleteFileIfEmpty(buildLog);
 	}
-	public OutputStream getChangeLogOutputStream(String projectName, UUID diffId) throws StoreException {
-		final File dir = getChangeLogDir(projectName);
-		
-		if (!dir.isDirectory()) {
-			dir.mkdirs();
-		}
-		
-		try {
-			return new FileOutputStream(new File(dir, diffId.toString()));
-		} catch (FileNotFoundException e) {
-			throw new StoreException(e);
-		}
-	}
-	public InputStream getChangeLogInputStream(String projectName, UUID diffId) throws StoreException {
-		final File file = new File(getChangeLogDir(projectName), diffId.toString());
-		
-		if (checkFile(file)) {
-			try {
-				return new FileInputStream(file);
-			} catch (FileNotFoundException ignore) {
-			}
-		}
-
-		throw new ResourceNotFoundException("ProjectName: " + projectName + ", diffId: " + diffId);
-	}
-	public OutputStream getBuildLogOutputStream(String projectName, UUID buildLogId) throws StoreException {
+	public File getBuildLog(String projectName, UUID id) throws StoreException {
 		final File dir = getBuildLogDir(projectName);
 		
 		if (!dir.isDirectory()) {
 			dir.mkdirs();
 		}
 		
-		try {
-			return new FileOutputStream(new File(dir, buildLogId.toString()));
-		} catch (FileNotFoundException e) {
-			throw new StoreException(e);
-		}
+		return new File(dir, id.toString());
 	}
-	public InputStream getBuildLogInputStream(String projectName, UUID buildLogId) throws StoreException {
-		final File file = new File(getBuildLogDir(projectName), buildLogId.toString());
-				
-		if (checkFile(file)) {
-			try {
-				return new FileInputStream(file);
-			} catch (FileNotFoundException ignore) {
-			}
+	public File getChangeLog(String projectName, UUID id) throws StoreException {
+		final File dir = getChangeLogDir(projectName);
+		
+		if (!dir.isDirectory()) {
+			dir.mkdirs();
 		}
-
-		throw new ResourceNotFoundException("ProjectName: " + projectName + ", buildLogId: " + buildLogId);
+		
+		return new File(dir, id.toString());
 	}
-
 	public synchronized Map<String, List<UUID>> getBuildOutcomeIDs() {
 		final Map<String, List<UUID>> map = new HashMap<String, List<UUID>>();
 		final File[] projects = getProjectsRoot().listFiles();
@@ -391,7 +330,10 @@ public class SpringFileStore extends AbstractFileStore implements BeanFactoryAwa
 			}
 		}
 	}
-	private boolean checkFile(File file) {
+	/**
+	 * @return true if the file exists and is not empty, false otherwise.
+	 */
+	private boolean deleteFileIfEmpty(File file) {
 		if (file.exists()) {
 			if (file.length() > 0) {
 				return true;
