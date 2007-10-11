@@ -7,8 +7,6 @@
 
 	<property name="build.debug" value="false"/>
 
-	<property name="version" value="0.0.0.0"/>
-
 	<target name="all">
 		<call target="build"/>
 		<call target="unit-test"/>
