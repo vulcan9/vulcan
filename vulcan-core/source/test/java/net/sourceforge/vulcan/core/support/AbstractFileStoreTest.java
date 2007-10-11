@@ -18,6 +18,7 @@
  */
 package net.sourceforge.vulcan.core.support;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -33,16 +34,10 @@ public class AbstractFileStoreTest extends TestCase {
 	AbstractFileStore store = new AbstractFileStore() {
 		public void exportConfiguration(OutputStream os) throws StoreException, IOException {
 		}
-		public InputStream getBuildLogInputStream(String projectName, UUID buildLogId) throws StoreException {
+		public File getBuildLog(String projectName, UUID diffId) throws StoreException {
 			return null;
 		}
-		public OutputStream getBuildLogOutputStream(String projectName, UUID buildLogId) throws StoreException {
-			return null;
-		}
-		public InputStream getChangeLogInputStream(String projectName, UUID diffId) throws StoreException {
-			return null;
-		}
-		public OutputStream getChangeLogOutputStream(String projectName, UUID diffId) throws StoreException {
+		public File getChangeLog(String projectName, UUID diffId) throws StoreException {
 			return null;
 		}
 		public String getExportMimeType() {

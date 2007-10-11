@@ -19,9 +19,7 @@
 package net.sourceforge.vulcan.core.support;
 
 import java.beans.PropertyDescriptor;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.InetAddress;
@@ -73,6 +71,7 @@ public class ProjectBuilderTest extends EasyMockTestCase {
 	boolean suppressStartDate = true;
 	
 	File logFile = new File("fakeBuildLog.log");
+	File diffFile = new File("fakeDiff.log");
 	
 	String errorMessage;
 	String warningMessage;
@@ -135,10 +134,6 @@ public class ProjectBuilderTest extends EasyMockTestCase {
 			}
 		}
 		@Override
-		protected File createTempFile() throws IOException {
-			return logFile;
-		}
-		@Override
 		protected ProjectStatusDto createBuildStatus(ProjectConfigDto currentTarget) {
 			final ProjectStatusDto projectStatusDto = super.createBuildStatus(currentTarget);
 			if (suppressStartDate) {
@@ -163,9 +158,6 @@ public class ProjectBuilderTest extends EasyMockTestCase {
 
 	UUID id = UUID.randomUUID();
 	
-	EqualByteArrayOutputStream changeLogOS = new EqualByteArrayOutputStream();
-	EqualByteArrayOutputStream buildLogOS = new EqualByteArrayOutputStream();
-	
 	StoreStub store = new StoreStub(null) {
 		@Override
 		public ProjectStatusDto createBuildOutcome(String projectName) {
@@ -175,19 +167,14 @@ public class ProjectBuilderTest extends EasyMockTestCase {
 			return dto;
 		}
 		@Override
-		public OutputStream getChangeLogOutputStream(String projectName, UUID diffId) throws StoreException {
-			return changeLogOS;
+		public File getBuildLog(String projectName, UUID diffId)
+				throws StoreException {
+			return logFile;
 		}
 		@Override
-		public OutputStream getBuildLogOutputStream(String projectConfig, UUID buildLogId) {
-			return buildLogOS;
-		}
-	};
-	
-	public static class EqualByteArrayOutputStream extends ByteArrayOutputStream {
-		@Override
-		public boolean equals(Object obj) {
-			return true;
+		public File getChangeLog(String projectName, UUID diffId)
+				throws StoreException {
+			return diffFile;
 		}
 	};
 	
@@ -235,6 +222,9 @@ public class ProjectBuilderTest extends EasyMockTestCase {
 		buildToolStatus.setWarnings(new ArrayList<BuildMessageDto>());
 		buildToolStatus.setBuildNumber(0);
 		buildToolStatus.setWorkDir("dir");
+		
+		logFile.deleteOnExit();
+		diffFile.deleteOnExit();
 	}
 
 	public void testSetsStartDate() throws Exception {
@@ -380,12 +370,12 @@ public class ProjectBuilderTest extends EasyMockTestCase {
 		buildToolStatus.setBuildReasonKey("messages.build.reason.repository.changes");
 		buildToolStatus.setRequestedBy("Deborah");
 		
-/*		tool.buildProject(
+		tool.buildProject(
 				(ProjectConfigDto) eq(project),
-				(ProjectStatusDto) eq(buildToolStatus),
+				(ProjectStatusDto) notNull(),
 				(File) eq(logFile),
 				(BuildDetailCallback)notNull());
-*/		
+		
 		mgr.targetCompleted(info, project, createFakeBuildOutcome(project.getName(), 0, rev0, "trunk", Status.PASS, null, null, null, "http://localhost", true, "Deborah", "messages.build.reason.repository.changes", null, ProjectStatusDto.UpdateType.Full, project.getWorkDir()));
 		
 		checkBuild();
@@ -493,7 +483,7 @@ public class ProjectBuilderTest extends EasyMockTestCase {
 
 		ra.createWorkingCopy(new File("a").getAbsoluteFile(), buildDetailCallback);
 		
-		ra.getChangeLog(rev0, rev1, store.getChangeLogOutputStream("a name", id));
+		ra.getChangeLog(eq(rev0), eq(rev1), (OutputStream) notNull());
 		expectLastCall().andReturn(new ChangeLogDto());
 
 		expect(projectMgr.getBuildTool(project)).andReturn(tool);
@@ -537,7 +527,7 @@ public class ProjectBuilderTest extends EasyMockTestCase {
 
 		ra.updateWorkingCopy(new File("a").getAbsoluteFile(), buildDetailCallback);
 		
-		ra.getChangeLog(rev0, rev1, store.getChangeLogOutputStream("a name", id));
+		ra.getChangeLog(eq(rev0), eq(rev1), (OutputStream)notNull());
 		expectLastCall().andReturn(new ChangeLogDto());
 
 		expect(projectMgr.getBuildTool(project)).andReturn(tool);
@@ -580,7 +570,7 @@ public class ProjectBuilderTest extends EasyMockTestCase {
 
 		ra.createWorkingCopy(new File("a").getAbsoluteFile(), buildDetailCallback);
 		
-		ra.getChangeLog(rev0, rev1, store.getChangeLogOutputStream("a name", id));
+		ra.getChangeLog(eq(rev0), eq(rev1), (OutputStream)notNull());
 		expectLastCall().andReturn(new ChangeLogDto());
 
 		expect(projectMgr.getBuildTool(project)).andReturn(tool);
@@ -639,48 +629,11 @@ public class ProjectBuilderTest extends EasyMockTestCase {
 		
 		checkBuild();
 	}
-	public void testBuildProjectCopiesLogOnFail() throws Exception {
-		project = new ProjectConfigDto();
-		project.setWorkDir("a");
-
-		expect(projectMgr
-		.getRepositoryAdaptor(project)).andReturn(ra);
-
-		expect(ra.getTagName()).andReturn("trunk");
-		expect(ra.getLatestRevision(null)).andReturn(rev0);
-		
-		expect(mgr.getLatestStatus(project.getName())).andReturn(((ProjectStatusDto) null));
-
-		ra.createWorkingCopy(new File("a").getAbsoluteFile(), buildDetailCallback);
-
-		tool = new BuildTool() {
-			public void buildProject(ProjectConfigDto projectConfig, ProjectStatusDto buildStatus, File logFile, BuildDetailCallback buildDetailCallback) throws BuildFailedException, ConfigException {
-				try {
-					OutputStream os = new FileOutputStream(logFile);
-					os.write("hello".getBytes());
-					os.close();
-				} catch (IOException e) {
-				}
-				throw new BuildFailedException("none", "target", 0);
-			}
-		};
-		
-		expect(projectMgr.getBuildTool(project)).andReturn(tool);
-		
-		mgr.targetCompleted(info, project, createFakeBuildOutcome(project.getName(), 0, rev0, "trunk", Status.FAIL, "messages.build.failure.during.target", new String[] {"none", "target"}, null, "http://localhost", true, null, "messages.build.reason.repository.changes", null, ProjectStatusDto.UpdateType.Full, project.getWorkDir()));
-		
-		sleepTime = 0;
-		
-		checkBuild();
-		
-		assertEquals("hello", buildLogOS.toString());
-	}
 	public void testBuildFailsNoTargetAvailable() throws Exception {
 		project = new ProjectConfigDto();
 		project.setWorkDir("a");
 
-		expect(projectMgr
-		.getRepositoryAdaptor(project)).andReturn(ra);
+		expect(projectMgr.getRepositoryAdaptor(project)).andReturn(ra);
 
 		expect(ra.getTagName()).andReturn("trunk");
 		expect(ra.getLatestRevision(null)).andReturn(rev0);
@@ -691,12 +644,6 @@ public class ProjectBuilderTest extends EasyMockTestCase {
 
 		tool = new BuildTool() {
 			public void buildProject(ProjectConfigDto projectConfig, ProjectStatusDto buildStatus, File logFile, BuildDetailCallback buildDetailCallback) throws BuildFailedException, ConfigException {
-				try {
-					OutputStream os = new FileOutputStream(logFile);
-					os.write("hello".getBytes());
-					os.close();
-				} catch (IOException e) {
-				}
 				throw new BuildFailedException("none", null, 0);
 			}
 		};
@@ -708,8 +655,6 @@ public class ProjectBuilderTest extends EasyMockTestCase {
 		sleepTime = 0;
 		
 		checkBuild();
-		
-		assertEquals("hello", buildLogOS.toString());
 	}
 	public void testBuildProjectNullOrBlankWorkDir() throws Exception {
 		project = new ProjectConfigDto();

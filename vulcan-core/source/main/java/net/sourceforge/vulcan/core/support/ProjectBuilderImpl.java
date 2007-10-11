@@ -22,10 +22,8 @@ import static net.sourceforge.vulcan.dto.ProjectStatusDto.UpdateType.Full;
 import static net.sourceforge.vulcan.dto.ProjectStatusDto.UpdateType.Incremental;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
@@ -37,8 +35,8 @@ import net.sourceforge.vulcan.RepositoryAdaptor;
 import net.sourceforge.vulcan.core.BuildDetailCallback;
 import net.sourceforge.vulcan.core.BuildManager;
 import net.sourceforge.vulcan.core.BuildOutcomeStore;
-import net.sourceforge.vulcan.core.ProjectBuilder;
 import net.sourceforge.vulcan.core.ConfigurationStore;
+import net.sourceforge.vulcan.core.ProjectBuilder;
 import net.sourceforge.vulcan.dto.BuildDaemonInfoDto;
 import net.sourceforge.vulcan.dto.BuildMessageDto;
 import net.sourceforge.vulcan.dto.Date;
@@ -54,7 +52,6 @@ import net.sourceforge.vulcan.exception.StoreException;
 import net.sourceforge.vulcan.metadata.SvnRevision;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -146,7 +143,8 @@ public class ProjectBuilderImpl implements ProjectBuilder {
 			}
 		} catch (ProjectUpToDateException e) {
 			buildStatus.setStatus(Status.UP_TO_DATE);
-		} catch (Exception e) {
+		} catch (Throwable e) {
+			e.printStackTrace(System.err);
 			log.error("unexpected error", e);
 			buildStatus.setStatus(Status.ERROR);
 			buildStatus.setMessageKey("messages.build.uncaught.exception");
@@ -289,8 +287,10 @@ public class ProjectBuilderImpl implements ProjectBuilder {
 						!alternateTag && 
 						!previousRevision.equals(buildStatus.getRevision())) {
 					final OutputStream diffOutputStream =
-						configurationStore.getChangeLogOutputStream(currentTarget.getName(), buildStatus.getDiffId());
-						
+						new FileOutputStream(configurationStore.getChangeLog(currentTarget.getName(), buildStatus.getDiffId()));
+					
+					// RepositoryAdaptor instance will close the OutputStream so it
+					// is not closed here in a finally block.
 					buildStatus.setChangeLog(ra.getChangeLog(previousRevision, buildStatus.getRevision(), diffOutputStream));
 				}
 			}
@@ -393,34 +393,11 @@ public class ProjectBuilderImpl implements ProjectBuilder {
 		ra.updateWorkingCopy(new File(workDir).getCanonicalFile(), buildDetailCallback);
 	}
 	protected void invokeBuilder(final ProjectConfigDto target) throws TimeoutException, KilledException, BuildFailedException, ConfigException, IOException, StoreException {
-		final File logFile = createTempFile();
+		final File logFile = configurationStore.getBuildLog(target.getName(), buildStatus.getBuildLogId());
 		
 		final BuildTool tool = projectManager.getBuildTool(target);
 		
-		try {
-			tool.buildProject(target, (ProjectStatusDto) buildStatus.copy(), logFile, buildDetailCallback);
-		} finally {
-			final InputStream is;
-		
-			try {
-				is = new FileInputStream(logFile);
-			} catch (FileNotFoundException e) {
-				return;
-			}
-			
-			final OutputStream os = configurationStore.getBuildLogOutputStream(target.getName(), buildStatus.getBuildLogId());
-			
-			try {
-				IOUtils.copy(is, os);
-			} finally {
-				os.close();
-				is.close();
-				logFile.delete();
-			}
-		}
-	}
-	protected File createTempFile() throws IOException {
-		return File.createTempFile("vulcan-build-log", ".txt");
+		tool.buildProject(target, (ProjectStatusDto) buildStatus.copy(), logFile, buildDetailCallback);
 	}
 	protected final void doPhase(BuildPhase phase, PhaseCallback callback) throws Exception {
 		currentPhase = phase;

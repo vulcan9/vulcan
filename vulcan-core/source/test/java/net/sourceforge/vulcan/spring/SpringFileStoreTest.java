@@ -27,7 +27,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.Writer;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -46,7 +45,6 @@ import net.sourceforge.vulcan.event.Event;
 import net.sourceforge.vulcan.event.EventHandler;
 import net.sourceforge.vulcan.exception.DuplicatePluginIdException;
 import net.sourceforge.vulcan.exception.InvalidPluginLayoutException;
-import net.sourceforge.vulcan.exception.ResourceNotFoundException;
 import net.sourceforge.vulcan.exception.StoreException;
 import net.sourceforge.vulcan.metadata.SvnRevision;
 
@@ -427,69 +425,7 @@ public class SpringFileStoreTest extends EasyMockTestCase {
 		assertEquals(1, plugins[0].getClassPath().length);
 		assertEquals(new File(mockPluginDir, "token.jar").toURI().toURL(), plugins[0].getClassPath()[0]);
 	}
-	public void trainStoreOutcome() throws IOException {
-		beanEncoder.reset();
-		beanEncoder.addBean((String) notNull(), notNull());
-		beanEncoder.write((Writer) notNull());
-	}
 
-	@TrainingMethod("trainStoreOutcome")
-	public void testStoreProjectOutcome() throws Exception {
-		ProjectStatusDto status = new ProjectStatusDto();
-		status.setName("fake");
-		
-		final File dir = new File(projectsDir + File.separator + "fake", "outcomes");
-		
-		assertFalse(dir.exists());
-		assertNull(status.getId());
-		
-		assertEquals(store.storeBuildOutcome(status), status.getId());
-		
-		assertTrue(dir.exists());
-		final File file = new File(dir, status.getId().toString());
-		assertTrue(file.exists());
-	}
-
-	@TrainingMethod("trainStoreOutcome")
-	public void testStoreProjectOutcomeRemovesUnusedBuildLogId() throws Exception {
-		ProjectStatusDto status = new ProjectStatusDto();
-		status.setName("fake");
-		status.setBuildLogId(UUID.randomUUID());
-		
-		final File dir = new File(projectsDir + File.separator + "fake", "outcomes");
-		
-		assertFalse(dir.exists());
-		assertNull(status.getId());
-		
-		assertEquals(store.storeBuildOutcome(status), status.getId());
-		
-		assertNull(status.getBuildLogId());
-		
-		assertTrue(dir.exists());
-		final File file = new File(dir, status.getId().toString());
-		assertTrue(file.exists());
-	}
-	
-	@TrainingMethod("trainStoreOutcome")
-	public void testStoreProjectOutcomeDoesNotOverrideId() throws Exception {
-		ProjectStatusDto status = new ProjectStatusDto();
-		status.setName("fake");
-		final UUID id = store.generateTimeBasedUUID();
-		status.setId(id);
-		
-		Thread.sleep(50);
-		
-		final File dir = new File(projectsDir + File.separator + "fake", "outcomes");
-		
-		assertFalse(dir.exists());
-		
-		assertEquals(id, status.getId());
-		assertEquals(store.storeBuildOutcome(status), status.getId());
-		
-		assertTrue(dir.exists());
-		final File file = new File(dir, status.getId().toString());
-		assertTrue(file.exists());
-	}
 	public void testThrowsOnOutcomeNotFound() throws Exception {
 		try {
 			store.loadBuildOutcome("fake", UUID.randomUUID());
@@ -497,6 +433,7 @@ public class SpringFileStoreTest extends EasyMockTestCase {
 		} catch (StoreException e) {
 		}
 	}
+	
 	public void testGetOutcomeIds() throws Exception {
 		final File dir1 = new File(projectsDir + File.separator + "fake", "outcomes");
 		final File dir2 = new File(projectsDir + File.separator + "fakey", "outcomes");
@@ -544,76 +481,18 @@ public class SpringFileStoreTest extends EasyMockTestCase {
 	}
 	public void testGetChangeLogOutputStream() throws Exception {
 		ProjectStatusDto st1 = store.createBuildOutcome("myProject");
-		Thread.sleep(50);
-		ProjectStatusDto st2 = store.createBuildOutcome("myProject");
 		
-		OutputStream s1 = store.getChangeLogOutputStream("myProject", st1.getDiffId());
-		OutputStream s2 = store.getChangeLogOutputStream("myProject", st2.getDiffId());
-		
-		s1.write("hello".getBytes());
-		s2.write("hi".getBytes());
-		s1.close();
-		s2.close();
-		
-		InputStream is1 = store.getChangeLogInputStream("myProject", st1.getDiffId());
-		InputStream is2 = store.getChangeLogInputStream("myProject", st2.getDiffId());
-		String str1 = IOUtils.toString(is1);
-		is1.close();
-		String str2 = IOUtils.toString(is2);
-		is2.close();
-		
-		assertEquals("hello", str1);
-		assertEquals("hi", str2);
-	}
-	public void testDeletesChangeLogOnEmpty() throws Exception {
-		ProjectStatusDto st1 = store.createBuildOutcome("myProject");
-		
-		OutputStream s1 = store.getChangeLogOutputStream("myProject", st1.getDiffId());
-		
-		s1.close();
-		
-		try {
-			store.getChangeLogInputStream("myProject", st1.getDiffId());
-			fail("expected exception");
-		} catch (ResourceNotFoundException e) {
-		}
-	}
-	public void testGetChangeLogInputStreamThrowsOnNotFound() throws Exception {
-		try {
-			store.getChangeLogInputStream("nonesuch", UUID.randomUUID());
-			fail("expected exception");
-		} catch (ResourceNotFoundException e) {
-		}
+		File f1 = store.getChangeLog("myProject", st1.getDiffId());
+
+		assertTrue(f1.getParentFile().exists());
+		assertFalse(f1.exists());
 	}
 	public void testGetBuildLogOutputStream() throws Exception {
 		ProjectStatusDto st1 = store.createBuildOutcome("myProject");
-		Thread.sleep(50);
-		ProjectStatusDto st2 = store.createBuildOutcome("myProject");
 		
-		OutputStream s1 = store.getBuildLogOutputStream("myProject", st1.getDiffId());
-		OutputStream s2 = store.getBuildLogOutputStream("myProject", st2.getDiffId());
-		
-		s1.write("hello".getBytes());
-		s2.write("hi".getBytes());
-		s1.close();
-		s2.close();
-		
-		InputStream is1 = store.getBuildLogInputStream("myProject", st1.getDiffId());
-		InputStream is2 = store.getBuildLogInputStream("myProject", st2.getDiffId());
-		String str1 = IOUtils.toString(is1);
-		is1.close();
-		String str2 = IOUtils.toString(is2);
-		is2.close();
-		
-		assertEquals("hello", str1);
-		assertEquals("hi", str2);
-	}
-	public void testGetBuildLogInputStreamThrowsOnNotFound() throws Exception {
-		try {
-			store.getBuildLogInputStream("nonesuch", UUID.randomUUID());
-			fail("expected exception");
-		} catch (ResourceNotFoundException e) {
-		}
+		File f1 = store.getBuildLog("myProject", st1.getDiffId());
+		assertTrue(f1.getParentFile().exists());
+		assertFalse(f1.exists());
 	}
 	private void tryToDelete(File file) throws Exception {
 		final long maxSleep = 1000;

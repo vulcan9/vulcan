@@ -18,6 +18,7 @@
  */
 package net.sourceforge.vulcan.web.struts.actions;
 
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Writer;
@@ -166,7 +167,7 @@ public final class ViewProjectStatusAction extends ProjectReportBaseAction {
 		if (status != null) {
 			UUID diffId = status.getDiffId();
 			try {
-				is = configurationStore.getChangeLogInputStream(status.getName(), diffId);
+				is = new FileInputStream(configurationStore.getChangeLog(status.getName(), diffId));
 			} catch (StoreException e) {
 				is = null;
 			}
@@ -180,7 +181,7 @@ public final class ViewProjectStatusAction extends ProjectReportBaseAction {
 		if (status != null) {
 			UUID logId = status.getBuildLogId();
 			try {
-				is = configurationStore.getBuildLogInputStream(status.getName(), logId);
+				is = new FileInputStream(configurationStore.getBuildLog(status.getName(), logId));
 			} catch (StoreException e) {
 				is = null;
 			}
