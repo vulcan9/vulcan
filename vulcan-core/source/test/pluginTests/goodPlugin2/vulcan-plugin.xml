@@ -11,7 +11,7 @@
 	<bean id="messageSource" class="org.springframework.context.support.ResourceBundleMessageSource">
 		<property name="basenames">
 			<list>
-				<value>plugin</value>
+				<value>goodPlugin2</value>
 			</list>
 		</property>
 	</bean>
