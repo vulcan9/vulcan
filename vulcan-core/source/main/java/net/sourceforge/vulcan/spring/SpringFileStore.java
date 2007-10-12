@@ -36,6 +36,7 @@ import java.util.UUID;
 import net.sourceforge.vulcan.core.BeanEncoder;
 import net.sourceforge.vulcan.core.ProjectNameChangeListener;
 import net.sourceforge.vulcan.core.support.AbstractFileStore;
+import net.sourceforge.vulcan.core.support.UUIDUtils;
 import net.sourceforge.vulcan.dto.ProjectStatusDto;
 import net.sourceforge.vulcan.dto.StateManagerConfigDto;
 import net.sourceforge.vulcan.event.WarningEvent;
@@ -44,7 +45,6 @@ import net.sourceforge.vulcan.metadata.SvnRevision;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
-import org.safehaus.uuid.UUIDGenerator;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
@@ -171,7 +171,7 @@ public class SpringFileStore extends AbstractFileStore implements BeanFactoryAwa
 	public ProjectStatusDto createBuildOutcome(String projectName) {
 		final ProjectStatusDto status = new ProjectStatusDto();
 		
-		final UUID id = generateTimeBasedUUID();
+		final UUID id = UUIDUtils.generateTimeBasedUUID();
 		
 		status.setName(projectName);
 		status.setId(id);
@@ -257,9 +257,6 @@ public class SpringFileStore extends AbstractFileStore implements BeanFactoryAwa
 	}
 	public void setBeanEncoder(BeanEncoder beanEncoder) {
 		this.beanEncoder = beanEncoder;
-	}
-	UUID generateTimeBasedUUID() {
-		return UUID.fromString(UUIDGenerator.getInstance().generateTimeBasedUUID().toString());
 	}
 	Resource getConfigurationResource() throws StoreException {
 		final File config = getConfigFile();

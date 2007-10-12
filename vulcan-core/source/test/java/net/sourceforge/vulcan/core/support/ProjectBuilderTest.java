@@ -160,13 +160,6 @@ public class ProjectBuilderTest extends EasyMockTestCase {
 	
 	StoreStub store = new StoreStub(null) {
 		@Override
-		public ProjectStatusDto createBuildOutcome(String projectName) {
-			final ProjectStatusDto dto = super.createBuildOutcome(projectName);
-			dto.setId(id);
-			dto.setDiffId(id);
-			return dto;
-		}
-		@Override
 		public File getBuildLog(String projectName, UUID diffId)
 				throws StoreException {
 			return logFile;
@@ -189,6 +182,8 @@ public class ProjectBuilderTest extends EasyMockTestCase {
 	@Override
 	public void setUp() throws Exception {
 		checkOrder(false);
+		
+		UUIDUtils.setForcedUUID(id);
 		
 		builder.setConfigurationStore(store);
 		builder.setBuildOutcomeStore(store);
@@ -217,6 +212,7 @@ public class ProjectBuilderTest extends EasyMockTestCase {
 		buildToolStatus.setTagName("trunk");
 		buildToolStatus.setId(id);
 		buildToolStatus.setDiffId(id);
+		buildToolStatus.setBuildLogId(id);
 		buildToolStatus.setRepositoryUrl("http://localhost");
 		buildToolStatus.setErrors(new ArrayList<BuildMessageDto>());
 		buildToolStatus.setWarnings(new ArrayList<BuildMessageDto>());
@@ -512,8 +508,7 @@ public class ProjectBuilderTest extends EasyMockTestCase {
 		project.setWorkDir("a");
 		project.setUpdateStrategy(ProjectConfigDto.UpdateStrategy.IncrementalAlways);
 		
-		expect(projectMgr
-		.getRepositoryAdaptor(project)).andReturn(ra);
+		expect(projectMgr.getRepositoryAdaptor(project)).andReturn(ra);
 
 		expect(ra.getTagName()).andReturn("trunk");
 		expect(ra.getLatestRevision(rev0)).andReturn(rev1);
@@ -920,6 +915,7 @@ public class ProjectBuilderTest extends EasyMockTestCase {
 		dto.setBuildNumber(buildNumber);
 		dto.setId(id);
 		dto.setDiffId(id);
+		dto.setBuildLogId(id);
 		dto.setName(name);
 		dto.setRevision(rev);
 		dto.setStatus(status);

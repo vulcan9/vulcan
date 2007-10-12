@@ -34,7 +34,6 @@ import net.sourceforge.vulcan.dto.ChangeLogDto;
 import net.sourceforge.vulcan.dto.ChangeSetDto;
 import net.sourceforge.vulcan.dto.Date;
 import net.sourceforge.vulcan.dto.MetricDto;
-import net.sourceforge.vulcan.dto.ProjectStatusDto;
 import net.sourceforge.vulcan.dto.RevisionTokenDto;
 import net.sourceforge.vulcan.dto.TestFailureDto;
 import net.sourceforge.vulcan.dto.ProjectStatusDto.Status;
@@ -199,14 +198,6 @@ public class JdbcBuildOutcomeStoreTest extends TestCase {
 		outcome.setBuildReasonArgs(new Object[] {"a", "b", "c", "d"});
 		
 		assertPersistence();
-	}
-	
-	public void testCreateBuildOutcomeGeneratesTimeBasedUUID() throws Exception {
-		final ProjectStatusDto dto = store.createBuildOutcome("foo");
-		
-		assertEquals("foo", dto.getName());
-		assertNotNull(dto.getId());
-		assertEquals(1, dto.getId().version());
 	}
 	
 	public void testGetBuildOutcomeIds() throws Exception {

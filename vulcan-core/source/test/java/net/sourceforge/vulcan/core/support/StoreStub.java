@@ -88,13 +88,6 @@ public class StoreStub implements ConfigurationStore, BuildOutcomeStore {
 	public Map<String, List<UUID>> getBuildOutcomeIDs() {
 		return new HashMap<String, List<UUID>>();
 	}
-	public ProjectStatusDto createBuildOutcome(String projectName) {
-		ProjectStatusDto dto = new ProjectStatusDto();
-		dto.setName(projectName);
-		dto.setId(UUID.randomUUID());
-		dto.setDiffId(dto.getId());
-		return dto;
-	}
 	public File getBuildLog(String projectName, UUID diffId)
 			throws StoreException {
 		return null;
