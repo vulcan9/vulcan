@@ -27,6 +27,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.TimeoutException;
 
 import net.sourceforge.vulcan.BuildTool;
@@ -143,8 +144,7 @@ public class ProjectBuilderImpl implements ProjectBuilder {
 			}
 		} catch (ProjectUpToDateException e) {
 			buildStatus.setStatus(Status.UP_TO_DATE);
-		} catch (Throwable e) {
-			e.printStackTrace(System.err);
+		} catch (Exception e) {
 			log.error("unexpected error", e);
 			buildStatus.setStatus(Status.ERROR);
 			buildStatus.setMessageKey("messages.build.uncaught.exception");
@@ -229,7 +229,7 @@ public class ProjectBuilderImpl implements ProjectBuilder {
 		this.deleteFailureSleepTime = deleteFailureSleepTime;
 	}
 	protected ProjectStatusDto createBuildStatus(ProjectConfigDto currentTarget) {
-		final ProjectStatusDto status = buildOutcomeStore.createBuildOutcome(currentTarget.getName());
+		final ProjectStatusDto status = createBuildOutcome(currentTarget.getName());
 		
 		if (previousStatus == null || previousStatus.getBuildNumber() == null) {
 			status.setBuildNumber(0);
@@ -246,6 +246,17 @@ public class ProjectBuilderImpl implements ProjectBuilder {
 		status.setWarnings(warnings);
 		
 		return status;
+	}
+	protected ProjectStatusDto createBuildOutcome(String projectName) {
+		final ProjectStatusDto dto = new ProjectStatusDto();
+		final UUID id = UUIDUtils.generateTimeBasedUUID();
+		
+		dto.setName(projectName);
+		dto.setId(id);
+		dto.setBuildLogId(id);
+		dto.setDiffId(id);
+		
+		return dto;
 	}
 	protected void buildProject(final ProjectConfigDto currentTarget) throws Exception {
 		if (StringUtils.isBlank(currentTarget.getWorkDir())) {
@@ -420,6 +431,7 @@ public class ProjectBuilderImpl implements ProjectBuilder {
 			throw new KilledException();
 		}
 	}
+	
 	protected interface PhaseCallback {
 		void execute() throws Exception;
 	}

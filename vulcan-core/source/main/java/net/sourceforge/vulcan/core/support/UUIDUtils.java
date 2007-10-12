@@ -1,6 +1,6 @@
 /*
  * Vulcan Build Manager
- * Copyright (C) 2005-2007 Chris Eldredge
+ * Copyright (C) 2005-2006 Chris Eldredge
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,32 +16,27 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-package net.sourceforge.vulcan.core;
+package net.sourceforge.vulcan.core.support;
 
-import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
-import org.springframework.transaction.annotation.Transactional;
-
-import net.sourceforge.vulcan.dto.BuildOutcomeQueryDto;
-import net.sourceforge.vulcan.dto.ProjectStatusDto;
-import net.sourceforge.vulcan.exception.StoreException;
 import net.sourceforge.vulcan.metadata.SvnRevision;
 
-@Transactional(readOnly=true)
+import org.safehaus.uuid.UUIDGenerator;
+
 @SvnRevision(id="$Id$", url="$HeadURL$")
-public interface BuildOutcomeStore {
+public abstract class UUIDUtils {
+	public static UUID forcedUUID;
 	
-	@Transactional(readOnly=false, rollbackFor=StoreException.class)
-	UUID storeBuildOutcome(ProjectStatusDto outcome) throws StoreException;
-	
-	@Transactional(readOnly=true)
-	ProjectStatusDto loadBuildOutcome(UUID id) throws StoreException;
-	
-	@Transactional(readOnly=true)
-	List<ProjectStatusDto> loadBuildSummaries(BuildOutcomeQueryDto query);
-	
-	@Transactional(readOnly=true)
-	Map<String, List<UUID>> getBuildOutcomeIDs();
+	public static UUID generateTimeBasedUUID() {
+		if (forcedUUID != null) {
+			return forcedUUID;
+		}
+		
+		return UUID.fromString(UUIDGenerator.getInstance().generateTimeBasedUUID().toString());
+	}
+
+	public static void setForcedUUID(UUID forcedUUID) {
+		UUIDUtils.forcedUUID = forcedUUID;
+	}
 }

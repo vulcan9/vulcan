@@ -18,20 +18,20 @@
  */
 package net.sourceforge.vulcan.spring.jdbc;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
-import java.io.IOException;
-import java.io.InputStream;
-
 import javax.sql.DataSource;
 
 import net.sourceforge.vulcan.core.BuildOutcomeStore;
 import net.sourceforge.vulcan.core.ConfigurationStore;
 import net.sourceforge.vulcan.core.ProjectNameChangeListener;
+import net.sourceforge.vulcan.core.support.UUIDUtils;
 import net.sourceforge.vulcan.dto.BuildOutcomeQueryDto;
 import net.sourceforge.vulcan.dto.ProjectStatusDto;
 import net.sourceforge.vulcan.exception.StoreException;
@@ -40,7 +40,6 @@ import net.sourceforge.vulcan.metadata.SvnRevision;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.safehaus.uuid.UUIDGenerator;
 import org.springframework.core.io.Resource;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -104,18 +103,6 @@ public class JdbcBuildOutcomeStore implements BuildOutcomeStore, ProjectNameChan
 		}
 	}
 	
-	public ProjectStatusDto createBuildOutcome(String projectName) {
-		final ProjectStatusDto dto = new ProjectStatusDto();
-		final UUID id = generateTimeBasedUUID();
-		
-		dto.setName(projectName);
-		dto.setId(id);
-		dto.setBuildLogId(id);
-		dto.setDiffId(id);
-		
-		return dto;
-	}
-
 	public Map<String, List<UUID>> getBuildOutcomeIDs() {
 		final BuildIdMapQuery query = new BuildIdMapQuery(dataSource);
 		
@@ -196,7 +183,7 @@ public class JdbcBuildOutcomeStore implements BuildOutcomeStore, ProjectNameChan
 		}
 		
 		if (outcome.getId() == null) {
-			outcome.setId(generateTimeBasedUUID());
+			outcome.setId(UUIDUtils.generateTimeBasedUUID());
 		}
 		
 		buildInserter.insert(outcome);
@@ -255,9 +242,5 @@ public class JdbcBuildOutcomeStore implements BuildOutcomeStore, ProjectNameChan
 		}
 		
 		jdbcTemplate.execute(script);
-	}
-
-	UUID generateTimeBasedUUID() {
-		return UUID.fromString(UUIDGenerator.getInstance().generateTimeBasedUUID().toString());
 	}
 }
