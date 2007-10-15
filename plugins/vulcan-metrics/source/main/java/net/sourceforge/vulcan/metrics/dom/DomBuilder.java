@@ -55,7 +55,7 @@ public class DomBuilder {
 
 			merge(xmlDoc);
 		} catch (Exception e) {
-			warn(e); 
+			warn(e, xmlFile);
 		}
 	}
 	
@@ -68,8 +68,8 @@ public class DomBuilder {
 		DomBuilder.log = log;
 	}
 	
-	private void warn(Exception e) {
-		log.error("error", e);
+	private void warn(Exception e, File file) {
+		log.error("Failed to merge " + file.getAbsolutePath() + ": " + e.getClass().getName() + ": " + e.getMessage());
 	}
 
 	/**
