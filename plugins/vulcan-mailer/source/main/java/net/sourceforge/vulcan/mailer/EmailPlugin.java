@@ -27,10 +27,12 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 
 import javax.mail.MessagingException;
 import javax.mail.Session;
@@ -41,6 +43,7 @@ import javax.xml.transform.TransformerException;
 
 import net.sourceforge.vulcan.core.ProjectDomBuilder;
 import net.sourceforge.vulcan.core.ProjectNameChangeListener;
+import net.sourceforge.vulcan.dto.ChangeSetDto;
 import net.sourceforge.vulcan.dto.PluginConfigDto;
 import net.sourceforge.vulcan.dto.ProjectConfigDto;
 import net.sourceforge.vulcan.dto.ProjectStatusDto;
@@ -56,6 +59,7 @@ import net.sourceforge.vulcan.mailer.dto.ProfileDto;
 import net.sourceforge.vulcan.mailer.dto.ProfileDto.Policy;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jdom.DocType;
 import org.jdom.Document;
@@ -118,9 +122,9 @@ public class EmailPlugin implements
 	}
 	public synchronized void onBuildCompleted(BuildCompletedEvent event) {
 		final ProjectStatusDto status = event.getStatus();
-		
-		final Map<Locale, List<String>> subscribers = getSubscribedAddresses(status.getName(), status.getStatus(), status.isStatusChanged());
-		
+
+		final Map<Locale, List<String>> subscribers = getSubscribedAddresses(status);
+
 		if (mailSession == null || subscribers == null) {
 			return;
 		}
@@ -180,14 +184,14 @@ public class EmailPlugin implements
 	void sendMessage(MimeMessage message) throws AddressException, MessagingException {
 		Transport.send(message);
 	}
-	Map<Locale, List<String>> getSubscribedAddresses(String projectName, Status status, boolean statusChanged) {
-		final List<ProfileDto> profiles = this.subscribers.get(projectName);
-		
+	Map<Locale, List<String>> getSubscribedAddresses(ProjectStatusDto status) {
+		final List<ProfileDto> profiles = this.subscribers.get(status.getName());
+
 		if (profiles != null) {
 			final Map<Locale, List<String>> map = new HashMap<Locale, List<String>>();
 			
 			for (ProfileDto profile : profiles) {
-				if (matchPolicy(status, profile, statusChanged)) {
+				if (matchPolicy(status.getStatus(), profile, status.isStatusChanged())) {
 					final Locale locale;
 					
 					if (StringUtils.isBlank(profile.getLocale())) {
@@ -205,7 +209,9 @@ public class EmailPlugin implements
 						map.put(locale, addresses);
 					}
 					
-					for (String addr : profile.getEmailAddresses()) {
+					List<String> addressList = getEmailAddresses(status, profile);
+
+					for (String addr : addressList) {
 						final String trimmed = addr.trim();
 						if (trimmed.length() > 0) {
 							addresses.add(trimmed);
@@ -223,6 +229,39 @@ public class EmailPlugin implements
 		}
 		return null;
 	}
+
+	protected List<String> getEmailAddresses(ProjectStatusDto status, ProfileDto profile) {
+		if(profile.isOnlyEmailChangeAuthors()) {
+			List<ChangeSetDto> changeSets = status.getChangeLog().getChangeSets();
+			Map<String, String> map = getChangeAuthorEmailMap();
+
+			Set<String> addresses = new LinkedHashSet<String>();
+			String[] profileAddresses = profile.getEmailAddresses();
+			for (ChangeSetDto changeSet : changeSets) {
+				String author = changeSet.getAuthor().trim();
+				if(map.containsKey(author) && ArrayUtils.contains(profileAddresses, map.get(author))) {
+					addresses.add(map.get(author));
+				}
+			}
+			return new ArrayList<String>(addresses);
+		} else {
+			return Arrays.asList(profile.getEmailAddresses());
+		}
+	}
+
+	/*
+	 * TODO: we need some validation for the mapping strings
+	 */
+	protected Map<String, String> getChangeAuthorEmailMap() {
+		String[] mappings = config.getRepositoryEmailMappings();
+		Map<String, String> map = new HashMap<String, String>();
+		for (String mapping : mappings) {
+			String[] keyValue = mapping.trim().split("=");
+			map.put(keyValue[0], keyValue[1]);
+		}
+		return map;
+	}
+
 	private void sendMessages(BuildCompletedEvent event, final ProjectConfigDto projectConfig, final Map<Locale, List<String>> subscribers) {
 		for (Map.Entry<Locale, List<String>> ent : subscribers.entrySet()) {
 			try {
