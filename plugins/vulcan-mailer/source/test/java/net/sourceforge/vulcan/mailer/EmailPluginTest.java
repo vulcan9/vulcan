@@ -18,11 +18,14 @@
  */
 package net.sourceforge.vulcan.mailer;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
 import junit.framework.TestCase;
+import net.sourceforge.vulcan.dto.ChangeLogDto;
+import net.sourceforge.vulcan.dto.ChangeSetDto;
 import net.sourceforge.vulcan.dto.ProjectStatusDto;
 import net.sourceforge.vulcan.mailer.dto.ConfigDto;
 import net.sourceforge.vulcan.mailer.dto.ProfileDto;
@@ -68,32 +71,205 @@ public class EmailPluginTest extends TestCase {
 		assertEquals(2, plugin.subscribers.get("b").size());
 		assertEquals(1, plugin.subscribers.get("c").size());
 	}
-	public void testGetEmailAddresses() throws Exception {
-		Map<Locale, List<String>> all = plugin.getSubscribedAddresses("b", ProjectStatusDto.Status.PASS, false);
+	public void testSubscribedAddresses() throws Exception {
+		ProjectStatusDto status = new ProjectStatusDto();
+		status.setName("b");
+		status.setStatus(ProjectStatusDto.Status.PASS);
+		status.setStatusChanged(false);
+
+		Map<Locale, List<String>> all = plugin.getSubscribedAddresses(status);
 		assertNotNull(all);
 		assertEquals(1, all.size());
 		assertNotNull(all.get(null));
 		assertEquals(1, all.get(null).size());
 
-		all = plugin.getSubscribedAddresses("b", ProjectStatusDto.Status.FAIL, false);
+		status.setStatus(ProjectStatusDto.Status.FAIL);
+		all = plugin.getSubscribedAddresses(status);
 		assertNotNull(all);
 		assertEquals(3, all.get(null).size());
 	}
-	public void testGetEmailAddressesTruncatesBlank() throws Exception {
-		assertNull(plugin.getSubscribedAddresses("nonesuch", ProjectStatusDto.Status.PASS, false));
-		final Map<Locale, List<String>> all = plugin.getSubscribedAddresses("d", ProjectStatusDto.Status.PASS, false);
+	public void testGetSubscribedAddressesTruncatesBlank() throws Exception {
+		ProjectStatusDto status = new ProjectStatusDto();
+		status.setName("nonesuch");
+		status.setStatus(ProjectStatusDto.Status.PASS);
+		status.setStatusChanged(false);
+
+		assertNull(plugin.getSubscribedAddresses(status));
+
+		status.setName("d");
+		final Map<Locale, List<String>> all = plugin.getSubscribedAddresses(status);
 		assertNull(all);
 	}
 	public void testOnlyOnChange() throws Exception {
 		profiles[1].setOnlyOnChange(true);
 		plugin.setConfiguration(config);
-		
-		Map<Locale, List<String>> all = plugin.getSubscribedAddresses("c", ProjectStatusDto.Status.FAIL, false);
+
+		ProjectStatusDto status = new ProjectStatusDto();
+		status.setName("c");
+		status.setStatus(ProjectStatusDto.Status.FAIL);
+		status.setStatusChanged(false);
+
+		Map<Locale, List<String>> all = plugin.getSubscribedAddresses(status);
 		assertNull(all);
 
-		all = plugin.getSubscribedAddresses("c", ProjectStatusDto.Status.FAIL, true);
+		status.setStatusChanged(true);
+		all = plugin.getSubscribedAddresses(status);
 		assertNotNull(all);
 		assertEquals(1, all.size());
 		assertEquals(2, all.get(null).size());
+	}
+
+	public void testGetEmailAddresses0Match() throws Exception {
+		config.setRepositoryEmailMappings(new String[]{"thedude=dude@dudes.com", "thedudette=dudette@dudettes.com", "dog=dog@dog.com"});
+
+		ChangeSetDto changeSetDto = new ChangeSetDto();
+		ChangeSetDto changeSetDto2 = new ChangeSetDto();
+		ChangeSetDto changeSetDto3 = new ChangeSetDto();
+		changeSetDto.setAuthor("thedude "); //just in case of spaces
+		changeSetDto2.setAuthor(" dog"); //just in case of spaces
+		changeSetDto3.setAuthor(" thedudette"); //just in case of spaces
+		ArrayList<ChangeSetDto> changeSets = new ArrayList<ChangeSetDto>();
+		changeSets.add(changeSetDto);
+		changeSets.add(changeSetDto2);
+		changeSets.add(changeSetDto3);
+
+		ChangeLogDto changeLogDto = new ChangeLogDto();
+		changeLogDto.setChangeSets(changeSets);
+
+		ProjectStatusDto statusDto = new ProjectStatusDto();
+		statusDto.setChangeLog(changeLogDto);
+
+		profiles[0].setOnlyEmailChangeAuthors(true);
+		profiles[0].setEmailAddresses(new String[]{"nomatch@dudes.com", "nomatch@dudettes.com", "nomatch@dog.com"});
+		List<String> emailAddresses = plugin.getEmailAddresses(statusDto, profiles[0]);
+
+		assertEquals(0, emailAddresses.size());
+	}
+
+	public void testGetEmailAddresses2Match() throws Exception {
+		config.setRepositoryEmailMappings(new String[]{"thedude=dude@dudes.com", "thedudette=dudette@dudettes.com", "dog=dog@dog.com"});
+
+		ChangeSetDto changeSetDto = new ChangeSetDto();
+		ChangeSetDto changeSetDto2 = new ChangeSetDto();
+		changeSetDto.setAuthor("thedude "); //just in case of spaces
+		changeSetDto2.setAuthor(" dog"); //just in case of spaces
+		ArrayList<ChangeSetDto> changeSets = new ArrayList<ChangeSetDto>();
+		changeSets.add(changeSetDto);
+		changeSets.add(changeSetDto2);
+
+		ChangeLogDto changeLogDto = new ChangeLogDto();
+		changeLogDto.setChangeSets(changeSets);
+
+		ProjectStatusDto statusDto = new ProjectStatusDto();
+		statusDto.setChangeLog(changeLogDto);
+
+		profiles[0].setOnlyEmailChangeAuthors(true);
+		profiles[0].setEmailAddresses(new String[]{"dude@dudes.com", "dudette@dudettes.com", "dog@dog.com"});
+		List<String> emailAddresses = plugin.getEmailAddresses(statusDto, profiles[0]);
+
+		assertEquals(2, emailAddresses.size());
+		assertEquals("dude@dudes.com", emailAddresses.get(0));
+		assertEquals("dog@dog.com", emailAddresses.get(1));
+	}
+
+	public void testGetEmailAddresses3Match() throws Exception {
+		config.setRepositoryEmailMappings(new String[]{"thedude=dude@dudes.com", "thedudette=dudette@dudettes.com", "dog=dog@dog.com"});
+
+		ChangeSetDto changeSetDto = new ChangeSetDto();
+		ChangeSetDto changeSetDto2 = new ChangeSetDto();
+		ChangeSetDto changeSetDto3 = new ChangeSetDto();
+		changeSetDto.setAuthor("thedude "); //just in case of spaces
+		changeSetDto2.setAuthor(" dog"); //just in case of spaces
+		changeSetDto3.setAuthor(" thedudette"); //just in case of spaces
+		ArrayList<ChangeSetDto> changeSets = new ArrayList<ChangeSetDto>();
+		changeSets.add(changeSetDto);
+		changeSets.add(changeSetDto2);
+		changeSets.add(changeSetDto3);
+
+		ChangeLogDto changeLogDto = new ChangeLogDto();
+		changeLogDto.setChangeSets(changeSets);
+
+		ProjectStatusDto statusDto = new ProjectStatusDto();
+		statusDto.setChangeLog(changeLogDto);
+
+		profiles[0].setOnlyEmailChangeAuthors(true);
+		profiles[0].setEmailAddresses(new String[]{"dude@dudes.com", "dudette@dudettes.com", "dog@dog.com"});
+		List<String> emailAddresses = plugin.getEmailAddresses(statusDto, profiles[0]);
+
+		assertEquals(3, emailAddresses.size());
+		assertEquals("dude@dudes.com", emailAddresses.get(0));
+		assertEquals("dog@dog.com", emailAddresses.get(1));
+		assertEquals("dudette@dudettes.com", emailAddresses.get(2));
+	}
+
+	public void testGetEmailAddressesRemovesDuplicateAuthors() throws Exception {
+		config.setRepositoryEmailMappings(new String[]{"thedude=dude@dudes.com", "thedudette=dudette@dudettes.com", "dog=dog@dog.com"});
+
+		ChangeSetDto changeSetDto = new ChangeSetDto();
+		ChangeSetDto changeSetDto2 = new ChangeSetDto();
+		ChangeSetDto changeSetDto3 = new ChangeSetDto();
+		changeSetDto.setAuthor("thedude "); //just in case of spaces
+		changeSetDto2.setAuthor(" dog"); //just in case of spaces
+		changeSetDto3.setAuthor(" thedude"); //just in case of spaces
+		ArrayList<ChangeSetDto> changeSets = new ArrayList<ChangeSetDto>();
+		changeSets.add(changeSetDto);
+		changeSets.add(changeSetDto2);
+		changeSets.add(changeSetDto3);
+
+		ChangeLogDto changeLogDto = new ChangeLogDto();
+		changeLogDto.setChangeSets(changeSets);
+
+		ProjectStatusDto statusDto = new ProjectStatusDto();
+		statusDto.setChangeLog(changeLogDto);
+
+		profiles[0].setOnlyEmailChangeAuthors(true);
+		profiles[0].setEmailAddresses(new String[]{"dude@dudes.com", "dudette@dudettes.com", "dog@dog.com"});
+		List<String> emailAddresses = plugin.getEmailAddresses(statusDto, profiles[0]);
+
+		assertEquals(2, emailAddresses.size());
+		assertEquals("dude@dudes.com", emailAddresses.get(0));
+		assertEquals("dog@dog.com", emailAddresses.get(1));
+	}
+
+	public void testGetEmailAddressesNoRepoMappings() throws Exception {
+		ChangeSetDto changeSetDto = new ChangeSetDto();
+		ChangeSetDto changeSetDto2 = new ChangeSetDto();
+		ChangeSetDto changeSetDto3 = new ChangeSetDto();
+		changeSetDto.setAuthor("thedude "); //just in case of spaces
+		changeSetDto2.setAuthor(" dog"); //just in case of spaces
+		changeSetDto3.setAuthor(" thedudette"); //just in case of spaces
+		ArrayList<ChangeSetDto> changeSets = new ArrayList<ChangeSetDto>();
+		changeSets.add(changeSetDto);
+		changeSets.add(changeSetDto2);
+		changeSets.add(changeSetDto3);
+
+		ChangeLogDto changeLogDto = new ChangeLogDto();
+		changeLogDto.setChangeSets(changeSets);
+
+		ProjectStatusDto statusDto = new ProjectStatusDto();
+		statusDto.setChangeLog(changeLogDto);
+
+		profiles[0].setOnlyEmailChangeAuthors(true);
+		profiles[0].setEmailAddresses(new String[]{"thedude@dudes.com", "thedudette@dudettes.com", "dog@dog.com"});
+		List<String> emailAddresses = plugin.getEmailAddresses(statusDto, profiles[0]);
+
+		assertEquals(0, emailAddresses.size());
+	}
+
+	public void testGetEmailAddressesOnlyEmailChangeAuthorsIsFalse() throws Exception {
+		ProjectStatusDto statusDto = new ProjectStatusDto();
+
+		profiles[0].setOnlyEmailChangeAuthors(false);
+		profiles[0].setEmailAddresses(new String[]{"thedude@dudes.com", "thedudette@dudettes.com", "dog@dog.com"});
+		List<String> emailAddresses = plugin.getEmailAddresses(statusDto, profiles[0]);
+
+		assertEquals(3, emailAddresses.size());
+	}
+
+	public void testGetChangeAuthorEmailMap() throws Exception {
+		config.setRepositoryEmailMappings(new String[]{"thedude=dude@dudes.com ", " thedudette=dudette@dudettes.com"}); //added some spaces
+		Map<String, String> changeAuthorEmailMap = plugin.getChangeAuthorEmailMap();
+		assertEquals("dude@dudes.com", changeAuthorEmailMap.get("thedude"));
+		assertEquals("dudette@dudettes.com", changeAuthorEmailMap.get("thedudette"));
 	}
 }
