@@ -163,6 +163,9 @@ function createLabel(time) {
 }
 
 function loadChartForm() {
+}
+
+function drawCurrentChart() {
 	var canvas = document.createElement("canvas");
 	
 	canvas.width = 800;
@@ -172,11 +175,9 @@ function loadChartForm() {
 	
 	canvas.id = "myCanvas"
 	
-}
-
-function drawCurrentChart() {
 	var select = document.getElementById("chartSelector");
 	var chartType = select.options[select.selectedIndex].value;
+
 	eval(chartType + "()");
 }
 
