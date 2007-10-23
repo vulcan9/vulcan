@@ -21,12 +21,12 @@ package net.sourceforge.vulcan.web.struts;
 import java.beans.IntrospectionException;
 import java.beans.PropertyDescriptor;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
 import net.sourceforge.vulcan.PluginManager;
 import net.sourceforge.vulcan.dto.BuildToolConfigDto;
-import net.sourceforge.vulcan.dto.Date;
 import net.sourceforge.vulcan.dto.ProjectConfigDto;
 import net.sourceforge.vulcan.dto.RepositoryAdaptorConfigDto;
 import net.sourceforge.vulcan.exception.DuplicateNameException;

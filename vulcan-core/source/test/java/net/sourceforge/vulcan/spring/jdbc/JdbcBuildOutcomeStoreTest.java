@@ -20,6 +20,7 @@ package net.sourceforge.vulcan.spring.jdbc;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -32,7 +33,6 @@ import net.sourceforge.vulcan.core.support.StoreStub;
 import net.sourceforge.vulcan.dto.BuildMessageDto;
 import net.sourceforge.vulcan.dto.ChangeLogDto;
 import net.sourceforge.vulcan.dto.ChangeSetDto;
-import net.sourceforge.vulcan.dto.Date;
 import net.sourceforge.vulcan.dto.MetricDto;
 import net.sourceforge.vulcan.dto.RevisionTokenDto;
 import net.sourceforge.vulcan.dto.TestFailureDto;

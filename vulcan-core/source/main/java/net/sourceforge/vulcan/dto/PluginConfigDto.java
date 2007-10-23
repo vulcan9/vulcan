@@ -41,7 +41,7 @@ public abstract class PluginConfigDto extends BaseDto implements ApplicationCont
 	
 	protected ApplicationContext applicationContext;
 	
-	private Date lastModificationDate;
+	private java.util.Date lastModificationDate;
 	
 	public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
 		this.applicationContext = applicationContext;
@@ -87,11 +87,11 @@ public abstract class PluginConfigDto extends BaseDto implements ApplicationCont
 		return null;
 	}
 	
-	public final Date getLastModificationDate() {
+	public final java.util.Date getLastModificationDate() {
 		return lastModificationDate;
 	}
 	
-	public final void setLastModificationDate(Date lastModificationDate) {
+	public final void setLastModificationDate(java.util.Date lastModificationDate) {
 		this.lastModificationDate = lastModificationDate;
 	}
 	

@@ -232,7 +232,11 @@ public final class SpringBeanXmlEncoder implements BeanEncoder {
 		
 		final Element valueNode = new Element("value");
 
-		final PropertyEditor editor = PropertyEditorManager.findEditor(object.getClass());
+		PropertyEditor editor = PropertyEditorManager.findEditor(object.getClass());
+
+		if (editor == null && object instanceof Date) {
+			editor = new DateEditor();
+		}
 		
 		if (editor != null) {
 			editor.setValue(object);

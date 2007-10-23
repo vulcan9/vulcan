@@ -18,6 +18,7 @@
  */
 package net.sourceforge.vulcan.dto;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -42,8 +43,8 @@ public class ProjectStatusDto extends NameDto {
 	private Object[] messageArgs;
 	private String buildReasonKey;
 	private Object[] buildReasonArgs;
-	private Date startDate;
-	private Date completionDate;
+	private java.util.Date startDate;
+	private java.util.Date completionDate;
 	private RevisionTokenDto revision;
 	private ChangeLogDto changeLog;
 
@@ -135,16 +136,16 @@ public class ProjectStatusDto extends NameDto {
 	public void setStatus(Status status) {
 		this.status = status;
 	}
-	public Date getStartDate() {
+	public java.util.Date getStartDate() {
 		return startDate;
 	}
-	public void setStartDate(Date startDate) {
+	public void setStartDate(java.util.Date startDate) {
 		this.startDate = startDate;
 	}
-	public Date getCompletionDate() {
+	public java.util.Date getCompletionDate() {
 		return completionDate;
 	}
-	public void setCompletionDate(Date completionDate) {
+	public void setCompletionDate(java.util.Date completionDate) {
 		this.completionDate = completionDate;
 	}
 	public RevisionTokenDto getRevision() {

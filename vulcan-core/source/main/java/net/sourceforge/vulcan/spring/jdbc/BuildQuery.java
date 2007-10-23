@@ -18,17 +18,16 @@
  */
 package net.sourceforge.vulcan.spring.jdbc;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
-
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.UUID;
 
 import javax.sql.DataSource;
 
-import net.sourceforge.vulcan.dto.Date;
 import net.sourceforge.vulcan.dto.ProjectStatusDto;
 import net.sourceforge.vulcan.dto.RevisionTokenDto;
 

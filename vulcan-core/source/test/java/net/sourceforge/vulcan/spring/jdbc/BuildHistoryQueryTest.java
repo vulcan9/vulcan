@@ -19,14 +19,14 @@
 package net.sourceforge.vulcan.spring.jdbc;
 
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.springframework.jdbc.datasource.DriverManagerDataSource;
-
 import junit.framework.TestCase;
 import net.sourceforge.vulcan.dto.BuildOutcomeQueryDto;
-import net.sourceforge.vulcan.dto.Date;
+
+import org.springframework.jdbc.datasource.DriverManagerDataSource;
 
 public class BuildHistoryQueryTest extends TestCase {
 	BuildOutcomeQueryDto dto = new BuildOutcomeQueryDto();

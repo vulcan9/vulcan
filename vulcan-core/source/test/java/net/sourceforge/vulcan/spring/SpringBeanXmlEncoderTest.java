@@ -18,22 +18,21 @@
  */
 package net.sourceforge.vulcan.spring;
 
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.OutputStreamWriter;
-import java.io.Writer;
-
 import junit.framework.TestCase;
-import net.sourceforge.vulcan.dto.Date;
 import net.sourceforge.vulcan.metadata.SvnRevision;
 import net.sourceforge.vulcan.metadata.Transient;
 import net.sourceforge.vulcan.spring.SpringBeanXmlEncoderTest.Bean.Status;

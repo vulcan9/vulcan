@@ -21,13 +21,13 @@ package net.sourceforge.vulcan.core.support;
 import java.beans.PropertyDescriptor;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
 import net.sourceforge.vulcan.core.ProjectNameChangeListener;
 import net.sourceforge.vulcan.dto.BuildManagerConfigDto;
 import net.sourceforge.vulcan.dto.BuildToolConfigDto;
-import net.sourceforge.vulcan.dto.Date;
 import net.sourceforge.vulcan.dto.PluginConfigDto;
 import net.sourceforge.vulcan.dto.PluginProfileDto;
 import net.sourceforge.vulcan.dto.PluginProfileDtoStub;

@@ -146,7 +146,7 @@ public class WorkingCopyUpdateExpertTest extends TestCase {
 		config.setRepositoryTagName("trunk");
 		previousStatus.setStatus(PASS);
 		previousStatus.setTagName("trunk");
-		previousStatus.setCompletionDate(new net.sourceforge.vulcan.dto.Date(day1.getTime()));
+		previousStatus.setCompletionDate(new Date(day1.getTime()));
 		
 		assertEquals(UpdateType.Full, expert.determineUpdateStrategy(config, previousStatus));
 	}
@@ -158,7 +158,7 @@ public class WorkingCopyUpdateExpertTest extends TestCase {
 		config.setRepositoryTagName("trunk");
 		previousStatus.setStatus(PASS);
 		previousStatus.setTagName("trunk");
-		previousStatus.setCompletionDate(new net.sourceforge.vulcan.dto.Date(day2.getTime()));
+		previousStatus.setCompletionDate(new Date(day2.getTime()));
 		
 		assertEquals(UpdateType.Incremental, expert.determineUpdateStrategy(config, previousStatus));
 	}

@@ -18,18 +18,17 @@
  */
 package net.sourceforge.vulcan.spring.jdbc;
 
-import java.util.List;
-
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.sql.Types;
+import java.util.Date;
+import java.util.List;
 
 import javax.sql.DataSource;
 
 import net.sourceforge.vulcan.dto.ChangeLogDto;
 import net.sourceforge.vulcan.dto.ChangeSetDto;
-import net.sourceforge.vulcan.dto.Date;
 
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.SqlParameter;
