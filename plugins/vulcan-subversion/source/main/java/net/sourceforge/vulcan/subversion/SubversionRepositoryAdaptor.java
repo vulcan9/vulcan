@@ -18,7 +18,6 @@
  */
 package net.sourceforge.vulcan.subversion;
 
-
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -27,6 +26,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -38,7 +38,6 @@ import net.sourceforge.vulcan.StateManager;
 import net.sourceforge.vulcan.core.BuildDetailCallback;
 import net.sourceforge.vulcan.dto.ChangeLogDto;
 import net.sourceforge.vulcan.dto.ChangeSetDto;
-import net.sourceforge.vulcan.dto.Date;
 import net.sourceforge.vulcan.dto.ProjectConfigDto;
 import net.sourceforge.vulcan.dto.RepositoryTagDto;
 import net.sourceforge.vulcan.dto.RevisionTokenDto;

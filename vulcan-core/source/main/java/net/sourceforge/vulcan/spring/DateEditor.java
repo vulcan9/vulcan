@@ -16,17 +16,26 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-package net.sourceforge.vulcan.dto;
+package net.sourceforge.vulcan.spring;
+
+import java.beans.PropertyEditorSupport;
+import java.util.Date;
 
 import net.sourceforge.vulcan.metadata.SvnRevision;
 
 @SvnRevision(id="$Id$", url="$HeadURL$")
-public class Date extends java.util.Date {
-	public Date() {
-		super();
+class DateEditor extends PropertyEditorSupport {
+	@Override
+	public void setAsText(String text) throws IllegalArgumentException {
+		setValue(new Date(Long.parseLong(text)));
 	}
-
-	public Date(long date) {
-		super(date);
+	@Override
+	public String getAsText() {
+		final Date date = (Date) getValue();
+		
+		if (date != null) {
+			return Long.toString(date.getTime());
+		}
+		return null;
 	}
 }

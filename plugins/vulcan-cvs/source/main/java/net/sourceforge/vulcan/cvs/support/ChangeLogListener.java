@@ -21,12 +21,12 @@ package net.sourceforge.vulcan.cvs.support;
 import static net.sourceforge.vulcan.cvs.support.CvsDateFormat.parseDate;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import net.sourceforge.vulcan.dto.ChangeSetDto;
-import net.sourceforge.vulcan.dto.Date;
 
 import org.netbeans.lib.cvsclient.command.log.LogInformation;
 

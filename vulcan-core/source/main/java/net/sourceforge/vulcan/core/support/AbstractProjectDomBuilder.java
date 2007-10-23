@@ -21,6 +21,7 @@ package net.sourceforge.vulcan.core.support;
 import static org.apache.commons.lang.StringUtils.isNotBlank;
 
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -46,7 +47,6 @@ import net.sourceforge.vulcan.core.ProjectDomBuilder;
 import net.sourceforge.vulcan.dto.BuildMessageDto;
 import net.sourceforge.vulcan.dto.ChangeLogDto;
 import net.sourceforge.vulcan.dto.ChangeSetDto;
-import net.sourceforge.vulcan.dto.Date;
 import net.sourceforge.vulcan.dto.MetricDto;
 import net.sourceforge.vulcan.dto.ProjectConfigDto;
 import net.sourceforge.vulcan.dto.ProjectStatusDto;

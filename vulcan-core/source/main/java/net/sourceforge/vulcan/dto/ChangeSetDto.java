@@ -24,7 +24,7 @@ import net.sourceforge.vulcan.metadata.SvnRevision;
 public class ChangeSetDto extends BaseDto {
 	private String revisionLabel;
 	private String author;
-	private Date timestamp;
+	private java.util.Date timestamp;
 	private String message;
 	private String[] modifiedPaths;
 	
@@ -64,10 +64,10 @@ public class ChangeSetDto extends BaseDto {
 	public void setRevisionLabel(String revisionLabel) {
 		this.revisionLabel = revisionLabel;
 	}
-	public Date getTimestamp() {
+	public java.util.Date getTimestamp() {
 		return timestamp;
 	}
-	public void setTimestamp(Date timestamp) {
+	public void setTimestamp(java.util.Date timestamp) {
 		this.timestamp = timestamp;
 	}
 }

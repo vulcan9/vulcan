@@ -63,7 +63,7 @@ public class SpringFileStore extends AbstractFileStore implements BeanFactoryAwa
 		final Resource configResource = getConfigurationResource();
 		
 		final XmlBeanFactory beanFactory = new XmlBeanFactory(configResource, this.beanFactory);
-		
+		beanFactory.registerCustomEditor(java.util.Date.class, new DateEditor());
 		return (StateManagerConfigDto) beanFactory.getBean("configuration");
 	}
 	public synchronized void exportConfiguration(OutputStream os) throws IOException, StoreException {

@@ -53,7 +53,7 @@ public class ProjectConfigDto extends NameDto {
 	boolean suppressErrors;
 	boolean suppressWarnings;
 	
-	Date lastModificationDate;
+	java.util.Date lastModificationDate;
 	
 	UpdateStrategy updateStrategy = UpdateStrategy.CleanAlways;
 
@@ -184,10 +184,10 @@ public class ProjectConfigDto extends NameDto {
 	public void setSuppressWarnings(boolean supressWarnings) {
 		this.suppressWarnings = supressWarnings;
 	}
-	public Date getLastModificationDate() {
+	public java.util.Date getLastModificationDate() {
 		return lastModificationDate;
 	}
-	public void setLastModificationDate(Date lastModificationDate) {
+	public void setLastModificationDate(java.util.Date lastModificationDate) {
 		this.lastModificationDate = lastModificationDate;
 	}
 	public UpdateStrategy getUpdateStrategy() {

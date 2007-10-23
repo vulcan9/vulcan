@@ -19,13 +19,13 @@
 package net.sourceforge.vulcan.core.support;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
 import net.sourceforge.vulcan.ProjectManager;
 import net.sourceforge.vulcan.core.BuildManager;
-import net.sourceforge.vulcan.dto.Date;
 import net.sourceforge.vulcan.dto.ProjectConfigDto;
 import net.sourceforge.vulcan.dto.ProjectStatusDto;
 import net.sourceforge.vulcan.dto.RevisionTokenDto;
