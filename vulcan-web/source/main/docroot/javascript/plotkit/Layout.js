@@ -243,13 +243,21 @@ PlotKit.Layout.prototype.hitTest = function(x, y) {
     }
 
     else if (this.style == "pie") {
+        x = 2 * x - 0.5;
         var dist = Math.sqrt((y-0.5)*(y-0.5) + (x-0.5)*(x-0.5));
         if (dist > this.options.pieRadius)
             return null;
 
         // TODO: actually doesn't work if we don't know how the Canvas
         //       lays it out, need to fix!
-        var angle = Math.atan2(y - 0.5, x - 0.5) - Math.PI/2;
+        var angle = 0.0;
+        if (y < 0.5 && x < 0.5) {
+            angle = Math.atan2(y - 0.5, x - 0.5) + 5 * Math.PI/2;
+        }
+        else {
+            angle = Math.atan2(y - 0.5, x - 0.5) + Math.PI/2;
+        }
+            
         for (var i = 0; i < this.slices.length; i++) {
             var slice = this.slices[i];
             if (slice.startAngle < angle && slice.endAngle >= angle)
@@ -286,7 +294,7 @@ PlotKit.Layout.prototype._evaluateLimits = function() {
 
 
     var all = collapse(map(itemgetter(1), items(this.datasets)));
-    if (isNil(this.options.xAxis)) {
+    if (isNil(this.options.xAxis)) { // calc minxval, maxxval from dataset
         if (this.options.xOriginIsZero)
             this.minxval = 0;
         else
@@ -524,6 +532,7 @@ PlotKit.Layout.prototype._evaluateLineCharts = function() {
 
 // Create the pie charts
 PlotKit.Layout.prototype._evaluatePieCharts = function() {
+    var map = PlotKit.Base.map;
     var items = PlotKit.Base.items;
     var sum = MochiKit.Iter.sum;
     var getter = MochiKit.Base.itemgetter;
@@ -677,7 +686,7 @@ PlotKit.Layout.prototype._evaluatePieTicks = function() {
 			if (slice) {
                 if (isNil(label))
                     label = tick.v.toString();
-				label += " (" + formatter(slice.fraction) + ")";
+				label = SPAN(null, label, " (" + formatter(slice.fraction) + ")");
 				this.xticks.push([tick.v, label]);
 			}
 		}

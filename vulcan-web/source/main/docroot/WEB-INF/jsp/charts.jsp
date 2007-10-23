@@ -13,6 +13,11 @@
 <head>
 	<jsp:element name="script">
 		<jsp:attribute name="type">text/javascript</jsp:attribute>
+		<jsp:attribute name="src"><c:url value="/javascript/plotkit/excanvas.js"/></jsp:attribute>
+		<jsp:body/>
+	</jsp:element>
+	<jsp:element name="script">
+		<jsp:attribute name="type">text/javascript</jsp:attribute>
 		<jsp:attribute name="src"><c:url value="/javascript/mochikit/MochiKit.js"/></jsp:attribute>
 		<jsp:body/>
 	</jsp:element>
@@ -38,6 +43,11 @@
 	</jsp:element>
 	<jsp:element name="script">
 		<jsp:attribute name="type">text/javascript</jsp:attribute>
+		<jsp:attribute name="src"><c:url value="/javascript/plotkit/Legend.js"/></jsp:attribute>
+		<jsp:body/>
+	</jsp:element>
+	<jsp:element name="script">
+		<jsp:attribute name="type">text/javascript</jsp:attribute>
 		<jsp:attribute name="src"><c:url value="/javascript/chart.js"/></jsp:attribute>
 		<jsp:body/>
 	</jsp:element>
@@ -47,10 +57,22 @@ window.buildData = ${jsonBuildHistory};
 </script>
 </head>
 <body>
-	<div><canvas id="myCanvas" height="600" width="800"></canvas></div>
 	<div style="margin-top: 1em;">
-		<input type="button" onclick="drawGraph1()" value="Bar Graph 1"/>
-		<input type="button" onclick="drawElapsedBuildTimeGraph()" value="Build Times"/>
+		Chart Type:
+		<select id="chartSelector">
+			<option value="drawElapsedBuildTimeGraph">Elapsed Build Time</option>
+			<option value="drawTotalBuildsGraph">Total Builds</option>
+		</select>
+		<br/>
+		<input type="checkbox" id="chkFullBuilds" checked="checked"/><label for="chkFullBuilds">Full Builds</label>
+		<input type="checkbox" id="chkIncrementalBuilds" checked="checked"/><label for="chkIncrementalBuilds">Incremental Builds</label>
+		<br/>
+		<button id="btnRedraw">Generate</button>
+	</div>
+	<div style="float: left"><canvas id="myCanvas" height="600" width="800"></canvas></div>
+	<div class="chart-legend">
+		<span class="legend-header">Legend</span>
+		<div id="myLegend"/>
 	</div>
 </body>
 </html>
