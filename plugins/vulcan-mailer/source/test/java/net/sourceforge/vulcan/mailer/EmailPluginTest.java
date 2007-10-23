@@ -1,7 +1,7 @@
 /*
  * Vulcan Build Manager
  * Copyright (C) 2005-2006 Chris Eldredge
- * 
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -11,7 +11,7 @@
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License along
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
@@ -33,40 +33,40 @@ import net.sourceforge.vulcan.mailer.dto.ProfileDto;
 public class EmailPluginTest extends TestCase {
 	EmailPlugin plugin = new EmailPlugin();
 	ConfigDto config = new ConfigDto();
-	
+
 	ProfileDto[] profiles = new ProfileDto[] {
 			new ProfileDto(),
 			new ProfileDto(),
 			new ProfileDto()
 		};
-	
+
 	@Override
 	public void setUp() throws Exception {
-		
-		
+
+
 		profiles[0].setPolicy(new ProfileDto.Policy[] {ProfileDto.Policy.ALWAYS});
 		profiles[1].setPolicy(new ProfileDto.Policy[] {ProfileDto.Policy.FAIL});
 		profiles[2].setPolicy(new ProfileDto.Policy[] {ProfileDto.Policy.ALWAYS});
-		
+
 		profiles[0].setProjects(new String[] {"a", "b"});
 		profiles[1].setProjects(new String[] {"c", "b"});
 		profiles[2].setProjects(new String[] {"d"});
-		
+
 		profiles[0].setEmailAddresses(new String[] {"Bugs Bunny <bugs@wb.com>"});
 		profiles[1].setEmailAddresses(new String[] {"Garfield <gman@home.net>", "Snoopy <snoops@example.com>"});
 		profiles[2].setEmailAddresses(new String[] {"", "  ", "\t"});
-		
+
 		config.setProfiles(profiles);
-		
+
 		plugin.setMessageAssembler(new MessageAssembler());
-		
+
 		plugin.setConfiguration(config);
 	}
 	public void testHashes() throws Exception {
 		assertTrue(plugin.subscribers.containsKey("a"));
 		assertTrue(plugin.subscribers.containsKey("b"));
 		assertTrue(plugin.subscribers.containsKey("c"));
-		
+
 		assertEquals(1, plugin.subscribers.get("a").size());
 		assertEquals(2, plugin.subscribers.get("b").size());
 		assertEquals(1, plugin.subscribers.get("c").size());
@@ -264,6 +264,15 @@ public class EmailPluginTest extends TestCase {
 		List<String> emailAddresses = plugin.getEmailAddresses(statusDto, profiles[0]);
 
 		assertEquals(3, emailAddresses.size());
+	}
+
+	public void testGetEmailAddressesChangeLogsIsNull() throws Exception {
+	    ProjectStatusDto statusDto = new ProjectStatusDto();
+
+	    profiles[0].setOnlyEmailChangeAuthors(true);
+	    List<String> emailAddresses = plugin.getEmailAddresses(statusDto, profiles[0]);
+
+	    assertEquals(0, emailAddresses.size());
 	}
 
 	public void testGetChangeAuthorEmailMap() throws Exception {

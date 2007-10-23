@@ -1,7 +1,7 @@
 /*
  * Vulcan Build Manager
  * Copyright (C) 2005-2006 Chris Eldredge
- * 
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -11,7 +11,7 @@
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License along
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
@@ -43,6 +43,7 @@ import javax.xml.transform.TransformerException;
 
 import net.sourceforge.vulcan.core.ProjectDomBuilder;
 import net.sourceforge.vulcan.core.ProjectNameChangeListener;
+import net.sourceforge.vulcan.dto.ChangeLogDto;
 import net.sourceforge.vulcan.dto.ChangeSetDto;
 import net.sourceforge.vulcan.dto.PluginConfigDto;
 import net.sourceforge.vulcan.dto.ProjectConfigDto;
@@ -72,348 +73,363 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.xml.sax.SAXException;
 
-public class EmailPlugin implements 
-		BuildManagerObserverPlugin, ConfigurablePlugin,
-		ProjectNameChangeListener, ApplicationContextAware {
-	ProjectDomBuilder projectDomBuilder;
-	EventHandler eventHandler;
-	MessageAssembler messageAssembler;
-	String	cssLocation;
-	ApplicationContext ctx;
-	
-	ConfigDto config = new ConfigDto();
-	Map<String, List<ProfileDto>> subscribers = new HashMap<String, List<ProfileDto>>();
-	Session mailSession;
-	String cssRules;
-	
-	public String getId() {
-		return ConfigDto.PLUGIN_ID;
-	}
-	public String getName() {
-		return ConfigDto.PLUGIN_NAME;
-	}
-	public PluginConfigDto getConfiguration() {
-		return config;
-	}
-	public synchronized void setConfiguration(PluginConfigDto config) {
-		this.config = (ConfigDto) config;
-		createMailSession();
-		hashProfiles();
-	}
-	public synchronized void init() throws Exception {
-		if (!StringUtils.isBlank(cssLocation)) {
-			InputStream is;
-			
-			try {
-				is = ctx.getResource(cssLocation).getInputStream();
-			} catch (Exception e) {
-				is = ctx.getParent().getResource(cssLocation).getInputStream();
-			}
-			
-			try {
-				cssRules = IOUtils.toString(is);
-			} finally {
-				is.close();
-			}
-		}
-		
-	}
-	public synchronized void destroy() throws Exception {
-	}
-	public synchronized void onBuildCompleted(BuildCompletedEvent event) {
-		final ProjectStatusDto status = event.getStatus();
+public class EmailPlugin implements BuildManagerObserverPlugin, ConfigurablePlugin, ProjectNameChangeListener, ApplicationContextAware {
+    ProjectDomBuilder projectDomBuilder;
+    EventHandler eventHandler;
+    MessageAssembler messageAssembler;
+    String cssLocation;
+    ApplicationContext ctx;
 
-		final Map<Locale, List<String>> subscribers = getSubscribedAddresses(status);
+    ConfigDto config = new ConfigDto();
+    Map<String, List<ProfileDto>> subscribers = new HashMap<String, List<ProfileDto>>();
+    Session mailSession;
+    String cssRules;
 
-		if (mailSession == null || subscribers == null) {
-			return;
-		}
-		
-		final ProjectConfigDto projectConfig = event.getProjectConfig();
-		
-		final ClassLoader prev = Thread.currentThread().getContextClassLoader();
-		
-		try {
-			Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
-			sendMessages(event, projectConfig, subscribers);
-		} finally {
-			Thread.currentThread().setContextClassLoader(prev);
-		}
-			
-	}
-	public synchronized void projectNameChanged(String oldName, String newName) {
-		final ProfileDto[] profiles = config.getProfiles();
-		
-		for (int i=0; i<profiles.length; i++) {
-			final String[] projects = profiles[i].getProjects();
-			for (int j=0; j<projects.length; j++) {
-				if (oldName.equals(projects[j])) {
-					projects[j] = newName;
-				}
-			}
-		}
-		hashProfiles();
-	}
-	public ProjectDomBuilder getProjectDomBuilder() {
-		return projectDomBuilder;
-	}
-	public void setProjectDomBuilder(ProjectDomBuilder projectDomBuilder) {
-		this.projectDomBuilder = projectDomBuilder;
-	}
-	public EventHandler getEventHandler() {
-		return eventHandler;
-	}
-	public void setEventHandler(EventHandler eventHandler) {
-		this.eventHandler = eventHandler;
-	}
-	public MessageAssembler getMessageAssembler() {
-		return messageAssembler;
-	}
-	public void setMessageAssembler(MessageAssembler messageAssembler) {
-		this.messageAssembler = messageAssembler;
-	}
-	public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-		this.ctx = applicationContext;
-	}
-	public String getCssLocation() {
-		return cssLocation;
-	}
-	public void setCssLocation(String cssLocation) {
-		this.cssLocation = cssLocation;
-	}
-	void sendMessage(MimeMessage message) throws AddressException, MessagingException {
-		Transport.send(message);
-	}
-	Map<Locale, List<String>> getSubscribedAddresses(ProjectStatusDto status) {
-		final List<ProfileDto> profiles = this.subscribers.get(status.getName());
+    public String getId() {
+        return ConfigDto.PLUGIN_ID;
+    }
 
-		if (profiles != null) {
-			final Map<Locale, List<String>> map = new HashMap<Locale, List<String>>();
-			
-			for (ProfileDto profile : profiles) {
-				if (matchPolicy(status.getStatus(), profile, status.isStatusChanged())) {
-					final Locale locale;
-					
-					if (StringUtils.isBlank(profile.getLocale())) {
-						locale = null;
-					} else {
-						locale = new Locale(profile.getLocale());
-					}
-					
-					final List<String> addresses;
-					
-					if (map.containsKey(locale)) {
-						addresses = map.get(locale);
-					} else {
-						addresses = new ArrayList<String>();
-						map.put(locale, addresses);
-					}
-					
-					List<String> addressList = getEmailAddresses(status, profile);
+    public String getName() {
+        return ConfigDto.PLUGIN_NAME;
+    }
 
-					for (String addr : addressList) {
-						final String trimmed = addr.trim();
-						if (trimmed.length() > 0) {
-							addresses.add(trimmed);
-						}
-					}
-					
-					if (addresses.isEmpty()) {
-						map.remove(locale);
-					}
-				}
-			}
-			if (map.size() > 0) {
-				return map;
-			}
-		}
-		return null;
-	}
+    public PluginConfigDto getConfiguration() {
+        return config;
+    }
 
-	protected List<String> getEmailAddresses(ProjectStatusDto status, ProfileDto profile) {
-		if(profile.isOnlyEmailChangeAuthors()) {
-			List<ChangeSetDto> changeSets = status.getChangeLog().getChangeSets();
-			Map<String, String> map = getChangeAuthorEmailMap();
+    public synchronized void setConfiguration(PluginConfigDto config) {
+        this.config = (ConfigDto) config;
+        createMailSession();
+        hashProfiles();
+    }
 
-			Set<String> addresses = new LinkedHashSet<String>();
-			String[] profileAddresses = profile.getEmailAddresses();
-			for (ChangeSetDto changeSet : changeSets) {
-				String author = changeSet.getAuthor().trim();
-				if(map.containsKey(author) && ArrayUtils.contains(profileAddresses, map.get(author))) {
-					addresses.add(map.get(author));
-				}
-			}
-			return new ArrayList<String>(addresses);
-		} else {
-			return Arrays.asList(profile.getEmailAddresses());
-		}
-	}
+    public synchronized void init() throws Exception {
+        if (!StringUtils.isBlank(cssLocation)) {
+            InputStream is;
 
-	/*
-	 * TODO: we need some validation for the mapping strings
-	 */
-	protected Map<String, String> getChangeAuthorEmailMap() {
-		String[] mappings = config.getRepositoryEmailMappings();
-		Map<String, String> map = new HashMap<String, String>();
-		for (String mapping : mappings) {
-			String[] keyValue = mapping.trim().split("=");
-			map.put(keyValue[0], keyValue[1]);
-		}
-		return map;
-	}
+            try {
+                is = ctx.getResource(cssLocation).getInputStream();
+            } catch (Exception e) {
+                is = ctx.getParent().getResource(cssLocation).getInputStream();
+            }
 
-	private void sendMessages(BuildCompletedEvent event, final ProjectConfigDto projectConfig, final Map<Locale, List<String>> subscribers) {
-		for (Map.Entry<Locale, List<String>> ent : subscribers.entrySet()) {
-			try {
-				final URL sandboxURL = generateSandboxURL(projectConfig);
-				final URL statusURL = generateStatusURL();
-				URL trackerURL = null;
-				
-				if (StringUtils.isNotBlank(projectConfig.getBugtraqUrl())) {
-					trackerURL = new URL(projectConfig.getBugtraqUrl());
-				}
-				
-				final Document document = projectDomBuilder.createProjectDocument(event.getStatus(), ent.getKey());
-				
-				final String content = 
-					generateXhtml(document, sandboxURL, statusURL, trackerURL, ent.getKey());
-				
-				final MimeMessage message = messageAssembler.constructMessage(
-						StringUtils.join(ent.getValue().iterator(), ","), config, event.getStatus(), content);
-				
-				sendMessage(message);
-			} catch (AddressException e) {
-				eventHandler.reportEvent(
-						new ErrorEvent(this, "errors.address.exception",
-								new Object[] {e.getRef(), e.getMessage()}, e));
-			} catch (MessagingException e) {
-				eventHandler.reportEvent(
-						new ErrorEvent(this, "errors.messaging.exception",
-								new Object[] {e.getMessage()}, e));
-			} catch (Exception e) {
-				eventHandler.reportEvent(
-						new ErrorEvent(this, "errors.exception",
-								new Object[] {e.getMessage()}, e));
-			}
-		}
-	}
-	private boolean matchPolicy(Status status, ProfileDto profile, boolean statusChanged) {
-		final List<Policy> policy = Arrays.asList(profile.getPolicy());
-		
-		if (policy.contains(Policy.ALWAYS)) {
-			return true;
-		}
+            try {
+                cssRules = IOUtils.toString(is);
+            } finally {
+                is.close();
+            }
+        }
 
-		if (profile.isOnlyOnChange() && !statusChanged) {
-			return false;
-		}
-		
-		return policy.contains(Policy.valueOf(status.name()));
-	}
-	private void hashProfiles() {
-		subscribers.clear();
-		for (ProfileDto profile : config.getProfiles()) {
-			for (String projectName : profile.getProjects()) {
-				List<ProfileDto> profiles = this.subscribers.get(projectName);
-				if (profiles == null) {
-					profiles = new ArrayList<ProfileDto>();
-					this.subscribers.put(projectName, profiles);
-				}
-				profiles.add(profile);
-			}
-		}
-	}
-	private void createMailSession() {
-		final String smtpHost = config.getSmtpHost();
-		
-		if (smtpHost != null && smtpHost.length() > 0) {
-			final Properties props = new Properties();
-		
-			props.setProperty("mail.host", smtpHost);
-		
-			mailSession = Session.getInstance(props);
-		} else {
-			mailSession = null;
-		}
-		messageAssembler.setMailSession(mailSession);
-	}
-	private String generateXhtml(Document projectDom, URL projectSiteURL, URL statusURL, URL trackerURL, Locale locale) throws SAXException, IOException, TransformerException, NoSuchTransformFormatException, MalformedURLException {
-		final JDOMResult xhtmlResult = new JDOMResult();
-		
-		projectDomBuilder.transform(
-				projectDom,
-				projectSiteURL,
-				statusURL,
-				trackerURL,
-				locale,
-				"xhtml",
-				xhtmlResult);
-		
-		final Document xhtmlDom = xhtmlResult.getDocument();
+    }
 
-		xhtmlDom.setDocType(new DocType("html", "-//W3C//DTD XHTML 1.1//EN", "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd"));
-		
-		addStyle(xhtmlDom.getRootElement());
-		
-		final OutputStream os = new ByteArrayOutputStream();
-		
-		final XMLOutputter out = new XMLOutputter(Format.getRawFormat());
-		out.output(xhtmlDom, os);
-		
-		return os.toString();
-	}
-	private void addStyle(Element xhtmlDom) {
-		if (StringUtils.isBlank(cssRules)) {
-			return;
-		}
-		
-		final Element head = (Element) xhtmlDom.getContent().get(0);
-		
-		if (head == null) {
-			throw new IllegalStateException("xhtml document does not have <head>");
-		}
-		
-		final Element style = new Element("style");
-		style.setAttribute("type", "text/css");
-		style.setText(cssRules);
+    public synchronized void destroy() throws Exception {
+    }
 
-		head.addContent(style);
-	}
-	private URL generateSandboxURL(ProjectConfigDto projectConfig) throws MalformedURLException {
-		final StringBuilder buf = getVulcanRootURL();
+    public synchronized void onBuildCompleted(BuildCompletedEvent event) {
+        final ProjectStatusDto status = event.getStatus();
 
-		buf.append("site/");
-		buf.append(projectConfig.getName());
-		
-		final String sitePath = projectConfig.getSitePath();
-		if (!sitePath.startsWith("/")) {
-			buf.append('/');
-		}
-		
-		buf.append(sitePath);
-		
-		return new URL(buf.toString());
-	}
-	private URL generateStatusURL() throws MalformedURLException {
-		final StringBuilder buf = getVulcanRootURL();
+        final Map<Locale, List<String>> subscribers = getSubscribedAddresses(status);
 
-		buf.append("viewProjectStatus.do?transform=xhtml");
-		
-		return new URL(buf.toString());
-	}
-	private StringBuilder getVulcanRootURL() {
-		final String vulcanUrl = config.getVulcanUrl();
+        if (mailSession == null || subscribers == null) {
+            return;
+        }
 
-		if (StringUtils.isBlank(vulcanUrl)) {
-			return new StringBuilder("http://localhost/vulcan");
-		}
-		
-		final StringBuilder buf = new StringBuilder(vulcanUrl);
-		
-		if (!vulcanUrl.endsWith("/")) {
-			buf.append('/');
-		}
-		
-		return buf;
-	}
+        final ProjectConfigDto projectConfig = event.getProjectConfig();
+
+        final ClassLoader prev = Thread.currentThread().getContextClassLoader();
+
+        try {
+            Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
+            sendMessages(event, projectConfig, subscribers);
+        } finally {
+            Thread.currentThread().setContextClassLoader(prev);
+        }
+
+    }
+
+    public synchronized void projectNameChanged(String oldName, String newName) {
+        final ProfileDto[] profiles = config.getProfiles();
+
+        for (int i = 0; i < profiles.length; i++) {
+            final String[] projects = profiles[i].getProjects();
+            for (int j = 0; j < projects.length; j++) {
+                if (oldName.equals(projects[j])) {
+                    projects[j] = newName;
+                }
+            }
+        }
+        hashProfiles();
+    }
+
+    public ProjectDomBuilder getProjectDomBuilder() {
+        return projectDomBuilder;
+    }
+
+    public void setProjectDomBuilder(ProjectDomBuilder projectDomBuilder) {
+        this.projectDomBuilder = projectDomBuilder;
+    }
+
+    public EventHandler getEventHandler() {
+        return eventHandler;
+    }
+
+    public void setEventHandler(EventHandler eventHandler) {
+        this.eventHandler = eventHandler;
+    }
+
+    public MessageAssembler getMessageAssembler() {
+        return messageAssembler;
+    }
+
+    public void setMessageAssembler(MessageAssembler messageAssembler) {
+        this.messageAssembler = messageAssembler;
+    }
+
+    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+        this.ctx = applicationContext;
+    }
+
+    public String getCssLocation() {
+        return cssLocation;
+    }
+
+    public void setCssLocation(String cssLocation) {
+        this.cssLocation = cssLocation;
+    }
+
+    void sendMessage(MimeMessage message) throws AddressException, MessagingException {
+        Transport.send(message);
+    }
+
+    Map<Locale, List<String>> getSubscribedAddresses(ProjectStatusDto status) {
+        final List<ProfileDto> profiles = this.subscribers.get(status.getName());
+
+        if (profiles != null) {
+            final Map<Locale, List<String>> map = new HashMap<Locale, List<String>>();
+
+            for (ProfileDto profile : profiles) {
+                if (matchPolicy(status.getStatus(), profile, status.isStatusChanged())) {
+                    final Locale locale;
+
+                    if (StringUtils.isBlank(profile.getLocale())) {
+                        locale = null;
+                    } else {
+                        locale = new Locale(profile.getLocale());
+                    }
+
+                    final List<String> addresses;
+
+                    if (map.containsKey(locale)) {
+                        addresses = map.get(locale);
+                    } else {
+                        addresses = new ArrayList<String>();
+                        map.put(locale, addresses);
+                    }
+
+                    List<String> addressList = getEmailAddresses(status, profile);
+
+                    for (String addr : addressList) {
+                        final String trimmed = addr.trim();
+                        if (trimmed.length() > 0) {
+                            addresses.add(trimmed);
+                        }
+                    }
+
+                    if (addresses.isEmpty()) {
+                        map.remove(locale);
+                    }
+                }
+            }
+            if (map.size() > 0) {
+                return map;
+            }
+        }
+        return null;
+    }
+
+    protected List<String> getEmailAddresses(ProjectStatusDto status, ProfileDto profile) {
+        if (profile.isOnlyEmailChangeAuthors()) {
+            ChangeLogDto changeLog = status.getChangeLog();
+            Set<String> addresses = new LinkedHashSet<String>();
+            if (changeLog != null) {
+
+                List<ChangeSetDto> changeSets = changeLog.getChangeSets();
+
+                Map<String, String> map = getChangeAuthorEmailMap();
+
+                String[] profileAddresses = profile.getEmailAddresses();
+                for (ChangeSetDto changeSet : changeSets) {
+                    String author = changeSet.getAuthor().trim();
+                    if (map.containsKey(author) && ArrayUtils.contains(profileAddresses, map.get(author))) {
+                        addresses.add(map.get(author));
+                    }
+                }
+            }
+            return new ArrayList<String>(addresses);
+        } else {
+            return Arrays.asList(profile.getEmailAddresses());
+        }
+    }
+
+    /*
+     * TODO: we need some validation for the mapping strings
+     */
+    protected Map<String, String> getChangeAuthorEmailMap() {
+        String[] mappings = config.getRepositoryEmailMappings();
+        Map<String, String> map = new HashMap<String, String>();
+        for (String mapping : mappings) {
+            String[] keyValue = mapping.trim().split("=");
+            map.put(keyValue[0], keyValue[1]);
+        }
+        return map;
+    }
+
+    private void sendMessages(BuildCompletedEvent event, final ProjectConfigDto projectConfig, final Map<Locale, List<String>> subscribers) {
+        for (Map.Entry<Locale, List<String>> ent : subscribers.entrySet()) {
+            try {
+                final URL sandboxURL = generateSandboxURL(projectConfig);
+                final URL statusURL = generateStatusURL();
+                URL trackerURL = null;
+
+                if (StringUtils.isNotBlank(projectConfig.getBugtraqUrl())) {
+                    trackerURL = new URL(projectConfig.getBugtraqUrl());
+                }
+
+                final Document document = projectDomBuilder.createProjectDocument(event.getStatus(), ent.getKey());
+
+                final String content = generateXhtml(document, sandboxURL, statusURL, trackerURL, ent.getKey());
+
+                final MimeMessage message = messageAssembler.constructMessage(StringUtils.join(ent.getValue().iterator(), ","), config, event.getStatus(), content);
+
+                sendMessage(message);
+            } catch (AddressException e) {
+                eventHandler.reportEvent(new ErrorEvent(this, "errors.address.exception", new Object[] { e.getRef(), e.getMessage() }, e));
+            } catch (MessagingException e) {
+                eventHandler.reportEvent(new ErrorEvent(this, "errors.messaging.exception", new Object[] { e.getMessage() }, e));
+            } catch (Exception e) {
+                eventHandler.reportEvent(new ErrorEvent(this, "errors.exception", new Object[] { e.getMessage() }, e));
+            }
+        }
+    }
+
+    private boolean matchPolicy(Status status, ProfileDto profile, boolean statusChanged) {
+        final List<Policy> policy = Arrays.asList(profile.getPolicy());
+
+        if (policy.contains(Policy.ALWAYS)) {
+            return true;
+        }
+
+        if (profile.isOnlyOnChange() && !statusChanged) {
+            return false;
+        }
+
+        return policy.contains(Policy.valueOf(status.name()));
+    }
+
+    private void hashProfiles() {
+        subscribers.clear();
+        for (ProfileDto profile : config.getProfiles()) {
+            for (String projectName : profile.getProjects()) {
+                List<ProfileDto> profiles = this.subscribers.get(projectName);
+                if (profiles == null) {
+                    profiles = new ArrayList<ProfileDto>();
+                    this.subscribers.put(projectName, profiles);
+                }
+                profiles.add(profile);
+            }
+        }
+    }
+
+    private void createMailSession() {
+        final String smtpHost = config.getSmtpHost();
+
+        if (smtpHost != null && smtpHost.length() > 0) {
+            final Properties props = new Properties();
+
+            props.setProperty("mail.host", smtpHost);
+
+            mailSession = Session.getInstance(props);
+        } else {
+            mailSession = null;
+        }
+        messageAssembler.setMailSession(mailSession);
+    }
+
+    private String generateXhtml(Document projectDom, URL projectSiteURL, URL statusURL, URL trackerURL, Locale locale) throws SAXException, IOException, TransformerException,
+            NoSuchTransformFormatException, MalformedURLException {
+        final JDOMResult xhtmlResult = new JDOMResult();
+
+        projectDomBuilder.transform(projectDom, projectSiteURL, statusURL, trackerURL, locale, "xhtml", xhtmlResult);
+
+        final Document xhtmlDom = xhtmlResult.getDocument();
+
+        xhtmlDom.setDocType(new DocType("html", "-//W3C//DTD XHTML 1.1//EN", "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd"));
+
+        addStyle(xhtmlDom.getRootElement());
+
+        final OutputStream os = new ByteArrayOutputStream();
+
+        final XMLOutputter out = new XMLOutputter(Format.getRawFormat());
+        out.output(xhtmlDom, os);
+
+        return os.toString();
+    }
+
+    private void addStyle(Element xhtmlDom) {
+        if (StringUtils.isBlank(cssRules)) {
+            return;
+        }
+
+        final Element head = (Element) xhtmlDom.getContent().get(0);
+
+        if (head == null) {
+            throw new IllegalStateException("xhtml document does not have <head>");
+        }
+
+        final Element style = new Element("style");
+        style.setAttribute("type", "text/css");
+        style.setText(cssRules);
+
+        head.addContent(style);
+    }
+
+    private URL generateSandboxURL(ProjectConfigDto projectConfig) throws MalformedURLException {
+        final StringBuilder buf = getVulcanRootURL();
+
+        buf.append("site/");
+        buf.append(projectConfig.getName());
+
+        final String sitePath = projectConfig.getSitePath();
+        if (!sitePath.startsWith("/")) {
+            buf.append('/');
+        }
+
+        buf.append(sitePath);
+
+        return new URL(buf.toString());
+    }
+
+    private URL generateStatusURL() throws MalformedURLException {
+        final StringBuilder buf = getVulcanRootURL();
+
+        buf.append("viewProjectStatus.do?transform=xhtml");
+
+        return new URL(buf.toString());
+    }
+
+    private StringBuilder getVulcanRootURL() {
+        final String vulcanUrl = config.getVulcanUrl();
+
+        if (StringUtils.isBlank(vulcanUrl)) {
+            return new StringBuilder("http://localhost/vulcan");
+        }
+
+        final StringBuilder buf = new StringBuilder(vulcanUrl);
+
+        if (!vulcanUrl.endsWith("/")) {
+            buf.append('/');
+        }
+
+        return buf;
+    }
 }
