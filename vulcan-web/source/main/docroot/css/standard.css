@@ -223,7 +223,26 @@ div.projectCheckboxes {
 div.projectCheckboxes li {
 	white-space: nowrap;
 }
-
+div.chart-legend {
+	float: left;
+	border: 1px solid black;
+}
+.legend-header {
+	font-weight: bold;
+	position: relative;
+	margin-left: 8px;
+	top: -8px;
+	background-color: white;
+}
+.legend-color-box {
+	width: 1em;
+	height: 1em;
+	border: 1px solid black;
+	margin-left: 5px;
+	margin-right: 5px;
+	padding: 0;
+	float: left;
+}
 a.xml {
 	float: right;
 	padding-top: 1px;

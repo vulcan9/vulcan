@@ -20,7 +20,7 @@
  * $HeadURL: https://vulcan.googlecode.com/svn/trunk/vulcan-web/source/main/docroot/javascript/widgets.js $
  */
 
-function drawGraph1() {
+function drawTotalBuildsGraph() {
 	var fullCount = 0;
 	var incrCount = 0;
 	for (var i=0; i < buildData.length; i++) {
@@ -50,8 +50,11 @@ function drawGraph1() {
 }
 
 function drawElapsedBuildTimeGraph() {
-	fullSamples = [];
-	incrementalSamples = [];
+	fullSamples = {};
+	incrementalSamples = {};
+	
+	var includeFull = document.getElementById("chkFullBuilds").checked;
+	var includeIncremental = document.getElementById("chkIncrementalBuilds").checked;
 	
 	var minX = buildData[0].startDate.time;
 	var maxX = buildData[0].startDate.time;
@@ -60,15 +63,21 @@ function drawElapsedBuildTimeGraph() {
 	var maxElapsedTime = 0;
 	
 	for (var i=0; i < buildData.length; i++) {
+		if (buildData[i].updateType == "Full" && !includeFull) {
+			continue;
+		} else if (buildData[i].updateType != "Full" && !includeIncremental) {
+			continue;
+		}
+		
 		var x = buildData[i].startDate.time;
 		var elapsed = (buildData[i].completionDate.time - buildData[i].startDate.time) / 1000;
 		
 		if (elapsed <= 0) {
 			broken++;
 		} else if (buildData[i].updateType == "Full") {
-			fullSamples[fullSamples.length] = [ x, elapsed ];
+			addSample(fullSamples, buildData[i].name, [ x, elapsed ]);
 		} else {
-			incrementalSamples[incrementalSamples.length] = [ x, elapsed ];
+			addSample(incrementalSamples, buildData[i].name, [ x, elapsed ]);
 		}
 		
 		if (x < minX) {
@@ -90,22 +99,47 @@ function drawElapsedBuildTimeGraph() {
 	};
 		
 	var layout = new PlotKit.Layout("line", layoutOptions);
-	layout.addDataset("Full Builds", fullSamples);
-	layout.addDataset("Incremental Builds", incrementalSamples);
+	if (includeFull) {
+		for (var pj in fullSamples) {
+			layout.addDataset("Full Builds - " + pj, fullSamples[pj]);
+		}
+	}
+	if (includeIncremental) {
+		for (var pj in incrementalSamples) {
+			layout.addDataset("Incremental Builds - " + pj, incrementalSamples[pj]);
+		}
+	}
 	layout.evaluate();
 	
 	var canvas = MochiKit.DOM.getElement("myCanvas");
 	
 	var plotOptions = {
-		"colorScheme": [Color.fromName("red"), Color.fromName("blue")],
-		"strokeColor": Color.fromName("red"),
-		"shouldStroke": false,
-	//	"shouldFill": false
+		//"colorScheme": [Color.fromName("red"), Color.fromName("blue")],
+		"colorScheme": PlotKit.Base.colorScheme(),
+		"shouldStroke": true,
+		"shouldFill": false
 	};
+	
 	var plotter = new PlotKit.SweetCanvasRenderer(canvas, layout, plotOptions);
+	plotter.clear();
 	plotter.render();
  
+	legend = new LegendRenderer("myLegend", layout, plotOptions);
+	legend.clear();
+	legend.render();
+	
  	return false;
+}
+function addSample(sampleMap, key, sample)
+{
+	var samples = sampleMap[key];
+	
+	if (samples == null) {
+		samples = [];
+		sampleMap[key] = samples;
+	}
+	
+	samples[samples.length] = sample;
 }
 function createLabels(samples, numTicks) {
 	var first = samples[0];
@@ -127,3 +161,33 @@ function createLabel(time) {
 	var date = new Date(time);
 	return {label: (date.getMonth()+1) + "/" + date.getDate() + "/" + date.getFullYear(), v:time};
 }
+
+function loadChartForm() {
+	var canvas = document.createElement("canvas");
+	
+	canvas.width = 800;
+	canvas.height = 600;
+	
+	MochiKit.DOM.replaceChildNodes(MochiKit.DOM.getElement("myCanvas").parentNode, canvas);
+	
+	canvas.id = "myCanvas"
+	
+}
+
+function drawCurrentChart() {
+	var select = document.getElementById("chartSelector");
+	var chartType = select.options[select.selectedIndex].value;
+	eval(chartType + "()");
+}
+
+function registerChartHandlers() {
+	var selector = document.getElementById("chartSelector");
+	customAddEventListener(selector, "change", loadChartForm);
+	
+	var btnRedraw = document.getElementById("btnRedraw");
+	customAddEventListener(btnRedraw, "click", drawCurrentChart);
+	
+	loadChartForm.apply(selector, null);
+}
+
+customAddEventListener(window, "load", registerChartHandlers);

@@ -205,7 +205,7 @@ PlotKit.Base.baseColors=function(){
 var _40=MochiKit.Color.Color.fromHexString;
 return [_40("#476fb2"),_40("#be2c2b"),_40("#85b730"),_40("#734a99"),_40("#26a1c5"),_40("#fb8707"),_40("#000000")];
 };
-PlotKit.Base.officeBaseStyle={"axisLineWidth":2,"axisLabelColor":Color.grayColor(),"axisLineColor":Color.whiteColor(),"padding":{top:5,bottom:10,left:30,right:30}};
+PlotKit.Base.officeBaseStyle={"axisLineWidth":2,"axisLabelColor":MochiKit.Color.Color.grayColor(),"axisLineColor":MochiKit.Color.Color.whiteColor(),"padding":{top:5,bottom:10,left:30,right:30}};
 MochiKit.Base.update(PlotKit.Base,{officeBlue:function(){
 var r={"colorScheme":PlotKit.Base.palette(PlotKit.Base.baseColors()[0]),"backgroundColor":PlotKit.Base.baseColors()[0].lighterColorWithLevel(0.45)};
 MochiKit.Base.update(r,PlotKit.Base.officeBaseStyle);
@@ -394,11 +394,17 @@ return obj;
 }
 }else{
 if(this.style=="pie"){
+x=2*x-0.5;
 var _71=Math.sqrt((y-0.5)*(y-0.5)+(x-0.5)*(x-0.5));
 if(_71>this.options.pieRadius){
 return null;
 }
-var _72=Math.atan2(y-0.5,x-0.5)-Math.PI/2;
+var _72=0;
+if(y<0.5&&x<0.5){
+_72=Math.atan2(y-0.5,x-0.5)+5*Math.PI/2;
+}else{
+_72=Math.atan2(y-0.5,x-0.5)+Math.PI/2;
+}
 for(var i=0;i<this.slices.length;i++){
 var _73=this.slices[i];
 if(_73.startAngle<_72&&_73.endAngle>=_72){
@@ -603,6 +609,7 @@ i++;
 }
 };
 PlotKit.Layout.prototype._evaluatePieCharts=function(){
+var map=PlotKit.Base.map;
 var _118=PlotKit.Base.items;
 var sum=MochiKit.Iter.sum;
 var _120=MochiKit.Base.itemgetter;
@@ -728,7 +735,7 @@ if(_150){
 if(_147(_151)){
 _151=tick.v.toString();
 }
-_151+=" ("+_148(_150.fraction)+")";
+_151=SPAN(null,_151," ("+_148(_150.fraction)+")");
 this.xticks.push([tick.v,_151]);
 }
 }
@@ -832,6 +839,14 @@ this.ylabels=new Array();
 this.isFirstRender=true;
 this.area={x:this.options.padding.left,y:this.options.padding.top,w:this.width-this.options.padding.left-this.options.padding.right,h:this.height-this.options.padding.top-this.options.padding.bottom};
 MochiKit.DOM.updateNodeAttributes(this.container,{"style":{"position":"relative","width":this.width+"px"}});
+try{
+this.event_isinside=null;
+if(MochiKit.Signal&&this.options.enableEvents){
+this._initialiseEvents();
+}
+}
+catch(e){
+}
 };
 PlotKit.CanvasRenderer.prototype.render=function(){
 if(this.isIE){
@@ -947,9 +962,11 @@ ctx_.lineTo(this.area.w*_195.x+this.area.x,this.area.h*_195.y+this.area.y);
 }
 };
 MochiKit.Iter.forEach(this.layout.points,_187(_193,ctx),this);
+if(this.options.shouldFill){
 ctx.lineTo(this.area.w+this.area.x,this.area.h+this.area.y);
 ctx.lineTo(this.area.x,this.area.y+this.area.h);
 ctx.closePath();
+}
 };
 if(this.options.shouldFill){
 bind(_191,this)(_182);
@@ -1859,7 +1876,7 @@ _353.fillStyle=_360.toRGBString();
 var _361=function(){
 _353.beginPath();
 _353.moveTo(_356,_357);
-_353.arc(_356,_357,_358,_355[i].startAngle-Math.PI/2,_355[i].endAngle-Math.PI/2,false);
+_353.arc(_356,_357,_358,_355[i].startAngle-Math.PI/2,_355[i].endAngle-Math.PI/2,_355[i].fraction==1);
 _353.lineTo(_356,_357);
 _353.closePath();
 };

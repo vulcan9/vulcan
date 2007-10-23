@@ -195,6 +195,9 @@ PlotKit.SweetCanvasRenderer.prototype._renderLineChart = function() {
             context.fill();
         }
         if (this.options.shouldStroke) {
+        	if (!this.options.shouldFill) {
+        		context.strokeStyle = color.toRGBString();
+        	}
             bind(makePath, this)(context);
             context.stroke();
         }
@@ -250,7 +253,7 @@ PlotKit.SweetCanvasRenderer.prototype._renderPieChart = function() {
             context.arc(centerx, centery, radius, 
                         slices[i].startAngle - Math.PI/2,
                         slices[i].endAngle - Math.PI/2,
-                        false);
+                        slices[i].fraction == 1);
             context.lineTo(centerx, centery);
             context.closePath();
         };
