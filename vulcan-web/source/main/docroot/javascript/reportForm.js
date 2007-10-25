@@ -70,7 +70,7 @@ ReportForm.prototype.dateRangeChanged = function(event) {
 	
 	var start = startInput.value;
 	var end = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
-	
+
 	switch (target.value) {
 		case "today":
 			start = now;
@@ -84,7 +84,7 @@ ReportForm.prototype.dateRangeChanged = function(event) {
 		case "yearToDate":
 			start = new Date(now.getFullYear(), 0, 1);
 			break;
-		case "default":
+		default:
 			return;
 	}
 	

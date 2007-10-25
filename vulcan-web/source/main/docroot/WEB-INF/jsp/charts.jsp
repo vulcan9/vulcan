@@ -57,18 +57,47 @@ window.buildData = ${jsonBuildHistory};
 </script>
 </head>
 <body>
-	<div style="margin-top: 1em;">
+	<form id="chartForm" method="post" action="#">
+	<div style="float: left;">
 		Chart Type:
 		<select id="chartSelector">
-			<option value="drawElapsedBuildTimeGraph">Elapsed Build Time</option>
-			<option value="drawTotalBuildsGraph">Total Builds</option>
+			<option value="SuccessRateGraph">Success Rate</option>
+			<option value="MetricsGraph">Build Metrics</option>
+			<option value="ElapsedBuildTimeGraph">Elapsed Build Time</option>
+			<option value="TotalBuildsGraph">Total Builds</option>
 		</select>
-		<br/>
-		<input type="checkbox" id="chkFullBuilds" checked="checked"/><label for="chkFullBuilds">Full Builds</label>
-		<input type="checkbox" id="chkIncrementalBuilds" checked="checked"/><label for="chkIncrementalBuilds">Incremental Builds</label>
-		<br/>
-		<button id="btnRedraw">Generate</button>
+	
+		<div id="ElapsedBuildTimeGraphForm" style="display: none">	
+			<ul class="metaDataOptions">
+				<li>
+					<input type="checkbox" id="chkFullBuilds" checked="checked"/>
+					<label for="chkFullBuilds">Full Builds</label>
+				</li>
+				<li>
+					<input type="checkbox" id="chkIncrementalBuilds" checked="checked"/>
+					<label for="chkIncrementalBuilds">Incremental Builds</label>
+				</li>
+			</ul>
+		</div>
+		
+		<div id="MetricsGraphForm" style="display: none">
+		</div>
+		
+		<div id="SuccessRateGraphForm" style="display: none">
+			Interval:
+			<select id="intervalSelector">
+				<option value="86400000">1 Day</option>
+				<option value="604800000">1 Week</option>
+				<option value="1209600000">2 Weeks</option>
+				<option value="2419200000">4 Weeks</option>
+			</select>
+		</div>
+		
+		<div>
+			<button id="btnRedraw">Generate</button>
+		</div>
 	</div>
+	</form>
 	<div style="float: left"><canvas id="myCanvas" height="600" width="800"></canvas></div>
 	<div class="chart-legend">
 		<span class="legend-header">Legend</span>
