@@ -33,10 +33,12 @@ import java.util.Map.Entry;
 import net.sourceforge.vulcan.StateManager;
 import net.sourceforge.vulcan.core.BuildOutcomeStore;
 import net.sourceforge.vulcan.dto.ProjectStatusDto;
+import net.sourceforge.vulcan.dto.ProjectStatusDto.Status;
 import net.sourceforge.vulcan.event.ErrorEvent;
 import net.sourceforge.vulcan.event.EventHandler;
 import net.sourceforge.vulcan.spring.SpringFileStore;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -148,6 +150,7 @@ public class BuildOutcomeConverter {
 		private final List<UUID> allIds;
 		private final Map<UUID, String> idsToProjectNames;
 		private final Set<UUID> converted = new HashSet<UUID>();
+		private final Map<String, Integer> buildNumbers = new HashMap<String, Integer>();
 		
 		public Converter(List<UUID> allIds, Map<UUID, String> idsToProjectNames) {
 			this.allIds = allIds;
@@ -182,6 +185,18 @@ public class BuildOutcomeConverter {
 			try {
 				final ProjectStatusDto buildOutcome = fileStore.loadBuildOutcome(projectName, id);
 				
+				final Integer buildNumber;
+				
+				if (buildNumbers.containsKey(projectName)) {
+					buildNumber = buildNumbers.get(projectName) + 1;	
+				} else {
+					buildNumber = 0;
+				}
+				
+				buildNumbers.put(projectName, buildNumber);
+				
+				buildOutcome.setBuildNumber(buildNumber);
+				
 				fixProblems(buildOutcome);
 				
 				buildOutcomeStore.storeBuildOutcome(buildOutcome);
@@ -199,6 +214,16 @@ public class BuildOutcomeConverter {
 			if (buildOutcome.getStartDate() == null) {
 				// old logs didn't have a start date.
 				buildOutcome.setStartDate(buildOutcome.getCompletionDate());
+			}
+			
+			if (StringUtils.isBlank(buildOutcome.getMessageKey())) {
+				if (buildOutcome.getStatus() == Status.PASS) {
+					buildOutcome.setMessageKey("messages.build.success");
+					buildOutcome.setMessageArgs(new String[] {buildOutcome.getName()});
+				} else {
+					buildOutcome.setMessageKey("messages.build.failure");
+					buildOutcome.setMessageArgs(new String[] {"(unknown)"});
+				}
 			}
 			
 			final Map<String, UUID> deps = buildOutcome.getDependencyIds();
