@@ -20,6 +20,7 @@ package net.sourceforge.vulcan.spring.jdbc;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -133,7 +134,10 @@ public class JdbcBuildOutcomeStore implements BuildOutcomeStore, ProjectNameChan
 	public List<ProjectStatusDto> loadBuildSummaries(BuildOutcomeQueryDto query) {
 		final BuildHistoryQuery historyQuery = new BuildHistoryQuery(dataSource, query);
 		
-		return historyQuery.queryForHistory();
+		final List<JdbcBuildOutcomeDto> results = historyQuery.queryForHistory();
+		
+		
+		return Collections.<ProjectStatusDto>unmodifiableList(results);
 	}
 	
 	public UUID storeBuildOutcome(ProjectStatusDto outcome)	throws StoreException {

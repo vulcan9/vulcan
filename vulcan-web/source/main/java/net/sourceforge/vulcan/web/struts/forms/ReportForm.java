@@ -19,6 +19,7 @@
 package net.sourceforge.vulcan.web.struts.forms;
 
 import static org.apache.commons.lang.ArrayUtils.EMPTY_STRING_ARRAY;
+import static org.apache.commons.lang.StringUtils.isNotBlank;
 
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -57,9 +58,12 @@ public class ReportForm extends ValidatorForm {
 	public void reset(ActionMapping mapping, HttpServletRequest request) {
 		super.reset(mapping, request);
 		rangeType = "date";
-		projectNames = EMPTY_STRING_ARRAY;
-		omitTypes = EMPTY_STRING_ARRAY;
-		download = false;
+		
+		if (isNotBlank(request.getParameter("rangeType"))) {
+			projectNames = EMPTY_STRING_ARRAY;
+			omitTypes = EMPTY_STRING_ARRAY;
+			download = false;
+		}
 	}
 	
 	@Override

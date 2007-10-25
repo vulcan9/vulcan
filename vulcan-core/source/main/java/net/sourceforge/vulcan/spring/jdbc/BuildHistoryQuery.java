@@ -27,17 +27,20 @@ import java.util.Set;
 import javax.sql.DataSource;
 
 import net.sourceforge.vulcan.dto.BuildOutcomeQueryDto;
-import net.sourceforge.vulcan.dto.ProjectStatusDto;
 
 import org.springframework.jdbc.core.SqlParameter;
 
 class BuildHistoryQuery extends BuildQuery {
 	private Object[] parameterValues;
+	private String whereClause;
+	private BuildHistoryMetricsQuery metricsQuery;
 	
 	public BuildHistoryQuery(DataSource dataSource, BuildOutcomeQueryDto queryDto) {
 		super(dataSource, false);
 		
 		buildQuery(queryDto);
+		
+		metricsQuery = new BuildHistoryMetricsQuery(dataSource, whereClause, getDeclaredParameters(), parameterValues);
 	}
 
 	public Object[] getParameterValues() {
@@ -45,8 +48,12 @@ class BuildHistoryQuery extends BuildQuery {
 	}
 	
 	@SuppressWarnings("unchecked")
-	public List<ProjectStatusDto> queryForHistory() {
-		return execute(parameterValues);
+	public List<JdbcBuildOutcomeDto> queryForHistory() {
+		final List<JdbcBuildOutcomeDto> builds = execute(parameterValues);
+		
+		metricsQuery.queryMetrics(builds);
+		
+		return builds;
 	}
 	
 	private void buildQuery(BuildOutcomeQueryDto dto) {
@@ -57,7 +64,7 @@ class BuildHistoryQuery extends BuildQuery {
 		
 		final List<? super Object> params = new ArrayList<Object>();
 		
-		final StringBuilder sb = new StringBuilder(SQL);
+		final StringBuilder sb = new StringBuilder();
 		
 		sb.append("where name");
 		
@@ -103,11 +110,10 @@ class BuildHistoryQuery extends BuildQuery {
 			declareParameter(new SqlParameter(Types.INTEGER));
 		}
 		
-		sb.append(" order by completion_date");
-		
 		parameterValues = params.toArray();
+		whereClause = sb.toString();
 		
-		setSql(sb.toString());
+		setSql(SQL + whereClause + " order by completion_date");
 		compile();
 	}
 }

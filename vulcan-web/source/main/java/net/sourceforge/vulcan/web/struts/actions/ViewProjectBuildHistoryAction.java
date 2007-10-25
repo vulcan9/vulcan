@@ -27,12 +27,12 @@ import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import net.sf.json.JSONArray;
 import net.sourceforge.vulcan.core.BuildOutcomeStore;
 import net.sourceforge.vulcan.dto.BuildOutcomeQueryDto;
 import net.sourceforge.vulcan.dto.ProjectStatusDto;
 import net.sourceforge.vulcan.dto.ProjectStatusDto.Status;
 import net.sourceforge.vulcan.metadata.SvnRevision;
+import net.sourceforge.vulcan.web.JsonSerializer;
 import net.sourceforge.vulcan.web.struts.forms.ReportForm;
 
 import org.apache.struts.action.ActionForm;
@@ -44,6 +44,7 @@ import org.jdom.Document;
 
 @SvnRevision(id="$Id$", url="$HeadURL$")
 public final class ViewProjectBuildHistoryAction extends ProjectReportBaseAction {
+	private JsonSerializer jsonSerializer;
 	private BuildOutcomeStore buildOutcomeStore;
 	private String filename;
 	
@@ -116,8 +117,12 @@ public final class ViewProjectBuildHistoryAction extends ProjectReportBaseAction
 		this.buildOutcomeStore = buildOutcomeStore;
 	}
 	
+	public void setJsonSerializer(JsonSerializer jsonSerializer) {
+		this.jsonSerializer = jsonSerializer;
+	}
+
 	private void prepareBuildHistoryForCharts(HttpServletRequest request, final List<ProjectStatusDto> outcomes) {
-		final String data = JSONArray.fromObject(outcomes).toString();
+		final String data = jsonSerializer.toJSON(outcomes, request.getLocale());
 		request.setAttribute("jsonBuildHistory", data.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;"));
 	}
 	
