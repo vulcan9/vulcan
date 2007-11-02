@@ -86,12 +86,17 @@ class BuildHistoryMetricsQuery extends MappingSqlQuery {
 
 		final int size = metrics.size();
 
+		final Integer buildId = metrics.get(0).getBuildId();
 		if (size == 1) {
-			buildsById.get(metrics.get(0).getBuildId()).setMetrics(Collections.<MetricDto>unmodifiableList(metrics));
+			if (buildsById.containsKey(buildId)) {
+				buildsById.get(buildId).setMetrics(Collections.<MetricDto>unmodifiableList(metrics));
+			} else {
+				LOG.error("Got metrics for missing build " + buildId);
+			}
 			return;
 		}
 		
-		Integer currentBuildId = metrics.get(0).getBuildId();
+		Integer currentBuildId = buildId;
 		int i = 0;
 		int j = 1;
 		
