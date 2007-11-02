@@ -57,7 +57,7 @@ public class ViewProjectBuildHistoryActionTest extends MockApplicationContextStr
 		ids.add(UUID.randomUUID());
 		ids.add(UUID.randomUUID());
 		
-		query.setStatuses(new HashSet<Status>(Arrays.asList(Status.values())));
+		//query.setStatuses(new HashSet<Status>(Arrays.asList(Status.values())));
 	}
 	
 	public void testBlankName() throws Exception {
@@ -169,6 +169,36 @@ public class ViewProjectBuildHistoryActionTest extends MockApplicationContextStr
 		
 		assertEquals("application/xml", response.getContentType());
 		assertEquals(null, response.getHeader("Content-Disposition"));
+	}		
+	public void testStoresInSessionForOpenFlashChart() throws Exception {
+		addRequestParameter("transform", "OpenFlashChart");
+		addRequestParameter("projectNames", "Trundle");
+		addRequestParameter("rangeType", "index");
+		addRequestParameter("minBuildNumber", "1");
+		addRequestParameter("maxBuildNumber", "2");
+		addRequestParameter("download", "false");
+		
+		query.setMinBuildNumber(1);
+		query.setMaxBuildNumber(2);
+		query.setProjectNames(Collections.singleton("Trundle"));
+		
+		buildOutcomeStore.loadBuildSummaries(query);
+		EasyMock.expectLastCall().andReturn(results);
+		
+		projectDomBuilder.createProjectSummaries(results,
+				"1", "2", request.getLocale());
+		
+		EasyMock.expectLastCall().andReturn(dom);
+		
+		replay();
+		
+		actionPerform();
+		
+		verify();
+
+		verifyForward("OpenFlashChart");
+		
+		assertSame(dom, request.getSession().getAttribute("buildHistory"));
 	}		
 	public void testIncludeAll() throws Exception {
 		addRequestParameter("download", "true");

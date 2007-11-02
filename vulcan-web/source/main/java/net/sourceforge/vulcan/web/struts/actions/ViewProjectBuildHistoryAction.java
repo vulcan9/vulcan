@@ -32,9 +32,10 @@ import net.sourceforge.vulcan.dto.BuildOutcomeQueryDto;
 import net.sourceforge.vulcan.dto.ProjectStatusDto;
 import net.sourceforge.vulcan.dto.ProjectStatusDto.Status;
 import net.sourceforge.vulcan.metadata.SvnRevision;
-import net.sourceforge.vulcan.web.JsonSerializer;
+import net.sourceforge.vulcan.web.Keys;
 import net.sourceforge.vulcan.web.struts.forms.ReportForm;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
@@ -44,7 +45,6 @@ import org.jdom.Document;
 
 @SvnRevision(id="$Id$", url="$HeadURL$")
 public final class ViewProjectBuildHistoryAction extends ProjectReportBaseAction {
-	private JsonSerializer jsonSerializer;
 	private BuildOutcomeStore buildOutcomeStore;
 	private String filename;
 	
@@ -81,11 +81,14 @@ public final class ViewProjectBuildHistoryAction extends ProjectReportBaseAction
 			toLabel = Integer.toString(maxBuildNumber);
 		}
 		
-		final Set<Status> statuses = new HashSet<Status>();
-		statuses.addAll(Arrays.asList(Status.values()));
-		statuses.removeAll(parseOmittedTypes(reportForm.getOmitTypes()));
-		
-		query.setStatuses(statuses);
+		final String[] omitTypes = reportForm.getOmitTypes();
+		if (omitTypes.length > 0) {
+			final Set<Status> statuses = new HashSet<Status>();
+			statuses.addAll(Arrays.asList(Status.values()));
+			statuses.removeAll(parseOmittedTypes(omitTypes));
+			
+			query.setStatuses(statuses);
+		}
 		
 		final List<ProjectStatusDto> outcomes = buildOutcomeStore.loadBuildSummaries(query);
 		
@@ -95,18 +98,24 @@ public final class ViewProjectBuildHistoryAction extends ProjectReportBaseAction
 			return mapping.getInputForward();
 		}
 		
-		if ("json".equals(reportForm.getTransform())) {
-			prepareBuildHistoryForCharts(request, outcomes);
-			return mapping.findForward("charts");
-		}
-		
 		final Document doc = projectDomBuilder.createProjectSummaries(outcomes, fromLabel, toLabel, request.getLocale());
 		
 		if (reportForm.isDownload()) {
 			response.setHeader("Content-Disposition", "attachment; filename=" + filename);
 		}
 		
-		return sendDocument(doc, reportForm.getTransform(), null, 0, mapping, request, response);
+		final String transformType = reportForm.getTransform();
+		if (StringUtils.isNotBlank(transformType)) {
+			final ActionForward forward = mapping.findForward(transformType);
+			if (forward != null) {
+				request.setAttribute("fromLabel", fromLabel);
+				request.setAttribute("toLabel", toLabel);
+				request.getSession().setAttribute(Keys.BUILD_HISTORY, doc);
+				return forward;
+			}
+		}
+		
+		return sendDocument(doc, transformType, null, 0, mapping, request, response);
 	}
 	
 	public void setFilename(String filename) {
@@ -115,15 +124,6 @@ public final class ViewProjectBuildHistoryAction extends ProjectReportBaseAction
 	
 	public void setBuildOutcomeStore(BuildOutcomeStore buildOutcomeStore) {
 		this.buildOutcomeStore = buildOutcomeStore;
-	}
-	
-	public void setJsonSerializer(JsonSerializer jsonSerializer) {
-		this.jsonSerializer = jsonSerializer;
-	}
-
-	private void prepareBuildHistoryForCharts(HttpServletRequest request, final List<ProjectStatusDto> outcomes) {
-		final String data = jsonSerializer.toJSON(outcomes, request.getLocale());
-		request.setAttribute("jsonBuildHistory", data.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;"));
 	}
 	
 	private Set<Status> parseOmittedTypes(String[] typeStrings) {

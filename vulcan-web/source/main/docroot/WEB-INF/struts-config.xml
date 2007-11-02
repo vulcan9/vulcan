@@ -66,7 +66,7 @@
 				name="projectStatusForm"
 				validate="true"
 				input="/WEB-INF/jsp/error.jsp"/>
-		
+				
 		<action path="/buildHistoryReport"
 				type="org.apache.struts.actions.ForwardAction"
 				name="reportForm"
@@ -78,8 +78,11 @@
 				type="org.springframework.web.struts.DelegatingActionProxy"
 				name="reportForm"
 				input="/WEB-INF/jsp/buildHistoryReportForm.jsp">
-			<forward name="charts" path="/WEB-INF/jsp/charts.jsp"/>
+			<forward name="OpenFlashChart" path="/WEB-INF/jsp/openFlashChart.jsp"/>
 		</action>
+		
+		<action path="/getBuildHistory"
+				type="org.springframework.web.struts.DelegatingActionProxy"/>
 		
 		<action path="/admin/clearMessages"
 				type="org.springframework.web.struts.DelegatingActionProxy"/>

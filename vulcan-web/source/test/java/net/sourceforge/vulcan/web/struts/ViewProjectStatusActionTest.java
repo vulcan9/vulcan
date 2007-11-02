@@ -492,8 +492,6 @@ public class ViewProjectStatusActionTest extends MockApplicationContextStrutsTes
 		final Map<String, ProjectStatusDto> empty = Collections.emptyMap();
 		trainForTransform(empty, "nonesuch");
 
-		expectLastCall().andThrow(new NoSuchTransformFormatException());
-		
 		addRequestParameter("projectName", "some project");
 		addRequestParameter("transform", "nonesuch");
 		
@@ -530,5 +528,11 @@ public class ViewProjectStatusActionTest extends MockApplicationContextStrutsTes
 				eq(request.getLocale()),
 				eq(transormType),
 				(Result)anyObject());
+		
+		if (transormType.equals("nonesuch")) {
+			expectLastCall().andThrow(new NoSuchTransformFormatException());	
+		} else {
+			expectLastCall().andReturn("text/html");
+		}
 	}
 }
