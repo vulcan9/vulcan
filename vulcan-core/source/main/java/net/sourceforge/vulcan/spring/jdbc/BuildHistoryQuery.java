@@ -27,6 +27,7 @@ import java.util.Set;
 import javax.sql.DataSource;
 
 import net.sourceforge.vulcan.dto.BuildOutcomeQueryDto;
+import net.sourceforge.vulcan.dto.ProjectStatusDto.Status;
 
 import org.springframework.jdbc.core.SqlParameter;
 
@@ -108,6 +109,20 @@ class BuildHistoryQuery extends BuildQuery {
 			sb.append(" and build_number<=?");
 			params.add(dto.getMaxBuildNumber());
 			declareParameter(new SqlParameter(Types.INTEGER));
+		}
+		
+		final Set<Status> statuses = dto.getStatuses();
+		if (statuses != null && !statuses.isEmpty()) {
+			declareParameter(new SqlParameter(Types.VARCHAR));
+
+			sb.append(" and status in (?");
+			for (int i=1; i<statuses.size(); i++) {
+				declareParameter(new SqlParameter(Types.VARCHAR));
+				sb.append(",?");
+			}
+			sb.append(")");
+
+			params.addAll(statuses);
 		}
 		
 		parameterValues = params.toArray();
