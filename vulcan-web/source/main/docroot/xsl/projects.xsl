@@ -2,7 +2,7 @@
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" 
 	version="1.0">
 	
-	<xsl:output omit-xml-declaration="yes"/>
+	<xsl:output method="xml" media-type="application/xml" omit-xml-declaration="yes"/>
 	
 	<xsl:param name="caption"/>
 	<xsl:param name="detailLink"/>

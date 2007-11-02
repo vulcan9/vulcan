@@ -37,6 +37,7 @@ import java.net.URL;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 
+import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Result;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
@@ -134,11 +135,12 @@ public abstract class AbstractProjectDomBuilder implements ProjectDomBuilder {
 			
 			addBasicContents(summary, outcome, locale, format);
 			
+			addMetrics(summary, outcome.getMetrics(), locale);
 			root.addContent(summary);
 		}
 		return doc;
 	}
-	public void transform(Document document, URL projectSiteURL, URL viewProjectStatusURL, URL issueTrackerURL, Locale locale, String format, Result result) throws SAXException, IOException, TransformerException, NoSuchTransformFormatException {
+	public String transform(Document document, URL projectSiteURL, URL viewProjectStatusURL, URL issueTrackerURL, Locale locale, String format, Result result) throws SAXException, IOException, TransformerException, NoSuchTransformFormatException {
 		final Transformer transformer = createTransformer(format);
 		
 		applyParameters(transformer, locale);
@@ -151,8 +153,9 @@ public abstract class AbstractProjectDomBuilder implements ProjectDomBuilder {
 		if (issueTrackerURL != null) {
 			transformer.setParameter("issueTrackerURL", issueTrackerURL.toExternalForm());	
 		}
-		
 		transformer.transform(new JDOMSource(document), result);
+		
+		return transformer.getOutputProperty(OutputKeys.MEDIA_TYPE);
 	}
 	public void setProjectManager(ProjectManager projectManager) {
 		this.projectManager = projectManager;

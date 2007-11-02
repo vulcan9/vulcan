@@ -23,7 +23,7 @@
 <v:messages/>
 
 <v:bubble styleClass="buildHistoryReportForm">
-<html:form action="/viewProjectBuildHistory" method="post">
+<html:form action="/viewProjectBuildHistory" method="get">
 <table class="buildHistoryReportForm">
 	<caption><fmt:message key="captions.report.build.history"/></caption>
 	<tbody>
@@ -145,9 +145,9 @@
 			<td><fmt:message key="label.transform"/></td>
 			<td colspan="3">
 				<html:select property="transform" styleClass="transform">
+					<html:option value="OpenFlashChart">Open Flash Chart</html:option>
 					<html:option value="xhtml">XHTML</html:option>
 					<html:option value="">XML</html:option>
-					<html:option value="json">Graphs and Charts</html:option>
 				</html:select>
 				<ul class="metaDataOptions">
 					<li>

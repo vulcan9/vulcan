@@ -333,7 +333,9 @@ function launchWindowHandler(event, href, launchMode, windowName) {
 	window.open(href, name, "width=" + width + ",height=" + height
 		+ ",resizable=yes,scrollbars=yes,status=yes,location=yes,menubar=yes,titlebar=yes,toolbar=yes");
 	
-	return preventDefaultHandler(event);
+	if (event != null || (target != null && target != window)) {
+		return preventDefaultHandler(event);
+	}
 }
 
 function launchHelpHandler(event) {

@@ -22,6 +22,8 @@ import static org.apache.commons.lang.StringUtils.isNotBlank;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.StringReader;
+import java.io.StringWriter;
 import java.io.Writer;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -33,13 +35,14 @@ import javax.xml.transform.stream.StreamResult;
 
 import net.sourceforge.vulcan.ProjectManager;
 import net.sourceforge.vulcan.core.BuildManager;
-import net.sourceforge.vulcan.core.ProjectDomBuilder;
 import net.sourceforge.vulcan.core.ConfigurationStore;
+import net.sourceforge.vulcan.core.ProjectDomBuilder;
 import net.sourceforge.vulcan.dto.ProjectConfigDto;
 import net.sourceforge.vulcan.exception.NoSuchTransformFormatException;
 import net.sourceforge.vulcan.metadata.SvnRevision;
 import net.sourceforge.vulcan.web.JstlFunctions;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.struts.action.Action;
 import org.apache.struts.action.ActionForward;
@@ -127,9 +130,8 @@ public abstract class ProjectReportBaseAction extends Action {
 		out.output(document, writer);
 	}
 	protected ActionForward sendDocument(Document doc, String transform, ProjectConfigDto projectConfig, int buildNumber, ActionMapping mapping, HttpServletRequest request, HttpServletResponse response) throws IOException, MalformedURLException, SAXException, TransformerException {
-		final PrintWriter writer = response.getWriter();
-	
 		if (StringUtils.isBlank(transform)) {
+			final PrintWriter writer = response.getWriter();
 			response.setContentType("application/xml");
 			try {
 				sendDocument(doc, writer);
@@ -137,8 +139,6 @@ public abstract class ProjectReportBaseAction extends Action {
 				writer.close();
 			}
 		} else {
-			response.setContentType("text/html");
-			
 			try {
 				final URL projectStatusUrl = getSelfURL(mapping, request, transform);
 				
@@ -161,10 +161,25 @@ public abstract class ProjectReportBaseAction extends Action {
 					issueTrackerURL = null;
 				}
 				
-				projectDomBuilder.transform(doc,
+				final StringWriter tmpWriter = new StringWriter();
+				final StreamResult result = new StreamResult(tmpWriter);
+				
+				final String contentType = projectDomBuilder.transform(doc,
 						projectSiteUrl, projectStatusUrl, issueTrackerURL,
-						request.getLocale(), transform, new StreamResult(writer));
-				writer.close();
+						request.getLocale(), transform, result);
+				
+				if (StringUtils.isNotBlank(contentType)) {
+					response.setContentType(contentType);
+				} else {
+					response.setContentType("application/xml");
+				}
+				
+				final PrintWriter writer = response.getWriter();
+				try {
+					IOUtils.copy(new StringReader(tmpWriter.toString()), writer);
+				} finally {
+					writer.close();
+				}
 			} catch (NoSuchTransformFormatException e) {
 				BaseDispatchAction.saveError(request, ActionMessages.GLOBAL_MESSAGE,
 						new ActionMessage("errors.transform.not.found",

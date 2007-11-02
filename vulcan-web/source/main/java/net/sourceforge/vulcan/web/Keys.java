@@ -32,4 +32,6 @@ public interface Keys {
 	String DIR_PATH = "fileListPath";
 	String FILE_LIST_VIEW = "/WEB-INF/jsp/fileList.jsp";
 	String LOG_CONTENTS = "logContents";
+	
+	String BUILD_HISTORY = "buildHistory";
 }

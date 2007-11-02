@@ -38,5 +38,8 @@ public interface ProjectDomBuilder {
 	Document createProjectDocument(ProjectStatusDto status, Locale locale);
 	Document createProjectSummaries(List<ProjectStatusDto> outcomes, Object fromLabel, Object toLabel, Locale locale);
 	
-	void transform(Document document, URL projectSiteURL, URL viewProjectStatusURL, URL issueTrackerURL, Locale locale, String format, Result result) throws SAXException, IOException, TransformerException, NoSuchTransformFormatException;
+	/**
+	 * @return MIME type of transformed result, if specified.
+	 */
+	String transform(Document document, URL projectSiteURL, URL viewProjectStatusURL, URL issueTrackerURL, Locale locale, String format, Result result) throws SAXException, IOException, TransformerException, NoSuchTransformFormatException;
 }

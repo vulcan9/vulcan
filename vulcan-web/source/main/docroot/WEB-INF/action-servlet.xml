@@ -21,11 +21,12 @@
 			class="net.sourceforge.vulcan.web.struts.actions.ViewProjectBuildHistoryAction"
 			parent="projectReportBaseAction">
 		<property name="buildOutcomeStore" ref="buildOutcomeStore"/>
-		<property name="jsonSerializer">
-			<bean class="net.sourceforge.vulcan.web.JsonSerializer"/>
-		</property>
 		<property name="filename" value="vulcan-build-history.xml"/>
 	</bean>
+	
+	<bean name="/getBuildHistory"
+			class="net.sourceforge.vulcan.web.struts.actions.GetCachedBuildHistoryAction"
+			parent="projectReportBaseAction"/>
 	
 	<bean name="/buildmanagement/manualBuild"
 			class="net.sourceforge.vulcan.web.struts.actions.ManualBuildAction">
