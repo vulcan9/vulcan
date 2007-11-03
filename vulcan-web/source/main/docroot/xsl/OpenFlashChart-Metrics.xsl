@@ -134,6 +134,50 @@
 				</xsl:otherwise>
 			</xsl:choose>
 		</xsl:for-each>&amp;
+		
+		&amp;tool_tips<xsl:value-of select="$suffix"/>=<xsl:for-each select="/build-history/project">
+			<xsl:sort data-type="number" select="timestamp/@millis"/>
+			<xsl:if test="position()!=1">
+				<xsl:text>,</xsl:text>
+			</xsl:if>
+			<xsl:choose>
+				<xsl:when test="name = $seriesName and metrics/metric[@label=$metricLabel]">
+					<xsl:text><xsl:value-of select="name"/></xsl:text>
+					<xsl:text>&lt;br&gt;</xsl:text>
+					<xsl:text>Build </xsl:text>
+					<xsl:text><xsl:value-of select="build-number"/></xsl:text>
+					<xsl:text>&lt;br&gt;</xsl:text>
+					<xsl:text><xsl:value-of select="$metricLabel"/></xsl:text>
+					<xsl:text>:</xsl:text>
+					<xsl:text><xsl:value-of select="metrics/metric[@label=$metricLabel]/@value"/></xsl:text>
+				</xsl:when>
+				<xsl:when test="name = $seriesName">
+					<xsl:text>0</xsl:text>
+				</xsl:when>
+				<xsl:otherwise>
+					<xsl:text>null</xsl:text>
+				</xsl:otherwise>
+			</xsl:choose>
+		</xsl:for-each>&amp;
+		
+		&amp;links<xsl:value-of select="$suffix"/>=<xsl:for-each select="/build-history/project">
+			<xsl:sort data-type="number" select="timestamp/@millis"/>
+			<xsl:if test="position()!=1">
+				<xsl:text>,</xsl:text>
+			</xsl:if>
+			<xsl:choose>
+				<xsl:when test="name = $seriesName and metrics/metric[@label=$metricLabel]">
+					<xsl:text>javascript:showBuildDetails('</xsl:text>
+					<xsl:text><xsl:value-of select="substring-before($viewProjectStatusURL, '?')"/></xsl:text>
+					<xsl:text>?projectName=</xsl:text>
+					<xsl:text><xsl:value-of select="name"/></xsl:text>
+					<xsl:text>%26buildNumber=</xsl:text>
+					<xsl:text><xsl:value-of select="build-number"/></xsl:text>
+					<xsl:text>%26transform=xhtml')</xsl:text>
+				</xsl:when>
+			</xsl:choose>
+		</xsl:for-each>&amp;
+		
 	</xsl:template>
 	
 	<xsl:template name="choose-color">

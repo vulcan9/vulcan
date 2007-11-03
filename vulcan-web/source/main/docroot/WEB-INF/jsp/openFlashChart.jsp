@@ -10,9 +10,11 @@
 	xmlns:v="http://vulcan.sourceforge.net/j2ee/jsp/tags">
 <html:xhtml/>
 <head>
-	<style type="text/css">
-		embed { border: 2px solid black; }
-	</style>
+	<script type="text/javascript">
+		function showBuildDetails(url) {
+			launchWindowHandler(null, url, "modePopup", "buildDetails");
+		}
+	</script>
 </head>
 <body>
 	<div style="float: left; margin-right: 5em;">
@@ -27,11 +29,20 @@
 		</c:forEach>
 		<br/>
 		Range: ${fromLabel} to ${toLabel}
+		<!-- <br/>
+		<span style="font-family: Verdana; font-size: 18pt; color: #7E97A6;">Verdana</span>
+		<br/>
+		<span style="font-family: Calibri; font-size: 18pt; color: #7E97A6;">Calibri</span>
+		<br/>
+		<span style="font-family: Arial; font-size: 18pt; color: #7E97A6;">Arial</span>
+		<br/>
+		<span style="font-family: Bitstream Vera Sans; font-size: 18pt; color: #7E97A6;">Bitstream Vera Sans</span>
+		 -->
 	</div>
 	<div>
 		<v:openFlashChart
 			name="successRateChart"
-			width="200"
+			width="300"
 			height="200"
 			dataUrl="/getBuildHistory.do?transform=OpenFlashChart-BuildOutcomePieChart"/>
 	</div>
