@@ -76,7 +76,7 @@ see <html:link page="/COPYING">GPL Version 2 License</html:link>.
 		</tr>
 		<tr>
 			<td>cglib</td>
-			<td><a href="http://www.apache.org/licenses/LICENSE-2.0">Apache Public License, Versoin 2.0</a></td>
+			<td><a href="http://www.apache.org/licenses/LICENSE-2.0">Apache Public License, Version 2.0</a></td>
 			<td><a href="http://cglib.sourceforge.net/">http://cglib.sourceforge.net/</a></td>
 		</tr>
 		<tr>
@@ -91,17 +91,17 @@ see <html:link page="/COPYING">GPL Version 2 License</html:link>.
 		</tr>
 		<tr>
 			<td>Jakarta Commons</td>
-			<td><a href="http://www.apache.org/licenses/LICENSE-2.0">Apache Public License, Versoin 2.0</a></td>
+			<td><a href="http://www.apache.org/licenses/LICENSE-2.0">Apache Public License, Version 2.0</a></td>
 			<td><a href="http://commons.apache.org/">http://commons.apache.org/</a></td>
 		</tr>
 		<tr>
 			<td>Jakarta Oro</td>
-			<td><a href="http://www.apache.org/licenses/LICENSE-2.0">Apache Public License, Versoin 2.0</a></td>
+			<td><a href="http://www.apache.org/licenses/LICENSE-2.0">Apache Public License, Version 2.0</a></td>
 			<td><a href="http://jakarta.apache.org/oro/">http://jakarta.apache.org/oro/</a></td>
 		</tr>
 		<tr>
 			<td>Jakarta Taglibs</td>
-			<td><a href="http://www.apache.org/licenses/LICENSE-2.0">Apache Public License, Versoin 2.0</a></td>
+			<td><a href="http://www.apache.org/licenses/LICENSE-2.0">Apache Public License, Version 2.0</a></td>
 			<td><a href="http://jakarta.apache.org/taglibs/">http://jakarta.apache.org/taglibs/</a></td>
 		</tr>
 		<tr>
@@ -126,7 +126,7 @@ see <html:link page="/COPYING">GPL Version 2 License</html:link>.
 		</tr>
 		<tr>
 			<td>log4j</td>
-			<td><a href="http://www.apache.org/licenses/LICENSE-2.0">Apache Public License, Versoin 2.0</a></td>
+			<td><a href="http://www.apache.org/licenses/LICENSE-2.0">Apache Public License, Version 2.0</a></td>
 			<td><a href="http://logging.apache.org/log4j/docs/index.html">http://logging.apache.org/log4j/docs/index.html</a></td>
 		</tr>
 		<tr>
@@ -141,7 +141,7 @@ see <html:link page="/COPYING">GPL Version 2 License</html:link>.
 		</tr>
 		<tr>
 			<td>Plexus Utils</td>
-			<td><a href="http://www.apache.org/licenses/LICENSE-2.0">Apache Public License, Versoin 2.0</a></td>
+			<td><a href="http://www.apache.org/licenses/LICENSE-2.0">Apache Public License, Version 2.0</a></td>
 			<td><a href="http://plexus.codehaus.org/plexus-utils/">http://plexus.codehaus.org/plexus-utils/</a></td>
 		</tr>
 		<tr>
@@ -161,7 +161,7 @@ see <html:link page="/COPYING">GPL Version 2 License</html:link>.
 		</tr>
 		<tr>
 			<td>Struts</td>
-			<td><a href="http://www.apache.org/licenses/LICENSE-2.0">Apache Public License, Versoin 2.0</a></td>
+			<td><a href="http://www.apache.org/licenses/LICENSE-2.0">Apache Public License, Version 2.0</a></td>
 			<td><a href="http://struts.apache.org/">http://struts.apache.org/</a></td>
 		</tr>
 		<tr>
