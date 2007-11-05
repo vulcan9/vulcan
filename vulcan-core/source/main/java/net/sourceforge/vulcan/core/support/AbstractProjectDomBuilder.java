@@ -79,6 +79,9 @@ public abstract class AbstractProjectDomBuilder implements ProjectDomBuilder {
 	private Map<String, String> transformMessageKeys = Collections.emptyMap();
 	
 	public final Document createProjectDocument(ProjectStatusDto status, Locale locale) {
+		if (locale == null) {
+			locale = Locale.getDefault();
+		}
 		final DateFormat format = new SimpleDateFormat(formatMessage("build.timestamp.format", null, locale), locale);
 		
 		final Element root = new Element("project");
@@ -119,6 +122,10 @@ public abstract class AbstractProjectDomBuilder implements ProjectDomBuilder {
 	}
 	
 	public Document createProjectSummaries(List<ProjectStatusDto> outcomes, Object fromLabel, Object toLabel, Locale locale) {
+		if (locale == null) {
+			locale = Locale.getDefault();
+		}
+		
 		final DateFormat format = new SimpleDateFormat(formatMessage("build.timestamp.format", null, locale), locale);
 		final Element root = new Element("build-history");
 		final Document doc = new Document(root);
