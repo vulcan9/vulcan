@@ -20,15 +20,6 @@ package net.sourceforge.vulcan.core.support;
 
 import static org.apache.commons.lang.StringUtils.isNotBlank;
 
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.TimeZone;
-import java.util.UUID;
-import java.util.regex.PatternSyntaxException;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -36,6 +27,17 @@ import java.io.InputStream;
 import java.net.URL;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.TimeZone;
+import java.util.UUID;
+import java.util.regex.PatternSyntaxException;
 
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Result;
@@ -62,6 +64,7 @@ import net.sourceforge.vulcan.metadata.SvnRevision;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.time.DateUtils;
 import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.transform.JDOMSource;
@@ -76,7 +79,7 @@ public abstract class AbstractProjectDomBuilder implements ProjectDomBuilder {
 	private Map<String, String> transformMessageKeys = Collections.emptyMap();
 	
 	public final Document createProjectDocument(ProjectStatusDto status, Locale locale) {
-		final DateFormat format = new SimpleDateFormat(formatMessage("build.timestamp.format", null, locale));
+		final DateFormat format = new SimpleDateFormat(formatMessage("build.timestamp.format", null, locale), locale);
 		
 		final Element root = new Element("project");
 		final Document doc = new Document(root);
@@ -116,7 +119,7 @@ public abstract class AbstractProjectDomBuilder implements ProjectDomBuilder {
 	}
 	
 	public Document createProjectSummaries(List<ProjectStatusDto> outcomes, Object fromLabel, Object toLabel, Locale locale) {
-		final DateFormat format = new SimpleDateFormat(formatMessage("build.timestamp.format", null, locale));
+		final DateFormat format = new SimpleDateFormat(formatMessage("build.timestamp.format", null, locale), locale);
 		final Element root = new Element("build-history");
 		final Document doc = new Document(root);
 
@@ -129,6 +132,8 @@ public abstract class AbstractProjectDomBuilder implements ProjectDomBuilder {
 		
 		root.setAttribute("from", fromLabel.toString());
 		root.setAttribute("to", toLabel.toString());
+		
+		addXAxis(root, outcomes, format, locale);
 		
 		for (ProjectStatusDto outcome : outcomes) {
 			final Element summary = new Element("project");
@@ -181,6 +186,11 @@ public abstract class AbstractProjectDomBuilder implements ProjectDomBuilder {
 			is.close();
 		}
 	}
+	
+	AxisLabelGenerator createAxisLabelGenerator(long min, long max, Locale locale) {
+		return new AxisLabelGenerator(min, max, locale);
+	}
+	
 	private void applyParameters(Transformer transformer, Locale locale) {
 		for (Map.Entry<String, String> e: transformMessageKeys.entrySet()) {
 			transformer.setParameter(e.getKey(),
@@ -453,11 +463,144 @@ public abstract class AbstractProjectDomBuilder implements ProjectDomBuilder {
 		
 		elapsed.setAttribute("millis", Long.toString(elapsedMillis));
 		
-		final DateFormat format = new SimpleDateFormat(formatMessage("build.time.elapsed.format", null, locale));
+		final DateFormat format = new SimpleDateFormat(formatMessage("build.time.elapsed.format", null, locale), locale);
 		format.setTimeZone(TimeZone.getTimeZone("Greenwich"));
 		
 		elapsed.setText(format.format(elapsedMillis));
 		
 		root.addContent(elapsed);
+	}
+	private void addXAxis(Element root, List<ProjectStatusDto> outcomes, DateFormat format, Locale locale) {
+		final Element xAxis = new Element("x-axis");
+		root.addContent(xAxis);
+		
+		long minSample = outcomes.get(0).getCompletionDate().getTime();
+		long maxSample = outcomes.get(outcomes.size()-1).getCompletionDate().getTime();
+		
+		final AxisLabelGenerator axisLabelGenerator = new AxisLabelGenerator(minSample, maxSample, locale);
+		
+		final Element minNode = addChildNodeWithText(xAxis, "minimum", format.format(new Date(axisLabelGenerator.getMin())));
+		minNode.setAttribute("millis", Long.toString(axisLabelGenerator.getMin()));
+		final Element maxNode = addChildNodeWithText(xAxis, "maximum", format.format(new Date(axisLabelGenerator.getMax())));
+		maxNode.setAttribute("millis", Long.toString(axisLabelGenerator.getMax()));
+		
+		final Element labelsNode = new Element("labels");
+		xAxis.addContent(labelsNode);
+		
+		for (AxisLabel label : axisLabelGenerator.getLabels()) {
+			final Element labelNode = new Element("label");
+			labelsNode.addContent(labelNode);
+			labelNode.setAttribute("millis", Long.toString(label.getScalar()));
+			labelNode.setText(label.getLabel());
+		}
+	}
+
+	static class AxisLabel {
+		private final long scalar;
+		private final String label;
+
+		AxisLabel(long scalar, String label) {
+			this.scalar = scalar;
+			this.label = label;
+		}
+
+		public long getScalar() {
+			return scalar;
+		}
+
+		public String getLabel() {
+			return label;
+		}
+	}
+	
+	class AxisLabelGenerator {
+		private final List<AxisLabel> labels;
+		private final long minSample;
+		private final long maxSample;
+		private final Locale locale;
+
+		private long min;
+		private long max;
+		
+		AxisLabelGenerator(long minSample, long maxSample, Locale locale) {
+			this.minSample = minSample;
+			this.maxSample = maxSample;
+			
+			if (locale != null) {
+				this.locale = locale;
+			} else {
+				this.locale = Locale.getDefault();
+			}
+			
+			this.labels = new ArrayList<AxisLabel>();
+			
+			generateLabels();
+		}
+
+		public long getMin() {
+			return min;
+		}
+
+		public long getMax() {
+			return max;
+		}
+		
+		public List<AxisLabel> getLabels() {
+			return labels;
+		}
+
+		private void generateLabels() {
+			final long delta = maxSample - minSample;
+			
+			final int roundingField;
+			final int incrementField;
+			final DateFormat fmt;
+			if (delta > DateUtils.MILLIS_PER_DAY * 7 * 6) {
+				roundingField = Calendar.MONTH;
+				incrementField = Calendar.MONTH;
+				
+				fmt = getDateFormat("axis.by.month");
+			} else if (delta > DateUtils.MILLIS_PER_DAY * 10) {
+				roundingField = Calendar.DATE;
+				incrementField = Calendar.WEEK_OF_MONTH;
+				
+				fmt = getDateFormat("axis.by.week");
+			} else {
+				roundingField = Calendar.DATE;
+				incrementField = Calendar.DATE;
+				
+				fmt = getDateFormat("axis.by.day");
+			}
+			
+			Calendar cal = new GregorianCalendar();
+			cal.setTimeInMillis(maxSample);
+			
+			cal = DateUtils.truncate(cal, roundingField);
+			cal.add(roundingField, 1);
+			
+			max = cal.getTimeInMillis();
+			
+			cal.setTimeInMillis(minSample);
+			
+			cal = DateUtils.truncate(cal, roundingField);
+			
+			min = cal.getTimeInMillis();
+			
+			while (cal.getTimeInMillis() < max) {
+				final long timeInMillis = cal.getTimeInMillis();
+				labels.add(new AxisLabel(timeInMillis, fmt.format(new Date(timeInMillis))));
+				cal.add(incrementField, 1);
+			}
+		}
+
+		private DateFormat getDateFormat(String key) {
+			final String messageFormat = formatMessage(key, null, locale);
+			
+			if (messageFormat == null) {
+				return DateFormat.getDateInstance(DateFormat.MEDIUM, locale);
+			}
+			
+			return new SimpleDateFormat(messageFormat, locale);
+		}
 	}
 }

@@ -76,7 +76,11 @@ public class AbstractProjectDomBuilderTest extends EasyMockTestCase {
 	AbstractProjectDomBuilder builder = new AbstractProjectDomBuilder() {
 		@Override
 		protected String formatMessage(String key, Object[] args, Locale locale) {
-			return new MessageFormat(messages.get(key)).format(args);
+			final String string = messages.get(key);
+			if (string == null) {
+				return null;
+			}
+			return new MessageFormat(string).format(args);
 		}
 		@Override
 		protected Transformer createTransformer(String format) throws NoSuchTransformFormatException {
@@ -831,9 +835,21 @@ public class AbstractProjectDomBuilderTest extends EasyMockTestCase {
 		final Element root = doc.getRootElement();
 		assertEquals("build-history", root.getName());
 		
-		assertEquals(1, root.getContentSize());
+		assertEquals(1, root.getChildren("project").size());
 		assertEquals("1", root.getAttributeValue("from"));
 		assertEquals("33", root.getAttributeValue("to"));
+	}
+	public void testCreateSummariesIncludesXAxisLabels() throws Exception {
+		replay();
+		
+		Document doc = builder.createProjectSummaries(Collections.singletonList(projectStatus),
+				new Integer(1), new Integer(33), null);
+		
+		final Element root = doc.getRootElement();
+		assertEquals("build-history", root.getName());
+		
+		final Element axis = root.getChild("x-axis");
+		assertNotNull("Should contain element 'axis'", axis);
 	}
 	public void testCreateSummariesByDate() throws Exception {
 		replay();
@@ -844,10 +860,9 @@ public class AbstractProjectDomBuilderTest extends EasyMockTestCase {
 		final Element root = doc.getRootElement();
 		assertEquals("build-history", root.getName());
 		
-		assertEquals(1, root.getContentSize());
+		assertEquals(1, root.getChildren("project").size());
 		assertEquals("18:05", root.getAttributeValue("from"));
 		assertEquals("01:25", root.getAttributeValue("to"));
-
 	}
 	private Element assertContainsChildWithText(final Element parent, String childNodeName, String text) {
 		final Element child = parent.getChild(childNodeName);
