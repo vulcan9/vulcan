@@ -50,17 +50,6 @@
 	<xsl:variable name="fullBuildCount" select="count(/build-history/project[update-type = 'Full'])"/>
 	
 	<xsl:template match="/build-history">
-		<xsl:variable name="samplesPerLabel">
-			<xsl:choose>
-				<xsl:when test="count(project) &gt;= 8">
-					<xsl:value-of select="floor(count(project) div 8)"/>
-				</xsl:when>
-				<xsl:otherwise>
-					<xsl:value-of select="1"/>
-				</xsl:otherwise>
-			</xsl:choose>
-		</xsl:variable>
-		
 		<xsl:variable name="maxDuration">
 			<xsl:for-each select="project/elapsed-time/@millis">
 				<xsl:sort data-type="number" select="." order="descending"/>
@@ -83,16 +72,36 @@
 		&amp;y_axis_colour=#818D9D&amp;
 		&amp;y_grid_colour=#ADB5C7&amp;
 
-		&amp;x_label_style=10,#164166,2,<xsl:value-of select="$samplesPerLabel"/>&amp;
-		&amp;x_axis_steps=<xsl:value-of select="$samplesPerLabel"/>&amp;
+		&amp;x_label_style=10,#164166,2,1&amp;
 		
 		&amp;y_legend=Duration (Minutes),12,#164166&amp;
 		&amp;y_ticks=5,10,5&amp;
 		
-		&amp;x_labels=<xsl:for-each select="project"><xsl:sort data-type="number" select="timestamp/@millis"/><xsl:if test="position()!=1">,</xsl:if><xsl:value-of select="substring-before(timestamp,' ')"/></xsl:for-each>&amp;
+		<xsl:text>&amp;x_min=</xsl:text>
+		<xsl:value-of select="x-axis/minimum/@millis"/>
+		<xsl:text>&amp;</xsl:text>
+		
+		<xsl:text>&amp;x_max=</xsl:text>
+		<xsl:value-of select="x-axis/maximum/@millis"/>
+		<xsl:text>&amp;</xsl:text>
+		
+		<xsl:text>&amp;x_labels=</xsl:text>
+		
+		<xsl:for-each select="x-axis/labels/label">
+			<xsl:if test="position()!=1">
+				<xsl:text>,</xsl:text>
+			</xsl:if>
+			<xsl:text>(</xsl:text>
+			<xsl:value-of select="."/>
+			<xsl:text>,</xsl:text>
+			<xsl:value-of select="@millis"/>
+			<xsl:text>)</xsl:text>
+		</xsl:for-each>
+		<xsl:text>&amp;</xsl:text>
 		
 		<xsl:for-each select="project[generate-id() = generate-id(key('builds-by-project-name-and-update-type', concat(name,'-',update-type))[1])]">
 			<xsl:call-template name="dataset">
+				<xsl:with-param name="samples" select="key('builds-by-project-name-and-update-type', concat(name,'-',update-type))"/>
 				<xsl:with-param name="series-name" select="name"/>
 				<xsl:with-param name="update-type" select="update-type"/>
 				<xsl:with-param name="index" select="position()"/>
@@ -104,6 +113,7 @@
 	</xsl:template>
 	
 	<xsl:template name="dataset">
+		<xsl:param name="samples"/>
 		<xsl:param name="index"/>
 		<xsl:param name="series-name"/>
 		<xsl:param name="update-type"/>
@@ -124,60 +134,47 @@
 		</xsl:if>
 		<xsl:text>,12,4&amp;</xsl:text>
 		
-		&amp;values<xsl:value-of select="$suffix"/>=<xsl:for-each select="/build-history/project">
-			<xsl:sort data-type="number" select="timestamp/@millis"/>
+		&amp;values<xsl:value-of select="$suffix"/>=<xsl:for-each select="$samples">
 			<xsl:if test="position()!=1">
 				<xsl:text>,</xsl:text>
 			</xsl:if>
-			<xsl:choose>
-				<xsl:when test="name = $series-name and update-type = $update-type">
-					<xsl:text><xsl:value-of select="elapsed-time/@millis div 60000"/></xsl:text>
-				</xsl:when>
-				<xsl:otherwise>
-					<xsl:text>null</xsl:text>
-				</xsl:otherwise>
-			</xsl:choose>
+			<xsl:text>(</xsl:text>
+			<xsl:value-of select="timestamp/@millis"/>
+			<xsl:text>,</xsl:text>
+			<xsl:value-of select="elapsed-time/@millis div 60000"/>
+			<xsl:text>)</xsl:text>
 		</xsl:for-each>&amp;
 		
-		&amp;tool_tips<xsl:value-of select="$suffix"/>=<xsl:for-each select="/build-history/project">
-			<xsl:sort data-type="number" select="timestamp/@millis"/>
+		&amp;tool_tips<xsl:value-of select="$suffix"/>=<xsl:for-each select="$samples">
 			<xsl:if test="position()!=1">
 				<xsl:text>,</xsl:text>
 			</xsl:if>
-			<xsl:choose>
-				<xsl:when test="name = $series-name and update-type = $update-type">
-					<xsl:text><xsl:value-of select="name"/></xsl:text>
-					<xsl:text>&lt;br&gt;</xsl:text>
-					<xsl:text>Build </xsl:text>
-					<xsl:text><xsl:value-of select="build-number"/></xsl:text>
-					<xsl:text>&lt;br&gt;</xsl:text>
-					<xsl:text>Update Type: </xsl:text>
-					<xsl:text><xsl:value-of select="update-type"/></xsl:text>
-					<xsl:text>&lt;br&gt;Elapsed time: </xsl:text>
-					<xsl:text><xsl:value-of select="elapsed-time"/></xsl:text>
-				</xsl:when>
-				<xsl:otherwise>
-					<xsl:text>null</xsl:text>
-				</xsl:otherwise>
-			</xsl:choose>
+			<xsl:text><xsl:value-of select="name"/></xsl:text>
+			<xsl:text>&lt;br&gt;</xsl:text>
+			<xsl:text>Build </xsl:text>
+			<xsl:text><xsl:value-of select="build-number"/></xsl:text>
+			<xsl:text>&lt;br&gt;</xsl:text>
+			<xsl:text>Completed: </xsl:text>
+			<xsl:text><xsl:value-of select="timestamp"/></xsl:text>
+			<xsl:text>&lt;br&gt;</xsl:text>
+			<xsl:text>Update Type: </xsl:text>
+			<xsl:text><xsl:value-of select="update-type"/></xsl:text>
+			<xsl:text>&lt;br&gt;Elapsed time: </xsl:text>
+			<xsl:text><xsl:value-of select="elapsed-time"/></xsl:text>
 		</xsl:for-each>&amp;
 
-		&amp;links<xsl:value-of select="$suffix"/>=<xsl:for-each select="/build-history/project">
+		&amp;links<xsl:value-of select="$suffix"/>=<xsl:for-each select="$samples">
 			<xsl:sort data-type="number" select="timestamp/@millis"/>
 			<xsl:if test="position()!=1">
 				<xsl:text>,</xsl:text>
 			</xsl:if>
-			<xsl:choose>
-				<xsl:when test="name = $series-name and update-type = $update-type">
-					<xsl:text>javascript:showBuildDetails('</xsl:text>
-					<xsl:text><xsl:value-of select="substring-before($viewProjectStatusURL, '?')"/></xsl:text>
-					<xsl:text>?projectName=</xsl:text>
-					<xsl:text><xsl:value-of select="name"/></xsl:text>
-					<xsl:text>%26buildNumber=</xsl:text>
-					<xsl:text><xsl:value-of select="build-number"/></xsl:text>
-					<xsl:text>%26transform=xhtml')</xsl:text>
-				</xsl:when>
-			</xsl:choose>
+			<xsl:text>javascript:showBuildDetails('</xsl:text>
+			<xsl:text><xsl:value-of select="substring-before($viewProjectStatusURL, '?')"/></xsl:text>
+			<xsl:text>?projectName=</xsl:text>
+			<xsl:text><xsl:value-of select="name"/></xsl:text>
+			<xsl:text>%26buildNumber=</xsl:text>
+			<xsl:text><xsl:value-of select="build-number"/></xsl:text>
+			<xsl:text>%26transform=xhtml')</xsl:text>
 		</xsl:for-each>&amp;
 	</xsl:template>
 	
@@ -200,5 +197,4 @@
 			</xsl:otherwise>
 		</xsl:choose>
 	</xsl:template>
-	
 </xsl:stylesheet>

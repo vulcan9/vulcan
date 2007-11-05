@@ -50,17 +50,6 @@
 	<xsl:variable name="metricLabel2" select="'Test failures'"/>
 	
 	<xsl:template match="/build-history">
-		<xsl:variable name="samplesPerLabel">
-			<xsl:choose>
-				<xsl:when test="count(project) &gt;= 8">
-					<xsl:value-of select="floor(count(project) div 8)"/>
-				</xsl:when>
-				<xsl:otherwise>
-					<xsl:value-of select="1"/>
-				</xsl:otherwise>
-			</xsl:choose>
-		</xsl:variable>
-		
 		<xsl:variable name="maxValue1">
 			<xsl:choose>
 				<xsl:when test="count(project/metrics/metric[@label=$metricLabel1]/@value) != 0">
@@ -97,10 +86,29 @@
 		&amp;x_axis_colour=#818D9D&amp;
 		&amp;x_grid_colour=#F0F0F0&amp;
 
-		&amp;x_label_style=10,#164166,2,<xsl:value-of select="$samplesPerLabel"/>&amp;
-		&amp;x_axis_steps=<xsl:value-of select="$samplesPerLabel"/>&amp;
+		&amp;x_label_style=10,#164166,2,1&amp;
+
+		<xsl:text>&amp;x_min=</xsl:text>
+		<xsl:value-of select="x-axis/minimum/@millis"/>
+		<xsl:text>&amp;</xsl:text>
 		
-		&amp;x_labels=<xsl:for-each select="project"><xsl:sort data-type="number" select="timestamp/@millis"/><xsl:if test="position()!=1">,</xsl:if><xsl:value-of select="substring-before(timestamp,' ')"/></xsl:for-each>&amp;
+		<xsl:text>&amp;x_max=</xsl:text>
+		<xsl:value-of select="x-axis/maximum/@millis"/>
+		<xsl:text>&amp;</xsl:text>
+		
+		<xsl:text>&amp;x_labels=</xsl:text>
+		
+		<xsl:for-each select="x-axis/labels/label">
+			<xsl:if test="position()!=1">
+				<xsl:text>,</xsl:text>
+			</xsl:if>
+			<xsl:text>(</xsl:text>
+			<xsl:value-of select="."/>
+			<xsl:text>,</xsl:text>
+			<xsl:value-of select="@millis"/>
+			<xsl:text>)</xsl:text>
+		</xsl:for-each>
+		<xsl:text>&amp;</xsl:text>
 
 		&amp;y_axis_colour=#818D9D&amp;
 		&amp;y_grid_colour=#ADB5C7&amp;
@@ -133,6 +141,7 @@
 		</xsl:if>
 		
 		<xsl:for-each select="project[generate-id() = generate-id(key('builds-by-project-name', name)[1])]">
+			<xsl:variable name="samples" select="key('builds-by-project-name', name)"/>
 			<xsl:variable name="name" select="name"/>
 			<xsl:variable name="index">
 				<xsl:choose>
@@ -147,6 +156,7 @@
 			<xsl:variable name="showMetricInLegend" select="$maxValue2 &gt; 0"/>
 			
 			<xsl:call-template name="dataset">
+				<xsl:with-param name="samples" select="$samples[metrics/metric/@label=$metricLabel1]"/>
 				<xsl:with-param name="metricLabel" select="$metricLabel1"/>
 				<xsl:with-param name="seriesName" select="name"/>
 				<xsl:with-param name="index" select="$index"/>
@@ -160,6 +170,7 @@
 			
 			<xsl:if test="$maxValue2 &gt; 0">
 				<xsl:call-template name="dataset">
+					<xsl:with-param name="samples" select="$samples[metrics/metric/@label=$metricLabel2]"/>
 					<xsl:with-param name="metricLabel" select="$metricLabel2"/>
 					<xsl:with-param name="seriesName" select="name"/>
 					<xsl:with-param name="index" select="$index + 1"/>
@@ -175,6 +186,7 @@
 	</xsl:template>
 	
 	<xsl:template name="dataset">
+		<xsl:param name="samples"/>
 		<xsl:param name="index"/>
 		<xsl:param name="seriesName"/>
 		<xsl:param name="metricLabel"/>
@@ -196,65 +208,51 @@
 		</xsl:if>
 		<xsl:text>,12,4&amp;</xsl:text>
 		
-		&amp;values<xsl:value-of select="$suffix"/>=<xsl:for-each select="/build-history/project">
-			<xsl:sort data-type="number" select="timestamp/@millis"/>
+<xsl:text>
+</xsl:text>
+		<xsl:text>&amp;values</xsl:text>
+		<xsl:value-of select="$suffix"/>
+		<xsl:text>=</xsl:text>
+		<xsl:for-each select="$samples">
 			<xsl:if test="position()!=1">
 				<xsl:text>,</xsl:text>
 			</xsl:if>
-			<xsl:choose>
-				<xsl:when test="name = $seriesName and metrics/metric[@label=$metricLabel]">
-					<xsl:text><xsl:value-of select="metrics/metric[@label=$metricLabel]/@value"/></xsl:text>
-				</xsl:when>
-				<xsl:when test="name = $seriesName">
-					<xsl:text>0</xsl:text>
-				</xsl:when>
-				<xsl:otherwise>
-					<xsl:text>null</xsl:text>
-				</xsl:otherwise>
-			</xsl:choose>
+			<xsl:text>(</xsl:text>
+			<xsl:value-of select="timestamp/@millis"/>
+			<xsl:text>,</xsl:text>
+			<xsl:value-of select="metrics/metric[@label=$metricLabel]/@value"/>
+			<xsl:text>)</xsl:text>
+		</xsl:for-each>
+		<xsl:text>&amp;</xsl:text>
+		
+		&amp;tool_tips<xsl:value-of select="$suffix"/>=<xsl:for-each select="$samples">
+			<xsl:if test="position()!=1">
+				<xsl:text>,</xsl:text>
+			</xsl:if>
+			<xsl:text><xsl:value-of select="name"/></xsl:text>
+			<xsl:text>&lt;br&gt;</xsl:text>
+			<xsl:text>Build </xsl:text>
+			<xsl:text><xsl:value-of select="build-number"/></xsl:text>
+			<xsl:text>&lt;br&gt;</xsl:text>
+			<xsl:text>Completed: </xsl:text>
+			<xsl:text><xsl:value-of select="timestamp"/></xsl:text>
+			<xsl:text>&lt;br&gt;</xsl:text>
+			<xsl:text><xsl:value-of select="$metricLabel"/></xsl:text>
+			<xsl:text>:</xsl:text>
+			<xsl:text><xsl:value-of select="metrics/metric[@label=$metricLabel]/@value"/></xsl:text>
 		</xsl:for-each>&amp;
 		
-		&amp;tool_tips<xsl:value-of select="$suffix"/>=<xsl:for-each select="/build-history/project">
-			<xsl:sort data-type="number" select="timestamp/@millis"/>
+		&amp;links<xsl:value-of select="$suffix"/>=<xsl:for-each select="$samples">
 			<xsl:if test="position()!=1">
 				<xsl:text>,</xsl:text>
 			</xsl:if>
-			<xsl:choose>
-				<xsl:when test="name = $seriesName and metrics/metric[@label=$metricLabel]">
-					<xsl:text><xsl:value-of select="name"/></xsl:text>
-					<xsl:text>&lt;br&gt;</xsl:text>
-					<xsl:text>Build </xsl:text>
-					<xsl:text><xsl:value-of select="build-number"/></xsl:text>
-					<xsl:text>&lt;br&gt;</xsl:text>
-					<xsl:text><xsl:value-of select="$metricLabel"/></xsl:text>
-					<xsl:text>:</xsl:text>
-					<xsl:text><xsl:value-of select="metrics/metric[@label=$metricLabel]/@value"/></xsl:text>
-				</xsl:when>
-				<xsl:when test="name = $seriesName">
-					<xsl:text>0</xsl:text>
-				</xsl:when>
-				<xsl:otherwise>
-					<xsl:text>null</xsl:text>
-				</xsl:otherwise>
-			</xsl:choose>
-		</xsl:for-each>&amp;
-		
-		&amp;links<xsl:value-of select="$suffix"/>=<xsl:for-each select="/build-history/project">
-			<xsl:sort data-type="number" select="timestamp/@millis"/>
-			<xsl:if test="position()!=1">
-				<xsl:text>,</xsl:text>
-			</xsl:if>
-			<xsl:choose>
-				<xsl:when test="name = $seriesName and metrics/metric[@label=$metricLabel]">
-					<xsl:text>javascript:showBuildDetails('</xsl:text>
-					<xsl:text><xsl:value-of select="substring-before($viewProjectStatusURL, '?')"/></xsl:text>
-					<xsl:text>?projectName=</xsl:text>
-					<xsl:text><xsl:value-of select="name"/></xsl:text>
-					<xsl:text>%26buildNumber=</xsl:text>
-					<xsl:text><xsl:value-of select="build-number"/></xsl:text>
-					<xsl:text>%26transform=xhtml')</xsl:text>
-				</xsl:when>
-			</xsl:choose>
+			<xsl:text>javascript:showBuildDetails('</xsl:text>
+			<xsl:text><xsl:value-of select="substring-before($viewProjectStatusURL, '?')"/></xsl:text>
+			<xsl:text>?projectName=</xsl:text>
+			<xsl:text><xsl:value-of select="name"/></xsl:text>
+			<xsl:text>%26buildNumber=</xsl:text>
+			<xsl:text><xsl:value-of select="build-number"/></xsl:text>
+			<xsl:text>%26transform=xhtml')</xsl:text>
 		</xsl:for-each>&amp;
 		
 	</xsl:template>
@@ -278,6 +276,24 @@
 				<xsl:text>#000000</xsl:text>
 			</xsl:otherwise>
 		</xsl:choose>
+	</xsl:template>
+	
+	<xsl:template name="x-axis-min-max">
+		<xsl:variable name="timestamps" select="/build-history/project/timestamp/@millis"/>
+		
+		<xsl:for-each select="$timestamps">
+			<xsl:sort data-type="number" select="." order="ascending"/>
+			<xsl:if test="position()=1">
+				<xsl:text>&amp;x_min=</xsl:text>
+				<xsl:value-of select="."/>
+				<xsl:text>&amp;</xsl:text>
+			</xsl:if>
+			<xsl:if test="position()=count($timestamps)">
+				<xsl:text>&amp;x_max=</xsl:text>
+				<xsl:value-of select="."/>
+				<xsl:text>&amp;</xsl:text>
+			</xsl:if>
+		</xsl:for-each>
 	</xsl:template>
 	
 </xsl:stylesheet>
