@@ -76,6 +76,11 @@ public class DomBuilder {
 	 * @return XML with non-standard entities removed.
 	 */
 	private String fixNonStandardXml(String xml) {
+		// .NET writes a useless UTF-8 header in text files that JDOM chokes on.
+		if (xml.indexOf('<') != 0) {
+			xml = xml.substring(xml.indexOf('<'));
+		}
+		
 		if (xml.contains("&nbsp;")) {
 			return xml.replaceAll("&nbsp;", "");
 		}
