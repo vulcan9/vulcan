@@ -69,7 +69,7 @@
 				<xsl:attribute name="value"><xsl:value-of select="$totalLines"/></xsl:attribute>
 			</metric>
 			<metric key="vulcan.metrics.coverage.line">
-				<xsl:attribute name="value"><xsl:value-of select="$hitLines div $totalLines"/></xsl:attribute>
+				<xsl:attribute name="value"><xsl:value-of select="$hitLines * 100 div $totalLines"/></xsl:attribute>
 			</metric>
 		</xsl:if>
 		
@@ -77,7 +77,7 @@
 			<!-- I don't know how branch coverage is calculated so it is only reported
 				when a single coverage report is being merged. -->			
 			<metric key="vulcan.metrics.coverage.branch">
-				<xsl:attribute name="value"><xsl:value-of select="/*/coverage/@branch-rate"/></xsl:attribute>
+				<xsl:attribute name="value"><xsl:value-of select="/*/coverage/@branch-rate * 100"/></xsl:attribute>
 			</metric>
 		</xsl:if>
 	</xsl:template>

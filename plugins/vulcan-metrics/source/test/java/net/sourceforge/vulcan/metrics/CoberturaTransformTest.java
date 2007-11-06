@@ -34,8 +34,8 @@ public class CoberturaTransformTest extends TransformTestCase {
 	public void testCoverage() throws Exception {
 		final Document t = plugin.transform(doc);
 		
-		assertContainsMetric(t, "vulcan.metrics.coverage.line", "0.8332542694497154", true);
-		assertContainsMetric(t, "vulcan.metrics.coverage.branch", "0.8017174082747853", true);
+		assertContainsMetric(t, "vulcan.metrics.coverage.line", "83.32542694497154", true);
+		assertContainsMetric(t, "vulcan.metrics.coverage.branch", "80.17174082747853", true);
 	}
 	
 	public void testCountsSource() throws Exception {
