@@ -127,7 +127,7 @@ class ProjectRebuildExpert {
 					}
 
 					buildStatus.setBuildReasonKey("messages.build.reason.dependency");
-					buildStatus.setBuildReasonArgs(new Object[] {depName});
+					buildStatus.setBuildReasonArgs(new String[] {depName});
 
 					return true;
 				}
