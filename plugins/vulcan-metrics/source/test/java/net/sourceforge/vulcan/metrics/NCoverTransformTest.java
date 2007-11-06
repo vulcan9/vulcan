@@ -42,8 +42,8 @@ public class NCoverTransformTest extends TransformTestCase {
 		assertContainsMetric(t, "vulcan.metrics.source.methods", "1101", true);
 		assertContainsMetric(t, "vulcan.metrics.source.files", "109", true);
 		assertContainsMetric(t, "vulcan.metrics.source.lines", "4272", true);
-		assertContainsMetric(t, "vulcan.metrics.coverage.block", "91.12", true);
-		assertContainsMetric(t, "vulcan.metrics.coverage.method", "92.23", true);
+		assertContainsMetric(t, "vulcan.metrics.coverage.block", "91.12%", true);
+		assertContainsMetric(t, "vulcan.metrics.coverage.method", "92.23%", true);
 	}
 	
 	private void addStats(int classes, int methods, int files, int lines, double coverageBySeq, double coverageByFunc) {
