@@ -8,7 +8,30 @@
 		<metrics>
 			<xsl:apply-templates select="//report/stats"/>
 			<xsl:apply-templates select="//report/data/all"/>
+			<xsl:apply-templates select="//coverageReport2/project"/>
 		</metrics>
+	</xsl:template>
+	
+	<!-- NCover (http://ncover.org) -->
+	<xsl:template match="//coverageReport2/project">
+		<metric key="vulcan.metrics.source.classes">
+			<xsl:attribute name="value"><xsl:value-of select="@classes"/></xsl:attribute>
+		</metric>
+		<metric key="vulcan.metrics.source.methods">
+			<xsl:attribute name="value"><xsl:value-of select="@totalFunctions"/></xsl:attribute>
+		</metric>
+		<metric key="vulcan.metrics.source.files">
+			<xsl:attribute name="value"><xsl:value-of select="@files"/></xsl:attribute>
+		</metric>
+		<metric key="vulcan.metrics.source.lines">
+			<xsl:attribute name="value"><xsl:value-of select="@nonCommentLines"/></xsl:attribute>
+		</metric>
+		<metric key="vulcan.metrics.coverage.block">
+			<xsl:attribute name="value"><xsl:value-of select="format-number(@coverage, '#.##')"/></xsl:attribute>
+		</metric>
+		<metric key="vulcan.metrics.coverage.method">
+			<xsl:attribute name="value"><xsl:value-of select="format-number(@functionCoverage, '#.##')"/></xsl:attribute>
+		</metric>
 	</xsl:template>
 	
 	<!-- Emma (http://emma.sourceforge.net) -->

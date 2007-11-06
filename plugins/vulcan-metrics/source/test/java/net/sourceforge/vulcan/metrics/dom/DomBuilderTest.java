@@ -60,4 +60,17 @@ public class DomBuilderTest extends EasyMockTestCase {
 		
 		verify();
 	}
+	public void testLoadNCoverReport() throws Exception {
+		Log log = createMock(Log.class);
+		
+		expect(log.isDebugEnabled()).andReturn(false);
+		
+		DomBuilder.setLog(log);
+		
+		replay();
+		
+		builder.merge(TestUtils.resolveRelativeFile("source/test/xml/utf-8-header.xml"));
+		
+		verify();
+	}
 }
