@@ -83,9 +83,16 @@
 				<tr>
 					<td>Range</td>
 					<td>
-						<fmt:formatDate value="${fromLabel}" type="date" dateStyle="full"/>
-						through
-						<fmt:formatDate value="${toLabel}" type="date" dateStyle="full"/>
+						<c:choose>
+							<c:when test="${fromLabel.class.name eq 'java.util.Date'}">
+								<fmt:formatDate value="${fromLabel}" type="date" dateStyle="full"/>
+								through
+								<fmt:formatDate value="${toLabel}" type="date" dateStyle="full"/>
+							</c:when>
+							<c:otherwise>
+								${fromLabel} to ${toLabel}
+							</c:otherwise>
+						</c:choose>
 					</td>
 				</tr>
 				<tr>
@@ -115,7 +122,7 @@
 			<div class="plotOptions">
 				<span>Plot 1: </span>
 				<select id="metric1">
-					<option value="none"></option>
+					<option value="none">&amp;nbsp;</option>
 					<c:forEach items="${availableMetrics}" var="metricKey">
 						<c:choose>
 							<c:when test="${metricKey eq selectedMetric1}">
@@ -133,7 +140,7 @@
 				</select>
 				<span>Plot 2: </span>
 				<select id="metric2">
-					<option value="none"></option>
+					<option value="none">&amp;nbsp;</option>
 					<c:forEach items="${availableMetrics}" var="metricKey">
 						<c:choose>
 							<c:when test="${metricKey eq selectedMetric2}">
