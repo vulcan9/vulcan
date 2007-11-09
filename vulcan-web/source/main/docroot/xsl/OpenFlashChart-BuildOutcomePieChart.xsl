@@ -13,9 +13,7 @@
 	<xsl:variable name="totalSamples" select="count(/build-history/project)"/>
 	
 	<xsl:template match="/build-history">
-		<xsl:text>&amp;title=Success Rate (</xsl:text>
-		<xsl:value-of select="format-number(count(key('builds-by-outcome', 'PASS')) div $totalSamples * 100, '#.##')"/>
-		<xsl:text>%25),{color: #7E97A6; font-size: 20; text-align:left}&amp;</xsl:text>
+		<xsl:text>&amp;title=,{color: #7E97A6; font-size: 2; text-align:left}&amp;</xsl:text>
 		<xsl:text>&amp;bg_colour=#FFFFFF&amp;</xsl:text>
 		<xsl:text>&amp;pie=90,#FFFFFF,#FFFFFF,false&amp;</xsl:text>
 		

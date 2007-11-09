@@ -18,8 +18,6 @@
  */
 package net.sourceforge.vulcan.web.struts.actions;
 
-import static org.apache.commons.lang.StringUtils.isNotBlank;
-
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringReader;
@@ -27,6 +25,8 @@ import java.io.StringWriter;
 import java.io.Writer;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -129,7 +129,7 @@ public abstract class ProjectReportBaseAction extends Action {
 		
 		out.output(document, writer);
 	}
-	protected ActionForward sendDocument(Document doc, String transform, ProjectConfigDto projectConfig, int buildNumber, ActionMapping mapping, HttpServletRequest request, HttpServletResponse response) throws IOException, MalformedURLException, SAXException, TransformerException {
+	protected ActionForward sendDocument(Document doc, String transform, ProjectConfigDto projectConfig, int buildNumber, Map<String, Object> transformParams, ActionMapping mapping, HttpServletRequest request, HttpServletResponse response) throws IOException, MalformedURLException, SAXException, TransformerException {
 		if (StringUtils.isBlank(transform)) {
 			final PrintWriter writer = response.getWriter();
 			response.setContentType("application/xml");
@@ -140,33 +140,24 @@ public abstract class ProjectReportBaseAction extends Action {
 			}
 		} else {
 			try {
-				final URL projectStatusUrl = getSelfURL(mapping, request, transform);
-				
-				final URL projectSiteUrl;
-				final URL issueTrackerURL;
-
-				final String issueTrackerUrl;
-				
-				if (projectConfig == null) {
-					projectSiteUrl = null;
-					issueTrackerUrl = null;
-				} else {
-					projectSiteUrl = getSiteBaseURL(mapping, request, projectConfig, buildNumber);
-					issueTrackerUrl = projectConfig.getBugtraqUrl();
+				final Map<String, Object> params = new HashMap<String, Object>();
+				if (transformParams != null) {
+					params.putAll(transformParams);
 				}
 				
-				if (isNotBlank(issueTrackerUrl)) {
-					issueTrackerURL = new URL(issueTrackerUrl);
-				} else {
-					issueTrackerURL = null;
+				params.put("viewProjectStatusURL", getSelfURL(mapping, request, transform));
+				
+				if (projectConfig != null) {
+					params.put("projectSiteURL", getSiteBaseURL(mapping, request, projectConfig, buildNumber));
+					params.put("issueTrackerURL", projectConfig.getBugtraqUrl());
 				}
 				
 				final StringWriter tmpWriter = new StringWriter();
 				final StreamResult result = new StreamResult(tmpWriter);
 				
 				final String contentType = projectDomBuilder.transform(doc,
-						projectSiteUrl, projectStatusUrl, issueTrackerURL,
-						request.getLocale(), transform, result);
+						params, request.getLocale(), transform,
+						result);
 				
 				if (StringUtils.isNotBlank(contentType)) {
 					response.setContentType(contentType);

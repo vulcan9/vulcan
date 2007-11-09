@@ -19,9 +19,9 @@
 package net.sourceforge.vulcan.core;
 
 import java.io.IOException;
-import java.net.URL;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 import javax.xml.transform.Result;
 import javax.xml.transform.TransformerException;
@@ -41,5 +41,5 @@ public interface ProjectDomBuilder {
 	/**
 	 * @return MIME type of transformed result, if specified.
 	 */
-	String transform(Document document, URL projectSiteURL, URL viewProjectStatusURL, URL issueTrackerURL, Locale locale, String format, Result result) throws SAXException, IOException, TransformerException, NoSuchTransformFormatException;
+	String transform(Document document, Map<String, ?> transormParameters, Locale locale, String format, Result result) throws SAXException, IOException, TransformerException, NoSuchTransformFormatException;
 }

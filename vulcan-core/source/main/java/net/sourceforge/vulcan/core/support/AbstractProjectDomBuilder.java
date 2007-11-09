@@ -24,7 +24,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URL;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -152,19 +151,17 @@ public abstract class AbstractProjectDomBuilder implements ProjectDomBuilder {
 		}
 		return doc;
 	}
-	public String transform(Document document, URL projectSiteURL, URL viewProjectStatusURL, URL issueTrackerURL, Locale locale, String format, Result result) throws SAXException, IOException, TransformerException, NoSuchTransformFormatException {
+	public String transform(Document document, Map<String, ?> transformParameters, Locale locale, String format, Result result) throws SAXException, IOException, TransformerException, NoSuchTransformFormatException {
 		final Transformer transformer = createTransformer(format);
 		
 		applyParameters(transformer, locale);
-		if (projectSiteURL != null) {
-			transformer.setParameter("projectSiteURL", projectSiteURL.toExternalForm());
+		
+		if (transformParameters != null) {
+			for (String key : transformParameters.keySet()) {
+				transformer.setParameter(key, transformParameters.get(key));
+			}
 		}
-		if (viewProjectStatusURL != null) {
-			transformer.setParameter("viewProjectStatusURL", viewProjectStatusURL.toExternalForm());	
-		}
-		if (issueTrackerURL != null) {
-			transformer.setParameter("issueTrackerURL", issueTrackerURL.toExternalForm());	
-		}
+		
 		transformer.transform(new JDOMSource(document), result);
 		
 		return transformer.getOutputProperty(OutputKeys.MEDIA_TYPE);

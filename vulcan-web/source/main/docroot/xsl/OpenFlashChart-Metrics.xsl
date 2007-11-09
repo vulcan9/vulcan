@@ -6,50 +6,31 @@
 	
 	<xsl:strip-space elements="*"/>
 	
-	<xsl:param name="title"/>
 	<xsl:param name="projectSiteURL"/>
 	<xsl:param name="viewProjectStatusURL"/>
 	<xsl:param name="issueTrackerURL"/>
-	<xsl:param name="issueListHeader"/>
-	<xsl:param name="nextBuildLabel"/>
-	<xsl:param name="prevBuildLabel"/>
-	<xsl:param name="sandboxLabel"/>
-	<xsl:param name="buildLogLabel"/>
-	<xsl:param name="revisionCaption"/>
-	<xsl:param name="changeSetCaption"/>
-	<xsl:param name="projectHeader"/>
-	<xsl:param name="revisionHeader"/>
-	<xsl:param name="buildNumberHeader"/>
-	<xsl:param name="authorHeader"/>
-	<xsl:param name="timestampHeader"/>
-	<xsl:param name="messageHeader"/>
-	<xsl:param name="pathsHeader"/>
-	<xsl:param name="diffHeader"/>
-	<xsl:param name="statusHeader"/>
-	<xsl:param name="lastGoodBuildNumberLabel"/>
-	<xsl:param name="repositoryUrlLabel"/>
-	<xsl:param name="repositoryTagNameHeader"/>
-	<xsl:param name="currentlyBuildingMessage"/>
-	<xsl:param name="buildRequestedByLabel"/>
-	<xsl:param name="buildScheduledByLabel"/>
-	<xsl:param name="elapsedTimeLabel"/>
-	<xsl:param name="buildReasonLabel"/>
-	<xsl:param name="updateTypeLabel"/>
-	<xsl:param name="warningsLabel"/>
-	<xsl:param name="errorsLabel"/>
-	<xsl:param name="metricsLabel"/>
-	<xsl:param name="testFailureLabel"/>
-	<xsl:param name="testNameLabel"/>
-	<xsl:param name="testFailureBuildNumberLabel"/>
-	<xsl:param name="newTestFailureLabel"/>
+	<xsl:param name="metricLabel1"/>
+	<xsl:param name="metricLabel2"/>
 	
 	<xsl:key name="builds-by-project-name" match="/build-history/project" use="name"/>
 	<xsl:key name="builds-by-timestamp" match="/build-history/project" use="timestamp/@millis"/>
 	
-	<xsl:variable name="metricLabel1" select="'Tests executed'"/>
-	<xsl:variable name="metricLabel2" select="'Test failures'"/>
-	
 	<xsl:template match="/build-history">
+		<xsl:variable name="minValue1">
+			<xsl:choose>
+				<xsl:when test="count(project/metrics/metric[@label=$metricLabel1]/@value) != 0">
+					<xsl:for-each select="project/metrics/metric[@label=$metricLabel1]/@value">
+						<xsl:sort data-type="number" select="." order="ascending"/>
+						<xsl:if test="position()=1">
+							<xsl:value-of select="ceiling(. * 0.95)"/>
+						</xsl:if>
+					</xsl:for-each>
+				</xsl:when>
+				<xsl:otherwise>
+					<xsl:value-of select="0"/>
+				</xsl:otherwise>
+			</xsl:choose>
+		</xsl:variable>
 		<xsl:variable name="maxValue1">
 			<xsl:choose>
 				<xsl:when test="count(project/metrics/metric[@label=$metricLabel1]/@value) != 0">
@@ -66,18 +47,26 @@
 			</xsl:choose>
 		</xsl:variable>
 		
+		<xsl:variable name="minValue2">
+			<xsl:for-each select="project/metrics/metric[@label=$metricLabel2]/@value">
+				<xsl:sort data-type="number" select="." order="ascending"/>
+				<xsl:if test="position()=1">
+					<xsl:value-of select="ceiling(. * 0.97)"/>
+				</xsl:if>
+			</xsl:for-each>
+		</xsl:variable>
 		<xsl:variable name="maxValue2">
 			<xsl:for-each select="project/metrics/metric[@label=$metricLabel2]/@value">
 				<xsl:sort data-type="number" select="." order="descending"/>
 				<xsl:if test="position()=1">
-					<xsl:value-of select="ceiling(. * 1.05)"/>
+					<xsl:value-of select="ceiling(. * 1.07)"/>
 				</xsl:if>
 			</xsl:for-each>
 		</xsl:variable>
 		
-		<xsl:text>&amp;title=Metrics,{color: #7E97A6; font-size: 20; text-align:left}&amp;</xsl:text>
-
-		&amp;y_min=0&amp;
+		<xsl:text>&amp;y_min=</xsl:text>
+		<xsl:text><xsl:value-of select="$minValue1"/></xsl:text>
+		<xsl:text>&amp;</xsl:text>
 		<xsl:text>&amp;y_max=</xsl:text>
 		<xsl:text><xsl:value-of select="$maxValue1"/></xsl:text>
 		<xsl:text>&amp;</xsl:text>
@@ -127,6 +116,10 @@
 			<xsl:text>&amp;y2_max=</xsl:text>
 			<xsl:value-of select="$maxValue2"/>
 			<xsl:text>&amp;</xsl:text>
+			<xsl:text>&amp;y2_min=</xsl:text>
+			<xsl:value-of select="$minValue2"/>
+			<xsl:text>&amp;</xsl:text>
+			
 			&amp;show_y2=true&amp;
 			
 			<xsl:text>&amp;y2_lines=</xsl:text>
@@ -197,7 +190,7 @@
 		
 		<xsl:text>&amp;line</xsl:text>
 		<xsl:value-of select="$suffix"/>
-		<xsl:text>=2,</xsl:text>
+		<xsl:text>=1,</xsl:text>
 		<xsl:value-of select="$color"/>
 		<xsl:text>,</xsl:text>
 		<xsl:value-of select="$seriesName"/>

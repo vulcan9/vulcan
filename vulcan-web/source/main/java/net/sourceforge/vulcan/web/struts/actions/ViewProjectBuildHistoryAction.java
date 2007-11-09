@@ -18,7 +18,9 @@
  */
 package net.sourceforge.vulcan.web.struts.actions;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -28,7 +30,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import net.sourceforge.vulcan.core.BuildOutcomeStore;
+import net.sourceforge.vulcan.core.support.MetricSelector;
+import net.sourceforge.vulcan.core.support.ReportHelper;
 import net.sourceforge.vulcan.dto.BuildOutcomeQueryDto;
+import net.sourceforge.vulcan.dto.MetricDto;
 import net.sourceforge.vulcan.dto.ProjectStatusDto;
 import net.sourceforge.vulcan.dto.ProjectStatusDto.Status;
 import net.sourceforge.vulcan.metadata.SvnRevision;
@@ -46,6 +51,7 @@ import org.jdom.Document;
 @SvnRevision(id="$Id$", url="$HeadURL$")
 public final class ViewProjectBuildHistoryAction extends ProjectReportBaseAction {
 	private BuildOutcomeStore buildOutcomeStore;
+	private MetricSelector metricSelector;
 	private String filename;
 	
 	@Override
@@ -108,16 +114,15 @@ public final class ViewProjectBuildHistoryAction extends ProjectReportBaseAction
 		if (StringUtils.isNotBlank(transformType)) {
 			final ActionForward forward = mapping.findForward(transformType);
 			if (forward != null) {
-				request.setAttribute("fromLabel", fromLabel);
-				request.setAttribute("toLabel", toLabel);
-				request.getSession().setAttribute(Keys.BUILD_HISTORY, doc);
+				prepareMetrics(request, outcomes, doc, fromLabel, toLabel);
+				prepareStatistics(request, query);
 				return forward;
 			}
 		}
 		
-		return sendDocument(doc, transformType, null, 0, mapping, request, response);
+		return sendDocument(doc, transformType, null, 0, null, mapping, request, response);
 	}
-	
+
 	public void setFilename(String filename) {
 		this.filename = filename;
 	}
@@ -126,6 +131,67 @@ public final class ViewProjectBuildHistoryAction extends ProjectReportBaseAction
 		this.buildOutcomeStore = buildOutcomeStore;
 	}
 	
+	private void prepareStatistics(HttpServletRequest request, BuildOutcomeQueryDto query) {
+		request.setAttribute("topErrors", buildOutcomeStore.loadTopBuildErrors(query, 5));
+		request.setAttribute("topTestFailures", buildOutcomeStore.loadTopTestFailures(query, 5));
+	}
+	
+	private void prepareMetrics(HttpServletRequest request,
+			final List<ProjectStatusDto> outcomes, final Document doc,
+			final Object fromLabel, final Object toLabel) {
+		
+		Date maxDate = null;
+		if (toLabel instanceof Date) {
+			maxDate = (Date) toLabel;
+		}
+		
+		final ReportHelper reportHelper = new ReportHelper(outcomes, maxDate);
+		
+		request.setAttribute("fromLabel", fromLabel);
+		request.setAttribute("toLabel", toLabel);
+		request.setAttribute("sampleCount", outcomes.size());
+		request.setAttribute("successCount", reportHelper.getSuccessCount());
+		request.setAttribute("longestTimeToFixBuild", reportHelper.getLongestTimeToFixBuild());
+		request.setAttribute("averageTimeToFixBuild", reportHelper.getAverageTimeToFixBuild());
+		
+		request.getSession().setAttribute(Keys.BUILD_HISTORY, doc);
+		final List<String> availableMetrics = getAvailableMetrics(outcomes);
+		request.setAttribute("availableMetrics", availableMetrics);
+		
+		final List<String> defaultMetrics = metricSelector.selectDefaultMetrics(availableMetrics);
+		if (defaultMetrics.size() > 0) {
+			request.setAttribute("selectedMetric1", defaultMetrics.get(0));
+			if (defaultMetrics.size() > 1) {
+				request.setAttribute("selectedMetric2", defaultMetrics.get(1));
+			}
+		}
+	}
+	
+	public void setMetricSelector(MetricSelector metricSelector) {
+		this.metricSelector = metricSelector;
+	}
+	
+	private List<String> getAvailableMetrics(List<ProjectStatusDto> outcomes) {
+		final Set<String> keys = new HashSet<String>();
+		
+		for (ProjectStatusDto outcome : outcomes) {
+			final List<MetricDto> metrics = outcome.getMetrics();
+			if (metrics == null) {
+				continue;
+			}
+			
+			for (MetricDto metric : metrics) {
+				keys.add(metric.getMessageKey());
+			}
+		}
+		
+		final List<String> list = new ArrayList<String>(keys);
+		
+		Collections.sort(list);
+		
+		return list;
+	}
+
 	private Set<Status> parseOmittedTypes(String[] typeStrings) {
 		final Set<Status> types = new HashSet<Status>();
 		

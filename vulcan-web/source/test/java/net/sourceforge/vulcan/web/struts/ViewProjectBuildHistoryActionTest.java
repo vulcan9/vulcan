@@ -26,8 +26,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.UUID;
 
+import net.sourceforge.vulcan.dto.BuildMessageDto;
 import net.sourceforge.vulcan.dto.BuildOutcomeQueryDto;
+import net.sourceforge.vulcan.dto.MetricDto;
 import net.sourceforge.vulcan.dto.ProjectStatusDto;
+import net.sourceforge.vulcan.dto.TestFailureDto;
 import net.sourceforge.vulcan.dto.ProjectStatusDto.Status;
 import net.sourceforge.vulcan.metadata.SvnRevision;
 
@@ -56,8 +59,6 @@ public class ViewProjectBuildHistoryActionTest extends MockApplicationContextStr
 		ids.add(UUID.randomUUID());
 		ids.add(UUID.randomUUID());
 		ids.add(UUID.randomUUID());
-		
-		//query.setStatuses(new HashSet<Status>(Arrays.asList(Status.values())));
 	}
 	
 	public void testBlankName() throws Exception {
@@ -189,7 +190,22 @@ public class ViewProjectBuildHistoryActionTest extends MockApplicationContextStr
 				"1", "2", request.getLocale());
 		
 		EasyMock.expectLastCall().andReturn(dom);
+
+		buildOutcomeStore.loadTopBuildErrors(query, 5);
+		final List<BuildMessageDto> buildFailures = new ArrayList<BuildMessageDto>();
+		EasyMock.expectLastCall().andReturn(buildFailures);
+
+		buildOutcomeStore.loadTopTestFailures(query, 5);
+		final List<TestFailureDto> testFailures = new ArrayList<TestFailureDto>();
+		EasyMock.expectLastCall().andReturn(testFailures);
 		
+		MetricDto m1 = new MetricDto();
+		MetricDto m2 = new MetricDto();
+		m1.setMessageKey("b.key");
+		m2.setMessageKey("a.key");
+		status.setMetrics(Arrays.asList(m1, m2));
+		status.setCompletionDate(new Date(1000L));
+
 		replay();
 		
 		actionPerform();
@@ -199,6 +215,9 @@ public class ViewProjectBuildHistoryActionTest extends MockApplicationContextStr
 		verifyForward("OpenFlashChart");
 		
 		assertSame(dom, request.getSession().getAttribute("buildHistory"));
+		assertEquals(Arrays.asList("a.key", "b.key"), request.getAttribute("availableMetrics"));
+		assertSame(buildFailures, request.getAttribute("topErrors"));
+		assertSame(testFailures, request.getAttribute("topTestFailures"));
 	}		
 	public void testIncludeAll() throws Exception {
 		addRequestParameter("download", "true");

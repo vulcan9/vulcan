@@ -109,6 +109,8 @@ public abstract class MockApplicationContextStrutsTestCase extends EasyMockStrut
 	public void setUp() throws Exception {
 		super.setUp();
 
+		request.setServerName("localhost");
+		request.setServerPort(80);
 		context.setAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE, wac);
 		
 		multipartElements.clear();

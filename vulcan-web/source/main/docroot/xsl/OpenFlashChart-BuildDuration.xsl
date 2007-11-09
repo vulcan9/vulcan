@@ -59,8 +59,6 @@
 			</xsl:for-each>
 		</xsl:variable>
 		
-		<xsl:text>&amp;title=Build Durations,{color: #7E97A6; font-size: 20; text-align:left}&amp;</xsl:text>
-
 		&amp;y_min=0&amp;
 		<xsl:text>&amp;y_max=</xsl:text>
 		<xsl:text><xsl:value-of select="$maxDuration"/></xsl:text>
@@ -123,7 +121,7 @@
 		
 		<xsl:text>&amp;line</xsl:text>
 		<xsl:value-of select="$suffix"/>
-		<xsl:text>=2,</xsl:text>
+		<xsl:text>=1,</xsl:text>
 		<xsl:value-of select="$color"/>
 		<xsl:text>,</xsl:text>
 		<xsl:value-of select="$series-name"/>
@@ -164,7 +162,6 @@
 		</xsl:for-each>&amp;
 
 		&amp;links<xsl:value-of select="$suffix"/>=<xsl:for-each select="$samples">
-			<xsl:sort data-type="number" select="timestamp/@millis"/>
 			<xsl:if test="position()!=1">
 				<xsl:text>,</xsl:text>
 			</xsl:if>

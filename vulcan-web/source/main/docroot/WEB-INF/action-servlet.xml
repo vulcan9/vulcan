@@ -22,6 +22,27 @@
 			parent="projectReportBaseAction">
 		<property name="buildOutcomeStore" ref="buildOutcomeStore"/>
 		<property name="filename" value="vulcan-build-history.xml"/>
+		<property name="metricSelector">
+			<bean class="net.sourceforge.vulcan.core.support.MetricSelector">
+				<property name="preferredMetrics">
+					<list>
+						<value>vulcan.metrics.tests.executed</value>
+						<value>vulcan.metrics.coverage.branch</value>
+						<value>vulcan.metrics.coverage.block</value>
+						<value>vulcan.metrics.coverage.line</value>
+						<value>vulcan.metrics.coverage.method</value>
+						<value>vulcan.metrics.coverage.class</value>
+						<value>vulcan.metrics.source.lines</value>
+						<value>vulcan.metrics.source.packages</value>
+						<value>vulcan.metrics.source.classes</value>
+						<value>vulcan.metrics.source.methods</value>
+						<value>vulcan.metrics.source.files</value>
+						<value>vulcan.metrics.tests.failed</value>
+						<value>vulcan.metrics.tests.ignored</value>
+					</list>
+				</property>
+			</bean>
+		</property>
 	</bean>
 	
 	<bean name="/getBuildHistory"

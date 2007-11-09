@@ -31,6 +31,7 @@ div.test-failures, div.test-failures caption {
 
 html, body {
 	background-color: white;
+	height: 100%;
 }
 
 .success, .PASS {
