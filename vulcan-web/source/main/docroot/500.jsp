@@ -11,7 +11,7 @@
 
 	<jsp:output	omit-xml-declaration="true"/>
 	
-	<jsp:directive.page session="false"/>
+	<jsp:directive.page session="false" contentType="text/html"/>
 
 	<v:bubble styleClass="error">
 		<span class="error"><fmt:message key="errors.internal"/></span>
