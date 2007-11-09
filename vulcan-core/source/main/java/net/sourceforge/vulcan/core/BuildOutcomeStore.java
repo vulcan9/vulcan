@@ -24,8 +24,10 @@ import java.util.UUID;
 
 import org.springframework.transaction.annotation.Transactional;
 
+import net.sourceforge.vulcan.dto.BuildMessageDto;
 import net.sourceforge.vulcan.dto.BuildOutcomeQueryDto;
 import net.sourceforge.vulcan.dto.ProjectStatusDto;
+import net.sourceforge.vulcan.dto.TestFailureDto;
 import net.sourceforge.vulcan.exception.StoreException;
 import net.sourceforge.vulcan.metadata.SvnRevision;
 
@@ -41,7 +43,14 @@ public interface BuildOutcomeStore {
 	
 	@Transactional(readOnly=true)
 	List<ProjectStatusDto> loadBuildSummaries(BuildOutcomeQueryDto query);
+
+	@Transactional(readOnly=true)
+	List<BuildMessageDto> loadTopBuildErrors(BuildOutcomeQueryDto query, int maxResultCount);
+	
+	@Transactional(readOnly=true)
+	List<TestFailureDto> loadTopTestFailures(BuildOutcomeQueryDto query, int maxResultCount);
 	
 	@Transactional(readOnly=true)
 	Map<String, List<UUID>> getBuildOutcomeIDs();
+
 }

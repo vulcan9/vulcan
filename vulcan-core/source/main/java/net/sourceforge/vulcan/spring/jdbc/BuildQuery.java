@@ -36,19 +36,9 @@ import org.springframework.jdbc.core.SqlParameter;
 import org.springframework.jdbc.object.MappingSqlQuery;
 
 class BuildQuery extends MappingSqlQuery {
-	protected final static String SQL =
-		"select builds.id, name, uuid, status, message_key, build_reason_key," +
-		"message_arg_0, message_arg_1, message_arg_2, message_arg_3, " +
-		"build_reason_arg_0, build_reason_arg_1, build_reason_arg_2, build_reason_arg_3, " +
-		"start_date, completion_date, build_number, update_type," +
-		"work_dir, revision, revision_label, last_good_build_number," +
-		"tag_name, repository_url, status_changed, scheduled_build," +
-		"requested_by, revision_unavailable " +
-		"from builds left join project_names on builds.project_id = project_names.id ";
-		
 	public BuildQuery(DataSource dataSource) {
 		this(dataSource, true);
-		setSql(SQL + "where uuid = ?");
+		setSql(HistoryQueryBuilder.BUILD_INFO_SQL + "where uuid = ?");
 		declareParameter(new SqlParameter("uuid", Types.VARCHAR));
 		compile();
 	}

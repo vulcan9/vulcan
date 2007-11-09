@@ -38,8 +38,8 @@ class DependencyQuery extends MappingSqlQuery {
 	public DependencyQuery(DataSource dataSource) {
 		super(dataSource, "select name, uuid " +
 				"from builds " +
-				"left join project_names on builds.project_id = project_names.id " +
-				"left join build_dependencies on builds.id = build_dependencies.dependency_build_id " +
+				"inner join project_names on builds.project_id = project_names.id " +
+				"inner join build_dependencies on builds.id = build_dependencies.dependency_build_id " +
 				"where build_dependencies.build_id = ?");
 		declareParameter(new SqlParameter("build_dependencies.build_id", Types.NUMERIC));
 		compile();

@@ -27,6 +27,7 @@ import java.util.Map;
 
 import javax.sql.DataSource;
 
+import net.sourceforge.vulcan.dto.BuildOutcomeQueryDto;
 import net.sourceforge.vulcan.dto.MetricDto;
 
 import org.apache.commons.logging.Log;
@@ -34,20 +35,14 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.object.MappingSqlQuery;
 
-class BuildHistoryMetricsQuery extends MappingSqlQuery {
+class BuildHistoryMetricsQuery extends MappingSqlQuery implements BuilderQuery {
 	private static Log LOG = LogFactory.getLog(BuildHistoryMetricsQuery.class);
-	private static String SQL = "select metrics.build_id, metrics.message_key, metrics.data " +
-		"from builds left join project_names on builds.project_id = project_names.id left join metrics on builds.id=metrics.build_id ";
-	
-	private final Object[] parameterValues;
+	private Object[] parameterValues;
 	
 	@SuppressWarnings("unchecked")
-	public BuildHistoryMetricsQuery(DataSource dataSource, String whereClause, List<?> declaredParameters, Object[] parameterValues) {
-		this.parameterValues = parameterValues;
+	public BuildHistoryMetricsQuery(DataSource dataSource, BuildOutcomeQueryDto query) {
 		setDataSource(dataSource);
-		setSql(SQL + whereClause + " order by build_id, message_key");
-		getDeclaredParameters().addAll(declaredParameters);
-		compile();
+		HistoryQueryBuilder.buildQuery(HistoryQueryBuilder.BUILD_HISTORY_METRICS_SQL, query, this);
 	}
 	
 	public void queryMetrics(List<JdbcBuildOutcomeDto> builds) {
@@ -61,11 +56,20 @@ class BuildHistoryMetricsQuery extends MappingSqlQuery {
 	}
 
 	@Override
+	public void setSql(String sql) {
+		super.setSql(sql + " order by build_id, message_key");
+	}
+	
+	@Override
 	@SuppressWarnings("unchecked")
 	public List<JdbcMetricDto> execute(Object[] params) throws DataAccessException {
 		return super.execute(params);
 	}
 
+	public void setParameterValues(Object[] parameterValues) {
+		this.parameterValues = parameterValues;
+	}
+	
 	@Override
 	protected JdbcMetricDto mapRow(ResultSet rs, int rowNumber) throws SQLException {
 		final JdbcMetricDto dto = new JdbcMetricDto();

@@ -38,7 +38,7 @@ class BuildIdMapQuery extends MappingSqlQuery {
 	
 	BuildIdMapQuery(DataSource dataSource) {
 		setDataSource(dataSource);
-		setSql("select name, uuid from builds left join project_names on project_id = project_names.id order by name, build_number");
+		setSql("select name, uuid from builds inner join project_names on project_id = project_names.id order by name, build_number");
 		compile();
 	}
 	public Map<String, List<UUID>> executeForMap() {
