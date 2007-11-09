@@ -30,6 +30,8 @@ import org.springframework.jdbc.core.SqlParameter;
 import org.springframework.jdbc.object.SqlUpdate;
 
 class BuildMessageInserter extends SqlUpdate {
+	public static final int MAX_MESSAGE_LENGTH = 1000;
+	
 	public BuildMessageInserter(DataSource dataSource) {
 		setDataSource(dataSource);
 		setSql("insert into build_messages " +
@@ -55,7 +57,12 @@ class BuildMessageInserter extends SqlUpdate {
 		params[1] = type.getRdbmsValue(); 
 
 		for (BuildMessageDto dto : messages) {
-			params[2] = dto.getMessage();
+			String message = dto.getMessage();
+			if (message.length() > MAX_MESSAGE_LENGTH) {
+				message = message.substring(0, MAX_MESSAGE_LENGTH);
+			}
+			
+			params[2] = message;
 			params[3] = dto.getLineNumber();
 			params[4] = dto.getFile();
 			params[5] = dto.getCode();

@@ -70,7 +70,7 @@ create table build_messages (
 	build_id integer not null,
 	message_type char(1), 
 	
-	message varchar(2048) not null,
+	message varchar(1000) not null,
 	code varchar(16),
 	file varchar(1024),
 	line_number integer,
@@ -121,4 +121,12 @@ create table modified_paths (
 );
 
 create index idx_builds_uuid on builds (uuid);
+create index idx_builds_project_id on builds (project_id);
 create index idx_builds_completion_date on builds (completion_date);
+create index idx_build_deps_build_id on build_dependencies(build_id);
+create index idx_build_messages_msg on build_messages (message);
+create index idx_build_messages_build_id on build_messages (build_id);
+create index idx_metrics_build_id on metrics (build_id);
+create index idx_test_failures_build_id on test_failures (build_id);
+create index idx_change_sets_build_id on change_sets (build_id);
+create index idx_modified_paths_build_id on modified_paths (build_id);

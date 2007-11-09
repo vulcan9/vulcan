@@ -18,32 +18,13 @@
  */
 package net.sourceforge.vulcan.spring.jdbc;
 
-import java.util.List;
+import org.springframework.jdbc.core.SqlParameter;
 
-import javax.sql.DataSource;
 
-import net.sourceforge.vulcan.dto.BuildOutcomeQueryDto;
-
-class BuildHistoryQuery extends BuildQuery implements BuilderQuery {
-	protected Object[] parameterValues;
+interface BuilderQuery {
+	public void setParameterValues(Object[] parameterValues);
 	
-	public BuildHistoryQuery(DataSource dataSource, BuildOutcomeQueryDto queryDto) {
-		super(dataSource, true);
-		
-		HistoryQueryBuilder.buildQuery(queryDto, this);
-	}
+	public void declareParameter(SqlParameter sqlParameter);
 
-	public void setParameterValues(Object[] parameterValues) {
-		this.parameterValues = parameterValues;
-	}
-	
-	@Override
-	public void setSql(String sql) {
-		super.setSql(sql + " order by completion_date");
-	}
-	
-	@SuppressWarnings("unchecked")
-	public List<JdbcBuildOutcomeDto> queryForHistory() {
-		return execute(parameterValues);
-	}
+	public void setSql(String string);
 }

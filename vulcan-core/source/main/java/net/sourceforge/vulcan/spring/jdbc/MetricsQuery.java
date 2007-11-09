@@ -34,7 +34,7 @@ import org.springframework.jdbc.object.MappingSqlQuery;
 class MetricsQuery extends MappingSqlQuery {
 	public MetricsQuery(DataSource dataSource) {
 		super(dataSource, "select message_key, data " +
-				"from metrics where build_id = ?");
+				"from metrics where build_id = ? order by message_key");
 		declareParameter(new SqlParameter("build_id", Types.NUMERIC));
 		compile();
 	}

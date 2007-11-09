@@ -33,8 +33,10 @@ import net.sourceforge.vulcan.core.BuildOutcomeStore;
 import net.sourceforge.vulcan.core.ConfigurationStore;
 import net.sourceforge.vulcan.core.ProjectNameChangeListener;
 import net.sourceforge.vulcan.core.support.UUIDUtils;
+import net.sourceforge.vulcan.dto.BuildMessageDto;
 import net.sourceforge.vulcan.dto.BuildOutcomeQueryDto;
 import net.sourceforge.vulcan.dto.ProjectStatusDto;
+import net.sourceforge.vulcan.dto.TestFailureDto;
 import net.sourceforge.vulcan.exception.StoreException;
 import net.sourceforge.vulcan.metadata.SvnRevision;
 
@@ -136,8 +138,19 @@ public class JdbcBuildOutcomeStore implements BuildOutcomeStore, ProjectNameChan
 		
 		final List<JdbcBuildOutcomeDto> results = historyQuery.queryForHistory();
 		
+		final BuildHistoryMetricsQuery metricsQuery = new BuildHistoryMetricsQuery(dataSource, query);
+		
+		metricsQuery.queryMetrics(results);
 		
 		return Collections.<ProjectStatusDto>unmodifiableList(results);
+	}
+	
+	public List<BuildMessageDto> loadTopBuildErrors(BuildOutcomeQueryDto query, int maxResultCount) {
+		return new BuildHistoryTopErrorsQuery(dataSource, query, maxResultCount).queryTopMessages();
+	}
+
+	public List<TestFailureDto> loadTopTestFailures(BuildOutcomeQueryDto query,	int maxResultCount) {
+		return new BuildHistoryTopTestFailuresQuery(dataSource, query, maxResultCount).queryTopMessages();
 	}
 	
 	public UUID storeBuildOutcome(ProjectStatusDto outcome)	throws StoreException {
