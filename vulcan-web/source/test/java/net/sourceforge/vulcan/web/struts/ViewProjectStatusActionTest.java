@@ -19,7 +19,6 @@
 package net.sourceforge.vulcan.web.struts;
 
 import java.io.File;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -505,6 +504,7 @@ public class ViewProjectStatusActionTest extends MockApplicationContextStrutsTes
 		assertPropertyHasError(ActionMessages.GLOBAL_MESSAGE, "errors.transform.not.found");
 	}
 	
+	@SuppressWarnings("unchecked")
 	private void trainForTransform(Map<String, ProjectStatusDto> projectsBeingBuilt, String transormType) throws Exception {
 		expect(manager.getProjectConfig("some project")).andReturn(projectConfig);
 
@@ -522,9 +522,7 @@ public class ViewProjectStatusActionTest extends MockApplicationContextStrutsTes
 		
 		projectDomBuilder.transform(
 				(Document) anyObject(),
-				(URL)anyObject(),
-				(URL)anyObject(),
-				(URL)anyObject(),
+				(Map<String, Object>)anyObject(),
 				eq(request.getLocale()),
 				eq(transormType),
 				(Result)anyObject());

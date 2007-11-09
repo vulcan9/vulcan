@@ -30,6 +30,7 @@ import net.sourceforge.vulcan.metadata.SvnRevision;
 public class TestFailureDto extends BaseDto {
 	private String name;
 	private Integer buildNumber;
+	private Integer count;
 	
 	public Integer getBuildNumber() {
 		return buildNumber;
@@ -42,5 +43,11 @@ public class TestFailureDto extends BaseDto {
 	}
 	public void setName(String name) {
 		this.name = name;
+	}
+	public Integer getCount() {
+		return count;
+	}
+	public void setCount(Integer count) {
+		this.count = count;
 	}
 }

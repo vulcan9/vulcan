@@ -29,10 +29,12 @@ import java.util.UUID;
 
 import net.sourceforge.vulcan.core.BuildOutcomeStore;
 import net.sourceforge.vulcan.core.ConfigurationStore;
+import net.sourceforge.vulcan.dto.BuildMessageDto;
 import net.sourceforge.vulcan.dto.BuildOutcomeQueryDto;
 import net.sourceforge.vulcan.dto.PluginMetaDataDto;
 import net.sourceforge.vulcan.dto.ProjectStatusDto;
 import net.sourceforge.vulcan.dto.StateManagerConfigDto;
+import net.sourceforge.vulcan.dto.TestFailureDto;
 import net.sourceforge.vulcan.exception.StoreException;
 import net.sourceforge.vulcan.metadata.SvnRevision;
 
@@ -83,6 +85,12 @@ public class StoreStub implements ConfigurationStore, BuildOutcomeStore {
 		return null;
 	}
 	public List<ProjectStatusDto> loadBuildSummaries(BuildOutcomeQueryDto query) {
+		return null;
+	}
+	public List<BuildMessageDto> loadTopBuildErrors(BuildOutcomeQueryDto query, int maxResultCount) {
+		return null;
+	}
+	public List<TestFailureDto> loadTopTestFailures(BuildOutcomeQueryDto query,	int maxResultCount) {
 		return null;
 	}
 	public Map<String, List<UUID>> getBuildOutcomeIDs() {

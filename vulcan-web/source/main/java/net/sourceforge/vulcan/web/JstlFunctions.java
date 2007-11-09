@@ -18,23 +18,34 @@
  */
 package net.sourceforge.vulcan.web;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import static org.apache.commons.lang.time.DateUtils.MILLIS_PER_SECOND;
+import static org.apache.commons.lang.time.DateUtils.MILLIS_PER_MINUTE;
+import static org.apache.commons.lang.time.DateUtils.MILLIS_PER_HOUR;
+import static org.apache.commons.lang.time.DateUtils.MILLIS_PER_DAY;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.jsp.PageContext;
 
 import net.sourceforge.vulcan.metadata.SvnRevision;
 
 import org.apache.struts.Globals;
 import org.apache.struts.action.ActionMessages;
+import org.springframework.context.MessageSource;
+import org.springframework.web.context.WebApplicationContext;
+import org.springframework.web.context.support.WebApplicationContextUtils;
 
 @SvnRevision(id="$Id$", url="$HeadURL$")
 public abstract class JstlFunctions {
+	private static MessageSource messageSource;
+	
 	public static String mangle(String s) {
 		return s.replaceAll("[ +\\[\\]]", "_");
 	}
@@ -67,4 +78,67 @@ public abstract class JstlFunctions {
 		return errorList;
 	}
 
+	public static String formatElapsedTime(PageContext pageContext, long elapsedTime) {
+		final StringBuilder sb = new StringBuilder();
+
+		for (long millisPerUnit : Arrays.asList(MILLIS_PER_DAY, MILLIS_PER_HOUR, MILLIS_PER_MINUTE, MILLIS_PER_SECOND)) {
+			final String messageKey;
+			
+			if (elapsedTime < millisPerUnit && sb.length() > 0) {
+				break;
+			}
+
+			if (millisPerUnit == MILLIS_PER_DAY) {
+				messageKey = "time.day";
+			} else if (millisPerUnit == MILLIS_PER_HOUR) {
+				messageKey = "time.hour";
+			} else if (millisPerUnit == MILLIS_PER_MINUTE) {
+				messageKey = "time.minute";
+			} else {
+				messageKey = "time.second";
+			}
+			
+			final long units = elapsedTime / millisPerUnit;
+
+			if (units == 0) {
+				continue;
+			}
+			
+			elapsedTime -= units * millisPerUnit;
+
+			boolean last = false;
+			
+			if (sb.length() > 0) {
+				sb.append(", ");
+				last = true;
+			}
+
+			sb.append(units);
+			sb.append(" ");
+			sb.append(formatTimeUnit(pageContext, messageKey,  units > 1));
+			
+			if (last) {
+				break;
+			}
+		}
+		
+		return sb.toString();
+	}
+	
+	static void setMessageSource(MessageSource messageSource) {
+		JstlFunctions.messageSource = messageSource;
+	}
+	
+	private static String formatTimeUnit(PageContext pageContext, String key, boolean plural) {
+		if (messageSource == null) {
+			final WebApplicationContext ctx = WebApplicationContextUtils.getRequiredWebApplicationContext(pageContext.getServletContext());
+			JstlFunctions.messageSource = ctx;
+		}
+		
+		if (plural) {
+			key += "s";
+		}
+		
+		return messageSource.getMessage(key, null, pageContext.getRequest().getLocale());
+	}
 }

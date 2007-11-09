@@ -18,15 +18,17 @@
  */
 package net.sourceforge.vulcan.spring.jdbc;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import junit.framework.TestCase;
 import net.sourceforge.vulcan.dto.BuildOutcomeQueryDto;
 
-import org.springframework.jdbc.datasource.DriverManagerDataSource;
+import org.springframework.jdbc.core.SqlParameter;
 
 public class BuildHistoryQueryTest extends TestCase {
 	BuildOutcomeQueryDto dto = new BuildOutcomeQueryDto();
@@ -41,42 +43,56 @@ public class BuildHistoryQueryTest extends TestCase {
 		dto.setProjectNames(makeProjectNames());
 		
 		try {
-			new BuildHistoryQuery(null, dto);
+			assertWhereClause(null);
 			fail("Expected exception");
 		} catch (IllegalArgumentException e) {
 		}
 	}
 	
 	public void testBuildsQueryOneProject() throws Exception {
-		assertWhereClause("where name=?", "a");
+		assertWhereClause("where project_names.name=?", "a");
 	}
 
 	public void testBuildsQueryManyProjectSortsNames() throws Exception {
 		dto.setProjectNames(makeProjectNames("b", "c", "a"));
-		assertWhereClause("where name in (?,?,?)", "a", "b", "c");
+		assertWhereClause("where project_names.name in (?,?,?)", "a", "b", "c");
 	}
 	
 	public void testBuildsQueryByDate() throws Exception {
 		dto.setMinDate(new Date());
 		dto.setMaxDate(new Date());
-		assertWhereClause("where name=? and completion_date>=? and completion_date<?", "a", dto.getMinDate(), dto.getMaxDate());
+		assertWhereClause("where project_names.name=? and completion_date>=? and completion_date<?", "a", dto.getMinDate(), dto.getMaxDate());
 	}
 	
 	
 	public void testBuildsQueryByBuildNumber() throws Exception {
 		dto.setMinBuildNumber(22);
 		dto.setMaxBuildNumber(45);
-		assertWhereClause("where name=? and build_number>=? and build_number<=?", "a", 22, 45);
+		assertWhereClause("where project_names.name=? and build_number>=? and build_number<=?", "a", 22, 45);
 	}
 	
 	private void assertWhereClause(String whereClause, Object... params) {
-		BuildHistoryQuery q = new BuildHistoryQuery(new DriverManagerDataSource(), dto);
+		final List<SqlParameter> actualParams = new ArrayList<SqlParameter>();
+		final Object[][] parameterValues = new Object[1][];
+		final String[] sql = new String[1];
 		
-		assertEquals(BuildQuery.SQL + whereClause + " order by completion_date", q.getSql());
+		HistoryQueryBuilder.buildQuery(dto, new BuilderQuery() {
+			public void declareParameter(SqlParameter sqlParameter) {
+				actualParams.add(sqlParameter);
+			}
+			public void setParameterValues(Object[] pv) {
+				parameterValues[0] = pv;
+			}
+			public void setSql(String string) {
+				sql[0] = string;
+			}
+		});
+		
+		assertEquals(HistoryQueryBuilder.BUILD_INFO_SQL + whereClause, sql[0]);
 		
 		assertTrue("Expected " + Arrays.toString(params)  +
-				" but was "  + Arrays.toString(q.getParameterValues()),
-				Arrays.equals(params, q.getParameterValues()));
+				" but was "  + Arrays.toString(parameterValues[0]),
+				Arrays.equals(params, parameterValues[0]));
 	}
 	
 	private Set<String> makeProjectNames(String... names)

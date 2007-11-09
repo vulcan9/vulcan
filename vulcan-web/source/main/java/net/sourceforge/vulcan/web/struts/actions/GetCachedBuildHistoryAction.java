@@ -18,12 +18,16 @@
  */
 package net.sourceforge.vulcan.web.struts.actions;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import net.sourceforge.vulcan.metadata.SvnRevision;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
@@ -51,6 +55,18 @@ public final class GetCachedBuildHistoryAction extends ProjectReportBaseAction {
 			return mapping.findForward("error");
 		}
 		
-		return sendDocument(buildHistory, request.getParameter("transform"), null, 0, mapping, request, response);
+		final Map<String, Object> params = new HashMap<String, Object>();
+		
+		addParameterIfPresent(request, "metricLabel1", params);
+		addParameterIfPresent(request, "metricLabel2", params);
+		
+		return sendDocument(buildHistory, request.getParameter("transform"), null, 0, params, mapping, request, response);
+	}
+
+	private void addParameterIfPresent(HttpServletRequest request, String key, Map<String, ? super Object> params) {
+		final String value = request.getParameter(key);
+		if (StringUtils.isNotBlank(value)) {
+			params.put(key, value);
+		}
 	}
 }

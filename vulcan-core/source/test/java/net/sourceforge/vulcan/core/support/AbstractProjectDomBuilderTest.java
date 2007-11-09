@@ -21,7 +21,6 @@ package net.sourceforge.vulcan.core.support;
 import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
 import java.io.StringWriter;
-import java.net.URL;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -820,7 +819,7 @@ public class AbstractProjectDomBuilderTest extends EasyMockTestCase {
 		final Document doc = new Document();
 		final Result result = new StreamResult(new StringWriter());
 
-		builder.transform(doc, new URL("http://localhost"), null, null, null, "text", result);
+		builder.transform(doc, null, null, "text", result);
 		
 		assertTrue(transResult instanceof StreamResult);
 		assertTrue(transSource instanceof JDOMSource);

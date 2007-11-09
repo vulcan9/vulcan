@@ -26,7 +26,8 @@ public class BuildMessageDto extends BaseDto {
 	private String file;
 	private Integer lineNumber;
 	private String code;
-
+	private Integer count;
+	
 	public BuildMessageDto() {
 	}
 	
@@ -36,7 +37,6 @@ public class BuildMessageDto extends BaseDto {
 		this.lineNumber = lineNumber;
 		this.code = code;
 	}
-
 
 	public String getCode() {
 		return code;
@@ -62,6 +62,10 @@ public class BuildMessageDto extends BaseDto {
 	public void setMessage(String message) {
 		this.message = message;
 	}
-	
-	
+	public Integer getCount() {
+		return count;
+	}
+	public void setCount(Integer count) {
+		this.count = count;
+	}
 }

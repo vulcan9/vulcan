@@ -359,7 +359,19 @@ public class EmailPlugin implements BuildManagerObserverPlugin, ConfigurablePlug
             NoSuchTransformFormatException, MalformedURLException {
         final JDOMResult xhtmlResult = new JDOMResult();
 
-        projectDomBuilder.transform(projectDom, projectSiteURL, statusURL, trackerURL, locale, "xhtml", xhtmlResult);
+        final Map<String, ? super Object> params = new HashMap<String, Object>();
+        
+		if (projectSiteURL != null) {
+			params.put("projectSiteURL", projectSiteURL.toExternalForm());
+		}
+		if (statusURL != null) {
+			params.put("viewProjectStatusURL", statusURL.toExternalForm());	
+		}
+		if (trackerURL != null) {
+			params.put("issueTrackerURL", trackerURL.toExternalForm());	
+		}
+
+		projectDomBuilder.transform(projectDom, params, locale, "xhtml", xhtmlResult);
 
         final Document xhtmlDom = xhtmlResult.getDocument();
 

@@ -137,7 +137,7 @@ public final class ViewProjectStatusAction extends ProjectReportBaseAction {
 		
 		final Document doc = createDocument(request, status, ids, index, currentlyBuilding);
 		
-		return sendDocument(doc, transform, projectConfig, status.getBuildNumber(), mapping, request, response);
+		return sendDocument(doc, transform, projectConfig, status.getBuildNumber(), null, mapping, request, response);
 	}
 	protected Document createDocument(HttpServletRequest request, ProjectStatusDto status, final List<UUID> ids, int index, boolean currentlyBuilding) {
 		final Document doc = projectDomBuilder.createProjectDocument(status, request.getLocale());
