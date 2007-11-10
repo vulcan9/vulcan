@@ -31,7 +31,7 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.object.MappingSqlQuery;
 
 class BuildHistoryTopErrorsQuery extends MappingSqlQuery implements BuilderQuery {
-	private static String SQL = "select msgs.message as message, count(msgs.message) as count " +
+	private static String SQL = "select msgs.message as message, count(msgs.message) as msg_count " +
 		"from builds inner join project_names on builds.project_id = project_names.id inner join build_messages msgs on builds.id=msgs.build_id ";
 	
 	private final int maxResultCount;
@@ -47,7 +47,7 @@ class BuildHistoryTopErrorsQuery extends MappingSqlQuery implements BuilderQuery
 	
 	@Override
 	public void setSql(String sql) {
-		super.setSql(sql + " and msgs.message_type='E' group by message order by count desc limit " + maxResultCount);
+		super.setSql(sql + " and msgs.message_type='E' group by message order by msg_count desc limit " + maxResultCount);
 	}
 	
 	public List<BuildMessageDto> queryTopMessages() {
@@ -68,7 +68,7 @@ class BuildHistoryTopErrorsQuery extends MappingSqlQuery implements BuilderQuery
 	protected BuildMessageDto mapRow(ResultSet rs, int rowNumber) throws SQLException {
 		final BuildMessageDto dto = new BuildMessageDto();
 		
-		dto.setCount(rs.getInt("count"));
+		dto.setCount(rs.getInt("msg_count"));
 		dto.setMessage(rs.getString("message"));
 		
 		return dto;
