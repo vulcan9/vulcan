@@ -31,7 +31,7 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.object.MappingSqlQuery;
 
 class BuildHistoryTopTestFailuresQuery extends MappingSqlQuery implements BuilderQuery {
-	private static String SQL = "select test.name as name, count(test.name) as count " +
+	private static String SQL = "select test.name as name, count(test.name) as msg_count " +
 		"from builds inner join project_names on builds.project_id = project_names.id inner join test_failures test on builds.id=test.build_id ";
 	
 	private final int maxResultCount;
@@ -47,7 +47,7 @@ class BuildHistoryTopTestFailuresQuery extends MappingSqlQuery implements Builde
 	
 	@Override
 	public void setSql(String sql) {
-		super.setSql(sql + " group by name order by count desc limit " + maxResultCount);
+		super.setSql(sql + " group by name order by msg_count desc limit " + maxResultCount);
 	}
 	
 	public List<TestFailureDto> queryTopMessages() {
@@ -68,7 +68,7 @@ class BuildHistoryTopTestFailuresQuery extends MappingSqlQuery implements Builde
 	protected TestFailureDto mapRow(ResultSet rs, int rowNumber) throws SQLException {
 		final TestFailureDto dto = new TestFailureDto();
 		
-		dto.setCount(rs.getInt("count"));
+		dto.setCount(rs.getInt("msg_count"));
 		dto.setName(rs.getString("name"));
 		
 		return dto;

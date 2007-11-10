@@ -20,6 +20,7 @@ package net.sourceforge.vulcan.spring.jdbc;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -31,6 +32,7 @@ import junit.framework.TestCase;
 import net.sourceforge.vulcan.TestUtils;
 import net.sourceforge.vulcan.core.support.StoreStub;
 import net.sourceforge.vulcan.dto.BuildMessageDto;
+import net.sourceforge.vulcan.dto.BuildOutcomeQueryDto;
 import net.sourceforge.vulcan.dto.ChangeLogDto;
 import net.sourceforge.vulcan.dto.ChangeSetDto;
 import net.sourceforge.vulcan.dto.MetricDto;
@@ -82,7 +84,6 @@ public class JdbcBuildOutcomeStoreTest extends TestCase {
 				return buildLogExistsFlag;
 			}
 		});
-		
 		
 		store.setDataSource(dataSource);
 		store.setCreateScript(new ClassPathResource("net/sourceforge/vulcan/resources/create_tables.sql"));
@@ -383,6 +384,15 @@ public class JdbcBuildOutcomeStoreTest extends TestCase {
 		assertPersistence();
 	}
 	
+	public void testCountBuildErrors() throws Exception {
+		store.init();
+		initCalled = true;
+
+		final BuildOutcomeQueryDto query = new BuildOutcomeQueryDto();
+		query.setProjectNames(Collections.singleton(outcome.getName()));
+		
+		store.loadTopBuildErrors(query, 5);
+	}
 	private void assertPersistence() throws StoreException {
 		if (!initCalled) {
 			store.init();
