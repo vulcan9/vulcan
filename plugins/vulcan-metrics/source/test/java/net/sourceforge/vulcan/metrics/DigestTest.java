@@ -25,6 +25,7 @@ import net.sourceforge.vulcan.core.support.BuildOutcomeCache;
 import net.sourceforge.vulcan.dto.MetricDto;
 import net.sourceforge.vulcan.dto.ProjectStatusDto;
 import net.sourceforge.vulcan.dto.TestFailureDto;
+import net.sourceforge.vulcan.dto.MetricDto.MetricType;
 
 import org.jdom.Element;
 
@@ -53,6 +54,7 @@ public class DigestTest extends TransformTestCase {
 		
 		m.setAttribute("key", "foo");
 		m.setAttribute("value", "124");
+		m.setAttribute("type", "number");
 		
 		e.addContent(m);
 		
@@ -63,6 +65,7 @@ public class DigestTest extends TransformTestCase {
 		assertEquals(1, digest.size());
 		assertEquals("foo", digest.get(0).getMessageKey());
 		assertEquals("124", digest.get(0).getValue());
+		assertEquals(MetricType.NUMBER, digest.get(0).getType());
 	}
 	
 	public void testDigestTestFailure() throws Exception {

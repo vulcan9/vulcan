@@ -13,19 +13,19 @@
 	<xsl:template match="/">
 		<metrics>
 			<xsl:if test="//FxCopReport">
-				<metric key="vulcan.metrics.fxcop.informational">
+				<metric key="vulcan.metrics.fxcop.informational" type="number">
 					<xsl:attribute name="value"><xsl:value-of select="$fxCopInformationals"/></xsl:attribute>
 				</metric>
-				<metric key="vulcan.metrics.fxcop.warnings">
+				<metric key="vulcan.metrics.fxcop.warnings" type="number">
 					<xsl:attribute name="value"><xsl:value-of select="$fxCopWarnings"/></xsl:attribute>
 				</metric>
-				<metric key="vulcan.metrics.fxcop.critical.warnings">
+				<metric key="vulcan.metrics.fxcop.critical.warnings" type="number">
 					<xsl:attribute name="value"><xsl:value-of select="$fxCopCriticalWarnings"/></xsl:attribute>
 				</metric>
-				<metric key="vulcan.metrics.fxcop.errors">
+				<metric key="vulcan.metrics.fxcop.errors" type="number">
 					<xsl:attribute name="value"><xsl:value-of select="$fxCopErrors"/></xsl:attribute>
 				</metric>
-				<metric key="vulcan.metrics.fxcop.critical.errors">
+				<metric key="vulcan.metrics.fxcop.critical.errors" type="number">
 					<xsl:attribute name="value"><xsl:value-of select="$fxCopCriticalErrors"/></xsl:attribute>
 				</metric>
 			</xsl:if>

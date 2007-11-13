@@ -18,6 +18,8 @@
  */
 package net.sourceforge.vulcan.metrics;
 
+import net.sourceforge.vulcan.dto.MetricDto.MetricType;
+
 import org.jdom.Document;
 import org.jdom.Element;
 
@@ -36,11 +38,11 @@ public class EmmaTransformTest extends TransformTestCase {
 		
 		final Document t = plugin.transform(doc);
 		
-		assertContainsMetric(t, "vulcan.metrics.source.packages", "16", true);
-		assertContainsMetric(t, "vulcan.metrics.source.classes", "150", true);
-		assertContainsMetric(t, "vulcan.metrics.source.methods", "1101", true);
-		assertContainsMetric(t, "vulcan.metrics.source.files", "109", true);
-		assertContainsMetric(t, "vulcan.metrics.source.lines", "4272", true);
+		assertContainsMetric(t, "vulcan.metrics.source.packages", MetricType.NUMBER, "16", true);
+		assertContainsMetric(t, "vulcan.metrics.source.classes", MetricType.NUMBER, "150", true);
+		assertContainsMetric(t, "vulcan.metrics.source.methods", MetricType.NUMBER, "1101", true);
+		assertContainsMetric(t, "vulcan.metrics.source.files", MetricType.NUMBER, "109", true);
+		assertContainsMetric(t, "vulcan.metrics.source.lines", MetricType.NUMBER, "4272", true);
 	}
 	
 	public void testCoverage() throws Exception {
@@ -59,10 +61,10 @@ public class EmmaTransformTest extends TransformTestCase {
 		
 		final Document t = plugin.transform(doc);
 		
-		assertContainsMetric(t, "vulcan.metrics.coverage.class", "91%", true);
-		assertContainsMetric(t, "vulcan.metrics.coverage.method", "89%", true);
-		assertContainsMetric(t, "vulcan.metrics.coverage.block", "84%", true);
-		assertContainsMetric(t, "vulcan.metrics.coverage.line", "81%", true);
+		assertContainsMetric(t, "vulcan.metrics.coverage.class", MetricType.PERCENT, "0.91", true);
+		assertContainsMetric(t, "vulcan.metrics.coverage.method", MetricType.PERCENT, "0.89", true);
+		assertContainsMetric(t, "vulcan.metrics.coverage.block", MetricType.PERCENT, "0.84", true);
+		assertContainsMetric(t, "vulcan.metrics.coverage.line", MetricType.PERCENT, "0.81", true);
 	}
 	
 	private void addCoverage(Element all, String type, String value) {

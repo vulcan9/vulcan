@@ -32,11 +32,12 @@ class MetricInserter extends SqlUpdate {
 	public MetricInserter(DataSource dataSource) {
 		setDataSource(dataSource);
 		setSql("insert into metrics " +
-				"(build_id, message_key, data) " +
-				"values (?, ?, ?)");
+				"(build_id, message_key, metric_type, data) " +
+				"values (?, ?, ?, ?)");
 		
 		declareParameter(new SqlParameter(Types.NUMERIC));
 		declareParameter(new SqlParameter(Types.VARCHAR));
+		declareParameter(new SqlParameter(Types.CHAR));
 		declareParameter(new SqlParameter(Types.VARCHAR));
 		
 		compile();
@@ -45,13 +46,14 @@ class MetricInserter extends SqlUpdate {
 	public int insert(int buildId, List<MetricDto> metrics) {
 		int count = 0;
 		
-		final Object[] params = new Object[3];
+		final Object[] params = new Object[4];
 		
 		params[0] = buildId;
 
 		for (MetricDto dto : metrics) {
 			params[1] = dto.getMessageKey();
-			params[2] = dto.getValue();
+			params[2] = dto.getType().getId();
+			params[3] = dto.getValue();
 			
 			count += update(params);
 		}

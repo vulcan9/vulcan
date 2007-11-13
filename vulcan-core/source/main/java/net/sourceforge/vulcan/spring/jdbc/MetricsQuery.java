@@ -26,6 +26,7 @@ import java.util.List;
 import javax.sql.DataSource;
 
 import net.sourceforge.vulcan.dto.MetricDto;
+import net.sourceforge.vulcan.dto.MetricDto.MetricType;
 
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.SqlParameter;
@@ -33,7 +34,7 @@ import org.springframework.jdbc.object.MappingSqlQuery;
 
 class MetricsQuery extends MappingSqlQuery {
 	public MetricsQuery(DataSource dataSource) {
-		super(dataSource, "select message_key, data " +
+		super(dataSource, "select message_key, metric_type, data " +
 				"from metrics where build_id = ? order by message_key");
 		declareParameter(new SqlParameter("build_id", Types.NUMERIC));
 		compile();
@@ -60,6 +61,7 @@ class MetricsQuery extends MappingSqlQuery {
 		final MetricDto dto = new MetricDto();
 		
 		dto.setMessageKey(rs.getString("message_key"));
+		dto.setType(MetricType.fromId(rs.getString("metric_type").charAt(0)));
 		dto.setValue(rs.getString("data"));
 		
 		return dto;

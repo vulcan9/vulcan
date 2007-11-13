@@ -18,6 +18,8 @@
  */
 package net.sourceforge.vulcan.metrics;
 
+import net.sourceforge.vulcan.dto.MetricDto.MetricType;
+
 import org.jdom.Document;
 import org.jdom.Element;
 
@@ -38,12 +40,12 @@ public class NCoverTransformTest extends TransformTestCase {
 		
 		final Document t = plugin.transform(doc);
 		
-		assertContainsMetric(t, "vulcan.metrics.source.classes", "150", true);
-		assertContainsMetric(t, "vulcan.metrics.source.methods", "1101", true);
-		assertContainsMetric(t, "vulcan.metrics.source.files", "109", true);
-		assertContainsMetric(t, "vulcan.metrics.source.lines", "4272", true);
-		assertContainsMetric(t, "vulcan.metrics.coverage.block", "91.12%", true);
-		assertContainsMetric(t, "vulcan.metrics.coverage.method", "92.23%", true);
+		assertContainsMetric(t, "vulcan.metrics.source.classes", MetricType.NUMBER, "150", true);
+		assertContainsMetric(t, "vulcan.metrics.source.methods", MetricType.NUMBER, "1101", true);
+		assertContainsMetric(t, "vulcan.metrics.source.files", MetricType.NUMBER, "109", true);
+		assertContainsMetric(t, "vulcan.metrics.source.lines", MetricType.NUMBER, "4272", true);
+		assertContainsMetric(t, "vulcan.metrics.coverage.block", MetricType.PERCENT, "0.9112223", true);
+		assertContainsMetric(t, "vulcan.metrics.coverage.method", MetricType.PERCENT, "0.92232", true);
 	}
 	
 	private void addStats(int classes, int methods, int files, int lines, double coverageBySeq, double coverageByFunc) {

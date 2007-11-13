@@ -18,6 +18,9 @@
 	<xsl:template match="/build-history">
 		<xsl:variable name="minValue1">
 			<xsl:choose>
+				<xsl:when test="project/metrics/metric[@label=$metricLabel1 and @type='percent']">
+					<xsl:value-of select="0"/>
+				</xsl:when>
 				<xsl:when test="count(project/metrics/metric[@label=$metricLabel1]/@value) != 0">
 					<xsl:for-each select="project/metrics/metric[@label=$metricLabel1]/@value">
 						<xsl:sort data-type="number" select="." order="ascending"/>
@@ -33,6 +36,9 @@
 		</xsl:variable>
 		<xsl:variable name="maxValue1">
 			<xsl:choose>
+				<xsl:when test="project/metrics/metric[@label=$metricLabel1 and @type='percent']">
+					<xsl:value-of select="100"/>
+				</xsl:when>
 				<xsl:when test="count(project/metrics/metric[@label=$metricLabel1]/@value) != 0">
 					<xsl:for-each select="project/metrics/metric[@label=$metricLabel1]/@value">
 						<xsl:sort data-type="number" select="." order="descending"/>
@@ -48,20 +54,34 @@
 		</xsl:variable>
 		
 		<xsl:variable name="minValue2">
-			<xsl:for-each select="project/metrics/metric[@label=$metricLabel2]/@value">
-				<xsl:sort data-type="number" select="." order="ascending"/>
-				<xsl:if test="position()=1">
-					<xsl:value-of select="ceiling(. * 0.97)"/>
-				</xsl:if>
-			</xsl:for-each>
+			<xsl:choose>
+				<xsl:when test="project/metrics/metric[@label=$metricLabel2 and @type='percent']">
+					<xsl:value-of select="0"/>
+				</xsl:when>
+				<xsl:otherwise>
+					<xsl:for-each select="project/metrics/metric[@label=$metricLabel2]/@value">
+						<xsl:sort data-type="number" select="." order="ascending"/>
+						<xsl:if test="position()=1">
+							<xsl:value-of select="ceiling(. * 0.95)"/>
+						</xsl:if>
+					</xsl:for-each>
+				</xsl:otherwise>
+			</xsl:choose>
 		</xsl:variable>
 		<xsl:variable name="maxValue2">
-			<xsl:for-each select="project/metrics/metric[@label=$metricLabel2]/@value">
-				<xsl:sort data-type="number" select="." order="descending"/>
-				<xsl:if test="position()=1">
-					<xsl:value-of select="ceiling(. * 1.07)"/>
-				</xsl:if>
-			</xsl:for-each>
+			<xsl:choose>
+				<xsl:when test="project/metrics/metric[@label=$metricLabel2 and @type='percent']">
+					<xsl:value-of select="100"/>
+				</xsl:when>
+				<xsl:otherwise>
+					<xsl:for-each select="project/metrics/metric[@label=$metricLabel2]/@value">
+						<xsl:sort data-type="number" select="." order="descending"/>
+						<xsl:if test="position()=1">
+							<xsl:value-of select="ceiling(. * 1.05)"/>
+						</xsl:if>
+					</xsl:for-each>
+				</xsl:otherwise>
+			</xsl:choose>
 		</xsl:variable>
 		
 		<xsl:text>&amp;y_min=</xsl:text>
@@ -213,7 +233,14 @@
 			<xsl:text>(</xsl:text>
 			<xsl:value-of select="timestamp/@millis"/>
 			<xsl:text>,</xsl:text>
-			<xsl:value-of select="metrics/metric[@label=$metricLabel]/@value"/>
+			<xsl:choose>
+				<xsl:when test="metrics/metric[@label=$metricLabel]/@type='percent'">
+					<xsl:value-of select="metrics/metric[@label=$metricLabel]/@value * 100"/>
+				</xsl:when>
+				<xsl:otherwise>
+					<xsl:value-of select="metrics/metric[@label=$metricLabel]/@value"/>
+				</xsl:otherwise>
+			</xsl:choose>
 			<xsl:text>)</xsl:text>
 		</xsl:for-each>
 		<xsl:text>&amp;</xsl:text>
@@ -232,7 +259,18 @@
 			<xsl:text>&lt;br&gt;</xsl:text>
 			<xsl:text><xsl:value-of select="$metricLabel"/></xsl:text>
 			<xsl:text>:</xsl:text>
-			<xsl:text><xsl:value-of select="metrics/metric[@label=$metricLabel]/@value"/></xsl:text>
+			<xsl:choose>
+				<xsl:when test="metrics/metric[@label=$metricLabel]/@type='percent'">
+					<!-- the data file uses % to escape symbols (including %),
+						so to render a percent sign we need to output %25 which
+						is hex ascii for %. -->
+					<xsl:value-of select="format-number(metrics/metric[@label=$metricLabel]/@value, '#.##%')"/>
+					<xsl:text>25</xsl:text>
+				</xsl:when>
+				<xsl:otherwise>			
+					<xsl:value-of select="metrics/metric[@label=$metricLabel]/@value"/>
+				</xsl:otherwise>
+			</xsl:choose>
 		</xsl:for-each>&amp;
 		
 		&amp;links<xsl:value-of select="$suffix"/>=<xsl:for-each select="$samples">

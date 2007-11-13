@@ -29,6 +29,7 @@ import javax.sql.DataSource;
 
 import net.sourceforge.vulcan.dto.BuildOutcomeQueryDto;
 import net.sourceforge.vulcan.dto.MetricDto;
+import net.sourceforge.vulcan.dto.MetricDto.MetricType;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -76,6 +77,7 @@ class BuildHistoryMetricsQuery extends MappingSqlQuery implements BuilderQuery {
 		
 		dto.setBuildId(rs.getInt("build_id"));
 		dto.setMessageKey(rs.getString("message_key"));
+		dto.setType(MetricType.fromId(rs.getString("metric_type").charAt(0)));
 		dto.setValue(rs.getString("data"));
 		
 		return dto;

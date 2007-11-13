@@ -18,6 +18,8 @@
  */
 package net.sourceforge.vulcan.metrics;
 
+import net.sourceforge.vulcan.dto.MetricDto.MetricType;
+
 import org.jdom.Document;
 import org.jdom.Element;
 
@@ -48,8 +50,8 @@ public class SeleniumTransformTest extends TransformTestCase {
 		
 		final Document t = plugin.transform(doc);
 		
-		assertContainsMetric(t, "vulcan.metrics.tests.executed", "2", true);
-		assertContainsMetric(t, "vulcan.metrics.tests.failed", "0", true);
+		assertContainsMetric(t, "vulcan.metrics.tests.executed", MetricType.NUMBER, "2", true);
+		assertContainsMetric(t, "vulcan.metrics.tests.failed", MetricType.NUMBER, "0", true);
 	}
 	
 	public void testTransformTestsWithFailures() throws Exception {
@@ -61,8 +63,8 @@ public class SeleniumTransformTest extends TransformTestCase {
 		
 		final Document t = plugin.transform(doc);
 		
-		assertContainsMetric(t, "vulcan.metrics.tests.executed", "3", true);
-		assertContainsMetric(t, "vulcan.metrics.tests.failed", "2", true);
+		assertContainsMetric(t, "vulcan.metrics.tests.executed", MetricType.NUMBER, "3", true);
+		assertContainsMetric(t, "vulcan.metrics.tests.failed", MetricType.NUMBER, "2", true);
 	}
 	
 	public void testTransformTestsWithFailuresGetsFailedTestNames() throws Exception {

@@ -18,6 +18,8 @@
  */
 package net.sourceforge.vulcan.metrics;
 
+import net.sourceforge.vulcan.dto.MetricDto.MetricType;
+
 import org.jdom.Document;
 import org.jdom.Element;
 
@@ -44,22 +46,17 @@ public class FxCopTransformTest extends TransformTestCase {
 	public void testStatsPresent() throws Exception {
 		final Element fxCopReport = new Element("FxCopReport");
 		
-/*		final Element issue = new Element("Issue");
-		issue.setAttribute("Level", "Warning");
-		
-		fxCopReport.addContent(issue);
-*/		
 		report.addContent(fxCopReport);
 		
 		final Document t = plugin.transform(doc);
 		
 		assertEquals(5, t.getRootElement().getContentSize());
 		
-		assertContainsMetric(t, "vulcan.metrics.fxcop.informational", "0", true);
-		assertContainsMetric(t, "vulcan.metrics.fxcop.warnings", "0", true);
-		assertContainsMetric(t, "vulcan.metrics.fxcop.critical.warnings", "0", true);
-		assertContainsMetric(t, "vulcan.metrics.fxcop.errors", "0", true);
-		assertContainsMetric(t, "vulcan.metrics.fxcop.critical.errors", "0", true);
+		assertContainsMetric(t, "vulcan.metrics.fxcop.informational", MetricType.NUMBER, "0", true);
+		assertContainsMetric(t, "vulcan.metrics.fxcop.warnings", MetricType.NUMBER, "0", true);
+		assertContainsMetric(t, "vulcan.metrics.fxcop.critical.warnings", MetricType.NUMBER, "0", true);
+		assertContainsMetric(t, "vulcan.metrics.fxcop.errors", MetricType.NUMBER, "0", true);
+		assertContainsMetric(t, "vulcan.metrics.fxcop.critical.errors", MetricType.NUMBER, "0", true);
 	}
 	public void testTotalsStatsAcrossReports() throws Exception {
 		addReportWithStat("Warning");
@@ -73,11 +70,11 @@ public class FxCopTransformTest extends TransformTestCase {
 		
 		assertEquals(5, t.getRootElement().getContentSize());
 		
-		assertContainsMetric(t, "vulcan.metrics.fxcop.informational", "1", true);
-		assertContainsMetric(t, "vulcan.metrics.fxcop.warnings", "2", true);
-		assertContainsMetric(t, "vulcan.metrics.fxcop.critical.warnings", "1", true);
-		assertContainsMetric(t, "vulcan.metrics.fxcop.errors", "1", true);
-		assertContainsMetric(t, "vulcan.metrics.fxcop.critical.errors", "1", true);
+		assertContainsMetric(t, "vulcan.metrics.fxcop.informational", MetricType.NUMBER, "1", true);
+		assertContainsMetric(t, "vulcan.metrics.fxcop.warnings", MetricType.NUMBER, "2", true);
+		assertContainsMetric(t, "vulcan.metrics.fxcop.critical.warnings", MetricType.NUMBER, "1", true);
+		assertContainsMetric(t, "vulcan.metrics.fxcop.errors", MetricType.NUMBER, "1", true);
+		assertContainsMetric(t, "vulcan.metrics.fxcop.critical.errors", MetricType.NUMBER, "1", true);
 	}
 
 	private void addReportWithStat(String level) {

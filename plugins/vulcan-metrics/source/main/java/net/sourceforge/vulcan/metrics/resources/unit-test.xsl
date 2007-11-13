@@ -15,10 +15,10 @@
 	<xsl:template match="/">
 		<metrics>
 			<xsl:if test="$total != 0 or $ignored != 0">
-				<metric key="vulcan.metrics.tests.executed">
+				<metric key="vulcan.metrics.tests.executed" type="number">
 					<xsl:attribute name="value"><xsl:value-of select="$total"/></xsl:attribute>
 				</metric>
-				<metric key="vulcan.metrics.tests.failed">
+				<metric key="vulcan.metrics.tests.failed" type="number">
 					<xsl:attribute name="value">
 						<xsl:value-of select="
 							count(//testcase/failure) +
@@ -43,7 +43,7 @@
 				<xsl:call-template name="list-failures-selenium"/>
 			</xsl:if>
 			<xsl:if test="$ignored != 0">
-				<metric key="vulcan.metrics.tests.ignored">
+				<metric key="vulcan.metrics.tests.ignored" type="number">
 					<xsl:attribute name="value">
 						<xsl:value-of select="$ignored"/>
 					</xsl:attribute>
