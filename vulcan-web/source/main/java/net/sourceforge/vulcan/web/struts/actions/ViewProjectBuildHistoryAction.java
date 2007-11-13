@@ -35,6 +35,7 @@ import net.sourceforge.vulcan.core.support.ReportHelper;
 import net.sourceforge.vulcan.dto.BuildOutcomeQueryDto;
 import net.sourceforge.vulcan.dto.MetricDto;
 import net.sourceforge.vulcan.dto.ProjectStatusDto;
+import net.sourceforge.vulcan.dto.MetricDto.MetricType;
 import net.sourceforge.vulcan.dto.ProjectStatusDto.Status;
 import net.sourceforge.vulcan.metadata.SvnRevision;
 import net.sourceforge.vulcan.web.Keys;
@@ -181,7 +182,9 @@ public final class ViewProjectBuildHistoryAction extends ProjectReportBaseAction
 			}
 			
 			for (MetricDto metric : metrics) {
-				keys.add(metric.getMessageKey());
+				if (metric.getType() == MetricType.NUMBER ||
+					metric.getType() == MetricType.PERCENT)
+						keys.add(metric.getMessageKey());
 			}
 		}
 		

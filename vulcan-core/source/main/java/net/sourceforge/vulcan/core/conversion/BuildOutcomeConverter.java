@@ -1,6 +1,6 @@
 /*
  * Vulcan Build Manager
- * Copyright (C) 2005-2006 Chris Eldredge
+ * Copyright (C) 2005-2007 Chris Eldredge
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,6 +18,8 @@
  */
 package net.sourceforge.vulcan.core.conversion;
 
+import java.text.NumberFormat;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -32,7 +34,9 @@ import java.util.Map.Entry;
 
 import net.sourceforge.vulcan.StateManager;
 import net.sourceforge.vulcan.core.BuildOutcomeStore;
+import net.sourceforge.vulcan.dto.MetricDto;
 import net.sourceforge.vulcan.dto.ProjectStatusDto;
+import net.sourceforge.vulcan.dto.MetricDto.MetricType;
 import net.sourceforge.vulcan.dto.ProjectStatusDto.Status;
 import net.sourceforge.vulcan.event.ErrorEvent;
 import net.sourceforge.vulcan.event.EventHandler;
@@ -137,6 +141,27 @@ public class BuildOutcomeConverter {
 		this.eventHandler = eventHandler;
 	}
 
+	static void fixMetric(MetricDto metric) {
+		if (metric.getType() == null) {
+			Number num = null;
+			try {
+				num = NumberFormat.getPercentInstance().parse(metric.getValue());
+				metric.setType(MetricType.PERCENT);
+			} catch (ParseException e) {
+				try {
+					num = NumberFormat.getNumberInstance().parse(metric.getValue());
+					metric.setType(MetricType.NUMBER);
+				} catch (ParseException e1) {
+					metric.setType(MetricType.STRING);
+				}
+			}
+
+			if (num != null) {
+				metric.setValue(num.toString());
+			}
+		}
+	}
+
 	private void startStateManager() {
 		try {
 			stateManager.start();
@@ -237,6 +262,15 @@ public class BuildOutcomeConverter {
 					log.info("Pruning missing dependency " + depName + "/" + id + " from project "+ buildOutcome.getName() + "/" + buildOutcome.getId());
 				}
 			}
+			
+			final List<MetricDto> metrics = buildOutcome.getMetrics();
+			
+			if (metrics != null) {
+				for (MetricDto metric : metrics) {
+					fixMetric(metric);
+				}
+			}
 		}
+
 	}
 }

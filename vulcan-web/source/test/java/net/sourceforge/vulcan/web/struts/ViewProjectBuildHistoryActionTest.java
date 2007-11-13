@@ -31,6 +31,7 @@ import net.sourceforge.vulcan.dto.BuildOutcomeQueryDto;
 import net.sourceforge.vulcan.dto.MetricDto;
 import net.sourceforge.vulcan.dto.ProjectStatusDto;
 import net.sourceforge.vulcan.dto.TestFailureDto;
+import net.sourceforge.vulcan.dto.MetricDto.MetricType;
 import net.sourceforge.vulcan.dto.ProjectStatusDto.Status;
 import net.sourceforge.vulcan.metadata.SvnRevision;
 
@@ -201,9 +202,14 @@ public class ViewProjectBuildHistoryActionTest extends MockApplicationContextStr
 		
 		MetricDto m1 = new MetricDto();
 		MetricDto m2 = new MetricDto();
+		MetricDto m3 = new MetricDto();
 		m1.setMessageKey("b.key");
+		m1.setType(MetricType.NUMBER);
 		m2.setMessageKey("a.key");
-		status.setMetrics(Arrays.asList(m1, m2));
+		m2.setType(MetricType.PERCENT);
+		m3.setMessageKey("c.key");
+		m3.setType(MetricType.STRING);
+		status.setMetrics(Arrays.asList(m1, m2, m3));
 		status.setCompletionDate(new Date(1000L));
 
 		replay();

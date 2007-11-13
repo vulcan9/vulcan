@@ -36,6 +36,7 @@ import net.sourceforge.vulcan.dto.MetricDto;
 import net.sourceforge.vulcan.dto.PluginConfigDto;
 import net.sourceforge.vulcan.dto.ProjectStatusDto;
 import net.sourceforge.vulcan.dto.TestFailureDto;
+import net.sourceforge.vulcan.dto.MetricDto.MetricType;
 import net.sourceforge.vulcan.event.BuildCompletedEvent;
 import net.sourceforge.vulcan.event.ErrorEvent;
 import net.sourceforge.vulcan.event.EventHandler;
@@ -203,8 +204,14 @@ public class XmlMetricsPlugin implements BuildManagerObserverPlugin, Configurabl
 		
 		for (Element c : metrics) {
 			final MetricDto m = new MetricDto();
-			m.setMessageKey(c.getAttributeValue("key"));
+			final String key = c.getAttributeValue("key");
+			m.setMessageKey(key);
 			m.setValue(c.getAttributeValue("value"));
+			final String typeString = c.getAttributeValue("type");
+			if (typeString == null) {
+				throw new IllegalStateException("Metric with key='" + key + "' must declare a type.");
+			}
+			m.setType(MetricType.valueOf(typeString.toUpperCase()));
 			metricList.add(m);
 		}
 		

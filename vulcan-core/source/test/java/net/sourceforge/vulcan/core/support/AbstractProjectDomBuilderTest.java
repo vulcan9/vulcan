@@ -53,6 +53,7 @@ import net.sourceforge.vulcan.dto.ProjectConfigDto;
 import net.sourceforge.vulcan.dto.ProjectStatusDto;
 import net.sourceforge.vulcan.dto.RevisionTokenDto;
 import net.sourceforge.vulcan.dto.TestFailureDto;
+import net.sourceforge.vulcan.dto.MetricDto.MetricType;
 import net.sourceforge.vulcan.dto.ProjectStatusDto.Status;
 import net.sourceforge.vulcan.event.Event;
 import net.sourceforge.vulcan.event.EventHandler;
@@ -464,7 +465,8 @@ public class AbstractProjectDomBuilderTest extends EasyMockTestCase {
 
 		final MetricDto m = new MetricDto();
 		m.setMessageKey("a.b");
-		m.setValue("23");
+		m.setValue("0.23");
+		m.setType(MetricType.PERCENT);
 		
 		projectStatus.setMetrics(Collections.singletonList(m));
 		
@@ -479,7 +481,8 @@ public class AbstractProjectDomBuilderTest extends EasyMockTestCase {
 		assertNotNull(metrics);
 		assertEquals(1, metrics.getContentSize());
 		assertEquals("a metric", metrics.getChild("metric").getAttributeValue("label"));
-		assertEquals("23", metrics.getChild("metric").getAttributeValue("value"));	
+		assertEquals("0.23", metrics.getChild("metric").getAttributeValue("value"));	
+		assertEquals("percent", metrics.getChild("metric").getAttributeValue("type"));
 	}
 	public void testTestFailures() throws Exception {
 		replay();

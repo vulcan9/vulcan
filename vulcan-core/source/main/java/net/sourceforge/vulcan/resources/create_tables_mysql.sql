@@ -84,9 +84,11 @@ create table metrics (
 
 	message_key varchar(256) not null,
 	data varchar(256),
-	
+	metric_type char(1) not null,
+
 	constraint fk_metrics_build_id foreign key (build_id) references builds (id),
-	constraint uniq_key_per_build unique (build_id, message_key)
+	constraint uniq_key_per_build unique (build_id, message_key),
+	constraint ck_metric_type check (metric_type in ('N', 'P', 'S'))
 );
 
 create table test_failures (

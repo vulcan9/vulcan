@@ -573,7 +573,16 @@
 				<xsl:for-each select="./metric">
 					<tr>
 						<td><xsl:value-of select="@label"/></td>
-						<td><xsl:value-of select="@value"/></td>
+						<td>
+							<xsl:choose>
+								<xsl:when test="@type='percent'">
+									<xsl:value-of select="format-number(@value, '#.##%')"/>
+								</xsl:when>
+								<xsl:otherwise>
+									<xsl:value-of select="@value"/>
+								</xsl:otherwise>
+							</xsl:choose>
+						</td>
 					</tr>
 				</xsl:for-each>
 			</tbody>

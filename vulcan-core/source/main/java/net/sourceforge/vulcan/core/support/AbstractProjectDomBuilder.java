@@ -234,7 +234,7 @@ public abstract class AbstractProjectDomBuilder implements ProjectDomBuilder {
 				final Element mEl = new Element("metric");
 				mEl.setAttribute("label", formatMessage(m.getMessageKey(), null, locale));
 				mEl.setAttribute("value", m.getValue());
-				
+				mEl.setAttribute("type", m.getType().name().toLowerCase());
 				mRoot.addContent(mEl);
 			}
 			root.addContent(mRoot);

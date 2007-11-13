@@ -18,6 +18,8 @@
  */
 package net.sourceforge.vulcan.metrics;
 
+import net.sourceforge.vulcan.dto.MetricDto.MetricType;
+
 import org.jdom.Document;
 import org.jdom.Element;
 
@@ -48,8 +50,8 @@ public class JUnitTransformTest extends TransformTestCase {
 		
 		final Document t = plugin.transform(doc);
 		
-		assertContainsMetric(t, "vulcan.metrics.tests.executed", "1", true);
-		assertContainsMetric(t, "vulcan.metrics.tests.failed", "0", true);
+		assertContainsMetric(t, "vulcan.metrics.tests.executed", MetricType.NUMBER, "1", true);
+		assertContainsMetric(t, "vulcan.metrics.tests.failed", MetricType.NUMBER, "0", true);
 	}
 	public void testTransformJUnitFail() throws Exception {
 		doc.getRootElement().addContent(suite);
@@ -57,8 +59,8 @@ public class JUnitTransformTest extends TransformTestCase {
 		
 		final Document t = plugin.transform(doc);
 		
-		assertContainsMetric(t, "vulcan.metrics.tests.executed", "1", true);
-		assertContainsMetric(t, "vulcan.metrics.tests.failed", "1", true);
+		assertContainsMetric(t, "vulcan.metrics.tests.executed", MetricType.NUMBER, "1", true);
+		assertContainsMetric(t, "vulcan.metrics.tests.failed", MetricType.NUMBER, "1", true);
 		assertContainsTestFailure(t, "net.sourceforge.vulcan.metrics.FakeSuite.Foo");
 	}
 	public void testTransformJUnitError() throws Exception {
@@ -67,8 +69,8 @@ public class JUnitTransformTest extends TransformTestCase {
 		
 		final Document t = plugin.transform(doc);
 		
-		assertContainsMetric(t, "vulcan.metrics.tests.executed", "1", true);
-		assertContainsMetric(t, "vulcan.metrics.tests.failed", "1", true);
+		assertContainsMetric(t, "vulcan.metrics.tests.executed", MetricType.NUMBER, "1", true);
+		assertContainsMetric(t, "vulcan.metrics.tests.failed", MetricType.NUMBER, "1", true);
 		assertContainsTestFailure(t, "net.sourceforge.vulcan.metrics.FakeSuite.Foo");
 	}
 	public void testTransformJUnitMultipleSuites() throws Exception {
@@ -83,8 +85,8 @@ public class JUnitTransformTest extends TransformTestCase {
 		
 		final Document t = plugin.transform(doc);
 		
-		assertContainsMetric(t, "vulcan.metrics.tests.executed", "2", true);
-		assertContainsMetric(t, "vulcan.metrics.tests.failed", "2", true);
+		assertContainsMetric(t, "vulcan.metrics.tests.executed", MetricType.NUMBER, "2", true);
+		assertContainsMetric(t, "vulcan.metrics.tests.failed", MetricType.NUMBER, "2", true);
 	}
 
 	public void testTransformNUnit() throws Exception {
@@ -94,8 +96,8 @@ public class JUnitTransformTest extends TransformTestCase {
 
 		final Document t = plugin.transform(doc);
 		
-		assertContainsMetric(t, "vulcan.metrics.tests.executed", "1", true);
-		assertContainsMetric(t, "vulcan.metrics.tests.failed", "0", true);
+		assertContainsMetric(t, "vulcan.metrics.tests.executed", MetricType.NUMBER, "1", true);
+		assertContainsMetric(t, "vulcan.metrics.tests.failed", MetricType.NUMBER, "0", true);
 	}
 
 	public void testTransformNUnitIgnored() throws Exception {
@@ -105,9 +107,9 @@ public class JUnitTransformTest extends TransformTestCase {
 
 		final Document t = plugin.transform(doc);
 		
-		assertContainsMetric(t, "vulcan.metrics.tests.ignored", "1", true);
-		assertContainsMetric(t, "vulcan.metrics.tests.executed", "0", true);
-		assertContainsMetric(t, "vulcan.metrics.tests.failed", "0", true);
+		assertContainsMetric(t, "vulcan.metrics.tests.ignored", MetricType.NUMBER, "1", true);
+		assertContainsMetric(t, "vulcan.metrics.tests.executed", MetricType.NUMBER, "0", true);
+		assertContainsMetric(t, "vulcan.metrics.tests.failed", MetricType.NUMBER, "0", true);
 	}
 	
 	public void testTransformNUnitFailures() throws Exception {
@@ -122,8 +124,8 @@ public class JUnitTransformTest extends TransformTestCase {
 		
 		final Document t = plugin.transform(doc);
 		
-		assertContainsMetric(t, "vulcan.metrics.tests.executed", "4", true);
-		assertContainsMetric(t, "vulcan.metrics.tests.failed", "2", true);
+		assertContainsMetric(t, "vulcan.metrics.tests.executed", MetricType.NUMBER, "4", true);
+		assertContainsMetric(t, "vulcan.metrics.tests.failed", MetricType.NUMBER, "2", true);
 		assertContainsTestFailure(t, "SourceForge.Vulcan.DotNet.FakeTest.Sample2");
 		assertContainsTestFailure(t, "SourceForge.Vulcan.DotNet.FakeTest.Sample4");
 	}
@@ -143,8 +145,8 @@ public class JUnitTransformTest extends TransformTestCase {
 		
 		final Document t = plugin.transform(doc);
 		
-		assertContainsMetric(t, "vulcan.metrics.tests.executed", "5", true);
-		assertContainsMetric(t, "vulcan.metrics.tests.failed", "3", true);
+		assertContainsMetric(t, "vulcan.metrics.tests.executed", MetricType.NUMBER, "5", true);
+		assertContainsMetric(t, "vulcan.metrics.tests.failed", MetricType.NUMBER, "3", true);
 	}
 	
 	private void addNunitTestCase(Element suite, String name, String executed, String success) {

@@ -23,6 +23,7 @@ import java.util.List;
 import javax.xml.transform.TransformerFactory;
 
 import junit.framework.TestCase;
+import net.sourceforge.vulcan.dto.MetricDto.MetricType;
 import net.sourceforge.vulcan.event.ErrorEvent;
 import net.sourceforge.vulcan.event.Event;
 import net.sourceforge.vulcan.event.EventHandler;
@@ -52,22 +53,25 @@ public abstract class TransformTestCase extends TestCase {
 		plugin.init();
 	}
 
-	protected static void assertContainsMetric(Document doc, String key, String value, boolean uniqueKey) {
+	protected static void assertContainsMetric(Document doc, String key, MetricType type, String value, boolean uniqueKey) {
 		assertEquals("metrics", doc.getRootElement().getName());
 		
 		final List<Element> children = getChildren(doc);
 		for (Element e : children) {
 			if (key.equals(e.getAttributeValue("key"))) {
-				if (value.equals(e.getAttributeValue("value"))) {
-					return;
-				}
 				if (uniqueKey) {
+					if (type != null) {
+						assertEquals("<metric key='" + key + "'/> type ", type.name().toLowerCase(), e.getAttributeValue("type").toLowerCase());
+					}
 					assertEquals("<metric key='" + key + "'/> value ", value, e.getAttributeValue("value"));
+					return;
+				} else if (value.equals(e.getAttributeValue("value"))) {
+					return;
 				}
 			}
 		}
 		
-		fail("Did not find <metric key='" + key + "' value='" + value + "'/>");
+		fail("Did not find <metric key='" + key + "' type='" + type + "' value='" + value + "'/>");
 	}
 	protected static void assertContainsTestFailure(Document doc, String name) {
 		final List<Element> children = getChildren(doc);

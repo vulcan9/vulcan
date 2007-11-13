@@ -19,6 +19,7 @@
 package net.sourceforge.vulcan.metrics;
 
 import net.sourceforge.vulcan.TestUtils;
+import net.sourceforge.vulcan.dto.MetricDto.MetricType;
 
 import org.jdom.Document;
 import org.jdom.input.SAXBuilder;
@@ -34,17 +35,17 @@ public class CoberturaTransformTest extends TransformTestCase {
 	public void testCoverage() throws Exception {
 		final Document t = plugin.transform(doc);
 		
-		assertContainsMetric(t, "vulcan.metrics.coverage.line", "83.33%", true);
-		assertContainsMetric(t, "vulcan.metrics.coverage.branch", "80.17%", true);
+		assertContainsMetric(t, "vulcan.metrics.coverage.line", MetricType.PERCENT, "0.8332542694497154", true);
+		assertContainsMetric(t, "vulcan.metrics.coverage.branch", MetricType.PERCENT, "0.8017174082747853", true);
 	}
 	
 	public void testCountsSource() throws Exception {
 		final Document t = plugin.transform(doc);
 		
-		assertContainsMetric(t, "vulcan.metrics.source.lines", "4216", true);
-		assertContainsMetric(t, "vulcan.metrics.source.methods", "1102", true);
-		assertContainsMetric(t, "vulcan.metrics.source.classes", "203", true);
-		assertContainsMetric(t, "vulcan.metrics.source.packages", "16", true);
-		assertContainsMetric(t, "vulcan.metrics.source.files", "148", true);
+		assertContainsMetric(t, "vulcan.metrics.source.lines", MetricType.NUMBER, "4216", true);
+		assertContainsMetric(t, "vulcan.metrics.source.methods", MetricType.NUMBER, "1102", true);
+		assertContainsMetric(t, "vulcan.metrics.source.classes", MetricType.NUMBER, "203", true);
+		assertContainsMetric(t, "vulcan.metrics.source.packages", MetricType.NUMBER, "16", true);
+		assertContainsMetric(t, "vulcan.metrics.source.files", MetricType.NUMBER, "148", true);
 	}
 }

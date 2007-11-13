@@ -38,6 +38,7 @@ import net.sourceforge.vulcan.dto.ChangeSetDto;
 import net.sourceforge.vulcan.dto.MetricDto;
 import net.sourceforge.vulcan.dto.RevisionTokenDto;
 import net.sourceforge.vulcan.dto.TestFailureDto;
+import net.sourceforge.vulcan.dto.MetricDto.MetricType;
 import net.sourceforge.vulcan.dto.ProjectStatusDto.Status;
 import net.sourceforge.vulcan.dto.ProjectStatusDto.UpdateType;
 import net.sourceforge.vulcan.exception.StoreException;
@@ -297,13 +298,21 @@ public class JdbcBuildOutcomeStoreTest extends TestCase {
 		
 		final MetricDto m1 = new MetricDto();
 		m1.setMessageKey("a.key.of.some.sort");
-		m1.setValue("12");
+		m1.setValue("0.12");
+		m1.setType(MetricType.PERCENT);
 		metrics.add(m1);
 
 		final MetricDto m2 = new MetricDto();
 		m2.setMessageKey("another.key");
-		m2.setValue("53%");
+		m2.setValue("53");
+		m2.setType(MetricType.NUMBER);
 		metrics.add(m2);
+		
+		final MetricDto m3 = new MetricDto();
+		m3.setMessageKey("yet.another.key");
+		m3.setValue("fifty three");
+		m3.setType(MetricType.STRING);
+		metrics.add(m3);
 		
 		outcome.setMetrics(metrics);
 		
