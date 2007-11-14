@@ -508,14 +508,14 @@
 	</xsl:template>
 	
 	<xsl:template match="/project/errors">
-		<a xmlns="http://www.w3.org/1999/xhtml" name="errors"/>
+		<a xmlns="http://www.w3.org/1999/xhtml" id="errors"/>
 		<xsl:call-template name="build-messages">
 			<xsl:with-param name="caption" select="'Build Errors'"/>
 		</xsl:call-template>
 	</xsl:template>
 	
 	<xsl:template match="/project/warnings">
-		<a xmlns="http://www.w3.org/1999/xhtml" name="warnings"/>
+		<a xmlns="http://www.w3.org/1999/xhtml" id="warnings"/>
 		<xsl:call-template name="build-messages">
 			<xsl:with-param name="caption" select="'Build Warnings'"/>
 		</xsl:call-template>
@@ -566,7 +566,7 @@
 	</xsl:template>
 	
 	<xsl:template match="/project/metrics">
-		<a xmlns="http://www.w3.org/1999/xhtml" name="metrics"/>
+		<a xmlns="http://www.w3.org/1999/xhtml" id="metrics"/>
 		<table xmlns="http://www.w3.org/1999/xhtml">
 			<caption><xsl:value-of select="$metricsLabel"/></caption>
 			<tbody>
@@ -590,7 +590,7 @@
 	</xsl:template>
 	
 	<xsl:template match="/project/test-failures">
-		<a xmlns="http://www.w3.org/1999/xhtml" name="testfailures"/>
+		<a xmlns="http://www.w3.org/1999/xhtml" id="testfailures"/>
 		<table xmlns="http://www.w3.org/1999/xhtml">
 			<caption><xsl:value-of select="$testFailureLabel"/></caption>
 			<thead>
