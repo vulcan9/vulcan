@@ -4,9 +4,8 @@
 	xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-US"
 	xmlns:jsp="http://java.sun.com/JSP/Page"
 	xmlns:c="http://java.sun.com/jsp/jstl/core"
-	xmlns:x="http://java.sun.com/jsp/jstl/xml"
-	xmlns:fmt="http://java.sun.com/jsp/jstl/fmt"
 	xmlns:html="http://struts.apache.org/tags-html"
+	xmlns:spring="http://www.springframework.org/tags"
 	xmlns:v="http://vulcan.sourceforge.net/j2ee/jsp/tags">
 
 <html:xhtml/>
@@ -20,46 +19,46 @@
 <v:bubble styleClass="manualBuild">
 <html:form action="/buildmanagement/manualBuild" method="post">
 <table class="manualBuild">
-	<caption><fmt:message key="captions.build.manual"/></caption>
+	<caption><spring:message code="captions.build.manual"/></caption>
 	<tbody>
 		<tr>
-			<td><fmt:message key="label.tag.options"/></td>
+			<td><spring:message code="label.tag.options"/></td>
 			<td>
 				<ul class="metaDataOptions">
 					<li>
 						<html:radio property="chooseTags" value="false" styleId="tagDefault"/>
-						<label for="tagDefault"><fmt:message key="label.tag.default"/></label>
+						<label for="tagDefault"><spring:message code="label.tag.default"/></label>
 					</li>
 					<li>
 						<html:radio property="chooseTags" value="true" styleId="tagChoose"/>
-						<label for="tagChoose"><fmt:message key="label.tag.choose"/></label>
+						<label for="tagChoose"><spring:message code="label.tag.choose"/></label>
 					</li>
 				</ul>
 			</td>
 		</tr>
 		
 		<tr>
-			<td><fmt:message key="label.update.strategy"/></td>
+			<td><spring:message code="label.update.strategy"/></td>
 			<td>
 				<ul class="metaDataOptions">
 					<li>
 						<html:radio property="updateStrategy" value="Default" styleId="updateStrategyDefault"/>
-						<label for="updateStrategyDefault"><fmt:message key="label.update.strategy.default"/></label>
+						<label for="updateStrategyDefault"><spring:message code="label.update.strategy.default"/></label>
 					</li>
 					<li>
 						<html:radio property="updateStrategy" value="Full" styleId="updateStrategyFull"/>
-						<label for="updateStrategyFull"><fmt:message key="label.update.strategy.manual.full"/></label>
+						<label for="updateStrategyFull"><spring:message code="label.update.strategy.manual.full"/></label>
 					</li>
 					<li>
 						<html:radio property="updateStrategy" value="Incremental" styleId="updateStrategyIncremental"/>
-						<label for="updateStrategyIncremental"><fmt:message key="label.update.strategy.manual.incremental"/></label>
+						<label for="updateStrategyIncremental"><spring:message code="label.update.strategy.manual.incremental"/></label>
 					</li>
 				</ul>
 			</td>
 		</tr>
 		
 		<tr>
-			<td><fmt:message key="label.projects"/></td>
+			<td><spring:message code="label.projects"/></td>
 			<td>
 				<div class="projectCheckboxes">
 					<ul>
@@ -81,36 +80,36 @@
 			</td>
 		</tr>
 		<tr>
-			<td><fmt:message key="label.build.manual.options"/></td>
+			<td><spring:message code="label.build.manual.options"/></td>
 			<td>
 				<ul class="metaDataOptions">
 					<li>
 						<html:checkbox property="buildOnNoUpdates" styleId="noUpdates"/>
-						<label for="noUpdates"><fmt:message key="label.build.when.no.updates"/></label>
+						<label for="noUpdates"><spring:message code="label.build.when.no.updates"/></label>
 					</li>
 					<li>
 						<html:checkbox property="buildOnDependencyFailure" styleId="failedDeps"/>
-						<label for="failedDeps"><fmt:message key="label.build.when.deps.fail"/></label>
+						<label for="failedDeps"><spring:message code="label.build.when.deps.fail"/></label>
 					</li>
 				</ul>
 			</td>
 		</tr>
 		<tr>
-			<td><fmt:message key="label.build.manual.dependency.options"/></td>
+			<td><spring:message code="label.build.manual.dependency.options"/></td>
 			<td>
-				<span class="description"><fmt:message key="label.build.manual.dependency.options.description"/></span>
+				<span class="description"><spring:message code="label.build.manual.dependency.options.description"/></span>
 				<ul class="metaDataOptions">
 					<li>
 						<html:radio property="dependencies" value="NONE" styleId="depNONE"/>
-						<label for="depNONE"><fmt:message key="label.build.deps.none"/></label>
+						<label for="depNONE"><spring:message code="label.build.deps.none"/></label>
 					</li>
 					<li>
 						<html:radio property="dependencies" value="AS_NEEDED" styleId="depAS_NEEDED"/>
-						<label for="depAS_NEEDED"><fmt:message key="label.build.deps.as.needed"/></label>
+						<label for="depAS_NEEDED"><spring:message code="label.build.deps.as.needed"/></label>
 					</li>
 					<li>
 						<html:radio property="dependencies" value="FORCE" styleId="depFORCE"/>
-						<label for="depFORCE" title="not implemented"><fmt:message key="label.build.deps.force"/></label>
+						<label for="depFORCE" title="not implemented"><spring:message code="label.build.deps.force"/></label>
 					</li>
 				</ul>
 			</td>

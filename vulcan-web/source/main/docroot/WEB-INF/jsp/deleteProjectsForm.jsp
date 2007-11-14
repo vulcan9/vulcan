@@ -4,9 +4,8 @@
 	xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-US"
 	xmlns:jsp="http://java.sun.com/JSP/Page"
 	xmlns:c="http://java.sun.com/jsp/jstl/core"
-	xmlns:x="http://java.sun.com/jsp/jstl/xml"
-	xmlns:fmt="http://java.sun.com/jsp/jstl/fmt"
 	xmlns:html="http://struts.apache.org/tags-html"
+	xmlns:spring="http://www.springframework.org/tags"
 	xmlns:v="http://vulcan.sourceforge.net/j2ee/jsp/tags">
 
 <html:xhtml/>
@@ -20,11 +19,11 @@
 <v:bubble styleClass="">
 <html:form action="/admin/setup/deleteProjects" method="post">
 <table class="delete-projects">
-	<caption><fmt:message key="captions.delete.projects"/></caption>
+	<caption><spring:message code="captions.delete.projects"/></caption>
 	<tbody>
 		<tr>
 			<td>
-				<fmt:message key="label.projects"/>
+				<spring:message code="label.projects"/>
 			</td>
 			<td>
 				<div class="projectCheckboxes">
@@ -46,13 +45,13 @@
 		<c:if test="${not empty projectsWithDependents}">
 			<tr>
 				<td colspan="2">
-					<span class="warning"><fmt:message key="messages.dependent.projects.pre"/></span>
+					<span class="warning"><spring:message code="messages.dependent.projects.pre"/></span>
 					<ul>
 						<c:forEach items="${projectsWithDependents}" var="projectName">
 							<li>${projectName}</li>
 						</c:forEach>
 					</ul>
-					<span><fmt:message key="messages.dependent.proejcts.mid"/></span>
+					<span><spring:message code="messages.dependent.proejcts.mid"/></span>
 					<ul>
 						<c:forEach items="${dependentProjects}" var="projectName">
 							<li>
@@ -61,13 +60,13 @@
 							</li>
 						</c:forEach>
 					</ul>
-					<span><fmt:message key="messages.dependent.projects.will.be.deleted"/></span>
+					<span><spring:message code="messages.dependent.projects.will.be.deleted"/></span>
 				</td>
 			</tr>
 		</c:if>
 		<tr>
 			<td class="buttons" colspan="2">
-				<button><fmt:message key="label.delete.projects"/></button>
+				<button><spring:message code="label.delete.projects"/></button>
 			</td>
 		</tr>
 	</tbody>

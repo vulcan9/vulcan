@@ -8,7 +8,7 @@
 		<property name="id"><value>2</value></property>
 	</bean>
 	
-	<bean id="messageSource" class="org.springframework.context.support.ResourceBundleMessageSource">
+	<bean id="messageSource" class="org.springframework.context.support.ReloadableResourceBundleMessageSource">
 		<property name="basenames">
 			<list>
 				<value>goodPlugin2</value>

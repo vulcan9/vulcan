@@ -23,14 +23,13 @@ import static net.sourceforge.vulcan.TestUtils.resolveRelativeFile;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.InputStream;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.List;
 
 import net.sourceforge.vulcan.EasyMockTestCase;
 import net.sourceforge.vulcan.MockApplicationContext;
-import net.sourceforge.vulcan.core.ProjectNameChangeListener;
 import net.sourceforge.vulcan.core.ConfigurationStore;
+import net.sourceforge.vulcan.core.ProjectNameChangeListener;
 import net.sourceforge.vulcan.core.BeanEncoder.FactoryExpert;
 import net.sourceforge.vulcan.dto.ComponentVersionDto;
 import net.sourceforge.vulcan.dto.PluginConfigDto;
@@ -456,11 +455,8 @@ public class SpringPluginManagerTest extends EasyMockTestCase {
 		cfg.setId(Integer.toString(count++));
 		final File dir = resolveRelativeFile(path);
 		cfg.setDirectory(dir);
-		try {
-			cfg.setClassPath(new URL[] {dir.toURI().toURL()});
-		} catch (MalformedURLException e) {
-			throw new RuntimeException(e);
-		}
+		cfg.setClassPath(new URL[] {});
+		
 		return cfg;
 	}
 }

@@ -5,8 +5,8 @@
 	xmlns:jsp="http://java.sun.com/JSP/Page"
 	xmlns:c="http://java.sun.com/jsp/jstl/core"
 	xmlns:x="http://java.sun.com/jsp/jstl/xml"
-	xmlns:fmt="http://java.sun.com/jsp/jstl/fmt"
 	xmlns:html="http://struts.apache.org/tags-html"
+	xmlns:spring="http://www.springframework.org/tags"
 	xmlns:v="http://vulcan.sourceforge.net/j2ee/jsp/tags">
 
 <html:xhtml/>
@@ -20,11 +20,11 @@
 <v:bubble styleClass="">
 <html:form action="/admin/setup/createProjectFromUrl" method="post">
 <table>
-	<caption><fmt:message key="captions.import.project"/></caption>
+	<caption><spring:message code="captions.import.project"/></caption>
 	<tbody>
 		<tr>
 			<td>
-				<fmt:message key="label.project.url"/>
+				<spring:message code="label.project.url"/>
 			</td>
 			<td>
 				<html:text property="url"/>
@@ -36,7 +36,7 @@
 		<c:if test="${projectImportForm.authenticationRequired}">
 		<tr>
 			<td>
-				<fmt:message key="label.username"/>
+				<spring:message code="label.username"/>
 			</td>
 			<td>
 				<html:text property="username"/>
@@ -44,7 +44,7 @@
 		</tr>
 		<tr>
 			<td>
-				<fmt:message key="label.password"/>
+				<spring:message code="label.password"/>
 			</td>
 			<td>
 				<html:password property="password" value=""/>
@@ -53,38 +53,38 @@
 		</c:if>
 		<tr>
 			<td>
-				<fmt:message key="label.child.projects"/>
+				<spring:message code="label.child.projects"/>
 			</td>
 			<td>
 				<ul class="metaDataOptions">
 					<li>
 						<html:radio property="createSubprojects" value="false" styleId="singleProject"/>
-						<label for="singleProject"><fmt:message key="label.child.projects.single"/></label>
+						<label for="singleProject"><spring:message code="label.child.projects.single"/></label>
 					</li>
 					<li>
 						<html:radio property="createSubprojects" value="true" styleId="multiProject"/>
-						<label for="multiProject"><fmt:message key="label.child.projects.multi"/></label>
+						<label for="multiProject"><spring:message code="label.child.projects.multi"/></label>
 					</li>
 				</ul>
 			</td>
 		</tr>
 		<tr>
 			<td>
-				<fmt:message key="label.name.collision.resolution"/>
+				<spring:message code="label.name.collision.resolution"/>
 			</td>
 			<td>
 				<ul class="metaDataOptions">
 					<li>
 						<html:radio property="nameCollisionResolutionMode" value="Abort" styleId="nameCollisionResolutionModeAbort"/>
-						<label for="nameCollisionResolutionModeAbort"><fmt:message key="label.name.collision.resolution.abort"/></label>
+						<label for="nameCollisionResolutionModeAbort"><spring:message code="label.name.collision.resolution.abort"/></label>
 					</li>
 					<li>
 						<html:radio property="nameCollisionResolutionMode" value="UseExisting" styleId="nameCollisionResolutionModeUseExisting"/>
-						<label for="nameCollisionResolutionModeUseExisting"><fmt:message key="label.name.collision.resolution.use.existing"/></label>
+						<label for="nameCollisionResolutionModeUseExisting"><spring:message code="label.name.collision.resolution.use.existing"/></label>
 					</li>
 					<li>
 						<html:radio property="nameCollisionResolutionMode" value="Overwrite" styleId="nameCollisionResolutionModeOverwrite"/>
-						<label for="nameCollisionResolutionModeOverwrite"><fmt:message key="label.name.collision.resolution.overwrite"/></label>
+						<label for="nameCollisionResolutionModeOverwrite"><spring:message code="label.name.collision.resolution.overwrite"/></label>
 					</li>
 				</ul>
 				<html:messages property="nameCollisionResolutionMode" id="msg">
@@ -93,7 +93,7 @@
 			</td>
 		</tr>
 		<tr>
-			<td><fmt:message key="label.project.build.scheduler"/></td>
+			<td><spring:message code="label.project.build.scheduler"/></td>
 			<td colspan="2">
 				<div class="projectCheckboxes">
 					<ul>

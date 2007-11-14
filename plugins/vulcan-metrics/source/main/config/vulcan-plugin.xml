@@ -15,10 +15,10 @@
 		</property>
 		<property name="transfomSources">
 			<list>
-				<value>classpath:net/sourceforge/vulcan/metrics/resources/identity.xsl</value>
-				<value>classpath:net/sourceforge/vulcan/metrics/resources/unit-test.xsl</value>
-				<value>classpath:net/sourceforge/vulcan/metrics/resources/code-coverage.xsl</value>
-				<value>classpath:net/sourceforge/vulcan/metrics/resources/static-analysis.xsl</value>
+				<value>xsl/identity.xsl</value>
+				<value>xsl/unit-test.xsl</value>
+				<value>xsl/code-coverage.xsl</value>
+				<value>xsl/static-analysis.xsl</value>
 			</list>
 		</property>
 		<property name="transformerFactory">
@@ -28,11 +28,12 @@
 	
 	<bean id="fileScanner" class="net.sourceforge.vulcan.metrics.scanner.plexus.PlexusFileScanner"/>
 	
-	<bean id="messageSource" class="org.springframework.context.support.ResourceBundleMessageSource">
+	<bean id="messageSource" class="org.springframework.context.support.ReloadableResourceBundleMessageSource">
 		<property name="basenames">
 			<list>
-				<value>net.sourceforge.vulcan.metrics.resources.application</value>
+				<value>i18n/metrics-messages</value>
 			</list>
 		</property>
+		<property name="cacheSeconds" value="30"/>
 	</bean>
 </beans>

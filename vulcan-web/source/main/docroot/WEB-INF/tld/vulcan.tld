@@ -64,6 +64,6 @@
 	<function>
 		<name>formatElapsedTime</name>
 		<function-class>net.sourceforge.vulcan.web.JstlFunctions</function-class>
-		<function-signature>java.lang.String formatElapsedTime(javax.servlet.jsp.PageContext, long)</function-signature>
+		<function-signature>java.lang.String formatElapsedTime(javax.servlet.jsp.PageContext, long, int)</function-signature>
 	</function>
 </taglib>

@@ -8,12 +8,12 @@
 		<property name="defaultGoals" value="install"/>
 	</bean>
 	
-	<bean id="messageSource" class="org.springframework.context.support.ResourceBundleMessageSource">
+	<bean id="messageSource" class="org.springframework.context.support.ReloadableResourceBundleMessageSource">
 		<property name="basenames">
 			<list>
-				<value>net.sourceforge.vulcan.ant.resources.application</value>
-				<value>net.sourceforge.vulcan.maven.resources.application</value>
+				<value>i18n/maven-messages</value>
 			</list>
 		</property>
+		<property name="cacheSeconds" value="30"/>
 	</bean>
 </beans>

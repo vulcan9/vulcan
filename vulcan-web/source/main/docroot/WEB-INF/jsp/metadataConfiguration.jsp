@@ -3,7 +3,6 @@
 <html
 	xmlns:jsp="http://java.sun.com/JSP/Page"
 	xmlns:c="http://java.sun.com/jsp/jstl/core"
-	xmlns:fmt="http://java.sun.com/jsp/jstl/fmt"
 	xmlns:html="http://struts.apache.org/tags-html"
 	xmlns:bean="http://struts.apache.org/tags-bean"
 	xmlns:v="http://vulcan.sourceforge.net/j2ee/jsp/tags">

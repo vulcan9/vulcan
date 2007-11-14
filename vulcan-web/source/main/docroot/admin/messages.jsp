@@ -16,7 +16,7 @@
 <body>
 	<c:choose>
 		<c:when test="${empty eventPool['WARNING'] and empty eventPool['ERROR']}">
-			<v:bubble styleClass="message"><fmt:message key="messages.none"/></v:bubble>
+			<v:bubble styleClass="message"><spring:message code="messages.none"/></v:bubble>
 		</c:when>
 		<c:otherwise>
 			<c:forEach items="${eventPool['ERROR']}" var="msg">
@@ -33,7 +33,7 @@
 				</span>
 				</v:bubble>
 			</c:forEach>
-			<span><html:link styleClass="confirm" forward="clearMessages"><fmt:message key="link.clear.messages"/></html:link></span>
+			<span><html:link styleClass="confirm" forward="clearMessages"><spring:message code="link.clear.messages"/></html:link></span>
 		</c:otherwise>
 	</c:choose>
 </body>

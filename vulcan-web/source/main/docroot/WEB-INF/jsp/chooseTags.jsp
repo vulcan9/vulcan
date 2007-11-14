@@ -4,9 +4,8 @@
 	xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-US"
 	xmlns:jsp="http://java.sun.com/JSP/Page"
 	xmlns:c="http://java.sun.com/jsp/jstl/core"
-	xmlns:x="http://java.sun.com/jsp/jstl/xml"
-	xmlns:fmt="http://java.sun.com/jsp/jstl/fmt"
 	xmlns:html="http://struts.apache.org/tags-html"
+	xmlns:spring="http://www.springframework.org/tags"
 	xmlns:v="http://vulcan.sourceforge.net/j2ee/jsp/tags">
 
 <html:xhtml/>
@@ -16,11 +15,11 @@
 <v:bubble styleClass="manualBuild">
 <html:form action="/buildmanagement/manualBuild" method="post">
 <table class="manualBuild">
-	<caption><fmt:message key="captions.choose.tags"/></caption>
+	<caption><spring:message code="captions.choose.tags"/></caption>
 	<tbody>
 		<tr>
 			<td colspan="3">
-				<span class="description"><fmt:message key="label.choose.tags.description"/></span>
+				<span class="description"><spring:message code="label.choose.tags.description"/></span>
 				<html:hidden property="chooseTags" value="true"/>
 			</td>
 		</tr>
@@ -54,7 +53,7 @@
 				</td>
 			</tr>
 			<tr>
-				<td><fmt:message key="label.working.copy.directory"/></td>
+				<td><spring:message code="label.working.copy.directory"/></td>
 				<td>
 					<html:text property="workDirOverrides" value="${manualBuildForm.workDirOverrides[loopStatus.index]}"/>
 				</td>

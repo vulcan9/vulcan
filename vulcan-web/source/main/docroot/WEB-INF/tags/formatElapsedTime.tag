@@ -8,6 +8,7 @@
     <jsp:directive.tag display-name="formatElapsedTime" dynamic-attributes="false"/>
     
 	<jsp:directive.attribute name="value" required="true" type="java.lang.Long" rtexprvalue="true"/>
+	<jsp:directive.attribute name="verbosity" required="false" type="java.lang.Long" rtexprvalue="true"/>
 	
-	${v:formatElapsedTime(pageContext, value)}
+	${v:formatElapsedTime(pageContext, value, verbosity)}
 </jsp:root>

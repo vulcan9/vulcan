@@ -4,9 +4,8 @@
 	xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-US"
 	xmlns:jsp="http://java.sun.com/JSP/Page"
 	xmlns:c="http://java.sun.com/jsp/jstl/core"
-	xmlns:x="http://java.sun.com/jsp/jstl/xml"
-	xmlns:fmt="http://java.sun.com/jsp/jstl/fmt"
 	xmlns:html="http://struts.apache.org/tags-html"
+	xmlns:spring="http://www.springframework.org/tags"
 	xmlns:v="http://vulcan.sourceforge.net/j2ee/jsp/tags">
 
 <jsp:directive.page session="false"/>
@@ -37,12 +36,12 @@ see <html:link page="/COPYING">GPL Version 2 License</html:link>.
 
 <v:bubble styleClass="plugin-versions">
 <table class="plugin-versions">
-	<caption><fmt:message key="captions.versions"/></caption>
+	<caption><spring:message code="captions.versions"/></caption>
 	<thead>
 		<tr>
-			<th><fmt:message key="th.component.name"/></th>
-			<th><fmt:message key="th.component.type"/></th>
-			<th><fmt:message key="th.component.version"/></th>
+			<th><spring:message code="th.component.name"/></th>
+			<th><spring:message code="th.component.type"/></th>
+			<th><spring:message code="th.component.version"/></th>
 		</tr>
 	</thead>
 	<tbody>

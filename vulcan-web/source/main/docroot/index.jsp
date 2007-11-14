@@ -7,6 +7,7 @@
 	xmlns:x="http://java.sun.com/jsp/jstl/xml"
 	xmlns:fmt="http://java.sun.com/jsp/jstl/fmt"
 	xmlns:html="http://struts.apache.org/tags-html"
+	xmlns:spring="http://www.springframework.org/tags"
 	xmlns:v="http://vulcan.sourceforge.net/j2ee/jsp/tags">
 
 <jsp:directive.page session="false"/>
@@ -29,7 +30,7 @@
 
 <c:choose>
 <c:when test="${not stateManager.running and not buildOutcomeConverter.running}">
-	<v:bubble styleClass="error"><span class="error"><fmt:message key="errors.not.running"/></span></v:bubble>
+	<v:bubble styleClass="error"><span class="error"><spring:message code="errors.not.running"/></span></v:bubble>
 </c:when>
 <c:when test="${buildOutcomeConverter.running}">
 	<c:set var="pctComplete" value="${buildOutcomeConverter.convertedCount * 100 / buildOutcomeConverter.totalCount}"/>
@@ -48,31 +49,31 @@
 <v:bubble>
 	<x:transform xslt="${xslt}">
 		<x:param name="caption">
-			<fmt:message key="captions.projects.status"/>
+			<spring:message code="captions.projects.status"/>
 		</x:param>
 		<x:param name="detailLink">
 			<c:url value="/viewProjectStatus.do?transform=xhtml&amp;projectName="/>
 		</x:param>
 		<x:param name="nameHeader">
-			<fmt:message key="th.project.name"/>
+			<spring:message code="th.project.name"/>
 		</x:param>
 		<x:param name="buildNumberHeader">
-			<fmt:message key="th.build.number"/>
+			<spring:message code="th.build.number"/>
 		</x:param>
 		<x:param name="ageHeader">
-			<fmt:message key="th.age"/>
+			<spring:message code="th.age"/>
 		</x:param>
 		<x:param name="tagHeader">
-			<fmt:message key="th.tagName"/>
+			<spring:message code="th.tagName"/>
 		</x:param>
 		<x:param name="revisionHeader">
-			<fmt:message key="th.revision"/>
+			<spring:message code="th.revision"/>
 		</x:param>
 		<x:param name="statusHeader">
-			<fmt:message key="th.project.status"/>
+			<spring:message code="th.project.status"/>
 		</x:param>
 		<x:param name="timestampLabel">
-			<fmt:message key="label.build.timestamp"/>
+			<spring:message code="label.build.timestamp"/>
 		</x:param>
 		<x:param name="sortSelect">${preferences.sortColumn}</x:param>
 		<x:param name="sortOrder">${preferences.sortOrder}</x:param>
@@ -82,14 +83,14 @@
 
 <v:bubble>
 <table class="buildDaemons">
-	<caption><fmt:message key="captions.build.daemons"/></caption>
+	<caption><spring:message code="captions.build.daemons"/></caption>
 	<thead>
 		<tr>
-			<th><fmt:message key="th.build.daemon.name"/></th>
-			<th><fmt:message key="th.build.daemon.project"/></th>
-			<th><fmt:message key="th.build.daemon.status"/></th>
-			<th><fmt:message key="th.build.daemon.detail"/></th>
-			<th><fmt:message key="th.control"/></th>
+			<th><spring:message code="th.build.daemon.name"/></th>
+			<th><spring:message code="th.build.daemon.project"/></th>
+			<th><spring:message code="th.build.daemon.status"/></th>
+			<th><spring:message code="th.build.daemon.detail"/></th>
+			<th><spring:message code="th.control"/></th>
 		</tr>
 	</thead>
 	<tbody>
@@ -109,10 +110,10 @@
 						<c:if test="${key == null}">
 							<c:set var="key" value="build.phase.build"/>
 						</c:if>
-						<fmt:message key="${key}"/>
+						<spring:message code="${key}"/>
 					</c:when>
 					<c:otherwise>
-						<fmt:message key="build.daemon.idle"/>
+						<spring:message code="build.daemon.idle"/>
 					</c:otherwise>										
 				</c:choose>
 			</td>
@@ -126,7 +127,7 @@
 					<html:link forward="killBuild" paramId="daemonName"
 							paramName="daemon" paramProperty="name"
 							styleClass="confirm">
-						<fmt:message key="link.build.abort"/>
+						<spring:message code="link.build.abort"/>
 					</html:link>
 				</c:if>				
 			</td>
@@ -138,11 +139,11 @@
 
 <v:bubble>
 <table class="buildQueue">
-	<caption><fmt:message key="captions.build.queue"/></caption>
+	<caption><spring:message code="captions.build.queue"/></caption>
 	<thead>
 		<tr>
-			<th><fmt:message key="th.project.name"/></th>
-			<th><fmt:message key="th.project.status"/></th>
+			<th><spring:message code="th.project.name"/></th>
+			<th><spring:message code="th.project.status"/></th>
 		</tr>
 	</thead>
 	<tbody>
@@ -150,7 +151,7 @@
 		<c:choose>
 			<c:when test="${empty pendingTargets}">
 				<tr>
-					<td colspan="2"><fmt:message key="label.empty"/></td>
+					<td colspan="2"><spring:message code="label.empty"/></td>
 				</tr>
 			</c:when>
 			<c:when test="${not empty pendingTargets}">
@@ -160,11 +161,11 @@
 						<td>${status.name}</td>
 						<td>
 							<c:if test="${status.inQueue}">
-								<fmt:message key="build.queue.project.waiting"/>
+								<spring:message code="build.queue.project.waiting"/>
 								<c:set var="hasPending" value="true"/>
 							</c:if>
 							<c:if test="${status.building}">
-								<fmt:message key="build.queue.project.building"/>
+								<spring:message code="build.queue.project.building"/>
 							</c:if>
 						</td>
 					</tr>
@@ -172,7 +173,7 @@
 				<c:if test="${hasPending}">
 					<tr>
 						<td colspan="2">
-							<html:link forward="flushQueue" styleClass="confirm"><fmt:message key="link.flush.queue"/></html:link>					
+							<html:link forward="flushQueue" styleClass="confirm"><spring:message code="link.flush.queue"/></html:link>					
 						</td>
 					</tr>
 				</c:if>
@@ -184,16 +185,16 @@
 
 <v:bubble>
 <table class="schedulers">
-	<caption><fmt:message key="captions.schedulers"/></caption>
+	<caption><spring:message code="captions.schedulers"/></caption>
 	<thead>
 		<tr>
-			<th><fmt:message key="th.scheduler.name"/></th>
-			<th><fmt:message key="th.scheduler.timestamp"/></th>
-			<th><fmt:message key="th.control"/></th>
+			<th><spring:message code="th.scheduler.name"/></th>
+			<th><spring:message code="th.scheduler.timestamp"/></th>
+			<th><spring:message code="th.control"/></th>
 		</tr>
 	</thead>
 	<tbody>
-	<fmt:message key="scheduler.timestamp.pattern" var="schedPattern"/>
+	<spring:message code="scheduler.timestamp.pattern" var="schedPattern"/>
 	<c:forEach items="${stateManager.schedulers}" var="sched">
 		<fmt:formatDate value="${sched.nextExecutionDate}" var="date" pattern="${schedPattern}"/>
 		<tr>
@@ -206,10 +207,10 @@
 							paramName="sched" paramProperty="name">
 					<c:choose>
 						<c:when test="${date ne null}">
-							<fmt:message key="label.pause.scheduler"/>
+							<spring:message code="label.pause.scheduler"/>
 						</c:when>
 						<c:otherwise>
-							<fmt:message key="label.unpause.scheduler"/>
+							<spring:message code="label.unpause.scheduler"/>
 						</c:otherwise>
 					</c:choose>
 				</html:link>

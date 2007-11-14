@@ -78,14 +78,16 @@ public abstract class JstlFunctions {
 		return errorList;
 	}
 
-	public static String formatElapsedTime(PageContext pageContext, long elapsedTime) {
+	public static String formatElapsedTime(PageContext pageContext, long elapsedTime, int verbosity) {
 		final StringBuilder sb = new StringBuilder();
 
+		int count = 0;
+		
 		for (long millisPerUnit : Arrays.asList(MILLIS_PER_DAY, MILLIS_PER_HOUR, MILLIS_PER_MINUTE, MILLIS_PER_SECOND)) {
 			final String messageKey;
 			
 			if (elapsedTime < millisPerUnit && sb.length() > 0) {
-				break;
+				//break;
 			}
 
 			if (millisPerUnit == MILLIS_PER_DAY) {
@@ -106,18 +108,15 @@ public abstract class JstlFunctions {
 			
 			elapsedTime -= units * millisPerUnit;
 
-			boolean last = false;
-			
 			if (sb.length() > 0) {
 				sb.append(", ");
-				last = true;
 			}
 
 			sb.append(units);
 			sb.append(" ");
 			sb.append(formatTimeUnit(pageContext, messageKey,  units > 1));
 			
-			if (last) {
+			if (++count == verbosity) {
 				break;
 			}
 		}
