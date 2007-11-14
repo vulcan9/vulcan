@@ -23,6 +23,7 @@ import java.util.List;
 import javax.xml.transform.TransformerFactory;
 
 import junit.framework.TestCase;
+import net.sourceforge.vulcan.TestUtils;
 import net.sourceforge.vulcan.dto.MetricDto.MetricType;
 import net.sourceforge.vulcan.event.ErrorEvent;
 import net.sourceforge.vulcan.event.Event;
@@ -30,7 +31,7 @@ import net.sourceforge.vulcan.event.EventHandler;
 
 import org.jdom.Document;
 import org.jdom.Element;
-import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 
 public abstract class TransformTestCase extends TestCase {
@@ -43,16 +44,19 @@ public abstract class TransformTestCase extends TestCase {
 		super.setUp();
 		plugin.setEventHandler(new Handler());
 		plugin.setTransfomSources(new Resource[] {
-				new ClassPathResource("net/sourceforge/vulcan/metrics/resources/unit-test.xsl"),
-				new ClassPathResource("net/sourceforge/vulcan/metrics/resources/code-coverage.xsl"),
-				new ClassPathResource("net/sourceforge/vulcan/metrics/resources/static-analysis.xsl"),
-				new ClassPathResource("net/sourceforge/vulcan/metrics/resources/identity.xsl")});
+				getResource("unit-test.xsl"),
+				getResource("code-coverage.xsl"),
+				getResource("static-analysis.xsl"),
+				getResource("identity.xsl")});
 		
 		plugin.setTransformerFactory(TransformerFactory.newInstance());
 		
 		plugin.init();
 	}
 
+	private Resource getResource(String filename) {
+		return new FileSystemResource(TestUtils.resolveRelativeFile("source/main/config/xsl/" + filename));
+	}
 	protected static void assertContainsMetric(Document doc, String key, MetricType type, String value, boolean uniqueKey) {
 		assertEquals("metrics", doc.getRootElement().getName());
 		

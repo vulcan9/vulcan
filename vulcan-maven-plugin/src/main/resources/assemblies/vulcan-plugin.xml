@@ -28,7 +28,7 @@
 			<directory>source/main/config</directory>
 			<outputDirectory>${vulcan.plugin.id}</outputDirectory>
 			<includes>
-				<include>vulcan-plugin.xml</include>
+				<include>**/*</include>
 			</includes>
 		</fileSet>
 	</fileSets>

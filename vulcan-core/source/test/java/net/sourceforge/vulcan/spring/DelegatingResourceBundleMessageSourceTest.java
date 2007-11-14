@@ -25,12 +25,14 @@ import java.util.Map;
 
 import junit.framework.TestCase;
 import net.sourceforge.vulcan.MockApplicationContext;
+import net.sourceforge.vulcan.TestUtils;
 import net.sourceforge.vulcan.metadata.SvnRevision;
 
 import org.springframework.beans.BeansException;
 import org.springframework.context.NoSuchMessageException;
 import org.springframework.context.support.AbstractApplicationContext;
 import org.springframework.context.support.AbstractMessageSource;
+import org.springframework.core.io.FileSystemResourceLoader;
 
 
 @SvnRevision(id="$Id$", url="$HeadURL$")
@@ -65,12 +67,15 @@ public class DelegatingResourceBundleMessageSourceTest extends TestCase {
 	
 	@Override
 	protected void setUp() throws Exception {
-		source.setBasename("net.sourceforge.vulcan.resources.application");
+		source.setResourceLoader(new FileSystemResourceLoader());
+		source.setBasename(TestUtils.resolveRelativePath("source/test/pluginTests/goodPlugin2/goodPlugin2"));
 		
 		ctx.refresh();
 	}
-	public void testDefault() throws Exception {
-		assertEquals("This field is required.", source.getMessage("errors.required", null, null));
+	public void testDefaultResolves() throws Exception {
+		assertEquals("good afternoon.", source.getMessage("plugin.message", null, null));
+	}
+	public void testDefaultThrowsOnMissingKey() throws Exception {
 		final String code = "no.such.message.code";
 		try {
 			source.getMessage(code, null, null);

@@ -29,11 +29,11 @@ import org.springframework.context.MessageSource;
 import org.springframework.context.NoSuchMessageException;
 import org.springframework.context.support.AbstractApplicationContext;
 import org.springframework.context.support.AbstractMessageSource;
-import org.springframework.context.support.ResourceBundleMessageSource;
+import org.springframework.context.support.ReloadableResourceBundleMessageSource;
 
 
 @SvnRevision(id="$Id$", url="$HeadURL$")
-public class DelegatingResourceBundleMessageSource extends ResourceBundleMessageSource {
+public class DelegatingResourceBundleMessageSource extends ReloadableResourceBundleMessageSource {
 	private Set<ApplicationContext> delegates = new HashSet<ApplicationContext>();
 	
 	private boolean recurseFlag;

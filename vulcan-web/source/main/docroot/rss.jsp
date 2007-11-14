@@ -7,11 +7,11 @@
 	<jsp:directive.page contentType="application/rss+xml" session="false"/>
 	<jsp:output omit-xml-declaration="false"/>
 	
-	<fmt:message key="rss.date.format" var="datePattern"/>
+	<spring:message code="rss.date.format" var="datePattern"/>
 	
 	<channel>
-		<title><fmt:message key="rss.title"/></title>
-		<description><fmt:message key="rss.description"/></description>
+		<title><spring:message code="rss.title"/></title>
+		<description><spring:message code="rss.description"/></description>
 
 		<c:set var="req" value="${pageContext.request}"/>
 		<c:set var="serverURL">${req.scheme}://${req.serverName}:${req.serverPort}</c:set>

@@ -83,7 +83,7 @@ public class JstlFunctionsTest extends EasyMockTestCase {
 		expect(messageSource.getMessage("time.seconds", null, request.getLocale())).andReturn("seconds");
 		replay();
 		
-		assertEquals("35 seconds", JstlFunctions.formatElapsedTime(pageContext, 35697));
+		assertEquals("35 seconds", JstlFunctions.formatElapsedTime(pageContext, 35697, 2));
 		
 		verify();
 	}
@@ -92,7 +92,7 @@ public class JstlFunctionsTest extends EasyMockTestCase {
 		expect(messageSource.getMessage("time.second", null, request.getLocale())).andReturn("second");
 		replay();
 		
-		assertEquals("1 minute, 1 second", JstlFunctions.formatElapsedTime(pageContext, 61297));
+		assertEquals("1 minute, 1 second", JstlFunctions.formatElapsedTime(pageContext, 61297, 2));
 		
 		verify();
 	}
@@ -100,7 +100,7 @@ public class JstlFunctionsTest extends EasyMockTestCase {
 		expect(messageSource.getMessage("time.minutes", null, request.getLocale())).andReturn("minutes");
 		replay();
 		
-		assertEquals("2 minutes", JstlFunctions.formatElapsedTime(pageContext, 120297));
+		assertEquals("2 minutes", JstlFunctions.formatElapsedTime(pageContext, 120297, 2));
 		
 		verify();
 	}
@@ -109,7 +109,7 @@ public class JstlFunctionsTest extends EasyMockTestCase {
 		expect(messageSource.getMessage("time.minutes", null, request.getLocale())).andReturn("minutes");
 		replay();
 		
-		assertEquals("1 hour, 2 minutes", JstlFunctions.formatElapsedTime(pageContext, DateUtils.MILLIS_PER_HOUR + 120297));
+		assertEquals("1 hour, 2 minutes", JstlFunctions.formatElapsedTime(pageContext, DateUtils.MILLIS_PER_HOUR + 120297, 2));
 		
 		verify();
 	}
@@ -118,7 +118,7 @@ public class JstlFunctionsTest extends EasyMockTestCase {
 		expect(messageSource.getMessage("time.minutes", null, request.getLocale())).andReturn("minutes");
 		replay();
 		
-		assertEquals("1 hour, 2 minutes", JstlFunctions.formatElapsedTime(pageContext, DateUtils.MILLIS_PER_HOUR + 122297));
+		assertEquals("1 hour, 2 minutes", JstlFunctions.formatElapsedTime(pageContext, DateUtils.MILLIS_PER_HOUR + 122297, 2));
 		
 		verify();
 	}
@@ -127,15 +127,36 @@ public class JstlFunctionsTest extends EasyMockTestCase {
 		expect(messageSource.getMessage("time.hours", null, request.getLocale())).andReturn("hours");
 		replay();
 		
-		assertEquals("3 days, 12 hours", JstlFunctions.formatElapsedTime(pageContext, DateUtils.MILLIS_PER_DAY * 3 + DateUtils.MILLIS_PER_HOUR * 12));
+		assertEquals("3 days, 12 hours", JstlFunctions.formatElapsedTime(pageContext, DateUtils.MILLIS_PER_DAY * 3 + DateUtils.MILLIS_PER_HOUR * 12, 2));
+		
+		verify();
+	}
+	public void testElapsedTimeDayHoursMinutesAndSeconds() throws Exception {
+		expect(messageSource.getMessage("time.days", null, request.getLocale())).andReturn("days");
+		expect(messageSource.getMessage("time.hours", null, request.getLocale())).andReturn("hours");
+		expect(messageSource.getMessage("time.minute", null, request.getLocale())).andReturn("minute");
+		expect(messageSource.getMessage("time.seconds", null, request.getLocale())).andReturn("seconds");
+
+		replay();
+		
+		assertEquals("3 days, 12 hours, 1 minute, 4 seconds", JstlFunctions.formatElapsedTime(pageContext, DateUtils.MILLIS_PER_DAY * 3 + DateUtils.MILLIS_PER_HOUR * 12 + DateUtils.MILLIS_PER_MINUTE + 4500, 4));
+		
+		verify();
+	}
+	public void testElapsedTimeDayAndHoursOne() throws Exception {
+		expect(messageSource.getMessage("time.days", null, request.getLocale())).andReturn("days");
+		replay();
+		
+		assertEquals("3 days", JstlFunctions.formatElapsedTime(pageContext, DateUtils.MILLIS_PER_DAY * 3 + DateUtils.MILLIS_PER_HOUR * 12, 1));
 		
 		verify();
 	}
 	public void testElapsedTimeDayAndZeroHours() throws Exception {
 		expect(messageSource.getMessage("time.days", null, request.getLocale())).andReturn("days");
+		expect(messageSource.getMessage("time.minutes", null, request.getLocale())).andReturn("minutes");
 		replay();
 		
-		assertEquals("3 days", JstlFunctions.formatElapsedTime(pageContext, DateUtils.MILLIS_PER_DAY * 3 + DateUtils.MILLIS_PER_MINUTE * 29));
+		assertEquals("3 days, 29 minutes", JstlFunctions.formatElapsedTime(pageContext, DateUtils.MILLIS_PER_DAY * 3 + DateUtils.MILLIS_PER_MINUTE * 29, 2));
 		
 		verify();
 	}

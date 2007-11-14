@@ -4,7 +4,7 @@
 	xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-US"
 	xmlns:jsp="http://java.sun.com/JSP/Page"
 	xmlns:c="http://java.sun.com/jsp/jstl/core"
-	xmlns:fmt="http://java.sun.com/jsp/jstl/fmt"
+	xmlns:spring="http://www.springframework.org/tags"
 	xmlns:decorator="http://www.opensymphony.com/sitemesh/decorator">
 	
 <jsp:directive.page session="false"/>
@@ -16,7 +16,7 @@
 	doctype-system="http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd"/>
 
 <head>
-	<title><fmt:message key="title.main"/></title>
+	<title><spring:message code="title.main"/></title>
 	
 	<jsp:element name="link">
 		<jsp:attribute name="rel">stylesheet</jsp:attribute>
@@ -45,11 +45,11 @@
 	</jsp:element>
 	<jsp:element name="meta">
 		<jsp:attribute name="name">confirmMessage</jsp:attribute>
-		<jsp:attribute name="content"><fmt:message key="confirmation"/></jsp:attribute>
+		<jsp:attribute name="content"><spring:message code="confirmation"/></jsp:attribute>
 	</jsp:element>
 	<jsp:element name="meta">
 		<jsp:attribute name="name">confirmUnsavedChangesMessage</jsp:attribute>
-		<jsp:attribute name="content"><fmt:message key="confirmation.unsaved.changes"/></jsp:attribute>
+		<jsp:attribute name="content"><spring:message code="confirmation.unsaved.changes"/></jsp:attribute>
 	</jsp:element>
 	<decorator:head/>
 </head>

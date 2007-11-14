@@ -4,7 +4,7 @@
 	xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-US"
 	xmlns:jsp="http://java.sun.com/JSP/Page"
 	xmlns:c="http://java.sun.com/jsp/jstl/core"
-	xmlns:fmt="http://java.sun.com/jsp/jstl/fmt"
+	xmlns:spring="http://www.springframework.org/tags"
 	xmlns:html="http://struts.apache.org/tags-html">
 
 <jsp:directive.page session="false"/>
@@ -20,16 +20,13 @@
 
 <head>
 	<title>
-		<fmt:message key="header.directory.listing">
-			<fmt:param value="${fileListPath}"/>
-		</fmt:message>
+		<spring:message code="header.directory.listing" arguments="${fileListPath}"/>
 	</title>
 </head>
 
 <body>
-	<fmt:message key="header.directory.listing">
-		<fmt:param value="${fileListPath}"/>
-	</fmt:message>
+	<spring:message code="header.directory.listing" arguments="${fileListPath}"/>
+	
 	<ul>
 		<li><a href="../">..</a></li>
 		<c:forEach var="file" items="${fileList}">

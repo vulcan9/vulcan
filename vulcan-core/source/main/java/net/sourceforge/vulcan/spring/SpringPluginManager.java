@@ -65,6 +65,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.support.FileSystemXmlApplicationContext;
 import org.springframework.context.support.ResourceBundleMessageSource;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 
 
@@ -105,33 +106,16 @@ public class SpringPluginManager
 			try {
 				Thread.currentThread().setContextClassLoader(this.classLoader);
 
-				this.context = new FileSystemXmlApplicationContext(
-						new String[] {contextUrl}, false, ctx);
-				
-				this.context.addBeanFactoryPostProcessor(
-					new BeanFactoryPostProcessor() {
-						public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
-							beanFactory.addBeanPostProcessor(new BeanPostProcessor() {
-								public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
-									if (bean instanceof ResourceBundleMessageSource) {
-										((ResourceBundleMessageSource)bean).setBundleClassLoader(classLoader);
-									}
-									return bean;
-								}
-								public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
-									return bean;
-								}
-							});
-						}
-					});
-				this.context.refresh();
-				this.plugin = (Plugin) context.getBean(beanName);
+				this.context = new VulcanPluginFileSystemXmlApplicationContext(
+						contextUrl, ctx, this);
 			} catch (Exception e) {
 				this.classLoader = null;
 				throw e;
 			} finally {
 				Thread.currentThread().setContextClassLoader(tmpLoader);
 			}
+			
+			this.plugin = (Plugin) context.getBean(beanName);
 		}
 		public void destroy() {
 			context.close();
@@ -143,6 +127,51 @@ public class SpringPluginManager
 			return plugin.getId();
 		}
 	}
+	
+	static class VulcanPluginFileSystemXmlApplicationContext extends FileSystemXmlApplicationContext {
+		private final PluginState pluginState;
+		
+		VulcanPluginFileSystemXmlApplicationContext(String url, ApplicationContext parentContext, PluginState state) {
+			super(new String[] {url}, false, parentContext);
+			
+			this.pluginState = state;
+			
+			addBeanFactoryPostProcessor(
+				new BeanFactoryPostProcessor() {
+					public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
+						beanFactory.addBeanPostProcessor(new BeanPostProcessor() {
+							public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
+								if (bean instanceof ResourceBundleMessageSource) {
+									((ResourceBundleMessageSource)bean).setBundleClassLoader(pluginState.classLoader);
+								}
+								return bean;
+							}
+							public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
+								return bean;
+							}
+						});
+					}
+				});
+			
+			refresh();
+		}
+		
+		/**
+		 * Attempt to load a resource relative to the plugin directory first.
+		 * If the resource does not exist there, fall back to the default behavior.
+		 */
+		@Override
+		protected Resource getResourceByPath(String path) {
+			final File file = new File(this.pluginState.pluginConfig.getDirectory(), path);
+			
+			if (file.exists()) {
+				return new FileSystemResource(file);
+			}
+			
+			return super.getResourceByPath(path);
+		}
+	}
+	
 	public void init() {
 		initialized = true;
 		

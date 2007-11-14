@@ -6,11 +6,12 @@
 		<property name="pluginManager" ref="pluginManager"/>
 	</bean>
 	
-	<bean id="messageSource" class="org.springframework.context.support.ResourceBundleMessageSource">
+	<bean id="messageSource" class="org.springframework.context.support.ReloadableResourceBundleMessageSource">
 		<property name="basenames">
 			<list>
-				<value>net.sourceforge.vulcan.dotnet.resources.application</value>
+				<value>i18n/dotnet-messages</value>
 			</list>
 		</property>
+		<property name="cacheSeconds" value="30"/>
 	</bean>
 </beans>

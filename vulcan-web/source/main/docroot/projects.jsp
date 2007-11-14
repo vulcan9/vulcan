@@ -2,13 +2,14 @@
 		xmlns:jsp="http://java.sun.com/JSP/Page"
 		xmlns:c="http://java.sun.com/jsp/jstl/core"
 		xmlns:fmt="http://java.sun.com/jsp/jstl/fmt"
-		xmlns:spring="http://www.springframework.org/tags">
+		xmlns:spring="http://www.springframework.org/tags"
+		xmlns:v="http://vulcan.sourceforge.net/j2ee/jsp/tags">
 
 	<jsp:directive.page contentType="application/xml" session="false"/>
 	<jsp:output omit-xml-declaration="false"/>
 	
 	<jsp:useBean id="now" class="java.util.Date" scope="page"/>
-	<fmt:message key="build.timestamp.format" var="timestampPattern"/>	
+	<spring:message code="build.timestamp.format" var="timestampPattern"/>	
 
 	<c:set var="buildingProjects" value="${stateManager.buildManager.projectsBeingBuilt}"/>
 	<c:set var="projects" value="${stateManager.config.projects}"/>
@@ -31,31 +32,10 @@
 						<c:choose>
 							<c:when test="${status.completionDate ne null}">
 								<c:set var="elapsedTime" value="${now.time - status.completionDate.time}"/>
-								<!-- WLS 91 can't handle the number 31449600000 -->
-								<c:set var="yearMillis" value="${604800000 * 52}"/>
 								<jsp:element name="timestamp">
 									<jsp:attribute name="millis">${status.completionDate.time}</jsp:attribute>
 									<jsp:attribute name="age">
-										<c:choose>
-											<c:when test="${elapsedTime lt 60000}">
-												1 <fmt:message key="time.minutes"/>
-											</c:when>
-											<c:when test="${elapsedTime lt 3600000}">
-												<fmt:formatNumber maxFractionDigits="0" value="${elapsedTime / 60000}"/>${' '}<fmt:message key="time.minutes"/>
-											</c:when>
-											<c:when test="${elapsedTime lt 86400000}">
-												<fmt:formatNumber maxFractionDigits="0" value="${elapsedTime / 3600000}"/>${' '}<fmt:message key="time.hours"/>
-											</c:when>
-											<c:when test="${elapsedTime lt 604800000}">
-												<fmt:formatNumber maxFractionDigits="0" value="${elapsedTime / 86400000}"/>${' '}<fmt:message key="time.days"/>
-											</c:when>
-											<c:when test="${elapsedTime lt yearMillis}">
-												<fmt:formatNumber maxFractionDigits="0" value="${elapsedTime / 604800000}"/>${' '}<fmt:message key="time.weeks"/>
-											</c:when>
-											<c:otherwise>
-												<fmt:formatNumber maxFractionDigits="0" value="${elapsedTime / yearMillis}"/>${' '}<fmt:message key="time.years"/>
-											</c:otherwise>
-										</c:choose>
+										<v:formatElapsedTime value="${elapsedTime}" verbosity="1"/> 
 									</jsp:attribute>
 									<jsp:body>
 										<fmt:formatDate value="${status.completionDate}" pattern="${timestampPattern}"/>

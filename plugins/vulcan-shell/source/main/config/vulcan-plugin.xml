@@ -4,11 +4,12 @@
 <beans>
 	<bean name="plugin" class="net.sourceforge.vulcan.shell.ShellBuildPlugin"/>
 	
-	<bean id="messageSource" class="org.springframework.context.support.ResourceBundleMessageSource">
+	<bean id="messageSource" class="org.springframework.context.support.ReloadableResourceBundleMessageSource">
 		<property name="basenames">
 			<list>
-				<value>net.sourceforge.vulcan.shell.resources.application</value>
+				<value>i18n/shell-messages</value>
 			</list>
 		</property>
+		<property name="cacheSeconds" value="30"/>
 	</bean>
 </beans>

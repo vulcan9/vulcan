@@ -6,5 +6,5 @@
 		class="net.sourceforge.vulcan.spring.SpringPluginManagerTest$MockPlugin"
 		init-method="init" destroy-method="end">
 		<property name="id"><value>1</value></property>
-        </bean>
+	</bean>
 </beans>

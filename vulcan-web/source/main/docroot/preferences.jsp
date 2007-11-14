@@ -4,9 +4,8 @@
 	xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-US"
 	xmlns:jsp="http://java.sun.com/JSP/Page"
 	xmlns:c="http://java.sun.com/jsp/jstl/core"
-	xmlns:x="http://java.sun.com/jsp/jstl/xml"
-	xmlns:fmt="http://java.sun.com/jsp/jstl/fmt"
 	xmlns:html="http://struts.apache.org/tags-html"
+	xmlns:spring="http://www.springframework.org/tags"
 	xmlns:v="http://vulcan.sourceforge.net/j2ee/jsp/tags">
 
 <jsp:directive.page session="false"/>
@@ -26,31 +25,31 @@
 <v:bubble styleClass="preferences">
 	<form name="preferencesForm" id="preferencesForm" action="#" method="post">
 		<table>
-			<caption><fmt:message key="captions.preferences"/></caption>
+			<caption><spring:message code="captions.preferences"/></caption>
 			<tbody>
 				<tr>
-					<th><fmt:message key="th.external.resources"/></th>
+					<th><spring:message code="th.external.resources"/></th>
 					<td>
 						<ul class="metaDataOptions">
 							<li>
 								<input type="radio" name="windowMode"
 									value="modeSame" id="modeSame"/>
 								<label for="modeSame">
-									<fmt:message key="label.same.window"/>
+									<spring:message code="label.same.window"/>
 								</label>
 							</li>
 							<li>
 								<input type="radio" name="windowMode"
 									value="modeNew" id="modeNew"/>
 								<label for="modeNew">
-									<fmt:message key="label.new.window"/>
+									<spring:message code="label.new.window"/>
 								</label>
 							</li>
 							<li>
 								<input type="radio" name="windowMode"
 									value="modePopup" id="modePopup"/>
 								<label for="modePopup">
-									<fmt:message key="label.new.window.single"/>
+									<spring:message code="label.new.window.single"/>
 								</label>
 							</li>
 						</ul>
@@ -93,8 +92,8 @@
 				</tr>
 				<tr>
 					<td colspan="2">
-						<button id="prefOkButton"><fmt:message key="button.save"/></button>
-						<button id="prefCancelButton"><fmt:message key="button.cancel"/></button>
+						<button id="prefOkButton"><spring:message code="button.save"/></button>
+						<button id="prefCancelButton"><spring:message code="button.cancel"/></button>
 					</td>
 				</tr>
 			</tbody>

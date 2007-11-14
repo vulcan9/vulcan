@@ -202,11 +202,10 @@
 	<bean id="messageSource" class="net.sourceforge.vulcan.spring.DelegatingResourceBundleMessageSource">
 		<property name="basenames">
 			<list>
-				<value>net.sourceforge.vulcan.resources.application</value>
+				<value>/WEB-INF/i18n/messages</value>
 			</list>
 		</property>
-		<property name="useCodeAsDefaultMessage">
-			<value>true</value>
-		</property>
+		<property name="cacheSeconds" value="30"/>
+		<property name="useCodeAsDefaultMessage" value="true"/>
 	</bean>
 </beans>
