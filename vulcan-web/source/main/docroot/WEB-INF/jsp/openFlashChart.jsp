@@ -58,10 +58,13 @@
 		table.build-report, table.build-report td {
 			border: 0 !important;
 		}
+		table.build-report td {
+			padding-left: 2em;
+		}
 	</style>
 </head>
 <body>
-	<div style="margin-left: 2%;">
+	<div style="margin-left: 1.5%;">
 		<table class="build-report">
 			<caption>
 				Build Report 
