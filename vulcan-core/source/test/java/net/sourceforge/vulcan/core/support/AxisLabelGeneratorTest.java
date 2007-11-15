@@ -92,7 +92,7 @@ public class AxisLabelGeneratorTest extends TestCase {
 	public void testLabelThreeMonthsAlternateLocale() throws Exception {
 		fakeDateFormats.put("fr:axis.by.month", "MMM yyyy");
 		locale = Locale.FRENCH;
-		assertLabels(DateUtils.MILLIS_PER_DAY * 90, "oct. 2001", "nov. 2001", "dÃ©c. 2001", "janv. 2002");
+		assertLabels(DateUtils.MILLIS_PER_DAY * 90, "oct. 2001", "nov. 2001", "déc. 2001", "janv. 2002");
 	}
 	
 	public void testLabelThreeWeeks() throws Exception {
