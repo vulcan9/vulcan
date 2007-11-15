@@ -46,8 +46,11 @@ import net.sourceforge.vulcan.integration.PluginStub;
 import net.sourceforge.vulcan.metadata.SvnRevision;
 
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.config.PropertyPlaceholderConfigurer;
+import org.springframework.beans.factory.config.PropertyResourceConfigurer;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
+import org.springframework.context.support.StaticApplicationContext;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 
@@ -252,6 +255,30 @@ public class SpringPluginManagerTest extends EasyMockTestCase {
 		verify();
 		assertEquals(1, mgr.plugins.size());
 		assertTrue(mgr.plugins.containsKey("1"));
+	}
+	public void testPluginAppCtxGetsParentPropertyPlaceholder() throws Exception {
+		final PropertyResourceConfigurer cfgr = new PropertyPlaceholderConfigurer();
+		
+		final StaticApplicationContext ctx = new StaticApplicationContext();
+		
+		ctx.getBeanFactory().registerSingleton("foo", cfgr);
+		
+		ctx.refresh();
+		
+		mgr.setApplicationContext(ctx);
+		
+		expect(store.getPluginConfigs()).andReturn(
+				new PluginMetaDataDto[] {createFakePluginConfig(true)});
+		
+		expert.registerPlugin((ClassLoader)anyObject(), (String)anyObject());
+
+		replay();
+		
+		mgr.init();
+		
+		verify();
+		
+		assertTrue("should contain cfgr", mgr.plugins.get("1").context.getBeanFactoryPostProcessors().contains(cfgr));
 	}
 	public void testInitDoesNotDeleteFailedPlugins() throws Exception {
 		final PluginMetaDataDto pluginConfig = createFakePluginConfig(false);
