@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -32,8 +33,8 @@ import java.util.Map;
 import net.sourceforge.vulcan.BuildTool;
 import net.sourceforge.vulcan.PluginManager;
 import net.sourceforge.vulcan.RepositoryAdaptor;
-import net.sourceforge.vulcan.core.ProjectNameChangeListener;
 import net.sourceforge.vulcan.core.ConfigurationStore;
+import net.sourceforge.vulcan.core.ProjectNameChangeListener;
 import net.sourceforge.vulcan.dto.BuildToolConfigDto;
 import net.sourceforge.vulcan.dto.ComponentVersionDto;
 import net.sourceforge.vulcan.dto.PluginConfigDto;
@@ -61,8 +62,10 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
+import org.springframework.beans.factory.config.PropertyResourceConfigurer;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
+import org.springframework.context.support.AbstractApplicationContext;
 import org.springframework.context.support.FileSystemXmlApplicationContext;
 import org.springframework.context.support.ResourceBundleMessageSource;
 import org.springframework.core.io.FileSystemResource;
@@ -136,6 +139,8 @@ public class SpringPluginManager
 			
 			this.pluginState = state;
 			
+			addParentPropertyResourceConfigurers(parentContext);
+			
 			addBeanFactoryPostProcessor(
 				new BeanFactoryPostProcessor() {
 					public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
@@ -169,6 +174,19 @@ public class SpringPluginManager
 			}
 			
 			return super.getResourceByPath(path);
+		}
+		
+		@SuppressWarnings("unchecked")
+		private void addParentPropertyResourceConfigurers(ApplicationContext parentContext) {
+			if (!(parentContext instanceof AbstractApplicationContext)) {
+				return;
+			}
+			final Collection<PropertyResourceConfigurer> beans = 
+				parentContext.getBeansOfType(PropertyResourceConfigurer.class).values();
+			
+			for (PropertyResourceConfigurer bean : beans) {
+				addBeanFactoryPostProcessor(bean);
+			}
 		}
 	}
 	

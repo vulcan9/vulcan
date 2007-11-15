@@ -11,6 +11,6 @@
 				<value>i18n/ant-messages</value>
 			</list>
 		</property>
-		<property name="cacheSeconds" value="30"/>
+		<property name="cacheSeconds" value="${i18n.cache.seconds}"/>
 	</bean>
 </beans>
