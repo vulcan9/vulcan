@@ -18,21 +18,20 @@
  */
 package net.sourceforge.vulcan.spring;
 
-import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
+import java.text.MessageFormat;
+
 import junit.framework.TestCase;
 import net.sourceforge.vulcan.MockApplicationContext;
-import net.sourceforge.vulcan.TestUtils;
 import net.sourceforge.vulcan.metadata.SvnRevision;
 
 import org.springframework.beans.BeansException;
 import org.springframework.context.NoSuchMessageException;
 import org.springframework.context.support.AbstractApplicationContext;
 import org.springframework.context.support.AbstractMessageSource;
-import org.springframework.core.io.FileSystemResourceLoader;
 
 
 @SvnRevision(id="$Id$", url="$HeadURL$")
@@ -67,13 +66,12 @@ public class DelegatingResourceBundleMessageSourceTest extends TestCase {
 	
 	@Override
 	protected void setUp() throws Exception {
-		source.setResourceLoader(new FileSystemResourceLoader());
-		source.setBasename(TestUtils.resolveRelativePath("source/test/pluginTests/goodPlugin2/goodPlugin2"));
+		source.setBasename("classpath:test_messages");
 		
 		ctx.refresh();
 	}
 	public void testDefaultResolves() throws Exception {
-		assertEquals("good afternoon.", source.getMessage("plugin.message", null, null));
+		assertEquals("hello there!", source.getMessage("test.message", null, null));
 	}
 	public void testDefaultThrowsOnMissingKey() throws Exception {
 		final String code = "no.such.message.code";
