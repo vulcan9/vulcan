@@ -34,15 +34,21 @@ public abstract class BuildDaemonImpl extends AbstractScheduler implements Build
 	
 	protected ProjectConfigDto currentTarget;
 	private ProjectBuilder builder;
-	private String phase;
+	private String phaseMessageKey;
 	private String detail;
+	private Object detailArgs[];
 	
 	BuildDetailCallback callback = new BuildDetailCallback() {
-		public void setPhase(String phase) {
-			BuildDaemonImpl.this.phase = phase;
+		public void setPhaseMessageKey(String phase) {
+			BuildDaemonImpl.this.phaseMessageKey = phase;
 		}
 		public void setDetail(String detail) {
 			BuildDaemonImpl.this.detail = detail;
+			detailArgs = null;
+		}
+		public void setDetailMessage(String messageKey, Object[] args) {
+			detail = messageKey;
+			detailArgs = args;
 		}
 		public void reportError(String message, String file, Integer lineNumber, String code) {
 		}
@@ -96,8 +102,9 @@ public abstract class BuildDaemonImpl extends AbstractScheduler implements Build
 			synchronized(this) {
 				currentTarget = null;
 				builder = null;
-				phase = null;
+				phaseMessageKey = null;
 				detail = null;
+				detailArgs = null;
 				notifyAll();
 			}
 			if (watchdog != null) {
@@ -112,11 +119,14 @@ public abstract class BuildDaemonImpl extends AbstractScheduler implements Build
 			builder.abortCurrentBuild(false, requestUsername);
 		}
 	}
-	public String getPhase() {
-		return phase;
+	public String getPhaseMessageKey() {
+		return phaseMessageKey;
 	}
 	public String getDetail() {
 		return detail;
+	}
+	public Object[] getDetailArgs() {
+		return detailArgs;
 	}
 	public synchronized boolean isBuilding() {
 		if (builder != null) {

@@ -70,7 +70,7 @@ public class StateManagerDaemonTest extends StateManagerTestBase {
 		public String getDetail() {
 			return null;
 		}
-		public String getPhase() {
+		public String getPhaseMessageKey() {
 			return null;
 		}
 		public boolean isBuilding() {

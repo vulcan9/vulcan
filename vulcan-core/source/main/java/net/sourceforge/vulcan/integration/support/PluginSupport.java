@@ -28,6 +28,14 @@ public abstract class PluginSupport {
 	public static enum ProgressUnit {
 		Bytes {
 			@Override
+			String getMessageKeyForScalar() {
+				return "progress.bytes.scalar";
+			}
+			@Override
+			String getMessageKeyForMoreThanPrevious() {
+				return "progress.bytes.more.than.previous";
+			}
+			@Override
 			String toUnits(long bytes) {
 				long amount;
 				String unit;
@@ -49,12 +57,24 @@ public abstract class PluginSupport {
 		
 		Files {
 			@Override
+			String getMessageKeyForScalar() {
+				return "progress.files.scalar";
+			}
+			@Override
+			String getMessageKeyForMoreThanPrevious() {
+				return "progress.files.more.than.previous";
+			}
+			@Override
 			String toUnits(long amount) {
-				return amount + " files";
+				return Long.toString(amount);
 			}
 		};
 		
 		abstract String toUnits(long amount);
+
+		abstract String getMessageKeyForScalar();
+
+		abstract String getMessageKeyForMoreThanPrevious();
 	}
 	
 	protected static interface Visitor<T> {
@@ -113,20 +133,25 @@ public abstract class PluginSupport {
 			return;
 		}
 		
-		final String detail;
+		final String messageKey;
+		
+		final Object arg;
 		
 		if (previousUnitsCounted <= 0) {
-			detail = progressUnit.toUnits(unitsCounted) + " so far";
+			messageKey = progressUnit.getMessageKeyForScalar();
+			arg = progressUnit.toUnits(unitsCounted);
 		} else {
-			long percent = unitsCounted * 100 / previousUnitsCounted;
+			double percent = (double)unitsCounted / previousUnitsCounted;
 			
-			if (percent > 100) {
-				detail = "100%+ (" + progressUnit.toUnits(unitsCounted - previousUnitsCounted) + " more than last time)";
+			if (percent > 1) {
+				arg = progressUnit.toUnits(unitsCounted - previousUnitsCounted);
+				messageKey = progressUnit.getMessageKeyForMoreThanPrevious();
 			} else {
-				detail = percent + "% (est.)";
+				messageKey = "progress.percent";
+				arg = percent;
 			}
 		}
 		
-		buildDetailCallback.setDetail(detail);
+		buildDetailCallback.setDetailMessage(messageKey, new Object[] { arg });
 	}
 }
