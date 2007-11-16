@@ -106,7 +106,7 @@
 			<td>
 				<c:choose>
 					<c:when test="${isBuilding}">
-						<c:set var="key" value="${daemon.phase}"/>
+						<c:set var="key" value="${daemon.phaseMessageKey}"/>
 						<c:if test="${key == null}">
 							<c:set var="key" value="build.phase.build"/>
 						</c:if>
@@ -119,7 +119,7 @@
 			</td>
 			<td>
 				<c:if test="${daemon.detail ne null}">
-					${daemon.detail}
+					<spring:message code="${daemon.detail}" arguments="${daemon.detailArgs}"/>
 				</c:if>
 			</td>
 			<td>

@@ -22,8 +22,10 @@ import net.sourceforge.vulcan.metadata.SvnRevision;
 
 @SvnRevision(id="$Id$", url="$HeadURL$")
 public interface BuildDetailCallback {
-	void setPhase(String phase);
+	void setPhaseMessageKey(String messageKey);
 	void setDetail(String detail);
+	void setDetailMessage(String messageKey, Object[] args);
+	
 	void reportError(String message, String file, Integer lineNumber, String code);
 	void reportWarning(String message, String file, Integer lineNumber, String code);
 }

@@ -79,12 +79,11 @@ public class ProjectBuilderTest extends EasyMockTestCase {
 	UpdateType updateType = null;
 	
 	BuildDetailCallback buildDetailCallback = new BuildDetailCallback() {
-		public void setPhase(String phase) {};
-		public void setDetail(String detail) {};
-		public void reportError(String message, String file, Integer lineNumber, String code) {
-		}
-		public void reportWarning(String message, String file, Integer lineNumber, String code) {
-		}
+		public void setPhaseMessageKey(String phase) {}
+		public void setDetail(String detail) {}
+		public void setDetailMessage(String messageKey, Object[] args) {}
+		public void reportError(String message, String file, Integer lineNumber, String code) {}
+		public void reportWarning(String message, String file, Integer lineNumber, String code) {}
 		@Override
 		public boolean equals(Object obj) {
 			return true;

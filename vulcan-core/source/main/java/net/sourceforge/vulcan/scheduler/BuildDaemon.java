@@ -35,7 +35,7 @@ public interface BuildDaemon extends Scheduler {
 
 	ProjectConfigDto getCurrentTarget();
 
-	String getPhase();
+	String getPhaseMessageKey();
 	
 	String getDetail();
 }

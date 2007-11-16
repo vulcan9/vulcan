@@ -53,7 +53,10 @@ public class Maven2BuildToolInvocationTest extends MavenBuildToolTestBase {
 		public void setDetail(String detail) {
 			details.add(detail);
 		}
-		public void setPhase(String phase) {
+		public void setDetailMessage(String messageKey, Object[] args) {
+			fail("should not call this method");
+		}
+		public void setPhaseMessageKey(String phase) {
 			fail("should not call this method");
 		}
 		public void reportError(String message, String file, Integer line, String arg3) {

@@ -44,7 +44,10 @@ public class AntBuildToolInvocationTest extends AntBuildToolTestBase {
 		public void setDetail(String detail) {
 			details.add(detail);
 		}
-		public void setPhase(String phase) {
+		public void setDetailMessage(String messageKey, Object[] args) {
+			fail("should not call this method");
+		}
+		public void setPhaseMessageKey(String phase) {
 			fail("should not call this method");
 		}
 		public void reportError(String message, String arg1, Integer arg2, String arg3) {

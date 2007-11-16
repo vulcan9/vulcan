@@ -53,9 +53,10 @@ public class Checkout {
 		
 		repo.createWorkingCopy(file, new BuildDetailCallback() {
 			public void setDetail(String msg) {
-				//System.out.println(msg);
 			}
-			public void setPhase(String arg0) {
+			public void setDetailMessage(String messageKey, Object[] args) {
+			}
+			public void setPhaseMessageKey(String arg0) {
 			}
 			public void reportError(String arg0, String arg1, Integer arg2, String arg3) {
 			}

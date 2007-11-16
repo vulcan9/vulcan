@@ -163,12 +163,12 @@ public class ProjectBuilderImpl implements ProjectBuilder {
 				buildStatus.setStatusChanged(!previousOutcome.equals(buildStatus.getStatus()));
 			}
 			
-			buildDetailCallback.setPhase(BuildPhase.Publish.getMessageKey());
+			buildDetailCallback.setPhaseMessageKey(BuildPhase.Publish.getMessageKey());
 			buildManager.targetCompleted(info, currentTarget, buildStatus);
 
 			previousRevision = null;
 			
-			this.buildDetailCallback.setPhase(null);
+			this.buildDetailCallback.setPhaseMessageKey(null);
 
 			synchronized(this) {
 					buildThread = null;
@@ -412,12 +412,12 @@ public class ProjectBuilderImpl implements ProjectBuilder {
 	}
 	protected final void doPhase(BuildPhase phase, PhaseCallback callback) throws Exception {
 		currentPhase = phase;
-		buildDetailCallback.setPhase(phase.getMessageKey());
+		buildDetailCallback.setPhaseMessageKey(phase.getMessageKey());
 		try {
 			callback.execute();
 		} catch (InterruptedException e) {
 		} finally {
-			this.buildDetailCallback.setPhase(null);
+			this.buildDetailCallback.setPhaseMessageKey(null);
 			this.buildDetailCallback.setDetail(null);
 		}
 
@@ -468,8 +468,12 @@ public class ProjectBuilderImpl implements ProjectBuilder {
 			delegate.setDetail(detail);
 		}
 
-		public void setPhase(String phase) {
-			delegate.setPhase(phase);
+		public void setDetailMessage(String messageKey, Object[] args) {
+			delegate.setDetailMessage(messageKey, args);
+		}
+		
+		public void setPhaseMessageKey(String key) {
+			delegate.setPhaseMessageKey(key);
 		}
 	}
 }

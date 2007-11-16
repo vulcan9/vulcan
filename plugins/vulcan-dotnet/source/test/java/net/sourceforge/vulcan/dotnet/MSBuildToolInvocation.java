@@ -58,7 +58,10 @@ public class MSBuildToolInvocation extends TestCase {
 		public void setDetail(String detail) {
 			targets.add(detail);
 		}
-		public void setPhase(String phase) {
+		public void setDetailMessage(String messageKey, Object[] args) {
+			fail("should not call this method");
+		}
+		public void setPhaseMessageKey(String phase) {
 			fail("should not call this method");
 		}
 		public void reportError(String message, String file, Integer lineNumber, String code) {
