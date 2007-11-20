@@ -602,7 +602,10 @@
 			<tbody>
 				<xsl:for-each select="./test-failure">
 					<tr>
-						<td><xsl:value-of select="@name"/></td>
+						<td>
+							<span class="test-name"><xsl:value-of select="@name"/></span>
+							<span class="test-namespace"><xsl:value-of select="@namespace"/></span>
+						</td>
 						<td class="build-number">
 							<xsl:choose>
 								<xsl:when test="@first-build = /project/build-number">

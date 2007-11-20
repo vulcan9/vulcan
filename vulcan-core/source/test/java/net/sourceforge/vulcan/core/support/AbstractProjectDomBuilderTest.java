@@ -503,7 +503,8 @@ public class AbstractProjectDomBuilderTest extends EasyMockTestCase {
 		
 		assertNotNull(failures);
 		assertEquals(1, failures.getContentSize());
-		assertEquals("a.b.c.testBroken", failures.getChild("test-failure").getAttributeValue("name"));	
+		assertEquals("testBroken", failures.getChild("test-failure").getAttributeValue("name"));
+		assertEquals("a.b.c", failures.getChild("test-failure").getAttributeValue("namespace"));
 		assertEquals("95843", failures.getChild("test-failure").getAttributeValue("first-build"));
 	}
 	public void testInvalidBugtraqRegex() throws Exception {

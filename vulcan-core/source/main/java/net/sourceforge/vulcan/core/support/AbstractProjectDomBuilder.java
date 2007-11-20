@@ -246,7 +246,16 @@ public abstract class AbstractProjectDomBuilder implements ProjectDomBuilder {
 			
 			for (TestFailureDto failure : failures) {
 				final Element failureElement = new Element("test-failure");
-				failureElement.setAttribute("name", failure.getName());
+				
+				final String testName = failure.getName();
+				final int lastDot = testName.lastIndexOf('.');
+				if (lastDot > 0) {
+					failureElement.setAttribute("name", testName.substring(lastDot + 1));
+					failureElement.setAttribute("namespace", testName.substring(0, lastDot));
+				} else {
+					failureElement.setAttribute("name", testName);
+				}
+				
 				failureElement.setAttribute("first-build", failure.getBuildNumber().toString());
 				
 				testFailuresRoot.addContent(failureElement);
