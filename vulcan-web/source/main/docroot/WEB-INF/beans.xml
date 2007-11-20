@@ -164,6 +164,7 @@
 				<entry key="projectHeader" value="th.project"/>
 				<entry key="revisionHeader" value="th.revision"/>
 				<entry key="buildNumberHeader" value="th.build.number"/>
+				<entry key="lblCompleted" value="label.build.completed"/>
 				<entry key="authorHeader" value="th.author"/>
 				<entry key="timestampHeader" value="th.timestamp"/>
 				<entry key="messageHeader" value="th.message"/>
@@ -177,6 +178,7 @@
 				<entry key="buildRequestedByLabel" value="label.build.request.username"/>
 				<entry key="buildScheduledByLabel" value="label.build.scheduled.by"/>
 				<entry key="elapsedTimeLabel" value="label.build.elapsed.time"/>
+				<entry key="lblBuildDuration" value="label.build.duration"/>
 				<entry key="issueListHeader" value="label.issue.list"/>
 				<entry key="errorsLabel" value="label.errors.occurred"/>
 				<entry key="warningsLabel" value="label.warnings.occurred"/>

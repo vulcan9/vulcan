@@ -67,11 +67,11 @@
 	<div style="margin-left: 1.5%;">
 		<table class="build-report">
 			<caption>
-				Build Report 
+				<spring:message code="captions.report.build.history"/>
 			</caption>
 			<tbody>
 				<tr>
-					<td>Project(s)</td>
+					<td><spring:message code="label.projects"/></td>
 					<td>
 						<c:forEach items="${reportForm.projectNames}" var="name" varStatus="loop">
 							<c:if test="${loop.index eq 0}">
@@ -84,12 +84,12 @@
 					</td>
 				</tr>					
 				<tr>
-					<td>Range</td>
+					<td><spring:message code="label.range"/></td>
 					<td>
 						<c:choose>
 							<c:when test="${fromLabel.class.name eq 'java.util.Date'}">
 								<fmt:formatDate value="${fromLabel}" type="date" dateStyle="full"/>
-								through
+								<c:out value=" "/><spring:message code="label.through"/><c:out value=" "/>
 								<fmt:formatDate value="${toLabel}" type="date" dateStyle="full"/>
 							</c:when>
 							<c:otherwise>
@@ -99,16 +99,19 @@
 					</td>
 				</tr>
 				<tr>
-					<td>Success rate</td>
-					<td><fmt:formatNumber value="${successCount / sampleCount}" type="percent"/> (${successCount}/${sampleCount} builds)</td>
+					<td><spring:message code="label.success.rate"/></td>
+					<td>
+						<fmt:formatNumber value="${successCount / sampleCount}" type="percent"/>
+						(${successCount}/${sampleCount} <spring:message code="label.builds"/>)
+					</td>
 				</tr>
 				<tr>
-					<td>Average time to fix a broken build</td>
-					<td><v:formatElapsedTime value="${averageTimeToFixBuild}"/></td>
+					<td><spring:message code="label.avg.time.to.fix.build"/></td>
+					<td><v:formatElapsedTime value="${averageTimeToFixBuild}" verbosity="2"/></td>
 				</tr>
 				<tr>
-					<td>Longest time to fix a broken build</td>
-					<td><v:formatElapsedTime value="${longestTimeToFixBuild}"/></td>
+					<td><spring:message code="label.max.time.to.fix.build"/></td>
+					<td><v:formatElapsedTime value="${longestTimeToFixBuild}" verbosity="2"/></td>
 				</tr>
 			</tbody>
 		</table>
@@ -119,11 +122,11 @@
 	<c:if test="${not empty availableMetrics}">
 	<div class="chart">
 		<div class="caption">
-			Trend Analysis
+			<spring:message code="label.trend.analysis"/>
 		</div>
 		<form id="metricsForm" action="#" method="post">
 			<div class="plotOptions">
-				<span>Plot 1: </span>
+				<span><spring:message code="label.trend.analysis.first.plot"/></span>
 				<select id="metric1">
 					<option value="none">&amp;nbsp;</option>
 					<c:forEach items="${availableMetrics}" var="metricKey">
@@ -141,7 +144,7 @@
 						</c:choose>
 					</c:forEach>
 				</select>
-				<span>Plot 2: </span>
+				<span><spring:message code="label.trend.analysis.second.plot"/></span>
 				<select id="metric2">
 					<option value="none">&amp;nbsp;</option>
 					<c:forEach items="${availableMetrics}" var="metricKey">
@@ -159,7 +162,7 @@
 						</c:choose>
 					</c:forEach>
 				</select>
-				<button id="btnRefresh">Refresh</button>
+				<button id="btnRefresh"><spring:message code="button.refresh"/></button>
 				<c:url value="/getBuildHistory.do?transform=OpenFlashChart-Metrics" var="metricsUrl"/>
 				<input type="hidden" id="metricsUrl" value="${metricsUrl}"/> 
 			</div>
@@ -174,7 +177,7 @@
 	</c:if>
 	<div class="chart">
 		<div class="caption" style="margin-bottom: 3ex;">
-			Build Durations
+			<spring:message code="label.trend.build.durations"/>
 		</div>
 	
 		<v:openFlashChart
@@ -189,11 +192,11 @@
 	<c:if test="${not empty topErrors}">
 	<div class="pane">
 		<table>
-			<caption>Top Errors</caption>
+			<caption><spring:message code="captions.top.errors"/></caption>
 			<thead>
 				<tr>
-					<th>Error</th>
-					<th>Count</th>
+					<th><spring:message code="th.message"/></th>
+					<th><spring:message code="th.count"/></th>
 				</tr>
 			</thead>
 			<tbody>
@@ -211,17 +214,17 @@
 	<c:if test="${not empty topTestFailures}">
 	<div class="pane">
 		<table>
-			<caption>Top Test Failures</caption>
+			<caption><spring:message code="captions.top.test.failures"/></caption>
 			<thead>
 				<tr>
-					<th>Test Case</th>
-					<th>Count</th>
+					<th><spring:message code="label.test.failure.name"/></th>
+					<th><spring:message code="th.count"/></th>
 				</tr>
 			</thead>
 			<tbody>
 				<c:forEach items="${topTestFailures}" var="e">
 					<tr>
-						<td>${e.name}</td>
+						<td><v:formatTestName value="${e.name}"/></td>
 						<td class="numeric"><fmt:formatNumber value="${e.count}"/></td>
 					</tr>
 				</c:forEach>

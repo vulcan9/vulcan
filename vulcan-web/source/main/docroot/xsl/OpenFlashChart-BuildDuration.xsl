@@ -6,42 +6,13 @@
 	
 	<xsl:strip-space elements="*"/>
 	
-	<xsl:param name="title"/>
+	<xsl:param name="buildNumberHeader"/>
 	<xsl:param name="projectSiteURL"/>
 	<xsl:param name="viewProjectStatusURL"/>
-	<xsl:param name="issueTrackerURL"/>
-	<xsl:param name="issueListHeader"/>
-	<xsl:param name="nextBuildLabel"/>
-	<xsl:param name="prevBuildLabel"/>
-	<xsl:param name="sandboxLabel"/>
-	<xsl:param name="buildLogLabel"/>
-	<xsl:param name="revisionCaption"/>
-	<xsl:param name="changeSetCaption"/>
-	<xsl:param name="projectHeader"/>
-	<xsl:param name="revisionHeader"/>
-	<xsl:param name="buildNumberHeader"/>
-	<xsl:param name="authorHeader"/>
-	<xsl:param name="timestampHeader"/>
-	<xsl:param name="messageHeader"/>
-	<xsl:param name="pathsHeader"/>
-	<xsl:param name="diffHeader"/>
-	<xsl:param name="statusHeader"/>
-	<xsl:param name="lastGoodBuildNumberLabel"/>
-	<xsl:param name="repositoryUrlLabel"/>
-	<xsl:param name="repositoryTagNameHeader"/>
-	<xsl:param name="currentlyBuildingMessage"/>
-	<xsl:param name="buildRequestedByLabel"/>
-	<xsl:param name="buildScheduledByLabel"/>
 	<xsl:param name="elapsedTimeLabel"/>
-	<xsl:param name="buildReasonLabel"/>
+	<xsl:param name="lblCompleted"/>
+	<xsl:param name="lblBuildDuration"/>
 	<xsl:param name="updateTypeLabel"/>
-	<xsl:param name="warningsLabel"/>
-	<xsl:param name="errorsLabel"/>
-	<xsl:param name="metricsLabel"/>
-	<xsl:param name="testFailureLabel"/>
-	<xsl:param name="testNameLabel"/>
-	<xsl:param name="testFailureBuildNumberLabel"/>
-	<xsl:param name="newTestFailureLabel"/>
 	
 	<xsl:key name="builds-by-project-name-and-update-type" match="/build-history/project" use="concat(name,'-',update-type)"/>
 	<xsl:key name="builds-by-timestamp" match="/build-history/project" use="timestamp/@millis"/>
@@ -64,16 +35,20 @@
 		<xsl:text><xsl:value-of select="$maxDuration"/></xsl:text>
 		<xsl:text>&amp;</xsl:text>
 
-		&amp;bg_colour=#FFFFFF&amp;
-		&amp;x_axis_colour=#818D9D&amp;
-		&amp;x_grid_colour=#F0F0F0&amp;
-		&amp;y_axis_colour=#818D9D&amp;
-		&amp;y_grid_colour=#ADB5C7&amp;
+<xsl:text>
+&amp;bg_colour=#FFFFFF&amp;
+&amp;x_axis_colour=#818D9D&amp;
+&amp;x_grid_colour=#F0F0F0&amp;
+&amp;y_axis_colour=#818D9D&amp;
+&amp;y_grid_colour=#ADB5C7&amp;
 
-		&amp;x_label_style=10,#164166,2,1&amp;
-		
-		&amp;y_legend=Duration (Minutes),12,#164166&amp;
-		&amp;y_ticks=5,10,5&amp;
+&amp;x_label_style=10,#164166,2,1&amp;
+
+&amp;y_legend=</xsl:text>
+<xsl:value-of select="$lblBuildDuration"/>
+<xsl:text>,12,#164166&amp;
+&amp;y_ticks=5,10,5&amp;
+</xsl:text>
 		
 		<xsl:text>&amp;x_min=</xsl:text>
 		<xsl:value-of select="x-axis/minimum/@millis"/>
@@ -149,15 +124,20 @@
 			</xsl:if>
 			<xsl:text><xsl:value-of select="name"/></xsl:text>
 			<xsl:text>&lt;br&gt;</xsl:text>
-			<xsl:text>Build </xsl:text>
+			<xsl:value-of select="$buildNumberHeader"/>
+			<xsl:text> </xsl:text>
 			<xsl:text><xsl:value-of select="build-number"/></xsl:text>
 			<xsl:text>&lt;br&gt;</xsl:text>
-			<xsl:text>Completed: </xsl:text>
+			<xsl:value-of select="$lblCompleted"/>
+			<xsl:text> </xsl:text>
 			<xsl:text><xsl:value-of select="timestamp"/></xsl:text>
 			<xsl:text>&lt;br&gt;</xsl:text>
-			<xsl:text>Update Type: </xsl:text>
+			<xsl:value-of select="$updateTypeLabel"/>
+			<xsl:text> </xsl:text>
 			<xsl:text><xsl:value-of select="update-type"/></xsl:text>
-			<xsl:text>&lt;br&gt;Elapsed time: </xsl:text>
+			<xsl:text>&lt;br&gt;</xsl:text>
+			<xsl:value-of select="$elapsedTimeLabel"/>
+			<xsl:text> </xsl:text>
 			<xsl:text><xsl:value-of select="elapsed-time"/></xsl:text>
 		</xsl:for-each>&amp;
 

@@ -6,6 +6,8 @@
 	
 	<xsl:strip-space elements="*"/>
 	
+	<xsl:param name="buildNumberHeader"/>
+	<xsl:param name="lblCompleted"/>
 	<xsl:param name="projectSiteURL"/>
 	<xsl:param name="viewProjectStatusURL"/>
 	<xsl:param name="issueTrackerURL"/>
@@ -251,10 +253,12 @@
 			</xsl:if>
 			<xsl:text><xsl:value-of select="name"/></xsl:text>
 			<xsl:text>&lt;br&gt;</xsl:text>
-			<xsl:text>Build </xsl:text>
+			<xsl:value-of select="$buildNumberHeader"/>
+			<xsl:text> </xsl:text>
 			<xsl:text><xsl:value-of select="build-number"/></xsl:text>
 			<xsl:text>&lt;br&gt;</xsl:text>
-			<xsl:text>Completed: </xsl:text>
+			<xsl:value-of select="$lblCompleted"/>
+			<xsl:text> </xsl:text>
 			<xsl:text><xsl:value-of select="timestamp"/></xsl:text>
 			<xsl:text>&lt;br&gt;</xsl:text>
 			<xsl:text><xsl:value-of select="$metricLabel"/></xsl:text>
