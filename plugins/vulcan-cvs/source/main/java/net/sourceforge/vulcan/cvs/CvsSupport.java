@@ -1,6 +1,6 @@
 /*
  * Vulcan Build Manager
- * Copyright (C) 2005-2006 Chris Eldredge
+ * Copyright (C) 2005-2007 Chris Eldredge
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,6 +17,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 package net.sourceforge.vulcan.cvs;
+
+import static org.apache.commons.lang.StringUtils.isBlank;
 
 import java.io.File;
 import java.io.IOException;
@@ -64,8 +66,15 @@ public abstract class CvsSupport extends PluginSupport {
 		this.config = config;
 		this.cvsRoot = cvsRoot;
 
-		options.setCVSRoot(cvsRoot.toString());
-		options.setVeryQuiet(true);
+		this.tag = config.getBranch();
+		
+		if (isBlank(this.tag)) {
+			this.tag = "HEAD";
+		}
+		
+		this.options.setCVSRoot(cvsRoot.toString());
+		this.options.setModeratelyQuiet(true);
+		this.options.setVeryQuiet(true);
 
 		this.connection = ConnectionFactory.getConnection(cvsRoot);
 	}
@@ -120,7 +129,6 @@ public abstract class CvsSupport extends PluginSupport {
 			});
 			
 			cmd.setModule(config.getModule());
-			cmd.setCheckoutByRevision(tag);
 			cmd.setCheckoutDirectory(tmpDir.getName());
 			cmd.setRecursive(false);
 			
