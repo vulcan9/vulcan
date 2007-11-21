@@ -18,8 +18,12 @@
  */
 package net.sourceforge.vulcan.core.support;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import net.sourceforge.vulcan.dto.ProjectStatusDto;
 import net.sourceforge.vulcan.dto.ProjectStatusDto.Status;
@@ -31,6 +35,9 @@ public class ReportHelper {
 	
 	private long longestTime;
 	private long average = -1;
+	private Integer failingBuildNumber;
+	private Integer fixedInBuildNumber;
+	private String longestElapsedFailureName;
 	
 	public ReportHelper(List<ProjectStatusDto> samples, Date maxDate) {
 		this.samples = samples;
@@ -64,43 +71,71 @@ public class ReportHelper {
 		return average;
 	}
 
+	public Integer getFailingBuildNumber() {
+		return failingBuildNumber;
+	}
+	
+	public Integer getFixedInBuildNumber() {
+		return fixedInBuildNumber;
+	}
+
+	public String getLongestElapsedFailureName() {
+		return longestElapsedFailureName;
+	}
+	
 	private void calculate(long maxTime) {
 		long max = -1;
 		long total = 0;
 		long count = 0;
 		
-		for (int i=0; i<samples.size(); i++) {
-			long failTime = 0;
-			long passTime = maxTime;
-			
-			for (; i<samples.size(); i++) {
-				final ProjectStatusDto sample = samples.get(i);
-				if (sample.getStatus() == Status.FAIL) {
-					failTime = sample.getCompletionDate().getTime();
+		final Collection<List<ProjectStatusDto>> samplesByName = keySamplesByName();
+		
+		for (List<ProjectStatusDto> projectSamples : samplesByName) {
+			for (int i=0; i<projectSamples.size(); i++) {
+				ProjectStatusDto failSample = null;
+				ProjectStatusDto passSample  = null;
+				
+				for (; i<projectSamples.size(); i++) {
+					final ProjectStatusDto sample = projectSamples.get(i);
+					if (sample.getStatus() == Status.FAIL) {
+						failSample = sample;
+						break;
+					}
+				}
+				
+				if (i>=projectSamples.size()) {
 					break;
 				}
-			}
-			
-			if (i>=samples.size()) {
-				break;
-			}
-			
-			for (; i<samples.size(); i++) {
-				final ProjectStatusDto sample = samples.get(i);
-				if (sample.getStatus() == Status.PASS) {
-					passTime = sample.getCompletionDate().getTime();
-					break;
+				
+				for (; i<projectSamples.size(); i++) {
+					final ProjectStatusDto sample = projectSamples.get(i);
+					if (sample.getStatus() == Status.PASS) {
+						passSample = sample;
+						break;
+					}
 				}
-			}
-
-			long elapsed = passTime - failTime;
-			
-			if (elapsed > max) {
-				max = elapsed;
-			}
-			if (elapsed > 0) {
-				total += elapsed;
-				count++;
+	
+				long elapsed = maxTime - failSample.getCompletionDate().getTime();
+				
+				if (passSample != null) {
+					elapsed = passSample.getCompletionDate().getTime() - failSample.getCompletionDate().getTime();
+				}
+				
+				if (elapsed > max) {
+					max = elapsed;
+					failingBuildNumber = failSample.getBuildNumber();
+					longestElapsedFailureName = failSample.getName();
+					
+					if (passSample != null) {
+						fixedInBuildNumber = passSample.getBuildNumber();
+					} else {
+						fixedInBuildNumber = null;
+					}
+				}
+				if (elapsed > 0) {
+					total += elapsed;
+					count++;
+				}
 			}
 		}
 		
@@ -108,5 +143,22 @@ public class ReportHelper {
 		if (count > 0) {
 			average = total/count;
 		}
+	}
+
+	private Collection<List<ProjectStatusDto>> keySamplesByName() {
+		final Map<String, List<ProjectStatusDto>> map = new HashMap<String, List<ProjectStatusDto>>();
+		
+		for (ProjectStatusDto sample : samples) {
+			final String name = sample.getName();
+			List<ProjectStatusDto> list = map.get(name);
+			if (list == null) {
+				list = new ArrayList<ProjectStatusDto>();
+				map.put(name, list);
+			}
+			
+			list.add(sample);
+		}
+		
+		return map.values();
 	}
 }

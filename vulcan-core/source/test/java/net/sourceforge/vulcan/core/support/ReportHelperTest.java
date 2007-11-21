@@ -33,86 +33,126 @@ import net.sourceforge.vulcan.dto.ProjectStatusDto.Status;
 
 public class ReportHelperTest extends TestCase {
 	private List<ProjectStatusDto> samples = new ArrayList<ProjectStatusDto>();
+	private int buildNumber;
 	
 	public void testGetSuccessCount() throws Exception {
 		for (int i=0; i<10; i++) {
-			addSample(PASS, new Date(0L));
+			addSample(PASS, new Date(0L), "a");
 		}
 		for (int i=0; i<10; i++) {
-			addSample(SKIP, new Date(0L));
+			addSample(SKIP, new Date(0L), "a");
 		}
 		for (int i=0; i<10; i++) {
-			addSample(ERROR, new Date(0L));
+			addSample(ERROR, new Date(0L), "a");
 		}
 		for (int i=0; i<10; i++) {
-			addSample(FAIL, new Date(0L));
+			addSample(FAIL, new Date(0L), "a");
 		}
 		
 		assertEquals(10, new ReportHelper(samples, null).getSuccessCount());
 	}
 
 	public void testGetLongestTimeToFixBuildNoFails() throws Exception {
-		addSample(PASS, new Date(1000L));
+		addSample(PASS, new Date(1000L), "a");
 		
 		assertEquals(-1, new ReportHelper(samples, null).getLongestTimeToFixBuild());
 	}
 	
 	public void testGetLongestTimeToFixBuildNeverFixed() throws Exception {
-		addSample(FAIL, new Date(1000L));
-		addSample(FAIL, new Date(1200L));
+		addSample(FAIL, new Date(1000L), "a");
+		addSample(FAIL, new Date(1200L), "a");
 		
 		assertEquals(500L, new ReportHelper(samples, new Date(1500L)).getLongestTimeToFixBuild());
 	}
 	
 	public void testGetLongestTimeToFixBuildNeverFixedNullMax() throws Exception {
-		addSample(FAIL, new Date(1000L));
-		addSample(FAIL, new Date(3400L));
+		addSample(FAIL, new Date(1000L), "a");
+		addSample(FAIL, new Date(3400L), "a");
 		
 		assertEquals(2400L, new ReportHelper(samples, null).getLongestTimeToFixBuild());
 	}
 	
 	public void testGetLongestTimeToFixBuildSingle() throws Exception {
-		addSample(FAIL, new Date(0L));
-		addSample(PASS, new Date(1000L));
+		addSample(FAIL, new Date(0L), "a");
+		addSample(PASS, new Date(1000L), "a");
 		
 		assertEquals(1000L, new ReportHelper(samples, null).getLongestTimeToFixBuild());
 	}
 	
 	public void testGetLongestTimeToFixBuild() throws Exception {
-		addSample(FAIL, new Date(0L));
-		addSample(PASS, new Date(1000L));
-		addSample(FAIL, new Date(3000L));
-		addSample(PASS, new Date(5000L));
+		addSample(FAIL, new Date(0L), "a");
+		addSample(PASS, new Date(1000L), "a");
+		addSample(FAIL, new Date(3000L), "a");
+		addSample(PASS, new Date(5000L), "a");
 		
 		assertEquals(2000L, new ReportHelper(samples, null).getLongestTimeToFixBuild());
 	}
 
+	public void testGetLongestTimeToFixBuildNumbers() throws Exception {
+		addSample(FAIL, new Date(0L), "a");
+		addSample(PASS, new Date(1000L), "a");
+		addSample(FAIL, new Date(3000L), "a");
+		addSample(PASS, new Date(5000L), "a");
+		
+		final ReportHelper reportHelper = new ReportHelper(samples, null);
+		assertEquals(Integer.valueOf(2), reportHelper.getFailingBuildNumber());
+		assertEquals(Integer.valueOf(3), reportHelper.getFixedInBuildNumber());
+	}
+
+	public void testGetLongestTimeToFixBuildNumbersNotFixed() throws Exception {
+		addSample(FAIL, new Date(0L), "a");
+		addSample(PASS, new Date(1000L), "a");
+		addSample(FAIL, new Date(3000L), "a");
+		
+		final ReportHelper reportHelper = new ReportHelper(samples, new Date(10000L));
+		assertEquals(Integer.valueOf(2), reportHelper.getFailingBuildNumber());
+		assertEquals(null, reportHelper.getFixedInBuildNumber());
+	}
+	
 	public void testGetAvgTimeToFixBuildNone() throws Exception {
-		addSample(PASS, new Date(1000L));
+		addSample(PASS, new Date(1000L), "a");
 		
 		assertEquals(-1, new ReportHelper(samples, null).getAverageTimeToFixBuild());
 	}
 	
 	public void testGetAvgTimeToFixBuildSingle() throws Exception {
-		addSample(FAIL, new Date(0L));
-		addSample(PASS, new Date(1000L));
+		addSample(FAIL, new Date(0L), "a");
+		addSample(PASS, new Date(1000L), "a");
 		
 		assertEquals(1000L, new ReportHelper(samples, null).getAverageTimeToFixBuild());
 	}
 	
 	public void testGetAvgTimeToFixBuildTwo() throws Exception {
-		addSample(FAIL, new Date(0L));
-		addSample(PASS, new Date(1000L));
-		addSample(FAIL, new Date(3000L));
-		addSample(PASS, new Date(5000L));
+		addSample(FAIL, new Date(0L), "a");
+		addSample(PASS, new Date(1000L), "a");
+		addSample(FAIL, new Date(3000L), "a");
+		addSample(PASS, new Date(5000L), "a");
 		
 		assertEquals(1500L, new ReportHelper(samples, null).getAverageTimeToFixBuild());
 	}
 	
-	private void addSample(Status status, Date completionDate) {
+	public void testGetAvgTimeToFixBuildMultiProject() throws Exception {
+		addSample(FAIL, new Date(0L), "a");
+		addSample(PASS, new Date(1000L), "b");
+		addSample(PASS, new Date(5000L), "a");
+		
+		assertEquals(5000L, new ReportHelper(samples, null).getAverageTimeToFixBuild());
+	}
+
+	public void testGetAvgTimeToFixBuildMultiProjectName() throws Exception {
+		addSample(FAIL, new Date(0L), "a");
+		addSample(PASS, new Date(1000L), "b");
+		addSample(PASS, new Date(5000L), "a");
+		
+		assertEquals("a", new ReportHelper(samples, null).getLongestElapsedFailureName());
+	}
+	
+	private void addSample(Status status, Date completionDate, String projectName) {
 		final ProjectStatusDto sample = new ProjectStatusDto();
 		sample.setStatus(status);
 		sample.setCompletionDate(completionDate);
+		sample.setName(projectName);
+		sample.setBuildNumber(buildNumber++);
 		samples.add(sample);
 	}
 }
