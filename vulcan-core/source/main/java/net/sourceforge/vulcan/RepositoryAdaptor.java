@@ -63,6 +63,13 @@ public interface RepositoryAdaptor {
 	void updateWorkingCopy(File absolutePath, BuildDetailCallback buildDetailCallback) throws RepositoryException;
 	
 	/**
+	 * Verify that a given path is a valid working copy.
+	 * @param path Location to verify
+	 * @return true if the path contains a working copy, false if not
+	 */
+	boolean isWorkingCopy(File absolutePath);
+	
+	/**
 	 * Return a logical name which identifies the tag/branch or other line of development
 	 * that is being used to create the working copy.  The identifier returned will be
 	 * passed into the BuildTool to identify the line of development.  If no branch or tag

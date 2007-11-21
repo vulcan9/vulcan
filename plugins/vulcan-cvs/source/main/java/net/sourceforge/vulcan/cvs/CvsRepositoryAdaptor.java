@@ -171,6 +171,17 @@ public class CvsRepositoryAdaptor extends CvsSupport implements RepositoryAdapto
 		executeCvsCommand(client, cmd);
 	}
 	
+	public boolean isWorkingCopy(File absolutePath) {
+		final Client client = new Client(connection, new StandardAdminHandler());
+		try {
+			if (client.getRepositoryForDirectory(absolutePath) != null) {
+				return true;
+			}
+		} catch (IOException e) {
+		}
+		return false;
+	}
+	
 	public String getRepositoryUrl() {
 		return null;
 	}

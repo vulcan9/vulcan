@@ -1,6 +1,6 @@
 /*
  * Vulcan Build Manager
- * Copyright (C) 2005-2006 Chris Eldredge
+ * Copyright (C) 2005-2007 Chris Eldredge
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -36,32 +36,36 @@ import net.sourceforge.vulcan.filesystem.dto.FileSystemProjectConfigDto;
 import org.apache.commons.io.FileUtils;
 
 public class FileSystemRepositoryAdaptor implements RepositoryAdaptor {
+	public static final String WORKING_COPY_MARKER = ".vulcan-filesystem";
 	private final FileSystemProjectConfigDto config;
 	
 	public FileSystemRepositoryAdaptor(FileSystemProjectConfigDto config) throws RepositoryException {
 		this.config = config;
 	}
 
-	public void createWorkingCopy(File targetDir, BuildDetailCallback buildDetailCallback) throws RepositoryException, InterruptedException {
+	public void createWorkingCopy(File targetDir, BuildDetailCallback buildDetailCallback) throws RepositoryException {
 		final File sourceDir = new File(config.getSourceDirectory());
 		
 		try {
 			FileUtils.copyDirectory(sourceDir, targetDir);
+			FileUtils.touch(new File(targetDir, WORKING_COPY_MARKER));
 		} catch (IOException e) {
 			throw new RepositoryException(e);
 		}
 	}
 	
-	// This will actaully overwrite all files from source to target (even if they are the same)
-	// so it's not as incremental as it should be.
 	public void updateWorkingCopy(File targetDir, BuildDetailCallback buildDetailCallback) throws RepositoryException {
-		final File sourceDir = new File(config.getSourceDirectory());
-		
-		try {
-			FileUtils.copyDirectory(sourceDir, targetDir);
-		} catch (IOException e) {
-			throw new RepositoryException(e);
+		// This will actually overwrite all files from source to target (even if they are the same)
+		// so it's not as incremental as it should be.
+		createWorkingCopy(targetDir, buildDetailCallback);
+	}
+	
+	public boolean isWorkingCopy(File absolutePath) {
+		if (new File(absolutePath, WORKING_COPY_MARKER).exists()) {
+			return true;
 		}
+		
+		return false;
 	}
 	
 	public RevisionTokenDto getLatestRevision(RevisionTokenDto previousRevision) throws RepositoryException, InterruptedException {
