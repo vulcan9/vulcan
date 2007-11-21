@@ -679,6 +679,52 @@ public class ProjectBuilderTest extends EasyMockTestCase {
 		
 		checkBuild();
 	}
+	public void testBuildProjectValidatesWorkingCopyBeforeDelete() throws Exception {
+		final File invalid = new File(".").getCanonicalFile();
+
+		createWorkingDirectoriesSuccess = false;
+
+		project = new ProjectConfigDto();
+		project.setWorkDir(invalid.getPath());
+
+		expect(projectMgr
+		.getRepositoryAdaptor(project)).andReturn(ra);
+
+		expect(ra.getTagName()).andReturn("trunk");
+		expect(ra.getLatestRevision(null)).andReturn(rev0);
+		
+		expect(mgr.getLatestStatus(project.getName())).andReturn(((ProjectStatusDto) null));
+
+		expect(ra.isWorkingCopy(invalid)).andReturn(true);
+		
+		mgr.targetCompleted(info, project, createFakeBuildOutcome(project.getName(), 0, rev0,
+				"trunk", Status.ERROR, "errors.cannot.create.dir", new Object[] {invalid.getCanonicalPath()}, null, "http://localhost", true, null, "messages.build.reason.repository.changes", null, ProjectStatusDto.UpdateType.Full, project.getWorkDir()));
+		
+		checkBuild();
+	}
+	public void testBuildProjectRefusesToDeleteNonWorkingCopy() throws Exception {
+		final File invalid = new File(".").getCanonicalFile();
+
+		createWorkingDirectoriesSuccess = false;
+
+		project = new ProjectConfigDto();
+		project.setWorkDir(invalid.getPath());
+
+		expect(projectMgr
+		.getRepositoryAdaptor(project)).andReturn(ra);
+
+		expect(ra.getTagName()).andReturn("trunk");
+		expect(ra.getLatestRevision(null)).andReturn(rev0);
+		
+		expect(mgr.getLatestStatus(project.getName())).andReturn(((ProjectStatusDto) null));
+
+		expect(ra.isWorkingCopy(invalid)).andReturn(false);
+		
+		mgr.targetCompleted(info, project, createFakeBuildOutcome(project.getName(), 0, rev0,
+				"trunk", Status.ERROR, "errors.wont.delete.non.working.copy", new Object[] {invalid.getCanonicalPath()}, null, "http://localhost", true, null, "messages.build.reason.repository.changes", null, ProjectStatusDto.UpdateType.Full, project.getWorkDir()));
+		
+		checkBuild();
+	}
 	public void testBuildProjectUpToDateForceFlag() throws Exception {
 		project = new ProjectConfigDto();
 		project.setName("a");

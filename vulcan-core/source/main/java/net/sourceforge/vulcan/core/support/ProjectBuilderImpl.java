@@ -144,7 +144,8 @@ public class ProjectBuilderImpl implements ProjectBuilder {
 			}
 		} catch (ProjectUpToDateException e) {
 			buildStatus.setStatus(Status.UP_TO_DATE);
-		} catch (Exception e) {
+		} catch (Throwable e) {
+			e.printStackTrace(System.err);
 			log.error("unexpected error", e);
 			buildStatus.setStatus(Status.ERROR);
 			buildStatus.setMessageKey("messages.build.uncaught.exception");
@@ -275,7 +276,7 @@ public class ProjectBuilderImpl implements ProjectBuilder {
 		if (updateType == Full) {
 			doPhase(BuildPhase.CleanWorkingCopy, new PhaseCallback() {
 				public void execute() throws Exception {
-					cleanWorkingDirectory(currentTarget.getWorkDir());
+					cleanWorkingDirectory(currentTarget.getWorkDir(), ra);
 				};
 			});
 			
@@ -313,8 +314,14 @@ public class ProjectBuilderImpl implements ProjectBuilder {
 			}
 		});
 	}
-	protected File cleanWorkingDirectory(String workDir) throws ConfigException, IOException {
+	protected File cleanWorkingDirectory(String workDir, RepositoryAdaptor ra) throws ConfigException, IOException {
 		final File path = new File(workDir).getCanonicalFile();
+		
+		if (path.exists() && !ra.isWorkingCopy(path)) {
+			throw new ConfigException(
+					"errors.wont.delete.non.working.copy",
+					new Object[] {path.toString()});
+		}
 		
 		if (!createWorkingDirectories(path)) {
 			throw new ConfigException(
@@ -329,6 +336,14 @@ public class ProjectBuilderImpl implements ProjectBuilder {
 	 * @return success flag (false if directories were not created).
 	 */
 	protected boolean createWorkingDirectories(File path) throws ConfigException {
+		if (!deleteWorkingDirectory(path)) {
+			return false;
+		}
+		
+		return path.mkdirs();
+	}
+
+	private boolean deleteWorkingDirectory(File path) throws ConfigException {
 		int tries = 0;
 		
 		try {
@@ -356,7 +371,7 @@ public class ProjectBuilderImpl implements ProjectBuilder {
 							e.getMessage()});
 		}
 		
-		return path.mkdirs();
+		return true;
 	}
 	protected RevisionTokenDto checkBuildNeccessary(final RepositoryAdaptor ra, final ProjectConfigDto currentTarget) throws ProjectUpToDateException, RepositoryException, InterruptedException {
 		String tagName = currentTarget.getRepositoryTagName();

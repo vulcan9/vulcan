@@ -209,6 +209,7 @@ public class SubversionRepositoryAdaptor extends SubversionSupport implements Re
 			throw new RepositoryException(e);
 		}
 	}
+	
 	public void updateWorkingCopy(File absolutePath, BuildDetailCallback buildDetailCallback) throws RepositoryException {
 		try {
 			client.update(absolutePath.toString(), Revision.getInstance(revision), config.isRecursive());
@@ -218,6 +219,16 @@ public class SubversionRepositoryAdaptor extends SubversionSupport implements Re
 			}
 			throw new RepositoryException(e);
 		}
+	}
+	
+	public boolean isWorkingCopy(File path) {
+		try {
+			if (client.info(path.getAbsolutePath()) != null) {
+				return true;
+			}
+		} catch (ClientException ignore) {
+		}
+		return false;
 	}
 	
 	public ChangeLogDto getChangeLog(RevisionTokenDto first, RevisionTokenDto last, OutputStream diffOutputStream) throws RepositoryException {
