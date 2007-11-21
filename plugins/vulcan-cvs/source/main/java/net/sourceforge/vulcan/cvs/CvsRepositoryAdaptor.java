@@ -1,6 +1,6 @@
 /*
  * Vulcan Build Manager
- * Copyright (C) 2005-2006 Chris Eldredge
+ * Copyright (C) 2005-2007 Chris Eldredge
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -61,23 +61,29 @@ public class CvsRepositoryAdaptor extends CvsSupport implements RepositoryAdapto
 	private Set<String> symbolicNames;
 	
 	public CvsRepositoryAdaptor(CvsConfigDto globalConfig, CvsRepositoryProfileDto profile, CvsProjectConfigDto config, String projectName) throws RepositoryException {
-		super(globalConfig, profile, config);
-		this.projectName = projectName;
-		
-		openConnection();
+		this(globalConfig, profile, config, projectName, true);
 	}
 
+	protected CvsRepositoryAdaptor(CvsConfigDto globalConfig, CvsRepositoryProfileDto profile, CvsProjectConfigDto config, String projectName, boolean connect) throws RepositoryException {
+		super(globalConfig, profile, config);
+		this.projectName = projectName;
+
+		if (connect) {
+			openConnection();
+		}
+	}
+	
 	public RevisionTokenDto getLatestRevision(RevisionTokenDto previousRevision) throws RepositoryException {
 		// first, check to see if there are any changes since the previous revision
 		if (previousRevision != null) {
-			if (getLatestRevision(config.getModule(), previousRevision) == previousRevision) {
+			if (getLatestRevision(config.getModule(), previousRevision, tag) == previousRevision) {
 				// no changes, short circuit.
 				return previousRevision;
 			}
 		}
 		
 		// get the aggregate revision of all files.
-		return getLatestRevision(config.getModule(), null);
+		return getLatestRevision(config.getModule(), null, tag);
 	}
 
 	public ChangeLogDto getChangeLog(RevisionTokenDto first, RevisionTokenDto last, OutputStream diffOutputStream) throws RepositoryException {
@@ -108,7 +114,7 @@ public class CvsRepositoryAdaptor extends CvsSupport implements RepositoryAdapto
 		
 		if (symbolicNames == null) {
 			final String path = findFile(config.getModule());
-			getLatestRevision(path, null);
+			getLatestRevision(path, null, null);
 		}
 		
 		for (String name : symbolicNames) {
@@ -143,6 +149,7 @@ public class CvsRepositoryAdaptor extends CvsSupport implements RepositoryAdapto
 		}
 		
 		final Client client = new Client(connection, new StandardAdminHandler());
+		
 		final CheckoutCommand cmd = new CheckoutCommand();
 		final CheckoutListener listener = new CheckoutListener(buildDetailCallback, previousBytesCounted);
 
@@ -194,7 +201,7 @@ public class CvsRepositoryAdaptor extends CvsSupport implements RepositoryAdapto
 		this.tag = tagName;
 	}
 
-	private RevisionTokenDto getLatestRevision(String path, RevisionTokenDto previousRevision) throws RepositoryException {
+	private RevisionTokenDto getLatestRevision(String path, RevisionTokenDto previousRevision, String tag) throws RepositoryException {
 		final List<String> revisions = new ArrayList<String>();
 		final NewestRevisionsLogListener logListener = new NewestRevisionsLogListener(revisions);
 		final Client client = new Client(connection, new StandardAdminHandler());
@@ -203,7 +210,7 @@ public class CvsRepositoryAdaptor extends CvsSupport implements RepositoryAdapto
 		cmd.setModule(path);
 		cmd.setRecursive(config.isRecursive());
 		
-		if ("HEAD" != tag) {
+		if (tag != null && !"HEAD".equals(tag)) {
 			cmd.setRevisionFilter(tag);
 		}
 
