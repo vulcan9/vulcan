@@ -6,6 +6,7 @@
 	xmlns:c="http://java.sun.com/jsp/jstl/core"
 	xmlns:x="http://java.sun.com/jsp/jstl/xml"
 	xmlns:fmt="http://java.sun.com/jsp/jstl/fmt"
+	xmlns:fn="http://java.sun.com/jsp/jstl/functions"
 	xmlns:html="http://struts.apache.org/tags-html"
 	xmlns:spring="http://www.springframework.org/tags"
 	xmlns:v="http://vulcan.sourceforge.net/j2ee/jsp/tags">
@@ -61,6 +62,11 @@
 		table.build-report td {
 			padding-left: 2em;
 		}
+		.longest-broken-build-details {
+			margin-left: 2em;
+			color: #666666;
+			font-style: italic;
+		}
 	</style>
 </head>
 <body>
@@ -72,16 +78,7 @@
 			<tbody>
 				<tr>
 					<td><spring:message code="label.projects"/></td>
-					<td>
-						<c:forEach items="${reportForm.projectNames}" var="name" varStatus="loop">
-							<c:if test="${loop.index eq 0}">
-								<c:out value="${name}"/>
-							</c:if>
-							<c:if test="${loop.index gt 0}">
-								<c:out value=", ${name}"/>
-							</c:if>
-						</c:forEach>
-					</td>
+					<td>${fn:join(reportForm.projectNames, ", ")}</td>
 				</tr>					
 				<tr>
 					<td><spring:message code="label.range"/></td>
@@ -111,7 +108,27 @@
 				</tr>
 				<tr>
 					<td><spring:message code="label.max.time.to.fix.build"/></td>
-					<td><v:formatElapsedTime value="${longestTimeToFixBuild}" verbosity="2"/></td>
+					<td>
+						<v:formatElapsedTime value="${longestTimeToFixBuild}" verbosity="2"/>
+						<span class="longest-broken-build-details">
+							<spring:message code="label.failed.build"/>
+							<c:out value=" "/>
+							<v:buildReportLink projectName="${longestElapsedFailureName}"
+								buildNumber="${failingBuildNumber}" text="${failingBuildNumber}"/>
+							<c:if test="${fn:join(reportForm.projectNames, ',') != longestElapsedFailureName}">
+								<c:out value=" "/>
+								<spring:message code="label.of.project"/>
+								<c:out value=" ${longestElapsedFailureName}"/>
+							</c:if>
+							<c:if test="${fixedInBuildNumber != null}">
+								<c:out value=" "/>
+								<spring:message code="label.fixed.in.build"/>
+								<c:out value=" "/>
+								<v:buildReportLink projectName="${longestElapsedFailureName}"
+									buildNumber="${fixedInBuildNumber}" text="${fixedInBuildNumber}"/>
+							</c:if>
+						</span>
+					</td>
 				</tr>
 			</tbody>
 		</table>

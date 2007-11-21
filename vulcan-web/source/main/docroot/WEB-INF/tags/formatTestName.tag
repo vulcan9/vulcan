@@ -5,7 +5,7 @@
 	xmlns:c="http://java.sun.com/jsp/jstl/core"
 	xmlns:fn="http://java.sun.com/jsp/jstl/functions">
     
-	<jsp:directive.tag display-name="formatElapsedTime" dynamic-attributes="false"/>
+	<jsp:directive.tag display-name="formatTestName" dynamic-attributes="false"/>
     
 	<jsp:directive.attribute name="value" required="true" type="java.lang.String" rtexprvalue="true"/>
 	

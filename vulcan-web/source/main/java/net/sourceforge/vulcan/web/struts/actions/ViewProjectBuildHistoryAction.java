@@ -152,8 +152,11 @@ public final class ViewProjectBuildHistoryAction extends ProjectReportBaseAction
 		request.setAttribute("toLabel", toLabel);
 		request.setAttribute("sampleCount", outcomes.size());
 		request.setAttribute("successCount", reportHelper.getSuccessCount());
-		request.setAttribute("longestTimeToFixBuild", reportHelper.getLongestTimeToFixBuild());
 		request.setAttribute("averageTimeToFixBuild", reportHelper.getAverageTimeToFixBuild());
+		request.setAttribute("longestTimeToFixBuild", reportHelper.getLongestTimeToFixBuild());
+		request.setAttribute("failingBuildNumber", reportHelper.getFailingBuildNumber());
+		request.setAttribute("fixedInBuildNumber", reportHelper.getFixedInBuildNumber());
+		request.setAttribute("longestElapsedFailureName", reportHelper.getLongestElapsedFailureName());
 		
 		request.getSession().setAttribute(Keys.BUILD_HISTORY, doc);
 		final List<String> availableMetrics = getAvailableMetrics(outcomes);
