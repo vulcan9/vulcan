@@ -1,5 +1,5 @@
 /* Colors: */
-caption, span.caption, .header {
+.header {
 	background-color: #C6DBFF;
 }
 
@@ -22,10 +22,7 @@ td {
 	background-color: #FFF3D3;
 }
 
-div.error, div.warning, div.message,
-div.build-errors, div.build-errors caption,
-div.build-warnings, div.build-warnings caption,
-div.test-failures, div.test-failures caption {
+div.error, div.warning, div.message {
 	border: 4px solid #FFD363 !important;
 	background-color: #FFD363;
 }
@@ -84,7 +81,7 @@ input[disabled] + label, label + input[disabled] {
 
 /* Everything Else */
 html, body {
-	font-family: Arial, Helvetica, sans-serif;
+	font-family: Arial, sans-serif;
 	font-size: 10pt;
 	padding: 0;
 	margin: 0;
@@ -95,11 +92,14 @@ form {
 	padding: 0;
 }
 
-
 .BUILDING, .building {
 	font-weight: bold;
 	background: transparent repeat top left;
 	background-image: url("../images/construction.gif");
+}
+
+.status {
+	font-weight: bold;
 }
 
 span.error {
@@ -218,18 +218,8 @@ div.inputGroup input {
 	margin-right: 5px;
 }
 
-div.tables {
-	margin-left: auto;
-	margin-right: auto;
-	width: 50em;
-}
-
 div.buildHistoryReport table, div.buildHistoryReport caption {
 	margin-left: 0;
-}
-
-div.tables table {
-	width: 100%;
 }
 
 div.projectCheckboxes {
@@ -417,11 +407,11 @@ div.lower-right  {
 	margin-right: -4px;
 	background-image: url("../images/lr.gif");
 }
-caption, span.caption {
-	padding-left: 4px;
-	padding-bottom: 4px;
-	font-size: 12pt;
-	font-weight: bold;
+.caption, caption {
+	font: Calibri, Helvetica, Verdana, Arial, sans-serif;
+	font-weight: normal;
+	color: #7E97A6;
+	font-size: 16pt;
 	text-align: left;
 }
 span.caption {
@@ -430,6 +420,8 @@ span.caption {
 
 table {
 	border-collapse: collapse;
+	border: 1px solid #bdbabd;
+	margin-bottom: 2ex;
 }
 
 table.error, table.warning, table.message,
@@ -507,7 +499,6 @@ th.timestamp, td.timestamp, td.label {
 }
 
 td.status {
-	font-weight: bold;
 	text-align: center;
 }
 th.long {
@@ -523,6 +514,16 @@ td.dateInputs {
 
 div.tables th,div.tables td {
 	text-align: center;
+}
+
+div.project-status-summary {
+	width: 60ex;
+	border: 1px solid #BDBABD;
+	margin-bottom: 1em;
+}
+
+div.project-status-summary .status {
+	float: right;
 }
 
 span.banner {

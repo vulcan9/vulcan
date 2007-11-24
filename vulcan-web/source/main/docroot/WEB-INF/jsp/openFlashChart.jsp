@@ -18,13 +18,6 @@
 		<jsp:body/>
 	</jsp:element>
 	<style type="text/css">
-		.caption, caption {
-			font: Calibri, Helvetica, Verdana, Arial, sans-serif;
-			font-weight: normal;
-			color: #7E97A6;
-			font-size: 16pt;
-			
-		}
 		div.pane, div.chart {
 			float: left;
 			width: 45%;

@@ -46,6 +46,19 @@
 								<timestamp millis="${now.time}"/>
 							</c:otherwise>
 						</c:choose>
+						<c:if test="${status.lastGoodBuildNumber != null and status.lastGoodBuildNumber != status.buildNumber}">
+							<c:set var="firstFailure" value="${v:getOutcomeByBuildNumber(pageContext, status.name, status.lastGoodBuildNumber + 1)}"/>
+							<c:set var="elapsedTime" value="${now.time - firstFailure.completionDate.time}"/>
+							<first-failure>
+								<build-number><c:out value="${firstFailure.buildNumber}"/></build-number>
+								<jsp:element name="elapsed-time">
+									<jsp:attribute name="millis">${elapsedTime}</jsp:attribute>
+									<jsp:attribute name="age">
+										<v:formatElapsedTime value="${elapsedTime}" verbosity="2"/> 
+									</jsp:attribute>
+								</jsp:element>
+							</first-failure>
+						</c:if>
 						<c:if test="${status.messageKey != null}">
 							<message><spring:message code="${status.messageKey}" arguments="${status.messageArgs}" htmlEscape="true"/></message>
 						</c:if>

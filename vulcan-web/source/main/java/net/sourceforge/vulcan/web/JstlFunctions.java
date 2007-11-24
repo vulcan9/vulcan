@@ -34,6 +34,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.jsp.PageContext;
 
+import net.sourceforge.vulcan.core.BuildManager;
+import net.sourceforge.vulcan.dto.ProjectStatusDto;
 import net.sourceforge.vulcan.metadata.SvnRevision;
 
 import org.apache.struts.Globals;
@@ -78,6 +80,14 @@ public abstract class JstlFunctions {
 		return errorList;
 	}
 
+	public static ProjectStatusDto getOutcomeByBuildNumber(PageContext pageContext, String projectName, int buildNumber) {
+		final WebApplicationContext ctx = WebApplicationContextUtils.getRequiredWebApplicationContext(pageContext.getServletContext());
+		
+		final BuildManager mgr = (BuildManager) ctx.getBean("buildManager", BuildManager.class);
+		
+		return mgr.getStatusByBuildNumber(projectName, buildNumber);
+	}
+	
 	public static String formatElapsedTime(PageContext pageContext, long elapsedTime, int verbosity) {
 		final StringBuilder sb = new StringBuilder();
 

@@ -42,46 +42,42 @@
 	</v:bubble>
 </c:when>
 <c:otherwise>
-<div class="tables">
+<c:import url="/xsl/projects-divs.xsl" var="xslt"/>
 
-<c:import url="/xsl/projects.xsl" var="xslt"/>
+<x:transform xslt="${xslt}">
+	<x:param name="caption">
+		<spring:message code="captions.projects.status"/>
+	</x:param>
+	<x:param name="detailLink">
+		<c:url value="/viewProjectStatus.do?transform=xhtml&amp;projectName="/>
+	</x:param>
+	<x:param name="nameHeader">
+		<spring:message code="th.project.name"/>
+	</x:param>
+	<x:param name="buildNumberHeader">
+		<spring:message code="th.build.number"/>
+	</x:param>
+	<x:param name="ageHeader">
+		<spring:message code="th.age"/>
+	</x:param>
+	<x:param name="tagHeader">
+		<spring:message code="th.tagName"/>
+	</x:param>
+	<x:param name="revisionHeader">
+		<spring:message code="th.revision"/>
+	</x:param>
+	<x:param name="statusHeader">
+		<spring:message code="th.project.status"/>
+	</x:param>
+	<x:param name="timestampLabel">
+		<spring:message code="label.build.timestamp"/>
+	</x:param>
+	<x:param name="sortSelect">${preferences.sortColumn}</x:param>
+	<x:param name="sortOrder">${preferences.sortOrder}</x:param>
+	<c:import url="/projects.jsp"/>
+</x:transform>
 
-<v:bubble>
-	<x:transform xslt="${xslt}">
-		<x:param name="caption">
-			<spring:message code="captions.projects.status"/>
-		</x:param>
-		<x:param name="detailLink">
-			<c:url value="/viewProjectStatus.do?transform=xhtml&amp;projectName="/>
-		</x:param>
-		<x:param name="nameHeader">
-			<spring:message code="th.project.name"/>
-		</x:param>
-		<x:param name="buildNumberHeader">
-			<spring:message code="th.build.number"/>
-		</x:param>
-		<x:param name="ageHeader">
-			<spring:message code="th.age"/>
-		</x:param>
-		<x:param name="tagHeader">
-			<spring:message code="th.tagName"/>
-		</x:param>
-		<x:param name="revisionHeader">
-			<spring:message code="th.revision"/>
-		</x:param>
-		<x:param name="statusHeader">
-			<spring:message code="th.project.status"/>
-		</x:param>
-		<x:param name="timestampLabel">
-			<spring:message code="label.build.timestamp"/>
-		</x:param>
-		<x:param name="sortSelect">${preferences.sortColumn}</x:param>
-		<x:param name="sortOrder">${preferences.sortOrder}</x:param>
-		<c:import url="/projects.jsp"/>
-	</x:transform>
-</v:bubble>
-
-<v:bubble>
+<!--
 <table class="buildDaemons">
 	<caption><spring:message code="captions.build.daemons"/></caption>
 	<thead>
@@ -135,9 +131,7 @@
 	</c:forEach>
 	</tbody>
 </table>
-</v:bubble>
 
-<v:bubble>
 <table class="buildQueue">
 	<caption><spring:message code="captions.build.queue"/></caption>
 	<thead>
@@ -181,9 +175,7 @@
 		</c:choose>
 	</tbody>
 </table>
-</v:bubble>
 
-<v:bubble>
 <table class="schedulers">
 	<caption><spring:message code="captions.schedulers"/></caption>
 	<thead>
@@ -219,8 +211,7 @@
 	</c:forEach>
 	</tbody>
 </table>
-</v:bubble>
-</div>
+-->
 </c:otherwise>
 </c:choose>
 </body>
