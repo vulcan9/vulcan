@@ -18,23 +18,19 @@
 	<html:img page="/images/vulcan-logo.png" alt="Vulcan Logo"/>
 </div>
 
-<v:bubble>
-<table>
-	<caption>About Vulcan</caption>
-	<tbody>
-		<tr><td><pre>Vulcan, Copyright (C) 2005-2007 Chris Eldredge
+<div>
+	<span class="caption">About Vulcan</span>
+
+	<pre>Vulcan, Copyright (C) 2005-2007 Chris Eldredge
 Vulcan comes with ABSOLUTELY NO WARRANTY.
 This is free software, and you are welcome
 to redistribute it under certain conditions;
 see <html:link page="/COPYING">GPL Version 2 License</html:link>.
 
 <a href="http://code.google.com/p/vulcan/">http://code.google.com/p/vulcan/</a>
-</pre></td></tr>
-	</tbody>
-</table>
-</v:bubble>
+</pre>
+</div>
 
-<v:bubble styleClass="plugin-versions">
 <table class="plugin-versions">
 	<caption><spring:message code="captions.versions"/></caption>
 	<thead>
@@ -55,9 +51,7 @@ see <html:link page="/COPYING">GPL Version 2 License</html:link>.
 	</c:forEach>
 	</tbody>
 </table>
-</v:bubble>
 
-<v:bubble>
 <table>
 	<caption>Third Party Software</caption>
 	<thead>
@@ -170,7 +164,6 @@ see <html:link page="/COPYING">GPL Version 2 License</html:link>.
 		</tr>
 	</tbody>
 </table>
-</v:bubble>
 
 </body>
 </html>
