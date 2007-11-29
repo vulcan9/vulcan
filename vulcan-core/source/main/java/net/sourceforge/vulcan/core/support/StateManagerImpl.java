@@ -23,6 +23,7 @@ import java.beans.PropertyChangeListener;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -266,7 +267,6 @@ public abstract class StateManagerImpl implements StateManager, ProjectManager {
 		}
 	}
 	public void deleteProjectConfig(String... names) throws ProjectNeedsDependencyException, StoreException {
-		
 		try {
 			writeLock.lock();
 			
@@ -322,6 +322,67 @@ public abstract class StateManagerImpl implements StateManager, ProjectManager {
 		} finally {
 			writeLock.unlock();
 		}
+	}
+	public void applyProjectLabel(String label, Collection<String> projectNames) throws StoreException {
+		try {
+			writeLock.lock();
+			
+			final Set<ProjectConfigDto> labeled = new HashSet<ProjectConfigDto>();
+			
+			for (String name : projectNames) {
+				final ProjectConfigDto config = (ProjectConfigDto) getConfigOrNull(name, this.config.getProjects());
+				if (config == null) {
+					throw new NoSuchProjectException(name);
+				}
+				labeled.add(config);
+			}
+			
+			for (ProjectConfigDto config : this.config.getProjects()) {
+				if (labeled.contains(config)) {
+					config.getLabels().add(label);
+				} else {
+					config.getLabels().remove(label);
+				}
+			}
+			
+			save();
+		} finally {
+			writeLock.unlock();
+		}
+	}
+	public List<String> getProjectConfigNamesByLabel(String label) {
+		try {
+			readLock.lock();
+			
+			final List<String> names = new ArrayList<String>();
+			
+			for (ProjectConfigDto config : this.config.getProjects()) {
+				if (config.getLabels().contains(label)) {
+					names.add(config.getName());
+				}
+			}
+			
+			return names;
+		} finally {
+			readLock.unlock();
+		}
+	}
+	public List<String> getProjectLabels() {
+		final Set<String> labels = new HashSet<String>();
+
+		try {
+			readLock.lock();
+			
+			for (ProjectConfigDto config : this.config.getProjects()) {
+				labels.addAll(config.getLabels());
+			}
+		} finally {
+			readLock.unlock();
+		}
+		
+		final ArrayList<String> list = new ArrayList<String>(labels);
+		Collections.sort(list);
+		return list;
 	}
 	public SchedulerConfigDto getSchedulerConfig(String name) {
 		try {

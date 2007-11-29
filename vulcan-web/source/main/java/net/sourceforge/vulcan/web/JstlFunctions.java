@@ -18,33 +18,35 @@
  */
 package net.sourceforge.vulcan.web;
 
-import static org.apache.commons.lang.time.DateUtils.MILLIS_PER_SECOND;
-import static org.apache.commons.lang.time.DateUtils.MILLIS_PER_MINUTE;
-import static org.apache.commons.lang.time.DateUtils.MILLIS_PER_HOUR;
 import static org.apache.commons.lang.time.DateUtils.MILLIS_PER_DAY;
+import static org.apache.commons.lang.time.DateUtils.MILLIS_PER_HOUR;
+import static org.apache.commons.lang.time.DateUtils.MILLIS_PER_MINUTE;
+import static org.apache.commons.lang.time.DateUtils.MILLIS_PER_SECOND;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.jsp.PageContext;
 
+import net.sourceforge.vulcan.StateManager;
 import net.sourceforge.vulcan.metadata.SvnRevision;
 
 import org.apache.struts.Globals;
 import org.apache.struts.action.ActionMessages;
-import org.springframework.context.MessageSource;
 import org.springframework.web.context.WebApplicationContext;
-import org.springframework.web.context.support.WebApplicationContextUtils;
 
 @SvnRevision(id="$Id$", url="$HeadURL$")
 public abstract class JstlFunctions {
-	private static MessageSource messageSource;
+	private static WebApplicationContext webApplicationContext;
 	
 	public static String mangle(String s) {
 		return s.replaceAll("[ +\\[\\]]", "_");
@@ -124,20 +126,37 @@ public abstract class JstlFunctions {
 		return sb.toString();
 	}
 	
-	static void setMessageSource(MessageSource messageSource) {
-		JstlFunctions.messageSource = messageSource;
+	public static List<String> getProjectNamesByLabels(String[] labels) {
+		final StateManager mgr = (StateManager) webApplicationContext.getBean(Keys.STATE_MANAGER, StateManager.class);
+		
+		if (labels == null || labels.length == 0) {
+			return mgr.getProjectConfigNames();
+		}
+		
+		final Set<String> set = new HashSet<String>();
+		for (String label : labels) {
+			set.addAll(mgr.getProjectConfigNamesByLabel(label));
+		}
+		
+		final ArrayList<String> list = new ArrayList<String>(set);
+		Collections.sort(list);
+		return list;
+	}
+	
+	static WebApplicationContext getWebApplicationContext() {
+		return webApplicationContext;
+	}
+	
+	static void setWebApplicationContext(
+			WebApplicationContext webApplicationContext) {
+		JstlFunctions.webApplicationContext = webApplicationContext;
 	}
 	
 	private static String formatTimeUnit(PageContext pageContext, String key, boolean plural) {
-		if (messageSource == null) {
-			final WebApplicationContext ctx = WebApplicationContextUtils.getRequiredWebApplicationContext(pageContext.getServletContext());
-			JstlFunctions.messageSource = ctx;
-		}
-		
 		if (plural) {
 			key += "s";
 		}
 		
-		return messageSource.getMessage(key, null, pageContext.getRequest().getLocale());
+		return webApplicationContext.getMessage(key, null, pageContext.getRequest().getLocale());
 	}
 }

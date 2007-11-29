@@ -20,7 +20,7 @@ package net.sourceforge.vulcan.web;
 
 import javax.servlet.ServletContextEvent;
 
-import net.sourceforge.vulcan.event.Event;
+import net.sourceforge.vulcan.core.conversion.BuildOutcomeConverter;
 import net.sourceforge.vulcan.exception.StoreException;
 import net.sourceforge.vulcan.metadata.SvnRevision;
 
@@ -35,6 +35,7 @@ public class VulcanContextListenerTest extends ServletTestCase {
 	@Override
 	public void setUp() throws Exception {
 		super.setUp();
+		wac.getBeanFactory().registerSingleton("buildOutcomeConverter", new BuildOutcomeConverter());
 	}
 	@TrainingMethod("trainNoCalls")
 	public void testInitNoWac() {
@@ -46,9 +47,11 @@ public class VulcanContextListenerTest extends ServletTestCase {
 		} catch (IllegalStateException e) {
 		}
 	}
-	public void DtestInit() throws Exception {
-		mgr.start();
+	public void testInit() throws Exception {
+		//disabled due to BuildOutcomeConverter which will be deleted in future releases
+		//mgr.start();
 		
+		JstlFunctions.setWebApplicationContext(null);
 		replay();
 		
 		l.contextInitialized(event);
@@ -57,14 +60,17 @@ public class VulcanContextListenerTest extends ServletTestCase {
 		
 		assertNotNull("Did not construct state manager instance", servletContext.getAttribute(Keys.STATE_MANAGER));
 		assertNotNull("Did not construct eventPool instance", servletContext.getAttribute(Keys.EVENT_POOL));
+		
+		assertSame(wac, JstlFunctions.getWebApplicationContext());
 	}
-	public void DtestInitManagerFailure() throws Exception {
-		final RuntimeException e = new RuntimeException("failure");
+	public void testInitManagerFailure() throws Exception {
+		//disabled due to BuildOutcomeConverter which will be deleted in future releases
+		//final RuntimeException e = new RuntimeException("failure");
 		
-		mgr.start();
-		expectLastCall().andThrow(e);
+		//mgr.start();
+		//expectLastCall().andThrow(e);
 		
-		eventHandler.reportEvent((Event) notNull());
+		//eventHandler.reportEvent((Event) notNull());
 		
 		replay();
 		

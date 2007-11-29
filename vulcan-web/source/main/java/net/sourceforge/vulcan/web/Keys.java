@@ -34,4 +34,5 @@ public interface Keys {
 	String LOG_CONTENTS = "logContents";
 	
 	String BUILD_HISTORY = "buildHistory";
+	String PREFERENCES = "preferences";
 }

@@ -6,6 +6,24 @@
 	$HeadURL$
 -->
 <beans>
+	<bean name="baseDispatchAction" abstract="true">
+		<property name="stateManager" ref="stateManager"/>
+		<property name="auditLog">
+			<bean class="org.apache.commons.logging.LogFactory" factory-method="getLog">
+				<constructor-arg value="net.sourceforge.vulcan.security.audit"/>
+			</bean>
+		</property>
+		<property name="actionsToAudit">
+			<set>
+				<value>create</value>
+				<value>update</value>
+				<value>delete</value>
+				<value>import</value>
+				<value>upload</value>
+			</set>
+		</property>
+	</bean>
+	
 	<bean name="projectReportBaseAction" abstract="true">
 		<property name="configurationStore" ref="configurationStore"/>
 		<property name="buildManager" ref="buildManager"/>
@@ -49,6 +67,12 @@
 			class="net.sourceforge.vulcan.web.struts.actions.GetCachedBuildHistoryAction"
 			parent="projectReportBaseAction"/>
 	
+	<bean name="/managePreferences"
+			class="net.sourceforge.vulcan.web.struts.actions.ManagePreferencesAction"
+			parent="baseDispatchAction">
+		<property name="preferencesStore" ref="preferencesStore"/>
+	</bean>
+	
 	<bean name="/buildmanagement/manualBuild"
 			class="net.sourceforge.vulcan.web.struts.actions.ManualBuildAction">
 		<property name="buildManager" ref="buildManager"/>
@@ -75,24 +99,6 @@
 			class="net.sourceforge.vulcan.web.struts.actions.ClearMessagesAction">
 		<property name="eventPool" ref="eventPool"/>
 	</bean>
-
-	<bean name="baseDispatchAction" abstract="true">
-		<property name="stateManager" ref="stateManager"/>
-		<property name="auditLog">
-			<bean class="org.apache.commons.logging.LogFactory" factory-method="getLog">
-				<constructor-arg value="net.sourceforge.vulcan.security.audit"/>
-			</bean>
-		</property>
-		<property name="actionsToAudit">
-			<set>
-				<value>create</value>
-				<value>update</value>
-				<value>delete</value>
-				<value>import</value>
-				<value>upload</value>
-			</set>
-		</property>
-	</bean>
 	
 	<bean name="/admin/setup/manageSchedulerConfig"
 			class="net.sourceforge.vulcan.web.struts.actions.ManageSchedulerConfigAction"
@@ -104,6 +110,11 @@
 			class="net.sourceforge.vulcan.web.struts.actions.ManageProjectConfigAction"
 			parent="baseDispatchAction">
 		<property name="configurationStore" ref="configurationStore"/>
+	</bean>
+	
+	<bean name="/admin/setup/manageLabels"
+			class="net.sourceforge.vulcan.web.struts.actions.ManageLabelAction"
+			parent="baseDispatchAction">
 	</bean>
 	
 	<bean name="/admin/setup/deleteProjects"

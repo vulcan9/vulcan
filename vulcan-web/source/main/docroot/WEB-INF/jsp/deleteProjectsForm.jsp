@@ -18,7 +18,7 @@
 
 <v:bubble styleClass="">
 <html:form action="/admin/setup/deleteProjects" method="post">
-<table class="delete-projects">
+<table class="projectConfig">
 	<caption><spring:message code="captions.delete.projects"/></caption>
 	<tbody>
 		<tr>
@@ -31,9 +31,9 @@
 						<c:forEach items="${stateManager.projectConfigNames}" var="projectName">
 							<li>
 								<html:multibox property="projectNames" value="${projectName}"
-									styleId="proj${projectName}"/>
+									styleId="proj${v:mangle(projectName)}"/>
 								<jsp:element name="label">
-									<jsp:attribute name="for">proj${projectName}</jsp:attribute>
+									<jsp:attribute name="for">proj${v:mangle(projectName)}</jsp:attribute>
 									<jsp:body>${projectName}</jsp:body>
 								</jsp:element>
 							</li>

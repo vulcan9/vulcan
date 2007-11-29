@@ -74,6 +74,11 @@ input[disabled] + label, label + input[disabled] {
 	color: gray;
 }
 
+input[type=text].new-label {
+	width: 12ex;
+	margin-left: 1ex;
+}
+
 .new-test-failure {
 	color: red;
 }
@@ -459,7 +464,7 @@ table.build-messages tbody td {
 	font-size: smaller;
 	white-space: pre;
 }
-table.projectConfig, table.delete-projects {
+table.projectConfig {
 	width: 60em;
 }
 table.dynamicEdit {
@@ -537,6 +542,10 @@ span.description {
 select.transform {
 	margin-left: 4px;
 	margin-bottom: 8px;
+}
+select.reloadInterval {
+	margin-left: 1ex;
+	margin-right: 1ex;
 }
 
 input.buildNumber {

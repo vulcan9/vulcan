@@ -37,6 +37,21 @@
 			</ul>
 		</li>
 		<li>
+			<spring:message code="label.project.labels"/>
+			<ul>
+				<li><html:link forward="createProjectLabel"><spring:message code="label.project.label.new"/></html:link></li>
+				<li><spring:message code="label.project.labels"/>
+					<ul>
+						<c:forEach items="${stateManager.projectLabels}" var="label">
+							<li>
+								<html:link forward="createProjectLabel" paramId="name" paramName="label">${label}</html:link>
+							</li>
+						</c:forEach>
+					</ul>
+				</li>
+			</ul>
+		</li>
+		<li>
 			<spring:message code="link.setup.scheduler"/>
 			<ul>
 				<li><html:link forward="createSchedulerConfig"><spring:message code="label.scheduler.new"/></html:link></li>

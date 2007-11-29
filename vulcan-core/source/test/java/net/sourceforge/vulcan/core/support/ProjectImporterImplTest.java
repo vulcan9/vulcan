@@ -155,7 +155,7 @@ public class ProjectImporterImplTest extends EasyMockTestCase {
 	@TrainingMethod("trainNoRepositorySupportsUrl")
 	public void testNoRepositorySupportsUrl() throws Exception {
 		try {
-			importer.createProjectsForUrl(url, null, null, false, NameCollisionResolutionMode.Abort, ArrayUtils.EMPTY_STRING_ARRAY);
+			importer.createProjectsForUrl(url, null, null, false, NameCollisionResolutionMode.Abort, ArrayUtils.EMPTY_STRING_ARRAY, null);
 			fail("Expected exception");
 		} catch (ConfigException e) {
 			assertEquals("errors.url.unsupported", e.getKey());
@@ -178,7 +178,7 @@ public class ProjectImporterImplTest extends EasyMockTestCase {
 	@TrainingMethod("trainWrapsIOExceptionDuringDownload")
 	public void testWrapsIOExceptionDuringDownload() throws Exception {
 		try {
-			importer.createProjectsForUrl(url, null, null, false, NameCollisionResolutionMode.Abort, ArrayUtils.EMPTY_STRING_ARRAY);
+			importer.createProjectsForUrl(url, null, null, false, NameCollisionResolutionMode.Abort, ArrayUtils.EMPTY_STRING_ARRAY, null);
 			fail("Expected exception");
 		} catch (ConfigException e) {
 			assertSame(ioException, e.getCause());
@@ -206,7 +206,7 @@ public class ProjectImporterImplTest extends EasyMockTestCase {
 	@TrainingMethod("trainNoBuildToolSupportsFile")
 	public void testNoBuildToolSupportsFile() throws Exception {
 		try {
-			importer.createProjectsForUrl(url, null, null, false, NameCollisionResolutionMode.Abort, ArrayUtils.EMPTY_STRING_ARRAY);
+			importer.createProjectsForUrl(url, null, null, false, NameCollisionResolutionMode.Abort, ArrayUtils.EMPTY_STRING_ARRAY, null);
 			fail("expected exception");
 		} catch (ConfigException e) {
 			assertEquals("errors.build.file.unsupported", e.getKey());
@@ -271,13 +271,14 @@ public class ProjectImporterImplTest extends EasyMockTestCase {
 		projectConfig.setBuildToolPluginId("a.fake.build.plugin");
 		projectConfig.setName(projectName);
 		projectConfig.setWorkDir(workDir);
+		projectConfig.setLabels(Collections.singleton("a label"));
 		
 		stateManager.addOrReplaceProjectConfig(projectConfig);
 	}
 	
 	@TrainingMethod("trainConfigures,trainSaves")
 	public void testConfiguresAndSaves() throws Exception {
-		importer.createProjectsForUrl(url, null, null, false, NameCollisionResolutionMode.Abort, ArrayUtils.EMPTY_STRING_ARRAY);
+		importer.createProjectsForUrl(url, null, null, false, NameCollisionResolutionMode.Abort, ArrayUtils.EMPTY_STRING_ARRAY, null);
 	}
 	
 	public void trainStandalone() throws Exception {
@@ -289,7 +290,7 @@ public class ProjectImporterImplTest extends EasyMockTestCase {
 	
 	@TrainingMethod("trainConfigures,trainStandalone,trainSaves")
 	public void testConfiguresAndSavesStandalone() throws Exception {
-		importer.createProjectsForUrl(url, null, null, true, NameCollisionResolutionMode.Abort, ArrayUtils.EMPTY_STRING_ARRAY);
+		importer.createProjectsForUrl(url, null, null, true, NameCollisionResolutionMode.Abort, ArrayUtils.EMPTY_STRING_ARRAY, null);
 	}
 
 	public void trainNotStandalone() throws Exception {
@@ -299,7 +300,7 @@ public class ProjectImporterImplTest extends EasyMockTestCase {
 
 	@TrainingMethod("trainConfigures,trainNotStandalone,trainSaves")
 	public void testConfiguresAndSavesNotStandalone() throws Exception {
-		importer.createProjectsForUrl(url, null, null, true, NameCollisionResolutionMode.Abort, ArrayUtils.EMPTY_STRING_ARRAY);
+		importer.createProjectsForUrl(url, null, null, true, NameCollisionResolutionMode.Abort, ArrayUtils.EMPTY_STRING_ARRAY, null);
 	}
 
 	public void trainSetupAlternateWorkDir() throws Exception {
@@ -308,7 +309,7 @@ public class ProjectImporterImplTest extends EasyMockTestCase {
 	
 	@TrainingMethod("trainSetupAlternateWorkDir,trainConfigures,trainNotStandalone,trainSavesWithAlternateWorkDir")
 	public void testConfiguresAndSavesBuildToolSetsWorkDir() throws Exception {
-		importer.createProjectsForUrl(url, null, null, true, NameCollisionResolutionMode.Abort, ArrayUtils.EMPTY_STRING_ARRAY);
+		importer.createProjectsForUrl(url, null, null, true, NameCollisionResolutionMode.Abort, ArrayUtils.EMPTY_STRING_ARRAY, Collections.singleton("a label"));
 	}
 	
 	public void trainGetSubprojects() throws Exception {
@@ -375,7 +376,7 @@ public class ProjectImporterImplTest extends EasyMockTestCase {
 	
 	@TrainingMethod("trainConfigures,trainGetSubprojects,trainSavesSubproject")
 	public void testCreatesProjectsRecursivelyOnFlag() throws Exception {
-		importer.createProjectsForUrl(url, null, null, true, NameCollisionResolutionMode.Overwrite, ArrayUtils.EMPTY_STRING_ARRAY);
+		importer.createProjectsForUrl(url, null, null, true, NameCollisionResolutionMode.Overwrite, ArrayUtils.EMPTY_STRING_ARRAY, null);
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -393,7 +394,7 @@ public class ProjectImporterImplTest extends EasyMockTestCase {
 		existingProjectNames = Arrays.asList(projectName);
 		
 		assertFalse(importer.configureProject(projectConfig, repoConfigurator, buildConfigurator,
-				url, existingProjectNames, NameCollisionResolutionMode.UseExisting, false));
+				url, existingProjectNames, NameCollisionResolutionMode.UseExisting, false, null));
 	}
 
 	@TrainingMethod("trainConfigureDontCare")
@@ -404,7 +405,7 @@ public class ProjectImporterImplTest extends EasyMockTestCase {
 		
 		try {
 			importer.configureProject(projectConfig, repoConfigurator, buildConfigurator,
-				url, existingProjectNames, NameCollisionResolutionMode.Abort, false);
+				url, existingProjectNames, NameCollisionResolutionMode.Abort, false, null);
 			fail("Expected exception");
 		} catch (DuplicateNameException e) {
 			assertEquals(projectName, e.getName());

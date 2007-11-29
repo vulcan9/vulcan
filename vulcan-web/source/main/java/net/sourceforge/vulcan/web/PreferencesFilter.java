@@ -25,45 +25,60 @@ import javax.servlet.ServletException;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 import net.sourceforge.vulcan.dto.PreferencesDto;
 import net.sourceforge.vulcan.metadata.SvnRevision;
 
-import org.apache.commons.lang.StringUtils;
+import org.springframework.web.context.support.WebApplicationContextUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 @SvnRevision(id="$Id$", url="$HeadURL$")
 public class PreferencesFilter extends OncePerRequestFilter {
+	private PreferencesStore store;
+	
+	@Override
+	protected void initFilterBean() throws ServletException {
+		super.initFilterBean();
+		
+		store = (PreferencesStore) WebApplicationContextUtils.getRequiredWebApplicationContext(
+				getServletContext()).getBean("preferencesStore", PreferencesStore.class);
+	}
+	
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws ServletException, IOException {
-		paramToCookie(request, response, "sortColumn");
-		paramToCookie(request, response, "sortOrder");
-		
-		createPreferences(request);
+		setupPreferences(request);
 		
 		chain.doFilter(request, response);
 	}
 
-	private void createPreferences(HttpServletRequest request) {
-		final PreferencesDto prefs = new PreferencesDto();
+	private void setupPreferences(HttpServletRequest request) {
+		final String cookieData = getCookieData(request, Keys.PREFERENCES);
 		
-		prefs.setSortColumn(getFromParamOrCookie(request, "sortColumn"));
-		prefs.setSortOrder(getFromParamOrCookie(request, "sortOrder"));
+		final HttpSession session = request.getSession(false);
 		
-		request.setAttribute("preferences", prefs);
-	}
-
-	private String getFromParamOrCookie(HttpServletRequest request, String paramName) {
-		String value = request.getParameter(paramName);
-		
-		if (value != null) {
-			return value;
+		if (session != null && session.getAttribute(Keys.PREFERENCES) != null) {
+			return;
 		}
 		
+		final PreferencesDto prefs;
+		
+		if (cookieData == null) {
+			prefs = store.getDefaultPreferences();
+		} else {
+			prefs = store.convertFromString(cookieData);
+		}
+		
+		if (session == null) {
+			request.setAttribute(Keys.PREFERENCES, prefs);	
+		} else if (session.getAttribute(Keys.PREFERENCES) == null) {
+			session.setAttribute(Keys.PREFERENCES, prefs);
+		}
+	}
+
+	private String getCookieData(HttpServletRequest request, String cookieName) {
 		final Cookie[] cookies = request.getCookies();
 		if (cookies != null) {
-			final String cookieName = "VULCAN_" + paramName;
-			
 			for (Cookie c : cookies) {
 				if (c.getName().equals(cookieName)) {
 					return c.getValue();
@@ -72,14 +87,5 @@ public class PreferencesFilter extends OncePerRequestFilter {
 		}
 		
 		return null;
-	}
-
-	private boolean paramToCookie(HttpServletRequest request, HttpServletResponse response, String paramName) {
-		final String value = request.getParameter(paramName);
-		if (StringUtils.isNotBlank(value)) {
-			response.addCookie(new Cookie("VULCAN_" + paramName, value));
-			return true;
-		}
-		return false;
 	}
 }

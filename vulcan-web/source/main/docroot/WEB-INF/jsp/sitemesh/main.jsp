@@ -7,8 +7,6 @@
 	xmlns:spring="http://www.springframework.org/tags"
 	xmlns:decorator="http://www.opensymphony.com/sitemesh/decorator">
 	
-<jsp:directive.page session="false"/>
-
 <jsp:output
 	omit-xml-declaration="false"
 	doctype-root-element="html"
@@ -18,10 +16,18 @@
 <head>
 	<title><spring:message code="title.main"/></title>
 	
+	<c:choose>
+		<c:when test="${preferences.stylesheet != null}">
+			<c:url var="cssUrl" value="/css/${preferences.stylesheet}.css"/>
+		</c:when>
+		<c:otherwise>
+			<c:url var="cssUrl" value="/css/standard.css"/>
+		</c:otherwise>
+	</c:choose>
 	<jsp:element name="link">
 		<jsp:attribute name="rel">stylesheet</jsp:attribute>
 		<jsp:attribute name="type">text/css</jsp:attribute>
-		<jsp:attribute name="href"><c:url value="/css/standard.css"/></jsp:attribute>
+		<jsp:attribute name="href">${cssUrl}</jsp:attribute>
 	</jsp:element>
 	<jsp:element name="link">
 		<jsp:attribute name="rel">shortcut icon</jsp:attribute>
@@ -50,6 +56,10 @@
 	<jsp:element name="meta">
 		<jsp:attribute name="name">confirmUnsavedChangesMessage</jsp:attribute>
 		<jsp:attribute name="content"><spring:message code="confirmation.unsaved.changes"/></jsp:attribute>
+	</jsp:element>
+	<jsp:element name="meta">
+		<jsp:attribute name="name">popupMode</jsp:attribute>
+		<jsp:attribute name="content">${preferences.popupMode}</jsp:attribute>
 	</jsp:element>
 	<decorator:head/>
 </head>

@@ -18,6 +18,11 @@
  */
 package net.sourceforge.vulcan.web.struts;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
+
 import net.sourceforge.vulcan.RepositoryAdaptor;
 import net.sourceforge.vulcan.core.NameCollisionResolutionMode;
 import net.sourceforge.vulcan.exception.AuthenticationRequiredRepositoryException;
@@ -55,8 +60,12 @@ public class CreateProjectFromUrlActionTest extends MockApplicationContextStruts
 	public void testImportUrl() throws Exception {
 		addRequestParameter("url", "http://www.example.com");
 		addRequestParameter("nameCollisionResolutionMode", NameCollisionResolutionMode.Abort.name());
+		addRequestParameter("labels", "x");
+		addRequestParameter("newLabel", "y");
 		
-		projectImporter.createProjectsForUrl("http://www.example.com", "", "", false, NameCollisionResolutionMode.Abort, ArrayUtils.EMPTY_STRING_ARRAY);
+		final Set<String> labels = new HashSet<String>(Arrays.asList("x", "y"));
+		
+		projectImporter.createProjectsForUrl("http://www.example.com", "", "", false, NameCollisionResolutionMode.Abort, ArrayUtils.EMPTY_STRING_ARRAY, labels);
 		
 		replay();
 		
@@ -73,7 +82,7 @@ public class CreateProjectFromUrlActionTest extends MockApplicationContextStruts
 		addRequestParameter("url", "http://www.example.com");
 		addRequestParameter("nameCollisionResolutionMode", NameCollisionResolutionMode.UseExisting.name());
 		
-		projectImporter.createProjectsForUrl("http://www.example.com", "", "", false, NameCollisionResolutionMode.UseExisting, ArrayUtils.EMPTY_STRING_ARRAY);
+		projectImporter.createProjectsForUrl("http://www.example.com", "", "", false, NameCollisionResolutionMode.UseExisting, ArrayUtils.EMPTY_STRING_ARRAY, Collections.<String>emptySet());
 		
 		expectLastCall().andThrow(new ConfigException("foo.bar", new Object[] {"a", "b"}));
 		
@@ -92,7 +101,7 @@ public class CreateProjectFromUrlActionTest extends MockApplicationContextStruts
 		addRequestParameter("url", "http://www.example.com");
 		addRequestParameter("nameCollisionResolutionMode", NameCollisionResolutionMode.UseExisting.name());
 		
-		projectImporter.createProjectsForUrl("http://www.example.com", "", "", false, NameCollisionResolutionMode.UseExisting, ArrayUtils.EMPTY_STRING_ARRAY);
+		projectImporter.createProjectsForUrl("http://www.example.com", "", "", false, NameCollisionResolutionMode.UseExisting, ArrayUtils.EMPTY_STRING_ARRAY, Collections.<String>emptySet());
 		
 		expectLastCall().andThrow(new AuthenticationRequiredRepositoryException("teresa"));
 		
@@ -115,7 +124,7 @@ public class CreateProjectFromUrlActionTest extends MockApplicationContextStruts
 		addRequestParameter("url", "http://www.example.com");
 		addRequestParameter("nameCollisionResolutionMode", NameCollisionResolutionMode.Overwrite.name());
 		
-		projectImporter.createProjectsForUrl("http://www.example.com", "", "", false, NameCollisionResolutionMode.Overwrite, ArrayUtils.EMPTY_STRING_ARRAY);
+		projectImporter.createProjectsForUrl("http://www.example.com", "", "", false, NameCollisionResolutionMode.Overwrite, ArrayUtils.EMPTY_STRING_ARRAY, Collections.<String>emptySet());
 		expectLastCall().andThrow(new StoreException("a message", null));
 		
 		replay();
@@ -133,7 +142,7 @@ public class CreateProjectFromUrlActionTest extends MockApplicationContextStruts
 		addRequestParameter("url", "http://www.example.com");
 		addRequestParameter("nameCollisionResolutionMode", NameCollisionResolutionMode.Abort.name());
 		
-		projectImporter.createProjectsForUrl("http://www.example.com", "", "", false, NameCollisionResolutionMode.Abort, ArrayUtils.EMPTY_STRING_ARRAY);
+		projectImporter.createProjectsForUrl("http://www.example.com", "", "", false, NameCollisionResolutionMode.Abort, ArrayUtils.EMPTY_STRING_ARRAY, Collections.<String>emptySet());
 		
 		expectLastCall().andThrow(new DuplicateNameException("scuba"));
 		

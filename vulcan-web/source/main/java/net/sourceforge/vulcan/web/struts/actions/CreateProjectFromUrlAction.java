@@ -22,6 +22,10 @@ import static net.sourceforge.vulcan.web.struts.actions.BaseDispatchAction.saveE
 import static net.sourceforge.vulcan.web.struts.actions.BaseDispatchAction.saveSuccessMessage;
 import static org.apache.commons.lang.StringUtils.isNotBlank;
 
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -51,6 +55,12 @@ public final class CreateProjectFromUrlAction extends Action {
 		
 		final ProjectImportForm importForm = (ProjectImportForm) form;
 		
+		final Set<String> labels = new HashSet<String>(Arrays.asList(importForm.getLabels()));
+		
+		if (isNotBlank(importForm.getNewLabel())) {
+			labels.add(importForm.getNewLabel());
+		}
+		
 		try {
 			projectImporter.createProjectsForUrl(
 					importForm.getUrl(),
@@ -58,7 +68,8 @@ public final class CreateProjectFromUrlAction extends Action {
 					importForm.getPassword(),
 					importForm.isCreateSubprojects(),
 					importForm.parseNameCollisionResolutionMode(),
-					importForm.getSchedulerNames());
+					importForm.getSchedulerNames(),
+					labels);
 			
 			saveSuccessMessage(request);
 		} catch (DuplicateNameException e) {

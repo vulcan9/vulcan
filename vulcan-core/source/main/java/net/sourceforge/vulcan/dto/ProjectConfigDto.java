@@ -20,9 +20,12 @@ package net.sourceforge.vulcan.dto;
 
 import static org.apache.commons.lang.ArrayUtils.EMPTY_STRING_ARRAY;
 
-import org.apache.commons.lang.StringUtils;
+import java.util.HashSet;
+import java.util.Set;
 
 import net.sourceforge.vulcan.metadata.SvnRevision;
+
+import org.apache.commons.lang.StringUtils;
 
 @SvnRevision(id="$Id$", url="$HeadURL$")
 public class ProjectConfigDto extends NameDto {
@@ -64,6 +67,8 @@ public class ProjectConfigDto extends NameDto {
 	String repositoryTagName;
 	String requestedBy;
 	boolean isScheduledBuild;
+	
+	Set<String> labels = new HashSet<String>();
 	
 	public String getId() {
 		return getName();
@@ -201,5 +206,11 @@ public class ProjectConfigDto extends NameDto {
 	}
 	public void setScheduledBuild(boolean isScheduledBuild) {
 		this.isScheduledBuild = isScheduledBuild;
+	}
+	public Set<String> getLabels() {
+		return labels;
+	}
+	public void setLabels(Set<String> labels) {
+		this.labels = labels;
 	}
 }

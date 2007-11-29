@@ -22,17 +22,22 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Writer;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
+import net.sourceforge.vulcan.dto.PreferencesDto;
 import net.sourceforge.vulcan.dto.ProjectConfigDto;
 import net.sourceforge.vulcan.dto.ProjectStatusDto;
 import net.sourceforge.vulcan.exception.NoSuchProjectException;
 import net.sourceforge.vulcan.exception.StoreException;
 import net.sourceforge.vulcan.metadata.SvnRevision;
+import net.sourceforge.vulcan.web.Keys;
 import net.sourceforge.vulcan.web.struts.forms.ProjectStatusForm;
 
 import org.apache.commons.io.IOUtils;
@@ -63,10 +68,7 @@ public final class ViewProjectStatusAction extends ProjectReportBaseAction {
 		}
 
 		ProjectStatusDto status = buildManager.getProjectsBeingBuilt().get(projectName);
-		boolean currentlyBuilding = false;
-		if (status != null) {
-			currentlyBuilding = true;
-		}
+		boolean currentlyBuilding = status != null;
 		
 		final List<UUID> ids = buildManager.getAvailableStatusIds(projectName);
 		int index = -1;
@@ -137,8 +139,9 @@ public final class ViewProjectStatusAction extends ProjectReportBaseAction {
 		
 		final Document doc = createDocument(request, status, ids, index, currentlyBuilding);
 		
-		return sendDocument(doc, transform, projectConfig, status.getBuildNumber(), null, mapping, request, response);
+		return sendDocument(doc, transform, projectConfig, status.getBuildNumber(), createTransformParameters(request), mapping, request, response);
 	}
+	
 	protected Document createDocument(HttpServletRequest request, ProjectStatusDto status, final List<UUID> ids, int index, boolean currentlyBuilding) {
 		final Document doc = projectDomBuilder.createProjectDocument(status, request.getLocale());
 		
@@ -161,6 +164,7 @@ public final class ViewProjectStatusAction extends ProjectReportBaseAction {
 		}
 		return doc;
 	}
+	
 	protected void sendDiff(HttpServletRequest request, HttpServletResponse response, ProjectStatusDto status) throws IOException {
 		InputStream is = null;
 		
@@ -175,6 +179,7 @@ public final class ViewProjectStatusAction extends ProjectReportBaseAction {
 		
 		sendText(response, is);
 	}
+	
 	protected void sendLog(HttpServletRequest request, HttpServletResponse response, ProjectStatusDto status) throws IOException {
 		InputStream is = null;
 		
@@ -189,6 +194,7 @@ public final class ViewProjectStatusAction extends ProjectReportBaseAction {
 		
 		sendText(response, is);
 	}
+	
 	protected void sendText(HttpServletResponse response, InputStream is) throws IOException {
 		if (is == null) {
 			response.sendError(HttpServletResponse.SC_NOT_FOUND);
@@ -204,5 +210,18 @@ public final class ViewProjectStatusAction extends ProjectReportBaseAction {
 			is.close();
 			os.close();
 		}
+	}
+	
+	private Map<String, Object> createTransformParameters(HttpServletRequest request) {
+		final HttpSession session = request.getSession(false);
+		if (session != null) {
+			final PreferencesDto prefs = (PreferencesDto) session.getAttribute(Keys.PREFERENCES);
+			
+			if (prefs != null) {
+				return Collections.<String,Object>singletonMap("reloadInterval", Integer.valueOf(prefs.getReloadInterval()));
+			}
+		}
+		
+		return Collections.<String,Object>emptyMap();
 	}
 }
