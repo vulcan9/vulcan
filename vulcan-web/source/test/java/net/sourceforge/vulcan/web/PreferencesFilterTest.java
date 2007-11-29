@@ -23,81 +23,84 @@ import java.io.IOException;
 import javax.servlet.ServletException;
 import javax.servlet.http.Cookie;
 
+import net.sourceforge.vulcan.MockApplicationContext;
 import net.sourceforge.vulcan.dto.PreferencesDto;
 import net.sourceforge.vulcan.metadata.SvnRevision;
 
+import org.easymock.EasyMock;
+import org.easymock.IMocksControl;
+import org.springframework.web.context.WebApplicationContext;
 
 @SvnRevision(id="$Id$", url="$HeadURL$")
 public class PreferencesFilterTest extends ServletFilterTestCase {
+	EasyMock mock = new EasyMock();
 	PreferencesFilter filter = new PreferencesFilter();
+	MockApplicationContext wac = new MockApplicationContext();
+	PreferencesStore prefStore;
+	
+	IMocksControl control = EasyMock.createControl();
 	
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
+		prefStore = control.createMock(PreferencesStore.class);
+		wac.getBeanFactory().registerSingleton("preferencesStore", prefStore);
+		context.setAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE, wac);
 		filter.init(filterConfig);
 	}
 	
 	public void testDoesNotCreateSession() throws Exception {
+		EasyMock.expect(prefStore.getDefaultPreferences()).andReturn(new PreferencesDto());
+		
 		filter();
 		
-		assertEquals(0, cookies.size());
+		assertNotNull(request.getAttribute(Keys.PREFERENCES));
 	}
 	
-	public void testSetsCookies() throws Exception {
-		request.addParameter("sortColumn", "name");
-		request.addParameter("sortOrder", "ascending");
+	public void testLoadsPreferencesFromCookieIntoRequest() throws Exception {
+		request.addCookie(new Cookie(Keys.PREFERENCES, "descending"));
+		
+		EasyMock.expect(prefStore.convertFromString("descending")).andReturn(new PreferencesDto());
 		
 		filter();
-		
-		assertEquals(2, cookies.size());
-		
-		assertCookieValues("name", "ascending");
-		assertPreferences("name", "ascending");
+
+		assertNotNull(request.getAttribute(Keys.PREFERENCES));
 	}
 
-	public void testGetsCookies() throws Exception {
-		request.addCookie(new Cookie("VULCAN_sortOrder", "descending"));
+	public void testLoadsPreferencesFromCookieIntoSessionIfPresent() throws Exception {
+		request.addCookie(new Cookie(Keys.PREFERENCES, "descending"));
+		request.getSession();
+		
+		EasyMock.expect(prefStore.convertFromString("descending")).andReturn(new PreferencesDto());
+		
 		filter();
-		
-		assertEquals(0, cookies.size());
-		
-		assertPreferences(null, "descending");
-	}
 
+		assertNotNull(request.getSession().getAttribute(Keys.PREFERENCES));
+	}
+	
+	public void testDoesNotReloadsPreferencesFromCookieIntoSessionIfPresent() throws Exception {
+		final PreferencesDto oldPrefs = new PreferencesDto();
+		request.getSession().setAttribute(Keys.PREFERENCES, oldPrefs);
+		
+		filter();
+
+		assertSame(oldPrefs, request.getSession().getAttribute(Keys.PREFERENCES));
+	}
 	private void filter() throws ServletException, IOException {
+		final boolean sessionExisted = request.getSession(false) != null;
+		
 		assertFalse(chain.doFilterCalled());
+		
+		control.replay();
 		
 		filter.doFilter(request, response, chain);
 		
+		control.verify();
+		
 		assertTrue("Should call chain", chain.doFilterCalled());
 		
-		assertNull("Should not create session", request.getSession(false));
-	}
-	
-	private void assertCookieValues(String sortColumn, String sortOrder) {
-		assertCookieValue("VULCAN_sortColumn", sortColumn);
-		assertCookieValue("VULCAN_sortOrder", sortOrder);
-	}
-
-	private void assertPreferences(String sortColumn, String sortOrder) {
-		final PreferencesDto prefs = (PreferencesDto) request.getAttribute("preferences");
-		
-		assertNotNull("Expected preferences in request but found null", prefs);
-		
-		assertEquals(sortColumn, prefs.getSortColumn());
-		assertEquals(sortOrder, prefs.getSortOrder());
-	}
-
-	private void assertCookieValue(String cookieName, String expected) {
-		final Cookie cookie = cookies.get(cookieName);
-		final String value;
-		if (cookie != null) {
-			assertEquals(-1, cookie.getMaxAge());
-			value = cookie.getValue();
-		} else {
-			value = null;
+		if (!sessionExisted) {
+			assertNull("Should not create session", request.getSession(false));
 		}
-		
-		assertEquals(expected, value);
 	}
 }

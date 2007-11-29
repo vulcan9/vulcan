@@ -22,6 +22,7 @@ import java.beans.PropertyDescriptor;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 
@@ -436,6 +437,84 @@ public class StateManagerImplTest extends StateManagerTestBase
 		
 		assertEquals(cfg.getLastModificationDate(), stateMgr.getPluginModificationDate(cfg.getPluginId()));
 	}
+	public void testLabelProjectThrowsOnNotFound() throws Exception {
+		final ProjectConfigDto a = createProjectDto("a");
+		
+		stateMgr.addProjectConfig(a);
+		
+		try {
+			stateMgr.applyProjectLabel("x", Arrays.asList("a", "c"));
+			fail("Expected exception");
+		} catch (NoSuchProjectException e) {
+			assertEquals("c", e.getMessage());
+		}
+		
+		assertEquals(Collections.emptySet(), a.getLabels());
+	}
+	public void testLabelProject() throws Exception {
+		final ProjectConfigDto a = createProjectDto("a");
+		final ProjectConfigDto b = createProjectDto("b");
+		final ProjectConfigDto c = createProjectDto("c");
+		
+		stateMgr.addProjectConfig(a);
+		stateMgr.addProjectConfig(b);
+		stateMgr.addProjectConfig(c);
+		
+		store.commitCalled = false;
+		
+		stateMgr.applyProjectLabel("x", Arrays.asList("a", "c"));
+		
+		assertEquals(new HashSet<String>(Arrays.asList("x")), a.getLabels());
+		assertEquals(Collections.emptySet(), b.getLabels());
+		assertEquals(new HashSet<String>(Arrays.asList("x")), c.getLabels());
+		
+		assertTrue(store.commitCalled);
+	}
+	public void testLabelProjectRemovesFromUnselected() throws Exception {
+		final ProjectConfigDto a = createProjectDto("a");
+		final ProjectConfigDto b = createProjectDto("b");
+		
+		a.getLabels().add("y");
+		b.getLabels().add("x");
+		b.getLabels().add("y");
+		
+		stateMgr.addProjectConfig(a);
+		stateMgr.addProjectConfig(b);
+		
+		store.commitCalled = false;
+		
+		stateMgr.applyProjectLabel("x", Arrays.asList("a"));
+		
+		assertEquals(new HashSet<String>(Arrays.asList("x", "y")), a.getLabels());
+		assertEquals(new HashSet<String>(Arrays.asList("y")), b.getLabels());
+		
+		assertTrue(store.commitCalled);
+	}
+	public void testGetProjectsByLabel() throws Exception {
+		final ProjectConfigDto a = createProjectDto("a");
+		final ProjectConfigDto b = createProjectDto("b");
+		
+		b.getLabels().add("x");
+		
+		stateMgr.addProjectConfig(a);
+		stateMgr.addProjectConfig(b);
+		
+		assertEquals(Arrays.asList("b"), stateMgr.getProjectConfigNamesByLabel("x"));
+	}
+	public void testGetLabels() throws Exception {
+		final ProjectConfigDto a = createProjectDto("a");
+		final ProjectConfigDto b = createProjectDto("b");
+		
+		a.getLabels().add("y");
+		b.getLabels().add("x");
+		b.getLabels().add("y");
+		
+		stateMgr.addProjectConfig(a);
+		stateMgr.addProjectConfig(b);
+
+		assertEquals(Arrays.asList("x", "y"), stateMgr.getProjectLabels());
+	}
+
 	private ProjectConfigDto createProjectDto(String name) {
 		final ProjectConfigDto config = new ProjectConfigDto();
 		config.setName(name);

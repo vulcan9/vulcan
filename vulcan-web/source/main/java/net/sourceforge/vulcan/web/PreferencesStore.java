@@ -16,26 +16,14 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-package net.sourceforge.vulcan.core;
+package net.sourceforge.vulcan.web;
 
-import java.util.Set;
-
-import net.sourceforge.vulcan.exception.ConfigException;
-import net.sourceforge.vulcan.exception.DuplicateNameException;
-import net.sourceforge.vulcan.exception.StoreException;
+import net.sourceforge.vulcan.dto.PreferencesDto;
 import net.sourceforge.vulcan.metadata.SvnRevision;
 
 @SvnRevision(id="$Id$", url="$HeadURL$")
-public interface ProjectImporter {
-
-	void createProjectsForUrl(
-			String url,
-			String username,
-			String password,
-			boolean createSubprojects,
-			NameCollisionResolutionMode nameCollisionResolutionMode,
-			String[] schedulerNames,
-			Set<String> labels)
-				throws ConfigException, StoreException, DuplicateNameException;
-
+public interface PreferencesStore {
+	public PreferencesDto getDefaultPreferences();
+	public PreferencesDto convertFromString(String data);
+	public String convertToString(PreferencesDto prefs);
 }

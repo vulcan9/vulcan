@@ -40,6 +40,11 @@
 		<path>/WEB-INF/tags/openFlashChart.tag</path>
 	</tag-file>
 	
+	<tag-file>
+		<name>projectStatusXml</name>
+		<path>/WEB-INF/tags/projectStatusXml.tag</path>
+	</tag-file>
+	
 	<function>
 		<name>mangle</name>
 		<description>
@@ -58,7 +63,13 @@
 		<function-class>net.sourceforge.vulcan.web.JstlFunctions</function-class>
 		<function-signature>java.util.List getActionErrorPropertyList(javax.servlet.http.HttpServletRequest)</function-signature>
 	</function>
-		
+	
+	<function>
+		<name>getProjectNamesByLabels</name>
+		<function-class>net.sourceforge.vulcan.web.JstlFunctions</function-class>
+		<function-signature>java.util.List getProjectNamesByLabels(java.lang.String[])</function-signature>
+	</function>
+	
 	<function>
 		<name>setStatus</name>
 		<function-class>net.sourceforge.vulcan.web.JstlFunctions</function-class>

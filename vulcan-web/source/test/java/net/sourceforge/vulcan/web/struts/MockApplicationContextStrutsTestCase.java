@@ -25,10 +25,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
+import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -44,6 +47,7 @@ import net.sourceforge.vulcan.event.EventHandler;
 import net.sourceforge.vulcan.event.EventPool;
 import net.sourceforge.vulcan.metadata.SvnRevision;
 import net.sourceforge.vulcan.web.Keys;
+import net.sourceforge.vulcan.web.PreferencesStore;
 import net.sourceforge.vulcan.web.ServletTestCase;
 
 import org.apache.commons.lang.StringUtils;
@@ -65,6 +69,11 @@ import org.springframework.context.support.AbstractMessageSource;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.StaticWebApplicationContext;
 
+import servletunit.HttpServletRequestSimulator;
+import servletunit.HttpServletResponseSimulator;
+import servletunit.ServletConfigSimulator;
+import servletunit.ServletContextSimulator;
+
 @SvnRevision(id="$Id$", url="$HeadURL$")
 public abstract class MockApplicationContextStrutsTestCase extends EasyMockStrutsTestCase {
 	protected ActionForward resultForward;
@@ -79,6 +88,7 @@ public abstract class MockApplicationContextStrutsTestCase extends EasyMockStrut
 	protected ConfigurationStore configurationStore;
 	protected BuildOutcomeStore buildOutcomeStore;
 	protected ProjectImporter projectImporter;
+	protected PreferencesStore preferencesStore;
 	
 	private boolean multipart;
 	
@@ -108,6 +118,22 @@ public abstract class MockApplicationContextStrutsTestCase extends EasyMockStrut
 	@Override
 	public void setUp() throws Exception {
 		super.setUp();
+
+		context = new ServletContextSimulator() {
+			@Override
+			@SuppressWarnings("unchecked")
+			public Set getResourcePaths(String path) {
+				return Collections.emptySet();
+			}
+		};
+        config = new ServletConfigSimulator() {
+        	@Override
+        	public ServletContext getServletContext() {
+        		return context;
+        	}
+        };
+        request = new HttpServletRequestSimulator(config.getServletContext());
+        response = new HttpServletResponseSimulator();
 
 		request.setServerName("localhost");
 		request.setServerPort(80);
@@ -317,7 +343,7 @@ public abstract class MockApplicationContextStrutsTestCase extends EasyMockStrut
 		configurationStore = defineWacSingleton("configurationStore", ConfigurationStore.class);
 		buildOutcomeStore = defineWacSingleton("buildOutcomeStore", BuildOutcomeStore.class);
 		projectImporter = defineWacSingleton("projectImporter", ProjectImporter.class);
-		
+		preferencesStore = defineWacSingleton("preferencesStore", PreferencesStore.class);
 		wac.refresh();
 	}
 

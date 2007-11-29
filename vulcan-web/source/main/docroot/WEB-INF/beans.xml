@@ -12,6 +12,19 @@
 		<property name="location" value="WEB-INF/application.properties"/>
 	</bean>
 
+	<bean name="preferencesStore" class="net.sourceforge.vulcan.web.DefaultPreferencesStore">
+		<property name="defaultPreferences">
+			<bean class="net.sourceforge.vulcan.dto.PreferencesDto">
+				<property name="showBuildDaemons" value="true"/>
+				<property name="showBuildQueue" value="true"/>
+				<property name="showSchedulers" value="true"/>
+				<property name="groupByLabel" value="true"/>
+				<property name="popupMode" value="modePopup"/>
+				<property name="reloadInterval" value="60"/>
+				<property name="stylesheet" value="standard"/>
+			</bean>
+		</property>
+	</bean>
 	<bean class="net.sourceforge.vulcan.spring.mbean.VulcanManager">
 		<property name="stateManager" ref="stateManager"/>
 	</bean>

@@ -19,8 +19,10 @@
 package net.sourceforge.vulcan.web.struts;
 
 import java.io.File;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -28,11 +30,13 @@ import java.util.UUID;
 import javax.xml.transform.Result;
 
 import net.sourceforge.vulcan.TestUtils;
+import net.sourceforge.vulcan.dto.PreferencesDto;
 import net.sourceforge.vulcan.dto.ProjectConfigDto;
 import net.sourceforge.vulcan.dto.ProjectStatusDto;
 import net.sourceforge.vulcan.exception.NoSuchProjectException;
 import net.sourceforge.vulcan.exception.NoSuchTransformFormatException;
 import net.sourceforge.vulcan.metadata.SvnRevision;
+import net.sourceforge.vulcan.web.Keys;
 
 import org.apache.struts.Globals;
 import org.apache.struts.action.ActionMessages;
@@ -47,6 +51,8 @@ public class ViewProjectStatusActionTest extends MockApplicationContextStrutsTes
 	ProjectConfigDto projectConfig = new ProjectConfigDto();
 
 	File helloFile = new File("");
+	
+	Map<String, Object> paramMap = new HashMap<String, Object>();
 	
 	@Override
 	public void setUp() throws Exception {
@@ -65,6 +71,9 @@ public class ViewProjectStatusActionTest extends MockApplicationContextStrutsTes
 		getActionServlet().getServletContext().setAttribute(Globals.SERVLET_KEY, "*.foobar");
 		
 		projectConfig.setName("some project");
+		
+		paramMap.put("projectSiteURL", new URL("http://localhost/site/some%20project/12/"));
+		paramMap.put("issueTrackerURL", "");
 	}
 	
 	public void testBlankName() throws Exception {
@@ -473,6 +482,30 @@ public class ViewProjectStatusActionTest extends MockApplicationContextStrutsTes
 		assertPropertyHasError(ActionMessages.GLOBAL_MESSAGE, "errors.request.invalid");
 	}
 	public void testTransform() throws Exception {
+		paramMap.put("viewProjectStatusURL", new URL("http://localhost/viewProjectStatus.do?transform=xhtml"));
+		
+		final Map<String, ProjectStatusDto> empty = Collections.emptyMap();
+		trainForTransform(empty, "xhtml");
+
+		addRequestParameter("projectName", "some project");
+		addRequestParameter("transform", "xhtml");
+		
+		replay();
+		
+		actionPerform();
+		
+		verify();
+		
+		assertEquals("text/html", response.getContentType());
+	}
+	public void testTransformSetsRefreshIntervalIfPresent() throws Exception {
+		PreferencesDto prefs = new PreferencesDto();
+		prefs.setReloadInterval(3424);
+		request.getSession().setAttribute(Keys.PREFERENCES, prefs);
+		
+		paramMap.put("reloadInterval", Integer.valueOf(prefs.getReloadInterval()));
+		paramMap.put("viewProjectStatusURL", new URL("http://localhost/viewProjectStatus.do?transform=xhtml"));
+		
 		final Map<String, ProjectStatusDto> empty = Collections.emptyMap();
 		trainForTransform(empty, "xhtml");
 
@@ -488,6 +521,7 @@ public class ViewProjectStatusActionTest extends MockApplicationContextStrutsTes
 		assertEquals("text/html", response.getContentType());
 	}
 	public void testTransformBadFormatType() throws Exception {
+		paramMap.put("viewProjectStatusURL", new URL("http://localhost/viewProjectStatus.do?transform=nonesuch"));
 		final Map<String, ProjectStatusDto> empty = Collections.emptyMap();
 		trainForTransform(empty, "nonesuch");
 
@@ -522,7 +556,7 @@ public class ViewProjectStatusActionTest extends MockApplicationContextStrutsTes
 		
 		projectDomBuilder.transform(
 				(Document) anyObject(),
-				(Map<String, Object>)anyObject(),
+				eq(paramMap),
 				eq(request.getLocale()),
 				eq(transormType),
 				(Result)anyObject());

@@ -18,6 +18,7 @@
  */
 package net.sourceforge.vulcan;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
@@ -37,6 +38,9 @@ import net.sourceforge.vulcan.scheduler.ProjectScheduler;
 @SvnRevision(id="$Id$", url="$HeadURL$")
 public interface StateManager {
 	public List<String> getProjectConfigNames();
+	public List<String> getProjectConfigNamesByLabel(String label);
+	public List<String> getProjectLabels();
+	public void applyProjectLabel(String label, Collection<String> projectNames) throws StoreException;
 	public ProjectConfigDto getProjectConfig(String name) throws NoSuchProjectException;
 	public void addProjectConfig(ProjectConfigDto... configs) throws DuplicateNameException, StoreException;
 	public void addOrReplaceProjectConfig(ProjectConfigDto... configs) throws StoreException;

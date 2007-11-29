@@ -10,8 +10,6 @@
 	xmlns:spring="http://www.springframework.org/tags"
 	xmlns:v="http://vulcan.sourceforge.net/j2ee/jsp/tags">
 
-<jsp:directive.page session="false"/>
-
 <html:xhtml/>
 
 <head>
@@ -21,10 +19,12 @@
 		<jsp:attribute name="type">application/rss+xml</jsp:attribute>
 		<jsp:attribute name="href"><c:url value="/rss.jsp"/></jsp:attribute>
 	</jsp:element>
-	<jsp:element name="meta">
-		<jsp:attribute name="http-equiv">Refresh</jsp:attribute>
-		<jsp:attribute name="content">30</jsp:attribute>
-	</jsp:element>
+	<c:if test="${preferences.reloadInterval > 0}">
+		<jsp:element name="meta">
+			<jsp:attribute name="http-equiv">Refresh</jsp:attribute>
+			<jsp:attribute name="content">${preferences.reloadInterval}</jsp:attribute>
+		</jsp:element>
+	</c:if>
 </head>
 <body>
 
@@ -50,6 +50,9 @@
 	<x:transform xslt="${xslt}">
 		<x:param name="caption">
 			<spring:message code="captions.projects.status"/>
+		</x:param>
+		<x:param name="sortUrl">
+			<c:url value="/managePreferences.do?action=save"/>
 		</x:param>
 		<x:param name="detailLink">
 			<c:url value="/viewProjectStatus.do?transform=xhtml&amp;projectName="/>
@@ -77,10 +80,12 @@
 		</x:param>
 		<x:param name="sortSelect">${preferences.sortColumn}</x:param>
 		<x:param name="sortOrder">${preferences.sortOrder}</x:param>
-		<c:import url="/projects.jsp"/>
+		
+		<v:projectStatusXml labels="${preferences.labels}"/>
 	</x:transform>
 </v:bubble>
 
+<c:if test="${preferences.showBuildDaemons}">
 <v:bubble>
 <table class="buildDaemons">
 	<caption><spring:message code="captions.build.daemons"/></caption>
@@ -136,7 +141,9 @@
 	</tbody>
 </table>
 </v:bubble>
+</c:if>
 
+<c:if test="${preferences.showBuildQueue}">
 <v:bubble>
 <table class="buildQueue">
 	<caption><spring:message code="captions.build.queue"/></caption>
@@ -182,7 +189,9 @@
 	</tbody>
 </table>
 </v:bubble>
+</c:if>
 
+<c:if test="${preferences.showSchedulers}">
 <v:bubble>
 <table class="schedulers">
 	<caption><spring:message code="captions.schedulers"/></caption>
@@ -220,6 +229,7 @@
 	</tbody>
 </table>
 </v:bubble>
+</c:if>
 </div>
 </c:otherwise>
 </c:choose>

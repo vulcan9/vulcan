@@ -19,10 +19,12 @@
 package net.sourceforge.vulcan.spring;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 import java.beans.PropertyDescriptor;
@@ -147,9 +149,11 @@ public final class SpringBeanXmlEncoder implements BeanEncoder {
 	}
 	void encodeObject(final Element node, final Object object) {
 		if (object instanceof List) {
-			encodeList(node, (List<?>) object);
+			encodeList(node, "list", (List<?>) object);
 		} else if (object instanceof Object[]) {
-			encodeList(node, Arrays.asList((Object[])object));
+			encodeList(node, "list", Arrays.asList((Object[])object));
+		} else if (object instanceof Set) {
+			encodeList(node, "set", (Collection<?>) object);
 		} else if (object instanceof Map) {
 			encodeMap(node, (Map<?,?>)object);
 		} else if (object instanceof UUID) {
@@ -171,11 +175,11 @@ public final class SpringBeanXmlEncoder implements BeanEncoder {
 		bean.addContent(arg);
 		propertyNode.addContent(bean);
 	}
-	void encodeList(Element root, List<? extends Object> list) {
-		final Element listNode = new Element("list");
+	void encodeList(Element root, String collectionType, Collection<? extends Object> collection) {
+		final Element listNode = new Element(collectionType);
 		root.addContent(listNode);
 		
-		for (final Object bean : list) {
+		for (final Object bean : collection) {
 			if (bean == null) {
 				listNode.addContent(new Element("null"));
 			} else {

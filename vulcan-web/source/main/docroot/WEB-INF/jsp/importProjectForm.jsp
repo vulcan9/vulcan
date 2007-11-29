@@ -94,19 +94,42 @@
 		</tr>
 		<tr>
 			<td><spring:message code="label.project.build.scheduler"/></td>
-			<td colspan="2">
+			<td>
 				<div class="projectCheckboxes">
 					<ul>
 					<c:forEach items="${stateManager.config.schedulers}" var="scheduler">
 						<li>
 							<html:multibox property="schedulerNames" value="${scheduler.name}"
-								styleId="sched${scheduler.name}"/>
+								styleId="sched${v:mangle(scheduler.name)}"/>
 							<jsp:element name="label">
-								<jsp:attribute name="for">sched${scheduler.name}</jsp:attribute>
+								<jsp:attribute name="for">sched${v:mangle(scheduler.name)}</jsp:attribute>
 								<jsp:body>${scheduler.name}</jsp:body>
 							</jsp:element>
 						</li>
 					</c:forEach>
+					</ul>
+				</div>
+			</td>
+		</tr>
+		<tr>
+			<td><spring:message code="label.project.labels"/></td>
+			<td>
+				<div class="projectCheckboxes">
+					<ul>
+					<c:forEach items="${stateManager.projectLabels}" var="label">
+						<li>
+							<html:multibox property="labels" value="${label}"
+								styleId="sched${v:mangle(label)}"/>
+							<jsp:element name="label">
+								<jsp:attribute name="for">sched${v:mangle(label)}</jsp:attribute>
+								<jsp:body>${label}</jsp:body>
+							</jsp:element>
+						</li>
+					</c:forEach>
+					<li>
+						<spring:message code="label.new"/>
+						<html:text property="newLabel" styleClass="new-label"/>
+					</li>
 					</ul>
 				</div>
 			</td>

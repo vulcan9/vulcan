@@ -40,10 +40,14 @@ public class ProjectImportForm extends ValidatorForm {
 	private String username;
 	private String password;
 	
+	private String[] labels;
+	private String newLabel;
+	
 	@Override
 	public void reset(ActionMapping mapping, HttpServletRequest request) {
 		super.reset(mapping, request);
 		schedulerNames = ArrayUtils.EMPTY_STRING_ARRAY;
+		labels = ArrayUtils.EMPTY_STRING_ARRAY;
 		username = StringUtils.EMPTY;
 		password = StringUtils.EMPTY;
 		authenticationRequired = false;
@@ -108,5 +112,21 @@ public class ProjectImportForm extends ValidatorForm {
 
 	public void setUsername(String username) {
 		this.username = username;
+	}
+
+	public String[] getLabels() {
+		return labels;
+	}
+
+	public void setLabels(String[] labels) {
+		this.labels = labels;
+	}
+
+	public String getNewLabel() {
+		return newLabel;
+	}
+
+	public void setNewLabel(String newLabel) {
+		this.newLabel = newLabel;
 	}
 }

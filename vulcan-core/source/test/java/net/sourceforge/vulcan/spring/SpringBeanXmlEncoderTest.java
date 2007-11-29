@@ -28,8 +28,10 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 import junit.framework.TestCase;
@@ -65,6 +67,7 @@ public class SpringBeanXmlEncoderTest extends TestCase {
 		private File filename;
 		private Bean innerBean;
 		private List<?> children;
+		private Set<?> set;
 		private Map<?,?> map;
 		private Status status;
 		private Integer trans;
@@ -93,6 +96,12 @@ public class SpringBeanXmlEncoderTest extends TestCase {
 		}
 		public void setChildren(List<?> children) {
 			this.children = children;
+		}
+		public Set<?> getSet() {
+			return set;
+		}
+		public void setSet(Set<?> set) {
+			this.set = set;
 		}
 		public Map<?,?> getMap() {
 			return map;
@@ -393,6 +402,38 @@ public class SpringBeanXmlEncoderTest extends TestCase {
 		assertEquals("value", beanInList.getName());
 		assertEquals(Long.toString(child2.getTime()), beanInList.getText());
 		
+	}
+	
+	public void testHandlesSet() {
+		final Element root = new Element("beans");
+		Bean b = new Bean();
+		
+		b.setSet(new HashSet<String>(Arrays.asList(new String[] {"a", "b"})));
+		
+		enc.encodeBean(root, "foo", b);
+		
+		assertEquals(1, root.getContentSize());
+		Element beanNode = root.getChild("bean");
+		assertNotNull(beanNode);
+		
+		Element propertyNode = beanNode.getChild("property");
+		assertNotNull(propertyNode);
+
+		Element setNode = propertyNode.getChild("set");
+		assertNotNull(setNode);
+		
+		List<?> beansInList = setNode.getChildren();
+		assertEquals(2, beansInList.size());
+		
+		Element beanInList = (Element) beansInList.get(0);
+		assertNotNull(beanInList);
+		assertEquals("value", beanInList.getName());
+		assertTrue("a".equals(beanInList.getText()) || "b".equals(beanInList.getText()));
+
+		beanInList = (Element) beansInList.get(1);
+		assertNotNull(beanInList);
+		assertEquals("value", beanInList.getName());
+		assertTrue("a".equals(beanInList.getText()) || "b".equals(beanInList.getText()));
 	}
 	@SuppressWarnings("unchecked")
 	public void testEncodesMap() {

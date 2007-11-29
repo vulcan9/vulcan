@@ -17,6 +17,8 @@
 		<form-bean name="projectImportForm" type="net.sourceforge.vulcan.web.struts.forms.ProjectImportForm"/>
 		<form-bean name="projectStatusForm" type="net.sourceforge.vulcan.web.struts.forms.ProjectStatusForm"/>
 		<form-bean name="multipleProjectConfigForm" type="net.sourceforge.vulcan.web.struts.forms.MultipleProjectConfigForm"/>
+		<form-bean name="labelForm" type="net.sourceforge.vulcan.web.struts.forms.LabelForm"/>
+		<form-bean name="preferencesForm" type="net.sourceforge.vulcan.web.struts.forms.PreferencesForm"/>
 	</form-beans>
 	
 	<global-forwards>
@@ -32,7 +34,7 @@
 		<forward name="failure" path="/WEB-INF/jsp/error.jsp"/>
 		<forward name="restResponse" path="/WEB-INF/jsp/restResponse.jsp"/>
 		
-		<forward name="preferences" path="/preferences.jsp"/>
+		<forward name="preferences" path="/editPreferences.do"/>
 		<forward name="help" path="http://code.google.com/p/vulcan/wiki/" redirect="true"/>
 		
 		<forward name="viewProjectStatus" path="/viewProjectStatus.do"/>
@@ -48,6 +50,7 @@
 		<forward name="configurePlugin" path="/admin/setup/managePlugin.do?action=Configure"/>
 		<forward name="importProjectConfig" path="/admin/setup/importProjectForm.do"/>
 		<forward name="createProjectConfig" path="/admin/setup/manageProjectConfig.do?action=edit&amp;amp;createNew=true"/>
+		<forward name="createProjectLabel" path="/admin/setup/manageLabels.do?action=edit"/>
 		<forward name="createSchedulerConfig" path="/admin/setup/manageSchedulerConfig.do?action=edit&amp;amp;createNew=true"/>
 		<forward name="createBuildDaemonConfig" path="/admin/setup/manageBuildDaemonConfig.do?action=edit&amp;amp;createNew=true&amp;amp;daemon=true"/>
 		<forward name="viewConfig" path="/admin/viewConfig.do?download"/>
@@ -84,6 +87,20 @@
 		<action path="/getBuildHistory"
 				type="org.springframework.web.struts.DelegatingActionProxy"/>
 		
+		<action path="/editPreferences"
+				type="org.apache.struts.actions.ForwardAction"
+				name="preferencesForm"
+				scope="request"
+				parameter="/WEB-INF/jsp/preferences.jsp"/>
+		
+		<action path="/managePreferences"
+				type="org.springframework.web.struts.DelegatingActionProxy"
+				name="preferencesForm"
+				scope="request"
+				parameter="action"
+				input="/WEB-INF/jsp/preferences.jsp">
+		</action>
+		
 		<action path="/admin/clearMessages"
 				type="org.springframework.web.struts.DelegatingActionProxy"/>
 
@@ -119,6 +136,15 @@
 				validate="false"
 				input="/WEB-INF/jsp/deleteProjectsForm.jsp">
 			<forward name="projectList" path="/admin/setup/"/>
+		</action>
+		
+		<action path="/admin/setup/manageLabels"
+				type="org.springframework.web.struts.DelegatingActionProxy"
+				name="labelForm"
+				parameter="action"
+				input="/WEB-INF/jsp/projectLabels.jsp"
+				scope="request">
+			<forward name="labelForm" path="/WEB-INF/jsp/projectLabels.jsp"/>
 		</action>
 		
 		<action path="/admin/setup/manageSchedulerConfig"

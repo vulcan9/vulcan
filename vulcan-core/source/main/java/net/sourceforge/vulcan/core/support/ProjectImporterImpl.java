@@ -30,6 +30,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import net.sourceforge.vulcan.PluginManager;
 import net.sourceforge.vulcan.ProjectBuildConfigurator;
@@ -65,7 +66,7 @@ public class ProjectImporterImpl implements ProjectImporter {
 	private StateManager stateManager;
 	private ConfigurationStore configurationStore;
 	
-	public void createProjectsForUrl(String startUrl, String username, String password, boolean createSubprojects, NameCollisionResolutionMode nameCollisionResolutionMode, String[] schedulerNames) throws ConfigException, StoreException, DuplicateNameException {
+	public void createProjectsForUrl(String startUrl, String username, String password, boolean createSubprojects, NameCollisionResolutionMode nameCollisionResolutionMode, String[] schedulerNames, Set<String> labels) throws ConfigException, StoreException, DuplicateNameException {
 		final List<RepositoryAdaptorPlugin> repositoryPlugins = pluginManager.getPlugins(RepositoryAdaptorPlugin.class);
 		final List<BuildToolPlugin> buildToolPlugins = pluginManager.getPlugins(BuildToolPlugin.class);
 		
@@ -100,7 +101,7 @@ public class ProjectImporterImpl implements ProjectImporter {
 			
 			final boolean shouldCreate = configureProject(
 					projectConfig, repoConfigurator, buildConfigurator, url,
-					existingProjectNames, nameCollisionResolutionMode, createSubprojects);
+					existingProjectNames, nameCollisionResolutionMode, createSubprojects, labels);
 			
 			if (createSubprojects) {
 				final List<String> subprojectUrls = buildConfigurator.getSubprojectUrls();
@@ -163,7 +164,7 @@ public class ProjectImporterImpl implements ProjectImporter {
 	 * @return <code>true</code> if the project should be created, <code>false</code>
 	 * if it should be skipped due to a name collision.
 	 */
-	protected boolean configureProject(final ProjectConfigDto projectConfig, final ProjectRepositoryConfigurator repoConfigurator, final ProjectBuildConfigurator buildConfigurator, String url, final List<String> existingProjectNames, NameCollisionResolutionMode nameCollisionResolutionMode, boolean createSubprojects) throws DuplicateNameException {
+	protected boolean configureProject(final ProjectConfigDto projectConfig, final ProjectRepositoryConfigurator repoConfigurator, final ProjectBuildConfigurator buildConfigurator, String url, final List<String> existingProjectNames, NameCollisionResolutionMode nameCollisionResolutionMode, boolean createSubprojects, Set<String> labels) throws DuplicateNameException {
 		final String relativePath = buildConfigurator.getRelativePathToProjectBasedir();
 		final PathInfo pathInfo = computeProjectBasedirUrl(url, relativePath, true);
 		
@@ -188,6 +189,10 @@ public class ProjectImporterImpl implements ProjectImporter {
 		if (isBlank(projectConfig.getWorkDir())) {
 			final String workDir = configurationStore.getWorkingCopyLocationPattern().replace("${projectName}", projectConfig.getName());
 			projectConfig.setWorkDir(workDir);
+		}
+		
+		if (labels != null) {
+			projectConfig.getLabels().addAll(labels);
 		}
 		
 		return buildConfigurator.shouldCreate();

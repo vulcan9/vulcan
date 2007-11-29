@@ -40,6 +40,7 @@
 	<xsl:param name="testNameLabel"/>
 	<xsl:param name="testFailureBuildNumberLabel"/>
 	<xsl:param name="newTestFailureLabel"/>
+	<xsl:param name="reloadInterval"/>
 	
 	<xsl:key name="builds-by-message" match="project" use="message"/>
 	
@@ -49,6 +50,13 @@
 		<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-US">
 			<head>
 				<title><xsl:value-of select="$title"/></title>
+				<xsl:if test="/project/status='BUILDING'">
+					<meta http-equiv="Refresh">
+						<xsl:attribute name="content">
+							<xsl:value-of select="$reloadInterval"/>
+						</xsl:attribute>
+					</meta>
+				</xsl:if>
 			</head>
 			<body>
 				<div class="content">
@@ -62,13 +70,6 @@
 						<xsl:apply-templates select="/project/next-index"/>
 						<br/><br/>
 					</div>
-					
-					<xsl:if test="/project/currently-building">
-						<xsl:call-template name="bubble">
-							<xsl:with-param name="target" select="'currently-building'"/>
-							<xsl:with-param name="styleClass" select="'warning'"/>
-						</xsl:call-template>
-					</xsl:if>
 					
 					<xsl:call-template name="bubble">
 						<xsl:with-param name="target" select="'summary'"/>
