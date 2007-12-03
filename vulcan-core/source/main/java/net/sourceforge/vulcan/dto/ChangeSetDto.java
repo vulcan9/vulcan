@@ -18,13 +18,15 @@
  */
 package net.sourceforge.vulcan.dto;
 
+import java.util.Date;
+
 import net.sourceforge.vulcan.metadata.SvnRevision;
 
 @SvnRevision(id="$Id$", url="$HeadURL$")
 public class ChangeSetDto extends BaseDto {
 	private String revisionLabel;
 	private String author;
-	private java.util.Date timestamp;
+	private Date timestamp;
 	private String message;
 	private String[] modifiedPaths;
 	

@@ -18,10 +18,8 @@
  */
 package net.sourceforge.vulcan.core;
 
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 
 import net.sourceforge.vulcan.dto.BuildDaemonInfoDto;
@@ -63,14 +61,6 @@ public interface BuildManager {
 	
 	List<UUID> getAvailableStatusIds(String projectName);
 	
-	/**
-	 * @param begin inclusive lower bound.
-	 * @param end exclusive upper bound.
-	 * @return Build IDs for project within specified Date range.
-	 */
-	@Deprecated
-	List<UUID> getAvailableStatusIdsInRange(Set<String> projectNames, Date begin, Date end);
-
 	Map<String, ProjectStatusDto> getProjectsBeingBuilt();
 
 	Map<String, ProjectStatusDto> getProjectStatus();

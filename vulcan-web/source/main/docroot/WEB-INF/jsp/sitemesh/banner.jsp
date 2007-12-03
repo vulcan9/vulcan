@@ -39,9 +39,9 @@
 	<c:if test="${stateManager.running}">
 		<li><html:link forward="report"><spring:message code="link.report.build.history"/></html:link></li>
 		<li><html:link forward="manualBuildForm"><spring:message code="link.build.manual"/></html:link></li>
+		<li><html:link forward="preferences"><spring:message code="link.preferences"/></html:link></li>
 	</c:if>
 	
-	<li><html:link forward="preferences"><spring:message code="link.preferences"/></html:link></li>
 	<li><html:link forward="setup"><spring:message code="link.setup"/></html:link></li>
 	<li><html:link forward="about"><spring:message code="link.about"/></html:link></li>
 	

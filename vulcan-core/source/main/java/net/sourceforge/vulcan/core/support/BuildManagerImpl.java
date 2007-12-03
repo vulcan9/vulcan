@@ -26,7 +26,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
@@ -227,30 +226,6 @@ public class BuildManagerImpl implements BuildManager {
 			return null;
 		}
 		return Collections.unmodifiableList(outcomeIds);
-	}
-	public List<UUID> getAvailableStatusIdsInRange(Set<String> projectNames, java.util.Date begin, java.util.Date end) {
-		final List<UUID> all = new ArrayList<UUID>();
-		
-		for (String projectName : projectNames) {
-			final List<UUID> ids = getAvailableStatusIds(projectName);
-			final long low = begin.getTime();
-			final long high = end.getTime();
-			
-			for (Iterator<UUID> itr = ids.iterator(); itr.hasNext();) {
-				final UUID id = itr.next();
-				
-				/* Time based UUIDs are measured as 100-nanosecond units since Oct. 15, 1582 UTC
-				 * whereas java.util.Date.getTime() is measures as milliseconds since January 1st, 1970.
-				 * Conversion necessary.
-				 */
-				final long timestamp = id.timestamp()/10000 - 12219292800000L;
-				
-				if (timestamp >= low && timestamp < high) {
-					all.add(id);
-				}
-			}
-		}
-		return all;
 	}
 	@ManagedAttribute
 	public Map<String, ProjectStatusDto> getProjectStatus() {

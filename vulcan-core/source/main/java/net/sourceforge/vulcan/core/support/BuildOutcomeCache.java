@@ -185,18 +185,8 @@ public class BuildOutcomeCache implements ProjectNameChangeListener {
 		try {
 			final ProjectStatusDto status = buildOutcomeStore.loadBuildOutcome(id);
 			
-			if (status.getBuildNumber() == null) {
-				// Legacy: build number was not introduced until several
-				// instances went live.  Use index as build number.
-				final Integer index = outcomeIDs.get(projectName).indexOf(id);
-				
-				status.setBuildNumber(index);
-			}
-			
-			// In case project was renamed, force status to use current name
-			status.setName(projectName);
-			
 			outcomes.put(id, status);
+			
 			return status;
 		} catch (StoreException e) {
 			eventHandler.reportEvent(new ErrorEvent(

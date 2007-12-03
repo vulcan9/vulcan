@@ -18,13 +18,6 @@
  */
 package net.sourceforge.vulcan.spring;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -32,6 +25,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.Writer;
 
 import net.sourceforge.vulcan.core.BeanEncoder;
 import net.sourceforge.vulcan.core.ProjectNameChangeListener;
@@ -143,9 +144,13 @@ public class SpringFileStore extends AbstractFileStore implements BeanFactoryAwa
 		final ProjectStatusDto outcome;
 		
 		try {
-			final BeanFactory beanFactory = new XmlBeanFactory(new FileSystemResource(file), this.beanFactory);
-		
+			final XmlBeanFactory beanFactory = new XmlBeanFactory(new FileSystemResource(file), this.beanFactory);
+			beanFactory.registerCustomEditor(java.util.Date.class, new DateEditor());
+			
 			outcome = (ProjectStatusDto) beanFactory.getBean("build-outcome");
+
+			// In case project was renamed, force status to use current name
+			outcome.setName(projectName);
 		} catch (Exception e) {
 			throw new StoreException(e);
 		}

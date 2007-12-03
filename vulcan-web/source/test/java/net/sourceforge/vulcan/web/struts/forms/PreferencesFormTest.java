@@ -40,6 +40,7 @@ public class PreferencesFormTest extends TestCase {
 	Map<String, Set<String>> paths = new HashMap<String, Set<String>>();
 	
 	ServletContextSimulator context = new ServletContextSimulator() {
+		@Override
 		@SuppressWarnings("unchecked")
 		public Set getResourcePaths(String path) {
 			if (!paths.containsKey(path)) {
