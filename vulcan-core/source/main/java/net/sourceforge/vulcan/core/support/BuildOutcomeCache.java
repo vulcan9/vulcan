@@ -111,6 +111,41 @@ public class BuildOutcomeCache implements ProjectNameChangeListener {
 			writeLock.unlock();
 		}
 	}
+	
+	public List<UUID> getOutcomeIds(String projectName) {
+		try {
+			readLock.lock();
+			return outcomeIDs.get(projectName);
+		} finally {
+			readLock.unlock();
+		}
+	}
+	
+	public UUID getLatestOutcomeId(String projectName) {
+		try {
+			readLock.lock();
+			return latestOutcomes.get(projectName);
+		} finally {
+			readLock.unlock();
+		}
+	}
+
+	public ProjectStatusDto getLatestOutcome(String projectName) {
+		final UUID uuid;
+		
+		try {
+			readLock.lock();
+			uuid = latestOutcomes.get(projectName);
+			if (uuid == null) {
+				return null;
+			}
+		} finally {
+			readLock.unlock();
+		}
+		
+		return getOutcome(uuid);
+	}
+	
 
 	/**
 	 * @return Mapping of project name to latest build outcome.
@@ -133,40 +168,6 @@ public class BuildOutcomeCache implements ProjectNameChangeListener {
 		return map;
 	}
 
-	public UUID getLatestOutcomeId(String projectName) {
-		try {
-			readLock.lock();
-			return latestOutcomes.get(projectName);
-		} finally {
-			readLock.unlock();
-		}
-	}
-	
-	public List<UUID> getOutcomeIds(String projectName) {
-		try {
-			readLock.lock();
-			return outcomeIDs.get(projectName);
-		} finally {
-			readLock.unlock();
-		}
-	}
-
-	public ProjectStatusDto getLatestOutcome(String projectName) {
-		final UUID uuid;
-		
-		try {
-			readLock.lock();
-			uuid = latestOutcomes.get(projectName);
-			if (uuid == null) {
-				return null;
-			}
-		} finally {
-			readLock.unlock();
-		}
-		
-		return getOutcome(uuid);
-	}
-	
 	public ProjectStatusDto getOutcome(UUID id) {
 		readLock.lock();
 		
@@ -180,8 +181,6 @@ public class BuildOutcomeCache implements ProjectNameChangeListener {
 		
 		writeLock.lock();
 		
-		final String projectName = idToProjects.get(id);
-		
 		try {
 			final ProjectStatusDto status = buildOutcomeStore.loadBuildOutcome(id);
 			
@@ -189,6 +188,8 @@ public class BuildOutcomeCache implements ProjectNameChangeListener {
 			
 			return status;
 		} catch (StoreException e) {
+			final String projectName = idToProjects.get(id);
+			
 			eventHandler.reportEvent(new ErrorEvent(
 					this, "errors.load.build.outcome",
 					new Object[] {id, projectName}, e));
@@ -235,59 +236,6 @@ public class BuildOutcomeCache implements ProjectNameChangeListener {
 		} finally {
 			writeLock.unlock();
 		}
-	}
-	
-	private ProjectStatusDto findOutcomeByNumber(final List<UUID> outcomeIds, int buildNumber, int guess, Set<Integer> visitedIndexes) {
-		final int numOutcomes = outcomeIds.size();
-
-		int delta = 0;
-		
-		if (guess >= numOutcomes) {
-			guess = numOutcomes - 1;
-		} else if (guess < 0) {
-			guess = 0;
-		}
-		
-		if (visitedIndexes != null && visitedIndexes.contains(guess)) {
-			return null;
-		}
-		
-		final ProjectStatusDto outcome = getOutcome(outcomeIds.get(guess));
-		final int actualBuildNumber = outcome.getBuildNumber();
-		
-		delta = buildNumber - actualBuildNumber;
-
-		if (delta == 0) {
-			return outcome;
-		}
-		
-		if (visitedIndexes == null) {
-			visitedIndexes = new HashSet<Integer>();
-		}
-		
-		visitedIndexes.add(guess);
-		
-		if (buildNumber > actualBuildNumber && guess >= numOutcomes - 1) {
-			return null;
-		}
-		
-		if (guess == 0 && delta < 0) {
-			return null;
-		}
-		
-		int nextGuess = guess + delta;
-		
-		if (delta < 0 && guess + delta < 0) {
-			nextGuess = guess - 1;
-		} else if (delta > 0 && guess + delta >= numOutcomes) {
-			nextGuess = guess + 1;
-		}
-		
-		while (visitedIndexes.contains(nextGuess)) {
-			nextGuess--;
-		}
-		
-		return findOutcomeByNumber(outcomeIds, buildNumber, nextGuess, visitedIndexes);
 	}
 
 	public BuildOutcomeStore getBuildOutcomeStore() {
@@ -341,5 +289,59 @@ public class BuildOutcomeCache implements ProjectNameChangeListener {
 		
 		ids.add(id);
 		statusDto.setId(id);
+	}
+	
+	
+	private ProjectStatusDto findOutcomeByNumber(final List<UUID> outcomeIds, int buildNumber, int guess, Set<Integer> visitedIndexes) {
+		final int numOutcomes = outcomeIds.size();
+
+		int delta = 0;
+		
+		if (guess >= numOutcomes) {
+			guess = numOutcomes - 1;
+		} else if (guess < 0) {
+			guess = 0;
+		}
+		
+		if (visitedIndexes != null && visitedIndexes.contains(guess)) {
+			return null;
+		}
+		
+		final ProjectStatusDto outcome = getOutcome(outcomeIds.get(guess));
+		final int actualBuildNumber = outcome.getBuildNumber();
+		
+		delta = buildNumber - actualBuildNumber;
+
+		if (delta == 0) {
+			return outcome;
+		}
+		
+		if (visitedIndexes == null) {
+			visitedIndexes = new HashSet<Integer>();
+		}
+		
+		visitedIndexes.add(guess);
+		
+		if (buildNumber > actualBuildNumber && guess >= numOutcomes - 1) {
+			return null;
+		}
+		
+		if (guess == 0 && delta < 0) {
+			return null;
+		}
+		
+		int nextGuess = guess + delta;
+		
+		if (delta < 0 && guess + delta < 0) {
+			nextGuess = guess - 1;
+		} else if (delta > 0 && guess + delta >= numOutcomes) {
+			nextGuess = guess + 1;
+		}
+		
+		while (visitedIndexes.contains(nextGuess)) {
+			nextGuess--;
+		}
+		
+		return findOutcomeByNumber(outcomeIds, buildNumber, nextGuess, visitedIndexes);
 	}
 }

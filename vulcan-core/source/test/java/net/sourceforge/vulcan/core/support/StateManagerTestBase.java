@@ -18,10 +18,8 @@
  */
 package net.sourceforge.vulcan.core.support;
 
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 
 import net.sourceforge.vulcan.EasyMockTestCase;
@@ -94,9 +92,6 @@ public abstract class StateManagerTestBase extends EasyMockTestCase
 				buildMgrClearCallCount++;
 			}
 			public List<UUID> getAvailableStatusIds(String projectName) {
-				return null;
-			}
-			public List<UUID> getAvailableStatusIdsInRange(Set<String> projectNames, Date begin, Date end) {
 				return null;
 			}
 			public Map<String, ProjectStatusDto> getProjectsBeingBuilt() {
