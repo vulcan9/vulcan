@@ -136,7 +136,7 @@
 		</tr>
 		<tr>
 			<td class="buttons" colspan="2">
-				<html:submit value="Import"/>
+				<button type="submit" value="import"><spring:message code="button.import"/></button>
 				<html:hidden property="authenticationRequired"/>
 			</td>
 		</tr>

@@ -51,7 +51,9 @@
 		</tr>
 		<tr>
 			<td class="buttons" colspan="2">
-				<button name="action" value="save"><spring:message code="button.save"/></button>
+				<v:button name="action" value="save">
+					<spring:message code="button.save"/>
+				</v:button>
 			</td>
 		</tr>
 	</tbody>

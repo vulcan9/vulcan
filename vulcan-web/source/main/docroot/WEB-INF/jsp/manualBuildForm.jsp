@@ -116,7 +116,7 @@
 		</tr>
 		<tr>
 			<td class="buttons" colspan="2">
-				<html:submit property="action" value="Build"/>
+				<v:button name="action" value="build"><spring:message code="button.build"/></v:button>
 			</td>
 		</tr>
 	</tbody>

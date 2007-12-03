@@ -21,11 +21,6 @@
   * in order to allow the codebase to stay readable.
   */
 
-function fixLayoutForIE() {
-	addContentBefore();
-	addStyleClassToLastChildren();
-}
-
 /* MSIE does not support the CSS :before { content: "..." } technique. */
 function addContentBefore() {
 	for (var i=0; i<document.styleSheets.length; i++) {
@@ -79,6 +74,26 @@ function addStyleClassToLastChildren() {
 			last.className = cls;
 		}
 	}
+}
+
+/* MSIE does not submit a form when a <button> is clicked. */
+function submitFormHandler(e) {
+	var o = getTarget(e);
+	if (o && o.getAttribute("actual-value")) {
+		var value = o.getAttribute("actual-value");
+		
+		var submit = document.getElementById("ieSubmit");
+		submit.value = value;
+		submit.click();
+	}
+	
+	return preventDefaultHandler(e);
+}
+
+function fixLayoutForIE() {
+	addContentBefore();
+	addStyleClassToLastChildren();
+	registerHandlerByTagNameAndClass("button", "ie-submit-button", "click", submitFormHandler);
 }
 
 if (navigator && navigator.appName == "Microsoft Internet Explorer") {

@@ -62,7 +62,7 @@
 		<tr>
 			<td class="buttons" colspan="3">
 				<c:if test="${not errorPresent}">
-					<html:submit property="action" value="Build"/>
+					<v:button name="action" value="build"><spring:message code="button.build"/></v:button>
 				</c:if>
 			</td>
 		</tr>

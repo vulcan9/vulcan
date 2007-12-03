@@ -66,7 +66,7 @@
 		</c:if>
 		<tr>
 			<td class="buttons" colspan="2">
-				<button><spring:message code="label.delete.projects"/></button>
+				<button type="submit"><spring:message code="label.delete.projects"/></button>
 			</td>
 		</tr>
 	</tbody>

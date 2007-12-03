@@ -117,7 +117,7 @@
 				</tr>
 				<tr>
 					<td colspan="2">
-						<button name="action" value="save"><spring:message code="button.save"/></button>
+						<button type="submit" name="action" value="save"><spring:message code="button.save"/></button>
 						<input type="hidden" name="fullReset" value="true"/>
 						<html:hidden property="config.sortColumn"/>
 						<html:hidden property="config.sortOrder"/>

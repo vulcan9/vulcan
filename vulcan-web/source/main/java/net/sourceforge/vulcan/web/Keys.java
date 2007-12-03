@@ -35,4 +35,5 @@ public interface Keys {
 	
 	String BUILD_HISTORY = "buildHistory";
 	String PREFERENCES = "preferences";
+	String BROWSER_IE = "browserIE";
 }

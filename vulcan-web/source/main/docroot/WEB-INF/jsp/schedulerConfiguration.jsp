@@ -100,11 +100,11 @@
 			<td class="buttons" colspan="3">
 				<c:choose>
 					<c:when test="${schedulerConfigForm.createNew}">
-						<html:submit property="action" value="Create"/>
+						<v:button name="action" value="create"><spring:message code="button.create"/></v:button>
 					</c:when>
 					<c:otherwise>
-						<html:submit property="action" value="Update"/>
-						<html:submit property="action" value="Delete"/>
+						<v:button name="action" value="update"><spring:message code="button.update"/></v:button>
+						<v:button name="action" value="delete"><spring:message code="button.delete"/></v:button>
 					</c:otherwise>
 				</c:choose>
 				<html:hidden property="daemon"/>

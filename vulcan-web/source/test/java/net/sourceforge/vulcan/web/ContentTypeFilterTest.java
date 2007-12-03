@@ -95,14 +95,22 @@ public class ContentTypeFilterTest extends ServletFilterTestCase {
 		check(DEFAULT_TYPE);
 	}
 
+	public void testSetsParamDetectsIE() throws Exception {
+		userAgent = "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; .NET CLR 1.1.4322)";
+		
+		check(LEGACY_TYPE);
+		
+		assertEquals(Boolean.TRUE, request.getParameter(Keys.BROWSER_IE));
+	}
+
 	public void testDetectsIE() throws Exception {
 		userAgent = "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; .NET CLR 1.1.4322)";
 		
 		check(LEGACY_TYPE);
 	}
-
+	
 	/* (Previous comment: Presumably, Microsoft will fix this problem in versions 7 and later of IE.) 
-	 * Nope, they didn't; at least as of beta 3.
+	 * Nope, they didn't.
 	 */
 	public void testDetectsIEVersion() throws Exception {
 		userAgent = "Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 5.1; .NET CLR 1.1.4322)";
