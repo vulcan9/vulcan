@@ -118,6 +118,7 @@ public class ContentTypeFilter extends OncePerRequestFilter {
 			final Matcher matcher = userAgentRegex.matcher(userAgent);
 			
 			if (matcher.matches()) {
+				request.setAttribute(Keys.BROWSER_IE, Boolean.TRUE);
 				return legacyContentType;	
 			}
 		}

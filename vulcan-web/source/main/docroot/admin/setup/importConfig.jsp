@@ -22,7 +22,7 @@
 			<span class="caption"><spring:message code="label.import.config"/></span>
 			<div class="file-upload">
 				<html:file property="configFile"/>
-				<html:submit property="action" value="Upload"/>
+				<v:button name="action" value="upload"><spring:message code="button.import"/></v:button>
 				<br/>
 				<html:messages property="configFile" id="msg">
 					<span class="error">${msg}</span>

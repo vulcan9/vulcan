@@ -20,7 +20,7 @@
 			<span class="caption"><spring:message code="label.plugin.manage"/></span>
 			<div class="file-upload">
 				<html:file property="pluginFile"/>
-				<html:submit property="action" value="Upload"/>
+				<v:button name="action" value="upload"><spring:message code="button.upload"/></v:button>
 				<br/>
 				<html:messages property="pluginFile" id="msg">
 					<span class="error">${msg}</span>
