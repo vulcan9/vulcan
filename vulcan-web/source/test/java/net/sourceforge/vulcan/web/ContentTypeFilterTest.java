@@ -100,7 +100,7 @@ public class ContentTypeFilterTest extends ServletFilterTestCase {
 		
 		check(LEGACY_TYPE);
 		
-		assertEquals(Boolean.TRUE, request.getParameter(Keys.BROWSER_IE));
+		assertEquals(Boolean.TRUE, request.getAttribute(Keys.BROWSER_IE));
 	}
 
 	public void testDetectsIE() throws Exception {
