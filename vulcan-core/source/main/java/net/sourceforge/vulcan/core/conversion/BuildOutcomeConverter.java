@@ -34,6 +34,7 @@ import java.util.Map.Entry;
 
 import net.sourceforge.vulcan.StateManager;
 import net.sourceforge.vulcan.core.BuildOutcomeStore;
+import net.sourceforge.vulcan.core.support.BuildOutcomeCache;
 import net.sourceforge.vulcan.dto.MetricDto;
 import net.sourceforge.vulcan.dto.ProjectStatusDto;
 import net.sourceforge.vulcan.dto.MetricDto.MetricType;
@@ -53,6 +54,7 @@ import org.apache.commons.logging.LogFactory;
 public class BuildOutcomeConverter {
 	private SpringFileStore fileStore;
 	private BuildOutcomeStore buildOutcomeStore;
+	private BuildOutcomeCache buildOutcomeCache;
 	private StateManager stateManager;
 	private EventHandler eventHandler;
 	
@@ -125,6 +127,14 @@ public class BuildOutcomeConverter {
 		this.buildOutcomeStore = buildOutcomeStore;
 	}
 
+	public BuildOutcomeCache getBuildOutcomeCache() {
+		return buildOutcomeCache;
+	}
+	
+	public void setBuildOutcomeCache(BuildOutcomeCache buildOutcomeCache) {
+		this.buildOutcomeCache = buildOutcomeCache;
+	}
+	
 	public StateManager getStateManager() {
 		return stateManager;
 	}
@@ -163,6 +173,8 @@ public class BuildOutcomeConverter {
 	}
 
 	private void startStateManager() {
+		buildOutcomeCache.init();
+		
 		try {
 			stateManager.start();
 		} catch (Exception e) {

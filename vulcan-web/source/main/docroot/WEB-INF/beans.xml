@@ -84,7 +84,7 @@
 		<property name="beanEncoder" ref="beanEncoder"/>
 	</bean>
 	
-	<bean id="buildOutcomeCache" class="net.sourceforge.vulcan.core.support.BuildOutcomeCache" init-method="init">
+	<bean id="buildOutcomeCache" class="net.sourceforge.vulcan.core.support.BuildOutcomeCache">
 		<property name="buildOutcomeStore" ref="buildOutcomeStore"/>
 		<property name="eventHandler" ref="eventHandler"/>
 		<property name="cacheSize" value="500"/>
@@ -209,6 +209,7 @@
 	<bean id="buildOutcomeConverter" class="net.sourceforge.vulcan.core.conversion.BuildOutcomeConverter"
 			init-method="convertOldBuildOutcomes">
 		<property name="buildOutcomeStore" ref="buildOutcomeStore"/>
+		<property name="buildOutcomeCache" ref="buildOutcomeCache"/>
 		<property name="fileStore" ref="configurationStore"/>
 		<property name="eventHandler" ref="eventHandler"/>
 		<property name="stateManager" ref="stateManager"/>

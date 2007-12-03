@@ -98,14 +98,6 @@ public class JdbcBuildOutcomeStore implements BuildOutcomeStore, ProjectNameChan
 		}
 	}
 
-	public void shutdown() {
-		try {
-			new JdbcTemplate(dataSource).execute("shutdown");
-		} catch (DataAccessException e) {
-			log.warn("Failed to shutdown database.", e);
-		}
-	}
-	
 	public Map<String, List<UUID>> getBuildOutcomeIDs() {
 		final BuildIdMapQuery query = new BuildIdMapQuery(dataSource);
 		
