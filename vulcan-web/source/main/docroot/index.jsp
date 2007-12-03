@@ -37,7 +37,12 @@
 	<v:bubble styleClass="warning">
 		<span class="warning">
 			Vulcan is converting build history to a new storage layer 
-			(<fmt:formatNumber value="${pctComplete}" maxFractionDigits="0"/>% complete).
+			(<fmt:formatNumber value="${pctComplete}" maxFractionDigits="0"/>
+			<c:out value="% complete; "/>
+			<fmt:formatNumber value="${buildOutcomeConverter.convertedCount}" type="number"/>
+			<c:out value=" out of "/>
+			<fmt:formatNumber value="${buildOutcomeConverter.totalCount}" type="number"/>
+			<c:out value=" builds converted)."/>
 		</span>
 	</v:bubble>
 </c:when>

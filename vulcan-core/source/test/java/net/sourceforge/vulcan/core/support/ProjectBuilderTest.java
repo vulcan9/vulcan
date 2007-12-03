@@ -365,9 +365,9 @@ public class ProjectBuilderTest extends EasyMockTestCase {
 		buildToolStatus.setRequestedBy("Deborah");
 		
 		tool.buildProject(
-				(ProjectConfigDto) eq(project),
+				eq(project),
 				(ProjectStatusDto) notNull(),
-				(File) eq(logFile),
+				eq(logFile),
 				(BuildDetailCallback)notNull());
 		
 		mgr.targetCompleted(info, project, createFakeBuildOutcome(project.getName(), 0, rev0, "trunk", Status.PASS, null, null, null, "http://localhost", true, "Deborah", "messages.build.reason.repository.changes", null, ProjectStatusDto.UpdateType.Full, project.getWorkDir()));

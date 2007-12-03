@@ -81,7 +81,7 @@ public class BuildOutcomeConverter {
 		
 		Collections.sort(allIds, new Comparator<UUID>() {
 			public int compare(UUID o1, UUID o2) {
-				return ((Integer)o1.clockSequence()).compareTo(o2.clockSequence());
+				return ((Long)o1.timestamp()).compareTo(o2.timestamp());
 			}
 		});
 		
