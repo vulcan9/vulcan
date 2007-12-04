@@ -10,8 +10,9 @@
 	<!-- hsqldb configuration -->
 	<bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
 		<property name="driverClassName" value="org.hsqldb.jdbcDriver"/>
-		<property name="url" value="jdbc:hsqldb:file:${vulcan.home}/hsqldb/builds"/>
+		<property name="url" value="jdbc:hsqldb:file:${vulcan.home}/hsqldb/builds;shutdown=true"/>
 		<property name="username" value="sa"/>
+		<property name="defaultAutoCommit" value="false"/>
 	</bean>
 	
 	<bean id="txManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
