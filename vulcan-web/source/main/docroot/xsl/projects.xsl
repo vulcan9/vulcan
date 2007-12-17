@@ -126,27 +126,27 @@
 			<tbody>
 				<xsl:choose>
 					<xsl:when test="$sortSelect='name'">
-						<xsl:apply-templates select="/projects/*">
+						<xsl:apply-templates select="/projects/project">
 							<xsl:sort select="@name" order="{$sortOrder1}"/>
 						</xsl:apply-templates>
 					</xsl:when>
 					<xsl:when test="$sortSelect='age'">
-						<xsl:apply-templates select="/projects/*">
+						<xsl:apply-templates select="/projects/project">
 							<xsl:sort select="timestamp/@millis" order="{$sortOrder1}" data-type="number"/>
 						</xsl:apply-templates>
 					</xsl:when>
 					<xsl:when test="$sortSelect='revision'">
-						<xsl:apply-templates select="/projects/*">
+						<xsl:apply-templates select="/projects/project">
 							<xsl:sort select="revision/@numeric" order="{$sortOrder1}" data-type="number"/>
 						</xsl:apply-templates>
 					</xsl:when>
 					<xsl:when test="$sortSelect='build-number'">
-						<xsl:apply-templates select="/projects/*">
+						<xsl:apply-templates select="/projects/project">
 							<xsl:sort select="build-number" order="{$sortOrder1}" data-type="number"/>
 						</xsl:apply-templates>
 					</xsl:when>
 					<xsl:otherwise>
-						<xsl:apply-templates select="/projects/*">
+						<xsl:apply-templates select="/projects/project">
 							<xsl:sort select="*[name()=$sortSelect]" order="{$sortOrder1}"/>
 						</xsl:apply-templates>
 					</xsl:otherwise>

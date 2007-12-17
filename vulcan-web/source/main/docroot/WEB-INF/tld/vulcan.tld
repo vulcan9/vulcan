@@ -72,7 +72,7 @@
 	<function>
 		<name>getProjectNamesByLabels</name>
 		<function-class>net.sourceforge.vulcan.web.JstlFunctions</function-class>
-		<function-signature>java.util.List getProjectNamesByLabels(java.lang.String[])</function-signature>
+		<function-signature>java.util.List getProjectNamesByLabels(java.lang.Object)</function-signature>
 	</function>
 	
 	<function>

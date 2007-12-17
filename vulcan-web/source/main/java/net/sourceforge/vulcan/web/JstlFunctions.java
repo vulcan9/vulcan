@@ -126,16 +126,42 @@ public abstract class JstlFunctions {
 		return sb.toString();
 	}
 	
-	public static List<String> getProjectNamesByLabels(String[] labels) {
+	@SuppressWarnings("unchecked")
+	public static List<String> getProjectNamesByLabels(Object labels) {
 		final StateManager mgr = (StateManager) webApplicationContext.getBean(Keys.STATE_MANAGER, StateManager.class);
 		
-		if (labels == null || labels.length == 0) {
+		if (labels == null) {
 			return mgr.getProjectConfigNames();
 		}
 		
+		final Iterable<String> itr;
+		
+		if (labels instanceof String) {
+			labels = Collections.singleton(labels);
+		}
+		
+		if (labels instanceof Iterable) {
+			itr = (Iterable<String>) labels;
+		} else if (labels instanceof String[]) {
+			itr = Arrays.asList((String[])labels);
+		} else {
+			throw new IllegalArgumentException("labels must be java.lang.String, java.lang.String[] or Iterable<String>");
+		}
+		
+		return getProjectNamesByLabels(mgr, itr);
+	}
+
+	private static List<String> getProjectNamesByLabels(StateManager mgr, Iterable<String> itr) {
 		final Set<String> set = new HashSet<String>();
-		for (String label : labels) {
+		boolean empty = true;
+		
+		for (String label : itr) {
 			set.addAll(mgr.getProjectConfigNamesByLabel(label));
+			empty = false;
+		}
+		
+		if (empty) {
+			return mgr.getProjectConfigNames();
 		}
 		
 		final ArrayList<String> list = new ArrayList<String>(set);
