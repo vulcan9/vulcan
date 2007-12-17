@@ -49,46 +49,24 @@
 <c:otherwise>
 <div class="tables">
 
-<c:import url="/xsl/projects.xsl" var="xslt"/>
-
-<v:bubble>
-	<x:transform xslt="${xslt}">
-		<x:param name="caption">
-			<spring:message code="captions.projects.status"/>
-		</x:param>
-		<x:param name="sortUrl">
-			<c:url value="/managePreferences.do?action=save"/>
-		</x:param>
-		<x:param name="detailLink">
-			<c:url value="/viewProjectStatus.do?transform=xhtml&amp;projectName="/>
-		</x:param>
-		<x:param name="nameHeader">
-			<spring:message code="th.project.name"/>
-		</x:param>
-		<x:param name="buildNumberHeader">
-			<spring:message code="th.build.number"/>
-		</x:param>
-		<x:param name="ageHeader">
-			<spring:message code="th.age"/>
-		</x:param>
-		<x:param name="tagHeader">
-			<spring:message code="th.tagName"/>
-		</x:param>
-		<x:param name="revisionHeader">
-			<spring:message code="th.revision"/>
-		</x:param>
-		<x:param name="statusHeader">
-			<spring:message code="th.project.status"/>
-		</x:param>
-		<x:param name="timestampLabel">
-			<spring:message code="label.build.timestamp"/>
-		</x:param>
-		<x:param name="sortSelect">${preferences.sortColumn}</x:param>
-		<x:param name="sortOrder">${preferences.sortOrder}</x:param>
-		
-		<v:projectStatusXml labels="${preferences.labels}"/>
-	</x:transform>
-</v:bubble>
+<c:choose>
+	<c:when test="${preferences.groupByLabel}">
+		<c:choose>
+			<c:when test="${not empty preferences.labels}">
+				<c:set var="labels" value="${preferences.labels}"/>
+			</c:when>
+			<c:otherwise>
+				<c:set var="labels" value="${stateManager.projectLabels}"/>
+			</c:otherwise>
+		</c:choose>
+		<c:forEach items="${labels}" var="label">
+			<v:projectStatusXml transform="true" labels="${label}" caption="${label}"/>
+		</c:forEach>
+	</c:when>
+	<c:otherwise>
+		<v:projectStatusXml transform="true" labels="${preferences.labels}"/>
+	</c:otherwise>
+</c:choose>
 
 <c:if test="${preferences.showBuildDaemons}">
 <v:bubble>
