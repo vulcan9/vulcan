@@ -66,6 +66,12 @@
 	</function>
 			
 	<function>
+		<name>getOutcomeByBuildNumber</name>
+		<function-class>net.sourceforge.vulcan.web.JstlFunctions</function-class>
+		<function-signature>net.sourceforge.vulcan.dto.ProjectStatusDto getOutcomeByBuildNumber(javax.servlet.jsp.PageContext, java.lang.String, int)</function-signature>
+	</function>
+			
+	<function>
 		<name>setStatus</name>
 		<function-class>net.sourceforge.vulcan.web.JstlFunctions</function-class>
 		<function-signature>void setStatus(javax.servlet.http.HttpServletResponse, int)</function-signature>

@@ -10,8 +10,6 @@
 	xmlns:spring="http://www.springframework.org/tags"
 	xmlns:v="http://vulcan.sourceforge.net/j2ee/jsp/tags">
 
-<jsp:directive.page session="false"/>
-
 <html:xhtml/>
 
 <head>
@@ -21,10 +19,12 @@
 		<jsp:attribute name="type">application/rss+xml</jsp:attribute>
 		<jsp:attribute name="href"><c:url value="/rss.jsp"/></jsp:attribute>
 	</jsp:element>
-	<jsp:element name="meta">
-		<jsp:attribute name="http-equiv">Refresh</jsp:attribute>
-		<jsp:attribute name="content">30</jsp:attribute>
-	</jsp:element>
+	<c:if test="${preferences.reloadInterval > 0}">
+		<jsp:element name="meta">
+			<jsp:attribute name="http-equiv">Refresh</jsp:attribute>
+			<jsp:attribute name="content">${preferences.reloadInterval}</jsp:attribute>
+		</jsp:element>
+	</c:if>
 </head>
 <body>
 
@@ -37,47 +37,37 @@
 	<v:bubble styleClass="warning">
 		<span class="warning">
 			Vulcan is converting build history to a new storage layer 
-			(<fmt:formatNumber value="${pctComplete}" maxFractionDigits="0"/>% complete).
+			(<fmt:formatNumber value="${pctComplete}" maxFractionDigits="0"/>
+			<c:out value="% complete; "/>
+			<fmt:formatNumber value="${buildOutcomeConverter.convertedCount}" type="number"/>
+			<c:out value=" out of "/>
+			<fmt:formatNumber value="${buildOutcomeConverter.totalCount}" type="number"/>
+			<c:out value=" builds converted)."/>
 		</span>
 	</v:bubble>
 </c:when>
 <c:otherwise>
-<c:import url="/xsl/projects-divs.xsl" var="xslt"/>
 
-<x:transform xslt="${xslt}">
-	<x:param name="caption">
-		<spring:message code="captions.projects.status"/>
-	</x:param>
-	<x:param name="detailLink">
-		<c:url value="/viewProjectStatus.do?transform=xhtml&amp;projectName="/>
-	</x:param>
-	<x:param name="nameHeader">
-		<spring:message code="th.project.name"/>
-	</x:param>
-	<x:param name="buildNumberHeader">
-		<spring:message code="th.build.number"/>
-	</x:param>
-	<x:param name="ageHeader">
-		<spring:message code="th.age"/>
-	</x:param>
-	<x:param name="tagHeader">
-		<spring:message code="th.tagName"/>
-	</x:param>
-	<x:param name="revisionHeader">
-		<spring:message code="th.revision"/>
-	</x:param>
-	<x:param name="statusHeader">
-		<spring:message code="th.project.status"/>
-	</x:param>
-	<x:param name="timestampLabel">
-		<spring:message code="label.build.timestamp"/>
-	</x:param>
-	<x:param name="sortSelect">${preferences.sortColumn}</x:param>
-	<x:param name="sortOrder">${preferences.sortOrder}</x:param>
-	<c:import url="/projects.jsp"/>
-</x:transform>
+<c:choose>
+	<c:when test="${preferences.groupByLabel}">
+		<c:choose>
+			<c:when test="${not empty preferences.labels}">
+				<c:set var="labels" value="${preferences.labels}"/>
+			</c:when>
+			<c:otherwise>
+				<c:set var="labels" value="${stateManager.projectLabels}"/>
+			</c:otherwise>
+		</c:choose>
+		<c:forEach items="${labels}" var="label">
+			<v:projectStatusXml transform="true" labels="${label}" caption="${label}"/>
+		</c:forEach>
+	</c:when>
+	<c:otherwise>
+		<v:projectStatusXml transform="true" labels="${preferences.labels}"/>
+	</c:otherwise>
+</c:choose>
 
-<!--
+<c:if test="${preferences.showBuildDaemons}">
 <table class="buildDaemons">
 	<caption><spring:message code="captions.build.daemons"/></caption>
 	<thead>
@@ -131,7 +121,9 @@
 	</c:forEach>
 	</tbody>
 </table>
+</c:if>
 
+<c:if test="${preferences.showBuildQueue}">
 <table class="buildQueue">
 	<caption><spring:message code="captions.build.queue"/></caption>
 	<thead>
@@ -175,7 +167,9 @@
 		</c:choose>
 	</tbody>
 </table>
+</c:if>
 
+<c:if test="${preferences.showSchedulers}">
 <table class="schedulers">
 	<caption><spring:message code="captions.schedulers"/></caption>
 	<thead>
@@ -211,7 +205,7 @@
 	</c:forEach>
 	</tbody>
 </table>
--->
+</c:if>
 </c:otherwise>
 </c:choose>
 </body>

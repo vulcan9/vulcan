@@ -46,9 +46,6 @@
 		caption {
 			background-color: white !important;
 		}
-		td.numeric {
-			text-align: right;
-		}
 		table.build-report, table.build-report td {
 			border: 0 !important;
 		}
