@@ -15,13 +15,13 @@
 	<bean name="preferencesStore" class="net.sourceforge.vulcan.web.DefaultPreferencesStore">
 		<property name="defaultPreferences">
 			<bean class="net.sourceforge.vulcan.dto.PreferencesDto">
-				<property name="showBuildDaemons" value="true"/>
-				<property name="showBuildQueue" value="true"/>
-				<property name="showSchedulers" value="true"/>
-				<property name="groupByLabel" value="true"/>
-				<property name="popupMode" value="modePopup"/>
-				<property name="reloadInterval" value="60"/>
-				<property name="stylesheet" value="standard"/>
+				<property name="showBuildDaemons" value="${preferences.default.showBuildDaemons}"/>
+				<property name="showBuildQueue" value="${preferences.default.showBuildQueue}"/>
+				<property name="showSchedulers" value="${preferences.default.showSchedulers}"/>
+				<property name="groupByLabel" value="${preferences.default.groupByLabel}"/>
+				<property name="popupMode" value="${preferences.default.popupMode}"/>
+				<property name="reloadInterval" value="${preferences.default.reloadInterval}"/>
+				<property name="stylesheet" value="${preferences.default.stylesheet}"/>
 			</bean>
 		</property>
 	</bean>
