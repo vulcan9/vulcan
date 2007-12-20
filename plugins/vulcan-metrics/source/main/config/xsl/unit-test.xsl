@@ -7,7 +7,6 @@
 	<xsl:variable name="junitCount" select="count(//testcase)"/>
 	<xsl:variable name="nunitCount" select="count(//test-case[@executed='True'])"/>
 	<xsl:variable name="seleniumCount" select="count(//html/body/table/tr/td/table/tbody/tr[@class='status_passed' or @class='status_failed'])"/>
-	<xsl:variable name="seleniumSuiteName" select="//html/body/table/tr/td/table/thead/tr[contains(@class, 'title')]/td/text()"/>
 	
 	<xsl:variable name="ignored" select="count(//test-case[@executed='False'])"/>
 	<xsl:variable name="total" select="$junitCount + $nunitCount + $seleniumCount"/>
@@ -70,8 +69,8 @@
 	<xsl:template name="list-failures-selenium">
 		<xsl:for-each select="//html/body/table/tr/td/table/tbody/tr[@class='status_failed']/td/a">
 			<test-failure>
-				<xsl:value-of select="$seleniumSuiteName"/>
-				<xsl:text>:</xsl:text>
+				<xsl:value-of select="ancestor::table/thead/tr[contains(@class, 'title')]/td/text()"/>
+				<xsl:text>.</xsl:text>
 				<xsl:value-of select="."/>
 			</test-failure>
 		</xsl:for-each>

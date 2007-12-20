@@ -24,29 +24,41 @@ import org.jdom.Document;
 import org.jdom.Element;
 
 public class SeleniumTransformTest extends TransformTestCase {
-	Element html = new Element("html");
-	Element titleCell = new Element("td");
-	Element summaryBody;
+	Element html1 = new Element("html");
+	Element titleCell1 = new Element("td");
+	Element summaryBody1;
+
+	Element html2 = new Element("html");
+	Element titleCell2 = new Element("td");
+	Element summaryBody2;
 	
 	@Override
 	public void setUp() throws Exception {
 		super.setUp();
 		
-		Element summaryTable = addElement(addElement(addElement(addElement(addElement(html, "body"), "table"), "tr"), "td"), "table");
+		Element summaryTable = addElement(addElement(addElement(addElement(addElement(html1, "body"), "table"), "tr"), "td"), "table");
 		
 		Element suiteTitleRow = addElement(addElement(summaryTable, "thead"), "tr");
 		suiteTitleRow.setAttribute("class", "foo title status_something");
-		suiteTitleRow.addContent(titleCell);
-		titleCell.setText("SomeSampleSeleniumSuite");
+		suiteTitleRow.addContent(titleCell1);
+		titleCell1.setText("SomeSampleSeleniumSuite");
 		
-		summaryBody = addElement(summaryTable, "tbody");
+		summaryBody1 = addElement(summaryTable, "tbody");
+
+		summaryTable = addElement(addElement(addElement(addElement(addElement(html1, "body"), "table"), "tr"), "td"), "table");
+		suiteTitleRow = addElement(addElement(summaryTable, "thead"), "tr");
+		suiteTitleRow.setAttribute("class", "foo title status_something");
+		suiteTitleRow.addContent(titleCell2);
+		titleCell2.setText("AnotherSampleSeleniumSuite");
+		
+		summaryBody2 = addElement(summaryTable, "tbody");
 	}
 	
 	public void testTransformTwoTests() throws Exception {
-		addSeleniumTest("FooTest", true);
-		addSeleniumTest("BarTest", true);
+		addSeleniumTest(summaryBody1, "FooTest", true);
+		addSeleniumTest(summaryBody1, "BarTest", true);
 		
-		doc.getRootElement().addContent(html);
+		doc.getRootElement().addContent(html1);
 		
 		final Document t = plugin.transform(doc);
 		
@@ -55,11 +67,11 @@ public class SeleniumTransformTest extends TransformTestCase {
 	}
 	
 	public void testTransformTestsWithFailures() throws Exception {
-		addSeleniumTest("FooTest", true);
-		addSeleniumTest("BarTest", false);
-		addSeleniumTest("ZipTest", false);
+		addSeleniumTest(summaryBody1, "FooTest", true);
+		addSeleniumTest(summaryBody1, "BarTest", false);
+		addSeleniumTest(summaryBody1, "ZipTest", false);
 		
-		doc.getRootElement().addContent(html);
+		doc.getRootElement().addContent(html1);
 		
 		final Document t = plugin.transform(doc);
 		
@@ -68,20 +80,34 @@ public class SeleniumTransformTest extends TransformTestCase {
 	}
 	
 	public void testTransformTestsWithFailuresGetsFailedTestNames() throws Exception {
-		addSeleniumTest("FooTest", true);
-		addSeleniumTest("BarTest", false);
-		addSeleniumTest("ZipTest", false);
+		addSeleniumTest(summaryBody1, "FooTest", true);
+		addSeleniumTest(summaryBody1, "BarTest", false);
+		addSeleniumTest(summaryBody1, "ZipTest", false);
 		
-		doc.getRootElement().addContent(html);
+		doc.getRootElement().addContent(html1);
 		
 		final Document t = plugin.transform(doc);
 
-		assertContainsTestFailure(t, "SomeSampleSeleniumSuite:BarTest");
-		assertContainsTestFailure(t, "SomeSampleSeleniumSuite:ZipTest");
+		assertContainsTestFailure(t, "SomeSampleSeleniumSuite.BarTest");
+		assertContainsTestFailure(t, "SomeSampleSeleniumSuite.ZipTest");
 	}
 	
-	private void addSeleniumTest(String name, boolean passed) {
-		Element tr = addElement(summaryBody, "tr");
+	public void testTransformTestsWithFailuresGetsFailedTestNamesMultipeSuites() throws Exception {
+		addSeleniumTest(summaryBody1, "FooTest", true);
+		addSeleniumTest(summaryBody1, "BarTest", false);
+		addSeleniumTest(summaryBody2, "ZipTest", false);
+		
+		doc.getRootElement().addContent(html1);
+		doc.getRootElement().addContent(html2);
+		
+		final Document t = plugin.transform(doc);
+
+		assertContainsTestFailure(t, "SomeSampleSeleniumSuite.BarTest");
+		assertContainsTestFailure(t, "AnotherSampleSeleniumSuite.ZipTest");
+	}
+	
+	private void addSeleniumTest(Element suite, String name, boolean passed) {
+		Element tr = addElement(suite, "tr");
 		if (passed) {
 			tr.setAttribute("class", "status_passed");
 		} else {
