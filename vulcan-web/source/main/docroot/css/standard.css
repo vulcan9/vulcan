@@ -60,9 +60,12 @@ table {
 	background-color: #BDBABD;
 }
 td, th {
-	border-bottom: 1px solid #BDBABD;
+	border-top: 1px solid #BDBABD;
 }
-
+tr.meta td {
+	border-top: 0;
+	color: gray;
+}
 .diff, .log {
 	background-color: #FAFAFA;
 }
@@ -474,6 +477,10 @@ table.primitiveArray th,table.primitiveArray td,table.objectArray th,table.objec
 	vertical-align: middle;
 }
 
+tr.meta {
+	font-style: italic;
+}
+
 td.wrapper {
 	padding: 0;
 }
@@ -487,7 +494,10 @@ tbody > th {
 }
 
 td,th {
-	padding: 3px;
+	padding-top: 3px;
+	padding-bottom: 3px;
+	padding-left: 1ex;
+	padding-right: 1ex;
 	vertical-align: top;
 }
 
@@ -504,16 +514,12 @@ td.status {
 th.long {
 	text-align: left;
 }
-td.build-number {
-	text-align: center;
+td.numeric {
+	text-align: right;
 }
 
 td.dateInputs {
 	vertical-align: bottom;
-}
-
-div.tables th,div.tables td {
-	text-align: center;
 }
 
 div.project-status-summary {

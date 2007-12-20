@@ -36,6 +36,8 @@ import javax.servlet.jsp.PageContext;
 
 import net.sourceforge.vulcan.core.BuildManager;
 import net.sourceforge.vulcan.dto.ProjectStatusDto;
+import net.sourceforge.vulcan.core.BuildManager;
+import net.sourceforge.vulcan.dto.ProjectStatusDto;
 import net.sourceforge.vulcan.metadata.SvnRevision;
 
 import org.apache.struts.Globals;

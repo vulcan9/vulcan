@@ -5,6 +5,7 @@
 	<xsl:output method="xml" media-type="application/xml" omit-xml-declaration="yes"/>
 	
 	<xsl:param name="caption"/>
+	<xsl:param name="sortUrl"/>
 	<xsl:param name="detailLink"/>
 	<xsl:param name="nameHeader"/>
 	<xsl:param name="ageHeader"/>
@@ -40,10 +41,10 @@
 							<xsl:choose>
 								<xsl:when test="$sortSelect='name'">
 									<xsl:attribute name="class">sorted-<xsl:value-of select="$sortOrder1"/></xsl:attribute>
-									<xsl:attribute name="href">?sortColumn=name&amp;sortOrder=<xsl:value-of select="$opposite"/></xsl:attribute>
+									<xsl:attribute name="href"><xsl:value-of select="$sortUrl"/>&amp;config.sortColumn=name&amp;config.sortOrder=<xsl:value-of select="$opposite"/></xsl:attribute>
 								</xsl:when>
 								<xsl:otherwise>
-									<xsl:attribute name="href">?sortColumn=name&amp;sortOrder=ascending</xsl:attribute>
+									<xsl:attribute name="href"><xsl:value-of select="$sortUrl"/>&amp;config.sortColumn=name&amp;config.sortOrder=ascending</xsl:attribute>
 								</xsl:otherwise>
 							</xsl:choose>
 							<xsl:value-of select="$nameHeader"/>
@@ -54,10 +55,10 @@
 							<xsl:choose>
 								<xsl:when test="$sortSelect='age'">
 									<xsl:attribute name="class">sorted-<xsl:value-of select="$sortOrder1"/></xsl:attribute>
-									<xsl:attribute name="href">?sortColumn=age&amp;sortOrder=<xsl:value-of select="$opposite"/></xsl:attribute>
+									<xsl:attribute name="href"><xsl:value-of select="$sortUrl"/>&amp;config.sortColumn=age&amp;config.sortOrder=<xsl:value-of select="$opposite"/></xsl:attribute>
 								</xsl:when>
 								<xsl:otherwise>
-									<xsl:attribute name="href">?sortColumn=age&amp;sortOrder=descending</xsl:attribute>
+									<xsl:attribute name="href"><xsl:value-of select="$sortUrl"/>&amp;config.sortColumn=age&amp;config.sortOrder=descending</xsl:attribute>
 								</xsl:otherwise>
 							</xsl:choose>
 							<xsl:value-of select="$ageHeader"/>
@@ -68,10 +69,10 @@
 							<xsl:choose>
 								<xsl:when test="$sortSelect='build-number'">
 									<xsl:attribute name="class">sorted-<xsl:value-of select="$sortOrder1"/></xsl:attribute>
-									<xsl:attribute name="href">?sortColumn=build-number&amp;sortOrder=<xsl:value-of select="$opposite"/></xsl:attribute>
+									<xsl:attribute name="href"><xsl:value-of select="$sortUrl"/>&amp;config.sortColumn=build-number&amp;config.sortOrder=<xsl:value-of select="$opposite"/></xsl:attribute>
 								</xsl:when>
 								<xsl:otherwise>
-									<xsl:attribute name="href">?sortColumn=build-number&amp;sortOrder=ascending</xsl:attribute>
+									<xsl:attribute name="href"><xsl:value-of select="$sortUrl"/>&amp;config.sortColumn=build-number&amp;config.sortOrder=ascending</xsl:attribute>
 								</xsl:otherwise>
 							</xsl:choose>
 							<xsl:value-of select="$buildNumberHeader"/>
@@ -82,10 +83,10 @@
 							<xsl:choose>
 								<xsl:when test="$sortSelect='revision'">
 									<xsl:attribute name="class">sorted-<xsl:value-of select="$sortOrder1"/></xsl:attribute>
-									<xsl:attribute name="href">?sortColumn=revision&amp;sortOrder=<xsl:value-of select="$opposite"/></xsl:attribute>
+									<xsl:attribute name="href"><xsl:value-of select="$sortUrl"/>&amp;config.sortColumn=revision&amp;config.sortOrder=<xsl:value-of select="$opposite"/></xsl:attribute>
 								</xsl:when>
 								<xsl:otherwise>
-									<xsl:attribute name="href">?sortColumn=revision&amp;sortOrder=ascending</xsl:attribute>
+									<xsl:attribute name="href"><xsl:value-of select="$sortUrl"/>&amp;config.sortColumn=revision&amp;config.sortOrder=ascending</xsl:attribute>
 								</xsl:otherwise>
 							</xsl:choose>
 							<xsl:value-of select="$revisionHeader"/>
@@ -96,10 +97,10 @@
 							<xsl:choose>
 								<xsl:when test="$sortSelect='repository-tag-name'">
 									<xsl:attribute name="class">sorted-<xsl:value-of select="$sortOrder1"/></xsl:attribute>
-									<xsl:attribute name="href">?sortColumn=repository-tag-name&amp;sortOrder=<xsl:value-of select="$opposite"/></xsl:attribute>
+									<xsl:attribute name="href"><xsl:value-of select="$sortUrl"/>&amp;config.sortColumn=repository-tag-name&amp;config.sortOrder=<xsl:value-of select="$opposite"/></xsl:attribute>
 								</xsl:when>
 								<xsl:otherwise>
-									<xsl:attribute name="href">?sortColumn=repository-tag-name&amp;sortOrder=ascending</xsl:attribute>
+									<xsl:attribute name="href"><xsl:value-of select="$sortUrl"/>&amp;config.sortColumn=repository-tag-name&amp;config.sortOrder=ascending</xsl:attribute>
 								</xsl:otherwise>
 							</xsl:choose>
 							<xsl:value-of select="$tagHeader"/>
@@ -110,10 +111,10 @@
 							<xsl:choose>
 								<xsl:when test="$sortSelect='status'">
 									<xsl:attribute name="class">sorted-<xsl:value-of select="$sortOrder1"/></xsl:attribute>
-									<xsl:attribute name="href">?sortColumn=status&amp;sortOrder=<xsl:value-of select="$opposite"/></xsl:attribute>
+									<xsl:attribute name="href"><xsl:value-of select="$sortUrl"/>&amp;config.sortColumn=status&amp;config.sortOrder=<xsl:value-of select="$opposite"/></xsl:attribute>
 								</xsl:when>
 								<xsl:otherwise>
-									<xsl:attribute name="href">?sortColumn=status&amp;sortOrder=ascending</xsl:attribute>
+									<xsl:attribute name="href"><xsl:value-of select="$sortUrl"/>&amp;config.sortColumn=status&amp;config.sortOrder=ascending</xsl:attribute>
 								</xsl:otherwise>
 							</xsl:choose>
 							<xsl:value-of select="$statusHeader"/>
@@ -125,27 +126,27 @@
 			<tbody>
 				<xsl:choose>
 					<xsl:when test="$sortSelect='name'">
-						<xsl:apply-templates select="/projects/*">
+						<xsl:apply-templates select="/projects/project">
 							<xsl:sort select="@name" order="{$sortOrder1}"/>
 						</xsl:apply-templates>
 					</xsl:when>
 					<xsl:when test="$sortSelect='age'">
-						<xsl:apply-templates select="/projects/*">
+						<xsl:apply-templates select="/projects/project">
 							<xsl:sort select="timestamp/@millis" order="{$sortOrder1}" data-type="number"/>
 						</xsl:apply-templates>
 					</xsl:when>
 					<xsl:when test="$sortSelect='revision'">
-						<xsl:apply-templates select="/projects/*">
+						<xsl:apply-templates select="/projects/project">
 							<xsl:sort select="revision/@numeric" order="{$sortOrder1}" data-type="number"/>
 						</xsl:apply-templates>
 					</xsl:when>
 					<xsl:when test="$sortSelect='build-number'">
-						<xsl:apply-templates select="/projects/*">
+						<xsl:apply-templates select="/projects/project">
 							<xsl:sort select="build-number" order="{$sortOrder1}" data-type="number"/>
 						</xsl:apply-templates>
 					</xsl:when>
 					<xsl:otherwise>
-						<xsl:apply-templates select="/projects/*">
+						<xsl:apply-templates select="/projects/project">
 							<xsl:sort select="*[name()=$sortSelect]" order="{$sortOrder1}"/>
 						</xsl:apply-templates>
 					</xsl:otherwise>
@@ -166,8 +167,8 @@
 				<xsl:attribute name="title"><xsl:value-of select="$timestampLabel"/> <xsl:value-of select="timestamp"/></xsl:attribute>
 				<xsl:value-of select="timestamp/@age"/>
 			</xsl:element>
-			<td><xsl:value-of select="build-number"/></td>
-			<td><xsl:value-of select="revision"/></td>
+			<td class="numeric"><xsl:value-of select="build-number"/></td>
+			<td class="numeric"><xsl:value-of select="revision"/></td>
 			<td><xsl:value-of select="repository-tag-name"/></td>
 			<xsl:element name="td">
 				<xsl:attribute name="title"><xsl:value-of select="message"/></xsl:attribute>
@@ -175,5 +176,14 @@
 				<xsl:value-of select="status"/>
 			</xsl:element>
 		</tr>
+		<xsl:if test="first-failure and build-number != first-failure/build-number">
+			<tr class="meta">
+				<td/>
+				<td colspan="5">
+					<xsl:text>Broken for </xsl:text>
+					<xsl:value-of select="first-failure/elapsed-time/@age"/>
+				</td>
+			</tr>
+		</xsl:if>
 	</xsl:template>
 </xsl:stylesheet>
