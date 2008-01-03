@@ -18,13 +18,6 @@
 		<jsp:body/>
 	</jsp:element>
 	<style type="text/css">
-		.caption, caption {
-			font: Calibri, Helvetica, Verdana, Arial, sans-serif;
-			font-weight: normal;
-			color: #7E97A6;
-			font-size: 16pt;
-			
-		}
 		div.pane, div.chart {
 			float: left;
 			width: 45%;
@@ -52,9 +45,6 @@
 		}
 		caption {
 			background-color: white !important;
-		}
-		td.numeric {
-			text-align: right;
 		}
 		table.build-report, table.build-report td {
 			border: 0 !important;
@@ -219,7 +209,7 @@
 			<tbody>
 				<c:forEach items="${topErrors}" var="e">
 					<tr>
-						<td>${e.message}</td>
+						<td><c:out value="${e.message}" escapeXml="true"/></td>
 						<td class="numeric"><fmt:formatNumber value="${e.count}"/></td>
 					</tr>
 				</c:forEach>
