@@ -14,7 +14,7 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>target\bin\</OutputPath>
+    <OutputPath>..\..\..\target\bin\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -22,7 +22,7 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>target\bin\</OutputPath>
+    <OutputPath>..\..\..\target\bin\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -37,41 +37,38 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="source\main\csharp\BrowserIntegration.cs" />
-    <Compile Include="source\main\csharp\ConfigForm.cs">
+    <Compile Include="BrowserIntegration.cs" />
+    <Compile Include="ConfigForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="source\main\csharp\ConfigForm.Designer.cs">
+    <Compile Include="ConfigForm.Designer.cs">
       <DependentUpon>ConfigForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="source\main\csharp\DashboardStatus.cs" />
-    <Compile Include="source\main\csharp\Icons.Designer.cs" />
-    <Compile Include="source\main\csharp\MultipleLabelSelectForm.cs">
+    <Compile Include="DashboardStatus.cs" />
+    <Compile Include="Icons.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Icons.resx</DependentUpon>
+    </Compile>
+    <Compile Include="MultipleLabelSelectForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="source\main\csharp\MultipleLabelSelectForm.Designer.cs">
+    <Compile Include="MultipleLabelSelectForm.Designer.cs">
       <DependentUpon>MultipleLabelSelectForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="source\main\csharp\Preferences.cs" />
-    <Compile Include="source\main\csharp\PreferenceStore.cs" />
-    <Compile Include="source\main\csharp\Program.cs" />
-    <Compile Include="source\main\csharp\Properties\AssemblyInfo.cs" />
-    <Compile Include="source\main\csharp\RegistryPreferenceStore.cs" />
-    <Compile Include="source\main\csharp\StatusForm.cs">
+    <Compile Include="Preferences.cs" />
+    <Compile Include="PreferenceStore.cs" />
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RegistryPreferenceStore.cs" />
+    <Compile Include="StatusForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="source\main\csharp\StatusForm.Designer.cs">
+    <Compile Include="StatusForm.Designer.cs">
       <DependentUpon>StatusForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="source\main\csharp\StatusMonitor.cs" />
-    <Compile Include="source\main\csharp\VulcanNotifyIcon.cs" />
-    <Compile Include="source\test\csharp\StatusMonitorTest.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="icons\error.ico" />
-    <Content Include="icons\fail.ico" />
-    <Content Include="icons\pass.ico" />
-    <Content Include="icons\success.ico" />
+    <Compile Include="StatusMonitor.cs" />
+    <Compile Include="VulcanNotifyIcon.cs" />
   </ItemGroup>
   <ItemGroup>
     <PublishFile Include="icons\error.ico">
@@ -112,27 +109,23 @@
     </PublishFile>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="source\main\csharp\ConfigForm.resx">
+    <EmbeddedResource Include="ConfigForm.resx">
       <DependentUpon>ConfigForm.cs</DependentUpon>
       <SubType>Designer</SubType>
     </EmbeddedResource>
-    <EmbeddedResource Include="source\main\csharp\Icons.resx">
+    <EmbeddedResource Include="Icons.resx">
       <SubType>Designer</SubType>
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Icons.Designer.cs</LastGenOutput>
     </EmbeddedResource>
-    <EmbeddedResource Include="source\main\csharp\MultipleLabelSelectForm.resx">
+    <EmbeddedResource Include="MultipleLabelSelectForm.resx">
       <SubType>Designer</SubType>
       <DependentUpon>MultipleLabelSelectForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="source\main\csharp\StatusForm.resx">
+    <EmbeddedResource Include="StatusForm.resx">
       <DependentUpon>StatusForm.cs</DependentUpon>
       <SubType>Designer</SubType>
     </EmbeddedResource>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="nant.build" />
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Properties\" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>

@@ -38,11 +38,11 @@ namespace SourceForge.Vulcan.Tray
 			
 			StatusForm mainForm = new StatusForm(statusMonitor, browserIntegration, new RegistryPreferenceStore());
 
-			//VulcanNotifyIcon trayIcon = new VulcanNotifyIcon(mainForm, statusMonitor, browserIntegration);
+			VulcanNotifyIcon trayIcon = new VulcanNotifyIcon(mainForm, statusMonitor, browserIntegration);
 			
 			Application.Run(mainForm);
 
-			//trayIcon.Dispose();
+			trayIcon.Dispose();
 		}
 	}
 }
