@@ -56,7 +56,7 @@ namespace SourceForge.Vulcan.Tray
 			else
 			{
 				reportUrl = string.Format(
-					"{0}viewProjectStatus.do?transform=xhtml&projectName={1}&index={2}",
+					"{0}viewProjectStatus.do?transform=xhtml&projectName={1}&buildNumber={2}",
 					baseUrl,
 					projectName,
 					buildNumber);
