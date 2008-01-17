@@ -21,6 +21,7 @@ namespace SourceForge.Vulcan.Tray
 	public class Preferences
 	{
 		private string url;
+		private string selectedLabels;
 		private int interval;
 		private bool bubbleFailures;
 		private bool bubbleSuccess;
@@ -29,6 +30,12 @@ namespace SourceForge.Vulcan.Tray
 		{
 			get { return url; }
 			set { url = value; }
+		}
+
+		public string SelectedLabels
+		{
+			get { return selectedLabels; }
+			set { selectedLabels = value; }
 		}
 
 		public int Interval
