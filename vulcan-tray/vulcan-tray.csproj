@@ -46,6 +46,12 @@
     </Compile>
     <Compile Include="source\main\csharp\DashboardStatus.cs" />
     <Compile Include="source\main\csharp\Icons.Designer.cs" />
+    <Compile Include="source\main\csharp\MultipleLabelSelectForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="source\main\csharp\MultipleLabelSelectForm.Designer.cs">
+      <DependentUpon>MultipleLabelSelectForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="source\main\csharp\Preferences.cs" />
     <Compile Include="source\main\csharp\PreferenceStore.cs" />
     <Compile Include="source\main\csharp\Program.cs" />
@@ -112,6 +118,10 @@
     </EmbeddedResource>
     <EmbeddedResource Include="source\main\csharp\Icons.resx">
       <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="source\main\csharp\MultipleLabelSelectForm.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>MultipleLabelSelectForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="source\main\csharp\StatusForm.resx">
       <DependentUpon>StatusForm.cs</DependentUpon>

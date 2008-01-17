@@ -47,6 +47,8 @@ namespace SourceForge.Vulcan.Tray
 			this.dataColumn7 = new System.Data.DataColumn();
 			this.dataColumn1 = new System.Data.DataColumn();
 			this.timer = new System.Windows.Forms.Timer(this.components);
+			this.cbProjectLabels = new System.Windows.Forms.ComboBox();
+			this.label1 = new System.Windows.Forms.Label();
 			((System.ComponentModel.ISupportInitialize)(this.dataGrid)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.xmlDataSet)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.projectsDataTable)).BeginInit();
@@ -54,7 +56,8 @@ namespace SourceForge.Vulcan.Tray
 			// 
 			// btnValidate
 			// 
-			this.btnValidate.Location = new System.Drawing.Point(12, 12);
+			this.btnValidate.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+			this.btnValidate.Location = new System.Drawing.Point(12, 174);
 			this.btnValidate.Name = "btnValidate";
 			this.btnValidate.Size = new System.Drawing.Size(75, 20);
 			this.btnValidate.TabIndex = 2;
@@ -66,8 +69,10 @@ namespace SourceForge.Vulcan.Tray
 			// 
 			this.dataGrid.AllowUserToAddRows = false;
 			this.dataGrid.AllowUserToDeleteRows = false;
-			this.dataGrid.AllowUserToOrderColumns = true;
 			this.dataGrid.AllowUserToResizeRows = false;
+			this.dataGrid.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+									| System.Windows.Forms.AnchorStyles.Left)
+									| System.Windows.Forms.AnchorStyles.Right)));
 			this.dataGrid.BackgroundColor = System.Drawing.SystemColors.Window;
 			this.dataGrid.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
 			this.dataGrid.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
@@ -77,12 +82,12 @@ namespace SourceForge.Vulcan.Tray
             this.revision,
             this.status,
             this.message});
-			this.dataGrid.Location = new System.Drawing.Point(-1, 50);
+			this.dataGrid.Location = new System.Drawing.Point(12, 12);
 			this.dataGrid.Name = "dataGrid";
 			this.dataGrid.ReadOnly = true;
 			this.dataGrid.RowHeadersVisible = false;
 			this.dataGrid.RowTemplate.ReadOnly = true;
-			this.dataGrid.Size = new System.Drawing.Size(759, 216);
+			this.dataGrid.Size = new System.Drawing.Size(726, 156);
 			this.dataGrid.TabIndex = 3;
 			this.dataGrid.CellDoubleClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.onCellDoubleClick);
 			// 
@@ -92,6 +97,7 @@ namespace SourceForge.Vulcan.Tray
 			this.name.HeaderText = "Project Name";
 			this.name.Name = "name";
 			this.name.ReadOnly = true;
+			this.name.Width = 120;
 			// 
 			// age
 			// 
@@ -99,13 +105,17 @@ namespace SourceForge.Vulcan.Tray
 			this.age.HeaderText = "Age";
 			this.age.Name = "age";
 			this.age.ReadOnly = true;
+			this.age.Resizable = System.Windows.Forms.DataGridViewTriState.False;
+			this.age.Width = 60;
 			// 
 			// buildNumber
 			// 
+			this.buildNumber.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.ColumnHeader;
 			this.buildNumber.DataPropertyName = "build-number";
-			this.buildNumber.HeaderText = "Build Number";
+			this.buildNumber.HeaderText = "Build #";
 			this.buildNumber.Name = "buildNumber";
 			this.buildNumber.ReadOnly = true;
+			this.buildNumber.Width = 65;
 			// 
 			// revision
 			// 
@@ -113,6 +123,8 @@ namespace SourceForge.Vulcan.Tray
 			this.revision.HeaderText = "Revision";
 			this.revision.Name = "revision";
 			this.revision.ReadOnly = true;
+			this.revision.Resizable = System.Windows.Forms.DataGridViewTriState.False;
+			this.revision.Width = 70;
 			// 
 			// status
 			// 
@@ -120,6 +132,8 @@ namespace SourceForge.Vulcan.Tray
 			this.status.HeaderText = "Status";
 			this.status.Name = "status";
 			this.status.ReadOnly = true;
+			this.status.Resizable = System.Windows.Forms.DataGridViewTriState.False;
+			this.status.Width = 70;
 			// 
 			// message
 			// 
@@ -127,7 +141,7 @@ namespace SourceForge.Vulcan.Tray
 			this.message.HeaderText = "Message";
 			this.message.Name = "message";
 			this.message.ReadOnly = true;
-			this.message.Width = 300;
+			this.message.Width = 320;
 			// 
 			// xmlDataSet
 			// 
@@ -185,24 +199,51 @@ namespace SourceForge.Vulcan.Tray
 			this.timer.Interval = 6000;
 			this.timer.Tick += new System.EventHandler(this.onTick);
 			// 
+			// cbProjectLabels
+			// 
+			this.cbProjectLabels.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+			this.cbProjectLabels.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+			this.cbProjectLabels.FormattingEnabled = true;
+			this.cbProjectLabels.Items.AddRange(new object[] {
+            "All",
+            "Multiple..."});
+			this.cbProjectLabels.Location = new System.Drawing.Point(574, 175);
+			this.cbProjectLabels.Name = "cbProjectLabels";
+			this.cbProjectLabels.Size = new System.Drawing.Size(164, 21);
+			this.cbProjectLabels.TabIndex = 6;
+			// 
+			// label1
+			// 
+			this.label1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+			this.label1.AutoSize = true;
+			this.label1.Location = new System.Drawing.Point(460, 179);
+			this.label1.Name = "label1";
+			this.label1.Size = new System.Drawing.Size(108, 13);
+			this.label1.TabIndex = 7;
+			this.label1.Text = "Select Project Group:";
+			// 
 			// StatusForm
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-			this.ClientSize = new System.Drawing.Size(758, 266);
+			this.ClientSize = new System.Drawing.Size(750, 208);
+			this.Controls.Add(this.label1);
+			this.Controls.Add(this.cbProjectLabels);
 			this.Controls.Add(this.dataGrid);
 			this.Controls.Add(this.btnValidate);
 			this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
 			this.MaximizeBox = false;
-			this.MaximumSize = new System.Drawing.Size(766, 300);
-			this.MinimumSize = new System.Drawing.Size(766, 300);
+			this.MaximumSize = new System.Drawing.Size(766, 1000);
+			this.MinimumSize = new System.Drawing.Size(766, 175);
 			this.Name = "StatusForm";
 			this.Text = "Vulcan Status";
+			this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.StatusForm_FormClosing);
 			this.Load += new System.EventHandler(this.onLoad);
 			((System.ComponentModel.ISupportInitialize)(this.dataGrid)).EndInit();
 			((System.ComponentModel.ISupportInitialize)(this.xmlDataSet)).EndInit();
 			((System.ComponentModel.ISupportInitialize)(this.projectsDataTable)).EndInit();
 			this.ResumeLayout(false);
+			this.PerformLayout();
 
 		}
 
@@ -218,13 +259,15 @@ namespace SourceForge.Vulcan.Tray
 		private System.Data.DataColumn dataColumn5;
 		private System.Windows.Forms.Timer timer;
 		private System.Data.DataColumn dataColumn7;
+		private System.Data.DataColumn dataColumn1;
 		private System.Windows.Forms.DataGridViewTextBoxColumn name;
 		private System.Windows.Forms.DataGridViewTextBoxColumn age;
 		private System.Windows.Forms.DataGridViewTextBoxColumn buildNumber;
 		private System.Windows.Forms.DataGridViewTextBoxColumn revision;
 		private System.Windows.Forms.DataGridViewTextBoxColumn status;
 		private System.Windows.Forms.DataGridViewTextBoxColumn message;
-		private System.Data.DataColumn dataColumn1;
+		private System.Windows.Forms.ComboBox cbProjectLabels;
+		private System.Windows.Forms.Label label1;
 	}
 }
 

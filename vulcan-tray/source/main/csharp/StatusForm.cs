@@ -21,7 +21,10 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Security;
 using System.Windows.Forms;
+using System.Collections.Generic;
 using System.Xml;
+using System.Text;
+using SourceForge.Vulcan.Tray.source.main.csharp;
 
 namespace SourceForge.Vulcan.Tray
 {
@@ -31,6 +34,9 @@ namespace SourceForge.Vulcan.Tray
 		private readonly PreferenceStore preferenceStore;
 		private readonly StatusMonitor statusMonitor;
 		private Preferences preferences;
+
+		private IList<string> availableLabels = new List<string>();
+		private IList<string> selectedLabels = new List<string>();
 		
 		internal StatusForm(StatusMonitor statusMonitor, BrowserIntegration browserIntegration, PreferenceStore preferenceStore)
 		{
@@ -108,6 +114,13 @@ namespace SourceForge.Vulcan.Tray
 		private void onLoad(object sender, EventArgs e)
 		{
 			updateProjectStatus();
+
+			if (!string.IsNullOrEmpty(Preferences.SelectedLabels))
+			{
+				SetSelectedLabels(ConstructList(Preferences.SelectedLabels));
+			}
+
+			cbProjectLabels.SelectedValueChanged += cbProjectLabels_SelectedValueChanged;
 		}
 
 		private void onXmlDataLoaded(object source, DataLoadedEventArgs e)
@@ -115,7 +128,7 @@ namespace SourceForge.Vulcan.Tray
 			/* Filthy dirty hack:  I can't figure out how to get the
 			 * DataGridView to display an attribute on a nested element.
 			 * Instead, hack the nested element to have text equal to
-			 * the attribute that I wan't to display.
+			 * the attribute that I want to display.
 			 */
 			foreach (XmlNode node in e.Document.SelectNodes("//timestamp"))
 			{
@@ -142,6 +155,34 @@ namespace SourceForge.Vulcan.Tray
 			{
 				// mono throws this
 			}
+
+			BindProjectLabels(e.Document.SelectSingleNode("//available-labels"), e.Document.SelectSingleNode("//selected-labels"));
+		}
+
+		private void BindProjectLabels(XmlNode availableLabels, XmlNode selectedLabels)
+		{
+			this.availableLabels.Clear();
+			this.selectedLabels.Clear();
+			cbProjectLabels.Items.Clear();
+
+			foreach (XmlNode currentLabel in availableLabels)
+			{
+				this.availableLabels.Add(currentLabel.InnerText);
+				cbProjectLabels.Items.Add(currentLabel.InnerText);
+			}
+
+			foreach (XmlNode currentLabel in selectedLabels)
+			{
+				this.selectedLabels.Add(currentLabel.InnerText);
+			}
+
+			cbProjectLabels.Items.Add("All");
+			if (this.availableLabels.Count > 1)
+			{
+				cbProjectLabels.Items.Add("Multiple...");
+			}
+
+			SetSelectedLabels(this.selectedLabels);
 		}
 		
 		private void onTick(object sender, EventArgs e)
@@ -190,9 +231,162 @@ namespace SourceForge.Vulcan.Tray
 			}
 
 			statusMonitor.Url = baseUrl + "projects.jsp";
+			
+			string queryString = ConstructQueryString(this.selectedLabels);
+
+			if(!string.IsNullOrEmpty(queryString))
+			{
+			  statusMonitor.Url = statusMonitor.Url + "?" + queryString;
+			}
+
 			statusMonitor.Reload();
 		}
 		#endregion
+
+		private IList<string> ConstructList(string preferenceString)
+		{
+			if(string.IsNullOrEmpty(preferenceString))
+			{
+				return new List<string>();
+			}
+
+			return new List<string>(preferenceString.Split(','));
+		}
+
+		private string ConstructQueryString(IList<string> selectedLabels)
+		{
+			StringBuilder QueryStringBuilder = new StringBuilder();
+			for (int i = 0; i < selectedLabels.Count; i++)
+			{
+				QueryStringBuilder.Append("label=");
+				QueryStringBuilder.Append(selectedLabels[i]);
+
+				//append an ampersand (query string argument delimiter) if we are not
+				//at the end of the array
+				if(i < selectedLabels.Count - 1)
+				{
+					QueryStringBuilder.Append("&");
+				}
+			}
+
+			return QueryStringBuilder.ToString();
+		}
+
+		private string ConstructPreferencesString(IList<string> selectedLabels)
+		{
+			List<string> l = new List<string>(selectedLabels);
+			return string.Join(",", l.ToArray());
+		}
+
+		private void clbProjectLabels_ItemCheck(object sender, ItemCheckEventArgs e)
+		{
+			updateProjectStatus();
+		}
+
+		private void cbProjectLabels_SelectedValueChanged(object sender, EventArgs e)
+		{
+			if(cbProjectLabels.SelectedItem as string == "Multiple...")
+			{
+				MultipleLabelSelectForm selectForm = new MultipleLabelSelectForm();
+				IList<string> selectedLabels = selectForm.Show(this.availableLabels, this.selectedLabels);
+
+				if(selectForm.DialogResult == DialogResult.OK)
+				{
+					SetSelectedLabels(selectedLabels);
+				}
+			}
+			else if(cbProjectLabels.SelectedItem as string == "All")
+			{
+				this.SetSelectedLabels(new List<string>());
+			}
+			else
+			{
+				this.SetSelectedLabel(this.cbProjectLabels.SelectedItem as string);
+			}
+		}
+
+		private void SetSelectedLabel(string newSelectedLabel)
+		{
+			List<string> l = new List<string>();
+			l.Add(newSelectedLabel);
+			this.SetSelectedLabels(l);
+		}
+
+		private void SetSelectedLabels(IList<string> newSelectedLabels)
+		{
+			cbProjectLabels.SelectedValueChanged -= cbProjectLabels_SelectedValueChanged;
+
+			IList<string> oldSelectedLabels = this.selectedLabels;
+			this.selectedLabels = newSelectedLabels;
+
+			if (newSelectedLabels.Count == 0)
+			{
+				cbProjectLabels.SelectedItem = "All";
+			}
+			else if (selectedLabels.Count == 1)
+			{
+				cbProjectLabels.SelectedItem = selectedLabels[0];
+			}
+			else
+			{
+				cbProjectLabels.SelectedItem = "Multiple...";
+			}
+
+			if (SelectedLabelsChanged(oldSelectedLabels, newSelectedLabels))
+			{
+				updateProjectStatus();
+			}
+
+			cbProjectLabels.SelectedValueChanged += cbProjectLabels_SelectedValueChanged;
+		}
+
+		private bool SelectedLabelsChanged(IList<string> currentSelectedLabels, IList<string> newSelectedLabels)
+		{
+			//different counts, so selection changed
+			if(currentSelectedLabels.Count != newSelectedLabels.Count)
+			{
+				return true;
+			}
+
+			//both are empty, selection didn't change
+			if(currentSelectedLabels.Count == 0 && newSelectedLabels.Count == 0)
+			{
+				return false;
+			}
+
+			//one item per list, so compare the items directly
+			if(currentSelectedLabels.Count == 1 && newSelectedLabels.Count == 1)
+			{
+				return currentSelectedLabels[0] != newSelectedLabels[0];
+			}
+
+			//construct a dictionary of one of the lists, then iterate through the other
+			//to see if it contains all the items in the first list.
+			IDictionary<string, string> currentSelectedLabelsDict = new Dictionary<string, string>();
+
+			foreach (string currentLabel in currentSelectedLabels)
+			{
+				currentSelectedLabelsDict.Add(currentLabel, currentLabel);
+			}
+
+			foreach (string currentLabel in newSelectedLabels)
+			{
+				if(!currentSelectedLabelsDict.ContainsKey(currentLabel))
+				{
+					return true;
+				}
+			}
+
+			return false;
+		}
+
+		private void StatusForm_FormClosing(object sender, FormClosingEventArgs e)
+		{
+			this.Preferences.SelectedLabels = ConstructPreferencesString(this.selectedLabels);
+			this.preferenceStore.Save(this.Preferences);
+		}
+
+
 	}
 
 	[SuppressUnmanagedCodeSecurity]
