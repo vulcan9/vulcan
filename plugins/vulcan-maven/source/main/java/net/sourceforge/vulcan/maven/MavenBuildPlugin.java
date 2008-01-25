@@ -29,7 +29,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import net.sourceforge.vulcan.BuildTool;
-import net.sourceforge.vulcan.ProjectBuildConfigurator;
 import net.sourceforge.vulcan.ant.JavaHome;
 import net.sourceforge.vulcan.dto.BuildToolConfigDto;
 import net.sourceforge.vulcan.dto.PluginConfigDto;
@@ -107,7 +106,7 @@ public class MavenBuildPlugin extends PluginSupport
 		return mavenBuildToolFactory.createMavenBuildTool(mavenProjectConfig, config, javaHome, mavenHome);
 	}
 	
-	public ProjectBuildConfigurator createProjectConfigurator(String url, File buildSpecFile, Document xmlDocument) throws ConfigException {
+	public MavenProjectBuildConfigurator createProjectConfigurator(String url, File buildSpecFile, Document xmlDocument) throws ConfigException {
 		if (xmlDocument == null) {
 			return null;
 		}

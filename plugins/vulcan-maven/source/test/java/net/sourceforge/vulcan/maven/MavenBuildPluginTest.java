@@ -1,6 +1,6 @@
 /*
  * Vulcan Build Manager
- * Copyright (C) 2005-2006 Chris Eldredge
+ * Copyright (C) 2005-2008 Chris Eldredge
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,12 +23,12 @@ import java.net.URL;
 import java.util.Arrays;
 import java.util.List;
 
-import org.jdom.input.SAXBuilder;
-
 import net.sourceforge.vulcan.ProjectBuildConfigurator;
 import net.sourceforge.vulcan.TestUtils;
 import net.sourceforge.vulcan.maven.integration.MavenIntegration;
-import net.sourceforge.vulcan.maven.integration.MavenProjectConfigurator;
+import net.sourceforge.vulcan.maven.integration.MavenProjectConfiguratorImpl;
+
+import org.jdom.input.SAXBuilder;
 
 public class MavenBuildPluginTest extends MavenBuildToolTestBase {
 	MavenBuildPlugin plugin = new MavenBuildPlugin();
@@ -78,6 +78,41 @@ public class MavenBuildPluginTest extends MavenBuildToolTestBase {
 		assertEquals(9, urls.size());
 		
 		assertEquals("http://vulcan.googlecode.com/svn/trunk/plugins/vulcan-ant/pom.xml", urls.get(0));
+		assertEquals(null, cfgr.getRelativePathToProjectBasedir());
+	}
+	
+	public void testProjectConfiguratorModulesNestedParentPom() throws Exception {
+		final File pomFile = TestUtils.resolveRelativeFile("source/test/import-test/parent/pom.xml");
+		final MavenProjectBuildConfigurator cfgr = plugin.createProjectConfigurator(
+				null, pomFile, new SAXBuilder().build(pomFile));
+		
+		final List<String> urls = cfgr.getSubprojectUrls();
+		
+		assertEquals(1, urls.size());
+		
+		assertEquals("pserver:anonymous@example.com:/cvsroot/import-test/module-1/pom.xml", urls.get(0));
+	}
+	
+	public void testProjectConfiguratorBasedirSetOnModuleInParentPath() throws Exception {
+		MavenProjectConfiguratorImpl cfgr = new MavenProjectConfiguratorImpl(null, null, null, null);
+		
+		cfgr.determineBasedir(Arrays.asList("../../module-a", "../module-b"));
+		
+		assertEquals("../../", cfgr.getRelativePathToProjectBasedir());
+	}
+	
+	public void testProjectConfiguratorModulesGetsScm() throws Exception {
+		// first, load the parent pom or else maven will not be able to find it.
+		final File parentPomFile = TestUtils.resolveRelativeFile("source/test/import-test/parent/pom.xml");
+		plugin.createProjectConfigurator(
+				null, parentPomFile, new SAXBuilder().build(parentPomFile));
+		
+		// load module pom
+		final File pomFile = TestUtils.resolveRelativeFile("source/test/import-test/module-1/pom.xml");
+		final MavenProjectBuildConfigurator cfgr = plugin.createProjectConfigurator(
+				null, pomFile, new SAXBuilder().build(pomFile));
+		
+		assertEquals("pserver:anonymous@example.com:/cvsroot/import-test/module-1/", cfgr.determineScmRootUrl());
 	}
 	
 	/* 
@@ -85,7 +120,7 @@ public class MavenBuildPluginTest extends MavenBuildToolTestBase {
 	 * http://svn.apache.org/repos/asf/jakarta/commons/proper/collections/trunk/pom.xml r523782
 	 */
 	public void testConfiguratorDeletesMultipleScmPrefix() throws Exception {
-		final String normal = MavenProjectConfigurator.normalizeScmUrl("scm:svn:scm:svn:http://localhost/svn/trunk");
+		final String normal = MavenProjectConfiguratorImpl.normalizeScmUrl("scm:svn:scm:svn:http://localhost/svn/trunk");
 		assertEquals("http://localhost/svn/trunk/", normal);
 	}
 	
