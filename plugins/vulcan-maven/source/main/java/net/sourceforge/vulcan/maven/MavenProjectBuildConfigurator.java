@@ -1,6 +1,6 @@
 /*
  * Vulcan Build Manager
- * Copyright (C) 2005-2006 Chris Eldredge
+ * Copyright (C) 2005-2008 Chris Eldredge
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,16 +18,12 @@
  */
 package net.sourceforge.vulcan.maven;
 
-import java.io.File;
+import java.util.List;
 
-import net.sourceforge.vulcan.exception.ConfigException;
+import net.sourceforge.vulcan.ProjectBuildConfigurator;
 
-import org.springframework.context.ApplicationContext;
+public interface MavenProjectBuildConfigurator extends ProjectBuildConfigurator {
+	public String determineScmRootUrl();
 
-public interface MavenProjectConfiguratorFactory {
-
-	MavenProjectBuildConfigurator createProjectConfigurator(File buildSpecFile,
-			String mavenHomeProfileName, String goals,
-			ApplicationContext applicationContext) throws ConfigException;
-
+	public void determineBasedir(List<String> modules);
 }

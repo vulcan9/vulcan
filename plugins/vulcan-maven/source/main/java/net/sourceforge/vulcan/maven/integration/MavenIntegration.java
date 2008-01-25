@@ -21,8 +21,8 @@ package net.sourceforge.vulcan.maven.integration;
 import java.io.File;
 import java.io.IOException;
 
-import net.sourceforge.vulcan.ProjectBuildConfigurator;
 import net.sourceforge.vulcan.exception.ConfigException;
+import net.sourceforge.vulcan.maven.MavenProjectBuildConfigurator;
 import net.sourceforge.vulcan.maven.MavenProjectConfiguratorFactory;
 
 import org.apache.maven.artifact.repository.ArtifactRepository;
@@ -62,13 +62,13 @@ public class MavenIntegration implements MavenProjectConfiguratorFactory {
 		artifactRepository = createLocalRepository(embedder, settings);
 	}
 	
-	public ProjectBuildConfigurator createProjectConfigurator(File buildSpecFile, String mavenHomeProfileName, String goals, ApplicationContext applicationContext) throws ConfigException {
+	public MavenProjectBuildConfigurator createProjectConfigurator(File buildSpecFile, String mavenHomeProfileName, String goals, ApplicationContext applicationContext) throws ConfigException {
 		try {
 			final MavenProjectBuilder builder = (MavenProjectBuilder) embedder.lookup(MavenProjectBuilder.ROLE);
 
 			final MavenProject project = builder.build(buildSpecFile, artifactRepository, null);
 			
-			return new MavenProjectConfigurator(project, mavenHomeProfileName, goals, applicationContext);
+			return new MavenProjectConfiguratorImpl(project, mavenHomeProfileName, goals, applicationContext);
 		} catch (ProjectBuildingException e) {
 			throw new ConfigException("maven.maven2.load.error", new Object[] {e.getMessage()});
 		} catch (ComponentLookupException e) {
