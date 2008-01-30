@@ -53,6 +53,7 @@ import org.tigris.subversion.javahl.ClientException;
 import org.tigris.subversion.javahl.Notify2;
 import org.tigris.subversion.javahl.NotifyAction;
 import org.tigris.subversion.javahl.NotifyInformation;
+import org.tigris.subversion.javahl.PromptUserPassword;
 import org.tigris.subversion.javahl.Revision;
 import org.tigris.subversion.javahl.SVNClient;
 import org.tmatesoft.svn.core.ISVNLogEntryHandler;
@@ -114,7 +115,7 @@ public class SubversionRepositoryAdaptor extends SubversionSupport implements Re
 			createRepository(profile, init));
 	}
 
-	protected SubversionRepositoryAdaptor(SubversionConfigDto globalConfig, ProjectConfigDto projectConfig, SubversionProjectConfigDto config, StateManager stateManager, SubversionRepositoryProfileDto profile, SVNRepository svnRepository) throws ConfigException {
+	protected SubversionRepositoryAdaptor(SubversionConfigDto globalConfig, ProjectConfigDto projectConfig, SubversionProjectConfigDto config, StateManager stateManager, final SubversionRepositoryProfileDto profile, SVNRepository svnRepository) throws ConfigException {
 		super(config, profile, svnRepository);
 		
 		this.stateManager = stateManager;
@@ -131,6 +132,26 @@ public class SubversionRepositoryAdaptor extends SubversionSupport implements Re
 		lineOfDevelopment.setTagFolderNames(new HashSet<String>(Arrays.asList(globalConfig.getTagFolderNames())));
 		
 		client.notification2(eventHandler);
+		
+		if (StringUtils.isNotBlank(profile.getUsername())) {
+			client.setPrompt(new PromptUserPassword() {
+				public String getUsername() {
+					return profile.getUsername();
+				}
+				public String getPassword() {
+					return profile.getPassword();
+				}
+				public String askQuestion(String arg0, String arg1, boolean arg2) {
+					throw new UnsupportedOperationException();
+				}
+				public boolean askYesNo(String arg0, String arg1, boolean arg2) {
+					return true;
+				}
+				public boolean prompt(String arg0, String arg1) {
+					return true;
+				}
+			});
+		}
 	}
 
 	public RevisionTokenDto getLatestRevision(RevisionTokenDto previousRevision) throws RepositoryException {
