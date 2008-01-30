@@ -53,7 +53,8 @@ import org.tigris.subversion.javahl.ClientException;
 import org.tigris.subversion.javahl.Notify2;
 import org.tigris.subversion.javahl.NotifyAction;
 import org.tigris.subversion.javahl.NotifyInformation;
-import org.tigris.subversion.javahl.PromptUserPassword;
+import org.tigris.subversion.javahl.PromptUserPassword2;
+import org.tigris.subversion.javahl.PromptUserPassword3;
 import org.tigris.subversion.javahl.Revision;
 import org.tigris.subversion.javahl.SVNClient;
 import org.tmatesoft.svn.core.ISVNLogEntryHandler;
@@ -134,22 +135,36 @@ public class SubversionRepositoryAdaptor extends SubversionSupport implements Re
 		client.notification2(eventHandler);
 		
 		if (StringUtils.isNotBlank(profile.getUsername())) {
-			client.setPrompt(new PromptUserPassword() {
+			client.setPrompt(new PromptUserPassword3() {
 				public String getUsername() {
 					return profile.getUsername();
 				}
 				public String getPassword() {
 					return profile.getPassword();
 				}
+				public boolean prompt(String arg0, String arg1) {
+					return true;
+				}
+				public boolean prompt(String arg0, String arg1, boolean arg2) {
+					return true;
+				}
+				public boolean userAllowedSave() {
+					return false;
+				}
+				public int askTrustSSLServer(String arg0, boolean arg1) {
+					return PromptUserPassword2.AcceptTemporary;
+				}
+				public String askQuestion(String arg0, String arg1,
+						boolean arg2, boolean arg3) {
+					throw new UnsupportedOperationException();
+				}
 				public String askQuestion(String arg0, String arg1, boolean arg2) {
 					throw new UnsupportedOperationException();
 				}
 				public boolean askYesNo(String arg0, String arg1, boolean arg2) {
-					return true;
+					throw new UnsupportedOperationException();
 				}
-				public boolean prompt(String arg0, String arg1) {
-					return true;
-				}
+				
 			});
 		}
 	}
