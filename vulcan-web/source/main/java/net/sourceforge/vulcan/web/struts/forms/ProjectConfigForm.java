@@ -116,6 +116,10 @@ public final class ProjectConfigForm extends ConfigForm {
 		
 		previousRepositoryAdaptorPluginId = prev.getRepositoryAdaptorPluginId();
 		previousBuildToolPluginId = prev.getBuildToolPluginId();
+		
+		if (prev != null) {
+			curr.setLabels(prev.getLabels());
+		}
 	}
 	@Override
 	protected void customValidate(ActionMapping mapping, HttpServletRequest request, ActionErrors errors) {
