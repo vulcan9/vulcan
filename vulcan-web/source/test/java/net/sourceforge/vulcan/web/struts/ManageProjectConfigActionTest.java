@@ -20,8 +20,10 @@ package net.sourceforge.vulcan.web.struts;
 
 import java.beans.IntrospectionException;
 import java.beans.PropertyDescriptor;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 
@@ -191,6 +193,42 @@ public class ManageProjectConfigActionTest extends MockApplicationContextStrutsT
 		config.setWorkDir("dir");
 		config.setAutoIncludeDependencies(true);
 		config.setSchedulerNames(new String[] {"a"});
+		
+		ProjectConfigForm form = new ProjectConfigForm();
+		form.populate(config, false);
+		form.setStore(configurationStore);
+		
+		request.getSession().setAttribute("projectConfigForm", form);
+		
+		addRequestParameter("action", "Update Project");
+		addRequestParameter("commit", "true");
+		addRequestParameter("config.workDir", "dirt");
+		addRequestParameter("config.name", "my project new name");
+		
+		ProjectConfigDto updated = (ProjectConfigDto) config.copy();
+		updated.setName("my project new name");
+		updated.setWorkDir("dirt");
+		updated.setAutoIncludeDependencies(false);
+		updated.setSchedulerNames(new String[0]);
+		
+		manager.updateProjectConfig(config.getName(), updated, true);
+		
+		replay();
+		
+		actionPerform();
+		
+		verify();
+		
+		verifyForward("projectList");
+		verifyActionMessages(new String[] {"messages.save.success"});
+	}
+	public void testUpdateProjectRemembersLabels() throws Exception {
+		ProjectConfigDto config = new ProjectConfigDto();
+		config.setName("my project");
+		config.setWorkDir("dir");
+		config.setAutoIncludeDependencies(true);
+		config.setSchedulerNames(new String[] {"a"});
+		config.setLabels(new HashSet<String>(Arrays.asList("a")));
 		
 		ProjectConfigForm form = new ProjectConfigForm();
 		form.populate(config, false);
