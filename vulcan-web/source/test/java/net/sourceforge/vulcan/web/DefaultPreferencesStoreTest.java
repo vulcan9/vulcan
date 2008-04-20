@@ -18,11 +18,11 @@
  */
 package net.sourceforge.vulcan.web;
 
-import org.apache.commons.lang.StringUtils;
-
+import junit.framework.TestCase;
 import net.sourceforge.vulcan.dto.PreferencesDto;
 import net.sourceforge.vulcan.metadata.SvnRevision;
-import junit.framework.TestCase;
+
+import org.apache.commons.lang.StringUtils;
 
 @SvnRevision(id="$Id$", url="$HeadURL$")
 public class DefaultPreferencesStoreTest extends TestCase {

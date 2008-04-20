@@ -43,7 +43,7 @@ public class DefaultPreferencesStore implements PreferencesStore {
 			final ObjectOutputStream oos = new ObjectOutputStream(os);
 			oos.writeObject(prefs);
 			
-			return new String(Base64.encodeBase64(os.toString().getBytes()));
+			return new String(Base64.encodeBase64(os.toByteArray()));
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
