@@ -27,6 +27,9 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+
 import javax.xml.transform.Transformer;
 
 import junit.framework.TestCase;
@@ -92,7 +95,11 @@ public class AxisLabelGeneratorTest extends TestCase {
 	public void testLabelThreeMonthsAlternateLocale() throws Exception {
 		fakeDateFormats.put("fr:axis.by.month", "MMM yyyy");
 		locale = Locale.FRENCH;
-		assertLabels(DateUtils.MILLIS_PER_DAY * 90, "oct. 2001", "nov. 2001", "déc. 2001", "janv. 2002");
+		
+		DateFormat df = new SimpleDateFormat("MMM yyyy", locale);
+		String dec = df.format(new GregorianCalendar(2001, GregorianCalendar.DECEMBER, 1).getTime());
+		
+		assertLabels(DateUtils.MILLIS_PER_DAY * 90, "oct. 2001", "nov. 2001", dec, "janv. 2002");
 	}
 	
 	public void testLabelThreeWeeks() throws Exception {
