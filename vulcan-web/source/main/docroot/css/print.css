@@ -1,0 +1,31 @@
+div.header {
+	display: none !important;
+}
+
+div.content {
+	margin: 0 !important;
+	position: relative !important;
+}
+
+div.setup-content {
+	margin: inherit !important;
+	position: relative !imporant;
+}
+
+div.detail-menu {
+	display: none !important;
+}
+
+/* Open Flash Chart report page */
+div.pane, div.chart {
+	float: none !important;
+	width: 98% !important;
+	margin: inherit !important;;
+}
+div.chart {
+	height: 360px;
+}
+
+div.plotOptions {
+	display: none !important;
+}
