@@ -156,7 +156,13 @@ namespace SourceForge.Vulcan.Tray
 				// mono throws this
 			}
 
-			BindProjectLabels(e.Document.SelectSingleNode("//available-labels"), e.Document.SelectSingleNode("//selected-labels"));
+			XmlNode availableLabelsNode = e.Document.SelectSingleNode("//available-labels");
+			XmlNode selectedLabelsNode = e.Document.SelectSingleNode("//selected-labels");
+
+			if (availableLabelsNode != null && selectedLabelsNode != null)
+			{
+				BindProjectLabels(availableLabelsNode, selectedLabelsNode);	
+			}
 		}
 
 		private void BindProjectLabels(XmlNode availableLabels, XmlNode selectedLabels)
