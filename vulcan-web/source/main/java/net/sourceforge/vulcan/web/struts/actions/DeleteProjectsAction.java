@@ -20,6 +20,9 @@ package net.sourceforge.vulcan.web.struts.actions;
 
 import static net.sourceforge.vulcan.web.struts.actions.BaseDispatchAction.saveSuccessMessage;
 
+import java.util.Arrays;
+import java.util.HashSet;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -44,7 +47,12 @@ public final class DeleteProjectsAction extends Action {
 		final MultipleProjectConfigForm configForm = (MultipleProjectConfigForm) form;
 
 		try {
-			stateManager.deleteProjectConfig(configForm.getProjectNames());
+			// remove duplicates
+			final String[] set = new HashSet<String>(Arrays.asList(configForm.getProjectNames())).toArray(new String[0]);
+			// sort for unit testing purposes
+			Arrays.sort(set);
+			
+			stateManager.deleteProjectConfig(set);
 			saveSuccessMessage(request);
 			return mapping.findForward("projectList");
 		} catch (ProjectNeedsDependencyException e) {

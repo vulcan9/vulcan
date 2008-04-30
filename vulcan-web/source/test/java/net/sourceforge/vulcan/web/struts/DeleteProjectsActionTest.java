@@ -47,6 +47,23 @@ public class DeleteProjectsActionTest extends MockApplicationContextStrutsTestCa
 		verifyForward("projectList");
 	}
 
+	public void testDeleteRemovesDupes() throws Exception {
+		addRequestParameter("projectNames", new String[] {"a", "b", "a"});
+		
+		manager.deleteProjectConfig("a", "b");
+		
+		replay();
+		
+		actionPerform();
+		
+		verify();
+		
+		verifyNoActionErrors();
+		verifyActionMessages(new String[] {"messages.save.success"});
+		
+		verifyForward("projectList");
+	}
+	
 	public void testHandlesDependencyException() throws Exception {
 		addRequestParameter("projectNames", new String[] {"a", "b"});
 		
