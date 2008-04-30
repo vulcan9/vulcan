@@ -41,6 +41,7 @@ import net.sourceforge.vulcan.core.NameCollisionResolutionMode;
 import net.sourceforge.vulcan.core.ProjectImporter;
 import net.sourceforge.vulcan.dto.PluginConfigDto;
 import net.sourceforge.vulcan.dto.ProjectConfigDto;
+import net.sourceforge.vulcan.dto.ProjectImportStatusDto;
 import net.sourceforge.vulcan.exception.ConfigException;
 import net.sourceforge.vulcan.exception.DuplicateNameException;
 import net.sourceforge.vulcan.exception.PluginNotConfigurableException;
@@ -66,7 +67,7 @@ public class ProjectImporterImpl implements ProjectImporter {
 	private StateManager stateManager;
 	private ConfigurationStore configurationStore;
 	
-	public void createProjectsForUrl(String startUrl, String username, String password, boolean createSubprojects, NameCollisionResolutionMode nameCollisionResolutionMode, String[] schedulerNames, Set<String> labels) throws ConfigException, StoreException, DuplicateNameException {
+	public void createProjectsForUrl(String startUrl, String username, String password, boolean createSubprojects, NameCollisionResolutionMode nameCollisionResolutionMode, String[] schedulerNames, Set<String> labels, ProjectImportStatusDto statusDto) throws ConfigException, StoreException, DuplicateNameException {
 		final List<RepositoryAdaptorPlugin> repositoryPlugins = pluginManager.getPlugins(RepositoryAdaptorPlugin.class);
 		final List<BuildToolPlugin> buildToolPlugins = pluginManager.getPlugins(BuildToolPlugin.class);
 		
@@ -80,6 +81,12 @@ public class ProjectImporterImpl implements ProjectImporter {
 		
 		for (int i=0; i<urls.size(); i++) {
 			final String url = (String) urls.get(i);
+			
+			if (statusDto != null) {
+				statusDto.setCurrentUrl(url);
+				statusDto.setNumProjectsCreated(newProjects.size());
+				statusDto.setNumRemainingModules(urls.size() - i);
+			}
 			
 			final ProjectConfigDto projectConfig = new ProjectConfigDto();
 			projectConfig.setSchedulerNames(schedulerNames);

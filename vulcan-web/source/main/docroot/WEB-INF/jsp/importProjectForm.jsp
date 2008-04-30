@@ -13,6 +13,11 @@
 
 <head>
 	<meta name="helpTopic" content="ImportProject"/>
+	<jsp:element name="script">
+		<jsp:attribute name="type">text/javascript</jsp:attribute>
+		<jsp:attribute name="src"><c:url value="/javascript/importProjectForm.js"/></jsp:attribute>
+		<jsp:body/>
+	</jsp:element>
 </head>
 
 <body>
@@ -140,12 +145,18 @@
 				<html:hidden property="authenticationRequired"/>
 			</td>
 		</tr>
+		<tr>
+			<td colspan="2">
+				<div id="status" class="ajax hidden">
+					<span class="processing"><spring:message code="ajax.processing"/></span>
+				</div>
+			</td>
+		</tr>
 	</tbody>
 </table>
 </html:form>
 </v:bubble>
-
+	
 <v:messages/>
-
 </body>
 </html>

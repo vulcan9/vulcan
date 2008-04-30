@@ -30,13 +30,22 @@
 		<jsp:attribute name="href">${cssUrl}</jsp:attribute>
 	</jsp:element>
 	<jsp:element name="link">
+		<jsp:attribute name="rel">stylesheet</jsp:attribute>
+		<jsp:attribute name="type">text/css</jsp:attribute>
+		<jsp:attribute name="media">print</jsp:attribute>
+		<jsp:attribute name="href"><c:url value="/css/print.css"/></jsp:attribute>
+	</jsp:element>
+	<jsp:element name="link">
 		<jsp:attribute name="rel">shortcut icon</jsp:attribute>
 		<jsp:attribute name="type">image/vnd.microsoft.ico</jsp:attribute>
 		<jsp:attribute name="href"><c:url value="/images/favicon.ico"/></jsp:attribute>
 	</jsp:element>
+	<script type="text/javascript">
+		window.contextRoot = '<c:url value="/"/>';
+	</script>
 	<jsp:element name="script">
 		<jsp:attribute name="type">text/javascript</jsp:attribute>
-		<jsp:attribute name="src"><c:url value="/javascript/cssQuery.js"/></jsp:attribute>
+		<jsp:attribute name="src"><c:url value="/javascript/jquery.js"/></jsp:attribute>
 		<jsp:body/>
 	</jsp:element>
 	<jsp:element name="script">
@@ -67,7 +76,7 @@
 <body>
 	<jsp:include page="/WEB-INF/jsp/sitemesh/banner.jsp" flush="true"/>
 	
-	<div class="content">
+	<div class="content" id="content">
 		<c:if test="${showSetupMenu}">
 			<jsp:include page="/WEB-INF/jsp/sitemesh/setupMenu.jsp" flush="true"/>
 		</c:if>

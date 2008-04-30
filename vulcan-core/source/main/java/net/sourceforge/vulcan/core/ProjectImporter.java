@@ -20,6 +20,7 @@ package net.sourceforge.vulcan.core;
 
 import java.util.Set;
 
+import net.sourceforge.vulcan.dto.ProjectImportStatusDto;
 import net.sourceforge.vulcan.exception.ConfigException;
 import net.sourceforge.vulcan.exception.DuplicateNameException;
 import net.sourceforge.vulcan.exception.StoreException;
@@ -35,7 +36,7 @@ public interface ProjectImporter {
 			boolean createSubprojects,
 			NameCollisionResolutionMode nameCollisionResolutionMode,
 			String[] schedulerNames,
-			Set<String> labels)
+			Set<String> labels, ProjectImportStatusDto statusDto)
 				throws ConfigException, StoreException, DuplicateNameException;
 
 }

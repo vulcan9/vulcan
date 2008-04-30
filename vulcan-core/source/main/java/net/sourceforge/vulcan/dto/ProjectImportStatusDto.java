@@ -1,6 +1,6 @@
 /*
  * Vulcan Build Manager
- * Copyright (C) 2005-2006 Chris Eldredge
+ * Copyright (C) 2005-2008 Chris Eldredge
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,31 +16,32 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-package net.sourceforge.vulcan.web.struts.forms;
-
-import javax.servlet.http.HttpServletRequest;
+package net.sourceforge.vulcan.dto;
 
 import net.sourceforge.vulcan.metadata.SvnRevision;
 
-import org.apache.commons.lang.ArrayUtils;
-import org.apache.struts.action.ActionMapping;
-import org.apache.struts.validator.ValidatorForm;
-
 @SvnRevision(id="$Id$", url="$HeadURL$")
-public class MultipleProjectConfigForm extends ValidatorForm {
-	private String[] projectNames;
+public class ProjectImportStatusDto extends BaseDto {
+	private String currentUrl;
+	private int numProjectsCreated;
+	private int numRemainingModules;
 	
-	@Override
-	public void reset(ActionMapping mapping, HttpServletRequest request) {
-		super.reset(mapping, request);
-		projectNames = ArrayUtils.EMPTY_STRING_ARRAY;
+	public int getNumProjectsCreated() {
+		return numProjectsCreated;
 	}
-	
-	public String[] getProjectNames() {
-		return projectNames;
+	public void setNumProjectsCreated(int numProjectsCreated) {
+		this.numProjectsCreated = numProjectsCreated;
 	}
-	
-	public void setProjectNames(String[] projectNames) {
-		this.projectNames = projectNames;
+	public int getNumRemainingModules() {
+		return numRemainingModules;
+	}
+	public void setNumRemainingModules(int numRemainingModules) {
+		this.numRemainingModules = numRemainingModules;
+	}
+	public String getCurrentUrl() {
+		return currentUrl;
+	}
+	public void setCurrentUrl(String currentUrl) {
+		this.currentUrl = currentUrl;
 	}
 }

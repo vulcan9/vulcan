@@ -41,12 +41,7 @@ function addContentBefore() {
 				var content = rule.style.content.substring(
 					1, rule.style.content.length - 1);
 					
-				var tags = cssQuery(selector);
-				
-				for (var k=0; k<tags.length; k++) {
-					tags[k].insertBefore(document.createTextNode(content),
-						tags[k].firstChild);
-				}
+				var tags = $(selector).prepend(content);
 			}
 		}
 	}
@@ -76,7 +71,9 @@ function addStyleClassToLastChildren() {
 	}
 }
 
-/* MSIE does not submit a form when a <button> is clicked. */
+/* MSIE sends the inner text of a button instead of the value attribute.
+ * This breaks server-side actions on buttons that have been i18nized.
+ */
 function submitFormHandler(e) {
 	var o = getTarget(e);
 	if (o && o.getAttribute("actual-value")) {

@@ -17,6 +17,14 @@
 				</var>
 			</field>
 		</form>
+		<form name="labelForm">
+			<field property="name" depends="validwhen">
+				<var>
+					<var-name>test</var-name>
+					<var-value>(((action=="save") and (*this* != null)) or (action != "save"))</var-value>
+				</var>
+			</field>
+		</form>
 		<form name="schedulerConfigForm">
 			<field property="config.name" depends="required"/>
 			<field property="intervalScalar" depends="required,integer"/>
