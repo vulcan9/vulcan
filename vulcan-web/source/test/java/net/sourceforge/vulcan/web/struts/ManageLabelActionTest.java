@@ -86,4 +86,19 @@ public class ManageLabelActionTest extends MockApplicationContextStrutsTestCase 
 		verifyForward("setup");
 		verifyActionMessages(new String[] {"messages.save.success"});
 	}
+	
+	public void testSaveRequiresLabel() throws Exception {
+		addRequestParameter("action", "save");
+		addRequestParameter("name", "");
+		addRequestParameter("projectNames", new String[] {"b"});
+		
+		replay();
+		
+		actionPerform();
+		
+		verify();
+		
+		verifyInputForward();
+		assertErrorPresent("name");
+	}
 }
