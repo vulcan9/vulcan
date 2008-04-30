@@ -108,6 +108,8 @@ public class ContentTypeFilter extends OncePerRequestFilter {
 		final HttpServletResponseContentTypeWrapper responseWrapper =
 			new HttpServletResponseContentTypeWrapper(response, suppressContentTypes, contentType);
 		
+		response.addHeader("Cache-Control", "max-age=0");
+		
 		chain.doFilter(request, responseWrapper);
 	}
 	

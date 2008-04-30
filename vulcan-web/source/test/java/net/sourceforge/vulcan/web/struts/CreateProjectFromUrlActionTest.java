@@ -25,6 +25,7 @@ import java.util.Set;
 
 import net.sourceforge.vulcan.RepositoryAdaptor;
 import net.sourceforge.vulcan.core.NameCollisionResolutionMode;
+import net.sourceforge.vulcan.dto.ProjectImportStatusDto;
 import net.sourceforge.vulcan.exception.AuthenticationRequiredRepositoryException;
 import net.sourceforge.vulcan.exception.ConfigException;
 import net.sourceforge.vulcan.exception.DuplicateNameException;
@@ -38,6 +39,7 @@ import org.apache.struts.action.ActionMessages;
 @SvnRevision(id="$Id$", url="$HeadURL$")
 public class CreateProjectFromUrlActionTest extends MockApplicationContextStrutsTestCase {
 	RepositoryAdaptor ra = createMock(RepositoryAdaptor.class);
+	ProjectImportStatusDto status = new ProjectImportStatusDto();
 	
 	@Override
 	public void setUp() throws Exception {
@@ -65,7 +67,7 @@ public class CreateProjectFromUrlActionTest extends MockApplicationContextStruts
 		
 		final Set<String> labels = new HashSet<String>(Arrays.asList("x", "y"));
 		
-		projectImporter.createProjectsForUrl("http://www.example.com", "", "", false, NameCollisionResolutionMode.Abort, ArrayUtils.EMPTY_STRING_ARRAY, labels);
+		projectImporter.createProjectsForUrl("http://www.example.com", "", "", false, NameCollisionResolutionMode.Abort, ArrayUtils.EMPTY_STRING_ARRAY, labels, status);
 		
 		replay();
 		
@@ -82,7 +84,7 @@ public class CreateProjectFromUrlActionTest extends MockApplicationContextStruts
 		addRequestParameter("url", "http://www.example.com");
 		addRequestParameter("nameCollisionResolutionMode", NameCollisionResolutionMode.UseExisting.name());
 		
-		projectImporter.createProjectsForUrl("http://www.example.com", "", "", false, NameCollisionResolutionMode.UseExisting, ArrayUtils.EMPTY_STRING_ARRAY, Collections.<String>emptySet());
+		projectImporter.createProjectsForUrl("http://www.example.com", "", "", false, NameCollisionResolutionMode.UseExisting, ArrayUtils.EMPTY_STRING_ARRAY, Collections.<String>emptySet(), status);
 		
 		expectLastCall().andThrow(new ConfigException("foo.bar", new Object[] {"a", "b"}));
 		
@@ -101,7 +103,7 @@ public class CreateProjectFromUrlActionTest extends MockApplicationContextStruts
 		addRequestParameter("url", "http://www.example.com");
 		addRequestParameter("nameCollisionResolutionMode", NameCollisionResolutionMode.UseExisting.name());
 		
-		projectImporter.createProjectsForUrl("http://www.example.com", "", "", false, NameCollisionResolutionMode.UseExisting, ArrayUtils.EMPTY_STRING_ARRAY, Collections.<String>emptySet());
+		projectImporter.createProjectsForUrl("http://www.example.com", "", "", false, NameCollisionResolutionMode.UseExisting, ArrayUtils.EMPTY_STRING_ARRAY, Collections.<String>emptySet(), status);
 		
 		expectLastCall().andThrow(new AuthenticationRequiredRepositoryException("teresa"));
 		
@@ -124,7 +126,7 @@ public class CreateProjectFromUrlActionTest extends MockApplicationContextStruts
 		addRequestParameter("url", "http://www.example.com");
 		addRequestParameter("nameCollisionResolutionMode", NameCollisionResolutionMode.Overwrite.name());
 		
-		projectImporter.createProjectsForUrl("http://www.example.com", "", "", false, NameCollisionResolutionMode.Overwrite, ArrayUtils.EMPTY_STRING_ARRAY, Collections.<String>emptySet());
+		projectImporter.createProjectsForUrl("http://www.example.com", "", "", false, NameCollisionResolutionMode.Overwrite, ArrayUtils.EMPTY_STRING_ARRAY, Collections.<String>emptySet(), status);
 		expectLastCall().andThrow(new StoreException("a message", null));
 		
 		replay();
@@ -142,7 +144,7 @@ public class CreateProjectFromUrlActionTest extends MockApplicationContextStruts
 		addRequestParameter("url", "http://www.example.com");
 		addRequestParameter("nameCollisionResolutionMode", NameCollisionResolutionMode.Abort.name());
 		
-		projectImporter.createProjectsForUrl("http://www.example.com", "", "", false, NameCollisionResolutionMode.Abort, ArrayUtils.EMPTY_STRING_ARRAY, Collections.<String>emptySet());
+		projectImporter.createProjectsForUrl("http://www.example.com", "", "", false, NameCollisionResolutionMode.Abort, ArrayUtils.EMPTY_STRING_ARRAY, Collections.<String>emptySet(), status);
 		
 		expectLastCall().andThrow(new DuplicateNameException("scuba"));
 		

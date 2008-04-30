@@ -30,6 +30,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import net.sourceforge.vulcan.core.ProjectImporter;
+import net.sourceforge.vulcan.dto.ProjectImportStatusDto;
 import net.sourceforge.vulcan.exception.AuthenticationRequiredRepositoryException;
 import net.sourceforge.vulcan.exception.ConfigException;
 import net.sourceforge.vulcan.exception.DuplicateNameException;
@@ -61,6 +62,9 @@ public final class CreateProjectFromUrlAction extends Action {
 			labels.add(importForm.getNewLabel());
 		}
 		
+		final ProjectImportStatusDto projectImportStatusDto = new ProjectImportStatusDto();
+		request.getSession().setAttribute("projectImportStatus", projectImportStatusDto);
+		
 		try {
 			projectImporter.createProjectsForUrl(
 					importForm.getUrl(),
@@ -69,7 +73,8 @@ public final class CreateProjectFromUrlAction extends Action {
 					importForm.isCreateSubprojects(),
 					importForm.parseNameCollisionResolutionMode(),
 					importForm.getSchedulerNames(),
-					labels);
+					labels,
+					projectImportStatusDto);
 			
 			saveSuccessMessage(request);
 		} catch (DuplicateNameException e) {

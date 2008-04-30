@@ -19,6 +19,7 @@
 package net.sourceforge.vulcan.web.struts.forms;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 
 import net.sourceforge.vulcan.core.NameCollisionResolutionMode;
 import net.sourceforge.vulcan.metadata.SvnRevision;
@@ -51,6 +52,11 @@ public class ProjectImportForm extends ValidatorForm {
 		username = StringUtils.EMPTY;
 		password = StringUtils.EMPTY;
 		authenticationRequired = false;
+		
+		final HttpSession session = request.getSession(false);
+		if (session != null) {
+			session.removeAttribute("projectImportStatus");
+		}
 	}
 
 	public NameCollisionResolutionMode parseNameCollisionResolutionMode() {
