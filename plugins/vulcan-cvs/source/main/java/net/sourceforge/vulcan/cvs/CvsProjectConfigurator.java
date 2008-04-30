@@ -64,9 +64,12 @@ public class CvsProjectConfigurator extends CvsSupport implements ProjectReposit
 
 		int index = url.lastIndexOf(':');
 		
+		if (index < 0) {
+			return null;
+		}
+		
 		final String file = url.substring(index + 1);
 		url = url.substring(0, index);
-		
 		
 		if (!method.startsWith(CVSRoot.METHOD_EXT)
 				&&!method.startsWith(CVSRoot.METHOD_FORK)
