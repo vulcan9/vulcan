@@ -59,6 +59,7 @@ public interface ProjectRepositoryConfigurator {
 	/**
 	 * If the configuration for the created project requires changes to the global
 	 * configuration for this plugin, those changes should be applied here.
+	 * @return true is configuration was modified, false if not changes were made.
 	 */
-	void updateGlobalConfig(PluginConfigDto globalRaConfig);
+	boolean updateGlobalConfig(PluginConfigDto globalRaConfig);
 }

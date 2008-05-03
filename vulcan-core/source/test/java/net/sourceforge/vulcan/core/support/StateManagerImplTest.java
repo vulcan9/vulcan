@@ -18,7 +18,6 @@
  */
 package net.sourceforge.vulcan.core.support;
 
-import java.beans.PropertyDescriptor;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
@@ -26,9 +25,12 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 
+import java.beans.PropertyDescriptor;
+
 import net.sourceforge.vulcan.core.ProjectNameChangeListener;
 import net.sourceforge.vulcan.dto.BuildManagerConfigDto;
 import net.sourceforge.vulcan.dto.BuildToolConfigDto;
+import net.sourceforge.vulcan.dto.ConfigUpdatesDto;
 import net.sourceforge.vulcan.dto.PluginConfigDto;
 import net.sourceforge.vulcan.dto.PluginProfileDto;
 import net.sourceforge.vulcan.dto.PluginProfileDtoStub;
@@ -129,6 +131,26 @@ public class StateManagerImplTest extends StateManagerTestBase
 		assertEquals(1, stateMgr.getConfig().getProjects().length);
 		assertNull(copy.getLastModificationDate());
 	}
+	public void testMultipleUpdatesCallsCommitOnlyOnces() throws Exception {
+		final ProjectConfigDto config = createProjectDto("a");
+		
+		ConfigUpdatesDto updates = new ConfigUpdatesDto();
+		updates.setNewProjectConfigs(Collections.singleton(config));
+		final FakeRepoConfig repoConfig = new FakeRepoConfig("fake");
+		updates.setModifiedPluginConfigs(Collections.singletonMap(repoConfig.getPluginId(), repoConfig));
+		
+		pluginMgr.configurePlugin(repoConfig);
+		
+		replay();
+		
+		stateMgr.applyMultipleUpdates(updates);
+		
+		verify();
+		
+		assertEquals(1, stateMgr.getConfig().getProjects().length);
+		
+		assertEquals(1, store.getCommitCount());
+	}
 	public void testUpdateProjectThrowsOnDuplicateName() throws Exception {
 		final ProjectConfigDto a = createProjectDto("a");
 		final ProjectConfigDto b = createProjectDto("b");
@@ -220,7 +242,7 @@ public class StateManagerImplTest extends StateManagerTestBase
 		
 		stateMgr.addProjectConfig(a);
 		
-		store.setCommitCalled(false);
+		store.clearCommitCount();
 		
 		stateMgr.updateProjectConfig(a.getName(), a2, true);
 		
@@ -230,7 +252,7 @@ public class StateManagerImplTest extends StateManagerTestBase
 		final ProjectConfigDto a = createProjectDto("a");
 		stateMgr.config.setProjects(new ProjectConfigDto[] {a});
 		
-		store.setCommitCalled(false);
+		store.clearCommitCount();
 
 		assertEquals(1, stateMgr.config.getProjects().length);
 		stateMgr.deleteProjectConfig(a.getName());
@@ -243,7 +265,7 @@ public class StateManagerImplTest extends StateManagerTestBase
 		final ProjectConfigDto c = createProjectDto("c");
 		stateMgr.config.setProjects(new ProjectConfigDto[] {a, b, c});
 		
-		store.setCommitCalled(false);
+		store.clearCommitCount();
 
 		assertEquals(3, stateMgr.config.getProjects().length);
 		stateMgr.deleteProjectConfig(a.getName(), b.getName());
@@ -261,7 +283,7 @@ public class StateManagerImplTest extends StateManagerTestBase
 		
 		stateMgr.config.setProjects(new ProjectConfigDto[] {a, b, c});
 		
-		store.setCommitCalled(false);
+		store.clearCommitCount();
 
 		assertEquals(3, stateMgr.config.getProjects().length);
 		stateMgr.deleteProjectConfig(a.getName(), b.getName(), c.getName());
@@ -345,7 +367,7 @@ public class StateManagerImplTest extends StateManagerTestBase
 		stateMgr.addProjectConfig(a);
 		assertSame(a, stateMgr.getConfig().getProjects()[0]);
 		
-		store.setCommitCalled(false);
+		store.clearCommitCount();
 		assertTrue(a.equals(a));
 		assertEquals(1, stateMgr.getConfig().getProjects().length);
 		stateMgr.updateProjectConfig(a.getName(), a2, true);
@@ -460,7 +482,7 @@ public class StateManagerImplTest extends StateManagerTestBase
 		stateMgr.addProjectConfig(b);
 		stateMgr.addProjectConfig(c);
 		
-		store.commitCalled = false;
+		store.clearCommitCount();
 		
 		stateMgr.applyProjectLabel("x", Arrays.asList("a", "c"));
 		
@@ -468,7 +490,7 @@ public class StateManagerImplTest extends StateManagerTestBase
 		assertEquals(Collections.emptySet(), b.getLabels());
 		assertEquals(new HashSet<String>(Arrays.asList("x")), c.getLabels());
 		
-		assertTrue(store.commitCalled);
+		assertTrue(store.isCommitCalled());
 	}
 	public void testLabelProjectRemovesFromUnselected() throws Exception {
 		final ProjectConfigDto a = createProjectDto("a");
@@ -481,14 +503,14 @@ public class StateManagerImplTest extends StateManagerTestBase
 		stateMgr.addProjectConfig(a);
 		stateMgr.addProjectConfig(b);
 		
-		store.commitCalled = false;
+		store.clearCommitCount();
 		
 		stateMgr.applyProjectLabel("x", Arrays.asList("a"));
 		
 		assertEquals(new HashSet<String>(Arrays.asList("x", "y")), a.getLabels());
 		assertEquals(new HashSet<String>(Arrays.asList("y")), b.getLabels());
 		
-		assertTrue(store.commitCalled);
+		assertTrue(store.isCommitCalled());
 	}
 	public void testGetProjectsByLabel() throws Exception {
 		final ProjectConfigDto a = createProjectDto("a");
@@ -616,7 +638,7 @@ public class StateManagerImplTest extends StateManagerTestBase
 		}
 		@Override
 		public String getPluginName() {
-			return null;
+			return pluginId;
 		}
 		@Override
 		public List<PropertyDescriptor> getPropertyDescriptors(Locale locale) {

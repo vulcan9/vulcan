@@ -22,15 +22,18 @@ import static net.sourceforge.vulcan.core.NameCollisionResolutionMode.Abort;
 import static net.sourceforge.vulcan.core.NameCollisionResolutionMode.UseExisting;
 import static org.apache.commons.lang.StringUtils.isBlank;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
 
 import net.sourceforge.vulcan.PluginManager;
 import net.sourceforge.vulcan.ProjectBuildConfigurator;
@@ -39,6 +42,7 @@ import net.sourceforge.vulcan.StateManager;
 import net.sourceforge.vulcan.core.ConfigurationStore;
 import net.sourceforge.vulcan.core.NameCollisionResolutionMode;
 import net.sourceforge.vulcan.core.ProjectImporter;
+import net.sourceforge.vulcan.dto.ConfigUpdatesDto;
 import net.sourceforge.vulcan.dto.PluginConfigDto;
 import net.sourceforge.vulcan.dto.ProjectConfigDto;
 import net.sourceforge.vulcan.dto.ProjectImportStatusDto;
@@ -132,22 +136,42 @@ public class ProjectImporterImpl implements ProjectImporter {
 			}
 		}
 		
-		//TODO: stateManager should be aware that pluginConfig is being modified.
-		//TODO: this entire block should succeed or fail atomically.
+		final Map<String, PluginConfigDto> pluginConfigs = new HashMap<String, PluginConfigDto>();
+		
 		for (int i=0; i<newProjects.size(); i++) {
 			final ProjectConfigDto projectConfig = newProjects.get(i);
 			try {
-				final PluginConfigDto pluginConfig = pluginManager.getPluginConfigInfo(
-						projectConfig.getRepositoryAdaptorPluginId());
-	
-				repoConfigurators.get(i).updateGlobalConfig(pluginConfig);
+				final String pluginId = projectConfig.getRepositoryAdaptorPluginId();
+				PluginConfigDto pluginConfig = pluginConfigs.get(pluginId);
+				
+				if (pluginConfig == null) {
+					pluginConfig = (PluginConfigDto) pluginManager.getPluginConfigInfo(pluginId).copy();
+				}
+				
+				if (repoConfigurators.get(i).updateGlobalConfig(pluginConfig)) {
+					pluginConfigs.put(pluginId, pluginConfig);
+				}
 			} catch (PluginNotConfigurableException ignore) {
 			} catch (PluginNotFoundException e) {
 				throw new RuntimeException(e);
 			}
 		}
 
-		stateManager.addOrReplaceProjectConfig(newProjects.toArray(new ProjectConfigDto[newProjects.size()]));
+		final ConfigUpdatesDto updates = new ConfigUpdatesDto();
+
+		updates.setNewProjectConfigs(newProjects);
+
+		if (!pluginConfigs.isEmpty()) {
+			updates.setModifiedPluginConfigs(pluginConfigs);
+		}
+
+		try {
+			stateManager.applyMultipleUpdates(updates);
+		} catch (PluginNotFoundException e) {
+			// Very unlikely...
+			throw new RuntimeException(e);
+		}
+		
 		log.info("Successfully imported project(s) for URL " + startUrl);
 	}
 

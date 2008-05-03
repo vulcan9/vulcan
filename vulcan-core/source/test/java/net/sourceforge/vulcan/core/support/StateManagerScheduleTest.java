@@ -279,7 +279,7 @@ public class StateManagerScheduleTest extends StateManagerTestBase {
 		
 		stateMgr.addSchedulerConfig(a);
 		stateMgr.addSchedulerConfig(b);
-		store.setCommitCalled(false);
+		store.clearCommitCount();
 		
 		final String oldName = b.getName();
 		b.setName("a");
@@ -298,7 +298,7 @@ public class StateManagerScheduleTest extends StateManagerTestBase {
 		stateMgr.addSchedulerConfig(config);
 		
 		assertEquals(1, stateMgr.getConfig().getSchedulers().length);
-		store.setCommitCalled(false);
+		store.clearCommitCount();
 		
 		try {
 			stateMgr.addSchedulerConfig(config);

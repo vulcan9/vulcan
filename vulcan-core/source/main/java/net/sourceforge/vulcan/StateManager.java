@@ -22,6 +22,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
+import net.sourceforge.vulcan.dto.ConfigUpdatesDto;
 import net.sourceforge.vulcan.dto.PluginConfigDto;
 import net.sourceforge.vulcan.dto.PluginProfileDto;
 import net.sourceforge.vulcan.dto.ProjectConfigDto;
@@ -43,9 +44,10 @@ public interface StateManager {
 	public void applyProjectLabel(String label, Collection<String> projectNames) throws StoreException;
 	public ProjectConfigDto getProjectConfig(String name) throws NoSuchProjectException;
 	public void addProjectConfig(ProjectConfigDto... configs) throws DuplicateNameException, StoreException;
-	public void addOrReplaceProjectConfig(ProjectConfigDto... configs) throws StoreException;
 	public void updateProjectConfig(String oldName, ProjectConfigDto updatedConfig, boolean setLastModifiedDate)	throws DuplicateNameException, NoSuchProjectException, StoreException;
 	public void deleteProjectConfig(String... names) throws ProjectNeedsDependencyException, StoreException;
+	
+	public void applyMultipleUpdates(ConfigUpdatesDto updates) throws DuplicateNameException, StoreException, PluginNotFoundException;
 	
 	public SchedulerConfigDto getSchedulerConfig(String name);
 	public ProjectConfigDto[] getProjectsForScheduler(String schedulerName);

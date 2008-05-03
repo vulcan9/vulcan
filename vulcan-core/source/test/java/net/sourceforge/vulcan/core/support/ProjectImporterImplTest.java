@@ -20,21 +20,24 @@ package net.sourceforge.vulcan.core.support;
 
 import static org.easymock.EasyMock.anyBoolean;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+
+import java.io.File;
+import java.io.IOException;
 
 import net.sourceforge.vulcan.EasyMockTestCase;
 import net.sourceforge.vulcan.PluginManager;
 import net.sourceforge.vulcan.ProjectBuildConfigurator;
 import net.sourceforge.vulcan.ProjectRepositoryConfigurator;
 import net.sourceforge.vulcan.StateManager;
-import net.sourceforge.vulcan.core.NameCollisionResolutionMode;
 import net.sourceforge.vulcan.core.ConfigurationStore;
+import net.sourceforge.vulcan.core.NameCollisionResolutionMode;
 import net.sourceforge.vulcan.core.support.ProjectImporterImpl.PathInfo;
+import net.sourceforge.vulcan.core.support.StateManagerImplTest.FakeRepoConfig;
+import net.sourceforge.vulcan.dto.ConfigUpdatesDto;
 import net.sourceforge.vulcan.dto.ProjectConfigDto;
 import net.sourceforge.vulcan.exception.ConfigException;
 import net.sourceforge.vulcan.exception.DuplicateNameException;
@@ -107,6 +110,8 @@ public class ProjectImporterImplTest extends EasyMockTestCase {
 	
 	String projectName = "importedProject";
 	String workDir = null;
+	
+	boolean pluginConfigChanged = true;
 	
 	boolean playback = false;
 	
@@ -258,7 +263,37 @@ public class ProjectImporterImplTest extends EasyMockTestCase {
 		projectConfig.setName(projectName);
 		projectConfig.setWorkDir("a workdir importedProject location");
 		
-		stateManager.addOrReplaceProjectConfig(projectConfig);
+		ConfigUpdatesDto updates = new ConfigUpdatesDto();
+		updates.setNewProjectConfigs(Arrays.asList(projectConfig));
+		stateManager.applyMultipleUpdates(updates);
+	}
+	
+	public void trainPluginConfigUnchanged() {
+		pluginConfigChanged = false;
+	}
+	
+	public void trainSavesWithPluginConfig() throws Exception {
+		final FakeRepoConfig repoConfig = new FakeRepoConfig("a.fake.repo.plugin");
+		expect(pluginManager.getPluginConfigInfo("a.fake.repo.plugin"))
+			.andReturn(repoConfig);
+
+		final ProjectConfigDto projectConfig = new ProjectConfigDto();
+		
+		projectConfig.setRepositoryAdaptorPluginId("a.fake.repo.plugin");
+		projectConfig.setBuildToolPluginId("a.fake.build.plugin");
+		projectConfig.setName(projectName);
+		projectConfig.setWorkDir("a workdir importedProject location");
+		
+		expect(repoConfigurator.updateGlobalConfig(repoConfig)).andReturn(pluginConfigChanged);
+		
+		ConfigUpdatesDto updates = new ConfigUpdatesDto();
+		updates.setNewProjectConfigs(Arrays.asList(projectConfig));
+		
+		if (pluginConfigChanged) {
+			updates.setModifiedPluginConfigs(Collections.singletonMap(repoConfig.getPluginId(), repoConfig));
+		}
+		
+		stateManager.applyMultipleUpdates(updates);
 	}
 	
 	public void trainSavesWithAlternateWorkDir() throws Exception {
@@ -273,11 +308,23 @@ public class ProjectImporterImplTest extends EasyMockTestCase {
 		projectConfig.setWorkDir(workDir);
 		projectConfig.setLabels(Collections.singleton("a label"));
 		
-		stateManager.addOrReplaceProjectConfig(projectConfig);
+		ConfigUpdatesDto updates = new ConfigUpdatesDto();
+		updates.setNewProjectConfigs(Arrays.asList(projectConfig));
+		stateManager.applyMultipleUpdates(updates);
 	}
 	
 	@TrainingMethod("trainConfigures,trainSaves")
 	public void testConfiguresAndSaves() throws Exception {
+		importer.createProjectsForUrl(url, null, null, false, NameCollisionResolutionMode.Abort, ArrayUtils.EMPTY_STRING_ARRAY, null, null);
+	}
+	
+	@TrainingMethod("trainConfigures,trainSavesWithPluginConfig")
+	public void testConfiguresAndSavesWithPluginChanges() throws Exception {
+		importer.createProjectsForUrl(url, null, null, false, NameCollisionResolutionMode.Abort, ArrayUtils.EMPTY_STRING_ARRAY, null, null);
+	}
+	
+	@TrainingMethod("trainConfigures,trainPluginConfigUnchanged,trainSavesWithPluginConfig")
+	public void testConfiguresAndSavesWithPluginChangesPluginNotModified() throws Exception {
 		importer.createProjectsForUrl(url, null, null, false, NameCollisionResolutionMode.Abort, ArrayUtils.EMPTY_STRING_ARRAY, null, null);
 	}
 	
@@ -362,7 +409,7 @@ public class ProjectImporterImplTest extends EasyMockTestCase {
 		expect(pluginManager.getPluginConfigInfo("a.fake.repo.plugin"))
 			.andReturn(pluginConfig);
 		
-		repoConfigurator.updateGlobalConfig(pluginConfig);
+		expect(repoConfigurator.updateGlobalConfig(pluginConfig)).andReturn(false);
 		
 		final ProjectConfigDto projectConfig2 = new ProjectConfigDto();
 		
@@ -371,7 +418,9 @@ public class ProjectImporterImplTest extends EasyMockTestCase {
 		projectConfig2.setName(projectName);
 		projectConfig2.setWorkDir("a workdir importedProject location");
 		
-		stateManager.addOrReplaceProjectConfig(projectConfig1, projectConfig2);
+		ConfigUpdatesDto updates = new ConfigUpdatesDto();
+		updates.setNewProjectConfigs(Arrays.asList(projectConfig1, projectConfig2));
+		stateManager.applyMultipleUpdates(updates);
 	}
 	
 	@TrainingMethod("trainConfigures,trainGetSubprojects,trainSavesSubproject")
