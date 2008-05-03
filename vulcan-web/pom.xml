@@ -22,7 +22,34 @@
 	</description>
 	
 	<build>
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<groupId>net.sourceforge.vulcan</groupId>
+					<artifactId>vulcan-maven-plugin</artifactId>
+					<configuration>
+						<versionLabel>${project.version}.${project.build.number}.${net.sourceforge.vulcan.maven-vulcan-plugin.revision}</versionLabel>
+						<vulcanPluginId>${vulcan.plugin.id}</vulcanPluginId>
+						<predefinedSubversionRevision>${project.revision.numeric}</predefinedSubversionRevision>
+					</configuration>
+					<executions>
+						<execution>
+							<goals>
+								<goal>get-subversion-revision</goal>
+								<goal>generate-version-properties</goal>
+							</goals>
+						</execution>
+					</executions>
+				</plugin>
+			</plugins>
+		</pluginManagement>
+		
 		<plugins>
+			<plugin>
+				<groupId>net.sourceforge.vulcan</groupId>
+				<artifactId>vulcan-maven-plugin</artifactId>
+			</plugin>
+
 			<plugin>
 				<artifactId>maven-war-plugin</artifactId>
 				<configuration>
@@ -41,6 +68,13 @@
 							<targetPath>WEB-INF/plugins</targetPath>
 							<includes>
 								<include>*.zip</include>
+							</includes>
+						</resource>
+						<resource>
+							<directory>${project.build.directory}</directory>
+							<targetPath>WEB-INF</targetPath>
+							<includes>
+								<include>version.properties</include>
 							</includes>
 						</resource>
 					</webResources>
