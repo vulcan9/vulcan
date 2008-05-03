@@ -167,9 +167,9 @@ public class CvsProjectConfigurator extends CvsSupport implements ProjectReposit
 		this.config.setRecursive(false);
 	}
 	
-	public void updateGlobalConfig(PluginConfigDto globalRaConfig) {
+	public boolean updateGlobalConfig(PluginConfigDto globalRaConfig) {
 		if (!newProfile) {
-			return;
+			return false;
 		}
 		
 		final CvsConfigDto globalConfig = (CvsConfigDto) globalRaConfig;
@@ -180,6 +180,8 @@ public class CvsProjectConfigurator extends CvsSupport implements ProjectReposit
 		profiles.add(this.profile);
 		
 		globalConfig.setProfiles(profiles.toArray(new CvsRepositoryProfileDto[profiles.size()]));
+		
+		return true;
 	}
 	
 	public String getFile() {
