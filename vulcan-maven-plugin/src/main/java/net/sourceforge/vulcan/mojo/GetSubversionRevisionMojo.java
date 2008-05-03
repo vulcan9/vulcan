@@ -24,15 +24,27 @@ public class GetSubversionRevisionMojo	extends AbstractMojo {
 	private String basedir;
 	
 	/**
+	 * @parameter expression="${project.revision.numeric}"
+	 */
+	private String predefinedSubversionRevision;
+	
+	/**
 	 * @parameter expression="${project}"
-     * @required
-     * @readonly 
+	 * @required
+	 * @readonly 
 	 */
 	private MavenProject mavenProject;
 	
 	private Exception exception;
 	
 	public void execute() throws MojoExecutionException	{
+		if (StringUtils.isNotBlank(predefinedSubversionRevision) && !"0".equals(predefinedSubversionRevision)) {
+			mavenProject.getProperties().setProperty(
+				"net.sourceforge.vulcan.maven-vulcan-plugin.revision",
+				predefinedSubversionRevision);
+			return;
+		}
+		
 		try {
 			final Document contents = exec();
 			final long revision = findRevision(contents);
