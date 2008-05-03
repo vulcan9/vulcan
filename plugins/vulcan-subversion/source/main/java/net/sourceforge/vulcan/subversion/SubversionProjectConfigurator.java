@@ -128,10 +128,10 @@ public class SubversionProjectConfigurator extends SubversionSupport
 		config.setRecursive(false);
 	}
 	
-	public void updateGlobalConfig(PluginConfigDto globalRaConfig) {
+	public boolean updateGlobalConfig(PluginConfigDto globalRaConfig) {
 		final SubversionConfigDto globalConfig = (SubversionConfigDto) globalRaConfig;
 		if (findProfileByUrlPrefix(globalConfig, profile.getRootUrl()) != null) {
-			return;
+			return false;
 		}
 		
 		final SubversionRepositoryProfileDto[] profiles = 
@@ -142,6 +142,8 @@ public class SubversionProjectConfigurator extends SubversionSupport
 		profiles[profiles.length - 1] = profile;
 		
 		globalConfig.setProfiles(profiles);
+		
+		return true;
 	}
 	
 	protected static SubversionRepositoryProfileDto findOrCreateProfile(SVNRepository repo, SubversionConfigDto globalConfig, ProjectConfigDto project, SubversionProjectConfigDto raProjectConfig, String absoluteUrl, String username, String password) throws SVNException {
