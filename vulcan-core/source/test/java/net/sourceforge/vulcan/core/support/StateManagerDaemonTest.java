@@ -213,7 +213,7 @@ public class StateManagerDaemonTest extends StateManagerTestBase {
 		
 		stateMgr.addBuildDaemonConfig(a);
 		stateMgr.addBuildDaemonConfig(b);
-		store.setCommitCalled(false);
+		store.clearCommitCount();
 		
 		final String oldName = b.getName();
 		b.setName("a");
@@ -232,7 +232,7 @@ public class StateManagerDaemonTest extends StateManagerTestBase {
 		stateMgr.addBuildDaemonConfig(config);
 		
 		assertEquals(1, stateMgr.getConfig().getBuildDaemons().length);
-		store.setCommitCalled(false);
+		store.clearCommitCount();
 		
 		try {
 			stateMgr.addBuildDaemonConfig(config);

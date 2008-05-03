@@ -50,6 +50,7 @@ import net.sourceforge.vulcan.core.ProjectNameChangeListener;
 import net.sourceforge.vulcan.core.WorkingCopyUpdateStrategy;
 import net.sourceforge.vulcan.dto.BuildManagerConfigDto;
 import net.sourceforge.vulcan.dto.ComponentVersionDto;
+import net.sourceforge.vulcan.dto.ConfigUpdatesDto;
 import net.sourceforge.vulcan.dto.NamedObject;
 import net.sourceforge.vulcan.dto.PluginConfigDto;
 import net.sourceforge.vulcan.dto.PluginProfileDto;
@@ -77,6 +78,7 @@ public abstract class StateManagerImpl implements StateManager, ProjectManager {
 	ConfigurationStore configurationStore;
 	BuildManager buildManager;
 	PluginManager pluginManager;
+	String version;
 	
 	/* State */
 	boolean running;
@@ -164,12 +166,36 @@ public abstract class StateManagerImpl implements StateManager, ProjectManager {
 		}
 			
 	}
+	public String getVersion() {
+		return version;
+	}
+	public void setVersion(String version) {
+		this.version = version;
+	}
 	public List<ComponentVersionDto> getComponentVersions() {
 		final List<ComponentVersionDto> versions = new ArrayList<ComponentVersionDto>();
 		
 		versions.addAll(pluginManager.getPluginVersions());
 		
 		return versions;
+	}
+	public void applyMultipleUpdates(ConfigUpdatesDto updates) throws DuplicateNameException, StoreException, PluginNotFoundException {
+		try {
+			writeLock.lock();
+			
+			final Collection<ProjectConfigDto> newProjectConfigs = updates.getNewProjectConfigs();
+			if (newProjectConfigs != null && newProjectConfigs.size() > 0) {
+				addOrReplaceProjectConfigInternal(false, false, newProjectConfigs.toArray(new ProjectConfigDto[newProjectConfigs.size()]));
+			}
+			
+			for (PluginConfigDto pluginConfig : updates.getModifiedPluginConfigs().values()) {
+				updatePluginConfigInternal(pluginConfig, null, false);
+			}
+			
+			save();
+		} finally {
+			writeLock.unlock();
+		}
 	}
 	public List<String> getProjectConfigNames() {
 		final List<String> list = new ArrayList<String>();
@@ -197,44 +223,13 @@ public abstract class StateManagerImpl implements StateManager, ProjectManager {
 		}
 	}
 	public void addProjectConfig(ProjectConfigDto... configs) throws DuplicateNameException, StoreException {
-		addOrReplaceProjectConfig(true, configs);
+		addOrReplaceProjectConfigInternal(true, true, configs);
 	}
 	public void addOrReplaceProjectConfig(ProjectConfigDto... configs) throws StoreException {
 		try {
-			addOrReplaceProjectConfig(false, configs);
+			addOrReplaceProjectConfigInternal(false, true, configs);
 		} catch (DuplicateNameException e) {
 			throw new RuntimeException(e);
-		}
-	}
-	public void addOrReplaceProjectConfig(boolean throwOnDuplicate, ProjectConfigDto... configs) throws DuplicateNameException, StoreException {
-		try {
-			writeLock.lock();
-			final ProjectConfigDto[] previous = this.config.getProjects();
-
-			final List<ProjectConfigDto> allConfigs = new ArrayList<ProjectConfigDto>(
-					Arrays.asList(previous));
-			
-			for (ProjectConfigDto config : configs) {
-				final NamedObject existingProject = getConfigOrNull(config.getName(), previous);
-				if (existingProject != null) {
-					if (throwOnDuplicate) {
-						throw new DuplicateNameException(config.getName());
-					}
-					if (!allConfigs.remove(existingProject)) {
-						throw new IllegalStateException();
-					}
-				}
-				
-				config.setLastModificationDate(new Date());
-				
-				allConfigs.add(config);
-			}
-			
-			projectsUpdated(allConfigs.toArray(new ProjectConfigDto[allConfigs.size()]));
-			
-			save();
-		} finally {
-			writeLock.unlock();
 		}
 	}
 	public void updateProjectConfig(String oldName, ProjectConfigDto updatedConfig, boolean setLastModifiedDate) throws DuplicateNameException, NoSuchProjectException, StoreException {
@@ -561,21 +556,7 @@ public abstract class StateManagerImpl implements StateManager, ProjectManager {
 		}
 	}
 	public void updatePluginConfig(PluginConfigDto pluginConfig, Set<PluginProfileDto> renamedProfiles) throws PluginNotFoundException, StoreException {
-		try {
-			writeLock.lock();
-			pluginConfig.setLastModificationDate(new Date());
-			config.getPluginConfigs().put(pluginConfig.getPluginId(), pluginConfig);
-			
-			if (renamedProfiles != null) {
-				updateRenamedProfiles(renamedProfiles);
-			}
-		} finally {
-			writeLock.unlock();
-		}
-		
-		pluginManager.configurePlugin(pluginConfig);
-		
-		save();
+		updatePluginConfigInternal(pluginConfig, renamedProfiles, true);
 	}
 	public void removePlugin(String pluginId) throws StoreException, PluginNotFoundException {
 		try {
@@ -759,6 +740,60 @@ public abstract class StateManagerImpl implements StateManager, ProjectManager {
 			}
 		} finally {
 			writeLock.unlock();
+		}
+	}
+	private void addOrReplaceProjectConfigInternal(boolean throwOnDuplicate, boolean saveOnSuccess, ProjectConfigDto... configs) throws DuplicateNameException, StoreException {
+		try {
+			writeLock.lock();	
+			
+			final ProjectConfigDto[] previous = this.config.getProjects();
+
+			final List<ProjectConfigDto> allConfigs = new ArrayList<ProjectConfigDto>(
+					Arrays.asList(previous));
+			
+			for (ProjectConfigDto config : configs) {
+				final NamedObject existingProject = getConfigOrNull(config.getName(), previous);
+				if (existingProject != null) {
+					if (throwOnDuplicate) {
+						throw new DuplicateNameException(config.getName());
+					}
+					if (!allConfigs.remove(existingProject)) {
+						throw new IllegalStateException();
+					}
+				}
+				
+				config.setLastModificationDate(new Date());
+				
+				allConfigs.add(config);
+			}
+			
+			projectsUpdated(allConfigs.toArray(new ProjectConfigDto[allConfigs.size()]));
+			
+			if (saveOnSuccess) {
+				save();
+			}
+		} finally {
+			writeLock.unlock();
+		}
+	}
+	private void updatePluginConfigInternal(PluginConfigDto pluginConfig, Set<PluginProfileDto> renamedProfiles, boolean saveOnSuccess) throws PluginNotFoundException, StoreException {
+		try {
+			writeLock.lock();
+			
+			pluginConfig.setLastModificationDate(new Date());
+			config.getPluginConfigs().put(pluginConfig.getPluginId(), pluginConfig);
+			
+			if (renamedProfiles != null) {
+				updateRenamedProfiles(renamedProfiles);
+			}
+		} finally {
+			writeLock.unlock();
+		}
+		
+		pluginManager.configurePlugin(pluginConfig);
+		
+		if (saveOnSuccess) {
+			save();
 		}
 	}
 	private void projectsUpdated(ProjectConfigDto[] projects) {

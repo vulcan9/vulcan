@@ -41,16 +41,22 @@ import net.sourceforge.vulcan.metadata.SvnRevision;
 @SvnRevision(id="$Id$", url="$HeadURL$")
 public class StoreStub implements ConfigurationStore, BuildOutcomeStore {
 	StateManagerConfigDto stateManagerConfig;
-	boolean commitCalled;
+	private int commitCount;
 	
 	public StoreStub(StateManagerConfigDto config) {
 		stateManagerConfig = config;
 	}
-	public boolean isCommitCalled() {
-		return commitCalled;
+	public int getCommitCount() {
+		return commitCount;
 	}
-	public void setCommitCalled(boolean commitCalled) {
-		this.commitCalled = commitCalled;
+	public boolean isCommitCalled() {
+		return commitCount > 0;
+	}
+	public void commitCalled() {
+		commitCount++;
+	}
+	public void clearCommitCount() {
+		commitCount = 0;
 	}
 	public StateManagerConfigDto getStateManagerConfig() {
 		return stateManagerConfig;
@@ -62,7 +68,7 @@ public class StoreStub implements ConfigurationStore, BuildOutcomeStore {
 		return stateManagerConfig;
 	}
 	public void storeConfiguration(StateManagerConfigDto config) {
-		commitCalled = true;
+		commitCalled();
 		stateManagerConfig = config;
 	}
 	public PluginMetaDataDto extractPlugin(InputStream is) throws StoreException {
