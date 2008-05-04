@@ -188,8 +188,10 @@ public abstract class StateManagerImpl implements StateManager, ProjectManager {
 				addOrReplaceProjectConfigInternal(false, false, newProjectConfigs.toArray(new ProjectConfigDto[newProjectConfigs.size()]));
 			}
 			
-			for (PluginConfigDto pluginConfig : updates.getModifiedPluginConfigs().values()) {
-				updatePluginConfigInternal(pluginConfig, null, false);
+			if (updates.getModifiedPluginConfigs() != null) {
+				for (PluginConfigDto pluginConfig : updates.getModifiedPluginConfigs().values()) {
+					updatePluginConfigInternal(pluginConfig, null, false);
+				}
 			}
 			
 			save();
