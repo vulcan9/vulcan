@@ -73,10 +73,9 @@
 						<finalName>${vulcan.plugin.id}</finalName>
 						<outputDirectory>${vulcan.zips.target}</outputDirectory>
 						<appendAssemblyId>false</appendAssemblyId>
+						<attach>false</attach>
 						<descriptorRefs>
-							<param>
-								vulcan-plugin
-							</param>
+							<param>vulcan-plugin</param>
 						</descriptorRefs>
 					</configuration>
 					<executions>

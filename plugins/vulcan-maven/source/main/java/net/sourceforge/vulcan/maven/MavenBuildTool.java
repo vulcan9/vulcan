@@ -58,6 +58,7 @@ public class MavenBuildTool extends AntBuildTool {
 	static final String MAVEN1_LAUNCHER_PATH_PREFIX = "forehead";
 	static final String MAVEN1_LAUNCHER_MAIN_CLASS_NAME = "com.werken.forehead.Forehead";
 	static final String MAVEN1_ENDORSED_DIR = "lib" + File.separator + "endorsed";
+	static final String OSX_ENDORSED_DIR = "/System/Library/Java/Extensions";
 	
 	/*
 	 * In maven-2.0.6, the boot jar is in boot.
@@ -376,6 +377,10 @@ public class MavenBuildTool extends AntBuildTool {
 		buf.append(File.pathSeparatorChar);
 		buf.append(new File(mavenHome, MAVEN1_ENDORSED_DIR).getCanonicalPath());
 		
+		if (new File(OSX_ENDORSED_DIR).isDirectory()) {
+			buf.append(File.pathSeparatorChar);
+			buf.append(OSX_ENDORSED_DIR);
+		}
 		return buf.toString();
 	}
 	
@@ -424,6 +429,7 @@ public class MavenBuildTool extends AntBuildTool {
 	
 	static File getJdkToolsJar(String javaHome) throws ConfigException {
 		final String tools = "lib" + File.separator + "tools.jar";
+		final String classes = "Classes" + File.separator + "classes.jar";
 		
 		File toolJar = new File(javaHome, tools);
 		
@@ -431,6 +437,11 @@ public class MavenBuildTool extends AntBuildTool {
 			toolJar = new File(new File(javaHome).getParentFile(), tools);
 		}
 		
+		if (!toolJar.exists()) {
+			// OS X uses classes.jar instead of tools.jar
+			toolJar = new File(new File(javaHome).getParentFile(), classes);
+		}
+
 		if (!toolJar.exists()) {
 			throw new ConfigException("maven.jdk.tools.not.found", new String[] {javaHome});
 		}
