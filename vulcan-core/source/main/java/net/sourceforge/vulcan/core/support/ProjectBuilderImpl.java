@@ -145,7 +145,6 @@ public class ProjectBuilderImpl implements ProjectBuilder {
 		} catch (ProjectUpToDateException e) {
 			buildStatus.setStatus(Status.UP_TO_DATE);
 		} catch (Throwable e) {
-			e.printStackTrace(System.err);
 			log.error("unexpected error", e);
 			buildStatus.setStatus(Status.ERROR);
 			buildStatus.setMessageKey("messages.build.uncaught.exception");
