@@ -411,13 +411,6 @@ public class EmailPlugin implements BuildManagerObserverPlugin, ConfigurablePlug
         buf.append("site/");
         buf.append(projectConfig.getName());
 
-        final String sitePath = projectConfig.getSitePath();
-        if (!sitePath.startsWith("/")) {
-            buf.append('/');
-        }
-
-        buf.append(sitePath);
-
         return new URL(buf.toString());
     }
 

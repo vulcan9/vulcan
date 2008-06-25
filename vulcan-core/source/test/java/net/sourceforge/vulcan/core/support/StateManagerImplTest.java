@@ -18,6 +18,7 @@
  */
 package net.sourceforge.vulcan.core.support;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
@@ -28,6 +29,7 @@ import java.util.Locale;
 import java.beans.PropertyDescriptor;
 
 import net.sourceforge.vulcan.core.ProjectNameChangeListener;
+import net.sourceforge.vulcan.dto.BuildArtifactLocationDto;
 import net.sourceforge.vulcan.dto.BuildManagerConfigDto;
 import net.sourceforge.vulcan.dto.BuildToolConfigDto;
 import net.sourceforge.vulcan.dto.ConfigUpdatesDto;
@@ -95,6 +97,24 @@ public class StateManagerImplTest extends StateManagerTestBase
 
 		stateMgr.start();
 		assertSame(mgrConfig, buildManagerConfig);
+	}
+	public void testGetBuildArtifactsReturnsCopy() throws Exception {
+		List<BuildArtifactLocationDto> list = new ArrayList<BuildArtifactLocationDto>();
+		list.add(new BuildArtifactLocationDto("x", "y", "z", false));
+		
+		stateMgr.getConfig().setArtifactLocations(list);
+		
+		assertNotSame(list, stateMgr.getArtifactLocations());
+		assertEquals(list, stateMgr.getArtifactLocations());
+	}
+	public void testUpdateBuildArtifacts() throws Exception {
+		List<BuildArtifactLocationDto> list = new ArrayList<BuildArtifactLocationDto>();
+		
+		stateMgr.updateArtifactLocations(list);
+		
+		assertSame(list, stateMgr.getConfig().getArtifactLocations());
+		
+		assertTrue(store.isCommitCalled());
 	}
 	public void testAddProject() throws Exception {
 		final ProjectConfigDto config = createProjectDto("a");

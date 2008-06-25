@@ -127,7 +127,7 @@
 								styleId="sched${v:mangle(label)}"/>
 							<jsp:element name="label">
 								<jsp:attribute name="for">sched${v:mangle(label)}</jsp:attribute>
-								<jsp:body>${label}</jsp:body>
+								<jsp:body><c:out value="${label}" escapeXml="true"/></jsp:body>
 							</jsp:element>
 						</li>
 					</c:forEach>

@@ -19,10 +19,12 @@
 package net.sourceforge.vulcan;
 
 import java.util.Date;
+import java.util.List;
 
 import net.sourceforge.vulcan.core.DependencyBuildPolicy;
 import net.sourceforge.vulcan.core.DependencyGroup;
 import net.sourceforge.vulcan.core.WorkingCopyUpdateStrategy;
+import net.sourceforge.vulcan.dto.BuildArtifactLocationDto;
 import net.sourceforge.vulcan.dto.ProjectConfigDto;
 import net.sourceforge.vulcan.exception.ConfigException;
 import net.sourceforge.vulcan.exception.DuplicateNameException;
@@ -45,6 +47,8 @@ public interface ProjectManager {
 	public void deleteProjectConfig(String... names)
 			throws ProjectNeedsDependencyException, NoSuchProjectException, StoreException;
 
+	public List<BuildArtifactLocationDto> getArtifactLocations();
+	
 	public ProjectConfigDto[] getProjectsForScheduler(String schedulerName);
 
 	public RepositoryAdaptor getRepositoryAdaptor(ProjectConfigDto projectConfig) throws ConfigException;

@@ -38,6 +38,8 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.jsp.PageContext;
 
 import net.sourceforge.vulcan.StateManager;
+import net.sourceforge.vulcan.core.BuildManager;
+import net.sourceforge.vulcan.dto.ProjectStatusDto;
 import net.sourceforge.vulcan.metadata.SvnRevision;
 
 import org.apache.struts.Globals;
@@ -49,7 +51,7 @@ public abstract class JstlFunctions {
 	private static WebApplicationContext webApplicationContext;
 	
 	public static String mangle(String s) {
-		return s.replaceAll("[ +\\[\\]]", "_");
+		return s.replaceAll("[ +\\[\\]<>&]", "_");
 	}
 	
 	public static String encode(String s) {
@@ -151,6 +153,11 @@ public abstract class JstlFunctions {
 		return getProjectNamesByLabels(mgr, itr);
 	}
 
+	public static ProjectStatusDto getOutcomeByBuildNumber(String projectName, int buildNumber) {
+		final BuildManager mgr = (BuildManager) webApplicationContext.getBean("buildManager", BuildManager.class);
+		return mgr.getStatusByBuildNumber(projectName, buildNumber);
+	}
+	
 	private static List<String> getProjectNamesByLabels(StateManager mgr, Iterable<String> itr) {
 		final Set<String> set = new HashSet<String>();
 		boolean empty = true;

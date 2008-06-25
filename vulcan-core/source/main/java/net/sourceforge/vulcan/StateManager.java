@@ -22,6 +22,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
+import net.sourceforge.vulcan.dto.BuildArtifactLocationDto;
 import net.sourceforge.vulcan.dto.ConfigUpdatesDto;
 import net.sourceforge.vulcan.dto.PluginConfigDto;
 import net.sourceforge.vulcan.dto.PluginProfileDto;
@@ -38,6 +39,7 @@ import net.sourceforge.vulcan.scheduler.ProjectScheduler;
 
 @SvnRevision(id="$Id$", url="$HeadURL$")
 public interface StateManager {
+	public void updateArtifactLocations(List<BuildArtifactLocationDto> list) throws StoreException;
 	public List<String> getProjectConfigNames();
 	public List<String> getProjectConfigNamesByLabel(String label);
 	public List<String> getProjectLabels();

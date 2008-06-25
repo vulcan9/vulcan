@@ -24,6 +24,7 @@
 				<li><html:link forward="importProjectConfig"><spring:message code="link.import.project"/></html:link></li>
 				<li><html:link forward="createProjectConfig"><spring:message code="label.project.new"/></html:link></li>
 				<li><html:link forward="deleteProjects"><spring:message code="label.delete.projects"/></html:link></li>
+				<li><html:link forward="editBuildReports"><spring:message code="label.setup.build.reports"/></html:link></li>
 				<li><spring:message code="label.projects"/>
 					<ul>
 						<c:forEach items="${stateManager.config.projects}" var="project">
@@ -44,7 +45,7 @@
 					<ul>
 						<c:forEach items="${stateManager.projectLabels}" var="label">
 							<li>
-								<html:link forward="createProjectLabel" paramId="name" paramName="label">${label}</html:link>
+								<html:link forward="createProjectLabel" paramId="name" paramName="label"><c:out value="${label}" escapeXml="true"/></html:link>
 							</li>
 						</c:forEach>
 					</ul>

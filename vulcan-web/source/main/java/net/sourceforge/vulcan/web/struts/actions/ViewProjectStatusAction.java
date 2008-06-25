@@ -126,7 +126,6 @@ public final class ViewProjectStatusAction extends ProjectReportBaseAction {
 			return mapping.findForward("failure");
 		}
 
-		final String transform = statusForm.getTransform();
 		final String view = statusForm.getView();
 		
 		if ("diff".equals(view)) {
@@ -138,6 +137,7 @@ public final class ViewProjectStatusAction extends ProjectReportBaseAction {
 		}
 		
 		final Document doc = createDocument(request, status, ids, index, currentlyBuilding);
+		final String transform = statusForm.getTransform();
 		
 		return sendDocument(doc, transform, projectConfig, status.getBuildNumber(), createTransformParameters(request), mapping, request, response);
 	}

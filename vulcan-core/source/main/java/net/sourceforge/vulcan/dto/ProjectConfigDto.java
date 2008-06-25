@@ -44,7 +44,6 @@ public class ProjectConfigDto extends NameDto {
 	BuildToolConfigDto buildToolConfig;
 	
 	String workDir = StringUtils.EMPTY;
-	String sitePath = StringUtils.EMPTY;
 	String bugtraqUrl = StringUtils.EMPTY;
 	String bugtraqLogRegex1 = StringUtils.EMPTY;
 	String bugtraqLogRegex2 = StringUtils.EMPTY;
@@ -137,11 +136,8 @@ public class ProjectConfigDto extends NameDto {
 	public void setBuildOnNoUpdates(boolean buildOnNoUpdates) {
 		this.buildOnNoUpdates = buildOnNoUpdates;
 	}
-	public String getSitePath() {
-		return sitePath;
-	}
+	@Deprecated
 	public void setSitePath(String sitePath) {
-		this.sitePath = sitePath;
 	}
 	public String getRepositoryTagName() {
 		return repositoryTagName;

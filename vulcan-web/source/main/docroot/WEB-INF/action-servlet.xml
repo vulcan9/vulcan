@@ -147,5 +147,10 @@
 	<bean name="/admin/setup/managePlugin"
 			class="net.sourceforge.vulcan.web.struts.actions.ManagePluginAction"
 			parent="baseDispatchAction"/>
+			
+	<bean name="/admin/setup/saveArtifactLocations"
+			class="net.sourceforge.vulcan.web.struts.actions.SaveArtifactLocationsAction">
+		<property name="stateManager" ref="stateManager"/>
+	</bean>
 </beans>
 	
