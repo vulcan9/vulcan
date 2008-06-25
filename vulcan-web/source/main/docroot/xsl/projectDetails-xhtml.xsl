@@ -41,6 +41,7 @@
 	<xsl:param name="testFailureBuildNumberLabel"/>
 	<xsl:param name="newTestFailureLabel"/>
 	<xsl:param name="reloadInterval"/>
+	<xsl:param name="buildDirectoryLabel"/>
 	
 	<xsl:key name="builds-by-message" match="project" use="message"/>
 	
@@ -86,6 +87,12 @@
 						</xsl:call-template>
 					</xsl:if>
 						
+					<xsl:if test="/project/reports">
+						<xsl:call-template name="bubble">
+							<xsl:with-param name="target" select="'reports'"/>
+						</xsl:call-template>
+					</xsl:if>
+					
 					<xsl:if test="/project/change-sets">
 						<xsl:call-template name="bubble">
 							<xsl:with-param name="target" select="'change-sets'"/>
@@ -178,6 +185,9 @@
 								<xsl:when test="$target='metrics'">
 									<xsl:apply-templates select="/project/metrics"/>
 								</xsl:when>
+								<xsl:when test="$target='reports'">
+									<xsl:apply-templates select="/project/reports"/>
+								</xsl:when>
 								<xsl:when test="$target='test-failures'">
 									<xsl:apply-templates select="/project/test-failures"/>
 								</xsl:when>
@@ -215,6 +225,8 @@
 			<xsl:apply-templates select="/project/build-reason"/>
 			
 			<xsl:apply-templates select="/project/update-type"/>
+
+			<xsl:apply-templates select="/project/work-directory"/>
 			
 			<xsl:apply-templates select="/project/build-requested-by"/>
 			<xsl:apply-templates select="/project/build-scheduled-by"/>
@@ -316,7 +328,31 @@
 			</tbody>
 		</table>
 	</xsl:template>
-		
+	
+	<xsl:template match="/project/reports">
+		<table>
+			<caption>Reports</caption>
+			<tbody>
+				<xsl:for-each select="./report">
+					<tr>
+						<td>
+							<a>
+								<xsl:attribute name="href">
+									<xsl:value-of select="$projectSiteURL"/>
+									<xsl:value-of select="./path"/>
+								</xsl:attribute>
+								<xsl:value-of select="./name"/>
+							</a>
+						</td>
+						<td>
+							<xsl:value-of select="./description"/>
+						</td>
+					</tr>
+				</xsl:for-each>
+			</tbody>
+		</table>
+	</xsl:template>
+	
 	<xsl:template match="build-reason">
 		<div xmlns="http://www.w3.org/1999/xhtml" class="requestUser">
 			<xsl:value-of select="$buildReasonLabel"/>
@@ -328,6 +364,14 @@
 	<xsl:template match="update-type">
 		<div xmlns="http://www.w3.org/1999/xhtml" class="requestUser">
 			<xsl:value-of select="$updateTypeLabel"/>
+			<xsl:text> </xsl:text>
+			<xsl:value-of select="."/>
+		</div>
+	</xsl:template>
+	
+	<xsl:template match="work-directory">
+		<div xmlns="http://www.w3.org/1999/xhtml" class="requestUser">
+			<xsl:value-of select="$buildDirectoryLabel"/>
 			<xsl:text> </xsl:text>
 			<xsl:value-of select="."/>
 		</div>

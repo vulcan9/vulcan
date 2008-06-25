@@ -102,18 +102,6 @@ public abstract class ProjectReportBaseAction extends Action {
 		buf.append(buildNumber);
 		buf.append('/');
 		
-		String sitePath = projectConfig.getSitePath();
-		
-		if (!StringUtils.isBlank(sitePath)) {
-			if (sitePath.startsWith("/")) {
-				sitePath = sitePath.substring(1);	
-			}
-		} else if (sitePath == null){
-			sitePath = "";
-		}
-		
-		buf.append(sitePath);
-		
 		return RequestUtils.absoluteURL(request, buf.toString());
 	}
 	protected URL getSelfURL(ActionMapping mapping, HttpServletRequest request, String transform) throws MalformedURLException {

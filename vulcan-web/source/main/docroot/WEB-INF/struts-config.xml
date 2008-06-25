@@ -55,6 +55,7 @@
 		<forward name="createBuildDaemonConfig" path="/admin/setup/manageBuildDaemonConfig.do?action=edit&amp;amp;createNew=true&amp;amp;daemon=true"/>
 		<forward name="viewConfig" path="/admin/viewConfig.do?download"/>
 		<forward name="importConfig" path="/admin/setup/importConfig.jsp"/>
+		<forward name="editBuildReports" path="/admin/setup/reports.jsp"/>
 		
 		<!-- build manager forwards -->
 		<forward name="manualBuildForm" path="/buildmanagement/manualBuildForm.do"/>
@@ -175,6 +176,9 @@
 			<forward name="configure" path="/WEB-INF/jsp/metadataConfiguration.jsp"/>
 		</action>
 
+		<action path="/admin/setup/saveArtifactLocations"
+				type="org.springframework.web.struts.DelegatingActionProxy"/>
+		
 		<action path="/admin/viewConfig"
 				type="org.springframework.web.struts.DelegatingActionProxy"/>
 

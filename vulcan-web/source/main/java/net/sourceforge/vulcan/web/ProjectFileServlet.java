@@ -139,7 +139,7 @@ public class ProjectFileServlet extends HttpServlet {
 		final File file = getFile(workDir, pathInfo, true);
 		
 		if (!file.exists()) {
-			if (shouldFallback(request, workDir, projectConfig.getSitePath(), file)) {
+			if (shouldFallback(request, workDir, file)) {
 				response.sendRedirect(getFallbackParentPath(request, workDir));
 				return;
 			}
@@ -374,20 +374,9 @@ public class ProjectFileServlet extends HttpServlet {
 	}
 	
 	/**
-	 * @return true if request parameter "fallback" is specified,
-	 * or the requested path matches the default ProjectConfigDto.SitePath.
+	 * @return true if request parameter "fallback" is specified.
 	 */
-	private boolean shouldFallback(HttpServletRequest request, String workDir, String sitePath, File file) {
-		if (request.getParameter("fallback") != null) {
-			return true;
-		}
-		
-		if (isBlank(sitePath)) {
-			return false;
-		}
-		
-		final File siteFile = getFile(workDir, sitePath, false);
-		
-		return file.equals(siteFile);
+	private boolean shouldFallback(HttpServletRequest request, String workDir, File file) {
+		return request.getParameter("fallback") != null;
 	}
 }

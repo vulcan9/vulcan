@@ -45,6 +45,7 @@ import javax.xml.transform.stream.StreamResult;
 import net.sourceforge.vulcan.EasyMockTestCase;
 import net.sourceforge.vulcan.ProjectManager;
 import net.sourceforge.vulcan.core.BuildManager;
+import net.sourceforge.vulcan.dto.BuildArtifactLocationDto;
 import net.sourceforge.vulcan.dto.BuildMessageDto;
 import net.sourceforge.vulcan.dto.ChangeLogDto;
 import net.sourceforge.vulcan.dto.ChangeSetDto;
@@ -86,6 +87,10 @@ public class AbstractProjectDomBuilderTest extends EasyMockTestCase {
 		protected Transformer createTransformer(String format) throws NoSuchTransformFormatException {
 			return trans;
 		}
+		@Override
+		protected boolean artifactExists(String workDir, String path) {
+			return artifactExists;
+		}
 	};
 	
 	Date date = new Date(1234567890L);
@@ -126,11 +131,16 @@ public class AbstractProjectDomBuilderTest extends EasyMockTestCase {
 			transResult = outputTarget;
 		}
 	};
+
+	private boolean artifactExists;
+	private List<BuildArtifactLocationDto> artifactLocations = new ArrayList<BuildArtifactLocationDto>();
 	
 	public AbstractProjectDomBuilderTest() {
 		pm = createMock(ProjectManager.class);
 		bm = createMock(BuildManager.class);
 		eh = createMock(EventHandler.class);
+		
+		expect(pm.getArtifactLocations()).andReturn(artifactLocations).anyTimes();
 	}
 	
 	@Override
@@ -145,6 +155,7 @@ public class AbstractProjectDomBuilderTest extends EasyMockTestCase {
 		projectStatus.setRepositoryUrl("http://localhost");
 		projectStatus.setTagName("rc2");
 		projectStatus.setBuildNumber(331);
+		projectStatus.setWorkDir("/home/vulcan/work/a name");
 		
 		projectStatus.setErrors(new ArrayList<BuildMessageDto>());
 		projectStatus.setWarnings(new ArrayList<BuildMessageDto>());
@@ -216,8 +227,41 @@ public class AbstractProjectDomBuilderTest extends EasyMockTestCase {
 		
 		assertNotNull(elem.getChild("diff-available"));
 		assertNotNull(elem.getChild("build-log-available"));
-
+		assertContainsChildWithText(elem, "work-directory", projectStatus.getWorkDir());
+		
 		verify();
+	}
+	
+	public void testAddsReportsWhenPresent() throws Exception {
+		artifactExists = true;
+		artifactLocations.add(new BuildArtifactLocationDto("x", "report on x", "/x.html", true));
+		
+		replay();
+
+		final Document doc = doCall();
+
+		final Element elem = doc.getRootElement();
+		
+		final Element reportNode = elem.getChild("reports");
+		
+		assertNotNull(reportNode);
+		
+		assertEquals(1, reportNode.getContentSize());
+	}
+	
+	public void testIgnoresReportsWhenNotPresent() throws Exception {
+		artifactExists = false;
+		artifactLocations.add(new BuildArtifactLocationDto("x", "report on x", "/x.html", true));
+		
+		replay();
+
+		final Document doc = doCall();
+
+		final Element elem = doc.getRootElement();
+		
+		final Element reportNode = elem.getChild("reports");
+		
+		assertEquals(null, reportNode);
 	}
 	
 	public void testBuiltByScheduler() throws Exception {
@@ -246,6 +290,7 @@ public class AbstractProjectDomBuilderTest extends EasyMockTestCase {
 		projectStatus.setBuildLogId(null);
 		projectStatus.setBuildReasonKey(null);
 		projectStatus.setBuildReasonArgs(null);
+		projectStatus.setWorkDir(null);
 		
 		reset();
 		replay();

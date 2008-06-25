@@ -503,25 +503,6 @@ public class ProjectFileServletTest extends ServletTestCase {
 		assertEquals("/myApp/site/myProject/77/subdir/", redirect);
 		assertEquals(0, response.getStatusCode());
 	}
-	public void testSendsRedirectOnMissingWhenEqualsProjectSite() throws Exception {
-		projectConfig.setSitePath("subdir/foo/bar/baz.html");
-		
-		servlet.init(servletConfig);
-		
-		request.setPathInfo("/myProject/6765/subdir/foo/bar/baz.html");
-		
-		expect(mgr.getProjectConfig("myProject")).andReturn(projectConfig);
-		expect(buildManager.getStatusByBuildNumber("myProject", 6765)).andReturn(latestStatus);
-		
-		replay();
-		
-		servlet.doGet(request, response);
-		
-		verify();
-		
-		assertEquals(0, response.getStatusCode());
-		assertEquals("/myApp/site/myProject/6765/subdir/", redirect);
-	}
 	public void testSendsRedirectOnDirListingNoSlash() throws Exception {
 		request.setRequestURI("/myApp/myProject/5432");
 		
