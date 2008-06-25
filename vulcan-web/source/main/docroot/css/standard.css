@@ -1,110 +1,136 @@
-/* Colors: */
-caption, span.caption, .header {
-	background-color: #C6DBFF;
-}
+@import url("yui/reset-min.css");
+@import url("yui/fonts-min.css");
+@import url("yui/base-min.css");
 
-div.bubble {
-	border: 4px solid #C6DBFF;
-}
-
-th {
-	background-color: #E7EFFF;
-	border-right: 1px solid #BDBABD;
-}
-tbody > th {
-	background-color: white;
-}
-td {
-	background-color: white;
-}
-
-.build-errors th, .build-warnings th, .test-failures th {
-	background-color: #FFF3D3;
-}
-
-div.error, div.warning, div.message,
-div.build-errors, div.build-errors caption,
-div.build-warnings, div.build-warnings caption,
-div.test-failures, div.test-failures caption {
-	border: 4px solid #FFD363 !important;
-	background-color: #FFD363;
-}
-
+/*** Main ******************************************************************/
 html, body {
+	background-color: #E7E7E7;
+}
+
+#logo {
+	background: transparent no-repeat url("../images/vulcanlogo.gif");
+	width: 83px;
+	height: 83px;
+	text-indent: -2000px;
+	overflow: hidden;
+}
+
+#main {
+	position: relative;
+	width: 974px;
+	margin-left: auto;
+	margin-right: auto;
+}
+
+#bottom {
+	text-align: center;
+	font-size: smaller;
+	background-color: #E7E7E7;
+}
+
+#bottom p {
+	margin: 0;
+}
+
+#content {
+	min-height: 400px;
 	background-color: white;
-	height: 100%;
+	border: 2px solid #9DAC39;
 }
 
-.success, .PASS {
-	color: #43F143;
+#content-header {
+	background-color: #F1FF95;
+	padding: 10px;
 }
 
-.failure, .FAIL {
-	color: red;
+#content-header span {
+	font-size: larger;
+	font-weight: bold;
+}
+/*** Top nav **********************************************************/
+ul#topnav {
+	background-color: black;
+	width: 50%;
+	margin-left: auto;
+	margin-right: auto;
+	margin-top: -20px;
+	padding: 10px;
 }
 
-.SKIP {
-	color: #C0C000;
+ul#topnav li a {
+	color: #F1FF95;
+}
+/*** Secondary nav *********************************************************/
+ul#secondarynav {
+	position: absolute;
+	top: 0;
+	right: 0;
 }
 
-.ERROR {
-	color: #FFA500;
+.username {
+	font-weight: bold;
 }
 
-a:link,a:visited {
+ul#secondarynav li {
+	margin-right: 0;
+}
+
+ul#secondarynav li:after {
+	color: darkgrey;
+	content: " | ";
+}
+
+#secondarynav li:last-child:after {
+	content: "";
+}
+/*** General use ***********************************************************/
+.hidden { display: none; }
+
+a {
+	text-decoration: none;
+}
+
+a:visited, a:link {
 	color: #0000CE;
 }
 
-a:active {
-	color: red;
+a.sorted-ascending,a.sorted-descending {
+	background: transparent no-repeat top right;
+	padding-right: 16px;
 }
 
-table {
-	background-color: #BDBABD;
-}
-td, th {
-	border-bottom: 1px solid #BDBABD;
+a.sorted-ascending,th.age a.sorted-descending {
+	background-image: url("../images/arrow_down.png");
 }
 
-.diff, .log {
-	background-color: #FAFAFA;
+a.sorted-descending,th.age a.sorted-ascending {
+	background-image: url("../images/arrow_up.png");
 }
 
-input[disabled] + label, label + input[disabled] {
-	color: gray;
-}
-
-input[type=text].new-label {
-	width: 12ex;
-	margin-left: 1ex;
-}
-
-.new-test-failure {
-	color: red;
-}
-
-.test-namespace {
-	color: gray;
-}
-
-/* Everything Else */
-html, body {
-	font-family: Arial, Helvetica, sans-serif;
-	font-size: 10pt;
-	padding: 0;
+ul {
 	margin: 0;
 }
 
-form {
-	margin: 0;
-	padding: 0;
+ul.flow {
+	display: inline;
+	margin-left: 2em;
 }
 
+ul.inline li {
+	display: inline;
+	margin-right: 30px;
+}	
 
-.BUILDING, .building {
-	font-weight: bold;
-	background: transparent repeat top left;
-	background-image: url("../images/construction.gif");
+ul.input-group li, .project-checkboxes li {
+	list-style: none;
+}
+
+.project-checkboxes li {
+	white-space: nowrap;
+}
+
+.project-checkboxes {
+	-moz-column-width: 18em;
 }
 
 span.error {
@@ -127,436 +153,177 @@ span.error, span.warning, span.message {
 	padding-left: 20px;
 }
 
-h3.build-outcome-message, li.issue-list {
-	max-width: 500px;
-}
-
-div.build-nav a {
-	margin-left: 5px;
-	margin-right: 5px;
-}
-div.file-upload {
-	padding: 10px;
-}
-
-.diff, .log {
-	position: absolute;
-	border: 1px solid black;
-	font-family: "Bitstream Vera Sans Mono", monospace;
-	left: 10px;
-	right: 10px;
-	height: 90%;
-	overflow: scroll;
-}
-
-.issue, .issue-unlinked {
-	font-family: "Bitstream Vera Sans Mono", monospace;
-	font-weight: bold;
-}
-
-.issue-unlinked {
-	border-bottom: 1px dotted orange;
-}
-
-.test-name {
-	font-size: larger;
-	display: block;
-}
-
-.test-namespace {
-	font-style: italic;
-}
-
-a.health {
-	float: right;
-	padding: 3px;
-}
-
-.authInfo {
-	float: right;
-	padding: 3px;
-}
-
-.requestUser {
-	font-weight: bold;
-	padding-bottom: 1ex;
-}
-
-div.header {
-	position: fixed;
-	top: 0;
-	left: 0;
-	right: 0;
-	height: 18px;
-	padding: 2px;
-	padding-left: 10px;
-	padding-bottom: 2px;
-	z-index: 2;
-}
-
-div.link {
-	margin-bottom: 1em;
-}
-
-div.content {
-	margin-top: 4em;
-	margin-left: 6px;
+input[type="checkbox"], input[type="radio"] {
 	margin-right: 6px;
-	position: static;
-	display: block;
 }
 
-div.setup-content {
-	margin-top: 4em;
-	margin-left: 320px;
-	position: static;
-	display: block;
+#loading-message {
+	color: red;
+	display: none;
+	float: right;
 }
-
-div.inputGroup h1 {
-	margin-top: 4px;
-	font-size: 10pt;
+/*** Dashboard  *******************************************************/
+.project-label-active {
+	border: 1px solid black;
 	font-weight: bold;
 }
 
-div.inputGroup input {
-	margin-right: 5px;
-}
-
-div.tables {
-	margin-left: auto;
-	margin-right: auto;
-	width: 50em;
-}
-
-div.buildHistoryReport table, div.buildHistoryReport caption {
-	margin-left: 0;
-}
-
-div.tables table {
+table#projectTable {
+	border-collapse: collapse;
+	border-spacing: 0;
 	width: 100%;
 }
 
-div.projectCheckboxes {
-	-moz-column-width: 18em;
-}
-div.projectCheckboxes li {
-	white-space: nowrap;
-}
-div.chart-legend {
-	float: left;
-	border: 1px solid black;
-}
-.legend-header {
-	font-weight: bold;
-	position: relative;
-	margin-left: 8px;
-	top: -8px;
-	background-color: white;
-}
-.legend-color-box {
-	width: 1em;
-	height: 1em;
-	border: 1px solid black;
-	margin-left: 5px;
-	margin-right: 5px;
-	padding: 0;
-	float: left;
-}
-a.xml {
-	float: right;
-	padding-top: 1px;
-	padding-right: 1px;
-	display: none;
-}
-
-a.edit,a.editing {
-	position: absolute;
-	margin-left: 1px;
-	display: none;
-}
-
-a img {
+#projectTable td, th {
 	border: none;
-}
-
-ul.menu {
-	display: inline;
-	padding-left: 0;
-	margin-left: 0;
-}
-
-ul.menu li:before {
-	content: " | ";
-}
-
-ul.menu li {
-	list-style: square;
-	display: inline;
-}
-
-ul.issue-list {
-	list-style: none;
-	display: inline;
 	padding: 0;
-	margin-left: 0;
+	vertical-align: top;
 }
 
-ul.issue-list li {
-	display: inline;
-	margin-left: 0.75em;
+#projectTable tr {
+	height: 50px;
 }
 
-ul.modified-paths {
-	margin: 0;
-	padding-left: 15px;
+#projectTable tr.half {
+	height: 25px;
 }
 
-ul.options,ul.projectBuildOptions,div.projectCheckboxes ul,
-ul.metaDataOptions,ul.object-array,ul.primitive-array,
-ul.dateRanges {
-	list-style: none;
-	padding-left: 0;
-	padding-right: 10px;
-	margin-left: 0;
-	margin-right: 10px;
-	margin-top: 0;
+#projectTable tr.PASS {
+	background-color: #F3FFF0;
 }
 
-ul.dateRanges li {
-	padding-left: 2em;
+#projectTable tr.FAIL {
+	background-color: #FFC0C0;
 }
 
-ul.options li {
-	display: inline;
-}
-
-div.detail-menu {
-	float: left;
-	margin-right: 2em;
-}
-
-ul.detail-menu {
-	list-style: none;
-	padding-left: 4px;
-	padding-right: 4px;
-	margin-left: 0;
-}
-
-ul.detail-menu > li {
-	margin-bottom: 2ex;
-	padding-left: 0;
-	margin-left: 0;
-}
-
-div.detail-menu > span {
-	font-size: larger;
-	font-weight: bold;
-	padding-left: 0;
-	border-bottom: 1px solid black;
-}
-
-input[type=radio]+label {
-	margin-right: 1em;
-}
-
-input[type=text], input[type=password] {
-	width: 35em;
-}
-input[type=button], button {
-	margin-right: 1em;
-}
-
-a {
-	text-decoration: none;
-}
-
-a.sorted-ascending,a.sorted-descending {
-	background: transparent no-repeat top right;
-	padding-right: 16px;
-}
-
-a.sorted-ascending,th.age a.sorted-descending {
-	background-image: url("../images/arrow_down.png");
-}
-
-a.sorted-descending,th.age a.sorted-ascending {
-	background-image: url("../images/arrow_up.png");
-}
-
-div.bubble {
-	margin-bottom: 2em;
-	padding: 0;
-	margin-left: auto;
-	margin-right: auto;
-}
-
-div.upper-left, div.upper-right, div.lower-left, div.lower-right {
-	width: 4px;
-	height: 4px;
-}
-div.upper-left, div.upper-right {
-	margin-top: -4px;
-}
-div.lower-left, div.lower-right  {
-	margin-bottom: -4px;
-}
-div.upper-left {
-	float: left;
-	
-	margin-left: -4px;
-	background-image: url("../images/ul.gif");
-}
-div.upper-right {
-	float: right;
-	margin-right: -4px;
-	background-image: url("../images/ur.gif");
-}
-div.lower-left {
-	float: left;
-	margin-left: -4px;
-	background-image: url("../images/ll.gif");
-}
-div.lower-right  {
-	float: right;
-	margin-right: -4px;
-	background-image: url("../images/lr.gif");
-}
-caption, span.caption {
-	padding-left: 4px;
-	padding-bottom: 4px;
-	font-size: 12pt;
-	font-weight: bold;
-	text-align: left;
-}
-span.caption {
-	display: block;
-}
-
-table {
-	border-collapse: collapse;
-}
-
-table.error, table.warning, table.message,
-table.buildHistoryReportForm,
-table.manualBuild {
-	margin-left: auto;
-	margin-right: auto;
-}
-table.blended td {
-	border: none;
-}
+/*** Build report *****************************************************/
 table.build-summary {
 	float: left;
 	margin-right: 2em;
 }
-table.change-sets, .build-errors, .build-warning, .test-failures {
+
+/*** Setup menu *******************************************************/
+#setupnav {
+	float: left;
+	border: 1px solid darkgrey;
+}
+
+h2.setup-group {
+	border-bottom: 2px solid lightgrey;
 	clear: left;
 }
-table.about th {
-	width: 8em;
+
+div#lightbox {
+	position: absolute;
+	display: none;
+	left: 0;
+	top: 0;
+	right: 0;
+	bottom: 0;
+	background-color: white;
 }
-td.component-version {
-	text-align: center;
+
+div.foo {
+	margin: 100px;
+	border: 4px solid purple;
+	background-color: white;
 }
-table.build-messages tbody td {
-	font-family: "Bitstream Vera Sans Mono", "MS Courier New", monospace;
-	font-size: smaller;
-	white-space: pre;
-}
-table.projectConfig {
-	width: 60em;
-}
-table.dynamicEdit {
-	width: 50em;
-}
-table.builds {
-	width: 100%;
-}
-table .error {
+
+ul.setup-option-list li {
+	float: left;
 	display: block;
-}
-
-table.primitiveArray,table.objectArray {
-	margin-left: 0;
-	border-spacing: 0 0;
-	border: 0;
-}
-
-table.primitiveArray th,table.primitiveArray td,table.objectArray th,table.objectArray td {
-	vertical-align: middle;
-}
-
-td.wrapper {
-	padding: 0;
-}
-td.wrapper {
-	border-bottom: none;
-}
-
-tbody > th {
-	text-align: right;
-	width: 10em;
-}
-
-td,th {
-	padding: 3px;
-	vertical-align: top;
-}
-
-th:last-child, th.last-child {
-	border-right: 0;
-}
-th.timestamp, td.timestamp, td.label {
-	white-space: nowrap;
-}
-
-td.status {
-	font-weight: bold;
+	width: 120px;
+	height: 120px;
+	margin-right: 30px;
+	margin-bottom: 30px;
+	list-style: none;
 	text-align: center;
+	background: transparent url("../images/setup-button.png") 0 0;
 }
-th.long {
-	text-align: left;
-}
-td.build-number {
-	text-align: center;
+ul.setup-option-list li:hover {
+	background-position: -120px -120px;
 }
 
-td.dateInputs {
-	vertical-align: bottom;
+ul.setup-option-list li a {
+	color: black;
+	display: block;
+	padding-left: 10px;
+	padding-right: 10px;
+	margin-top: 10px;
+	padding-top: 48px;
 }
 
-div.tables th,div.tables td {
-	text-align: center;
+ul.setup-option-list a.import {
+	background: transparent no-repeat top center url("../images/import.png");
 }
 
-span.banner {
-	font-size: larger;
-	font-weight: bold;
+ul.setup-option-list a.add {
+	background: transparent no-repeat top center url("../images/add_32.png");
 }
 
-span.description {
-	font-style: italic;
+ul.setup-option-list a.edit {
+	background: transparent no-repeat top center url("../images/edit_32.png");
 }
 
-select.transform {
-	margin-left: 4px;
-	margin-bottom: 8px;
-}
-select.reloadInterval {
-	margin-left: 1ex;
-	margin-right: 1ex;
+ul.setup-option-list a.group {
+	background: transparent no-repeat top center url("../images/group.png");
 }
 
-input.buildNumber {
-	width: 8em;
-	margin-left: 1em;
+ul.setup-option-list a.remove {
+	background: transparent no-repeat top center url("../images/remove_32.png");
 }
 
-input[type=submit] {
-	margin-left: 1em;
+ul.setup-option-list a.reports {
+	background: transparent no-repeat top center url("../images/report.png");
 }
 
-.vulcan-logo {
+ul.setup-option-list a.java-homes {
+	background: transparent no-repeat top center url("../images/java.png");
+}
+
+ul.setup-option-list a.system-settings {
+	background: transparent no-repeat top center url("../images/system-settings.png");
+}
+/*** Import Projects *******************************************************/
+.processing, .status-detail {
+	color: #7E97A6;
+}
+
+.ajax-progress-bar {
+	margin-top: 20px;
+	padding-top: 24px;
+	padding-left: 10px;
+	background: transparent no-repeat top left;
+	background-image: url("../images/progressbar.gif");
+}
+
+.floater {
+	border: 4px solid lightgrey;
+	float: left;
+	min-width: 350px;
+	max-width: 400px;
+	margin-right: 10px;
+	margin-bottom: 10px;
+}
+
+.floater h3 {
+	border-bottom: 2px solid lightgrey;
+	margin-bottom: 0;
+	margin-top: 0;
+}
+
+.hideme {
 	float: right;
+}
+
+.pass {
+	background-color: #C0FFC0;
+}
+
+.clearfix {
+	clear: both;
+}
+
+span.updates {
+	color: darkgrey;
 }

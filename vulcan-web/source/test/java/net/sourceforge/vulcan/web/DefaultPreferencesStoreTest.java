@@ -35,6 +35,8 @@ public class DefaultPreferencesStoreTest extends TestCase {
 		prefs.setLabels(new String[] {"x", "y"});
 		prefs.setGroupByLabel(true);
 		prefs.setReloadInterval(543);
+		prefs.setPopupMode("modePopup");
+		prefs.setStylesheet("standard");
 	}
 	
 	public void testRoundTrip() throws Exception {
@@ -44,6 +46,15 @@ public class DefaultPreferencesStoreTest extends TestCase {
 		assertEquals(prefs, out);
 	}
 	
+	public void testRoundTripTruncatesEquals() throws Exception {
+		final String data = store.convertToString(prefs);
+		assertTrue(data.endsWith("=="));
+		
+		final PreferencesDto out = store.convertFromString(data.substring(0, data.length()-2));
+		
+		assertEquals(prefs, out);
+	}
+
 	public void testAscii() throws Exception {
 		final String data = store.convertToString(prefs);
 		assertTrue(StringUtils.isAsciiPrintable(data));

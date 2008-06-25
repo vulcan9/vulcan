@@ -16,7 +16,6 @@
 
 <body>
 
-<v:bubble styleClass="manualBuild">
 <html:form action="/buildmanagement/manualBuild" method="post">
 <table class="manualBuild">
 	<caption><spring:message code="captions.build.manual"/></caption>
@@ -24,7 +23,7 @@
 		<tr>
 			<td><spring:message code="label.tag.options"/></td>
 			<td>
-				<ul class="metaDataOptions">
+				<ul class="input-group">
 					<li>
 						<html:radio property="chooseTags" value="false" styleId="tagDefault"/>
 						<label for="tagDefault"><spring:message code="label.tag.default"/></label>
@@ -40,7 +39,7 @@
 		<tr>
 			<td><spring:message code="label.update.strategy"/></td>
 			<td>
-				<ul class="metaDataOptions">
+				<ul class="input-group">
 					<li>
 						<html:radio property="updateStrategy" value="Default" styleId="updateStrategyDefault"/>
 						<label for="updateStrategyDefault"><spring:message code="label.update.strategy.default"/></label>
@@ -61,7 +60,7 @@
 			<td><spring:message code="label.projects"/></td>
 			<td>
 				<div class="projectCheckboxes">
-					<ul>
+					<ul class="input-group">
 					<c:forEach items="${stateManager.projectConfigNames}" var="projectName">
 						<li>
 							<html:multibox property="targets" value="${projectName}"
@@ -82,7 +81,7 @@
 		<tr>
 			<td><spring:message code="label.build.manual.options"/></td>
 			<td>
-				<ul class="metaDataOptions">
+				<ul class="input-group">
 					<li>
 						<html:checkbox property="buildOnNoUpdates" styleId="noUpdates"/>
 						<label for="noUpdates"><spring:message code="label.build.when.no.updates"/></label>
@@ -98,7 +97,7 @@
 			<td><spring:message code="label.build.manual.dependency.options"/></td>
 			<td>
 				<span class="description"><spring:message code="label.build.manual.dependency.options.description"/></span>
-				<ul class="metaDataOptions">
+				<ul class="input-group">
 					<li>
 						<html:radio property="dependencies" value="NONE" styleId="depNONE"/>
 						<label for="depNONE"><spring:message code="label.build.deps.none"/></label>
@@ -122,7 +121,6 @@
 	</tbody>
 </table>
 </html:form>
-</v:bubble>
 
 </body>
 </html>

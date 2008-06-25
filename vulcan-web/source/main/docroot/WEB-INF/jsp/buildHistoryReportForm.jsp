@@ -31,7 +31,7 @@
 			<td>
 				<html:radio property="rangeType" value="date" styleId="rangeByDate"/>
 				<label for="rangeByDate"><spring:message code="label.range.by.date"/></label>
-				<ul class="dateRanges">
+				<ul class="input-group">
 					<li>
 						<html:radio property="dateRangeSelector" value="today" styleId="dateRangeToday"/>
 						<label for="dateRangeToday"><spring:message code="label.range.date.today"/></label>
@@ -98,7 +98,7 @@
 		<tr>
 			<td><spring:message code="label.projects"/></td>
 			<td colspan="3">
-				<div class="projectCheckboxes">
+				<div class="project-checkboxes">
 					<ul>
 						<c:forEach items="${stateManager.projectConfigNames}" var="projectName">
 							<li>
@@ -128,7 +128,7 @@
 		<tr>
 			<td><spring:message code="label.options"/></td>
 			<td colspan="3">
-				<ul class="metaDataOptions">
+				<ul class="input-group">
 					<li>
 						<html:multibox property="omitTypes" value="SKIP" styleId="omitSkip"/>
 						<label for="omitSkip"><spring:message code="label.report.omit.skip"/></label>
@@ -148,7 +148,7 @@
 					<html:option value="xhtml">XHTML</html:option>
 					<html:option value="">XML</html:option>
 				</html:select>
-				<ul class="metaDataOptions">
+				<ul class="input-group">
 					<li>
 						<html:radio property="download" value="false" styleId="download_f"/>
 						<label for="download_f">

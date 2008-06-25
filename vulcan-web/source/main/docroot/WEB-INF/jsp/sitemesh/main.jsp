@@ -24,6 +24,7 @@
 			<c:url var="cssUrl" value="/css/standard.css"/>
 		</c:otherwise>
 	</c:choose>
+	
 	<jsp:element name="link">
 		<jsp:attribute name="rel">stylesheet</jsp:attribute>
 		<jsp:attribute name="type">text/css</jsp:attribute>
@@ -74,14 +75,21 @@
 </head>
 
 <body>
-	<jsp:include page="/WEB-INF/jsp/sitemesh/banner.jsp" flush="true"/>
-	
-	<div class="content" id="content">
-		<c:if test="${showSetupMenu}">
-			<jsp:include page="/WEB-INF/jsp/sitemesh/setupMenu.jsp" flush="true"/>
-		</c:if>
+	<div id="main" class="yui-navset">
+		<jsp:include page="/WEB-INF/jsp/sitemesh/topnav.jsp" flush="true"/>
 		
-		<decorator:body/>
+		<div id="content">
+			<c:if test="${showSetupMenu}">
+				<!--jsp:include page="/WEB-INF/jsp/sitemesh/setupMenu.jsp" flush="true"/-->
+			</c:if>
+			
+			<decorator:body/>
+		</div>
+		
+		<div id="bottom">
+			<p>Version ${stateManager.version} Copyright (C) 2005-2008</p>
+			<p>GNU General Public License v2</p>
+		</div>
 	</div>
 </body>
 </html>

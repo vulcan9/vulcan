@@ -334,6 +334,49 @@ function warnPendingChangesHandler(event) {
 	}
 }
 
+jQuery.fn.loadCustom = function (url, params, selector) {
+	var target = this;
+	
+	$("#loading-message").show();
+	
+	jQuery.get(url, params, function(data, textStatus) {
+		var contents;
+
+		if (data && data.getElementById) {
+			contents = $(document.importNode(data.getElementsByTagName("body")[0], true)).find(selector);
+		} else {
+			contents = jQuery("<div/>").append(data.replace(/<script(.|\s)*?\/script>/g, "")).find(selector);
+		}
+
+		// re-register handlers on new table
+		contents.find("th.sortable a").click(setPreference);
+		
+		target.replaceWith(contents);
+		$("#loading-message").fadeOut();
+	});
+}
+
+function setPreference(event) {
+	event.preventDefault();
+	
+	var url = $(this).attr("href");
+	$("#projectTable").loadCustom(url, null, "#projectTable");
+	
+	return false;
+}
+
+function toggleProjectLabel(event) {
+	event.preventDefault();
+	$(this).toggleClass("project-label-active");
+}
+
+function displayProjectSelector(event) {
+	event.preventDefault();
+
+	$("#lightbox").fadeIn("slow");	
+
+	return false;
+}
 function registerHandler(type, value, handler) {
 	var inputs = document.getElementsByTagName('input');
 	for (var i=0; i<inputs.length; i++) {
@@ -401,6 +444,11 @@ function registerHandlers() {
 	
 		customAddEventListener(helpLink, 'click', launchHelpHandler);
 	}
+	
+	// toggle project labels
+	$("a.project-label").click(toggleProjectLabel).click(setPreference);
+	$("th.sortable a").click(setPreference);
+	$(".select-project").click(displayProjectSelector);
 }
 
 function getConfirmMessages() {
@@ -416,6 +464,6 @@ function customAddEventListener(target, eventType, callback) {
     }
 }
 
-customAddEventListener(window, 'load', registerHandlers);
-customAddEventListener(window, 'load', getConfirmMessages);
-customAddEventListener(window, 'beforeunload', warnPendingChangesHandler);
+$(document).ready(registerHandlers);
+$(document).ready(getConfirmMessages);
+$(document).ready(warnPendingChangesHandler);

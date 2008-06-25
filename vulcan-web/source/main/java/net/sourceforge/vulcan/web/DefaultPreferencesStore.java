@@ -42,7 +42,7 @@ public class DefaultPreferencesStore implements PreferencesStore {
 			final ByteArrayOutputStream os = new ByteArrayOutputStream();
 			final ObjectOutputStream oos = new ObjectOutputStream(os);
 			oos.writeObject(prefs);
-			
+			oos.close();
 			return new String(Base64.encodeBase64(os.toByteArray()));
 		} catch (IOException e) {
 			throw new RuntimeException(e);
@@ -50,6 +50,11 @@ public class DefaultPreferencesStore implements PreferencesStore {
 	}
 
 	public PreferencesDto convertFromString(String data) {
+		if (!data.endsWith("==")) {
+			// browsers sometimes eat the terminating equals signs which results in corruption.
+			data += "==";
+		}
+		
 		try {
 			final ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(Base64.decodeBase64(data.getBytes())));
 		
