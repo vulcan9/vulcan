@@ -125,6 +125,7 @@ create table modified_paths (
 create index idx_builds_uuid on builds (uuid);
 create index idx_builds_project_id on builds (project_id);
 create index idx_builds_completion_date on builds (completion_date);
+create index idx_builds_work_dir on builds (work_dir);
 create index idx_build_deps_build_id on build_dependencies(build_id);
 create index idx_build_messages_msg on build_messages (message);
 create index idx_build_messages_build_id on build_messages (build_id);

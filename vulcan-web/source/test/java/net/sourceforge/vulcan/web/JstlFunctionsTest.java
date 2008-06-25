@@ -68,6 +68,9 @@ public class JstlFunctionsTest extends EasyMockTestCase {
 	public void testBrackets() throws Exception {
 		assertEquals("fullThrottle_0_", JstlFunctions.mangle("fullThrottle[0]"));
 	}
+	public void testMangleLtGtNpsb() throws Exception {
+		assertEquals("_rocky___bullwinkle_", JstlFunctions.mangle("<rocky & bullwinkle>"));
+	}
 	public void testGetPropList() throws Exception {
 		ActionErrors errors = new ActionErrors();
 		errors.add("a", new ActionMessage("foo"));
