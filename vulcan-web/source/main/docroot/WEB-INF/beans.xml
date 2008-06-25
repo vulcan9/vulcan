@@ -9,7 +9,12 @@
 	<!-- This will replace values with System Properties where applicable: -->
 	<bean id="placeholderConfig" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
 		<property name="ignoreUnresolvablePlaceholders" value="true"/>
-		<property name="location" value="WEB-INF/application.properties"/>
+		<property name="locations">
+			<list>
+				<value>WEB-INF/application.properties</value>
+				<value>WEB-INF/version.properties</value>
+			</list>
+		</property>
 	</bean>
 
 	<bean name="preferencesStore" class="net.sourceforge.vulcan.web.DefaultPreferencesStore">
@@ -33,6 +38,7 @@
 		<lookup-method name="createBuildDaemon" bean="buildDaemon"/>
 		<lookup-method name="createProjectScheduler" bean="quartzScheduler"/>
 		
+		<property name="version" value="${version}"/>
 		<property name="buildManager" ref="buildManager"/>
 		<property name="pluginManager" ref="pluginManager"/>
 		<property name="configurationStore" ref="configurationStore"/>
@@ -202,6 +208,7 @@
 				<entry key="testNameLabel" value="label.test.failure.name"/>
 				<entry key="testFailureBuildNumberLabel" value="label.test.failure.build.number"/>
 				<entry key="newTestFailureLabel" value="label.test.failure.new"/>
+				<entry key="buildDirectoryLabel" value="label.work.directory"/>
 			</map>
 		</property>
 	</bean>

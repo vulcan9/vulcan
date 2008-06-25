@@ -47,18 +47,6 @@
 	</tr>
 	<tr>
 		<jsp:element name="td">
-			<jsp:attribute name="title"><spring:message code="label.site.path.description"/></jsp:attribute>
-			<jsp:body><spring:message code="label.site.path"/></jsp:body>
-		</jsp:element>
-		<td colspan="2">
-			<html:text property="config.sitePath"/>
-			<html:messages property="config.sitePath" id="msg">
-				<span class="error">${msg}</span>
-			</html:messages>
-		</td>
-	</tr>
-	<tr>
-		<jsp:element name="td">
 			<jsp:attribute name="title"><spring:message code="label.bugtraq.url.description"/></jsp:attribute>
 			<jsp:body><spring:message code="label.bugtraq.url"/></jsp:body>
 		</jsp:element>
