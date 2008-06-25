@@ -148,5 +148,6 @@ public abstract class ServletTestCase extends EasyMockTestCase {
 		wac.getBeanFactory().registerSingleton(Keys.EVENT_HANDLER, eventHandler);
 	}
 
-	public interface StateAndProjectManager extends StateManager, ProjectManager {}
+	public interface StateAndProjectManager extends StateManager, ProjectManager {
+	}
 }

@@ -49,7 +49,6 @@ public class ConfigDto extends PluginConfigDto {
 		addProperty(pds, "vulcanUrl", "ConfigDto.vulcanUrl.name", "ConfigDto.vulcanUrl.description", locale);
 		addProperty(pds, "profiles", "ConfigDto.profiles.name", "ConfigDto.profiles.description", locale);
 
-
 		return pds;
 	}
 

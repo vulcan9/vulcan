@@ -20,10 +20,11 @@
 		<jsp:attribute name="href"><c:url value="/rss.jsp"/></jsp:attribute>
 	</jsp:element>
 	<c:if test="${preferences.reloadInterval > 0}">
-		<jsp:element name="meta">
-			<jsp:attribute name="http-equiv">Refresh</jsp:attribute>
-			<jsp:attribute name="content">${preferences.reloadInterval}</jsp:attribute>
-		</jsp:element>
+		<script type="text/javascript">
+			$(document).ready(function() {
+				//TODO
+			});
+		</script>
 	</c:if>
 </head>
 <body>
@@ -47,7 +48,27 @@
 	</v:bubble>
 </c:when>
 <c:otherwise>
-<div class="tables">
+
+<div id="content-header">
+	<span class="">Latest activity</span>
+	<ul class="inline flow">
+		<li><html:link page="/managePreferences.do?action=save&amp;amp;clearLabels=true">All Projects</html:link></li>
+		<c:forEach items="${stateManager.projectLabels}" var="label">
+			<li>
+				<c:set var="labelClass" value="project-label"/>
+				<c:forEach items="${preferences.labels}" var="requestedLabel">
+					<c:if test="${label eq requestedLabel}">
+						<c:set var="labelClass" value="project-label project-label-active"/>
+					</c:if>
+				</c:forEach>
+				
+				<html:link styleClass="${labelClass}" page="/managePreferences.do?action=save" paramId="toggleLabel" paramName="label">
+					<c:out value="${label}" escapeXml="true"/>
+				</html:link>
+			</li>
+		</c:forEach>
+	</ul>
+</div>
 
 <c:choose>
 	<c:when test="${preferences.groupByLabel}">
@@ -69,7 +90,6 @@
 </c:choose>
 
 <c:if test="${preferences.showBuildDaemons}">
-<v:bubble>
 <table class="buildDaemons">
 	<caption><spring:message code="captions.build.daemons"/></caption>
 	<thead>
@@ -123,11 +143,9 @@
 	</c:forEach>
 	</tbody>
 </table>
-</v:bubble>
 </c:if>
 
 <c:if test="${preferences.showBuildQueue}">
-<v:bubble>
 <table class="buildQueue">
 	<caption><spring:message code="captions.build.queue"/></caption>
 	<thead>
@@ -171,11 +189,9 @@
 		</c:choose>
 	</tbody>
 </table>
-</v:bubble>
 </c:if>
 
 <c:if test="${preferences.showSchedulers}">
-<v:bubble>
 <table class="schedulers">
 	<caption><spring:message code="captions.schedulers"/></caption>
 	<thead>
@@ -211,9 +227,7 @@
 	</c:forEach>
 	</tbody>
 </table>
-</v:bubble>
 </c:if>
-</div>
 </c:otherwise>
 </c:choose>
 </body>

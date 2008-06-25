@@ -157,7 +157,14 @@
 	
 	<xsl:template match="project">
 		<tr>
+			<xsl:attribute name="class"><xsl:value-of select="status"/></xsl:attribute>
+			<xsl:if test="./first-failure">
+				<xsl:attribute name="class"><xsl:value-of select="status"/> half</xsl:attribute>
+			</xsl:if>
 			<td>
+				<xsl:if test="./first-failure">
+					<xsl:attribute name="rowspan">2</xsl:attribute>
+				</xsl:if>
 				<xsl:element name="a">
 					<xsl:attribute name="href"><xsl:value-of select="$detailLink"/><xsl:value-of select="@name"/></xsl:attribute>
 					<xsl:value-of select="@name"/>
@@ -176,5 +183,13 @@
 				<xsl:value-of select="status"/>
 			</xsl:element>
 		</tr>
+		<xsl:if test="./first-failure">
+			<tr>
+				<xsl:attribute name="class"><xsl:value-of select="status"/> half</xsl:attribute>
+				<td colspan="5">
+					Build has been broken for <xsl:value-of select="./first-failure/elapsed-time/@age"/>
+				</td>
+			</tr>
+		</xsl:if>
 	</xsl:template>
 </xsl:stylesheet>

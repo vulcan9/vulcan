@@ -18,6 +18,12 @@
  */
 package net.sourceforge.vulcan.web.struts.actions;
 
+import static org.apache.commons.lang.StringUtils.isNotBlank;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -40,6 +46,24 @@ public final class ManagePreferencesAction extends BaseDispatchAction {
 			throws Exception {
 		
 		final PreferencesForm form = (PreferencesForm) actionForm;
+		
+		final String toggleLabel = form.getToggleLabel();
+		if (isNotBlank(toggleLabel)) {
+			final ArrayList<String> labels = new ArrayList<String>();
+			
+			final String[] existingLabels = form.getConfig().getLabels();
+			
+			if (existingLabels != null) {
+				labels.addAll(Arrays.asList(existingLabels));
+			}
+			
+			if (!labels.remove(toggleLabel)) {
+				labels.add(toggleLabel);
+			}
+			
+			Collections.sort(labels);
+			form.getConfig().setLabels(labels.toArray(new String[labels.size()]));
+		}
 		
 		request.removeAttribute(Keys.PREFERENCES);
 		request.getSession().setAttribute(Keys.PREFERENCES, form.getConfig());

@@ -18,14 +18,18 @@
  */
 
 function updateStatusLater() {
-	setTimeout(updateStatus, 1000);
+	if (!window.importProjectRequestComplete) {
+		window.setTimeout(updateStatus, 2500);
+	}
 }
 
 function updateStatus() {
-	$("#status").load(contextRoot + "ajax/importStatus.jsp", null, updateStatusLater);
+	$("#status").load(contextRoot + "ajax/importProjectStatus.jsp", null, updateStatusLater);
 }
 
 function onProjectImportFormSubmit(x) {
+	$(".error").hide();
+	
 	var params = {};
 	
 	$("#projectImportForm input").each(function(i) {
@@ -37,6 +41,8 @@ function onProjectImportFormSubmit(x) {
 			params[this.name] = this.value;
 		}
 	});
+	
+	window.importProjectRequestComplete = false;
 	
 	jQuery.get(this.action, params, onProjectImportProcessingComplete);
 	
@@ -58,8 +64,10 @@ function onProjectImportProcessingComplete(data, textStatus) {
 	
 	$("#content").replaceWith(contents);
 	
+	window.importProjectRequestComplete = true;
+	
 	// re-register events for newly imported elements
-	onLoadProjectImportForm()
+	onLoadProjectImportForm();
 }
 
 function onLoadProjectImportForm() {

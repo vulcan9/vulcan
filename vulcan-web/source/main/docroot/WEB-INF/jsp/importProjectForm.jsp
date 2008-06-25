@@ -22,7 +22,6 @@
 
 <body>
 
-<v:bubble styleClass="">
 <html:form action="/admin/setup/createProjectFromUrl" method="post">
 <table>
 	<caption><spring:message code="captions.import.project"/></caption>
@@ -127,7 +126,7 @@
 								styleId="sched${v:mangle(label)}"/>
 							<jsp:element name="label">
 								<jsp:attribute name="for">sched${v:mangle(label)}</jsp:attribute>
-								<jsp:body>${label}</jsp:body>
+								<jsp:body><c:out value="${label}" escapeXml="true"/></jsp:body>
 							</jsp:element>
 						</li>
 					</c:forEach>
@@ -145,17 +144,15 @@
 				<html:hidden property="authenticationRequired"/>
 			</td>
 		</tr>
-		<tr>
-			<td colspan="2">
-				<div id="status" class="ajax hidden">
-					<span class="processing"><spring:message code="ajax.processing"/></span>
-				</div>
-			</td>
-		</tr>
 	</tbody>
 </table>
 </html:form>
-</v:bubble>
+
+<div id="status" class="ajax-progress-bar hidden">
+	<div class="processing">
+		<spring:message code="ajax.processing"/>
+	</div>
+</div>
 	
 <v:messages/>
 </body>
