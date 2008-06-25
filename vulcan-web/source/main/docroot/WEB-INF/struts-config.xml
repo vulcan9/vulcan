@@ -175,6 +175,9 @@
 			<forward name="configure" path="/WEB-INF/jsp/metadataConfiguration.jsp"/>
 		</action>
 
+		<action path="/admin/setup/saveArtifactLocations"
+				type="org.springframework.web.struts.DelegatingActionProxy"/>
+		
 		<action path="/admin/viewConfig"
 				type="org.springframework.web.struts.DelegatingActionProxy"/>
 

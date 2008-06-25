@@ -46,6 +46,7 @@ import javax.xml.transform.TransformerException;
 import net.sourceforge.vulcan.ProjectManager;
 import net.sourceforge.vulcan.core.BuildManager;
 import net.sourceforge.vulcan.core.ProjectDomBuilder;
+import net.sourceforge.vulcan.dto.BuildArtifactLocationDto;
 import net.sourceforge.vulcan.dto.BuildMessageDto;
 import net.sourceforge.vulcan.dto.ChangeLogDto;
 import net.sourceforge.vulcan.dto.ChangeSetDto;
@@ -116,6 +117,10 @@ public abstract class AbstractProjectDomBuilder implements ProjectDomBuilder {
 
 		addMetrics(root, status.getMetrics(), locale);
 		addTestFailures(root, status.getTestFailures());
+		final String workDir = status.getWorkDir();
+		if (isNotBlank(workDir)) {
+			addReports(root, workDir);
+		}
 		
 		return doc;
 	}
@@ -181,6 +186,10 @@ public abstract class AbstractProjectDomBuilder implements ProjectDomBuilder {
 	
 	protected abstract Transformer createTransformer(String format) throws NoSuchTransformFormatException;
 	protected abstract String formatMessage(String key, Object[] args, Locale locale);
+	
+	protected boolean artifactExists(String workDir, String path) {
+		return new File(workDir, path).exists();
+	}
 	
 	protected String readLog(File log) throws IOException {
 		final InputStream is = new FileInputStream(log);
@@ -264,6 +273,33 @@ public abstract class AbstractProjectDomBuilder implements ProjectDomBuilder {
 			root.addContent(testFailuresRoot);
 		}
 	}
+	
+	private void addReports(final Element root, final String workDir) {
+		final List<BuildArtifactLocationDto> specs = projectManager.getArtifactLocations();
+		
+		final Element reportsNode = new Element("reports");
+		
+		for (BuildArtifactLocationDto spec : specs) {
+			if (artifactExists(workDir, spec.getPath())) {
+				addArtifact(reportsNode, spec);
+			}
+		}
+		
+		if (reportsNode.getContentSize() > 0) {
+			root.addContent(reportsNode);
+		}
+	}
+	
+	private void addArtifact(final Element reportsNode, BuildArtifactLocationDto spec) {
+		final Element artifact = new Element("report");
+		
+		addChildNodeWithText(artifact, "name", spec.getName());
+		addChildNodeWithText(artifact, "description", spec.getDescription());
+		addChildNodeWithText(artifact, "path", spec.getPath());
+		
+		reportsNode.addContent(artifact);
+	}
+	
 	private static Element addChildNodeWithText(final Element root, final String name, final String text) {
 		final Element child = new Element(name);
 		child.setText(text);
@@ -432,6 +468,11 @@ public abstract class AbstractProjectDomBuilder implements ProjectDomBuilder {
 		final String repositoryTagName = status.getTagName();
 		if (isNotBlank(repositoryTagName)) {
 			addChildNodeWithText(root, "repository-tag-name", repositoryTagName);
+		}
+		
+		final String workDir = status.getWorkDir();
+		if (isNotBlank(workDir)) {
+			addChildNodeWithText(root, "work-directory", workDir);
 		}
 		
 		final String requestedBy = status.getRequestedBy();

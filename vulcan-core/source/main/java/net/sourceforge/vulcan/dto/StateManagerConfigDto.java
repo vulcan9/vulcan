@@ -19,6 +19,7 @@
 package net.sourceforge.vulcan.dto;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import net.sourceforge.vulcan.metadata.SvnRevision;
@@ -30,6 +31,7 @@ public class StateManagerConfigDto extends BaseDto {
 	private ProjectConfigDto[] projects = {};
 	private SchedulerConfigDto[] schedulers = {};
 	private SchedulerConfigDto[] buildDaemons = {};
+	private List<BuildArtifactLocationDto> artifactLocations;
 	private Map<String, PluginConfigDto> pluginConfigs = new HashMap<String, PluginConfigDto>();
 	
 	public BuildManagerConfigDto getBuildManagerConfig() {
@@ -63,5 +65,11 @@ public class StateManagerConfigDto extends BaseDto {
 	}
 	public void setPluginConfigs(Map<String, PluginConfigDto> pluginConfigs) {
 		this.pluginConfigs = pluginConfigs;
+	}
+	public List<BuildArtifactLocationDto> getArtifactLocations() {
+		return artifactLocations;
+	}
+	public void setArtifactLocations(List<BuildArtifactLocationDto> artifactLocations) {
+		this.artifactLocations = artifactLocations;
 	}
 }

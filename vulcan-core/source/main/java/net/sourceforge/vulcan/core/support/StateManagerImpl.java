@@ -48,6 +48,7 @@ import net.sourceforge.vulcan.core.DependencyBuildPolicy;
 import net.sourceforge.vulcan.core.DependencyGroup;
 import net.sourceforge.vulcan.core.ProjectNameChangeListener;
 import net.sourceforge.vulcan.core.WorkingCopyUpdateStrategy;
+import net.sourceforge.vulcan.dto.BuildArtifactLocationDto;
 import net.sourceforge.vulcan.dto.BuildManagerConfigDto;
 import net.sourceforge.vulcan.dto.ComponentVersionDto;
 import net.sourceforge.vulcan.dto.ConfigUpdatesDto;
@@ -380,6 +381,25 @@ public abstract class StateManagerImpl implements StateManager, ProjectManager {
 		final ArrayList<String> list = new ArrayList<String>(labels);
 		Collections.sort(list);
 		return list;
+	}
+	public List<BuildArtifactLocationDto> getArtifactLocations() {
+		try {
+			readLock.lock();
+			return Collections.unmodifiableList(config.getArtifactLocations());
+		} finally {
+			readLock.unlock();
+		}
+	}
+	public void updateArtifactLocations(List<BuildArtifactLocationDto> list) throws StoreException {
+		try {
+			writeLock.lock();
+			
+			config.setArtifactLocations(list);
+			
+			save();
+		} finally {
+			writeLock.unlock();
+		}
 	}
 	public SchedulerConfigDto getSchedulerConfig(String name) {
 		try {

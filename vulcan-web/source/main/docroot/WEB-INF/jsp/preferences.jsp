@@ -108,7 +108,7 @@
 								<c:forEach items="${stateManager.projectLabels}" var="label">
 									<li>
 										<html:multibox property="config.labels" value="${label}" styleId="lbl${v:mangle(label)}"/>
-										<label for="lbl${v:mangle(label)}">${label}</label>
+										<label for="lbl${v:mangle(label)}"><c:out value="${label}" escapeXml="true"/></label>
 									</li>
 								</c:forEach>
 							</ul>
