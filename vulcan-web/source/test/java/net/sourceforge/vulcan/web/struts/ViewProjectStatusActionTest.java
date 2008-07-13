@@ -74,6 +74,8 @@ public class ViewProjectStatusActionTest extends MockApplicationContextStrutsTes
 		
 		paramMap.put("projectSiteURL", new URL("http://localhost/site/some%20project/12/"));
 		paramMap.put("issueTrackerURL", "");
+		
+		expect(buildManager.getMostRecentBuildNumberByWorkDir((String)anyObject())).andReturn(42).anyTimes();
 	}
 	
 	public void testBlankName() throws Exception {
@@ -482,6 +484,7 @@ public class ViewProjectStatusActionTest extends MockApplicationContextStrutsTes
 		assertPropertyHasError(ActionMessages.GLOBAL_MESSAGE, "errors.request.invalid");
 	}
 	public void testTransform() throws Exception {
+		paramMap.put("workingCopyBuildNumber", 42);
 		paramMap.put("viewProjectStatusURL", new URL("http://localhost/viewProjectStatus.do?transform=xhtml"));
 		
 		final Map<String, ProjectStatusDto> empty = Collections.emptyMap();
@@ -503,6 +506,7 @@ public class ViewProjectStatusActionTest extends MockApplicationContextStrutsTes
 		prefs.setReloadInterval(3424);
 		request.getSession().setAttribute(Keys.PREFERENCES, prefs);
 		
+		paramMap.put("workingCopyBuildNumber", 42);
 		paramMap.put("reloadInterval", Integer.valueOf(prefs.getReloadInterval()));
 		paramMap.put("viewProjectStatusURL", new URL("http://localhost/viewProjectStatus.do?transform=xhtml"));
 		
@@ -521,6 +525,7 @@ public class ViewProjectStatusActionTest extends MockApplicationContextStrutsTes
 		assertEquals("text/html", response.getContentType());
 	}
 	public void testTransformBadFormatType() throws Exception {
+		paramMap.put("workingCopyBuildNumber", 42);
 		paramMap.put("viewProjectStatusURL", new URL("http://localhost/viewProjectStatus.do?transform=nonesuch"));
 		final Map<String, ProjectStatusDto> empty = Collections.emptyMap();
 		trainForTransform(empty, "nonesuch");

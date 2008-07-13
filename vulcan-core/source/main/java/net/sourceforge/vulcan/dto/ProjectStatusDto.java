@@ -43,8 +43,8 @@ public class ProjectStatusDto extends NameDto {
 	private Object[] messageArgs;
 	private String buildReasonKey;
 	private Object[] buildReasonArgs;
-	private java.util.Date startDate;
-	private java.util.Date completionDate;
+	private Date startDate;
+	private Date completionDate;
 	private RevisionTokenDto revision;
 	private ChangeLogDto changeLog;
 

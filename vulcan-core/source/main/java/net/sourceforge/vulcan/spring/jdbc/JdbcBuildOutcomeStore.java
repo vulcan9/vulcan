@@ -153,6 +153,17 @@ public class JdbcBuildOutcomeStore implements BuildOutcomeStore, ProjectNameChan
 		}
 	}
 
+	public Integer findMostRecentBuildNumberByWorkDir(String workDir) {
+		final int result = jdbcTemplate.queryForInt("select ifnull(max(build_number), -1) from builds where work_dir=?",
+				new Object[] { workDir });
+		
+		if (result == -1) {
+			return null;
+		}
+		
+		return result;
+	}
+	
 	public void projectNameChanged(String oldName, String newName) {
 		jdbcTemplate.update("update project_names set name=? where name=?",
 				new Object[] {newName, oldName});

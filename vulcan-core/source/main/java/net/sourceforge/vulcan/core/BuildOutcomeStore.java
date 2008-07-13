@@ -53,4 +53,6 @@ public interface BuildOutcomeStore {
 	@Transactional(readOnly=true)
 	Map<String, List<UUID>> getBuildOutcomeIDs();
 
+	@Transactional(readOnly=true)
+	Integer findMostRecentBuildNumberByWorkDir(String workDir);
 }

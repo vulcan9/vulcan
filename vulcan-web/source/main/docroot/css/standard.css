@@ -32,7 +32,6 @@ div.test-failures, div.test-failures caption {
 
 html, body {
 	background-color: white;
-	height: 100%;
 }
 
 .success, .PASS {
@@ -100,6 +99,19 @@ form {
 	padding: 0;
 }
 
+h1, h2, h3 {
+	margin: 0;
+}
+
+a.external {
+	background: transparent no-repeat center right url("../images/external.png");
+	padding-right: 14px;
+}
+
+a.issue {
+	background: none !important;
+	padding-right: 0 !important;
+}
 
 .BUILDING, .building {
 	font-weight: bold;
@@ -130,10 +142,13 @@ span.error, span.warning, span.message {
 h3.build-outcome-message, li.issue-list {
 	max-width: 500px;
 }
-
+div.build-nav {
+	float: right;
+}
 div.build-nav a {
 	margin-left: 5px;
 	margin-right: 5px;
+	
 }
 div.file-upload {
 	padding: 10px;
@@ -449,6 +464,7 @@ table.manualBuild {
 }
 table.blended td {
 	border: none;
+	white-space: pre;
 }
 table.build-summary {
 	float: left;
@@ -466,7 +482,6 @@ td.component-version {
 table.build-messages tbody td {
 	font-family: "Bitstream Vera Sans Mono", "MS Courier New", monospace;
 	font-size: smaller;
-	white-space: pre;
 }
 table.projectConfig {
 	width: 60em;
@@ -579,4 +594,46 @@ div.foo {
 
 .vulcan-logo {
 	float: right;
+}
+
+ul.tabs {
+	margin: 0;
+	margin-top: 20px;
+	padding: 0;
+}
+
+ul.tabs li {
+	display: inline;
+	background-color: #ccc;
+	margin-left: 10px;
+	padding: 10px;
+	border: 1px solid black;
+}
+
+ul.tabs li.active {
+	background-color: white;
+	padding-bottom: 11px;
+	border-bottom: none;
+}
+
+div.tab-panel {
+	display: none;
+	border: 1px solid black;
+	margin-top: 10px;
+	padding: 10px;
+}
+
+div#summary-panel {
+	display: block;
+}
+
+span.count {
+	font-size: smaller;
+	color: black;
+}
+
+iframe {
+	border: none;
+	width: 100%;
+	/* height set by javascript */
 }

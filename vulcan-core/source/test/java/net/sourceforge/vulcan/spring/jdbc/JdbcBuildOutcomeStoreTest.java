@@ -177,6 +177,24 @@ public class JdbcBuildOutcomeStoreTest extends TestCase {
 		assertPersistence();
 	}
 	
+	public void testFindMostRecentBuildNumberByWorkingCopy() throws Exception {
+		outcome.setWorkDir("a work dir");
+		
+		assertPersistence();
+		
+		outcome.setId(UUID.randomUUID());
+		outcome.setBuildNumber(42);
+		
+		assertPersistence();
+		
+		assertEquals(outcome.getBuildNumber(), store.findMostRecentBuildNumberByWorkDir(outcome.getWorkDir()));
+	}
+
+	public void testFindMostRecentBuildNumberByWorkingCopyNull() throws Exception {
+		store.init();
+		assertEquals(null, store.findMostRecentBuildNumberByWorkDir("never used"));
+	}
+	
 	public void testSaveLastKnownRevision() throws Exception {
 		outcome.setRevision(null);
 		outcome.setLastKnownRevision(new RevisionTokenDto(342l, "r342"));

@@ -22,11 +22,14 @@
 	<title>
 		<spring:message code="header.directory.listing" arguments="${fileListPath}"/>
 	</title>
+	<jsp:element name="link">
+		<jsp:attribute name="rel">stylesheet</jsp:attribute>
+		<jsp:attribute name="type">text/css</jsp:attribute>
+		<jsp:attribute name="href"><c:url value="/css/standard.css"/></jsp:attribute>
+	</jsp:element>
 </head>
 
 <body>
-	<spring:message code="header.directory.listing" arguments="${fileListPath}"/>
-	
 	<ul>
 		<li><a href="../">..</a></li>
 		<c:forEach var="file" items="${fileList}">

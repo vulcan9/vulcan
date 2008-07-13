@@ -48,6 +48,7 @@ public class BuildOutcomeCache implements ProjectNameChangeListener {
 	
 	final Map<String, UUID> latestOutcomes = new HashMap<String, UUID>();
 	final Map<String, UUID> latestOutcomesReadonly = Collections.unmodifiableMap(latestOutcomes);
+	final Map<String, Integer> workDirBuildNumbers = new HashMap<String, Integer>();
 	
 	int cacheSize;
 	
@@ -210,6 +211,27 @@ public class BuildOutcomeCache implements ProjectNameChangeListener {
 		return findOutcomeByNumber(outcomeIds, buildNumber, buildNumber, null);
 	}
 
+	public Integer getMostRecentBuildNumberByWorkDir(String workDir) {
+		try {
+			readLock.lock();
+			if (workDirBuildNumbers.containsKey(workDir)) {
+				return workDirBuildNumbers.get(workDir);
+			}
+		} finally {
+			readLock.unlock();
+		}
+
+		try {
+			writeLock.lock();
+			final Integer buildNumber = buildOutcomeStore.findMostRecentBuildNumberByWorkDir(workDir);
+			workDirBuildNumbers.put(workDir, buildNumber);
+			
+			return buildNumber;
+		} finally {
+			writeLock.unlock();
+		}
+	}
+
 	public void projectNameChanged(String oldName, String newName) {
 		try {
 			writeLock.lock();
@@ -277,6 +299,7 @@ public class BuildOutcomeCache implements ProjectNameChangeListener {
 		final UUID id = buildOutcomeStore.storeBuildOutcome(statusDto);
 		latestOutcomes.put(name, id);
 		outcomes.put(id, statusDto);
+		workDirBuildNumbers.put(statusDto.getWorkDir(), statusDto.getBuildNumber());
 		
 		final List<UUID> ids;
 		

@@ -99,6 +99,9 @@ public class StoreStub implements ConfigurationStore, BuildOutcomeStore {
 	public List<TestFailureDto> loadTopTestFailures(BuildOutcomeQueryDto query,	int maxResultCount) {
 		return null;
 	}
+	public Integer findMostRecentBuildNumberByWorkDir(String workDir) {
+		return null;
+	}
 	public Map<String, List<UUID>> getBuildOutcomeIDs() {
 		return new HashMap<String, List<UUID>>();
 	}
