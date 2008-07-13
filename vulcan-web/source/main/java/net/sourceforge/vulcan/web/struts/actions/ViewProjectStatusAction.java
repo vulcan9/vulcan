@@ -22,7 +22,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Writer;
-import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -139,7 +139,7 @@ public final class ViewProjectStatusAction extends ProjectReportBaseAction {
 		final Document doc = createDocument(request, status, ids, index, currentlyBuilding);
 		final String transform = statusForm.getTransform();
 		
-		return sendDocument(doc, transform, projectConfig, status.getBuildNumber(), createTransformParameters(request), mapping, request, response);
+		return sendDocument(doc, transform, projectConfig, status.getBuildNumber(), createTransformParameters(request, status), mapping, request, response);
 	}
 	
 	protected Document createDocument(HttpServletRequest request, ProjectStatusDto status, final List<UUID> ids, int index, boolean currentlyBuilding) {
@@ -212,16 +212,20 @@ public final class ViewProjectStatusAction extends ProjectReportBaseAction {
 		}
 	}
 	
-	private Map<String, Object> createTransformParameters(HttpServletRequest request) {
+	private Map<String, Object> createTransformParameters(HttpServletRequest request, ProjectStatusDto status) {
+		final Map<String, Object> params = new HashMap<String, Object>();
+		
+		params.put("workingCopyBuildNumber", buildManager.getMostRecentBuildNumberByWorkDir(status.getWorkDir()));
+		
 		final HttpSession session = request.getSession(false);
 		if (session != null) {
 			final PreferencesDto prefs = (PreferencesDto) session.getAttribute(Keys.PREFERENCES);
 			
 			if (prefs != null) {
-				return Collections.<String,Object>singletonMap("reloadInterval", Integer.valueOf(prefs.getReloadInterval()));
+				params.put("reloadInterval", Integer.valueOf(prefs.getReloadInterval()));
 			}
 		}
 		
-		return Collections.<String,Object>emptyMap();
+		return params;
 	}
 }

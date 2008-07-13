@@ -385,7 +385,11 @@ public abstract class StateManagerImpl implements StateManager, ProjectManager {
 	public List<BuildArtifactLocationDto> getArtifactLocations() {
 		try {
 			readLock.lock();
-			return Collections.unmodifiableList(config.getArtifactLocations());
+			final List<BuildArtifactLocationDto> artifactLocations = config.getArtifactLocations();
+			if (artifactLocations == null) {
+				return Collections.emptyList();
+			}
+			return Collections.unmodifiableList(artifactLocations);
 		} finally {
 			readLock.unlock();
 		}

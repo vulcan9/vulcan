@@ -68,7 +68,7 @@ public class ProjectFileServlet extends HttpServlet {
 	
 	ProjectManager projectManager;
 	BuildManager buildManager;
-	boolean cacheEnabled;
+	boolean cacheEnabled = true;
 	
 	@Override
 	public void init(ServletConfig config) throws ServletException {
@@ -175,7 +175,6 @@ public class ProjectFileServlet extends HttpServlet {
 		response.setStatus(HttpServletResponse.SC_OK);
 		
 		setLastModifiedDate(response, lastModifiedDate);
-		//response.setHeader("Cache-Control", "must-revalidate");
 		
 		response.setContentLength((int)file.length());
 		
@@ -343,6 +342,8 @@ public class ProjectFileServlet extends HttpServlet {
 		synchronized (HTTP_DATE_FORMAT) {
 			response.setHeader("Last-Modified", HTTP_DATE_FORMAT.format(date));
 		}
+		
+		response.addHeader("Cache-Control", "max-age=0");
 	}
 	
 	/**

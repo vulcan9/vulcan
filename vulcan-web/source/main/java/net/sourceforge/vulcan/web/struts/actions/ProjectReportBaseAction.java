@@ -143,9 +143,8 @@ public abstract class ProjectReportBaseAction extends Action {
 				final StringWriter tmpWriter = new StringWriter();
 				final StreamResult result = new StreamResult(tmpWriter);
 				
-				final String contentType = projectDomBuilder.transform(doc,
-						params, request.getLocale(), transform,
-						result);
+				final String contentType = projectDomBuilder.transform(
+						doc, params, request.getLocale(), transform, result);
 				
 				if (StringUtils.isNotBlank(contentType)) {
 					response.setContentType(contentType);

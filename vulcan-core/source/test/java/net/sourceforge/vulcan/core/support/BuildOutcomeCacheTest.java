@@ -20,6 +20,7 @@ package net.sourceforge.vulcan.core.support;
 
 import static org.easymock.EasyMock.getCurrentArguments;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -72,7 +73,7 @@ public class BuildOutcomeCacheTest extends EasyMockTestCase {
 		storedOutcomes.get(four).setName("myProject");
 		storedOutcomes.get(four).setBuildNumber(4);
 		
-		map.put("myProject", Arrays.asList(zero, one, two, three, four));
+		map.put("myProject", new ArrayList<UUID>(Arrays.asList(zero, one, two, three, four)));
 	}
 	
 	public void trainInit() throws Exception {
@@ -249,6 +250,34 @@ public class BuildOutcomeCacheTest extends EasyMockTestCase {
 		final ProjectStatusDto outcome = cache.getOutcome(four);
 		assertNotNull(outcome);
 		assertEquals("aNewProject", outcome.getName());
+	}
+	
+	public void trainWorkDir() throws Exception {
+		expect(store.findMostRecentBuildNumberByWorkDir("/work/dir")).andReturn(42);
+	}
+	
+	@TrainingMethod("trainWorkDir")
+	public void testGetMostRecentBuildNumberByWorkDir() throws Exception {
+		assertEquals((Integer)42, cache.getMostRecentBuildNumberByWorkDir("/work/dir"));
+		
+		assertEquals((Integer)42, cache.getMostRecentBuildNumberByWorkDir("/work/dir"));
+	}
+
+	public void trainStore() throws Exception {
+		expect(store.storeBuildOutcome((ProjectStatusDto) anyObject())).andReturn(UUID.randomUUID());
+	}
+
+	@TrainingMethod("trainInit,trainStore")
+	public void testStoreCachesWorkDirBuildNumber() throws Exception {
+		cache.init();
+		
+		final ProjectStatusDto build = storedOutcomes.get(four);
+		build.setBuildNumber(42);
+		build.setWorkDir("/work/dir");
+		
+		cache.store(build);
+		
+		assertEquals((Integer)42, cache.getMostRecentBuildNumberByWorkDir("/work/dir"));
 	}
 	
 	private void setBuildNumbers(int i, int j, int k, int l, int m) {

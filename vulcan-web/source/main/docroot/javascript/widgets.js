@@ -298,8 +298,11 @@ function launchWindowHandler(event, href, launchMode, windowName) {
 	var width = screen.width * 4 / 5;
 	var height = screen.height * 4 / 5;
 	
-	window.open(href, name, "width=" + width + ",height=" + height
+	var childWindow = window.open(href, name, "width=" + width + ",height=" + height
 		+ ",resizable=yes,scrollbars=yes,status=yes,location=yes,menubar=yes,titlebar=yes,toolbar=yes");
+	
+	// if the window was already open, bring it to the front.
+	childWindow.focus();
 	
 	if (event != null || (target != null && target != window)) {
 		return preventDefaultHandler(event);
@@ -401,6 +404,105 @@ function registerHandlers() {
 	
 		customAddEventListener(helpLink, 'click', launchHelpHandler);
 	}
+	
+	$("ul.tabs a").click(function(e) {
+		e.preventDefault();
+		
+		var id = $(this).attr("id");
+		
+		var panelName = id.replace("-tab", "");
+		
+		showBuildReportPanel(panelName);
+		
+		return false;
+	});
+	
+	$(".report-link").click(function() {
+		setTimeout(function() { showBuildReportPanel("build-directory"); }, 500);
+	});
+	
+	window.iframe = document.getElementById("iframe");
+	if (iframe) {
+		var height = document.documentElement.clientHeight;
+		
+		iframe.style.height = (3 * height / 5) + "px";
+		
+		window.rootLocation = iframe.contentWindow.location.href;
+		
+		var buildDir = $("#build-directory-root").text();
+		
+		var index = buildDir.lastIndexOf("/");
+		window.pathSeparator = "/";
+		if (index < 0) {
+			index = buildDir.lastIndexOf("\\");
+			window.pathSeparator = "\\";
+		}
+		
+		window.rootDirName = buildDir.substring(index+1);
+		
+		$("#build-directory-root").text(buildDir.substring(0, index));
+		
+		updateBreadcrumbs();
+	}
+}
+
+function showBuildReportPanel(panelName) {
+	// hide all panels
+	$(".tab-panel").hide();
+	
+	// show selected panel
+	$("#" + panelName + "-panel").show();
+	
+	// make all tabs inactive
+	$("#build-report-tabs li").removeClass("active");
+	
+	$("#" + panelName + "-tab").parent("li").addClass("active");
+}
+
+function updateBreadcrumbs() {
+	var location;
+	
+	try {
+		location = iframe.contentWindow.location.href;
+	} catch (e) {
+		// if iframe navigated to another domain, ignore error
+		location = "";
+	}
+	
+	if (location.length >= rootLocation.length && (window.lastLocation != location)
+			&& (location.substring(0, rootLocation.length) == rootLocation)) {
+		
+		window.lastLocation = location;
+		
+		var relativePath = location.substring(rootLocation.length);
+		var paths = [rootDirName];
+		paths = paths.concat(relativePath.split("/"));
+		
+		var crumbs = $("#build-directory-bread-crumbs");
+		crumbs.empty();
+		
+		var path = rootLocation;
+		
+		for (var i in paths) {
+			if (paths[i].length == 0) {
+				continue;
+			}
+			
+			if (i>0) {
+				path += "/";
+				path += paths[i];
+			}
+			
+			var a = document.createElement("a");
+			a.href = path;
+			a.target = "iframe";
+			a.appendChild(document.createTextNode(paths[i]));
+			crumbs.append(document.createTextNode(window.pathSeparator));
+			crumbs.append(a);
+		}
+	}
+	
+	window.setTimeout(updateBreadcrumbs, 250);
 }
 
 function getConfirmMessages() {

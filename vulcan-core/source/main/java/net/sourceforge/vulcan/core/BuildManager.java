@@ -64,4 +64,6 @@ public interface BuildManager {
 	Map<String, ProjectStatusDto> getProjectsBeingBuilt();
 
 	Map<String, ProjectStatusDto> getProjectStatus();
+
+	Integer getMostRecentBuildNumberByWorkDir(String workDir);
 }
