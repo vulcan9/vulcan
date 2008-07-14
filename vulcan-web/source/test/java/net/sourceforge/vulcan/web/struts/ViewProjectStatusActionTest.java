@@ -18,14 +18,15 @@
  */
 package net.sourceforge.vulcan.web.struts;
 
-import java.io.File;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+
+import java.io.File;
+import java.net.URL;
 
 import javax.xml.transform.Result;
 
@@ -40,6 +41,7 @@ import net.sourceforge.vulcan.web.Keys;
 
 import org.apache.struts.Globals;
 import org.apache.struts.action.ActionMessages;
+import org.easymock.IAnswer;
 import org.jdom.Document;
 import org.jdom.Element;
 
@@ -53,6 +55,8 @@ public class ViewProjectStatusActionTest extends MockApplicationContextStrutsTes
 	File helloFile = new File("");
 	
 	Map<String, Object> paramMap = new HashMap<String, Object>();
+	
+	Integer mostRecentBuildNumberByWorkDir = 42;
 	
 	@Override
 	public void setUp() throws Exception {
@@ -75,7 +79,11 @@ public class ViewProjectStatusActionTest extends MockApplicationContextStrutsTes
 		paramMap.put("projectSiteURL", new URL("http://localhost/site/some%20project/12/"));
 		paramMap.put("issueTrackerURL", "");
 		
-		expect(buildManager.getMostRecentBuildNumberByWorkDir((String)anyObject())).andReturn(42).anyTimes();
+		expect(buildManager.getMostRecentBuildNumberByWorkDir((String)anyObject())).andAnswer(new IAnswer<Integer>() {
+			public Integer answer() throws Throwable {
+				return mostRecentBuildNumberByWorkDir;
+			}
+		}).anyTimes();
 	}
 	
 	public void testBlankName() throws Exception {
@@ -502,11 +510,13 @@ public class ViewProjectStatusActionTest extends MockApplicationContextStrutsTes
 		assertEquals("text/html", response.getContentType());
 	}
 	public void testTransformSetsRefreshIntervalIfPresent() throws Exception {
+		mostRecentBuildNumberByWorkDir = null;
+		
 		PreferencesDto prefs = new PreferencesDto();
 		prefs.setReloadInterval(3424);
 		request.getSession().setAttribute(Keys.PREFERENCES, prefs);
 		
-		paramMap.put("workingCopyBuildNumber", 42);
+		paramMap.put("workingCopyBuildNumber", -1);
 		paramMap.put("reloadInterval", Integer.valueOf(prefs.getReloadInterval()));
 		paramMap.put("viewProjectStatusURL", new URL("http://localhost/viewProjectStatus.do?transform=xhtml"));
 		

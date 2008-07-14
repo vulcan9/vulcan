@@ -215,7 +215,13 @@ public final class ViewProjectStatusAction extends ProjectReportBaseAction {
 	private Map<String, Object> createTransformParameters(HttpServletRequest request, ProjectStatusDto status) {
 		final Map<String, Object> params = new HashMap<String, Object>();
 		
-		params.put("workingCopyBuildNumber", buildManager.getMostRecentBuildNumberByWorkDir(status.getWorkDir()));
+		Integer buildNo = buildManager.getMostRecentBuildNumberByWorkDir(status.getWorkDir());
+		
+		if (buildNo == null) {
+			buildNo = -1;
+		}
+		
+		params.put("workingCopyBuildNumber", buildNo);
 		
 		final HttpSession session = request.getSession(false);
 		if (session != null) {
