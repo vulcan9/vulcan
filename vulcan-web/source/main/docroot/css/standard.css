@@ -103,6 +103,10 @@ h1, h2, h3 {
 	margin: 0;
 }
 
+.build-outcome-message {
+	margin-bottom: 1ex;
+}
+
 a.external {
 	background: transparent no-repeat center right url("../images/external.png");
 	padding-right: 14px;
@@ -139,9 +143,6 @@ span.error, span.warning, span.message {
 	padding-left: 20px;
 }
 
-h3.build-outcome-message, li.issue-list {
-	max-width: 500px;
-}
 div.build-nav {
 	float: right;
 }

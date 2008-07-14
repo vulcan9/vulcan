@@ -266,9 +266,8 @@ public class EmailPlugin implements BuildManagerObserverPlugin, ConfigurablePlug
                 }
             }
             return new ArrayList<String>(addresses);
-        } else {
-            return Arrays.asList(profile.getEmailAddresses());
         }
+        return Arrays.asList(profile.getEmailAddresses());
     }
 
     /*

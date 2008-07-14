@@ -81,8 +81,6 @@
 					<xsl:apply-templates select="/project/status"/>
 				</h1>
 	
-				<h3 class="build-outcome-message"><xsl:apply-templates select="/project/message"/></h3>
-				
 				<ul class="tabs" id="build-report-tabs">
 					<li class="active"><a id="summary-tab" href="#"><xsl:value-of select="$title"/></a></li>
 					<li><a id="dependencies-tab" href="#">Dependencies</a></li>
@@ -235,6 +233,18 @@
 
 	<xsl:template name="summary">
 		<div xmlns="http://www.w3.org/1999/xhtml" id="summary-panel" class="tab-panel">
+			<h3 class="build-outcome-message">
+				<xsl:choose>
+					<xsl:when test="substring-before(/project/message, '&#10;')!=''">
+						<xsl:value-of select="substring-before(/project/message, '&#10;')"/>
+						<xsl:text>...</xsl:text>
+					</xsl:when>
+					<xsl:otherwise>
+						<xsl:value-of select="/project/message"/>
+					</xsl:otherwise>
+				</xsl:choose>
+			</h3>
+		
 			<xsl:apply-templates select="/project/build-reason"/>
 			
 			<xsl:apply-templates select="/project/update-type"/>
