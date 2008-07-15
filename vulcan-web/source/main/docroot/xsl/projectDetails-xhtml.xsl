@@ -162,6 +162,7 @@
 						<xsl:attribute name="src">
 							<xsl:value-of select="$projectSiteURL"/>
 						</xsl:attribute>
+						<xsl:text></xsl:text>
 					</iframe>
 				</div>
 			</body>

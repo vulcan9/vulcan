@@ -423,9 +423,9 @@ function registerHandlers() {
 	
 	window.iframe = document.getElementById("iframe");
 	if (iframe) {
-		var height = document.documentElement.clientHeight;
+		resizeIframe();
 		
-		iframe.style.height = (3 * height / 5) + "px";
+		$(window).resize(resizeIframe);
 		
 		window.rootLocation = iframe.contentWindow.location.href;
 		
@@ -444,6 +444,25 @@ function registerHandlers() {
 		
 		updateBreadcrumbs();
 	}
+}
+
+function resizeIframe() {
+	window.iframe = document.getElementById("iframe");
+	var height = 0;
+	
+	if (document.documentElement && document.documentElement.clientHeight) {
+		height = document.documentElement.clientHeight;
+	} else if (document.body && document.body.clientHeight) {
+		// IE 6
+		height = document.body.clientHeight;
+	}
+
+	height = (3 * height / 5);
+	if (height < 300) {
+		height = 300;
+	}
+	
+	iframe.style.height = height + "px";
 }
 
 function showBuildReportPanel(panelName) {
