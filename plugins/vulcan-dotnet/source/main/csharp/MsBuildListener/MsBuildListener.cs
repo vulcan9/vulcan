@@ -18,15 +18,17 @@
  */
 using System;
 using System.Collections.Generic;
-using System.Text;
-
+using System.IO;
 using Microsoft.Build.Framework;
 
 namespace SourceForge.Vulcan.DotNet {
 	public class MsBuildListener : ILogger	{
-		string parameters;
-		LoggerVerbosity verbosity;
-		UdpBuildReporter reporter;
+		private string parameters;
+
+		private LoggerVerbosity verbosity;
+		private IBuildMessageReporter reporter;
+
+		private readonly Queue<FileInfo> projectFiles = new Queue<FileInfo>();
 
 		public string Parameters
 		{
@@ -50,6 +52,11 @@ namespace SourceForge.Vulcan.DotNet {
 			{
 				verbosity = value;
 			}
+		}
+
+		public IBuildMessageReporter Reporter
+		{
+			set { reporter = value; }
 		}
 
 		public void Initialize(IEventSource eventSource)
@@ -84,57 +91,68 @@ namespace SourceForge.Vulcan.DotNet {
 				throw new LoggerException("must specify hostname and port");
 			}
 
-			reporter = new UdpBuildReporter(map["hostname"], int.Parse((string)map["port"]));
+			reporter = new UdpBuildReporter(map["hostname"], int.Parse(map["port"]));
 
-			eventSource.BuildStarted += new BuildStartedEventHandler(buildStarted);
-			eventSource.BuildFinished += new BuildFinishedEventHandler(buildFinished);
-			eventSource.TargetStarted += new TargetStartedEventHandler(targetStarted);
-			eventSource.TargetFinished += new TargetFinishedEventHandler(targetFinished);
-			eventSource.TaskStarted += new TaskStartedEventHandler(taskStarted);
-			eventSource.TaskFinished += new TaskFinishedEventHandler(taskFinished);
-			eventSource.ErrorRaised += new BuildErrorEventHandler(buildErrorRaised);
-			eventSource.WarningRaised += new BuildWarningEventHandler(buildWarningRaised);
+			eventSource.BuildStarted += BuildStarted;
+			eventSource.BuildFinished += BuildFinished;
+			eventSource.TargetStarted += TargetStarted;
+			eventSource.TargetFinished += TargetFinished;
+			eventSource.TaskStarted += TaskStarted;
+			eventSource.TaskFinished += TaskFinished;
+			eventSource.ErrorRaised += BuildErrorRaised;
+			eventSource.WarningRaised += BuildWarningRaised;
 		}
 
 		public void Shutdown()
 		{
-			
 		}
 
-		void buildStarted(object sender, BuildStartedEventArgs e)
+		public void BuildStarted(object sender, BuildStartedEventArgs e)
 		{
 			reporter.SendMessage("BUILD_STARTED", null, null, null, e.Message);
 		}
-		void buildFinished(object sender, BuildFinishedEventArgs e)
+		public void BuildFinished(object sender, BuildFinishedEventArgs e)
 		{
 			reporter.SendMessage("BUILD_FINISHED", null, null, null, e.Message);
 		}
-		void targetStarted(object sender, TargetStartedEventArgs e)
+		public void TargetStarted(object sender, TargetStartedEventArgs e)
 		{
 			reporter.SendMessage("TARGET_STARTED", e.ProjectFile, e.TargetName, null, e.Message);
+			projectFiles.Enqueue(new FileInfo(e.ProjectFile));
 		}
-		void targetFinished(object sender, TargetFinishedEventArgs e)
+		public void TargetFinished(object sender, TargetFinishedEventArgs e)
 		{
 			reporter.SendMessage("TARGET_FINISHED", e.ProjectFile, e.TargetName, null, e.Message);
+			projectFiles.Dequeue();
 		}
-		void taskStarted(object sender, TaskStartedEventArgs e)
+		public void TaskStarted(object sender, TaskStartedEventArgs e)
 		{
 			reporter.SendMessage("TASK_STARTED", e.ProjectFile, null, e.TaskName, e.Message);
+			projectFiles.Enqueue(new FileInfo(e.ProjectFile));
 		}
-		void taskFinished(object sender, TaskFinishedEventArgs e)
+		public void TaskFinished(object sender, TaskFinishedEventArgs e)
 		{
 			reporter.SendMessage("TASK_FINISHED", e.ProjectFile, null, e.TaskName, e.Message);
+			projectFiles.Dequeue();
 		}
-		void buildErrorRaised(object sender, BuildErrorEventArgs e)
+		public void BuildErrorRaised(object sender, BuildErrorEventArgs e)
 		{
-			reporter.SendMessage("MESSAGE_LOGGED", MessagePriority.ERROR, e.Message,
-			                     e.File, e.LineNumber, e.Code);
-		}
-		void buildWarningRaised(object sender, BuildWarningEventArgs e)
-		{
-			reporter.SendMessage("MESSAGE_LOGGED", MessagePriority.WARNING, e.Message,
-													 e.File, e.LineNumber, e.Code);
+			SendMessageWithPriority(MessagePriority.ERROR, e.Message, e.File, e.LineNumber, e.Code);
 		}
 
+		public void BuildWarningRaised(object sender, BuildWarningEventArgs e)
+		{
+			SendMessageWithPriority(MessagePriority.WARNING, e.Message, e.File, e.LineNumber, e.Code);
+		}
+
+		private void SendMessageWithPriority(MessagePriority prio, string message, string file, int lineNumber, string code)
+		{
+			if (!Path.IsPathRooted(file) && projectFiles.Count > 0)
+			{
+				file = Path.Combine(projectFiles.Peek().DirectoryName, file);
+			}
+			reporter.SendMessage("MESSAGE_LOGGED", prio, message,
+													 file, lineNumber, code);
+		}
 	}
 }

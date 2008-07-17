@@ -126,8 +126,28 @@ public class MSBuildToolInvocation extends TestCase {
 			assertEquals("You can't do that on television.", error.getMessage());
 			
 			assertTrue(error.getFile() != null && error.getFile().length() > 0);
-			assertEquals(Integer.valueOf(9), error.getLineNumber());
+			assertEquals(Integer.valueOf(8), error.getLineNumber());
 			assertEquals("", error.getCode());
+		}
+	}
+	
+	public void testCompileErrorsHaveAbsolutePathsToFiles() throws Exception {
+		dotNetProjectConfig.setTargets("Build");
+		
+		try {
+			tool.buildProject(projectConfig, status, buildLog, detailCallback);
+			fail("expected exception");
+		} catch (BuildFailedException e) {
+			assertEquals("Build", e.getTarget());
+			assertEquals("Build FAILED.", e.getMessage());
+			
+			assertEquals(2, errors.size());
+			
+			final BuildMessageDto error = errors.get(0);
+			assertEquals("CS0246", error.getCode());
+			
+			assertTrue(error.getFile() != null && error.getFile().length() > 0);
+			assertTrue(new File(error.getFile()).isAbsolute());
 		}
 	}
 	
