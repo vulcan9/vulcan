@@ -16,6 +16,13 @@
 	<target name="build">
 		<mkdir dir="${assembly.target.dir}"/>
 
+		<copy todir="${assembly.target.dir}">
+			<fileset basedir="${nunit.bin.dir}">
+				<include name="nunit.core.dll"/>
+				<include name="nunit.framework.dll"/>
+			</fileset>
+		</copy>
+
 		<call target="generate-assembly-info"/>
 		<call target="build-msbuild-assembly"/>
 		<call target="build-nant-assembly"/>
@@ -93,15 +100,16 @@
 			<sources failonempty="true">
 				<include name="${assembly.info.file}"/>
 				<include name="source/test/csharp/**/*.cs"/>
+				<include name="source/main/csharp/**/*.cs"/>
 			</sources>
 
 			<references>
 				<lib>
-					<include name="${assembly.target.dir}"/>
 					<include name="${nunit.bin.dir}"/>
 				</lib>
+				<include name="${nant::get-base-directory()}/NAnt.Core.dll"/>
 				<include name="nunit.framework.dll"/>
-				<include name="NantBuildListener.dll"/>
+				<include name="Microsoft.Build.Framework.dll"/>
 			</references>
 		</csc>
 	</target>
@@ -120,6 +128,7 @@
 			<fileset basedir="${assembly.target.dir}">
 				<include name="*.dll"/>
 				<exclude name="*test*"/>
+				<exclude name="nunit*"/>
 			</fileset>
 		</copy>
 	</target>

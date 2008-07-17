@@ -1,5 +1,4 @@
-<Project DefaultTargets="SayHello" InitialTargets="" 
-	xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project DefaultTargets="SayHello" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 	
 	<Target Name="SayHello">
 		<Message Text="This is a message originating from an MSBuild script."/>
@@ -17,5 +16,9 @@ ProjectTag: $(ProjectTag)
 Configuration: $(Configuration)
 Foo: $(Foo)
 Bar: $(Bar)"/>
+	</Target>
+	
+	<Target Name="Build">
+		<MSBuild Projects="subproject\subproject.csproj"/>
 	</Target>
 </Project>

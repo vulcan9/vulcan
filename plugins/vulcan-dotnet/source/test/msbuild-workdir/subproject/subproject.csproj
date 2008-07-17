@@ -1,0 +1,17 @@
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+	<PropertyGroup>
+		<ProjectType>Local</ProjectType>
+		<ProductVersion>8.0.50727</ProductVersion>
+		<SchemaVersion>2.0</SchemaVersion>
+		<ProjectGuid>{bb81c92c-86f2-4555-b500-30f1bbb32618}</ProjectGuid>
+		<AssemblyName>FakeTest</AssemblyName>
+		<OutputType>Library</OutputType>
+		<RootNamespace>Fool.Services</RootNamespace>
+		<SignAssembly>false</SignAssembly>
+		<OutputPath>$(MSBuildProjectDirectory)</OutputPath>
+	</PropertyGroup>
+	<ItemGroup>
+		<Compile Include="code\WontCompile.cs" />
+	</ItemGroup>
+	<Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+</Project>

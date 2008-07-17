@@ -16,26 +16,25 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-using System;
 using System.Net;
 using System.Net.Sockets;
-using System.Reflection;
 
 namespace SourceForge.Vulcan.DotNet {
-	public class UdpBuildReporter	{
+	public class UdpBuildReporter : IBuildMessageReporter
+	{
 		const int MAX_MESSAGE_LENGTH = 4096;
 		const string MESSAGE_TRUNCATED_SUFFIX = "...";
 
-		private Socket sendSocket;
-		private EndPoint endPoint;
-		private PacketBuilder packetBuilder;
+		private readonly Socket sendSocket;
+		private readonly EndPoint endPoint;
+		private readonly PacketBuilder packetBuilder;
 
 		public UdpBuildReporter(string host, int destinationPort)
 		{
 			sendSocket = new Socket(AddressFamily.InterNetwork,
 				SocketType.Dgram, ProtocolType.Udp);
 			
-			IPAddress dstAddr = System.Net.Dns.GetHostByName(host).AddressList[0];
+			IPAddress dstAddr = Dns.GetHostEntry(host).AddressList[0];
 
 			endPoint = new IPEndPoint(dstAddr, destinationPort);
 
