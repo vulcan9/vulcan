@@ -52,6 +52,7 @@
 	<xsl:variable name="num-warnings" select="count(/project/warnings/warning)"/>
 	<xsl:variable name="num-change-sets" select="count(/project/change-sets/change-set)"/>
 	<xsl:variable name="num-test-failures" select="count(/project/test-failures/test-failure)"/>
+	<xsl:variable name="work-directory" select="/project/work-directory/text()"/>
 	
 	<xsl:template match="/project">
 		<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-US">
@@ -165,6 +166,13 @@
 						<xsl:text></xsl:text>
 					</iframe>
 				</div>
+				
+				<input id="work-directory" type="hidden">
+					<xsl:attribute name="value"><xsl:value-of select="$work-directory"/></xsl:attribute>
+				</input>
+				<input id="repository-url" type="hidden">
+					<xsl:attribute name="value"><xsl:value-of select="/project/repository-url"/></xsl:attribute>
+				</input>
 			</body>
 		</html>
 	</xsl:template>
@@ -556,7 +564,7 @@
 			<xsl:if test="$showTableHead">
 				<thead>
 					<tr>
-						<xsl:if test="$showFiles"><th class="long">File</th></xsl:if>
+						<xsl:if test="$showFiles"><th class="file">File</th></xsl:if>
 						<xsl:if test="$showLineNumbers"><th>Line</th></xsl:if>
 						<xsl:if test="$showCode"><th>Code</th></xsl:if>
 						<th class="long">Message</th>
@@ -567,7 +575,24 @@
 				<xsl:for-each select="./*">
 					<tr>
 						<xsl:if test="$showFiles">
-							<td><xsl:value-of select="@file"/></td>
+							<td class="file">
+								<xsl:choose>
+									<xsl:when test="starts-with(@file, $work-directory)">
+										<xsl:variable name="rel-path" select="substring-after(@file, $work-directory)"/>
+										<xsl:choose>
+											<xsl:when test="starts-with($rel-path, '\') or starts-with($rel-path, '/')">
+												<xsl:value-of select="substring($rel-path, 2)"/>
+											</xsl:when>
+											<xsl:otherwise>
+												<xsl:value-of select="$rel-path"/>
+											</xsl:otherwise>
+										</xsl:choose>
+									</xsl:when>
+									<xsl:otherwise>
+										<xsl:value-of select="@file"/>
+									</xsl:otherwise>
+								</xsl:choose>
+							</td>
 						</xsl:if>
 						<xsl:if test="$showLineNumbers">
 							<td><xsl:value-of select="@line-number"/></td>

@@ -535,7 +535,7 @@ td.status {
 	font-weight: bold;
 	text-align: center;
 }
-th.long {
+th.long, th.file {
 	text-align: left;
 }
 td.build-number {
