@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import junit.framework.TestCase;
+import net.sourceforge.vulcan.TestUtils;
 import net.sourceforge.vulcan.core.BuildDetailCallback;
 import net.sourceforge.vulcan.dotnet.dto.DotNetBuildEnvironmentDto;
 import net.sourceforge.vulcan.dotnet.dto.DotNetGlobalConfigDto;
@@ -76,10 +77,10 @@ public class NAntBuildToolInvocation extends TestCase {
 	protected void setUp() throws Exception {
 		super.setUp();
 		
-		buildEnv.setLocation("c:\\program files\\nant-0.85-rc4\\bin\\nant.exe");
+		buildEnv.setLocation("c:\\program files (x86)\\nant-0.85\\bin\\nant.exe");
 		buildEnv.setType(DotNetBuildEnvironmentDto.DotNetEnvironmentType.NAnt);
 		
-		projectConfig.setWorkDir("source/test/nant-workdir");
+		projectConfig.setWorkDir(TestUtils.resolveRelativePath("source/test/nant-workdir"));
 		
 		tool = new NAntBuildTool(globalConfig, dotNetProjectConfig, buildEnv, new File("target/assemblies"));
 		
@@ -122,6 +123,29 @@ public class NAntBuildToolInvocation extends TestCase {
 		}
 	}
 	
+	public void testSyntaxErrors() throws Exception {
+		dotNetProjectConfig.setTargets("compile-syntax-errors");
+		
+		try {
+			tool.buildProject(projectConfig, status, buildLog, detailCallback);
+			fail("expected exception");
+		} catch (BuildFailedException e) {
+		}
+		assertEquals(1, errors.size());
+		assertEquals(1, warnings.size());
+
+		final BuildMessageDto err = errors.get(0);
+		assertTrue(err.getFile().endsWith("SyntaxErrors.cs"));
+		assertTrue(new File(err.getFile()).isAbsolute());
+		assertEquals("CS0029", err.getCode());
+		assertEquals((Integer)5, err.getLineNumber());
+		
+		final BuildMessageDto warn = warnings.get(0);
+		assertTrue(warn.getFile().endsWith("SyntaxErrors.cs"));
+		assertTrue(new File(warn.getFile()).isAbsolute());
+		assertEquals("CS0219", warn.getCode());
+		assertEquals((Integer)10, warn.getLineNumber());
+	}
 	public void testFailsOnManyProjectFilesNoneSpecified() throws Exception {
 		final File otherFile = new File(projectConfig.getWorkDir(), "other.build");
 		FileUtils.touch(otherFile);

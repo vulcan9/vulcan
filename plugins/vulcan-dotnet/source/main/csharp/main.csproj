@@ -45,7 +45,7 @@
     <Compile Include="ListenerBase\PacketBuilder.cs" />
     <Compile Include="ListenerBase\UdpBuildReporter.cs" />
     <Compile Include="MsBuildListener\MsBuildListener.cs" />
-    <Compile Include="NantBuildListener\NantBuildListener.cs" />
+    <Compile Include="NantBuildListener\NAntListener.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties\" />

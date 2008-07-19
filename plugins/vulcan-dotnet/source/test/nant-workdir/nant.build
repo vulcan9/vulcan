@@ -26,7 +26,6 @@ Bar: ${Bar}"/>
 	</target>
 	
 	<target name="compile-syntax-errors">
-		<echo level="Error" message="foo"/>
 		<csc
 			target="library"
 			output="SyntaxErrors.dll">
