@@ -633,6 +633,11 @@ span.count {
 	color: black;
 }
 
+div.build-stats {
+	float: left;
+	margin-right: 20px;
+}
+
 iframe {
 	border: none;
 	width: 100%;

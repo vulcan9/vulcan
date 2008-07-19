@@ -254,34 +254,52 @@
 				</xsl:choose>
 			</h3>
 		
-			<xsl:apply-templates select="/project/build-reason"/>
-			
-			<xsl:apply-templates select="/project/update-type"/>
-
-			<xsl:apply-templates select="/project/build-requested-by"/>
-			<xsl:apply-templates select="/project/build-scheduled-by"/>
-			
-			<xsl:apply-templates select="/project/elapsed-time"/>
-			
-			<xsl:apply-templates select="/project/last-good-build-number"/>
-			
-			<ul>
+			<div class="build-stats">
+				<dl>
+					<dt><xsl:value-of select="$buildReasonLabel"/></dt>
+					<dd><xsl:value-of select="/project/build-reason"/></dd>
+					
+					<dt><xsl:value-of select="$updateTypeLabel"/></dt>
+					<dd><xsl:value-of select="/project/update-type"/></dd>
+					
+					<xsl:if test="/project/build-requested-by">
+						<dt><xsl:value-of select="$buildRequestedByLabel"/></dt>
+						<dd><xsl:value-of select="/project/build-requested-by"/></dd>
+					</xsl:if>
+								
+					<xsl:if test="/project/build-scheduled-by">
+						<dt><xsl:value-of select="$buildScheduledByLabel"/></dt>
+						<dd><xsl:value-of select="/project/build-scheduled-by"/></dd>
+					</xsl:if>
+					
+					<dt><xsl:value-of select="$elapsedTimeLabel"/></dt>
+					<dd><xsl:value-of select="/project/elapsed-time"/></dd>
+					
+					<xsl:if test="/project/last-good-build-number">
+						<dt><xsl:value-of select="$lastGoodBuildNumberLabel"/></dt>
+						<dd>
+							<xsl:call-template name="buildLink">
+								<xsl:with-param name="buildNumber" select="/project/last-good-build-number"/>
+							</xsl:call-template>
+						</dd>
+					</xsl:if>
+				</dl>
 				<xsl:if test="/project/build-log-available">
-					<li>
-						<xsl:element name="a">
-								<xsl:attribute name="href"><xsl:value-of select="$viewProjectStatusURL"/>&amp;projectName=<xsl:value-of select="/project/name"/>&amp;buildNumber=<xsl:value-of select="/project/build-number"/>&amp;view=log</xsl:attribute>
-								<xsl:attribute name="class">external</xsl:attribute>
-								<xsl:value-of select="$buildLogLabel"/>
-						</xsl:element>
-					</li>
+					<xsl:element name="a">
+							<xsl:attribute name="href"><xsl:value-of select="$viewProjectStatusURL"/>&amp;projectName=<xsl:value-of select="/project/name"/>&amp;buildNumber=<xsl:value-of select="/project/build-number"/>&amp;view=log</xsl:attribute>
+							<xsl:attribute name="class">external</xsl:attribute>
+							<xsl:value-of select="$buildLogLabel"/>
+					</xsl:element>
 				</xsl:if>
-			</ul>
+			</div>
 			
 			<xsl:if test="/project/reports">
 				<xsl:call-template name="bubble">
 					<xsl:with-param name="target" select="'reports'"/>
 				</xsl:call-template>
 			</xsl:if>
+			
+			<div style="clear: left;"/>
 		</div>
 	</xsl:template>
 	
@@ -340,52 +358,12 @@
 		</table>
 	</xsl:template>
 	
-	<xsl:template match="build-reason">
-		<div xmlns="http://www.w3.org/1999/xhtml" class="requestUser">
-			<xsl:value-of select="$buildReasonLabel"/>
-			<xsl:text> </xsl:text>
-			<xsl:value-of select="."/>
-		</div>
-	</xsl:template>
-	
-	<xsl:template match="update-type">
-		<div xmlns="http://www.w3.org/1999/xhtml" class="requestUser">
-			<xsl:value-of select="$updateTypeLabel"/>
-			<xsl:text> </xsl:text>
-			<xsl:value-of select="."/>
-		</div>
-	</xsl:template>
-	
 	<xsl:template match="work-directory">
 		<div xmlns="http://www.w3.org/1999/xhtml">
 			<xsl:value-of select="$buildDirectoryLabel"/>
 			<xsl:text> </xsl:text>
 			<span id="build-directory-root"><xsl:value-of select="."/></span>
 			<span id="build-directory-bread-crumbs"><xsl:text> </xsl:text></span>
-		</div>
-	</xsl:template>
-	
-	<xsl:template match="build-requested-by">
-		<div xmlns="http://www.w3.org/1999/xhtml" class="requestUser">
-			<xsl:value-of select="$buildRequestedByLabel"/>
-			<xsl:text> </xsl:text>
-			<xsl:value-of select="."/>
-		</div>
-	</xsl:template>
-	
-	<xsl:template match="build-scheduled-by">
-		<div xmlns="http://www.w3.org/1999/xhtml" class="requestUser">
-			<xsl:value-of select="$buildScheduledByLabel"/>
-			<xsl:text> </xsl:text>
-			<xsl:value-of select="."/>
-		</div>
-	</xsl:template>
-	
-	<xsl:template match="elapsed-time">
-		<div xmlns="http://www.w3.org/1999/xhtml" class="requestUser">
-			<xsl:value-of select="$elapsedTimeLabel"/>
-			<xsl:text> </xsl:text>
-			<xsl:value-of select="."/>
 		</div>
 	</xsl:template>
 	
@@ -409,13 +387,6 @@
 			<xsl:with-param name="text" select="$prevBuildLabel"/>
 			<xsl:with-param name="byIndex" select="true()"/>
 		</xsl:call-template>
-	</xsl:template>
-	
-	<xsl:template match="last-good-build-number">
-		<div xmlns="http://www.w3.org/1999/xhtml">
-			<xsl:value-of select="$lastGoodBuildNumberLabel"/>
-			<xsl:call-template name="buildLink"/>
-		</div>
 	</xsl:template>
 	
 	<xsl:template match="change-sets">

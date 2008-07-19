@@ -98,6 +98,7 @@ public class UdpEventSource extends SerializedEventSource {
 					socket.receive(packet);
 					
 					final AntEventSummary summary = deserialize(packet.getData());
+					
 					fireEvent(summary);
 				} catch (SocketTimeoutException e) {
 					continue;

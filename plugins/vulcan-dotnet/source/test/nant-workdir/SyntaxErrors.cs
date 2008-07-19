@@ -4,5 +4,10 @@ namespace SyntaxErrors {
 		{
 			string s = 42;
 		}
+		
+		public void Thing()
+		{
+			int x = 42;
+		}
 	}
 }

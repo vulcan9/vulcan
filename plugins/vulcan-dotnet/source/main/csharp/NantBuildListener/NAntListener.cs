@@ -16,6 +16,7 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
+using System.Text.RegularExpressions;
 using NAnt.Core;
 
 namespace SourceForge.Vulcan.DotNet {
@@ -26,9 +27,6 @@ namespace SourceForge.Vulcan.DotNet {
 		const string DEFAULT_HOST = "localhost";
 		const string DEFAULT_PORT = "7123";
 		
-		const int MAX_MESSAGE_LENGTH = 4096;
-		const string MESSAGE_TRUNCATED_SUFFIX = "...";
-
 		private UdpBuildReporter reporter;
 		
 		public void BuildStarted(object sender, BuildEventArgs e) {
@@ -95,18 +93,55 @@ namespace SourceForge.Vulcan.DotNet {
 			
 			if ("MESSAGE_LOGGED".Equals(eventType)) {
 				MessagePriority priority;
-				
-				switch(e.MessageLevel) {
-					case Level.Warning: priority = MessagePriority.WARNING; break;
-					case Level.Error: priority = MessagePriority.ERROR; break;
-					default: priority = MessagePriority.INFO; break;
-				}
-				
-				reporter.SendMessage(eventType, priority, message, null, 0, null);
+				string file;
+				int lineNumber;
+				string code;
+				ParseMessage(e, out priority, out file, out lineNumber, out code, out message);
+				reporter.SendMessage(eventType, priority, message, file, lineNumber, code);
 			} else {
 				reporter.SendMessage(eventType, projectName, targetName, taskName, message);
 			}
 
+		}
+
+		private static readonly Regex messageRegex = new Regex(@"(?'file'.*?)(\((?'line'\d+)(,(?'column'\d+))?\))?: (?'category'error|warning)( (?'code'[^:]+))?: (?'message'.*)", RegexOptions.Compiled);
+
+		public void ParseMessage(BuildEventArgs e, out MessagePriority priority, out string file, out int lineNumber, out string code, out string message)
+		{
+			switch(e.MessageLevel) {
+				case Level.Warning: priority = MessagePriority.WARNING; break;
+				case Level.Error: priority = MessagePriority.ERROR; break;
+				default: priority = MessagePriority.INFO; break;
+			}
+
+			file = null;
+			code = null;
+			lineNumber = 0;
+			message = e.Message;
+
+			Match match = messageRegex.Match(message);
+			if (match.Success)
+			{
+				if (match.Groups["category"].Value == "warning")
+				{
+					priority = MessagePriority.WARNING;
+				}
+				else
+				{
+					priority = MessagePriority.ERROR;	
+				}
+				
+				file = match.Groups["file"].Value;
+
+				string lineString = match.Groups["line"].Value;
+				if (lineString != "")
+				{
+					lineNumber = int.Parse(lineString);	
+				}
+				
+				code = match.Groups["code"].Value;
+				message = match.Groups["message"].Value;
+			}
 		}
 	}
 }
