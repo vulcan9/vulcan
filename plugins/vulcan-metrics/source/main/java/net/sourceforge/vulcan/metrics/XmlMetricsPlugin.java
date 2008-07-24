@@ -19,6 +19,7 @@
 package net.sourceforge.vulcan.metrics;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -51,26 +52,32 @@ import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.transform.JDOMResult;
 import org.jdom.transform.JDOMSource;
+import org.springframework.beans.BeansException;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.core.io.Resource;
+import org.springframework.core.io.support.ResourcePatternResolver;
 import org.xml.sax.InputSource;
 import org.xml.sax.helpers.XMLReaderFactory;
 
 @MetricsPlugin
-public class XmlMetricsPlugin implements BuildManagerObserverPlugin, ConfigurablePlugin {
+public class XmlMetricsPlugin implements BuildManagerObserverPlugin, ConfigurablePlugin, ApplicationContextAware {
 	public static final String PLUGIN_ID = "net.sourceforge.vulcan.metrics";
 	public static final String PLUGIN_NAME = "XML Metrics";
 
 	EventHandler eventHandler;
 	FileScanner fileScanner;
-	Resource[] transfomSources;
+	String transformSourcePath;
 	TransformerFactory transformerFactory;
 	BuildOutcomeCache buildOutcomeCache;
 	
 	List<Transformer> transformers = new ArrayList<Transformer>();
 	GlobalConfigDto globalConfig = new GlobalConfigDto();
-
-	public void init() {
-		for (Resource r : transfomSources) {
+	
+	private ResourcePatternResolver resourceResolver;
+	
+	public void init() throws IOException {
+		for (Resource r : resourceResolver.getResources(transformSourcePath)) {
 			try {
 				final SAXSource source = new SAXSource(
 						XMLReaderFactory.createXMLReader(),
@@ -138,11 +145,17 @@ public class XmlMetricsPlugin implements BuildManagerObserverPlugin, Configurabl
 	public void setFileScanner(FileScanner fileScanner) {
 		this.fileScanner = fileScanner;
 	}
-	public void setTransfomSources(Resource[] transfomSources) {
-		this.transfomSources = transfomSources;
+	public void setTransfomSourcePath(String transformSourcePath) {
+		this.transformSourcePath = transformSourcePath;
 	}
 	public void setTransformerFactory(TransformerFactory transformerFactory) {
 		this.transformerFactory = transformerFactory;
+	}
+	public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+		this.resourceResolver = applicationContext;
+	}
+	public void setResourceResolver(ResourcePatternResolver resourceResolver) {
+		this.resourceResolver = resourceResolver;
 	}
 	protected Document merge(final File rootDir, final String[] matches) {
 		final DomBuilder builder = new DomBuilder();
