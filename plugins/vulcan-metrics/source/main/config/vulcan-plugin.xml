@@ -13,14 +13,7 @@
 		<property name="fileScanner">
 			<ref bean="fileScanner"/>
 		</property>
-		<property name="transfomSources">
-			<list>
-				<value>xsl/identity.xsl</value>
-				<value>xsl/unit-test.xsl</value>
-				<value>xsl/code-coverage.xsl</value>
-				<value>xsl/static-analysis.xsl</value>
-			</list>
-		</property>
+		<property name="transformSourcePath" value="xsl/*.xsl"/>
 		<property name="transformerFactory">
 			<bean class="javax.xml.transform.TransformerFactory" factory-method="newInstance"/>
 		</property>

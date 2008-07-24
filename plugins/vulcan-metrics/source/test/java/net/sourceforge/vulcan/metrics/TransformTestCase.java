@@ -18,6 +18,7 @@
  */
 package net.sourceforge.vulcan.metrics;
 
+import java.io.IOException;
 import java.util.List;
 
 import javax.xml.transform.TransformerFactory;
@@ -33,8 +34,9 @@ import org.jdom.Document;
 import org.jdom.Element;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
+import org.springframework.core.io.support.ResourcePatternResolver;
 
-public abstract class TransformTestCase extends TestCase {
+public abstract class TransformTestCase extends TestCase implements ResourcePatternResolver {
 
 	protected final XmlMetricsPlugin plugin = new XmlMetricsPlugin();
 	protected final Document doc = new Document(new Element("merged-root"));
@@ -43,20 +45,28 @@ public abstract class TransformTestCase extends TestCase {
 	public void setUp() throws Exception {
 		super.setUp();
 		plugin.setEventHandler(new Handler());
-		plugin.setTransfomSources(new Resource[] {
-				getResource("unit-test.xsl"),
-				getResource("code-coverage.xsl"),
-				getResource("static-analysis.xsl"),
-				getResource("identity.xsl")});
-		
+		plugin.setTransfomSourcePath("source/main/config/xsl/*.xsl");
+		plugin.setResourceResolver(this);
 		plugin.setTransformerFactory(TransformerFactory.newInstance());
 		
 		plugin.init();
 	}
 
-	private Resource getResource(String filename) {
+	public Resource getResource(String filename) {
 		return new FileSystemResource(TestUtils.resolveRelativeFile("source/main/config/xsl/" + filename));
 	}
+	
+	public Resource[] getResources(String pattern) throws IOException {
+		assertEquals("source/main/config/xsl/*.xsl", pattern);
+		
+		return new Resource[] {
+				 getResource("unit-test.xsl"),
+				 getResource("code-coverage.xsl"),
+				 getResource("static-analysis.xsl"),
+				 getResource("identity.xsl")
+		};
+	}
+
 	protected static void assertContainsMetric(Document doc, String key, MetricType type, String value, boolean uniqueKey) {
 		assertEquals("metrics", doc.getRootElement().getName());
 		
