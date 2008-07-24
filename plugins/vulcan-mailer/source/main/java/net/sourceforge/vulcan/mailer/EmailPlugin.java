@@ -360,6 +360,8 @@ public class EmailPlugin implements BuildManagerObserverPlugin, ConfigurablePlug
 
         final Map<String, ? super Object> params = new HashMap<String, Object>();
         
+        params.put("showBuildDirectory", Boolean.FALSE);
+        
 		if (projectSiteURL != null) {
 			params.put("projectSiteURL", projectSiteURL.toExternalForm());
 		}

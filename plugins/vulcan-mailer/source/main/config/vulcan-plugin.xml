@@ -14,7 +14,7 @@
 			<ref parent="projectDomBuilder"/>
 		</property>
 		<property name="cssLocation">
-			<value>/css/standard.css</value>
+			<value>/css/email.css</value>
 		</property>
 	</bean>
 	

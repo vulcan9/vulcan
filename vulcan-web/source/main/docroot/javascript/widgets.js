@@ -438,6 +438,11 @@ function registerHandlers() {
 			window.pathSeparator = "\\";
 		}
 		
+		if (buildDir[buildDir.length-1] == window.pathSeparator) {
+			buildDir = buildDir.substring(0, buildDir.length - 1);
+			index = buildDir.lastIndexOf(window.pathSeparator);
+		}
+		
 		window.rootDirName = buildDir.substring(index+1);
 		
 		$("#build-directory-root").text(buildDir.substring(0, index));

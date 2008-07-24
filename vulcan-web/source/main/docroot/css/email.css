@@ -1,0 +1,116 @@
+h2.build-stats {
+	color: gray;
+	font-size: 10pt;
+	font-weight: normal;
+}
+.success, .PASS {
+	color: #43F143;
+}
+.failure, .FAIL {
+	color: red;
+}
+.SKIP {
+	color: #C0C000;
+}
+.ERROR {
+	color: #FFA500;
+}
+a:link,a:visited {
+	color: #0000CE;
+}
+a:active {
+	color: red;
+}
+.new-test-failure {
+	color: red;
+}
+.test-namespace {
+	color: gray;
+}
+html, body {
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 10pt;
+	padding: 0;
+	margin: 0;
+}
+h1, h2, h3 {
+	margin: 0;
+}
+.build-outcome-message {
+	margin-bottom: 1ex;
+}
+.issue, .issue-unlinked {
+	font-family: "Bitstream Vera Sans Mono", monospace;
+	font-weight: bold;
+}
+.issue-unlinked {
+	border-bottom: 1px dotted orange;
+}
+.test-name {
+	font-size: larger;
+	display: block;
+}
+.test-namespace {
+	font-style: italic;
+}
+ul.modified-paths {
+	margin: 0;
+	padding-left: 15px;
+}
+
+ul.options,ul.projectBuildOptions,div.projectCheckboxes ul,
+ul.metaDataOptions,ul.object-array,ul.primitive-array,
+ul.dateRanges {
+	list-style: none;
+	padding-left: 0;
+	padding-right: 10px;
+	margin-left: 0;
+	margin-right: 10px;
+	margin-top: 0;
+}
+caption, span.caption {
+	padding-left: 4px;
+	padding-bottom: 4px;
+	font-size: 12pt;
+	font-weight: bold;
+	text-align: left;
+}
+span.caption {
+	display: block;
+}
+table {
+	border-collapse: collapse;
+}
+table.blended td {
+	border: none;
+	white-space: pre;
+}
+table.build-messages tbody td {
+	font-family: "Bitstream Vera Sans Mono", "MS Courier New", monospace;
+	font-size: smaller;
+}
+th.timestamp, td.timestamp, td.label {
+	white-space: nowrap;
+}
+td.status {
+	font-weight: bold;
+	text-align: center;
+}
+th.long, th.file {
+	text-align: left;
+}
+td.build-number {
+	text-align: center;
+}
+ul.tabs {
+	margin: 0;
+	margin-top: 20px;
+	padding: 0;
+}
+span.count {
+	font-size: smaller;
+	color: black;
+}
+.tab-panel {
+	margin-top: 20px;
+}
