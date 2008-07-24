@@ -45,7 +45,7 @@ public abstract class TransformTestCase extends TestCase implements ResourcePatt
 	public void setUp() throws Exception {
 		super.setUp();
 		plugin.setEventHandler(new Handler());
-		plugin.setTransfomSourcePath("source/main/config/xsl/*.xsl");
+		plugin.setTransformSourcePath("source/main/config/xsl/*.xsl");
 		plugin.setResourceResolver(this);
 		plugin.setTransformerFactory(TransformerFactory.newInstance());
 		
