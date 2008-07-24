@@ -19,6 +19,8 @@
 package net.sourceforge.vulcan.metrics.dom;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.Reader;
 import java.io.StringReader;
 
 import org.apache.commons.io.FileUtils;
@@ -26,6 +28,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jdom.Document;
 import org.jdom.Element;
+import org.jdom.JDOMException;
 import org.jdom.input.SAXBuilder;
 
 public class DomBuilder {
@@ -51,12 +54,19 @@ public class DomBuilder {
 			
 			final String xmlWithDoctype = fixNonStandardXml(xml);
 			
-			final Document xmlDoc = new SAXBuilder().build(new StringReader(xmlWithDoctype));
+			Reader reader = new StringReader(xmlWithDoctype);
+			final Document xmlDoc = loadXml(reader);
 
 			merge(xmlDoc);
 		} catch (Exception e) {
 			warn(e, xmlFile);
 		}
+	}
+
+	Document loadXml(Reader reader) throws JDOMException, IOException {
+		final SAXBuilder builder = new SAXBuilder();
+		builder.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
+		return builder.build(reader);
 	}
 	
 	void merge(Document xmlDoc) {
@@ -81,6 +91,7 @@ public class DomBuilder {
 			xml = xml.substring(xml.indexOf('<'));
 		}
 		
+		// Selenium uses &nbsp without declaring an HTML doctype.
 		if (xml.contains("&nbsp;")) {
 			return xml.replaceAll("&nbsp;", "");
 		}
