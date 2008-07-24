@@ -472,7 +472,8 @@ public abstract class AbstractProjectDomBuilder implements ProjectDomBuilder {
 		
 		final String workDir = status.getWorkDir();
 		if (isNotBlank(workDir)) {
-			addChildNodeWithText(root, "work-directory", workDir);
+			final Element workDirNode = addChildNodeWithText(root, "work-directory", workDir);
+			workDirNode.setAttribute("available", Boolean.toString(new File(workDir).isDirectory()));
 		}
 		
 		final String requestedBy = status.getRequestedBy();

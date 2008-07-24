@@ -42,6 +42,7 @@
 	<xsl:param name="newTestFailureLabel"/>
 	<xsl:param name="reloadInterval"/>
 	<xsl:param name="buildDirectoryLabel"/>
+	<xsl:param name="showBuildDirectory" select="'true'"/>
 	<xsl:param name="workingCopyBuildNumber"/>
 	
 	<xsl:key name="builds-by-message" match="project" use="message"/>
@@ -82,25 +83,40 @@
 					<xsl:apply-templates select="/project/status"/>
 				</h1>
 	
+				<h2 class="build-stats">
+					<xsl:value-of select="$buildNumberHeader"/>
+					<xsl:text> </xsl:text>
+					<xsl:value-of select="/project/build-number"/>
+					<xsl:text>, </xsl:text>
+					<xsl:value-of select="$revisionHeader"/>
+					<xsl:text> </xsl:text>
+					<xsl:value-of select="/project/revision"/>
+					<xsl:text> (</xsl:text>
+					<xsl:value-of select="/project/repository-tag-name"/>
+					<xsl:text>)</xsl:text>
+				</h2>
+				
 				<ul class="tabs" id="build-report-tabs">
-					<li class="active"><a id="summary-tab" href="#"><xsl:value-of select="$title"/></a></li>
-					<li><a id="dependencies-tab" href="#">Dependencies</a></li>
+					<li class="active"><a id="summary-tab" href="#summary-anchor"><xsl:value-of select="$title"/></a></li>
+					<li><a id="dependencies-tab" href="#dependencies-anchor">Dependencies</a></li>
 					<xsl:if test="$num-change-sets &gt; 0">
-						<li><a id="change-sets-tab" href="#">Commit Log (<xsl:value-of select="$num-change-sets"/>)</a></li>
+						<li><a id="change-sets-tab" href="#change-sets-anchor">Commit Log (<xsl:value-of select="$num-change-sets"/>)</a></li>
 					</xsl:if>
 					<xsl:if test="$num-errors &gt; 0">
-						<li><a id="errors-tab" href="#">Errors (<xsl:value-of select="$num-errors"/>)</a></li>
+						<li><a id="errors-tab" href="#errors-anchor">Errors (<xsl:value-of select="$num-errors"/>)</a></li>
 					</xsl:if>
 					<xsl:if test="$num-warnings &gt; 0">
-						<li><a id="warnings-tab" href="#">Warnings (<xsl:value-of select="$num-warnings"/>)</a></li>
+						<li><a id="warnings-tab" href="#warnings-anchor">Warnings (<xsl:value-of select="$num-warnings"/>)</a></li>
 					</xsl:if>
 					<xsl:if test="$num-test-failures &gt; 0">
-						<li><a id="test-failures-tab" href="#"><xsl:value-of select="$testFailureLabel"/> (<xsl:value-of select="$num-test-failures"/>)</a></li>
+						<li><a id="test-failures-tab" href="#test-failures-anchor"><xsl:value-of select="$testFailureLabel"/> (<xsl:value-of select="$num-test-failures"/>)</a></li>
 					</xsl:if>
 					<xsl:if test="/project/metrics">
-						<li><a id="metrics-tab" href="#"><xsl:value-of select="$metricsLabel"/></a></li>
+						<li><a id="metrics-tab" href="#metrics-anchor"><xsl:value-of select="$metricsLabel"/></a></li>
 					</xsl:if>
-					<li><a id="build-directory-tab" href="#">Build Directory</a></li>
+					<xsl:if test="$showBuildDirectory">
+						<li><a id="build-directory-tab" href="#build-directory-anchor">Build Directory</a></li>
+					</xsl:if>
 				</ul>
 				
 				<xsl:call-template name="bubble">
@@ -146,33 +162,45 @@
 					</xsl:call-template>
 				</xsl:if>
 				
-				<div id="build-directory-panel" class="tab-panel">
-					<xsl:apply-templates select="/project/work-directory"/>
-					<xsl:if test="$workingCopyBuildNumber &gt; /project/build-number">
-						<span class="warning">
-							<xsl:text>The contents of this directory were overwritten by Build </xsl:text>
-							<xsl:call-template name="buildLink">
-								<xsl:with-param name="buildNumber">
-									<xsl:value-of select="$workingCopyBuildNumber"/>
-								</xsl:with-param>
-							</xsl:call-template>
-							<xsl:text>.</xsl:text>
-						</span>
-					</xsl:if>
-					<iframe id="iframe" name="iframe" frameborder="0">
-						<xsl:attribute name="src">
-							<xsl:value-of select="$projectSiteURL"/>
-						</xsl:attribute>
-						<xsl:text></xsl:text>
-					</iframe>
-				</div>
-				
-				<input id="work-directory" type="hidden">
-					<xsl:attribute name="value"><xsl:value-of select="$work-directory"/></xsl:attribute>
-				</input>
-				<input id="repository-url" type="hidden">
-					<xsl:attribute name="value"><xsl:value-of select="/project/repository-url"/></xsl:attribute>
-				</input>
+				<xsl:if test="$showBuildDirectory">
+					<a name="build-directory-anchor"/>
+					<div id="build-directory-panel" class="tab-panel">
+						<xsl:apply-templates select="/project/work-directory"/>
+						<xsl:choose>
+							<xsl:when test="/project/work-directory[@available='true']">
+								<xsl:if test="$workingCopyBuildNumber &gt; /project/build-number">
+									<span class="warning">
+										<xsl:text>The contents of this directory were overwritten by Build </xsl:text>
+										<xsl:call-template name="buildLink">
+											<xsl:with-param name="buildNumber">
+												<xsl:value-of select="$workingCopyBuildNumber"/>
+											</xsl:with-param>
+										</xsl:call-template>
+										<xsl:text>.</xsl:text>
+									</span>
+								</xsl:if>
+								<iframe id="iframe" name="iframe" frameborder="0">
+									<xsl:attribute name="src">
+										<xsl:value-of select="$projectSiteURL"/>
+									</xsl:attribute>
+									<xsl:text></xsl:text>
+								</iframe>
+							</xsl:when>
+							<xsl:otherwise>
+								<span class="warning">
+									<xsl:text>This directory is no longer present.</xsl:text>
+							</span>
+							</xsl:otherwise>
+						</xsl:choose>
+					</div>
+					
+					<input id="work-directory" type="hidden">
+						<xsl:attribute name="value"><xsl:value-of select="$work-directory"/></xsl:attribute>
+					</input>
+					<input id="repository-url" type="hidden">
+						<xsl:attribute name="value"><xsl:value-of select="/project/repository-url"/></xsl:attribute>
+					</input>
+				</xsl:if>
 			</body>
 		</html>
 	</xsl:template>
@@ -242,6 +270,7 @@
 
 	<xsl:template name="summary">
 		<div xmlns="http://www.w3.org/1999/xhtml" id="summary-panel" class="tab-panel">
+			<a name="summary-anchor"/>
 			<h3 class="build-outcome-message">
 				<xsl:choose>
 					<xsl:when test="substring-before(/project/message, '&#10;')!=''">
@@ -305,7 +334,9 @@
 	
 	<xsl:template name="revisions">
 		<div xmlns="http://www.w3.org/1999/xhtml" id="dependencies-panel" class="tab-panel">
+			<a name="dependencies-anchor"/>
 			<table>
+				<caption class="panel-caption"><xsl:value-of select="$revisionCaption"/></caption>
 				<thead>
 					<tr>
 						<th><xsl:value-of select="$projectHeader"/></th>
@@ -391,6 +422,7 @@
 	
 	<xsl:template match="change-sets">
 		<div xmlns="http://www.w3.org/1999/xhtml" id="change-sets-panel" class="tab-panel">
+			<a name="change-sets-anchor"/>
 			<table>
 				<thead>
 					<tr>
@@ -506,6 +538,7 @@
 	
 	<xsl:template match="/project/errors">
 		<div xmlns="http://www.w3.org/1999/xhtml" id="errors-panel" class="tab-panel">
+			<a name="errors-anchor"/>
 			<xsl:call-template name="build-messages">
 				<xsl:with-param name="caption" select="'Build Errors'"/>
 			</xsl:call-template>
@@ -514,6 +547,7 @@
 	
 	<xsl:template match="/project/warnings">
 		<div xmlns="http://www.w3.org/1999/xhtml" id="warnings-panel" class="tab-panel">
+			<a name="warnings-anchor"/>
 			<xsl:call-template name="build-messages">
 				<xsl:with-param name="caption" select="'Build Warnings'"/>
 			</xsl:call-template>
@@ -529,6 +563,7 @@
 		<xsl:param name="showTableHead" select="$showFiles or $showLineNumbers or $showCode"/>
 		
 		<table xmlns="http://www.w3.org/1999/xhtml" class="build-messages">
+			<caption class="panel-caption"><xsl:value-of select="$caption"/></caption>
 			<xsl:if test="not($showTableHead)">
 				<xsl:attribute name="class">blended build-messages</xsl:attribute>
 			</xsl:if>
@@ -582,6 +617,7 @@
 	
 	<xsl:template match="/project/metrics">
 		<div xmlns="http://www.w3.org/1999/xhtml" class="tab-panel" id="metrics-panel">
+			<a name="metrics-anchor"/>
 			<table>
 				<tbody>
 					<xsl:for-each select="./metric">
@@ -610,6 +646,7 @@
 	
 	<xsl:template match="/project/test-failures">
 		<div class="tab-panel" id="test-failures-panel" xmlns="http://www.w3.org/1999/xhtml">
+			<a name="test-failures-anchor"/>
 			<table>
 				<thead>
 					<tr>

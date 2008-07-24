@@ -34,6 +34,12 @@ html, body {
 	background-color: white;
 }
 
+h2.build-stats {
+	color: gray;
+	font-size: 10pt;
+	font-weight: normal;
+}
+
 .success, .PASS {
 	color: #43F143;
 }
@@ -622,6 +628,10 @@ div.tab-panel {
 	border: 1px solid black;
 	margin-top: 10px;
 	padding: 10px;
+}
+
+caption.panel-caption {
+	display: none;
 }
 
 div#summary-panel {
