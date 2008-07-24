@@ -18,6 +18,8 @@
  */
 package net.sourceforge.vulcan.metrics.dom;
 
+import java.io.StringReader;
+
 import net.sourceforge.vulcan.EasyMockTestCase;
 import net.sourceforge.vulcan.TestUtils;
 
@@ -72,5 +74,9 @@ public class DomBuilderTest extends EasyMockTestCase {
 		builder.merge(TestUtils.resolveRelativeFile("source/test/xml/utf-8-header.xml"));
 		
 		verify();
+	}
+	public void testLoadXmlDisablesDtdCatalog() throws Exception {
+		String xml = "<!DOCTYPE document SYSTEM 'Do_not_load_me.dtd'><document/>";
+		builder.loadXml(new StringReader(xml));
 	}
 }
