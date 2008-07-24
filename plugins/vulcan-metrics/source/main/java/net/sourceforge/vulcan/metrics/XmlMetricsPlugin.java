@@ -145,7 +145,7 @@ public class XmlMetricsPlugin implements BuildManagerObserverPlugin, Configurabl
 	public void setFileScanner(FileScanner fileScanner) {
 		this.fileScanner = fileScanner;
 	}
-	public void setTransfomSourcePath(String transformSourcePath) {
+	public void setTransformSourcePath(String transformSourcePath) {
 		this.transformSourcePath = transformSourcePath;
 	}
 	public void setTransformerFactory(TransformerFactory transformerFactory) {
