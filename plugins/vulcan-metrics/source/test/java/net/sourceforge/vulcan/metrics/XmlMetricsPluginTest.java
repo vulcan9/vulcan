@@ -18,9 +18,13 @@
  */
 package net.sourceforge.vulcan.metrics;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.support.ResourcePatternResolver;
 
 import junit.framework.TestCase;
 import net.sourceforge.vulcan.core.support.BuildOutcomeCache;
@@ -31,7 +35,7 @@ import net.sourceforge.vulcan.dto.TestFailureDto;
 import net.sourceforge.vulcan.dto.ProjectStatusDto.Status;
 import net.sourceforge.vulcan.event.BuildCompletedEvent;
 
-public class XmlMetricsPluginTest extends TestCase {
+public class XmlMetricsPluginTest extends TestCase implements ResourcePatternResolver {
 	XmlMetricsPlugin plugin = new XmlMetricsPlugin();
 	
 	BuildOutcomeCache cache = new BuildOutcomeCache() {
@@ -52,6 +56,7 @@ public class XmlMetricsPluginTest extends TestCase {
 	protected void setUp() throws Exception {
 		super.setUp();
 		plugin.setBuildOutcomeCache(cache);
+		plugin.setResourceResolver(this);
 		previousStatus.setName("myProject");
 		previousStatus.setTestFailures(previousFailures);
 		
@@ -111,5 +116,11 @@ public class XmlMetricsPluginTest extends TestCase {
 		plugin.preserveTestFailures(currentStatus);
 		
 		assertEquals(null, currentStatus.getTestFailures());
+	}
+	public Resource getResource(String location) {
+		return null;
+	}
+	public Resource[] getResources(String locationPattern) throws IOException {
+		return new Resource[0];
 	}
 }

@@ -48,6 +48,8 @@ import net.sourceforge.vulcan.metrics.dom.DomBuilder;
 import net.sourceforge.vulcan.metrics.dto.GlobalConfigDto;
 import net.sourceforge.vulcan.metrics.scanner.FileScanner;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.transform.JDOMResult;
@@ -62,6 +64,8 @@ import org.xml.sax.helpers.XMLReaderFactory;
 
 @MetricsPlugin
 public class XmlMetricsPlugin implements BuildManagerObserverPlugin, ConfigurablePlugin, ApplicationContextAware {
+	private static Log LOG = LogFactory.getLog(XmlMetricsPlugin.class);
+	
 	public static final String PLUGIN_ID = "net.sourceforge.vulcan.metrics";
 	public static final String PLUGIN_NAME = "XML Metrics";
 
@@ -71,27 +75,25 @@ public class XmlMetricsPlugin implements BuildManagerObserverPlugin, Configurabl
 	TransformerFactory transformerFactory;
 	BuildOutcomeCache buildOutcomeCache;
 	
-	List<Transformer> transformers = new ArrayList<Transformer>();
+	Map<String, Transformer> transformers = new HashMap<String, Transformer>();
 	GlobalConfigDto globalConfig = new GlobalConfigDto();
+	
+	long newestTransformDate = 0;
 	
 	private ResourcePatternResolver resourceResolver;
 	
 	public void init() throws IOException {
-		for (Resource r : resourceResolver.getResources(transformSourcePath)) {
-			try {
-				final SAXSource source = new SAXSource(
-						XMLReaderFactory.createXMLReader(),
-						new InputSource(r.getInputStream()));
-				
-				transformers.add(transformerFactory.newTransformer(source));
-			} catch (Exception e) {
-				eventHandler.reportEvent(new ErrorEvent(this, "metrics.errors.load.transform",
-						new Object[] {e.getMessage()}, e));
-			}
-		}
+		loadTransformers();
 	}
-	
+
 	public void onBuildCompleted(BuildCompletedEvent event) {
+		try {
+			refreshTransformers();
+		} catch (IOException e) {
+			eventHandler.reportEvent(new ErrorEvent(this, "metrics.errors.refresh",
+				new Object[] {e.getMessage()}, e));
+		}
+		
 		final ProjectStatusDto status = event.getStatus();
 		
 		if (status.getStatus() == ProjectStatusDto.Status.ERROR
@@ -108,6 +110,9 @@ public class XmlMetricsPlugin implements BuildManagerObserverPlugin, Configurabl
 				globalConfig.getExcludes());
 		
 		if (matches.length == 0) {
+			if (LOG.isDebugEnabled()) {
+				LOG.debug("No XML files found for processing.");
+			}
 			return;
 		}
 		
@@ -172,8 +177,10 @@ public class XmlMetricsPlugin implements BuildManagerObserverPlugin, Configurabl
 		final Document metrics = new Document(metricsRoot);
 		
 		final JDOMSource source = new JDOMSource(mergedRoot);
-		for (Transformer transformer : transformers) {
+		for (Map.Entry<String,Transformer> key : transformers.entrySet()) {
 			final JDOMResult result = new JDOMResult();
+			
+			final Transformer transformer = key.getValue();
 			
 			synchronized(transformer) {
 				try {
@@ -184,8 +191,20 @@ public class XmlMetricsPlugin implements BuildManagerObserverPlugin, Configurabl
 				}
 			}
 			
-			final Element root = result.getDocument().getRootElement();
-			metricsRoot.addContent(root.cloneContent());
+			boolean hasContent = false;
+			
+			if (result.getDocument().hasRootElement()) {
+				final Element root = result.getDocument().getRootElement();
+				
+				if (root.getContentSize() > 0) {
+					hasContent = true;
+					metricsRoot.addContent(root.cloneContent());
+				}
+			}
+			
+			if (!hasContent && LOG.isDebugEnabled()) {
+				LOG.debug("Transform " + key.getKey() + " did not produce any metrics.");
+			}
 		}
 		
 		return metrics;
@@ -210,6 +229,46 @@ public class XmlMetricsPlugin implements BuildManagerObserverPlugin, Configurabl
 		}
 	}
 
+	private void refreshTransformers() throws IOException {
+		final Resource[] resources = resourceResolver.getResources(transformSourcePath);
+		
+		if (transformers.size() != resources.length) {
+			loadTransformers();
+			return;
+		}
+		
+		for (Resource r : resources) {
+			final long lastModified = r.getFile().lastModified();
+			if (lastModified > newestTransformDate) {
+				loadTransformers();
+				return;
+			}			
+		}
+	}
+	
+	private void loadTransformers() throws IOException {
+		LOG.info("Reloading XSL transformers because they have changed.");
+		
+		transformers.clear();
+		for (Resource r : resourceResolver.getResources(transformSourcePath)) {
+			try {
+				final long lastModified = r.getFile().lastModified();
+				if (lastModified > newestTransformDate) {
+					newestTransformDate = lastModified;
+				}
+				
+				final SAXSource source = new SAXSource(
+						XMLReaderFactory.createXMLReader(),
+						new InputSource(r.getInputStream()));
+
+				transformers.put(r.getFilename(), transformerFactory.newTransformer(source));
+			} catch (Exception e) {
+				eventHandler.reportEvent(new ErrorEvent(this, "metrics.errors.load.transform",
+						new Object[] {e.getMessage()}, e));
+			}
+		}
+	}
+	
 	@SuppressWarnings("unchecked")
 	private void digestMetrics(Element root, ProjectStatusDto status) {
 		final List<MetricDto> metricList = new ArrayList<MetricDto>();
