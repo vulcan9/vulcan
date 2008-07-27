@@ -45,7 +45,12 @@
 	</script>
 	<jsp:element name="script">
 		<jsp:attribute name="type">text/javascript</jsp:attribute>
-		<jsp:attribute name="src"><c:url value="/javascript/jquery.js"/></jsp:attribute>
+		<jsp:attribute name="src"><c:url value="/javascript/jquery-1.2.6.js"/></jsp:attribute>
+		<jsp:body/>
+	</jsp:element>
+	<jsp:element name="script">
+		<jsp:attribute name="type">text/javascript</jsp:attribute>
+		<jsp:attribute name="src"><c:url value="/javascript/jquery-ui-1.5.2.js"/></jsp:attribute>
 		<jsp:body/>
 	</jsp:element>
 	<jsp:element name="script">
