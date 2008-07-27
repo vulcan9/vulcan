@@ -93,10 +93,6 @@
 			debug="${build.debug}"
 			output="${assembly.target.dir}/UnitTests.dll">
 
-			<nowarn>
-				<warning number="0618"/>
-			</nowarn>
-
 			<sources failonempty="true">
 				<include name="${assembly.info.file}"/>
 				<include name="source/test/csharp/**/*.cs"/>
