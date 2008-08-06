@@ -50,6 +50,16 @@ namespace SourceForge.Vulcan.DotNet
 			Assert.That(Path.IsPathRooted(files[0]), Is.True);
 		}
 
+		[Test]
+		public void TestAvoidNREWheFileIsNull()
+		{
+			listener.TaskStarted(this, new TaskStartedEventArgs("foo", "help", "DoStuff", "/home/samantha/work/module1/module1.csproj", "/library/useful-stuff.targets"));
+			listener.BuildErrorRaised(this, new BuildErrorEventArgs("x", "y", null, 22, 0, 0, 0, "error", "", "csc"));
+
+			Assert.That(files.Count, Is.EqualTo(1));
+			Assert.That(files[0], Is.Null);
+		}
+
 		public void SendMessage(string eventType, string projectName, string targetName, string taskName, string message)
 		{
 		}
