@@ -68,6 +68,17 @@
 				</xsl:if>
 			</head>
 			<body>
+				<form class="hidden" action="#" method="get">
+					<input name="work-directory" id="work-directory" type="hidden">
+						<xsl:attribute name="value"><xsl:value-of select="$work-directory"/></xsl:attribute>
+						<xsl:text> </xsl:text>
+					</input>
+					<input id="repository-url" type="hidden">
+						<xsl:attribute name="value"><xsl:value-of select="/project/repository-url"/></xsl:attribute>
+						<xsl:text> </xsl:text>
+					</input>
+				</form>
+				
 				<div class="build-nav">
 					<xsl:apply-templates select="/project/prev-index"/>
 					<xsl:text> </xsl:text>
@@ -193,13 +204,6 @@
 							</xsl:otherwise>
 						</xsl:choose>
 					</div>
-					
-					<input id="work-directory" type="hidden">
-						<xsl:attribute name="value"><xsl:value-of select="$work-directory"/></xsl:attribute>
-					</input>
-					<input id="repository-url" type="hidden">
-						<xsl:attribute name="value"><xsl:value-of select="/project/repository-url"/></xsl:attribute>
-					</input>
 				</xsl:if>
 			</body>
 		</html>
@@ -271,18 +275,20 @@
 	<xsl:template name="summary">
 		<div xmlns="http://www.w3.org/1999/xhtml" id="summary-panel" class="tab-panel">
 			<a name="summary-anchor"/>
-			<h3 class="build-outcome-message">
-				<xsl:choose>
-					<xsl:when test="substring-before(/project/message, '&#10;')!=''">
-						<xsl:value-of select="substring-before(/project/message, '&#10;')"/>
-						<xsl:text>...</xsl:text>
-					</xsl:when>
-					<xsl:otherwise>
-						<xsl:value-of select="/project/message"/>
-					</xsl:otherwise>
-				</xsl:choose>
-			</h3>
-		
+			<xsl:if test="/project/message != ''">
+				<h3 class="build-outcome-message">
+					<xsl:choose>
+						<xsl:when test="substring-before(/project/message, '&#10;')!=''">
+							<xsl:value-of select="substring-before(/project/message, '&#10;')"/>
+							<xsl:text>...</xsl:text>
+						</xsl:when>
+						<xsl:otherwise>
+							<xsl:value-of select="/project/message"/>
+						</xsl:otherwise>
+					</xsl:choose>
+				</h3>
+			</xsl:if>
+			
 			<div class="build-stats">
 				<dl>
 					<dt><xsl:value-of select="$buildReasonLabel"/></dt>
@@ -328,7 +334,8 @@
 				</xsl:call-template>
 			</xsl:if>
 			
-			<div style="clear: left;"/>
+			<!-- IE7 can't figure out <div/>.  Render <div> </div> instead. -->
+			<div style="clear: left;"><xsl:text> </xsl:text></div>
 		</div>
 	</xsl:template>
 	
@@ -381,7 +388,15 @@
 							</a>
 						</td>
 						<td>
-							<xsl:value-of select="./description"/>
+							<xsl:choose>
+								<xsl:when test="./description = ''">
+									<xsl:text> </xsl:text>
+									<!-- IE7 can't figure out <td/>.  Render <td> </td> instead. -->
+								</xsl:when>
+								<xsl:otherwise>
+									<xsl:value-of select="./description"/>
+								</xsl:otherwise>
+							</xsl:choose>
 						</td>
 					</tr>
 				</xsl:for-each>
@@ -674,12 +689,12 @@
 										</xsl:call-template>
 									</xsl:otherwise>
 								</xsl:choose>
-								
 							</td>
 						</tr>
 					</xsl:for-each>
 				</tbody>
 			</table>
+			<div style="clear: left;"><xsl:text> </xsl:text></div>
 		</div>
 	</xsl:template>
 	
