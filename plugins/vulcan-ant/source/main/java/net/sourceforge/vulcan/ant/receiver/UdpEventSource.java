@@ -113,7 +113,7 @@ public class UdpEventSource extends SerializedEventSource {
 	}
 	
 	public String getHostname() {
-		return listenAddress.getHostAddress();
+		return listenAddress.getHostName();
 	}
 	public int getPort() {
 		return port;
