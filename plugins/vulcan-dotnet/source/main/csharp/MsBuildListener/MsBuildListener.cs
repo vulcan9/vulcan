@@ -147,7 +147,7 @@ namespace SourceForge.Vulcan.DotNet {
 
 		private void SendMessageWithPriority(MessagePriority prio, string message, string file, int lineNumber, string code)
 		{
-			if (!Path.IsPathRooted(file) && projectFiles.Count > 0)
+			if (!string.IsNullOrEmpty(file) && !Path.IsPathRooted(file) && projectFiles.Count > 0)
 			{
 				file = Path.Combine(projectFiles.Peek().DirectoryName, file);
 			}
