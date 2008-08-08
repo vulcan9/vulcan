@@ -405,6 +405,26 @@ function registerHandlers() {
 		customAddEventListener(helpLink, 'click', launchHelpHandler);
 	}
 	
+	$("table.sortable").tablesorter({
+		cssAsc: "sorted-ascending",
+		cssDesc: "sorted-descending",
+		cssHeader: "",
+		textExtraction: function(node) {
+			var text = $(node).text();
+			var number = parseInt(text);
+			
+			if (isNaN(number)) {
+				return text;
+			}
+			
+			while (text.length < 8) {
+				text = "0" + text;
+			}
+			
+			return text;
+		}
+	});
+	
 	$("ul.tabs a").click(function(e) {
 		e.preventDefault();
 		

@@ -62,6 +62,7 @@ public class ViewProjectStatusActionTest extends MockApplicationContextStrutsTes
 	public void setUp() throws Exception {
 		super.setUp();
 		
+		request.setContextPath("/vulcan-web");
 		setRequestPathInfo("/viewProjectStatus.do");
 		
 		dom.setRootElement(new Element("project"));
@@ -76,7 +77,7 @@ public class ViewProjectStatusActionTest extends MockApplicationContextStrutsTes
 		
 		projectConfig.setName("some project");
 		
-		paramMap.put("projectSiteURL", new URL("http://localhost/site/some%20project/12/"));
+		paramMap.put("projectSiteURL", new URL("http://localhost/vulcan-web/site/some%20project/12/"));
 		paramMap.put("issueTrackerURL", "");
 		
 		expect(buildManager.getMostRecentBuildNumberByWorkDir((String)anyObject())).andAnswer(new IAnswer<Integer>() {
@@ -492,8 +493,9 @@ public class ViewProjectStatusActionTest extends MockApplicationContextStrutsTes
 		assertPropertyHasError(ActionMessages.GLOBAL_MESSAGE, "errors.request.invalid");
 	}
 	public void testTransform() throws Exception {
+		paramMap.put("contextRoot", "/vulcan-web");
+		paramMap.put("viewProjectStatusURL", new URL("http://localhost/vulcan-web/viewProjectStatus.do?transform=xhtml"));
 		paramMap.put("workingCopyBuildNumber", 42);
-		paramMap.put("viewProjectStatusURL", new URL("http://localhost/viewProjectStatus.do?transform=xhtml"));
 		
 		final Map<String, ProjectStatusDto> empty = Collections.emptyMap();
 		trainForTransform(empty, "xhtml");
@@ -517,8 +519,9 @@ public class ViewProjectStatusActionTest extends MockApplicationContextStrutsTes
 		request.getSession().setAttribute(Keys.PREFERENCES, prefs);
 		
 		paramMap.put("workingCopyBuildNumber", -1);
+		paramMap.put("contextRoot", "/vulcan-web");
 		paramMap.put("reloadInterval", Integer.valueOf(prefs.getReloadInterval()));
-		paramMap.put("viewProjectStatusURL", new URL("http://localhost/viewProjectStatus.do?transform=xhtml"));
+		paramMap.put("viewProjectStatusURL", new URL("http://localhost/vulcan-web/viewProjectStatus.do?transform=xhtml"));
 		
 		final Map<String, ProjectStatusDto> empty = Collections.emptyMap();
 		trainForTransform(empty, "xhtml");
@@ -536,7 +539,8 @@ public class ViewProjectStatusActionTest extends MockApplicationContextStrutsTes
 	}
 	public void testTransformBadFormatType() throws Exception {
 		paramMap.put("workingCopyBuildNumber", 42);
-		paramMap.put("viewProjectStatusURL", new URL("http://localhost/viewProjectStatus.do?transform=nonesuch"));
+		paramMap.put("contextRoot", "/vulcan-web");
+		paramMap.put("viewProjectStatusURL", new URL("http://localhost/vulcan-web/viewProjectStatus.do?transform=nonesuch"));
 		final Map<String, ProjectStatusDto> empty = Collections.emptyMap();
 		trainForTransform(empty, "nonesuch");
 

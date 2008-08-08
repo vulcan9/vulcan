@@ -39,6 +39,9 @@ public class GetCachedBuildHistoryActionTest extends MockApplicationContextStrut
 	public void setUp() throws Exception {
 		super.setUp();
 		
+		request.setRequestURL("http://localhost/getBuildHistory.do");
+		
+		request.setContextPath("");
 		setRequestPathInfo("/getBuildHistory.do");
 		
 		doc.setRootElement(new Element("root"));
@@ -80,6 +83,7 @@ public class GetCachedBuildHistoryActionTest extends MockApplicationContextStrut
 		final Map<String, ? super Object> params = new HashMap<String, Object>();
 		
 		params.put("viewProjectStatusURL", new URL("http://localhost/viewProjectStatus.do?transform=xyz"));
+		params.put("contextRoot", "");
 		
 		projectDomBuilder.transform(eq(doc), eq(params), eq(request.getLocale()), eq("xyz"), (Result)notNull());
 		expectLastCall().andReturn("text/plain");
@@ -108,6 +112,7 @@ public class GetCachedBuildHistoryActionTest extends MockApplicationContextStrut
 		params.put("metricLabel1", "Tests executed");
 		params.put("metricLabel2", "Code coverage by line");
 		params.put("viewProjectStatusURL", new URL("http://localhost/viewProjectStatus.do?transform=xyz"));
+		params.put("contextRoot", "");
 		
 		projectDomBuilder.transform(eq(doc), eq(params), eq(request.getLocale()), eq("xyz"), (Result)notNull());
 		expectLastCall().andReturn("text/plain");

@@ -397,17 +397,23 @@ a {
 	text-decoration: none;
 }
 
-a.sorted-ascending,a.sorted-descending {
-	background: transparent no-repeat top right;
-	padding-right: 16px;
+table.sortable thead th {
+	cursor: pointer;
+	background: #E7EFFF no-repeat center right url("../images/sortable.gif");
+	padding-right: 21px;
 }
 
-a.sorted-ascending,th.age a.sorted-descending {
-	background-image: url("../images/arrow_down.png");
+.sorted-ascending, .sorted-descending {
+	background: transparent no-repeat center right;
+	padding-right: 21px;
 }
 
-a.sorted-descending,th.age a.sorted-ascending {
-	background-image: url("../images/arrow_up.png");
+.sorted-ascending,th.age .sorted-descending {
+	background-image: url("../images/desc.gif") !important;
+}
+
+.sorted-descending,th.age .sorted-ascending {
+	background-image: url("../images/asc.gif") !important;
 }
 
 div.bubble {
