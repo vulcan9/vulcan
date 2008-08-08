@@ -4,6 +4,7 @@
 	<xsl:output method="xml" media-type="text/html" version="1.0"
 		encoding="UTF-8" omit-xml-declaration="no"/>
 	
+	<xsl:param name="contextRoot"/>
 	<xsl:param name="title"/>
 	<xsl:param name="projectSiteURL"/>
 	<xsl:param name="viewProjectStatusURL"/>
@@ -438,7 +439,7 @@
 	<xsl:template match="change-sets">
 		<div xmlns="http://www.w3.org/1999/xhtml" id="change-sets-panel" class="tab-panel">
 			<a name="change-sets-anchor"/>
-			<table>
+			<table class="sortable">
 				<thead>
 					<tr>
 						<th><xsl:value-of select="$revisionHeader"/></th>
@@ -577,7 +578,7 @@
 		<xsl:param name="showCode" select="./*/@code"/>
 		<xsl:param name="showTableHead" select="$showFiles or $showLineNumbers or $showCode"/>
 		
-		<table xmlns="http://www.w3.org/1999/xhtml" class="build-messages">
+		<table xmlns="http://www.w3.org/1999/xhtml" class="build-messages sortable">
 			<caption class="panel-caption"><xsl:value-of select="$caption"/></caption>
 			<xsl:if test="not($showTableHead)">
 				<xsl:attribute name="class">blended build-messages</xsl:attribute>

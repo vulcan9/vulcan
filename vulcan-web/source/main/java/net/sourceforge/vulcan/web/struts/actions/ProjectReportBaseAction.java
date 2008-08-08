@@ -134,6 +134,7 @@ public abstract class ProjectReportBaseAction extends Action {
 				}
 				
 				params.put("viewProjectStatusURL", getSelfURL(mapping, request, transform));
+				params.put("contextRoot", request.getContextPath());
 				
 				if (projectConfig != null) {
 					params.put("projectSiteURL", getSiteBaseURL(mapping, request, projectConfig, buildNumber));
