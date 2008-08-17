@@ -173,11 +173,15 @@ public class AntBuildToolInvocationTest extends AntBuildToolTestBase {
 		assertEquals(null, details.get(9));
 	}
 	
-	public void testAntSeesRevisionAndTagName() throws Exception {
+	public void testAntSeesBuildProperties() throws Exception {
 		antConfig.setBuildNumberPropertyName("build.number");
 		antConfig.setRevisionPropertyName("repo.revision");
 		antConfig.setNumericRevisionPropertyName("repo.revision.numeric");
 		antConfig.setTagNamePropertyName("repo.tag");
+		antConfig.setBuildUserPropertyName("build.user");
+		antConfig.setBuildSchedulerPropertyName("build.scheduler");
+		
+		buildStatus.setRequestedBy("Sam");
 		
 		config.setTargets("echo-build-info-1");
 		
@@ -196,6 +200,38 @@ public class AntBuildToolInvocationTest extends AntBuildToolTestBase {
 		assertMessageLogged("revision: 11-43/2 (11432)");
 		assertMessageLogged("tag: 1.2rc4");
 		assertMessageLogged("build number: 792");
+		assertMessageLogged("build user: Sam");
+	}
+		
+	public void testAntSeesBuildPropertiesScheduledBuild() throws Exception {
+		antConfig.setBuildNumberPropertyName("build.number");
+		antConfig.setRevisionPropertyName("repo.revision");
+		antConfig.setNumericRevisionPropertyName("repo.revision.numeric");
+		antConfig.setTagNamePropertyName("repo.tag");
+		antConfig.setBuildUserPropertyName("build.user");
+		antConfig.setBuildSchedulerPropertyName("build.scheduler");
+		
+		buildStatus.setRequestedBy("Sambot");
+		buildStatus.setScheduledBuild(true);
+		
+		config.setTargets("echo-build-info-1");
+		
+		tool.getEventSource().addEventListener(new EventListener() {
+			public void eventReceived(AntEventSummary event) {
+				AntBuildToolInvocationTest.this.events.add(event);
+			}
+		});
+		
+		assertEquals(0, events.size());
+		
+		tool.buildProject(projectConfig, buildStatus, null, detailCallback);
+		
+		assertTrue(events.size() > 0);
+
+		assertMessageLogged("revision: 11-43/2 (11432)");
+		assertMessageLogged("tag: 1.2rc4");
+		assertMessageLogged("build number: 792");
+		assertMessageLogged("build scheduler: Sambot");
 	}
 	
 	public void testAntSeesRevisionAndTagNameWithDifferentNames() throws Exception {

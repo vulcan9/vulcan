@@ -43,6 +43,8 @@ public class AntConfig extends PluginConfigDto {
 	private String revisionPropertyName = "project.revision";
 	private String numericRevisionPropertyName = "project.revision.numeric";
 	private String tagNamePropertyName = "project.tag";
+	private String buildUserPropertyName = "project.build.user";
+	private String buildSchedulerPropertyName = "project.build.scheduler";
 	
 	@Override
 	public String getPluginId() {
@@ -67,6 +69,8 @@ public class AntConfig extends PluginConfigDto {
 		addProperty(pds, "revisionPropertyName", "AntConfig.revisionPropertyName.name", "AntConfig.revisionPropertyName.text", locale);
 		addProperty(pds, "numericRevisionPropertyName", "AntConfig.numericRevisionPropertyName.name", "AntConfig.numericRevisionPropertyName.text", locale);
 		addProperty(pds, "tagNamePropertyName", "AntConfig.tagNamePropertyName.name", "AntConfig.tagNamePropertyName.text", locale);
+		addProperty(pds, "buildUserPropertyName", "AntConfig.buildUsername.name", "AntConfig.buildUsername.text", locale);
+		addProperty(pds, "buildSchedulerPropertyName", "AntConfig.scheduler.name", "AntConfig.scheduler.text", locale);
 		
 		return pds;
 	}
@@ -121,6 +125,18 @@ public class AntConfig extends PluginConfigDto {
 	}
 	public void setTagNamePropertyName(String tagNamePropertyName) {
 		this.tagNamePropertyName = tagNamePropertyName;
+	}
+	public String getBuildUserPropertyName() {
+		return buildUserPropertyName;
+	}
+	public void setBuildUserPropertyName(String buildUserPropertyName) {
+		this.buildUserPropertyName = buildUserPropertyName;
+	}
+	public String getBuildSchedulerPropertyName() {
+		return buildSchedulerPropertyName;
+	}
+	public void setBuildSchedulerPropertyName(String buildSchedulerPropertyName) {
+		this.buildSchedulerPropertyName = buildSchedulerPropertyName;
 	}
 	static String[] trim(String[] antProperties) {
 		for (int i=0; i<antProperties.length; i++) {

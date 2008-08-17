@@ -34,6 +34,8 @@ public class ShellBuildToolConfig extends PluginConfigDto {
 	private String revisionVariableName = "ProjectRevision";
 	private String numericRevisionVariableName = "ProjectNumericRevision";
 	private String tagNameVariableName = "ProjectTag";
+	private String buildUserVariableName = "ProjectBuildUser";
+	private String buildSchedulerVariableName = "ProjectBuildScheduler";
 	private String[] environmentVariables = {};
 	
 	@Override
@@ -44,6 +46,8 @@ public class ShellBuildToolConfig extends PluginConfigDto {
 		addProperty(pds, "revisionVariableName", "ShellConfig.revisionVariableName.name", "ShellConfig.revisionVariableName.text", locale);
 		addProperty(pds, "numericRevisionVariableName", "ShellConfig.numericRevisionVariableName.name", "ShellConfig.numericRevisionVariableName.text", locale);
 		addProperty(pds, "tagNameVariableName", "ShellConfig.tagNameVariableName.name", "ShellConfig.tagNameVariableName.text", locale);
+		addProperty(pds, "buildUserVariableName", "ShellConfig.buildUserVariableName.name", "ShellConfig.buildUserVariableName.text", locale);
+		addProperty(pds, "buildSchedulerVariableName", "ShellConfig.buildSchedulerVariableName.name", "ShellConfig.buildSchedulerVariableName.text", locale);
 		addProperty(pds, "environmentVariables", "ShellConfig.environment.name", "ShellConfig.environment.text", locale);
 		
 		return pds;
@@ -103,6 +107,22 @@ public class ShellBuildToolConfig extends PluginConfigDto {
 
 	public void setTagNameVariableName(String tagNameVariableName) {
 		this.tagNameVariableName = tagNameVariableName;
+	}
+	
+	public String getBuildUserVariableName() {
+		return buildUserVariableName;
+	}
+	
+	public void setBuildUserVariableName(String buildUserVariableName) {
+		this.buildUserVariableName = buildUserVariableName;
+	}
+	
+	public String getBuildSchedulerVariableName() {
+		return buildSchedulerVariableName;
+	}
+	
+	public void setBuildSchedulerVariableName(String buildSchedulerVariableName) {
+		this.buildSchedulerVariableName = buildSchedulerVariableName;
 	}
 
 	public String[] getEnvironmentVariables() {

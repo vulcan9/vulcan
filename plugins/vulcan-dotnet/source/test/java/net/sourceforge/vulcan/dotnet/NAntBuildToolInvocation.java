@@ -36,6 +36,7 @@ import net.sourceforge.vulcan.exception.BuildFailedException;
 import net.sourceforge.vulcan.exception.ConfigException;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang.StringUtils;
 
 public class NAntBuildToolInvocation extends TestCase {
 	DotNetBuildToolBase tool;
@@ -77,7 +78,7 @@ public class NAntBuildToolInvocation extends TestCase {
 	protected void setUp() throws Exception {
 		super.setUp();
 		
-		buildEnv.setLocation("c:\\program files (x86)\\nant-0.85\\bin\\nant.exe");
+		buildEnv.setLocation("NAnt");
 		buildEnv.setType(DotNetBuildEnvironmentDto.DotNetEnvironmentType.NAnt);
 		
 		projectConfig.setWorkDir(TestUtils.resolveRelativePath("source/test/nant-workdir"));
@@ -137,7 +138,7 @@ public class NAntBuildToolInvocation extends TestCase {
 		final BuildMessageDto err = errors.get(0);
 		assertTrue(err.getFile().endsWith("SyntaxErrors.cs"));
 		assertTrue(new File(err.getFile()).isAbsolute());
-		assertEquals("CS0029", err.getCode());
+		assertTrue(StringUtils.isNotBlank(err.getCode()));
 		assertEquals((Integer)5, err.getLineNumber());
 		
 		final BuildMessageDto warn = warnings.get(0);
@@ -181,34 +182,61 @@ public class NAntBuildToolInvocation extends TestCase {
 
 		dotNetProjectConfig.setBuildConfiguration(DotNetProjectConfigDto.BuildConfiguration.Unspecified);
 	
-		doEchoTest("", "", "", "", "", "123", "baz");
+		doEchoTest("", "", "", "", "", "", "", "123", "baz");
 	}
 
-	public void testSetsRevisionAndTagName() throws Exception {
+	public void testSetsDefinedProperties() throws Exception {
 		globalConfig.setBuildNumberProperty("BuildNumber");
 		globalConfig.setRevisionProperty("ProjectRevision");
 		globalConfig.setNumericRevisionProperty("RepositoryRevision");
 		globalConfig.setTagProperty("ProjectTag");
-
+		globalConfig.setSchedulerProperty("BuildScheduler");
+		globalConfig.setBuildUsernameProperty("BuildUser");
+		
 		status.setBuildNumber(747463);
 		status.setTagName("tags/5.4");
 		status.setRevision(new RevisionTokenDto(14322l, "1.4.32.2"));
+		status.setRequestedBy("Night Time");
+		status.setScheduledBuild(true);
 		
 		dotNetProjectConfig.setBuildConfiguration(DotNetProjectConfigDto.BuildConfiguration.Unspecified);
 	
 		String expectedBuildNumber = "747463";
 		String expectedNumericRevision = "14322";
 		
-		doEchoTest(expectedBuildNumber, "1.4.32.2", expectedNumericRevision, "tags/5.4", "", "", "");
+		doEchoTest(expectedBuildNumber, "1.4.32.2", expectedNumericRevision, "tags/5.4", "", "Night Time", "", "", "");
 	}
 
+
+	public void testSetsDefinedPropertiesCustomBuild() throws Exception {
+		globalConfig.setBuildNumberProperty("BuildNumber");
+		globalConfig.setRevisionProperty("ProjectRevision");
+		globalConfig.setNumericRevisionProperty("RepositoryRevision");
+		globalConfig.setTagProperty("ProjectTag");
+		globalConfig.setSchedulerProperty("BuildScheduler");
+		globalConfig.setBuildUsernameProperty("BuildUser");
+		
+		status.setBuildNumber(747463);
+		status.setTagName("tags/5.4");
+		status.setRevision(new RevisionTokenDto(14322l, "1.4.32.2"));
+		status.setRequestedBy("Mary");
+		status.setScheduledBuild(false);
+
+		dotNetProjectConfig.setBuildConfiguration(DotNetProjectConfigDto.BuildConfiguration.Unspecified);
+	
+		String expectedBuildNumber = "747463";
+		String expectedNumericRevision = "14322";
+		
+		doEchoTest(expectedBuildNumber, "1.4.32.2", expectedNumericRevision, "tags/5.4", "", "", "Mary", "", "");
+	}
+	
 	public void testSetPropertyNoValueOrNoEquals() throws Exception {
 		dotNetProjectConfig.setAntProperties(
 				new String[] {"Foo", "Bar="});
 
 		dotNetProjectConfig.setBuildConfiguration(DotNetProjectConfigDto.BuildConfiguration.Unspecified);
 	
-		doEchoTest("", "", "", "", "", "", "");
+		doEchoTest("", "", "", "", "", "", "", "", "");
 	}
 	
 	public void testSetGlobalProperty() throws Exception {
@@ -219,7 +247,7 @@ public class NAntBuildToolInvocation extends TestCase {
 
 		dotNetProjectConfig.setBuildConfiguration(DotNetProjectConfigDto.BuildConfiguration.Unspecified);
 	
-		doEchoTest("", "", "", "", "", "321", "baz");
+		doEchoTest("", "", "", "", "", "", "", "321", "baz");
 	}
 
 	public void testOverrideGlobalProperty() throws Exception {
@@ -230,34 +258,34 @@ public class NAntBuildToolInvocation extends TestCase {
 
 		dotNetProjectConfig.setBuildConfiguration(DotNetProjectConfigDto.BuildConfiguration.Unspecified);
 	
-		doEchoTest("", "", "", "", "", "abc", "");
+		doEchoTest("", "", "", "", "", "", "", "abc", "");
 	}
 	
 	public void testSetConfiguration() throws Exception {
 		dotNetProjectConfig.setBuildConfiguration(DotNetProjectConfigDto.BuildConfiguration.Debug);
 	
-		doEchoTest("", "", "", "", "Debug", "", "");
+		doEchoTest("", "", "", "", "Debug", "", "", "", "");
 	}
 	
 	public void testSetConfigurationInherits() throws Exception {
 		globalConfig.setBuildConfiguration(DotNetGlobalConfigDto.GlobalBuildConfiguration.Release);
 		dotNetProjectConfig.setBuildConfiguration(DotNetProjectConfigDto.BuildConfiguration.Inherit);
 	
-		doEchoTest("", "", "", "", "Release", "", "");
+		doEchoTest("", "", "", "", "Release", "", "", "", "");
 	}
 	
 	public void testSetConfigurationOverrideUnspecified() throws Exception {
 		globalConfig.setBuildConfiguration(DotNetGlobalConfigDto.GlobalBuildConfiguration.Release);
 		dotNetProjectConfig.setBuildConfiguration(DotNetProjectConfigDto.BuildConfiguration.Unspecified);
 	
-		doEchoTest("", "", "", "", "", "", "");
+		doEchoTest("", "", "", "", "", "", "", "", "");
 	}
 	
 	public void testSetConfigurationOverride() throws Exception {
 		globalConfig.setBuildConfiguration(DotNetGlobalConfigDto.GlobalBuildConfiguration.Release);
 		dotNetProjectConfig.setBuildConfiguration(DotNetProjectConfigDto.BuildConfiguration.Debug);
 	
-		doEchoTest("", "", "", "", "Debug", "", "");
+		doEchoTest("", "", "", "", "Debug", "", "", "", "");
 	}
 	
 	public void testBadExecPath() throws Exception {
@@ -272,7 +300,8 @@ public class NAntBuildToolInvocation extends TestCase {
 	}
 	private void doEchoTest(
 			String expectedBuildNumber, String expectedRevision,
-			String expectedNumericRevision, String expectedTag, String expectedConfiguration, String expectedFoo, String expectedBar)
+			String expectedNumericRevision, String expectedTag,
+			String expectedConfiguration, String expectedScheduler, String expectedBuildUser, String expectedFoo, String expectedBar)
 			throws BuildFailedException, ConfigException {
 		dotNetProjectConfig.setTargets("echo");
 		
@@ -287,6 +316,8 @@ public class NAntBuildToolInvocation extends TestCase {
 				";NumericRevision: " + expectedNumericRevision +
 				";ProjectTag: " + expectedTag +
 				";Configuration: " + expectedConfiguration +
+				";Scheduler: " + expectedScheduler +
+				";BuildUser: " + expectedBuildUser +
 				";Foo: " + expectedFoo +
 				";Bar: " + expectedBar, warning.getMessage().replaceAll("\r", "").replaceAll("\n", ";"));
 	}
