@@ -100,6 +100,13 @@ public class ShellBuildTool implements BuildTool {
 		addIfKeyDefined(map, globalConfig.getNumericRevisionVariableName(), status.getRevision().getRevision().toString());
 		addIfKeyDefined(map, globalConfig.getTagNameVariableName(), status.getTagName());
 		
+		if (status.isScheduledBuild()) {
+			addIfKeyDefined(map, globalConfig.getBuildSchedulerVariableName(), status.getRequestedBy());
+		} else {
+			addIfKeyDefined(map, globalConfig.getBuildUserVariableName(), status.getRequestedBy());
+		}
+		
+		
 		final String[] env = map.keySet().toArray(new String[map.size()]);
 		
 		for (int i=0; i<env.length; i++) {

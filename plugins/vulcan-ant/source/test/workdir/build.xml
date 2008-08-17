@@ -13,6 +13,8 @@
 		<echo message="revision: ${repo.revision} (${repo.revision.numeric})"/>
 		<echo message="tag: ${repo.tag}"/>
 		<echo message="build number: ${build.number}"/>
+		<echo message="build user: ${build.user}"/>
+		<echo message="build scheduler: ${build.scheduler}"/>
 	</target>
 		
 	<target name="echo-build-info-2">

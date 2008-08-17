@@ -181,7 +181,7 @@ public class ShellBuildToolTest extends EasyMockTestCase {
 	}
 
 	public void testRemovesOnEmptyValue() throws Exception {
-		fakeEnv.put("EMPTY_VALUE", "a value that should be overriddent");
+		fakeEnv.put("EMPTY_VALUE", "a value that should be overridden");
 		projectPluginConfig.setEnvironmentVariables(new String[] {"EMPTY_VALUE="});
 
 		String[] env = tool.CreateEnvironment(status);
@@ -194,22 +194,44 @@ public class ShellBuildToolTest extends EasyMockTestCase {
 		globalConfig.setNumericRevisionVariableName("N");
 		globalConfig.setRevisionVariableName("R");
 		globalConfig.setTagNameVariableName("T");
+		globalConfig.setBuildUserVariableName("BU");
+		globalConfig.setBuildSchedulerVariableName("BS");
 		
 		status.setBuildNumber(4231);
 		status.setRevision(new RevisionTokenDto(7655l, "xyz.7655"));
 		status.setTagName("b2.2");
+		status.setRequestedBy("Kate");
 		
 		String[] env = tool.CreateEnvironment(status);
 		
 		Arrays.sort(env);
 		
-		assertEquals(4, env.length);
+		assertEquals(5, env.length);
 		assertEquals("B=4231", env[0]);
-		assertEquals("N=7655", env[1]);
-		assertEquals("R=xyz.7655", env[2]);
-		assertEquals("T=b2.2", env[3]);
+		assertEquals("BU=Kate", env[1]);
+		assertEquals("N=7655", env[2]);
+		assertEquals("R=xyz.7655", env[3]);
+		assertEquals("T=b2.2", env[4]);
 	}
 
+	public void testAddsBuildInfoScheduledBuild() throws Exception {
+		globalConfig.setBuildUserVariableName("BU");
+		globalConfig.setBuildSchedulerVariableName("BS");
+		
+		status.setBuildNumber(4231);
+		status.setRevision(new RevisionTokenDto(7655l, "xyz.7655"));
+		status.setTagName("b2.2");
+		status.setRequestedBy("Katebot");
+		status.setScheduledBuild(true);
+		
+		String[] env = tool.CreateEnvironment(status);
+		
+		Arrays.sort(env);
+		
+		assertEquals(1, env.length);
+		assertEquals("BS=Katebot", env[0]);
+	}
+	
 	public void testExecuteNoArgsThrows() throws Exception {
 		projectPluginConfig.setArguments(new String[0]);
 		

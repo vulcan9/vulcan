@@ -42,6 +42,8 @@ public class DotNetGlobalConfigDto extends DotNetBaseDto {
 	private String revisionProperty = "RepositoryRevisionLabel";
 	private String numericRevisionProperty = "RepositoryRevision";
 	private String tagProperty = "RepositoryTag";
+	private String schedulerProperty = "Scheduler";
+	private String buildUsernameProperty = "BuildUser";
 	
 	@Override
 	public String getHelpTopic() {
@@ -72,6 +74,13 @@ public class DotNetGlobalConfigDto extends DotNetBaseDto {
 		
 		addProperty(pds, "tagProperty", "DotNetGlobalConfigDto.tagProperty.name",
 				"DotNetGlobalConfigDto.tagProperty.text", locale);
+
+		addProperty(pds, "schedulerProperty", "DotNetGlobalConfigDto.scheduler.name",
+				"DotNetGlobalConfigDto.scheduler.text", locale);
+		
+		addProperty(pds, "buildUsernameProperty", "DotNetGlobalConfigDto.buildUsername.name",
+				"DotNetGlobalConfigDto.buildUsername.text", locale);
+		
 		return pds;
 	}
 
@@ -139,5 +148,21 @@ public class DotNetGlobalConfigDto extends DotNetBaseDto {
 
 	public void setTagProperty(String tagProperty) {
 		this.tagProperty = tagProperty;
+	}
+
+	public void setSchedulerProperty(String schedulerProperty) {
+		this.schedulerProperty = schedulerProperty;
+	}
+	
+	public String getSchedulerProperty() {
+		return schedulerProperty;
+	}
+
+	public void setBuildUsernameProperty(String buildUsernameProperty) {
+		this.buildUsernameProperty = buildUsernameProperty;
+	}
+	
+	public String getBuildUsernameProperty() {
+		return buildUsernameProperty;
 	}
 }

@@ -32,6 +32,7 @@ import net.sourceforge.vulcan.dotnet.dto.DotNetGlobalConfigDto;
 import net.sourceforge.vulcan.dotnet.dto.DotNetProjectConfigDto;
 import net.sourceforge.vulcan.dto.ProjectConfigDto;
 import net.sourceforge.vulcan.dto.ProjectStatusDto;
+import net.sourceforge.vulcan.dto.RevisionTokenDto;
 
 public abstract class DotNetBuildToolBase extends AntBuildTool {
 	protected final DotNetGlobalConfigDto globalConfig;
@@ -77,25 +78,23 @@ public abstract class DotNetBuildToolBase extends AntBuildTool {
 		
 		final Map<String, String> antProps = getAntProps();
 		
-		final String buildNumKey = globalConfig.getBuildNumberProperty();
-		if (isNotBlank(buildNumKey)) {
-			antProps.put(buildNumKey, status.getBuildNumber().toString());
+		addPropertyIfNecessary(antProps, globalConfig.getBuildNumberProperty(), status.getBuildNumber());
+		
+		final RevisionTokenDto revision = status.getRevision();
+		
+		if (revision != null) {
+			addPropertyIfNecessary(antProps, globalConfig.getRevisionProperty(), revision.getLabel());
+			addPropertyIfNecessary(antProps, globalConfig.getNumericRevisionProperty(), revision.getRevision());
 		}
 		
-		final String revPropKey = globalConfig.getRevisionProperty();
-		if (isNotBlank(revPropKey)) {
-			antProps.put(revPropKey, status.getRevision().getLabel());
+		addPropertyIfNecessary(antProps, globalConfig.getTagProperty(), status.getTagName());
+		
+		if (status.isScheduledBuild()) {
+			addPropertyIfNecessary(antProps, globalConfig.getSchedulerProperty(), status.getRequestedBy());
+		} else {
+			addPropertyIfNecessary(antProps, globalConfig.getBuildUsernameProperty(), status.getRequestedBy());
 		}
 		
-		final String numericRevPropKey = globalConfig.getNumericRevisionProperty();
-		if (isNotBlank(numericRevPropKey)) {
-			antProps.put(numericRevPropKey, status.getRevision().getRevision().toString());
-		}
-		
-		final String tagPropKey = globalConfig.getTagProperty();
-		if (isNotBlank(tagPropKey)) {
-			antProps.put(tagPropKey, status.getTagName());
-		}
 		
 		for (Map.Entry<String, String> e : antProps.entrySet()) {
 			final StringBuilder sb = new StringBuilder();
@@ -107,6 +106,12 @@ public abstract class DotNetBuildToolBase extends AntBuildTool {
 			sb.append(e.getValue());
 			
 			args.add(sb.toString());
+		}
+	}
+
+	private void addPropertyIfNecessary(Map<String, String> antProps, String propertyName, Object value) {
+		if (isNotBlank(propertyName) && value != null) {
+			antProps.put(propertyName, value.toString());
 		}
 	}
 	

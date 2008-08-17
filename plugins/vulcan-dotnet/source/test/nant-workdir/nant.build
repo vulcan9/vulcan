@@ -13,6 +13,8 @@
 		<property name="RepositoryRevision" value=""/>
 		<property name="ProjectTag" value=""/>
 		<property name="Configuration" value=""/>
+		<property name="BuildScheduler" value=""/>
+		<property name="BuildUser" value=""/>
 		<property name="Foo" value=""/>
 		<property name="Bar" value=""/>
 		
@@ -21,6 +23,8 @@ Revision: ${ProjectRevision}
 NumericRevision: ${RepositoryRevision}
 ProjectTag: ${ProjectTag}
 Configuration: ${Configuration}
+Scheduler: ${BuildScheduler}
+BuildUser: ${BuildUser}
 Foo: ${Foo}
 Bar: ${Bar}"/>
 	</target>

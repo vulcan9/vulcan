@@ -259,6 +259,14 @@ public class AntBuildTool implements BuildTool {
 		if (isNotBlank(antConfig.getTagNamePropertyName()) && isNotBlank(tagName)) {
 			antProps.put(antConfig.getTagNamePropertyName(), tagName);
 		}
+		
+		if (!status.isScheduledBuild() && isNotBlank(antConfig.getBuildUserPropertyName())) {
+			antProps.put(antConfig.getBuildUserPropertyName(), status.getRequestedBy());
+		}
+		
+		if (status.isScheduledBuild() && isNotBlank(antConfig.getBuildSchedulerPropertyName())) {
+			antProps.put(antConfig.getBuildSchedulerPropertyName(), status.getRequestedBy());
+		}
 	}
 
 	protected String setJavaExecutablePath(final JavaCommandBuilder jcb) throws ConfigException {
