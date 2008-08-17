@@ -146,12 +146,6 @@ public abstract class MavenBuildToolTestBase extends TestCase {
 		sb.append("<artifactId>").append("super-tool").append("</artifactId>");
 		sb.append("<version>").append("1.0").append("</version>");
 
-/*		sb.append("<parent>")
-			.append("<groupId>").append("com.example").append("</groupId>")
-			.append("<artifactId>").append("no-such-artifact").append("</artifactId>")
-			.append("<version>").append("1.0").append("</version>")
-		.append("</parent>");
-*/		
 		sb.append("<modules>")
 			.append("<module>").append("foo").append("</module>")
 		.append("</modules>");

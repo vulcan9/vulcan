@@ -74,6 +74,7 @@ public class MavenBuildToolTest extends MavenBuildToolTestBase {
 		mavenConfig.setAntProperties(new String[] {"example=bar", "-Dsimple"});
 		config.setAntProperties(new String[] {"example=car"});
 		config.setDebug(true);
+		projectConfig.setScheduledBuild(true);
 		tool.setEventSource(null);
 		tool.configure();
 		
@@ -82,6 +83,7 @@ public class MavenBuildToolTest extends MavenBuildToolTestBase {
 		expected.addArgument("--debug");
 		expected.addArgument("-Dexample=car");
 		expected.addArgument("-Dproject.build.number=12");
+		expected.addArgument("-Dproject.build.scheduler=");
 		expected.addArgument("-Dsimple=");
 
 		setDefaults(expected, false);
@@ -104,7 +106,7 @@ public class MavenBuildToolTest extends MavenBuildToolTestBase {
 	private void checkBuilder(final JavaCommandBuilder expected) throws ConfigException {
 		final ProjectStatusDto status = new ProjectStatusDto();
 		status.setBuildNumber(12);
-		
+		status.setScheduledBuild(projectConfig.isScheduledBuild());
 		final JavaCommandBuilder actual = tool.createJavaCommand(projectConfig, status, new File("target/test.ant.log"));
 
 		assertEquals(expected.toString(), actual.toString());
@@ -114,7 +116,7 @@ public class MavenBuildToolTest extends MavenBuildToolTestBase {
 		setDefaults(expected, true);
 		return expected;
 	}
-	private void setDefaults(final JavaCommandBuilder expected, boolean includeBuildNumber) throws ConfigException, IOException {
+	private void setDefaults(final JavaCommandBuilder expected, boolean includeBuildNumberAndBuildUser) throws ConfigException, IOException {
 		tool.launchConfigFile = File.createTempFile("foo", "bar");
 		tool.launchConfigFile.deleteOnExit();
 		
@@ -145,9 +147,12 @@ public class MavenBuildToolTest extends MavenBuildToolTestBase {
 		
 		expected.setMainClassName(MavenBuildTool.MAVEN1_LAUNCHER_MAIN_CLASS_NAME);
 		
-		if (includeBuildNumber) {
+		if (includeBuildNumberAndBuildUser) {
 			expected.addArgument("-Dproject.build.number=12");
+			expected.addArgument("-Dproject.build.user=");
 		}
+		
+		
 		expected.addArgument("clean");
 	}
 }
