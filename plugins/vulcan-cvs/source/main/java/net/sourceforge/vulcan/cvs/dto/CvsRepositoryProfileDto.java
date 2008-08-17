@@ -27,6 +27,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import org.apache.commons.lang.StringUtils;
+
 import net.sourceforge.vulcan.dto.PluginProfileDto;
 import net.sourceforge.vulcan.integration.ConfigChoice;
 
@@ -36,8 +38,8 @@ public class CvsRepositoryProfileDto extends PluginProfileDto {
 	private String host;
 	private String repositoryPath;
 	
-	private String username;
-	private String password;
+	private String username = StringUtils.EMPTY;
+	private String password = StringUtils.EMPTY;
 	
 	@Override
 	public String getProjectConfigProfilePropertyName() {
