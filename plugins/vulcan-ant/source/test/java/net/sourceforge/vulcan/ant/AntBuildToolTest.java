@@ -38,6 +38,8 @@ public class AntBuildToolTest extends AntBuildToolTestBase {
 		antConfig.setRevisionPropertyName(null);
 		antConfig.setTagNamePropertyName(null);
 		antConfig.setBuildNumberPropertyName(null);
+		antConfig.setBuildSchedulerPropertyName(null);
+		antConfig.setBuildUserPropertyName(null);
 	}
 	
 	public void testThrowsOnScriptNotFound() throws Exception {

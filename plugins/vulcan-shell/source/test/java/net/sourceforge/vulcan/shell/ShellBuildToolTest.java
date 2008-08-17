@@ -116,6 +116,8 @@ public class ShellBuildToolTest extends EasyMockTestCase {
 		globalConfig.setRevisionVariableName("");
 		globalConfig.setNumericRevisionVariableName("");
 		globalConfig.setTagNameVariableName("");
+		globalConfig.setBuildSchedulerVariableName("");
+		globalConfig.setBuildUserVariableName("");
 		
 		projectConfig.setWorkDir(".");
 		status.setBuildNumber(0);
