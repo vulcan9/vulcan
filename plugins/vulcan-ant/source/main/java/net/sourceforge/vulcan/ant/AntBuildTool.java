@@ -260,12 +260,17 @@ public class AntBuildTool implements BuildTool {
 			antProps.put(antConfig.getTagNamePropertyName(), tagName);
 		}
 		
+		String requestedBy = status.getRequestedBy();
+		if (requestedBy == null) {
+			requestedBy = "";
+		}
+		
 		if (!status.isScheduledBuild() && isNotBlank(antConfig.getBuildUserPropertyName())) {
-			antProps.put(antConfig.getBuildUserPropertyName(), status.getRequestedBy());
+			antProps.put(antConfig.getBuildUserPropertyName(), requestedBy);
 		}
 		
 		if (status.isScheduledBuild() && isNotBlank(antConfig.getBuildSchedulerPropertyName())) {
-			antProps.put(antConfig.getBuildSchedulerPropertyName(), status.getRequestedBy());
+			antProps.put(antConfig.getBuildSchedulerPropertyName(), requestedBy);
 		}
 	}
 
