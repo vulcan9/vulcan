@@ -16,6 +16,7 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
+using System;
 using System.Net;
 using System.Net.Sockets;
 
@@ -34,7 +35,7 @@ namespace SourceForge.Vulcan.DotNet {
 			sendSocket = new Socket(AddressFamily.InterNetwork,
 				SocketType.Dgram, ProtocolType.Udp);
 			
-			IPAddress dstAddr = Dns.GetHostEntry(host).AddressList[0];
+			IPAddress dstAddr = GetIPv4Address(host);
 
 			endPoint = new IPEndPoint(dstAddr, destinationPort);
 
@@ -74,7 +75,22 @@ namespace SourceForge.Vulcan.DotNet {
 
 			SendData(packetBuilder.ToArray());			
 		}
-		
+
+		private IPAddress GetIPv4Address(string host)
+		{
+			IPHostEntry entry = Dns.GetHostEntry(host);
+
+			foreach (IPAddress address in entry.AddressList)
+			{
+				if (address.AddressFamily == AddressFamily.InterNetwork)
+				{
+					return address;
+				}
+			}
+
+			throw new ArgumentException("No IPv4 addresses found for host " + host, "host");
+		}
+
 		private void SendData(byte[] data) {
 			sendSocket.SendTo(data, data.Length, SocketFlags.None, endPoint);
 		}
