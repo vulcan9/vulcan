@@ -443,8 +443,6 @@ function registerHandlers() {
 	
 	window.iframe = document.getElementById("iframe");
 	if (iframe) {
-		resizeIframe();
-		
 		$(window).resize(resizeIframe);
 		
 		window.rootLocation = iframe.contentWindow.location.href;
@@ -482,7 +480,7 @@ function resizeIframe() {
 		height = document.body.clientHeight;
 	}
 
-	height = (3 * height / 5);
+	height = (height - iframe.offsetTop - 20);
 	if (height < 300) {
 		height = 300;
 	}
@@ -501,6 +499,8 @@ function showBuildReportPanel(panelName) {
 	$("#build-report-tabs li").removeClass("active");
 	
 	$("#" + panelName + "-tab").parent("li").addClass("active");
+	
+	resizeIframe();
 }
 
 function updateBreadcrumbs() {
