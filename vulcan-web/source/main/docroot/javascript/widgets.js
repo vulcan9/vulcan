@@ -1,6 +1,6 @@
 /*
  * Vulcan Build Manager
- * Copyright (C) 2005-2006 Chris Eldredge
+ * Copyright (C) 2005-2008 Chris Eldredge
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,20 +20,11 @@
  * $HeadURL$
  */
 
-Function.prototype.bind = function(object) {
-  var method = this;
-  return function() {
-    method.apply(object, arguments);
-  }
-}
-
 function getMetaContent(name, defaultValue) {
-	var metas = document.getElementsByTagName("meta");
+	var meta = $("meta[name='" + name + "']");
 	
-	for (var i=0;i<metas.length; i++) {
-		if (name == metas[i].getAttribute("name")) {
-			return metas[i].getAttribute("content");
-		}
+	if (meta && meta.attr("content")) {
+		return meta.attr("content");
 	}
 	
 	return defaultValue;
@@ -315,12 +306,9 @@ function launchHelpHandler(event) {
 	return launchWindowHandler(event, target.href, "modePopup", "vulcanHelp");
 }
 
-function setDirtyHandler(event) {
-	var target = getTarget(event);
-	
-	if (target && target.form) {
-		window.hasPendingChanges = true;
-	}
+function setDirtyHandler() {
+	console.debug("form data has been changed");
+	window.hasPendingChanges = true;
 }
 
 /**
@@ -328,10 +316,12 @@ function setDirtyHandler(event) {
  * since the user is submitting the pending changes.
  */
 function clearPendingChangesFlagHandler(event) {
+	console.debug("clearPendingChange");
 	window.hasPendingChanges = false;
 }
 
 function warnPendingChangesHandler(event) {
+	console.debug("warnPendingChanges");
 	if (window.hasPendingChanges) {
 		event.returnValue = window.confirmUnsavedChangesMessage;
 	}
@@ -379,8 +369,8 @@ function registerHandlers() {
 	
 	var pendingChanges = document.getElementById('pendingChanges');
 	if (pendingChanges != null) {
-		registerHandlerByTagNameAndClass('input', '.*', 'change', setDirtyHandler);
-		registerHandlerByTagNameAndClass('form', '.*', 'submit', clearPendingChangesFlagHandler);
+		$("input").change(setDirtyHandler);
+		$("form").submit(clearPendingChangesFlagHandler);
 		
 		window.hasPendingChanges = (pendingChanges.value == "true");
 	}
@@ -562,6 +552,7 @@ function customAddEventListener(target, eventType, callback) {
     }
 }
 
-customAddEventListener(window, 'load', registerHandlers);
-customAddEventListener(window, 'load', getConfirmMessages);
-customAddEventListener(window, 'beforeunload', warnPendingChangesHandler);
+$(document).ready(registerHandlers);
+$(document).ready(getConfirmMessages);
+customAddEventListener(window, "beforeunload", warnPendingChangesHandler);
+
