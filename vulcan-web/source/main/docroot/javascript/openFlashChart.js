@@ -45,11 +45,11 @@ function reloadMetrics(e) {
 	return preventDefaultHandler(e);
 }
 
-customAddEventListener(window, "load", function() {
-	var metricsRefreshButton = document.getElementById("btnRefresh");
+$(document).ready(function() {
+	var refreshButton = $("#btnRefresh");
 	
-	if (metricsRefreshButton) {
-		customAddEventListener(metricsRefreshButton, "click", reloadMetrics);
-		window.setTimeout(reloadMetrics, 5);
+	if (refreshButton.length == 1) {
+		refreshButton.click(reloadMetrics);
+		window.setTimeout(reloadMetrics, 500);
 	}
 });

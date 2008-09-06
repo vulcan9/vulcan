@@ -16,34 +16,32 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-function onProjectNameChange(e) {
-	var target = getTarget(e);
-	var txtWorkDir = document.getElementById("txtWorkDir");
+function onProjectNameChange() {
+	var newName = $(this).val();
 	
-	// Set to default if it is blank
-	if (txtWorkDir.value == "") {
-		txtWorkDir.value = window.defaultWorkDirPattern.replace("${projectName}", target.value);
-	} else {
-		// Update project name with new one if applicable
-		txtWorkDir.value = txtWorkDir.value.replace(target.previousValue, target.value);
+	if (newName == "") {
+		return;
 	}
 	
-	target.previousValue = target.value;
+	var txtWorkDir = $("#txtWorkDir");
+	
+	if (txtWorkDir.val() == "") {
+		// Use default directory when current work directory is blank.
+		txtWorkDir.val($("#defaultWorkDirPattern").val().replace("${projectName}", newName));
+	} else {
+		// Update project name with new one if applicable
+		txtWorkDir.val(txtWorkDir.val().replace(this.previousValue, newName));
+	}
+	
+	this.previousValue = newName;
 }
 
 function registerProjectConfigFormEventHandlers(e) {
-	var txtProjectName = document.getElementById("txtProjectName");
+	var txtProjectName = $("#txtProjectName");
 	
-	if (txtProjectName) {
-		txtProjectName.previousValue = txtProjectName.value;
-		customAddEventListener(txtProjectName, "change", onProjectNameChange);
-	}
+	txtProjectName.change(onProjectNameChange);
 	
-	var defaultWorkDirPattern = document.getElementById("defaultWorkDirPattern");
-	
-	if (defaultWorkDirPattern) {
-		window.defaultWorkDirPattern = defaultWorkDirPattern.value;
-	}
+	txtProjectName.get(0).previousValue = txtProjectName.val();
 }
 
-customAddEventListener(window, "load", registerProjectConfigFormEventHandlers);
+$(document).ready(registerProjectConfigFormEventHandlers);

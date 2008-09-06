@@ -20,58 +20,61 @@ function ReportForm(form) {
 	this.form = form;
 	this.visibleControls = new Object();
 	
-	this.radioChanged = ReportForm.prototype.radioChanged.bind(this);
+	this.rangeTypeControls = this.form.find("input[name='rangeType']");
+	this.dateRangeControls = this.form.find("input[name='dateRangeSelector']");
+	
+	this.startDateControl = this.form.find("input[name='startDate']");
+	this.endDateControl = this.form.find("input[name='endDate']");
+	
+	this.projectControls = this.form.find("input[name='projectNames']");
 }
 
 ReportForm.prototype.initialize = function() {
-	customAddEventListener(this.form["startDate"], "focus", this.dateRangeFocus);
-	customAddEventListener(this.form["endDate"], "focus", this.dateRangeFocus);
+	console.debug("ReportForm.initialize");
 	
-	var inputs = this.form["rangeType"];
-
-	for (var i=0; i<inputs.length; i++) {
-		customAddEventListener(inputs[i], "change", this.radioChanged);
-	}
-
-	var inputs = this.form["dateRangeSelector"];
-	var target = new Object();
+	this.rangeTypeControls.change(rangeTypeChanged);
+	this.dateRangeControls.change(dateRangeChanged);
+	this.startDateControl.focus(dateRangeFocus);
+	this.endDateControl.focus(dateRangeFocus);
 	
-	for (var i=0; i<inputs.length; i++) {
-		customAddEventListener(inputs[i], "change", this.dateRangeChanged);
-		if (inputs[i].checked) {
-			target.target = inputs[i];
-		}
-	}
-	
-	this.radioChanged();
-	this.dateRangeChanged(target);
+	rangeTypeChanged();
+	dateRangeChanged.apply(this.dateRangeControls.filter(":checked"), null);
 }
 
-ReportForm.prototype.radioChanged = function() {
-	var radios = this.form["rangeType"];
+function rangeTypeChanged() {
+	console.debug("rangeTypeChanged this=%o reportForm=%o", this, reportForm);
 	
-	for (var i=0; i<radios.length; i++) {
-		var inputs = findAncestorByTagName(radios[i], "tr").getElementsByTagName("input");
+	reportForm.rangeTypeControls.each(function(e) {
+		console.debug("%s[%d]: %s", this.name, e, this.checked ? "checked" : "unchecked");
 		
-		for (var j=0; j<inputs.length; j++) {
-			if (radios[i] != inputs[j]) {
-				inputs[j].disabled = !radios[i].checked;
-			}
+		var tr = $(this).parents("tr").get(0);
+		var controls = $(tr).find("input[name!='" + this.name + "']");
+		
+		if (this.checked) {
+			controls.removeAttr("disabled");
+		} else {
+			controls.attr("disabled", "disabled");
 		}
-	}
+	});
+	
+	// Switch project checkboxes to radio buttons or vice-versa.
+	var selectedType = reportForm.rangeTypeControls.filter(":checked").val();
+	var type = selectedType == "index" ? "radio" : "checkbox";
+	
+	reportForm.projectControls.each(function() {
+		this.setAttribute("type", type);
+	});
 }
 
-ReportForm.prototype.dateRangeChanged = function(event) {
-	var target = getTarget(event);
-	var startInput = target.form["startDate"];
-	var endInput = target.form["endDate"];
-
+function dateRangeChanged() {
+	console.debug("dateRangeChanged start=%o", reportForm.startDateControl);
+	
 	var now = new Date();
 	
-	var start = startInput.value;
+	var start = reportForm.startDateControl.val();
 	var end = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
 
-	switch (target.value) {
+	switch ($(this).val()) {
 		case "today":
 			start = now;
 			break;
@@ -88,44 +91,19 @@ ReportForm.prototype.dateRangeChanged = function(event) {
 			return;
 	}
 	
-	startInput.value = (start.getMonth()+1) + "/" + start.getDate() + "/" + start.getFullYear();
-	endInput.value = (end.getMonth()+1) + "/" + end.getDate() + "/" + end.getFullYear();
+	reportForm.startDateControl.val((start.getMonth()+1) + "/" + start.getDate() + "/" + start.getFullYear());
+	reportForm.endDateControl.val((end.getMonth()+1) + "/" + end.getDate() + "/" + end.getFullYear());
 }
 
-ReportForm.prototype.dateRangeFocus = function() {
-	document.getElementById("dateRangeSpecific").checked = true;
-}
-
-function getSelectedValue(radios) {
-	for (var i=0; i<radios.length; i++) {
-		if (radios[i].checked) {
-			return radios[i].value;
-		}
-	}
-	return null;
+function dateRangeFocus() {
+	console.debug("dateRangeFocus");
+	$("#dateRangeSpecific").attr("checked", "checked");
 }
 
 function registerReportEventHandlers(e) {
-	window.reportForm = new ReportForm(document.getElementById("reportForm"));
-	window.reportForm.defaultRadioChanged = window.reportForm.radioChanged;
-	window.reportForm.radioChanged = (function() {
-		this.defaultRadioChanged();
-		
-		var value = getSelectedValue(this.form["rangeType"]);
-		
-		if (value == "index") {
-			type = "radio";
-		} else {
-			type = "checkbox";
-		}
-		
-		var clickers = this.form["projectNames"];
-		
-		for (var i=clickers.length-1; i>=0; i--) {
-			clickers[i].setAttribute("type", type);
-		}
-	}).bind(window.reportForm);
+	window.reportForm = new ReportForm($("#reportForm"));
+
 	window.reportForm.initialize();
 }
 
-customAddEventListener(window, "load", registerReportEventHandlers);
+$(document).ready(registerReportEventHandlers);
