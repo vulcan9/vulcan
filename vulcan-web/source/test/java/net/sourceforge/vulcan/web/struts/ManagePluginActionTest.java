@@ -629,6 +629,41 @@ public class ManagePluginActionTest extends MockApplicationContextStrutsTestCase
 		assertEquals(cfg.getHelpUrl(), request.getAttribute("helpUrl"));
 		assertEquals(cfg.getHelpTopic(), request.getAttribute("helpTopic"));
 	}
+	public void testBackSortsArray() throws Exception {
+		addRequestParameter("action", "Back");
+		addRequestParameter("pluginId", "a.b.c.plugin");
+		addRequestParameter("pluginConfig.arr[1].value", "5");
+		addRequestParameter("focus", "pluginConfig.arr[1]");
+		
+		final PluginConfigForm form = new PluginConfigForm();
+		
+		final PluginConfigWithArray cfg = new PluginConfigWithArray();
+		final NestedArrayElement[] arr = new NestedArrayElement[2];
+		final NestedArrayElement lastElem = new NestedArrayElement();
+		final NestedArrayElement firstElem = new NestedArrayElement();
+		arr[0] = lastElem;
+		arr[0].setValue(10);
+		arr[1] = firstElem;
+		
+		cfg.setArr(arr);
+		form.setPluginConfig(request, cfg, false);
+		form.setFocus("pluginConfig.arr[1]");
+		form.introspect(request);
+		
+		request.getSession().setAttribute("pluginConfigForm", form);
+		
+		replay();
+		
+		actionPerform();
+		
+		verify();
+		
+		assertEquals(5, firstElem.getValue());
+		assertEquals(10, lastElem.getValue());
+
+		assertSame(firstElem, cfg.getArr()[0]);
+		assertSame(lastElem, cfg.getArr()[1]);
+	}
 	public void testConfigureRenamableNestedObjectBack() throws Exception {
 		addRequestParameter("action", "Back");
 		addRequestParameter("pluginId", "a.b.c.plugin");
@@ -819,7 +854,7 @@ public class ManagePluginActionTest extends MockApplicationContextStrutsTestCase
 		}
 	}
 	
-	public static class NestedArrayElement extends BaseDto {
+	public static class NestedArrayElement extends BaseDto implements Comparable<NestedArrayElement> {
 		private int value;
 
 		public NestedArrayElement() {
@@ -835,6 +870,9 @@ public class ManagePluginActionTest extends MockApplicationContextStrutsTestCase
 
 		public void setValue(int value) {
 			this.value = value;
+		}
+		public int compareTo(NestedArrayElement o) {
+			return ((Integer)value).compareTo(o.value);
 		}
 		
 	}

@@ -26,8 +26,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.HashMap;
-import java.util.Map;
 
 import net.sourceforge.vulcan.ProjectRepositoryConfigurator;
 import net.sourceforge.vulcan.dto.PluginConfigDto;
@@ -35,6 +33,7 @@ import net.sourceforge.vulcan.dto.ProjectConfigDto;
 import net.sourceforge.vulcan.exception.AuthenticationRequiredRepositoryException;
 import net.sourceforge.vulcan.exception.ConfigException;
 import net.sourceforge.vulcan.exception.RepositoryException;
+import net.sourceforge.vulcan.subversion.dto.CheckoutDepth;
 import net.sourceforge.vulcan.subversion.dto.SubversionConfigDto;
 import net.sourceforge.vulcan.subversion.dto.SubversionProjectConfigDto;
 import net.sourceforge.vulcan.subversion.dto.SubversionRepositoryProfileDto;
@@ -42,6 +41,7 @@ import net.sourceforge.vulcan.subversion.dto.SubversionRepositoryProfileDto;
 import org.springframework.context.ApplicationContext;
 import org.tmatesoft.svn.core.ISVNDirEntryHandler;
 import org.tmatesoft.svn.core.SVNException;
+import org.tmatesoft.svn.core.SVNProperties;
 import org.tmatesoft.svn.core.SVNURL;
 import org.tmatesoft.svn.core.auth.BasicAuthenticationManager;
 import org.tmatesoft.svn.core.io.SVNRepository;
@@ -125,7 +125,7 @@ public class SubversionProjectConfigurator extends SubversionSupport
 	}
 
 	public void setNonRecursive() {
-		config.setRecursive(false);
+		config.setCheckoutDepth(CheckoutDepth.Files);
 	}
 	
 	public boolean updateGlobalConfig(PluginConfigDto globalRaConfig) {
@@ -208,7 +208,7 @@ public class SubversionProjectConfigurator extends SubversionSupport
 	}
 
 	private void applyBugtraqConfiguration(ProjectConfigDto projectConfig) {
-		final Map<String, String> properties = new HashMap<String, String>();
+		final SVNProperties properties = new SVNProperties();
 		
 		try {
 			svnRepository.getDir(config.getPath(), SVNRevision.HEAD.getNumber(), properties, (ISVNDirEntryHandler)null);

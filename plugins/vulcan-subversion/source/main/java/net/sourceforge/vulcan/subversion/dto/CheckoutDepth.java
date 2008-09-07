@@ -1,6 +1,6 @@
 /*
  * Vulcan Build Manager
- * Copyright (C) 2005-2006 Chris Eldredge
+ * Copyright (C) 2005-2008 Chris Eldredge
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,26 +16,30 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-package net.sourceforge.vulcan.integration;
+package net.sourceforge.vulcan.subversion.dto;
 
-import net.sourceforge.vulcan.metadata.SvnRevision;
+import org.tmatesoft.svn.core.SVNDepth;
 
-/**
- * Enumeration of categories that may be used to display available choices to
- * a user when configuring a plugin.  These values instruct the GUI component
- * on which options should be presented to a user as available choices.
- */
-@SvnRevision(id="$Id$", url="$HeadURL$")
-public enum ConfigChoice {
-	/**
-	 * Allow user to select from a list of currently configured projects.
-	 */
-	PROJECTS,
+public enum CheckoutDepth {
+	Empty(SVNDepth.EMPTY),
+	Files(SVNDepth.FILES),
+	Immediates(SVNDepth.IMMEDIATES),
+	Infinity(SVNDepth.INFINITY);
 	
-	/**
-	 * Choices are specified by the plugin by setting
-	 * PluginConfigDto.ATTR_AVAILABLE_CHOICES to a collection
-	 * of choices in the property map.
-	 */
-	INLINE;
+	private final SVNDepth depth;
+
+	CheckoutDepth(SVNDepth depth)
+	{
+		this.depth = depth;
+	}
+	
+	public int getId()
+	{
+		return depth.getId();
+	}
+	
+	public SVNDepth getSVNDepth()
+	{
+		return depth;
+	}
 }

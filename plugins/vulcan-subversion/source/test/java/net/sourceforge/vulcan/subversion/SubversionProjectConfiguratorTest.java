@@ -18,9 +18,6 @@
  */
 package net.sourceforge.vulcan.subversion;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import junit.framework.TestCase;
 import net.sourceforge.vulcan.dto.ProjectConfigDto;
 import net.sourceforge.vulcan.subversion.dto.SubversionConfigDto;
@@ -29,6 +26,7 @@ import net.sourceforge.vulcan.subversion.dto.SubversionRepositoryProfileDto;
 
 import org.tmatesoft.svn.core.ISVNDirEntryHandler;
 import org.tmatesoft.svn.core.SVNException;
+import org.tmatesoft.svn.core.SVNProperties;
 import org.tmatesoft.svn.core.SVNURL;
 import org.tmatesoft.svn.core.internal.io.svn.SVNRepositoryImpl;
 import org.tmatesoft.svn.core.io.SVNRepository;
@@ -39,7 +37,7 @@ public class SubversionProjectConfiguratorTest extends TestCase {
 	ProjectConfigDto projectConfig = new ProjectConfigDto();
 	SubversionRepositoryProfileDto profile = new SubversionRepositoryProfileDto();
 	
-	Map<String, String> bugtraqProps = new HashMap<String, String>();
+	SVNProperties bugtraqProps = new SVNProperties();
 	
 	@Override
 	protected void setUp() throws Exception {
@@ -221,10 +219,11 @@ public class SubversionProjectConfiguratorTest extends TestCase {
 		}
 		@Override
 		@SuppressWarnings("unchecked")
-		public long getDir(String path, long revision, Map properties, ISVNDirEntryHandler handler) throws SVNException {
+		public long getDir(String path, long revision, SVNProperties properties, ISVNDirEntryHandler handler) throws SVNException {
 			assertEquals(this.path, path);
 			assertNull(handler);
 			assertNotNull(properties);
+			
 			
 			properties.putAll(bugtraqProps);
 			

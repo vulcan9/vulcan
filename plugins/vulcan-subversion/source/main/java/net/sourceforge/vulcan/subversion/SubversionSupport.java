@@ -19,9 +19,6 @@
 package net.sourceforge.vulcan.subversion;
 
 import static org.apache.commons.lang.StringUtils.isNotBlank;
-
-import java.util.Map;
-
 import net.sourceforge.vulcan.dto.ProjectConfigDto;
 import net.sourceforge.vulcan.exception.ConfigException;
 import net.sourceforge.vulcan.exception.RepositoryException;
@@ -33,6 +30,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.tmatesoft.svn.core.SVNException;
+import org.tmatesoft.svn.core.SVNProperties;
 import org.tmatesoft.svn.core.SVNURL;
 import org.tmatesoft.svn.core.auth.BasicAuthenticationManager;
 import org.tmatesoft.svn.core.internal.io.dav.DAVRepositoryFactory;
@@ -116,8 +114,8 @@ public abstract class SubversionSupport extends PluginSupport {
 		return sb.toString();
 	}
 
-	protected void configureBugtraq(final ProjectConfigDto projectConfig, final Map<String, String> bugtraqProps) {
-		final String logRegex = bugtraqProps.get(BUGTRAQ_LOGREGEX);
+	protected void configureBugtraq(final ProjectConfigDto projectConfig, final SVNProperties bugtraqProps) {
+		final String logRegex = bugtraqProps.getStringValue(BUGTRAQ_LOGREGEX);
 		final String logRegex1;
 		final String logRegex2;
 	
@@ -137,14 +135,14 @@ public abstract class SubversionSupport extends PluginSupport {
 			logRegex2 = "";
 		}
 		
-		String bugtraqUrl = bugtraqProps.get(BUGTRAQ_URL);
+		String bugtraqUrl = bugtraqProps.getStringValue(BUGTRAQ_URL);
 		if (bugtraqUrl == null) {
 			bugtraqUrl = StringUtils.EMPTY;
 		}
 		
 		if (isNotBlank(bugtraqUrl)) {
 			projectConfig.setBugtraqUrl(bugtraqUrl);
-			projectConfig.setBugtraqLogRegex1(combinePatterns(logRegex1, bugtraqProps.get(BUGTRAQ_MESSAGE)));
+			projectConfig.setBugtraqLogRegex1(combinePatterns(logRegex1, bugtraqProps.getStringValue(BUGTRAQ_MESSAGE)));
 			projectConfig.setBugtraqLogRegex2(logRegex2);
 		}
 	}
