@@ -61,11 +61,12 @@ public abstract class BaseDto implements Serializable, Cloneable, Copyable {
 			throw new RuntimeException("The world is flat.", e);
 		}
 	}
-	protected final BaseDto[] copyArray(BaseDto[] arr) {
-		BaseDto[] copies = (BaseDto[]) Array.newInstance(arr.getClass().getComponentType(), arr.length);
+	@SuppressWarnings("unchecked")
+	protected final <T extends BaseDto> T[] copyArray(T[] arr) {
+		T[] copies = (T[]) Array.newInstance(arr.getClass().getComponentType(), arr.length);
 		
 		for (int i=0; i<arr.length; i++) {
-			copies[i] = arr[i].copy();
+			copies[i] = (T) arr[i].copy();
 		}
 		
 		return copies;

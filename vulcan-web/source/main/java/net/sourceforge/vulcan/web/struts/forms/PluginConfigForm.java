@@ -27,6 +27,7 @@ import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -167,13 +168,7 @@ public final class PluginConfigForm extends ValidatorForm implements DispatchFor
 	}
 	
 	public Object getFocusObject() {
-		try {
-			return PropertyUtils.getProperty(this, focus);
-		} catch (RuntimeException e) {
-			throw e;
-		} catch (Exception e) {
-			throw new RuntimeException(e);
-		}
+		return getProperty(focus);
 	}
 
 	public void putLocationInRequest(HttpServletRequest request) {
@@ -209,12 +204,30 @@ public final class PluginConfigForm extends ValidatorForm implements DispatchFor
 		loadProjectChoices(request);
 	}
 
+	public void resortArrayIfNecessary() {
+		if (!focus.endsWith("]")) {
+			return;
+		}
+		
+		final Object arrayElement = getFocusObject();
+		
+		if (arrayElement instanceof Comparable<?>) {
+			final String arrayProperty = focus.substring(0, focus.lastIndexOf('['));
+			
+			final Object[] array = (Object[]) getProperty(arrayProperty);
+
+			Arrays.sort(array);
+		}
+	}
+
 	public String getPluginId() {
 		return pluginId;
 	}
+	
 	public void setPluginId(String pluginId) {
 		this.pluginId = pluginId;
 	}
+	
 	public void setPluginConfig(HttpServletRequest request, PluginConfigDto pluginConfig, boolean dirty) throws IntrospectionException, IllegalAccessException, InvocationTargetException, NoSuchMethodException, InstantiationException {
 		this.originalPluginConfig = (PluginConfigDto) pluginConfig.copy();
 		this.pluginConfig = (PluginConfigDto) pluginConfig.copy();
@@ -287,6 +300,17 @@ public final class PluginConfigForm extends ValidatorForm implements DispatchFor
 	public boolean isNested() {
 		return !"pluginConfig".equals(focus);
 	}
+	
+	Object getProperty(String property) {
+		try {
+			return PropertyUtils.getProperty(this, property);
+		} catch (RuntimeException e) {
+			throw e;
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
+
 	@SuppressWarnings("unchecked")
 	private String getTypeAndPrepare(String propertyName, PropertyDescriptor pd) {
 		final Class c = pd.getPropertyType();

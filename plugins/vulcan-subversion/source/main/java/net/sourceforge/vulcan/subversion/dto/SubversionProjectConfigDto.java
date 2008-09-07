@@ -32,8 +32,9 @@ import net.sourceforge.vulcan.subversion.SubversionPlugin;
 public class SubversionProjectConfigDto extends RepositoryAdaptorConfigDto {
 	private String repositoryProfile;
 	private String path;
-	private boolean recursive = true;
+	private CheckoutDepth checkoutDepth	= CheckoutDepth.Infinity;
 	private boolean obtainBugtraqProperties = true;
+	private SparseCheckoutDto[] folders = new SparseCheckoutDto[0];
 	
 	@Override
 	public List<PropertyDescriptor> getPropertyDescriptors(Locale locale) {
@@ -56,14 +57,19 @@ public class SubversionProjectConfigDto extends RepositoryAdaptorConfigDto {
 		
 		addProperty(pds, "path", "SubversionProjectConfigDto.path.name", "SubversionProjectConfigDto.path.description", locale);
 
-		addProperty(pds, "recursive", "SubversionProjectConfigDto.recursive.name", "SubversionProjectConfigDto.recursive.description", locale);
-		
 		addProperty(pds, "obtainBugtraqProperties", "SubversionProjectConfigDto.obtainBugtraqProperties.name", "SubversionProjectConfigDto.obtainBugtraqProperties.description", locale);
+
+		addProperty(pds, "checkoutDepth", "SparseCheckoutDto.checkoutDepth.name", "SparseCheckoutDto.checkoutDepth.description", locale);
+		
+		addProperty(pds, "folders", "SubversionProjectConfigDto.folders.name", "SubversionProjectConfigDto.folders.description", locale);
+		
 		return pds;
 	}
 	@Override
 	public SubversionProjectConfigDto copy() {
-		return (SubversionProjectConfigDto) super.copy();
+		final SubversionProjectConfigDto copy = (SubversionProjectConfigDto) super.copy();
+		copy.setFolders(copyArray(folders));
+		return copy;
 	}
 	@Override
 	public String getPluginId() {
@@ -90,16 +96,26 @@ public class SubversionProjectConfigDto extends RepositoryAdaptorConfigDto {
 	public void setPath(String path) {
 		this.path = path;
 	}
-	public boolean isRecursive() {
-		return recursive;
+	public CheckoutDepth getCheckoutDepth() {
+		return checkoutDepth;
 	}
+	public void setCheckoutDepth(CheckoutDepth checkoutDepth) {
+		this.checkoutDepth = checkoutDepth;
+	}
+	@Deprecated
 	public void setRecursive(boolean recursive) {
-		this.recursive = recursive;
+		setCheckoutDepth(recursive ? CheckoutDepth.Infinity : CheckoutDepth.Files);
 	}
 	public boolean isObtainBugtraqProperties() {
 		return obtainBugtraqProperties;
 	}
 	public void setObtainBugtraqProperties(boolean obtainBugtraqProperties) {
 		this.obtainBugtraqProperties = obtainBugtraqProperties;
+	}
+	public SparseCheckoutDto[] getFolders() {
+		return folders;
+	}
+	public void setFolders(SparseCheckoutDto[] folders) {
+		this.folders = folders;
 	}
 }

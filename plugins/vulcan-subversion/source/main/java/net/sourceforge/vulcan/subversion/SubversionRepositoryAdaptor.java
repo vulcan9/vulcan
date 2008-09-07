@@ -1,6 +1,6 @@
 /*
  * Vulcan Build Manager
- * Copyright (C) 2005-2006 Chris Eldredge
+ * Copyright (C) 2005-2008 Chris Eldredge
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,7 +27,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -44,6 +43,8 @@ import net.sourceforge.vulcan.dto.RevisionTokenDto;
 import net.sourceforge.vulcan.exception.ConfigException;
 import net.sourceforge.vulcan.exception.RepositoryException;
 import net.sourceforge.vulcan.integration.support.PluginSupport;
+import net.sourceforge.vulcan.subversion.dto.CheckoutDepth;
+import net.sourceforge.vulcan.subversion.dto.SparseCheckoutDto;
 import net.sourceforge.vulcan.subversion.dto.SubversionConfigDto;
 import net.sourceforge.vulcan.subversion.dto.SubversionProjectConfigDto;
 import net.sourceforge.vulcan.subversion.dto.SubversionRepositoryProfileDto;
@@ -59,11 +60,13 @@ import org.tigris.subversion.javahl.Revision;
 import org.tigris.subversion.javahl.SVNClient;
 import org.tmatesoft.svn.core.ISVNLogEntryHandler;
 import org.tmatesoft.svn.core.SVNCancelException;
+import org.tmatesoft.svn.core.SVNDepth;
 import org.tmatesoft.svn.core.SVNDirEntry;
 import org.tmatesoft.svn.core.SVNErrorCode;
 import org.tmatesoft.svn.core.SVNException;
 import org.tmatesoft.svn.core.SVNLogEntry;
 import org.tmatesoft.svn.core.SVNNodeKind;
+import org.tmatesoft.svn.core.SVNProperties;
 import org.tmatesoft.svn.core.SVNURL;
 import org.tmatesoft.svn.core.io.SVNRepository;
 import org.tmatesoft.svn.core.wc.ISVNEventHandler;
@@ -225,16 +228,20 @@ public class SubversionRepositoryAdaptor extends SubversionSupport implements Re
 		
 		eventHandler.setBuildDetailCallback(buildDetailCallback);
 		
+		final Revision svnRev = Revision.getInstance(revision);
+		final boolean ignoreExternals = false;
+		final boolean allowUnverObstructions = false;
+		
 		try {
 			client.checkout(
 					getCompleteSVNURL().toString(),
 					absolutePath.toString(),
-					Revision.getInstance(revision),
-					config.isRecursive());
-			
-			synchronized (byteCounters) {
-				byteCounters.put(projectName, eventHandler.getFileCount());
-			}
+					svnRev,
+					svnRev,
+					config.getCheckoutDepth().getId(),
+					ignoreExternals,
+					allowUnverObstructions
+					);
 			
 			configureBugtraqIfNecessary(absolutePath);
 		} catch (ClientException e) {
@@ -244,11 +251,55 @@ public class SubversionRepositoryAdaptor extends SubversionSupport implements Re
 		} catch (SVNException e) {
 			throw new RepositoryException(e);
 		}
+		
+		final boolean depthIsSticky = true;
+		
+		for (SparseCheckoutDto folder : config.getFolders()) {
+			sparseUpdate(folder, absolutePath, svnRev, ignoreExternals,
+					allowUnverObstructions, depthIsSticky);
+		}
+		
+		synchronized (byteCounters) {
+			byteCounters.put(projectName, eventHandler.getFileCount());
+		}
+
+	}
+
+	void sparseUpdate(SparseCheckoutDto folder,
+			File workingCopyRootPath, final Revision svnRev,
+			final boolean ignoreExternals,
+			final boolean allowUnverObstructions, final boolean depthIsSticky)
+			throws RepositoryException {
+		
+		final File dir = new File(workingCopyRootPath, folder.getDirectoryName());
+		final File parentDir = dir.getParentFile();
+		
+		if (!parentDir.exists()) {
+			final SparseCheckoutDto parentFolder = new SparseCheckoutDto();
+			parentFolder.setDirectoryName(new File(folder.getDirectoryName()).getParent());
+			parentFolder.setCheckoutDepth(CheckoutDepth.Empty);
+			sparseUpdate(parentFolder, workingCopyRootPath, svnRev, ignoreExternals, allowUnverObstructions, depthIsSticky);
+		}
+		
+		final String path = dir.toString();
+		
+		try {
+			client.update(path, svnRev, folder.getCheckoutDepth().getId(), depthIsSticky, ignoreExternals, allowUnverObstructions);
+		} catch (ClientException e) {
+			if (!canceling) {
+				throw new RepositoryException("svn.sparse.checkout.error", new Object[] {folder.getDirectoryName()}, e);
+			}
+		}
 	}
 	
 	public void updateWorkingCopy(File absolutePath, BuildDetailCallback buildDetailCallback) throws RepositoryException {
 		try {
-			client.update(absolutePath.toString(), Revision.getInstance(revision), config.isRecursive());
+			final Revision svnRev = Revision.getInstance(revision);
+			final boolean depthIsSticky = false;
+			final boolean ignoreExternals = false;
+			final boolean allowUnverObstructions = false;
+			
+			client.update(absolutePath.toString(), svnRev, SVNDepth.UNKNOWN.getId(), depthIsSticky, ignoreExternals, allowUnverObstructions);
 		} catch (ClientException e) {
 			if (!canceling) {
 				throw new RepositoryException(e);
@@ -390,7 +441,7 @@ public class SubversionRepositoryAdaptor extends SubversionSupport implements Re
 		diffClient.setEventHandler(eventHandler);
 		
 		try {
-			diffClient.doDiff(getCompleteSVNURL(), r1, r1, r2, true, true, os);
+			diffClient.doDiff(getCompleteSVNURL(), r1, r1, r2, SVNDepth.INFINITY, true, os);
 			os.close();
 		} catch (SVNCancelException e) {
 		} catch (SVNException e) {
@@ -436,7 +487,7 @@ public class SubversionRepositoryAdaptor extends SubversionSupport implements Re
 		
 		final SVNWCClient client = new SVNWCClient(svnRepository.getAuthenticationManager(), options);
 		
-		final Map<String, String> bugtraqProps = new HashMap<String, String>();
+		final SVNProperties bugtraqProps = new SVNProperties();
 		
 		getWorkingCopyProperty(client, absolutePath, BUGTRAQ_URL, bugtraqProps);
 		getWorkingCopyProperty(client, absolutePath, BUGTRAQ_MESSAGE, bugtraqProps);
@@ -459,15 +510,15 @@ public class SubversionRepositoryAdaptor extends SubversionSupport implements Re
 		}
 	}
 
-	private void getWorkingCopyProperty(final SVNWCClient client, File absolutePath, String propName, final Map<String, String> bugtraqProps) throws SVNException {
+	private void getWorkingCopyProperty(final SVNWCClient client, File absolutePath, String propName, final SVNProperties bugtraqProps) throws SVNException {
 		SVNPropertyData prop;
-		prop = client.doGetProperty(absolutePath, propName, SVNRevision.BASE, null, false);
+		prop = client.doGetProperty(absolutePath, propName, SVNRevision.BASE, SVNRevision.BASE);
 		bugtraqProps.put(propName, getValueIfNotNull(prop));
 	}
 
 	private String getValueIfNotNull(SVNPropertyData prop) {
 		if (prop != null) {
-			return prop.getValue();
+			return prop.getValue().getString();
 		}
 		return StringUtils.EMPTY;
 	}
@@ -481,6 +532,8 @@ public class SubversionRepositoryAdaptor extends SubversionSupport implements Re
 			if (info.getAction() == NotifyAction.update_add) {
 				fileCount++;
 				PluginSupport.setWorkingCopyProgress(buildDetailCallback, fileCount, previousFileCount, ProgressUnit.Files);
+			} else if (info.getAction() == NotifyAction.skip) {
+				log.warn("Skipping missing target: " + info.getPath());
 			}
 			
 			if (Thread.interrupted()) {

@@ -23,7 +23,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 
 import junit.framework.TestCase;
 import net.sourceforge.vulcan.dto.ProjectConfigDto;
@@ -38,6 +37,7 @@ import org.tmatesoft.svn.core.SVNErrorCode;
 import org.tmatesoft.svn.core.SVNErrorMessage;
 import org.tmatesoft.svn.core.SVNException;
 import org.tmatesoft.svn.core.SVNNodeKind;
+import org.tmatesoft.svn.core.SVNProperties;
 import org.tmatesoft.svn.core.SVNURL;
 import org.tmatesoft.svn.core.internal.io.svn.SVNRepositoryImpl;
 
@@ -69,17 +69,18 @@ public class SubversionRepositoryAdaptorTest extends TestCase {
 		
 		final SVNURL fakeURL = SVNURL.parseURIEncoded("http://localhost");
 		
-		unsorted.add(new SVNDirEntry(fakeURL, "b", SVNNodeKind.DIR, 1, false, 1, new Date(), ""));
-		unsorted.add(new SVNDirEntry(fakeURL, "a", SVNNodeKind.DIR, 1, false, 1, new Date(), ""));
+		unsorted.add(new SVNDirEntry(fakeURL, fakeURL, "b", SVNNodeKind.DIR, 1, false, 1, new Date(), ""));
+		unsorted.add(new SVNDirEntry(fakeURL, fakeURL, "a", SVNNodeKind.DIR, 1, false, 1, new Date(), ""));
 		
 		repoConfig.setPath(path);
 		
 		r = new SubversionRepositoryAdaptor(globalConfig, projectConfig, repoConfig, null, globalConfig.getProfiles()[0], new SVNRepositoryImpl(fakeURL, null) {
 			@Override
 			@SuppressWarnings("unchecked")
-			public Collection getDir(String path, long arg1, Map arg2, Collection arg3) throws SVNException {
+			
+			public Collection getDir(String path, long arg1, SVNProperties arg2, Collection arg3) throws SVNException {
 				if (path.equals(path)) {
-					return Collections.singletonList(new SVNDirEntry(fakeURL, "tags", SVNNodeKind.DIR, 1, false, 1, new Date(), "tags"));
+					return Collections.singletonList(new SVNDirEntry(fakeURL, fakeURL, "tags", SVNNodeKind.DIR, 1, false, 1, new Date(), "tags"));
 				}
 				
 				return unsorted;

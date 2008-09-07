@@ -158,7 +158,7 @@ public final class ManagePluginAction extends BaseDispatchAction {
 			return mapping.findForward("configure");
 		}
 		
-		String focus = configForm.getFocus();
+		configForm.resortArrayIfNecessary();
 		
 		if (configForm.isProjectPlugin() && !configForm.isNested()) {
 			putConfigInProjectForm(mapping, request, configForm.getPluginConfig());
@@ -172,7 +172,8 @@ public final class ManagePluginAction extends BaseDispatchAction {
 				configForm.getRenamedProfiles().add(pluginProfileDto);
 			}
 		}
-		
+
+		String focus = configForm.getFocus();
 		focus = focus.substring(0, focus.lastIndexOf("."));
 		
 		configForm.setFocus(focus);
@@ -289,7 +290,6 @@ public final class ManagePluginAction extends BaseDispatchAction {
 		return true;
 	}
 	private void convertExceptionToActionMessages(ValidationException validationException, final ActionMessages errors, final String focus) {
-		
 		for (ValidationException e : validationException) {
 			String propertyName = e.getPropertyName();
 			
