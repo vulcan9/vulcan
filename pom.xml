@@ -10,6 +10,13 @@
 	<version>0.9-SNAPSHOT</version>
 	<packaging>pom</packaging>
 	
+	<repositories>
+		<repository>
+			<id>vulcan-project.org</id>
+			<url>http://vulcan-project.org/maven2</url>
+		</repository>
+	</repositories>
+	
 	<modules>
 		<!-- Test resources -->
 		<module>vulcan-test-utils</module>
@@ -202,18 +209,20 @@
 	</reporting>
 	
 	<distributionManagement>
-		<!--repository>
-			<id>repo1</id>
-			<name>Maven Central Repository</name>
-			<url>scp://repo1.maven.org/home/projects/maven/repository-staging/to-ibiblio/maven2</url>
+		<repository>
+			<id>vulcan-project.org</id>
+			<name>Vulcan Project Repository</name>
+			<url>scp://vulcan-project.org/home/vulcan/repo</url>
 		</repository>
+		<!--
 		<snapshotRepository>
-			<id>apache.snapshots</id>
-			<name>Apache Development Repository</name>
-			<url>scp://minotaur.apache.org/www/cvs.apache.org/maven-snapshot-repository</url>
-		</snapshotRepository-->
+			<id>vulcan-project.org</id>
+			<name>Vulcan Project Snapshot Repository</name>
+			<url>scp://vulcan-project.org/home/vulcan/snapshot-repo</url>
+		</snapshotRepository>
+		-->
 		<site>
-			<id>vulcan-website</id>
+			<id>vulcan.sourceforge.net</id>
 			<url>scp://shell.sourceforge.net/home/groups/v/vu/vulcan/htdocs</url>
 		</site>
 	</distributionManagement>
