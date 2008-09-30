@@ -30,6 +30,12 @@ import net.sourceforge.vulcan.exception.ConfigException;
 import org.apache.maven.VulcanMavenExtensionsMarker;
 
 public class MavenBuildToolTest extends MavenBuildToolTestBase {
+	@Override
+	protected void setUp() throws Exception {
+		super.setUp();
+		config.setOffline(false);
+	}
+	
 	public void testGetForeheadJar() throws Exception {
 		final File launcher = MavenBuildTool.getMavenHomeLibrary(mavenHome, MavenBuildTool.MAVEN1_LAUNCHER_PATH_PREFIX);
 		

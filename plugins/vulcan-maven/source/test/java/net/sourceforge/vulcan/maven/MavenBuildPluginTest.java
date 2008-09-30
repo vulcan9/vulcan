@@ -104,8 +104,10 @@ public class MavenBuildPluginTest extends MavenBuildToolTestBase {
 	public void testProjectConfiguratorModulesGetsScm() throws Exception {
 		// first, load the parent pom or else maven will not be able to find it.
 		final File parentPomFile = TestUtils.resolveRelativeFile("source/test/import-test/parent/pom.xml");
-		plugin.createProjectConfigurator(
+		final MavenProjectBuildConfigurator pCfgr = plugin.createProjectConfigurator(
 				null, parentPomFile, new SAXBuilder().build(parentPomFile));
+
+		assertEquals("pserver:anonymous@example.com:/cvsroot/import-test/parent/", pCfgr.determineScmRootUrl());
 		
 		// load module pom
 		final File pomFile = TestUtils.resolveRelativeFile("source/test/import-test/module-1/pom.xml");
@@ -117,7 +119,7 @@ public class MavenBuildPluginTest extends MavenBuildToolTestBase {
 	
 	/* 
 	 * Not sure why this is done in the wild; for an example see
-	 * http://svn.apache.org/repos/asf/jakarta/commons/proper/collections/trunk/pom.xml r523782
+	 * http://svn.apache.org/repos/asf/jakarta/commons/proper/collections/trunk/pom.xml@r523782
 	 */
 	public void testConfiguratorDeletesMultipleScmPrefix() throws Exception {
 		final String normal = MavenProjectConfiguratorImpl.normalizeScmUrl("scm:svn:scm:svn:http://localhost/svn/trunk");
