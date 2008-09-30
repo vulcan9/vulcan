@@ -94,6 +94,7 @@ public abstract class MavenBuildToolTestBase extends TestCase {
 		config = new MavenProjectConfig();
 		config.setTargets("clean");
 		config.setBuildScript("");
+		config.setOffline(true);
 		
 		int index = 0;
 		
