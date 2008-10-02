@@ -50,8 +50,6 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.SingleConnectionDataSource;
 
 public class JdbcBuildOutcomeStoreTest extends TestCase {
-	private String dbPath = TestUtils.resolveRelativePath("target/test-db/builds");
-	
 	JdbcBuildOutcomeStore store = new JdbcBuildOutcomeStore();
 	SingleConnectionDataSource dataSource = new SingleConnectionDataSource();
 	JdbcBuildOutcomeDto outcome = new JdbcBuildOutcomeDto();
@@ -69,7 +67,7 @@ public class JdbcBuildOutcomeStoreTest extends TestCase {
 		props.setProperty("autocommit", "false");
 
 		dataSource.setDriverClassName("org.hsqldb.jdbcDriver");
-		dataSource.setUrl("jdbc:hsqldb:file:" + dbPath);
+		dataSource.setUrl("jdbc:hsqldb:mem:JdbcBuildOutcomeStoreTest");
 		dataSource.setUsername("sa");
 		dataSource.setPassword("");
 		dataSource.setConnectionProperties(props);
