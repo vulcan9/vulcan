@@ -29,7 +29,6 @@ import java.util.Properties;
 import java.util.UUID;
 
 import junit.framework.TestCase;
-import net.sourceforge.vulcan.TestUtils;
 import net.sourceforge.vulcan.core.support.StoreStub;
 import net.sourceforge.vulcan.dto.BuildMessageDto;
 import net.sourceforge.vulcan.dto.BuildOutcomeQueryDto;
@@ -43,7 +42,6 @@ import net.sourceforge.vulcan.dto.ProjectStatusDto.Status;
 import net.sourceforge.vulcan.dto.ProjectStatusDto.UpdateType;
 import net.sourceforge.vulcan.exception.StoreException;
 
-import org.apache.commons.io.FileUtils;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -100,9 +98,6 @@ public class JdbcBuildOutcomeStoreTest extends TestCase {
 	@Override
 	protected void tearDown() throws Exception {
 		new JdbcTemplate(dataSource).execute("shutdown;");
-		
-		FileUtils.deleteDirectory(TestUtils.resolveRelativeFile("target/test-db").getAbsoluteFile());
-		
 		super.tearDown();
 	}
 	
