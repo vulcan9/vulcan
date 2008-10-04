@@ -80,6 +80,18 @@
 					</webResources>
 				</configuration>
 			</plugin>
+
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>cobertura-maven-plugin</artifactId>
+				<configuration>
+				<instrumentation>
+				<excludes>
+					<exclude>net/sourceforge/vulcan/web/struts/RestRequestProcessor$ActionMappingWrapper.class</exclude>
+				</excludes>
+				</instrumentation>
+				</configuration>
+			</plugin>
 		</plugins>
 	</build>
 	
