@@ -435,8 +435,6 @@ function registerHandlers() {
 	if (iframe) {
 		$(window).resize(resizeIframe);
 		
-		window.rootLocation = iframe.contentWindow.location.href;
-		
 		var buildDir = $("#build-directory-root").text();
 		
 		var index = buildDir.lastIndexOf("/");
@@ -455,7 +453,7 @@ function registerHandlers() {
 		
 		$("#build-directory-root").text(buildDir.substring(0, index));
 		
-		updateBreadcrumbs();
+		window.setTimeout(updateBreadcrumbs, 250);
 	}
 }
 
@@ -499,10 +497,15 @@ function updateBreadcrumbs() {
 	try {
 		location = iframe.contentWindow.location.href;
 	} catch (e) {
+		if (console) console.warn("unable to retrieve location.href from iframe");
 		// if iframe navigated to another domain, ignore error
 		location = "";
 	}
-	
+
+	if (!window.rootLocation) {
+		window.rootLocation = location;
+	}
+
 	if (location.length >= rootLocation.length && (window.lastLocation != location)
 			&& (location.substring(0, rootLocation.length) == rootLocation)) {
 		
