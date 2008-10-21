@@ -85,6 +85,13 @@ public class JdbcBuildOutcomeStoreTest extends TestCase {
 		store.setDataSource(dataSource);
 		store.setCreateScript(new ClassPathResource("net/sourceforge/vulcan/resources/create_tables.sql"));
 
+		final Map<String, String> queries = new HashMap<String, String>();
+		queries.put("select.average.build.time", "select avg(elapsed) from (select top 10 datediff('ms', start_date, completion_date) as elapsed " +
+				"from builds inner join project_names on builds.project_id = project_names.id " +
+				"where name=? and update_type=? and status='PASS' order by build_number desc)");
+		
+		store.setSqlQueries(queries);
+		
 		outcome.setId(UUID.randomUUID());
 		outcome.setStatus(Status.PASS);
 		outcome.setName("project-a");
@@ -413,7 +420,23 @@ public class JdbcBuildOutcomeStoreTest extends TestCase {
 		
 		store.loadTopBuildErrors(query, 5);
 	}
-	private void assertPersistence() throws StoreException {
+	
+	public void testAverageBuildTimeNoData() throws Exception {
+		store.init();
+		initCalled = true;
+		
+		assertEquals(null, store.loadAverageBuildTimeMillis("No such project", UpdateType.Full));
+	}
+	
+	public void testAverageBuildTime() throws Exception {
+		storeOutcome();
+		
+		Long expected = outcome.getCompletionDate().getTime() - outcome.getStartDate().getTime();
+		
+		assertEquals(expected, store.loadAverageBuildTimeMillis(outcome.getName(), outcome.getUpdateType()));
+	}
+	
+	private JdbcBuildOutcomeDto storeOutcome() throws StoreException {
 		if (!initCalled) {
 			store.init();
 			initCalled = true;
@@ -424,6 +447,11 @@ public class JdbcBuildOutcomeStoreTest extends TestCase {
 		store.storeBuildOutcome(outcome);
 		
 		final JdbcBuildOutcomeDto loadedOutcome = store.loadBuildOutcome(outcome.getId());
+		return loadedOutcome;
+	}
+	
+	private void assertPersistence() throws StoreException {
+		final JdbcBuildOutcomeDto loadedOutcome = storeOutcome();
 		
 		assertPersistence(loadedOutcome);
 	}

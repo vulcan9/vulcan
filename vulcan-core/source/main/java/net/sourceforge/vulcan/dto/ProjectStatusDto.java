@@ -82,6 +82,9 @@ public class ProjectStatusDto extends NameDto {
 	private List<MetricDto> metrics;
 	private List<TestFailureDto> testFailures;
 	
+	// Only defined while building
+	private Long estimatedBuildTimeMillis;
+	
 	public String getWorkDir() {
 		return workDir;
 	}
@@ -278,5 +281,11 @@ public class ProjectStatusDto extends NameDto {
 	}
 	public void setUpdateType(UpdateType updateType) {
 		this.updateType = updateType;
+	}
+	public Long getEstimatedBuildTimeMillis() {
+		return estimatedBuildTimeMillis;
+	}
+	public void setEstimatedBuildTimeMillis(Long estimatedBuildTimeMillis) {
+		this.estimatedBuildTimeMillis = estimatedBuildTimeMillis;
 	}
 }

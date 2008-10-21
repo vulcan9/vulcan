@@ -94,6 +94,10 @@ public abstract class AbstractProjectDomBuilder implements ProjectDomBuilder {
 			addChildNodeWithText(root, "repository-url", repositoryUrl);
 		}
 		
+		if (status.getEstimatedBuildTimeMillis() != null) {
+			addChildNodeWithText(root, "estimated-build-time", status.getEstimatedBuildTimeMillis().toString());
+		}
+		
 		addDependencies(root, status, format);
 		
 		addChangeLog(root, status, format);

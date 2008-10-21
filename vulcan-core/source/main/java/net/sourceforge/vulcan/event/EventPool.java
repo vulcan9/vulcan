@@ -27,7 +27,7 @@ import net.sourceforge.vulcan.metadata.SvnRevision;
 /**
  * Implementation Note:  This interface extends Map in order to allow JSTL to access
  * events of various types using expressions such as ${eventPool['ERROR']}.  Only the
- * "get" and "containsKey" methods need to be implemented.  Other methods derrived
+ * "get" and "containsKey" methods need to be implemented.  Other methods derived
  * from Map may throw UnsupportedOperationException.
  */
 @SvnRevision(id="$Id$", url="$HeadURL$")

@@ -35,6 +35,7 @@ import net.sourceforge.vulcan.dto.PluginMetaDataDto;
 import net.sourceforge.vulcan.dto.ProjectStatusDto;
 import net.sourceforge.vulcan.dto.StateManagerConfigDto;
 import net.sourceforge.vulcan.dto.TestFailureDto;
+import net.sourceforge.vulcan.dto.ProjectStatusDto.UpdateType;
 import net.sourceforge.vulcan.exception.StoreException;
 import net.sourceforge.vulcan.metadata.SvnRevision;
 
@@ -97,6 +98,9 @@ public class StoreStub implements ConfigurationStore, BuildOutcomeStore {
 		return null;
 	}
 	public List<TestFailureDto> loadTopTestFailures(BuildOutcomeQueryDto query,	int maxResultCount) {
+		return null;
+	}
+	public Long loadAverageBuildTimeMillis(String name, UpdateType updateType) {
 		return null;
 	}
 	public Integer findMostRecentBuildNumberByWorkDir(String workDir) {
