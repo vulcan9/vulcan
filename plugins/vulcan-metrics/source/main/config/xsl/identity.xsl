@@ -6,7 +6,7 @@
 
 	<xsl:template match="/">
 		<metrics>
-			<xsl:apply-templates select="//metric[@key!='' and @value!='']"/>
+			<xsl:apply-templates select="//metric[@key!='' and @value!='' and @type!='']"/>
 		</metrics>
 	</xsl:template>
 	
@@ -14,6 +14,7 @@
 		<metric>
 			<xsl:attribute name="key"><xsl:value-of select="@key"/></xsl:attribute>
 			<xsl:attribute name="value"><xsl:value-of select="@value"/></xsl:attribute>
+			<xsl:attribute name="type"><xsl:value-of select="@type"/></xsl:attribute>
 		</metric>
 	</xsl:template>
 </xsl:stylesheet>

@@ -36,9 +36,11 @@ public class IdentityTransformTest extends TransformTestCase {
 		
 		final String key = "a metric";
 		final String value = "eleventy-billion";
+		final String type = "string";
 		
 		metric.setAttribute("key", key);
 		metric.setAttribute("value", value);
+		metric.setAttribute("type", type);
 		
 		report.addContent(metric);
 		
@@ -49,6 +51,7 @@ public class IdentityTransformTest extends TransformTestCase {
 		final Element transformedMetric = t.getRootElement().getChild("metric");
 		assertEquals(key, transformedMetric.getAttributeValue("key"));
 		assertEquals(value, transformedMetric.getAttributeValue("value"));
+		assertEquals(type, transformedMetric.getAttributeValue("type"));
 	}
 	public void testSkipsOnMissingKey() throws Exception {
 		final Element metric = new Element("metric");
