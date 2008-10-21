@@ -46,6 +46,24 @@
 								<status>${status.status}</status>
 								<c:if test="${status.status eq 'BUILDING' and projectStatus[projectName] ne null}">
 									<previous-status>${projectStatus[projectName].status}</previous-status>
+									<c:set var="remainingTime" value="${status.estimatedBuildTimeMillis - (now.time - status.startDate.time)}"/>
+									<c:if test="${remainingTime lt 0}">
+										<c:set var="remainingTime" value="0"/>
+									</c:if>
+									<jsp:element name="estimated-build-time">
+										<jsp:attribute name="millis">
+											${status.estimatedBuildTimeMillis}
+										</jsp:attribute>
+										<jsp:attribute name="remaining-millis">
+											${remainingTime}
+										</jsp:attribute>
+										<jsp:body>
+											<v:formatElapsedTime value="${status.estimatedBuildTimeMillis}" verbosity="2"/>
+										</jsp:body>
+									</jsp:element>
+									<c:if test="${! empty status.errors}">
+										<errors-present/>
+									</c:if>
 								</c:if>
 								<c:choose>
 									<c:when test="${status.completionDate ne null}">

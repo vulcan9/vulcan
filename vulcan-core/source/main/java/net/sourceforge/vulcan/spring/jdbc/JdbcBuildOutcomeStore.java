@@ -37,6 +37,7 @@ import net.sourceforge.vulcan.dto.BuildMessageDto;
 import net.sourceforge.vulcan.dto.BuildOutcomeQueryDto;
 import net.sourceforge.vulcan.dto.ProjectStatusDto;
 import net.sourceforge.vulcan.dto.TestFailureDto;
+import net.sourceforge.vulcan.dto.ProjectStatusDto.UpdateType;
 import net.sourceforge.vulcan.exception.StoreException;
 import net.sourceforge.vulcan.metadata.SvnRevision;
 
@@ -56,6 +57,7 @@ public class JdbcBuildOutcomeStore implements BuildOutcomeStore, ProjectNameChan
 	private ConfigurationStore configurationStore;
 	private DataSource dataSource;
 	private Resource createScript;
+	private Map<String, String> sqlQueries;
 	
 	/* Helpers */
 	private JdbcTemplate jdbcTemplate;
@@ -145,6 +147,19 @@ public class JdbcBuildOutcomeStore implements BuildOutcomeStore, ProjectNameChan
 		return new BuildHistoryTopTestFailuresQuery(dataSource, query, maxResultCount).queryTopMessages();
 	}
 	
+	public Long loadAverageBuildTimeMillis(String name, UpdateType updateType) {
+		final String sql = sqlQueries.get("select.average.build.time");
+		final Object[] params = new Object[] { name, updateType.name() };
+		
+		final long result = jdbcTemplate.queryForLong(sql, params);
+		
+		if (result <= 0) {
+			return null;
+		}
+		
+		return result;
+	}
+	
 	public UUID storeBuildOutcome(ProjectStatusDto outcome)	throws StoreException {
 		try {
 			return storeBuildOutcomeInternal(outcome);
@@ -191,6 +206,14 @@ public class JdbcBuildOutcomeStore implements BuildOutcomeStore, ProjectNameChan
 	
 	public void setCreateScript(Resource createScript) {
 		this.createScript = createScript;
+	}
+	
+	public Map<String, String> getSqlQueries() {
+		return sqlQueries;
+	}
+	
+	public void setSqlQueries(Map<String, String> sqlQueries) {
+		this.sqlQueries = sqlQueries;
 	}
 	
 	private UUID storeBuildOutcomeInternal(ProjectStatusDto outcome) {

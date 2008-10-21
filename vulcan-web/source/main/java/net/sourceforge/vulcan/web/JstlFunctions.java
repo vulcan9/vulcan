@@ -90,10 +90,6 @@ public abstract class JstlFunctions {
 		for (long millisPerUnit : Arrays.asList(MILLIS_PER_DAY, MILLIS_PER_HOUR, MILLIS_PER_MINUTE, MILLIS_PER_SECOND)) {
 			final String messageKey;
 			
-			if (elapsedTime < millisPerUnit && sb.length() > 0) {
-				//break;
-			}
-
 			if (millisPerUnit == MILLIS_PER_DAY) {
 				messageKey = "time.day";
 			} else if (millisPerUnit == MILLIS_PER_HOUR) {

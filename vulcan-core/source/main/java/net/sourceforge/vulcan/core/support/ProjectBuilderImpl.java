@@ -269,6 +269,7 @@ public class ProjectBuilderImpl implements ProjectBuilder {
 			public void execute() throws Exception {
 				checkBuildNeccessary(ra, currentTarget);
 				determineUpdateType(currentTarget);
+				buildStatus.setEstimatedBuildTimeMillis(buildOutcomeStore.loadAverageBuildTimeMillis(currentTarget.getName(), updateType));
 			}
 		});
 		
