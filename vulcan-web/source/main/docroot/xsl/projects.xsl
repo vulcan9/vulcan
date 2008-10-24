@@ -4,6 +4,7 @@
 	
 	<xsl:output method="xml" media-type="application/xml" omit-xml-declaration="yes"/>
 	
+	<xsl:param name="contextRoot"/>
 	<xsl:param name="caption"/>
 	<xsl:param name="sortUrl"/>
 	<xsl:param name="detailLink"/>
@@ -172,9 +173,52 @@
 			<td><xsl:value-of select="repository-tag-name"/></td>
 			<xsl:element name="td">
 				<xsl:attribute name="title"><xsl:value-of select="message"/></xsl:attribute>
-				<xsl:attribute name="class"><xsl:value-of select="status"/> status</xsl:attribute>
+				<xsl:attribute name="class">
+					<xsl:value-of select="status"/>
+					<xsl:text> status</xsl:text>
+				</xsl:attribute>
 				<xsl:value-of select="status"/>
+				<xsl:if test="locked/text() = 'true'">
+					<img alt="Locked">
+						<xsl:attribute name="src">
+							<xsl:value-of select="$contextRoot"/>
+							<xsl:text>/images/lock.png</xsl:text>
+						</xsl:attribute>
+						<xsl:attribute name="title">
+							<xsl:value-of select="locked/@message"/>
+						</xsl:attribute>
+					</img>
+				</xsl:if>
 			</xsl:element>
 		</tr>
+		<xsl:if test="estimated-build-time/@millis &gt; 0">
+			<xsl:variable name="pctDone" select="format-number(1 - estimated-build-time/@remaining-millis div estimated-build-time/@millis, '##%')"/>
+			<tr>
+				<td colspan="6" class="progress-bar">
+					<xsl:attribute name="title">
+						<xsl:value-of select="$pctDone"/>
+					</xsl:attribute>
+					
+					<div class="progress-bar">
+						<xsl:attribute name="class">
+							<xsl:text>progress-bar-</xsl:text>
+							<xsl:choose>
+								<xsl:when test="errors-present">
+									<xsl:text>failure</xsl:text>
+								</xsl:when>
+								<xsl:otherwise>
+									<xsl:text>success</xsl:text>
+								</xsl:otherwise>
+							</xsl:choose>
+						</xsl:attribute>
+						<xsl:attribute name="style">
+							<xsl:text>width:</xsl:text>
+							<xsl:value-of select="$pctDone"/>
+						</xsl:attribute>
+						<xsl:text>.</xsl:text>
+					</div>
+				</td>
+			</tr>
+		</xsl:if>
 	</xsl:template>
 </xsl:stylesheet>

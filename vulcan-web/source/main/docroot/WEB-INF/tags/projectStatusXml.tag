@@ -86,6 +86,9 @@
 									<message><spring:message code="${status.messageKey}" arguments="${status.messageArgs}" htmlEscape="true"/></message>
 								</c:if>
 								<build-number><c:out value="${status.buildNumber}"/></build-number>
+								<locked message="${v:getProjectLockMessage(projectName)}">
+									<c:out value="${v:isProjectLocked(projectName)}"/>
+								</locked>
 								<c:if test="${status.revision != null}">
 									<jsp:element name="revision">
 										<jsp:attribute name="numeric"><c:out value="${status.revision.revision}"/></jsp:attribute>
@@ -112,6 +115,7 @@
 	
 			<v:bubble>
 				<x:transform xslt="${xslt}" doc="${statusXml}">
+					<x:param name="contextRoot"><c:url value="/"/></x:param>
 					<x:param name="caption">
 						<spring:message code="captions.projects.status"/>
 						<c:if test="${caption ne null}">

@@ -20,12 +20,15 @@ package net.sourceforge.vulcan.core.support;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
@@ -169,6 +172,27 @@ public class BuildManagerImpl implements BuildManager {
 		}
 		
 		processTargetComplete(info, config, outcome);
+	}
+	public boolean isBuildingOrInQueue(String... name) {
+		final Set<String> names = new HashSet<String>(Arrays.asList(name));
+		try {
+			readLock.lock();
+			for (Iterator<ProjectConfigDto> itr = activeBuilds.iterator(); itr.hasNext();) {
+				if (names.contains(itr.next().getName())) {
+					return true;
+				}
+			}
+			
+			for (Iterator<Target> itr = queue.iterator(); itr.hasNext();) {
+				if (itr.next().containsAny(names)) {
+					return true;
+				}
+			}
+			
+			return false;
+		} finally {
+			readLock.unlock();
+		}
 	}
 	public ProjectStatusDto[] getPendingTargets() {
 		final List<ProjectStatusDto> targets = new ArrayList<ProjectStatusDto>();
@@ -477,11 +501,12 @@ public class BuildManagerImpl implements BuildManager {
 			statusDto.setMessageKey(message.getKey());
 			statusDto.setMessageArgs(message.getArgs());
 		}
-
+		
 		return statusDto;
 	}
 	private interface Target {
 		boolean hasNext();
+		boolean containsAny(Collection<String> projectNames);
 		ProjectConfigDto next() throws PendingDependencyException;
 		void targetCompleted(ProjectConfigDto config, boolean success);
 		void appendPendingTargets(List<ProjectStatusDto> list);
@@ -522,6 +547,14 @@ public class BuildManagerImpl implements BuildManager {
 		}
 		public void appendPendingTargets(List<ProjectStatusDto> list) {
 			list.addAll(Arrays.asList(group.getPendingTargets()));
+		}
+		public boolean containsAny(Collection<String> projectNames) {
+			for (ProjectConfigDto target : group.getPendingProjects()) {
+				if (projectNames.contains(target.getName())) {
+					return true;
+				}
+			}
+			return false;
 		}
 		public String getName() {
 			return group.getName();

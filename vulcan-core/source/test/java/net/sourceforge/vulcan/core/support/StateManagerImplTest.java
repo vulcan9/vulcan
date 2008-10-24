@@ -557,6 +557,94 @@ public class StateManagerImplTest extends StateManagerTestBase
 		assertEquals(Arrays.asList("x", "y"), stateMgr.getProjectLabels());
 	}
 
+	public void testLockProjects() throws Exception {
+		final ProjectConfigDto a = createProjectDto("a");
+		final ProjectConfigDto b = createProjectDto("b");
+
+		stateMgr.addProjectConfig(a);
+		stateMgr.addProjectConfig(b);
+
+		stateMgr.lockProjects("xyz", "b");
+		
+		assertEquals(0, a.getLockCount());
+		assertEquals(null, a.getLockMessage());
+		
+		assertEquals(1, b.getLockCount());
+		assertEquals("xyz", b.getLockMessage());
+		
+		stateMgr.lockProjects("xyz2", "a", "b");
+
+		assertEquals(1, a.getLockCount());
+		assertEquals("xyz2", a.getLockMessage());
+		
+		assertEquals(2, b.getLockCount());
+		assertEquals("xyz2", b.getLockMessage());
+	}
+	
+	public void testLockProjectsNotFoundIdemponent() throws Exception {
+		final ProjectConfigDto a = createProjectDto("a");
+
+		stateMgr.addProjectConfig(a);
+
+		try {
+			stateMgr.lockProjects("xyz", "a", "b");
+			fail("Expected exception");
+		} catch (NoSuchProjectException e) {
+		}
+		
+		assertEquals(0, a.getLockCount());
+		assertEquals(null, a.getLockMessage());
+	}
+	
+	public void testUnlockProjectsNotFoundIdemponent() throws Exception {
+		final ProjectConfigDto a = createProjectDto("a");
+		a.setLockCount(22);
+		a.setLockMessage("foo");
+		
+		stateMgr.addProjectConfig(a);
+
+		try {
+			stateMgr.unlockProjects(true, "a", "b");
+			fail("Expected exception");
+		} catch (NoSuchProjectException e) {
+		}
+		
+		assertEquals(22, a.getLockCount());
+		assertEquals("foo", a.getLockMessage());
+	}
+	
+	public void testUnlockProjects() throws Exception {
+		final ProjectConfigDto a = createProjectDto("a");
+		final ProjectConfigDto b = createProjectDto("b");
+
+		a.setLockCount(1);
+		a.setLockMessage("msg");
+		
+		b.setLockCount(12);
+		b.setLockMessage("msg");
+		
+		stateMgr.addProjectConfig(a);
+		stateMgr.addProjectConfig(b);
+
+		stateMgr.unlockProjects(false, "b", "a");
+		
+		assertEquals(0, a.getLockCount());
+		assertEquals(null, a.getLockMessage());
+		
+		assertEquals(11, b.getLockCount());
+		assertEquals("msg", b.getLockMessage());
+		
+		stateMgr.unlockProjects(false, "a");
+
+		assertEquals(0, a.getLockCount());
+		assertEquals(null, a.getLockMessage());
+		
+		stateMgr.unlockProjects(true, "b");
+
+		assertEquals(0, b.getLockCount());
+		assertEquals(null, b.getLockMessage());
+	}
+	
 	private ProjectConfigDto createProjectDto(String name) {
 		final ProjectConfigDto config = new ProjectConfigDto();
 		config.setName(name);

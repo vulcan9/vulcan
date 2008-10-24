@@ -222,6 +222,134 @@ public class ManageProjectConfigActionTest extends MockApplicationContextStrutsT
 		verifyForward("projectList");
 		verifyActionMessages(new String[] {"messages.save.success"});
 	}
+	public void testUpdateProjectSetsLockReason() throws Exception {
+		ProjectConfigDto config = new ProjectConfigDto();
+		config.setName("my project");
+		config.setWorkDir("dir");
+		ProjectConfigForm form = new ProjectConfigForm();
+		form.populate(config, false);
+		form.setStore(configurationStore);
+		
+		request.getSession().setAttribute("projectConfigForm", form);
+		
+		addRequestParameter("action", "Update Project");
+		addRequestParameter("commit", "true");
+		addRequestParameter("config.name", config.getName());
+		addRequestParameter("config.workDir", config.getWorkDir());
+		addRequestParameter("locked", "true");
+		
+		ProjectConfigDto updated = (ProjectConfigDto) config.copy();
+		updated.setLockCount(1);
+		updated.setLockMessage("messages.project.locked.by.user");
+		
+		expect(buildManager.isBuildingOrInQueue(config.getName())).andReturn(false);
+		
+		manager.updateProjectConfig(config.getName(), updated, true);
+		
+		replay();
+		
+		actionPerform();
+		
+		verify();
+		
+		verifyNoActionErrors();
+		verifyActionMessages(new String[] {"messages.save.success"});
+		verifyForward("projectList");
+	}
+	public void testLockProjectFailsWhenBuilding() throws Exception {
+		ProjectConfigDto config = new ProjectConfigDto();
+		config.setName("my project");
+		config.setWorkDir("dir");
+		ProjectConfigForm form = new ProjectConfigForm();
+		form.populate(config, false);
+		form.setStore(configurationStore);
+		
+		request.getSession().setAttribute("projectConfigForm", form);
+		
+		addRequestParameter("action", "Update Project");
+		addRequestParameter("commit", "true");
+		addRequestParameter("config.name", config.getName());
+		addRequestParameter("config.workDir", config.getWorkDir());
+		addRequestParameter("locked", "true");
+		
+		expect(buildManager.isBuildingOrInQueue(config.getName())).andReturn(true);
+		
+		replay();
+		
+		actionPerform();
+		
+		verify();
+		
+		verifyActionErrors(new String[] {"errors.cannot.lock.project"});
+		verifyNoActionMessages();
+		verifyInputForward();
+	}
+	public void testUpdateProjectPreservesLockCountAndMessage() throws Exception {
+		ProjectConfigDto config = new ProjectConfigDto();
+		config.setName("my project");
+		config.setWorkDir("dir");
+		config.setLockCount(42);
+		config.setLockMessage("some pre-existing reason.");
+		ProjectConfigForm form = new ProjectConfigForm();
+		form.populate(config, false);
+		form.setStore(configurationStore);
+		
+		request.getSession().setAttribute("projectConfigForm", form);
+		
+		addRequestParameter("action", "Update Project");
+		addRequestParameter("commit", "true");
+		addRequestParameter("config.name", config.getName());
+		addRequestParameter("config.workDir", config.getWorkDir() + "2");
+		addRequestParameter("locked", "true");
+		
+		ProjectConfigDto updated = (ProjectConfigDto) config.copy();
+		updated.setWorkDir(config.getWorkDir()+"2");
+		
+		manager.updateProjectConfig(config.getName(), updated, true);
+		
+		replay();
+		
+		actionPerform();
+		
+		verify();
+		
+		verifyNoActionErrors();
+		verifyActionMessages(new String[] {"messages.save.success"});
+		verifyForward("projectList");
+	}
+	public void testUpdateProjectRemovesLockCountAndMessage() throws Exception {
+		ProjectConfigDto config = new ProjectConfigDto();
+		config.setName("my project");
+		config.setWorkDir("dir");
+		config.setLockCount(42);
+		config.setLockMessage("something pre-existing reason.");
+		ProjectConfigForm form = new ProjectConfigForm();
+		form.populate(config, false);
+		form.setStore(configurationStore);
+		
+		request.getSession().setAttribute("projectConfigForm", form);
+		
+		addRequestParameter("action", "Update Project");
+		addRequestParameter("commit", "true");
+		addRequestParameter("config.name", config.getName());
+		addRequestParameter("config.workDir", config.getWorkDir());
+		
+		ProjectConfigDto updated = (ProjectConfigDto) config.copy();
+		updated.setLockCount(0);
+		updated.setLockMessage(null);
+		
+		manager.updateProjectConfig(config.getName(), updated, true);
+		
+		replay();
+		
+		actionPerform();
+		
+		verify();
+		
+		verifyNoActionErrors();
+		verifyActionMessages(new String[] {"messages.save.success"});
+		verifyForward("projectList");
+	}
 	public void testUpdateProjectRemembersLabels() throws Exception {
 		ProjectConfigDto config = new ProjectConfigDto();
 		config.setName("my project");

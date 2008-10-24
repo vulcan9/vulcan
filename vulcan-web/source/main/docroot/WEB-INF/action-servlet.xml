@@ -20,6 +20,9 @@
 				<value>delete</value>
 				<value>import</value>
 				<value>upload</value>
+				<value>lock</value>
+				<value>unlock</value>
+				<value>clear</value>
 			</set>
 		</property>
 	</bean>
@@ -95,6 +98,12 @@
 		<property name="stateManager" ref="stateManager"/>
 	</bean>
 	
+	<bean name="/buildmanagement/manageLocks"
+			class="net.sourceforge.vulcan.web.struts.actions.ManageLocksAction"
+			parent="baseDispatchAction">
+		<property name="buildManager" ref="buildManager"/>
+	</bean>
+	
 	<bean name="/admin/clearMessages"
 			class="net.sourceforge.vulcan.web.struts.actions.ClearMessagesAction">
 		<property name="eventPool" ref="eventPool"/>
@@ -110,6 +119,7 @@
 			class="net.sourceforge.vulcan.web.struts.actions.ManageProjectConfigAction"
 			parent="baseDispatchAction">
 		<property name="configurationStore" ref="configurationStore"/>
+		<property name="buildManager" ref="buildManager"/>
 	</bean>
 	
 	<bean name="/admin/setup/manageLabels"

@@ -50,6 +50,11 @@
 		<path>/WEB-INF/tags/projectStatusXml.tag</path>
 	</tag-file>
 	
+	<tag-file>
+		<name>projectCheckboxes</name>
+		<path>/WEB-INF/tags/projectCheckboxes.tag</path>
+	</tag-file>
+	
 	<function>
 		<name>mangle</name>
 		<description>
@@ -73,6 +78,18 @@
 		<name>getProjectNamesByLabels</name>
 		<function-class>net.sourceforge.vulcan.web.JstlFunctions</function-class>
 		<function-signature>java.util.List getProjectNamesByLabels(java.lang.Object)</function-signature>
+	</function>
+	
+	<function>
+		<name>isProjectLocked</name>
+		<function-class>net.sourceforge.vulcan.web.JstlFunctions</function-class>
+		<function-signature>boolean isProjectLocked(java.lang.String)</function-signature>
+	</function>
+	
+	<function>
+		<name>getProjectLockMessage</name>
+		<function-class>net.sourceforge.vulcan.web.JstlFunctions</function-class>
+		<function-signature>java.lang.String getProjectLockMessage(java.lang.String)</function-signature>
 	</function>
 	
 	<function>

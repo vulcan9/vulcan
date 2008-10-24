@@ -8,8 +8,10 @@ div.bubble {
 }
 
 th {
+	color: #9ba6ba;
 	background-color: #E7EFFF;
 	border-right: 1px solid #BDBABD;
+	font-weight: normal;
 }
 tbody > th {
 	background-color: white;
@@ -38,14 +40,22 @@ h2.build-stats {
 	color: gray;
 	font-size: 10pt;
 	font-weight: normal;
+	margin-top: 5px;
 }
 
 .success, .PASS {
 	color: #43F143;
 }
+div.progress-bar-success {
+	background-color: #43F143;
+}
 
 .failure, .FAIL {
 	color: red;
+}
+
+div.progress-bar-failure {
+	background-color: red;
 }
 
 .SKIP {
@@ -129,6 +139,15 @@ a.issue {
 	background-image: url("../images/construction.gif");
 }
 
+td.progress-bar {
+	padding: 0;
+	margin: 0;
+}
+
+td.progress-bar div {
+	height: 5px;
+	overflow: hidden;
+}
 span.error {
 	background: transparent no-repeat top left;
 	background-image: url("../images/error.gif");
@@ -164,7 +183,6 @@ div.file-upload {
 .diff, .log {
 	position: absolute;
 	border: 1px solid black;
-	font-family: "Bitstream Vera Sans Mono", monospace;
 	left: 10px;
 	right: 10px;
 	height: 90%;
@@ -172,8 +190,14 @@ div.file-upload {
 }
 
 .issue, .issue-unlinked {
-	font-family: "Bitstream Vera Sans Mono", monospace;
 	font-weight: bold;
+}
+
+/* monospace */
+.diff, .log,
+.issue, .issue-unlinked,
+table.build-messages tbody td {
+	font-family: "Monaco", "Lucida Console", "Bitstream Vera Sans Mono", "DejaVu Sans Mono", monospace;
 }
 
 .issue-unlinked {
@@ -493,7 +517,6 @@ td.component-version {
 	text-align: center;
 }
 table.build-messages tbody td {
-	font-family: "Bitstream Vera Sans Mono", "MS Courier New", monospace;
 	font-size: smaller;
 }
 table.projectConfig {
@@ -547,6 +570,7 @@ td.status {
 	font-weight: bold;
 	text-align: center;
 }
+
 th.long, th.file {
 	text-align: left;
 }
@@ -561,13 +585,17 @@ td.dateInputs {
 div.tables th,div.tables td {
 	text-align: center;
 }
+input[type="checkbox"] + label + div {
+	margin-top: 1ex;
+	margin-left: 2ex;
+}
 
 span.banner {
 	font-size: larger;
 	font-weight: bold;
 }
 
-span.description {
+.description {
 	font-style: italic;
 }
 

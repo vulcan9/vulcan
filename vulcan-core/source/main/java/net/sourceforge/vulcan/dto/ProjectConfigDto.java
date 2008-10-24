@@ -67,6 +67,9 @@ public class ProjectConfigDto extends NameDto {
 	String requestedBy;
 	boolean isScheduledBuild;
 	
+	int lockCount;
+	String lockMessage;
+	
 	Set<String> labels = new HashSet<String>();
 	
 	public String getId() {
@@ -208,5 +211,21 @@ public class ProjectConfigDto extends NameDto {
 	}
 	public void setLabels(Set<String> labels) {
 		this.labels = labels;
+	}
+	public boolean isLocked() {
+		return lockCount > 0;
+	}
+	public int getLockCount() {
+		return lockCount;
+	}
+	public void setLockCount(int lockCount)
+	{
+		this.lockCount = lockCount;
+	}
+	public String getLockMessage() {
+		return lockMessage;
+	}
+	public void setLockMessage(String lockMessage) {
+		this.lockMessage = lockMessage;
 	}
 }

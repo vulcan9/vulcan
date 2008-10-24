@@ -26,6 +26,7 @@ import net.sourceforge.vulcan.dto.ProjectConfigDto;
 import net.sourceforge.vulcan.event.EventHandler;
 import net.sourceforge.vulcan.event.WarningEvent;
 import net.sourceforge.vulcan.exception.AlreadyScheduledException;
+import net.sourceforge.vulcan.exception.ProjectsLockedException;
 import net.sourceforge.vulcan.metadata.SvnRevision;
 
 import org.quartz.Job;
@@ -70,22 +71,23 @@ public class ScheduleProjectsJob extends QuartzJobBean implements Job {
 
 	protected void executeInternal(final String name) {
 		final ProjectConfigDto[] projects = projectManager.getProjectsForScheduler(name);
-			
+		
 		if (projects.length == 0) {
 			return;
 		}
-			
-		final DependencyGroup dg = projectManager
-				.buildDependencyGroup(
-						projects,
-						DependencyBuildPolicy.AS_NEEDED,
-						null,
-						false, false);
-			
-		dg.setName(name);
 		
 		try {
+			final DependencyGroup dg = projectManager
+			.buildDependencyGroup(
+					projects,
+					DependencyBuildPolicy.AS_NEEDED,
+					null,
+					false, false);
+		
+			dg.setName(name);
 			buildManager.add(dg);
+		} catch (ProjectsLockedException ignore) {
+			// This is a very unlikely race condition.
 		} catch (AlreadyScheduledException e) {
 			eventHandler.reportEvent(new WarningEvent(
 					this,

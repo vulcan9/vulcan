@@ -124,6 +124,16 @@ public abstract class JstlFunctions {
 		return sb.toString();
 	}
 	
+	public static boolean isProjectLocked(String projectName) {
+		final StateManager mgr = (StateManager) webApplicationContext.getBean(Keys.STATE_MANAGER, StateManager.class);
+		return mgr.getProjectConfig(projectName).isLocked();
+	}
+	
+	public static String getProjectLockMessage(String projectName) {
+		final StateManager mgr = (StateManager) webApplicationContext.getBean(Keys.STATE_MANAGER, StateManager.class);
+		return mgr.getProjectConfig(projectName).getLockMessage();
+	}
+	
 	@SuppressWarnings("unchecked")
 	public static List<String> getProjectNamesByLabels(Object labels) {
 		final StateManager mgr = (StateManager) webApplicationContext.getBean(Keys.STATE_MANAGER, StateManager.class);

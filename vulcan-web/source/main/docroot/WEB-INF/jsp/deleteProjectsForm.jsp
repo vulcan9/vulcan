@@ -26,20 +26,7 @@
 				<spring:message code="label.projects"/>
 			</td>
 			<td>
-				<div class="projectCheckboxes">
-					<ul>
-						<c:forEach items="${stateManager.projectConfigNames}" var="projectName">
-							<li>
-								<html:multibox property="projectNames" value="${projectName}"
-									styleId="proj${v:mangle(projectName)}"/>
-								<jsp:element name="label">
-									<jsp:attribute name="for">proj${v:mangle(projectName)}</jsp:attribute>
-									<jsp:body>${projectName}</jsp:body>
-								</jsp:element>
-							</li>
-						</c:forEach>
-					</ul>
-				</div>
+				<v:projectCheckboxes/>
 			</td>
 		</tr>
 		<c:if test="${not empty projectsWithDependents}">

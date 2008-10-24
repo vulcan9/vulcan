@@ -103,6 +103,9 @@ public abstract class StateManagerTestBase extends EasyMockTestCase
 			public Map<String, ProjectStatusDto> getProjectStatus() {
 				return null;
 			}
+			public boolean isBuildingOrInQueue(String... originalName) {
+				return false;
+			}
 		});
 		
 		stateMgr.setPluginManager(pluginMgr);

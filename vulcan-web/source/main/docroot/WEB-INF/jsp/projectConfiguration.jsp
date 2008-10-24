@@ -20,6 +20,8 @@
 
 <body>
 
+<v:messages/>
+
 <v:bubble>
 <html:form action="/admin/setup/manageProjectConfig" method="post">
 <table class="projectConfig">
@@ -153,6 +155,15 @@
 				<li>
 					<html:checkbox property="config.suppressWarnings" styleId="suppressWarnings"/>
 					<label for="suppressWarnings"><spring:message code="label.build.options.warnings.suppress"/></label>
+				</li>
+				<li>
+					<html:checkbox property="locked" styleId="lock"/>
+					<label for="lock"><spring:message code="label.build.options.lock.project"/></label>
+					<c:if test="${projectConfigForm.locked}">
+						<div class="description">
+							${projectConfigForm.config.lockMessage}
+						</div>
+					</c:if>
 				</li>
 			</ul>
 		</td>

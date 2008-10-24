@@ -11,7 +11,10 @@
 	<c:set var="keys" value="${v:getActionErrorPropertyList(pageContext.request)}"/>
 	
 	<c:if test="${not empty keys}">
-		${v:setStatus(pageContext.response, 400)}
+		<c:if test="${restResponseCode eq null}">
+			<c:set var="restResponseCode" value="400"/>
+		</c:if>
+		${v:setStatus(pageContext.response, restResponseCode)}
 	</c:if>
 	
 	<c:forEach var="prop" items="${keys}">

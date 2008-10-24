@@ -514,6 +514,20 @@ public class BuildManagerImplTest extends TestCase {
 
 		assertEquals(3, fireCount);
 	}
+	public void testIsBuildingOrInQueue() throws Exception {
+		dg.addTarget(a);
+		
+		mgr.add(dg);
+		mgr.add(c);
+		
+		assertTrue(mgr.isBuildingOrInQueue(a.getName()));
+		assertFalse(mgr.isBuildingOrInQueue(b.getName()));
+		assertTrue(mgr.isBuildingOrInQueue(c.getName()));
+		
+		mgr.getTarget(info1);
+		
+		assertTrue(mgr.isBuildingOrInQueue(a.getName()));
+	}
 	public void testGetPendingTargets() throws Exception {
 		dg.addTarget(a);
 		dg.addTarget(b);

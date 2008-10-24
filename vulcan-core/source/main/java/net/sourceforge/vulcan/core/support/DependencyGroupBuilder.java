@@ -18,9 +18,12 @@
  */
 package net.sourceforge.vulcan.core.support;
 
-import static net.sourceforge.vulcan.core.WorkingCopyUpdateStrategy.*;
+import static net.sourceforge.vulcan.core.WorkingCopyUpdateStrategy.Full;
+import static net.sourceforge.vulcan.core.WorkingCopyUpdateStrategy.Incremental;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import net.sourceforge.vulcan.ProjectManager;
@@ -29,6 +32,7 @@ import net.sourceforge.vulcan.core.DependencyGroup;
 import net.sourceforge.vulcan.core.WorkingCopyUpdateStrategy;
 import net.sourceforge.vulcan.dto.ProjectConfigDto;
 import net.sourceforge.vulcan.dto.ProjectConfigDto.UpdateStrategy;
+import net.sourceforge.vulcan.exception.ProjectsLockedException;
 import net.sourceforge.vulcan.metadata.SvnRevision;
 
 
@@ -42,6 +46,7 @@ class DependencyGroupBuilder {
 	final Set<String> added = new HashSet<String>();
 	final DependencyGroup dg = new DependencyGroupImpl();
 	final WorkingCopyUpdateStrategy updateStrategyOverride;
+	final List<String> locked = new ArrayList<String>();
 	
 	private DependencyGroupBuilder(ProjectManager projectManager, DependencyBuildPolicy policy, WorkingCopyUpdateStrategy updateStrategyOverride, boolean buildOnDependencyFailureOverride, boolean buildOnNoUpdatesOverride) {
 		this.projectManager = projectManager;
@@ -52,19 +57,36 @@ class DependencyGroupBuilder {
 	}
 	static DependencyGroup buildDependencyGroup(ProjectConfigDto[] projects,
 			ProjectManager projectManager, DependencyBuildPolicy policy,
-			WorkingCopyUpdateStrategy updateStrategyOverride, boolean buildOnDependencyFailureOverride, boolean buildOnNoUpdatesOverride) {
+			WorkingCopyUpdateStrategy updateStrategyOverride, boolean buildOnDependencyFailureOverride, boolean buildOnNoUpdatesOverride)
+		throws ProjectsLockedException {
 		return new DependencyGroupBuilder(projectManager, policy,
 				updateStrategyOverride,
 				buildOnDependencyFailureOverride, buildOnNoUpdatesOverride).buildDependencyGroup(projects);
 	}
-	private DependencyGroup buildDependencyGroup(ProjectConfigDto[] projects) {
+	private DependencyGroup buildDependencyGroup(ProjectConfigDto[] projects) throws ProjectsLockedException {
 		for (ProjectConfigDto project : projects) {
-			addOnce(project);
+			addOnce(project, false);
 		}
+		if (locked.size() > 0) {
+			throw new ProjectsLockedException(locked);
+		}
+			
 		return dg;
 	}
-	private void addOnce(ProjectConfigDto projectConfig) {
+	private void addOnce(ProjectConfigDto projectConfig, boolean isDependency) {
 		final String name = projectConfig.getName();
+		
+		if (projectConfig.isLocked()) {
+			if (isDependency && DependencyBuildPolicy.AS_NEEDED.equals(policy)) {
+				// exclude locked projects that have been included "as needed"
+				return;
+			}
+			
+			// fail otherwise
+			locked.add(projectConfig.getName());
+			return;
+		}
+		
 		if (!added.contains(name)) {
 			added.add(name);
 			
@@ -90,7 +112,8 @@ class DependencyGroupBuilder {
 						copy.setBuildOnDependencyFailure(true);
 						copy.setBuildOnNoUpdates(true);
 					}
-					addOnce(copy);
+									
+					addOnce(copy, true);
 				}
 			}
 		}
