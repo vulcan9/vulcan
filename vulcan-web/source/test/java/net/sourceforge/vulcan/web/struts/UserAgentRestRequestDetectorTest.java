@@ -33,6 +33,12 @@ public class UserAgentRestRequestDetectorTest extends TestCase {
 		assertFalse(detector.isRestRequest(request));
 	}
 
+	public void testUserAgentIsLynx() throws Exception {
+		request.setHeader("User-Agent", "Lynx");
+		assertFalse(detector.isRestRequest(request));
+	}
+
+	
 	public void testUserAgent() throws Exception {
 		assertTrue(detector.isRestRequest(request));
 	}
