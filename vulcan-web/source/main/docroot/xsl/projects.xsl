@@ -182,7 +182,7 @@
 					<img alt="Locked">
 						<xsl:attribute name="src">
 							<xsl:value-of select="$contextRoot"/>
-							<xsl:text>/images/lock.png</xsl:text>
+							<xsl:text>images/lock.png</xsl:text>
 						</xsl:attribute>
 						<xsl:attribute name="title">
 							<xsl:value-of select="locked/@message"/>
