@@ -23,13 +23,15 @@ import javax.servlet.http.HttpServletRequest;
 import net.sourceforge.vulcan.metadata.SvnRevision;
 
 import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.struts.action.ActionMapping;
 import org.apache.struts.validator.ValidatorForm;
 
 @SvnRevision(id="$Id$", url="$HeadURL$")
-public class MultipleProjectConfigForm extends ValidatorForm {
+public class MultipleProjectConfigForm extends ValidatorForm implements DispatchForm {
 	private String[] projectNames;
 	private String message;
+	private String action;
 	
 	@Override
 	public void reset(ActionMapping mapping, HttpServletRequest request) {
@@ -51,5 +53,25 @@ public class MultipleProjectConfigForm extends ValidatorForm {
 	
 	public void setMessage(String message) {
 		this.message = message;
+	}
+
+	public String getAction() {
+		return action;
+	}
+
+	public void setAction(String action) {
+		this.action = action;
+	}
+	
+	public String getName() {
+		return StringUtils.join(projectNames, ", ");
+	}
+
+	public String getOriginalName() {
+		return getName();
+	}
+
+	public String getTargetType() {
+		return "project";
 	}
 }
