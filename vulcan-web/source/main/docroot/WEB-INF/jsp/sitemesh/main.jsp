@@ -40,9 +40,7 @@
 		<jsp:attribute name="type">image/vnd.microsoft.ico</jsp:attribute>
 		<jsp:attribute name="href"><c:url value="/images/favicon.ico"/></jsp:attribute>
 	</jsp:element>
-	<script type="text/javascript">
-		window.contextRoot = '<c:url value="/"/>';
-	</script>
+	<script type="text/javascript">window.contextRoot = '<c:url value="/"/>';</script>
 	<jsp:element name="script">
 		<jsp:attribute name="type">text/javascript</jsp:attribute>
 		<jsp:attribute name="src"><c:url value="/javascript/jquery-1.2.6.js"/></jsp:attribute>

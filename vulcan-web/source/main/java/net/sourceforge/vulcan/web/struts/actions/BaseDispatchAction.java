@@ -20,6 +20,7 @@ package net.sourceforge.vulcan.web.struts.actions;
 
 import static org.apache.commons.lang.StringUtils.isBlank;
 
+import java.util.Locale;
 import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
@@ -32,6 +33,7 @@ import net.sourceforge.vulcan.metadata.SvnRevision;
 import net.sourceforge.vulcan.web.struts.forms.ConfigForm;
 import net.sourceforge.vulcan.web.struts.forms.DispatchForm;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.struts.Globals;
 import org.apache.struts.action.ActionForm;
@@ -40,12 +42,15 @@ import org.apache.struts.action.ActionMapping;
 import org.apache.struts.action.ActionMessage;
 import org.apache.struts.action.ActionMessages;
 import org.apache.struts.actions.DispatchAction;
+import org.springframework.context.MessageSource;
+import org.springframework.context.MessageSourceAware;
 
 @SvnRevision(id="$Id$", url="$HeadURL$")
-public abstract class BaseDispatchAction extends DispatchAction {
+public abstract class BaseDispatchAction extends DispatchAction implements MessageSourceAware {
 	private Log auditLog;
 	private Set<String> actionsToAudit;
 	protected StateManager stateManager;
+	private MessageSource messageSource;
 	
 	@Override
 	public final ActionForward execute(ActionMapping mapping, ActionForm form,
@@ -74,6 +79,10 @@ public abstract class BaseDispatchAction extends DispatchAction {
 		this.stateManager = stateManager;
 	}
 
+	public void setMessageSource(MessageSource messageSource) {
+		this.messageSource = messageSource;
+	}
+	
 	public void setAuditLog(Log auditLog) {
 		this.auditLog = auditLog;
 	}
@@ -87,11 +96,24 @@ public abstract class BaseDispatchAction extends DispatchAction {
 			HttpServletRequest request, HttpServletResponse response,
 			String parameter) throws Exception {
 		
+		String name;
+		
 		if (form instanceof DispatchForm) {
 			final DispatchForm dispatchForm = (DispatchForm) form;
-			return dispatchForm.getAction();
+			name = dispatchForm.getAction();
+		} else {
+			name = ConfigForm.translateAction(request.getParameter(parameter));
 		}
-		return ConfigForm.translateAction(request.getParameter(parameter));
+		
+		if (StringUtils.isBlank(name)) {
+			return null;
+		}
+		
+		return name;
+	}
+	
+	protected final String formatMessage(String key, Object... args) {
+		return messageSource.getMessage(key, args, Locale.getDefault());
 	}
 	
 	protected final static void saveError(HttpServletRequest request, String propertyName, ActionMessage message) {
@@ -140,12 +162,8 @@ public abstract class BaseDispatchAction extends DispatchAction {
 		
 		final StringBuilder msgBuf = new StringBuilder();
 		msgBuf.append("User: ");
-		
-		if (request.getUserPrincipal() != null) {
-			msgBuf.append(request.getUserPrincipal().getName());
-		} else {
-			msgBuf.append("(anonymous)");
-		}
+
+		msgBuf.append(getUsername(request));
 		
 		msgBuf.append("; Host: ");
 		msgBuf.append(request.getRemoteHost());
@@ -168,5 +186,15 @@ public abstract class BaseDispatchAction extends DispatchAction {
 		}
 		
 		return msgBuf.toString();
+	}
+
+	protected static String getUsername(HttpServletRequest request) {
+		String user;
+		if (request.getUserPrincipal() != null) {
+			user = request.getUserPrincipal().getName();
+		} else {
+			user = "(anonymous)";
+		}
+		return user;
 	}
 }

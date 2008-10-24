@@ -18,11 +18,14 @@
  */
 package net.sourceforge.vulcan.web.struts.actions;
 
+import java.util.Date;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import net.sourceforge.vulcan.StateManager;
+import net.sourceforge.vulcan.core.BuildManager;
 import net.sourceforge.vulcan.core.ConfigurationStore;
 import net.sourceforge.vulcan.dto.PluginConfigDto;
 import net.sourceforge.vulcan.dto.ProjectConfigDto;
@@ -41,6 +44,7 @@ import org.apache.struts.action.ActionMessages;
 @SvnRevision(id="$Id$", url="$HeadURL$")
 public final class ManageProjectConfigAction extends BaseDispatchAction {
 	private ConfigurationStore configurationStore;
+	private BuildManager buildManager;
 	
 	public ActionForward edit(ActionMapping mapping, ActionForm form,
 			HttpServletRequest request, HttpServletResponse response)
@@ -103,6 +107,15 @@ public final class ManageProjectConfigAction extends BaseDispatchAction {
 		final StateManager mgr = stateManager;
 		
 		if (configForm.isDirty()) {
+			if (configForm.lockWasAdded()) {
+				if (buildManager.isBuildingOrInQueue(configForm.getOriginalName())) {
+					saveError(request, ActionMessages.GLOBAL_MESSAGE,
+							new ActionMessage("errors.cannot.lock.project"));
+					return mapping.getInputForward();
+				}
+				config.setLockMessage(formatMessage("messages.project.locked.by.user", getUsername(request), new Date()));
+			}
+
 			mgr.updateProjectConfig(configForm.getOriginalName(), config, true);
 			saveSuccessMessage(request);
 		} else {
@@ -180,9 +193,15 @@ public final class ManageProjectConfigAction extends BaseDispatchAction {
 		
 		return mapping.findForward("configure");
 	}
+	
 	public void setConfigurationStore(ConfigurationStore store) {
 		this.configurationStore = store;
 	}
+	
+	public void setBuildManager(BuildManager buildManager) {
+		this.buildManager = buildManager;
+	}
+	
 	private PluginConfigForm getOrCreatePluginForm(ActionMapping mapping, HttpServletRequest request) {
 		final HttpSession session = request.getSession();
 		

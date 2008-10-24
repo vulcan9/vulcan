@@ -18,13 +18,13 @@
  */
 package net.sourceforge.vulcan.web.struts.forms;
 
-import static org.apache.commons.lang.StringUtils.*;
-
-import java.util.regex.Pattern;
-import java.util.regex.PatternSyntaxException;
+import static org.apache.commons.lang.StringUtils.isBlank;
+import static org.apache.commons.lang.StringUtils.isNotBlank;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -54,6 +54,24 @@ public final class ProjectConfigForm extends ConfigForm {
 	}
 	public String getTargetType() {
 		return "project";
+	}
+	public boolean isLocked() {
+		return getProjectConfig().isLocked();
+	}
+	public void setLocked(boolean locked) {
+		if (locked) {
+			final ProjectConfigDto cur = getProjectConfig();
+			final ProjectConfigDto prev = (ProjectConfigDto) getOriginal();
+			
+			final int lockCount = prev.getLockCount();
+			
+			if (lockCount == 0) {
+				cur.setLockCount(1);
+			} else {
+				cur.setLockCount(lockCount);
+				cur.setLockMessage(prev.getLockMessage());
+			}
+		}
 	}
 	public String getFocus() {
 		return focus;
@@ -100,6 +118,13 @@ public final class ProjectConfigForm extends ConfigForm {
 		
 		getProjectConfig().setUpdateStrategy(us);
 	}
+	
+	public boolean lockWasAdded() {
+		final ProjectConfigDto prev = (ProjectConfigDto) getOriginal();
+		
+		return isLocked() && (prev == null || (prev != null && !prev.isLocked()));
+	}
+
 	@Override
 	protected void initializeConfig(NamedObject config, NamedObject previousConfig) {
 		if (previousConfig == null) {
@@ -121,54 +146,57 @@ public final class ProjectConfigForm extends ConfigForm {
 			curr.setLabels(prev.getLabels());
 		}
 	}
+	
 	@Override
 	protected void customValidate(ActionMapping mapping, HttpServletRequest request, ActionErrors errors) {
 		final String action = translateAction(getAction());
-		if ("update".equals(action) || "create".equals(action)) {
-			final ProjectConfigDto projectConfig = getProjectConfig();
-			if (isBlank(projectConfig.getRepositoryAdaptorPluginId())) {
-				projectConfig.setRepositoryAdaptorConfig(null);
-			} else if (isRepositoryAdaptorChanged()) {
-				final RepositoryAdaptorConfigDto config = projectConfig.getRepositoryAdaptorConfig();
-				
-				if (config == null || !config.getPluginId().equals(projectConfig.getRepositoryAdaptorPluginId())) {
-					errors.add("config.repositoryAdaptorPluginId",
-							new ActionMessage("errors.plugin.not.configured"));
-				}
+		if (!"update".equals(action) && !"create".equals(action)) {
+			return;
+		}
+		
+		final ProjectConfigDto projectConfig = getProjectConfig();
+		if (isBlank(projectConfig.getRepositoryAdaptorPluginId())) {
+			projectConfig.setRepositoryAdaptorConfig(null);
+		} else if (isRepositoryAdaptorChanged()) {
+			final RepositoryAdaptorConfigDto config = projectConfig.getRepositoryAdaptorConfig();
+			
+			if (config == null || !config.getPluginId().equals(projectConfig.getRepositoryAdaptorPluginId())) {
+				errors.add("config.repositoryAdaptorPluginId",
+						new ActionMessage("errors.plugin.not.configured"));
+			}
+		}
+		
+		if (isBlank(projectConfig.getBuildToolPluginId())) {
+			projectConfig.setBuildToolConfig(null);
+		} else if (isBuildToolChanged()) {
+			final BuildToolConfigDto config = projectConfig.getBuildToolConfig();
+			
+			if (config == null || !config.getPluginId().equals(projectConfig.getBuildToolPluginId())) {
+				errors.add("config.buildToolPluginId",
+						new ActionMessage("errors.plugin.not.configured"));
+			}
+		}
+		
+		final String url = projectConfig.getBugtraqUrl();
+		
+		if (isNotBlank(url)) {
+			try {
+				new URL(url);
+			} catch (MalformedURLException e) {
+				errors.add("config.bugtraqUrl", new ActionMessage("errors.url"));
 			}
 			
-			if (isBlank(projectConfig.getBuildToolPluginId())) {
-				projectConfig.setBuildToolConfig(null);
-			} else if (isBuildToolChanged()) {
-				final BuildToolConfigDto config = projectConfig.getBuildToolConfig();
-				
-				if (config == null || !config.getPluginId().equals(projectConfig.getBuildToolPluginId())) {
-					errors.add("config.buildToolPluginId",
-							new ActionMessage("errors.plugin.not.configured"));
-				}
+			if (url.indexOf("%BUGID%") < 0) {
+				errors.add("config.bugtraqUrl", new ActionMessage("errors.bugtraq.must.contain.id"));
 			}
-			
-			final String url = projectConfig.getBugtraqUrl();
-			
-			if (isNotBlank(url)) {
-				try {
-					new URL(url);
-				} catch (MalformedURLException e) {
-					errors.add("config.bugtraqUrl", new ActionMessage("errors.url"));
-				}
-				
-				if (url.indexOf("%BUGID%") < 0) {
-					errors.add("config.bugtraqUrl", new ActionMessage("errors.bugtraq.must.contain.id"));
-				}
-			}
-			
-			validateRegex(errors, projectConfig.getBugtraqLogRegex1(), "config.bugtraqLogRegex1");
-			validateRegex(errors, projectConfig.getBugtraqLogRegex2(), "config.bugtraqLogRegex2");
-			
-			final String workDir = projectConfig.getWorkDir();
-			if (isNotBlank(workDir) && store.isWorkingCopyLocationInvalid(workDir)) {
-				errors.add("config.workDir", new ActionMessage("errors.work.dir.reserved"));
-			}
+		}
+		
+		validateRegex(errors, projectConfig.getBugtraqLogRegex1(), "config.bugtraqLogRegex1");
+		validateRegex(errors, projectConfig.getBugtraqLogRegex2(), "config.bugtraqLogRegex2");
+		
+		final String workDir = projectConfig.getWorkDir();
+		if (isNotBlank(workDir) && store.isWorkingCopyLocationInvalid(workDir)) {
+			errors.add("config.workDir", new ActionMessage("errors.work.dir.reserved"));
 		}
 	}
 	

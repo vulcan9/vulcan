@@ -63,6 +63,7 @@ import net.sourceforge.vulcan.exception.DuplicateNameException;
 import net.sourceforge.vulcan.exception.NoSuchProjectException;
 import net.sourceforge.vulcan.exception.PluginNotFoundException;
 import net.sourceforge.vulcan.exception.ProjectNeedsDependencyException;
+import net.sourceforge.vulcan.exception.ProjectsLockedException;
 import net.sourceforge.vulcan.exception.StoreException;
 import net.sourceforge.vulcan.metadata.SvnRevision;
 import net.sourceforge.vulcan.scheduler.BuildDaemon;
@@ -321,6 +322,55 @@ public abstract class StateManagerImpl implements StateManager, ProjectManager {
 			writeLock.unlock();
 		}
 	}
+	public void lockProjects(String message, String... projectNames) {
+		try {
+			writeLock.lock();
+			final List<ProjectConfigDto> projects = new ArrayList<ProjectConfigDto>();
+			
+			// get all projects in case one doesn't exist.
+			for (String name : projectNames) {
+				projects.add(getProjectConfig(name));
+			}
+			
+			// make changes
+			for (ProjectConfigDto project : projects) {
+				project.setLockCount(project.getLockCount()+1);
+				project.setLockMessage(message);
+			}
+		} finally {
+			writeLock.unlock();
+		}
+	}
+	public void unlockProjects(boolean resetLockCounts, String... projectNames) {
+		try {
+			writeLock.lock();
+			final List<ProjectConfigDto> projects = new ArrayList<ProjectConfigDto>();
+			
+			// get all projects in case one doesn't exist.
+			for (String name : projectNames) {
+				projects.add(getProjectConfig(name));
+			}
+			
+			// make changes
+			for (ProjectConfigDto project : projects) {
+				int count;
+				if (resetLockCounts) {
+					count = 0;
+				} else {
+					count = project.getLockCount() - 1;
+					if (count < 0) {
+						count = 0;
+					}
+				}
+				project.setLockCount(count);
+				if (count <= 0) {
+					project.setLockMessage(null);
+				}
+			}
+		} finally {
+			writeLock.unlock();
+		}
+	}
 	public void applyProjectLabel(String label, Collection<String> projectNames) throws StoreException {
 		try {
 			writeLock.lock();
@@ -497,7 +547,7 @@ public abstract class StateManagerImpl implements StateManager, ProjectManager {
 			for (Iterator<ProjectConfigDto> itr = list.iterator(); itr.hasNext();) {
 				final ProjectConfigDto config = itr.next();
 				
-				if (!Arrays.asList(config.getSchedulerNames()).contains(schedulerName)) {
+				if (!Arrays.asList(config.getSchedulerNames()).contains(schedulerName) || config.isLocked()) {
 					itr.remove();
 				}
 			}
@@ -677,7 +727,7 @@ public abstract class StateManagerImpl implements StateManager, ProjectManager {
 		
 		throw new ConfigException("messages.build.tool.not.configured", null);
 	}
-	public DependencyGroup buildDependencyGroup(ProjectConfigDto[] projects, DependencyBuildPolicy policy, WorkingCopyUpdateStrategy updateStrategyOverride, boolean buildOnDependencyFailure, boolean buildOnNoUpdates) {
+	public DependencyGroup buildDependencyGroup(ProjectConfigDto[] projects, DependencyBuildPolicy policy, WorkingCopyUpdateStrategy updateStrategyOverride, boolean buildOnDependencyFailure, boolean buildOnNoUpdates) throws ProjectsLockedException {
 		return DependencyGroupBuilder.buildDependencyGroup(projects, this, policy, updateStrategyOverride, buildOnDependencyFailure, buildOnNoUpdates);
 	}
 	public StateManagerConfigDto getConfig() {

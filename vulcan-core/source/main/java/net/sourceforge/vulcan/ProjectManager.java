@@ -30,6 +30,7 @@ import net.sourceforge.vulcan.exception.ConfigException;
 import net.sourceforge.vulcan.exception.DuplicateNameException;
 import net.sourceforge.vulcan.exception.NoSuchProjectException;
 import net.sourceforge.vulcan.exception.ProjectNeedsDependencyException;
+import net.sourceforge.vulcan.exception.ProjectsLockedException;
 import net.sourceforge.vulcan.exception.StoreException;
 import net.sourceforge.vulcan.metadata.SvnRevision;
 
@@ -49,6 +50,9 @@ public interface ProjectManager {
 
 	public List<BuildArtifactLocationDto> getArtifactLocations();
 	
+	/**
+	 * @return Array of projects assigned to a scheduler, excluding locked projects.
+	 */
 	public ProjectConfigDto[] getProjectsForScheduler(String schedulerName);
 
 	public RepositoryAdaptor getRepositoryAdaptor(ProjectConfigDto projectConfig) throws ConfigException;
@@ -57,7 +61,7 @@ public interface ProjectManager {
 	
 	public DependencyGroup buildDependencyGroup(ProjectConfigDto[] projects,
 			DependencyBuildPolicy policy, WorkingCopyUpdateStrategy updateStrategyOverride,
-			boolean buildOnDependencyFailureOverride, boolean buildOnNoUpdatesOverride);
+			boolean buildOnDependencyFailureOverride, boolean buildOnNoUpdatesOverride) throws ProjectsLockedException;
 
 	public Date getPluginModificationDate(String pluginId);
 }

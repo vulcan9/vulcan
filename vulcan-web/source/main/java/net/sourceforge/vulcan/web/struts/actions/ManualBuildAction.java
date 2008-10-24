@@ -37,15 +37,18 @@ import net.sourceforge.vulcan.dto.ProjectStatusDto;
 import net.sourceforge.vulcan.dto.RepositoryTagDto;
 import net.sourceforge.vulcan.exception.ConfigException;
 import net.sourceforge.vulcan.exception.NoSuchProjectException;
+import net.sourceforge.vulcan.exception.ProjectsLockedException;
 import net.sourceforge.vulcan.metadata.SvnRevision;
 import net.sourceforge.vulcan.scheduler.BuildDaemon;
 import net.sourceforge.vulcan.web.struts.forms.ManualBuildForm;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.struts.action.Action;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.apache.struts.action.ActionMessage;
+import org.apache.struts.action.ActionMessages;
 
 @SvnRevision(id="$Id$", url="$HeadURL$")
 public final class ManualBuildAction extends Action {
@@ -94,11 +97,19 @@ public final class ManualBuildAction extends Action {
 			buildOnNoUpdates = true;
 		}
 		
-		final DependencyGroup dg = projectManager.buildDependencyGroup(
+		final DependencyGroup dg;
+		
+		try {
+			dg = projectManager.buildDependencyGroup(
+		
 					projects.toArray(new ProjectConfigDto[projects.size()]),
 					policy,
 					buildForm.getWorkingCopyUpdateStrategy(),
 					buildForm.isBuildOnDependencyFailure(), buildOnNoUpdates);
+		} catch (ProjectsLockedException e) {
+			BaseDispatchAction.saveError(request, ActionMessages.GLOBAL_MESSAGE, new ActionMessage("errors.projects.locked", StringUtils.join(e.getLockedProjectNames(), ", ")));
+			return mapping.getInputForward();
+		}
 		
 		dg.setName(requestedBy);
 		dg.setManualBuild(true);
@@ -110,7 +121,7 @@ public final class ManualBuildAction extends Action {
 		
 		buildManager.add(dg);
 		
-		wakeUpBuildDaemon();
+		wakeUpBuildDaemons(projects.size());
 		
 		return mapping.findForward("dashboard");
 	}
@@ -151,21 +162,26 @@ public final class ManualBuildAction extends Action {
 
 	// Wake up an idle build daemon if one is found in order to show that
 	// the project is building when the user is brought back to the dashboard.
-	private void wakeUpBuildDaemon() {
+	private void wakeUpBuildDaemons(int numProjects) {
 		final List<BuildDaemon> buildDaemons = stateManager.getBuildDaemons();
+		int count = 0;
 		
 		for (BuildDaemon bd : buildDaemons) {
 			if (bd.isRunning() && !bd.isBuilding()) {
 				bd.wakeUp();
 				
-				// sleep to allow buildDaemon a chance to fetch the target.
+				// sleep to allow buildDaemon a chance to fetch the target
+				// before client is shown the dashboard.
 				try {
 					Thread.sleep(100);
 				} catch (InterruptedException ignore) {
 					// propagate interrupt that is not intended for us.
 					Thread.currentThread().interrupt();
 				}
-				return;
+				if (++count == numProjects)
+				{
+					return;	
+				}
 			}
 		}
 	}

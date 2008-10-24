@@ -29,6 +29,7 @@ import org.apache.struts.validator.ValidatorForm;
 @SvnRevision(id="$Id$", url="$HeadURL$")
 public class MultipleProjectConfigForm extends ValidatorForm {
 	private String[] projectNames;
+	private String message;
 	
 	@Override
 	public void reset(ActionMapping mapping, HttpServletRequest request) {
@@ -42,5 +43,13 @@ public class MultipleProjectConfigForm extends ValidatorForm {
 	
 	public void setProjectNames(String[] projectNames) {
 		this.projectNames = projectNames;
+	}
+	
+	public String getMessage() {
+		return message;
+	}
+	
+	public void setMessage(String message) {
+		this.message = message;
 	}
 }

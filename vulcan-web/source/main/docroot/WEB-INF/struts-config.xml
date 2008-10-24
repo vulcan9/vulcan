@@ -210,6 +210,16 @@
 		
 		<action path="/buildmanagement/kill"
 				type="org.springframework.web.struts.DelegatingActionProxy"/>
+				
+		<action path="/buildmanagement/manageLocks"
+				type="org.springframework.web.struts.DelegatingActionProxy"
+				name="multipleProjectConfigForm"
+				input="/buildmanagement/manageLocks.jsp"
+				parameter="action"
+				scope="request">
+			<forward name="failure" path="/buildmanagement/manageLocks.jsp"/>
+			<forward name="success" path="/buildmanagement/manageLocks.jsp"/>
+		</action>
 	</action-mappings>
 	
 	<controller contentType="" processorClass="net.sourceforge.vulcan.web.struts.RestRequestProcessor"/>

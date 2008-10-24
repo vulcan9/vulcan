@@ -45,8 +45,15 @@ public interface BuildManager {
 	void add(DependencyGroup dg) throws AlreadyScheduledException;
 
 	void targetCompleted(BuildDaemonInfoDto info, ProjectConfigDto currentTarget, ProjectStatusDto buildStatus);
+
+	/**
+	 * @return true if any project is currently being built or is in the build queue; false otherwise.
+	 */
+	boolean isBuildingOrInQueue(String... projectNames);
 	
 	ProjectStatusDto[] getPendingTargets();
+	
+	Map<String, ProjectStatusDto> getProjectsBeingBuilt();
 
 	/**
 	 * Flush projects waiting to be built.  Does not flush building projects.
@@ -61,8 +68,6 @@ public interface BuildManager {
 	
 	List<UUID> getAvailableStatusIds(String projectName);
 	
-	Map<String, ProjectStatusDto> getProjectsBeingBuilt();
-
 	Map<String, ProjectStatusDto> getProjectStatus();
 
 	Integer getMostRecentBuildNumberByWorkDir(String workDir);

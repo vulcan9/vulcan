@@ -49,6 +49,21 @@ public interface StateManager {
 	public void updateProjectConfig(String oldName, ProjectConfigDto updatedConfig, boolean setLastModifiedDate)	throws DuplicateNameException, NoSuchProjectException, StoreException;
 	public void deleteProjectConfig(String... names) throws ProjectNeedsDependencyException, StoreException;
 	
+	/**
+	 * Increment the lockCount for each specified project.
+	 * @param message Comment describing why a lock is being added
+	 * @param projectNames Array of one or more projects to lock
+	 */
+	public void lockProjects(String message, String... projectNames);
+	
+	/**
+	 * Decrement the lockCount for each specified project.
+	 * @param resetLockCounts When true, lockCount will be set to zero.  When false,
+	 * lockCount will be decremented (or will remain at zero for projects that were not locked).
+	 * @param projectNames Array of one or more projects to unlock.
+	 */
+	public void unlockProjects(boolean resetLockCounts, String... projectNames);
+	
 	public void applyMultipleUpdates(ConfigUpdatesDto updates) throws DuplicateNameException, StoreException, PluginNotFoundException;
 	
 	public SchedulerConfigDto getSchedulerConfig(String name);

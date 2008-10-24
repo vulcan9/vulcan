@@ -347,10 +347,16 @@ public class StateManagerScheduleTest extends StateManagerTestBase {
 		c.setName("c");
 		c.setSchedulerNames(new String[] {"mock"});
 
+		final ProjectConfigDto d = new ProjectConfigDto();
+		d.setName("d");
+		d.setSchedulerNames(new String[] {"mock"});
+		d.setLockCount(1);
+
 		stateMgr.addSchedulerConfig(sched);
 		stateMgr.addProjectConfig(a);
 		stateMgr.addProjectConfig(b);
 		stateMgr.addProjectConfig(c);
+		stateMgr.addProjectConfig(d);
 		
 		ProjectConfigDto[] ps = stateMgr.getProjectsForScheduler(sched.getName());
 		

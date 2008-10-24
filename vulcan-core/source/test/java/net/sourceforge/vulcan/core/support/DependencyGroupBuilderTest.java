@@ -25,6 +25,7 @@ import net.sourceforge.vulcan.core.DependencyGroup;
 import net.sourceforge.vulcan.core.WorkingCopyUpdateStrategy;
 import net.sourceforge.vulcan.dto.ProjectConfigDto;
 import net.sourceforge.vulcan.dto.ProjectConfigDto.UpdateStrategy;
+import net.sourceforge.vulcan.exception.ProjectsLockedException;
 import net.sourceforge.vulcan.metadata.SvnRevision;
 
 import org.easymock.EasyMock;
@@ -48,6 +49,52 @@ public class DependencyGroupBuilderTest extends EasyMockTestCase {
 		dg.addTarget(projects[1]);
 		
 		check(dg, DependencyBuildPolicy.AS_NEEDED, true, false, WorkingCopyUpdateStrategy.Default);
+	}
+	public void testThrowsOnLockedProject() throws Exception {
+		projects[0].setLockCount(1);
+		try {
+			check(null, DependencyBuildPolicy.AS_NEEDED, true, false, WorkingCopyUpdateStrategy.Default);
+			fail("Expected exception");
+		} catch (ProjectsLockedException e) {
+			assertEquals(1, e.getLockedProjectNames().size());
+			assertEquals(projects[0].getName(), e.getLockedProjectNames().get(0));
+		}
+	}
+	public void testThrowsOnLockedProjectIncludesAllLocked() throws Exception {
+		projects[0].setLockCount(1);
+		projects[1].setLockCount(1);
+		try {
+			check(null, DependencyBuildPolicy.AS_NEEDED, true, false, WorkingCopyUpdateStrategy.Default);
+			fail("Expected exception");
+		} catch (ProjectsLockedException e) {
+			assertEquals(2, e.getLockedProjectNames().size());
+			assertEquals(projects[0].getName(), e.getLockedProjectNames().get(0));
+			assertEquals(projects[1].getName(), e.getLockedProjectNames().get(1));
+		}
+	}
+	public void testThrowsOnLockedProjectDependency() throws Exception {
+		EasyMock.expect(projectMgr.getProjectConfig("b")).andReturn(projects[1]);
+		
+		projects[0].setDependencies(new String[] {"b"});
+		projects[1].setLockCount(1);
+		try {
+			check(null, DependencyBuildPolicy.FORCE, false, false, WorkingCopyUpdateStrategy.Default);
+			fail("Expected exception");
+		} catch (ProjectsLockedException e) {
+			assertEquals(1, e.getLockedProjectNames().size());
+			assertEquals(projects[1].getName(), e.getLockedProjectNames().get(0));
+		}
+	}
+	public void testSkipsOnLockedProjectDependencyAsNeeded() throws Exception {
+		EasyMock.expect(projectMgr.getProjectConfig("b")).andReturn(projects[1]);
+		
+		projects[0].setDependencies(new String[] {"b"});
+		projects[1].setLockCount(1);
+		
+		final DependencyGroup dg = new DependencyGroupImpl();
+		dg.addTarget(projects[0]);
+		
+		check(dg, DependencyBuildPolicy.AS_NEEDED, false, false, WorkingCopyUpdateStrategy.Default);
 	}
 	public void testOverrideOptions() throws Exception {
 		final DependencyGroup dg = new DependencyGroupImpl();
