@@ -216,6 +216,7 @@
 				name="multipleProjectConfigForm"
 				input="/buildmanagement/manageLocks.jsp"
 				parameter="action"
+				validate="false"
 				scope="request">
 			<forward name="failure" path="/buildmanagement/manageLocks.jsp"/>
 			<forward name="success" path="/buildmanagement/manageLocks.jsp"/>

@@ -150,11 +150,11 @@ public abstract class BaseDispatchAction extends DispatchAction implements Messa
 			final String newName = configForm.getName();
 			final String type = configForm.getTargetType();
 
+			//TODO: move this method onto DispatchForm
 			final String msg = createAuditMessage(request, action, type, oldName, newName);
 			
 			auditLog.info(msg);
 		}
-
 	}
 
 	static String createAuditMessage(HttpServletRequest request, String action, String type,
