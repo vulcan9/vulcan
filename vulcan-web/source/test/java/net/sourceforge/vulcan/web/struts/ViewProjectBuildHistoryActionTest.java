@@ -26,6 +26,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.UUID;
 
+import java.text.SimpleDateFormat;
+
 import net.sourceforge.vulcan.dto.BuildMessageDto;
 import net.sourceforge.vulcan.dto.BuildOutcomeQueryDto;
 import net.sourceforge.vulcan.dto.MetricDto;
@@ -327,8 +329,9 @@ public class ViewProjectBuildHistoryActionTest extends MockApplicationContextStr
 		addRequestParameter("startDate", "06/6/2002");
 		addRequestParameter("endDate", "06/6/2003");
 		
-		final Date start = new Date(1023336000000L);
-		final Date end = new Date(1054872000000L);
+		final SimpleDateFormat format = new SimpleDateFormat("MM/dd/yyyy");
+		final Date start = format.parse("06/6/2002");
+		final Date end = format.parse("06/6/2003");
 		
 		query.setProjectNames(Collections.singleton("Trundle"));
 		query.setMinDate(start);
