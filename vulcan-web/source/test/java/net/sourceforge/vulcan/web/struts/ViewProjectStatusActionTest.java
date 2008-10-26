@@ -557,7 +557,6 @@ public class ViewProjectStatusActionTest extends MockApplicationContextStrutsTes
 		assertPropertyHasError(ActionMessages.GLOBAL_MESSAGE, "errors.transform.not.found");
 	}
 	
-	@SuppressWarnings("unchecked")
 	private void trainForTransform(Map<String, ProjectStatusDto> projectsBeingBuilt, String transormType) throws Exception {
 		expect(manager.getProjectConfig("some project")).andReturn(projectConfig);
 
