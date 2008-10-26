@@ -75,7 +75,6 @@ public class GetCachedBuildHistoryActionTest extends MockApplicationContextStrut
 		assertEquals("application/xml", response.getContentType());
 	}
 	
-	@SuppressWarnings("unchecked")
 	public void testPerformsTransform() throws Exception {
 		request.getSession().setAttribute(Keys.BUILD_HISTORY, doc);
 		request.addParameter("transform", "xyz");
@@ -100,7 +99,6 @@ public class GetCachedBuildHistoryActionTest extends MockApplicationContextStrut
 		assertEquals("text/plain", response.getContentType());
 	}
 	
-	@SuppressWarnings("unchecked")
 	public void testPerformsTransformWithMetricKeys() throws Exception {
 		request.getSession().setAttribute(Keys.BUILD_HISTORY, doc);
 		request.addParameter("transform", "xyz");
