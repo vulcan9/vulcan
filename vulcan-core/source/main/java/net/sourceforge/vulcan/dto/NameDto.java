@@ -28,9 +28,6 @@ public abstract class NameDto extends BaseDto implements Comparable<NameDto>, Na
 		return getName().compareTo(dto.getName());
 	}
 	
-	/* (non-Javadoc)
-	 * @see net.sourceforge.vulcan.dto.NamedObject#getName()
-	 */
 	public String getName() {
 		return name;
 	}
