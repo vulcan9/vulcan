@@ -1,6 +1,6 @@
 /*
  * Vulcan Build Manager
- * Copyright (C) 2005-2006 Chris Eldredge
+ * Copyright (C) 2005-2008 Chris Eldredge
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,30 +20,43 @@ package net.sourceforge.vulcan.event;
 
 import net.sourceforge.vulcan.metadata.SvnRevision;
 
+
 @SvnRevision(id="$Id$", url="$HeadURL$")
-public enum EventType {
-	ALL(Event.class),
-	AUDIT(AuditEvent.class),
-	BUILD(BuildCompletedEvent.class),
-	MESSAGE(MessageEvent.class),
-	ERROR(ErrorEvent.class),
-	WARNING(WarningEvent.class);
+public class AuditEvent extends MessageEvent {
+	final String user;
+	final String host;
+	final String action;
+	final String type;
+	final String name;
+	final String oldName;
 	
+	public AuditEvent(Object source, String messageKey, String user,
+			String host, String action, String type, String name, String oldName) {
+		super(source, messageKey, new String[] {user, host, action, type, name, oldName});
+		this.user = user;
+		this.host = host;
+		this.action = action;
+		this.type = type;
+		this.name = name;
+		this.oldName = oldName;
+	}
 	
-	private final Class<? extends Event> eventClass;
-
-	private EventType(Class<? extends Event> eventClass) {
-		this.eventClass = eventClass;
+	public String getUser() {
+		return user;
 	}
-
-	public Class<? extends Event> getEventClass() {
-		return eventClass;
+	public String getHost() {
+		return host;
 	}
-
-	public boolean matches(Event e) {
-		if (getEventClass().isAssignableFrom(e.getClass())) {
-			return true;
-		}
-		return false;
+	public String getAction() {
+		return action;
+	}
+	public String getType() {
+		return type;
+	}
+	public String getName() {
+		return name;
+	}
+	public String getOldName() {
+		return oldName;
 	}
 }

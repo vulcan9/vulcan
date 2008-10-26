@@ -19,6 +19,7 @@
 package net.sourceforge.vulcan.web.struts;
 
 import net.sourceforge.vulcan.dto.SchedulerConfigDto;
+import net.sourceforge.vulcan.event.Event;
 import net.sourceforge.vulcan.metadata.SvnRevision;
 
 @SvnRevision(id="$Id$", url="$HeadURL$")
@@ -36,6 +37,8 @@ public class ToggleSchedulerActionTest extends MockApplicationContextStrutsTestC
 		addRequestParameter("schedulerName", "scheddy");
 		
 		expect(manager.getSchedulerConfig("scheddy")).andReturn(config);
+		
+		eventHandler.reportEvent((Event) notNull());
 		
 		SchedulerConfigDto copy = (SchedulerConfigDto) config.copy();
 		copy.setPaused(true);

@@ -15,25 +15,26 @@
 
 <body>
 	<c:choose>
-		<c:when test="${empty eventPool['WARNING'] and empty eventPool['ERROR']}">
+		<c:when test="${empty eventPool['WARNING'] and empty eventPool['ERROR'] and empty eventPool['AUDIT']}">
 			<v:bubble styleClass="message"><spring:message code="messages.none"/></v:bubble>
 		</c:when>
 		<c:otherwise>
 			<c:forEach items="${eventPool['ERROR']}" var="msg">
-				<v:bubble styleClass="error">
-				<span class="error">
+				<div class="error">
 					<fmt:formatDate value="${msg.date}" type="both"/>:  <spring:message code="${msg.key}" arguments="${msg.args}" htmlEscape="true"/>
-				</span>
-				</v:bubble>
+				</div>
 			</c:forEach>	
 			<c:forEach items="${eventPool['WARNING']}" var="msg">
-				<v:bubble styleClass="warning">
-				<span class="warning">
+				<div class="warning">
 					<fmt:formatDate value="${msg.date}" type="both"/>:  <spring:message code="${msg.key}" arguments="${msg.args}" htmlEscape="true"/>
-				</span>
-				</v:bubble>
+				</div>
 			</c:forEach>
-			<span><html:link styleClass="confirm" forward="clearMessages"><spring:message code="link.clear.messages"/></html:link></span>
+			<c:forEach items="${eventPool['AUDIT']}" var="msg">
+				<div>
+					<fmt:formatDate value="${msg.date}" type="both"/>:  <spring:message code="${msg.key}" arguments="${msg.args}" htmlEscape="true"/>
+				</div>
+			</c:forEach>	
+			<div><html:link styleClass="confirm" forward="clearMessages"><spring:message code="link.clear.messages"/></html:link></div>
 		</c:otherwise>
 	</c:choose>
 </body>
