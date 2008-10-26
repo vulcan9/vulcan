@@ -18,22 +18,22 @@
  */
 package net.sourceforge.vulcan.web.struts.actions;
 
+import java.util.Locale;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import net.sourceforge.vulcan.StateManager;
 import net.sourceforge.vulcan.dto.SchedulerConfigDto;
+import net.sourceforge.vulcan.event.AuditEvent;
 import net.sourceforge.vulcan.metadata.SvnRevision;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.struts.action.Action;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 
 @SvnRevision(id="$Id$", url="$HeadURL$")
-public final class ToggleSchedulerAction extends Action {
-	private StateManager stateManager;
+public final class ToggleSchedulerAction extends BaseAuditAction {
 	
 	@Override
 	public ActionForward execute(ActionMapping mapping, ActionForm form,
@@ -47,15 +47,16 @@ public final class ToggleSchedulerAction extends Action {
 		
 		final SchedulerConfigDto schedulerConfig = 
 			(SchedulerConfigDto) stateManager.getSchedulerConfig(schedulerName).copy();
+
+		final String action = schedulerConfig.isPaused() ? "unpause" : "pause";
+		final AuditEvent event = BaseDispatchAction.createAuditEvent(this, request, action, "scheduler", null, schedulerName);
+		eventHandler.reportEvent(event);
+		auditLog.info(messageSource.getMessage(event.getKey(), event.getArgs(), Locale.getDefault()));
 		
 		schedulerConfig.setPaused(!schedulerConfig.isPaused());
 		
 		stateManager.updateSchedulerConfig(schedulerName, schedulerConfig, false);
 		
 		return mapping.findForward("dashboard");
-	}
-
-	public void setStateManager(StateManager stateManager) {
-		this.stateManager = stateManager;
 	}
 }

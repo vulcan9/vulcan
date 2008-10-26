@@ -18,14 +18,16 @@
  */
 package net.sourceforge.vulcan.web.struts.actions;
 
+import java.util.Locale;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import net.sourceforge.vulcan.StateManager;
+import net.sourceforge.vulcan.dto.ProjectConfigDto;
+import net.sourceforge.vulcan.event.AuditEvent;
 import net.sourceforge.vulcan.metadata.SvnRevision;
 import net.sourceforge.vulcan.scheduler.BuildDaemon;
 
-import org.apache.struts.action.Action;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
@@ -34,8 +36,7 @@ import org.apache.struts.action.ActionMessages;
 
 
 @SvnRevision(id="$Id$", url="$HeadURL$")
-public final class KillBuildAction extends Action {
-	private StateManager stateManager;
+public final class KillBuildAction extends BaseAuditAction {
 	
 	@Override
 	public ActionForward execute(ActionMapping mapping, ActionForm form,
@@ -53,16 +54,16 @@ public final class KillBuildAction extends Action {
 			return mapping.findForward("failure");
 		}
 
-		daemon.abortCurrentBuild(ManualBuildAction.getRequestUsernameOrHostname(request));
+		final ProjectConfigDto currentProject = daemon.getCurrentTarget();
+		if (currentProject != null) {
+			
+			final AuditEvent event = BaseDispatchAction.createAuditEvent(this, request, "abort", "build", null, currentProject.getName());
+			eventHandler.reportEvent(event);
+			auditLog.info(messageSource.getMessage(event.getKey(), event.getArgs(), Locale.getDefault()));
+			
+			daemon.abortCurrentBuild(ManualBuildAction.getRequestUsernameOrHostname(request));
+		}
 		
 		return mapping.findForward("dashboard");
-	}
-
-	public StateManager getStateManager() {
-		return stateManager;
-	}
-
-	public void setStateManager(StateManager manager) {
-		this.stateManager = manager;
 	}
 }

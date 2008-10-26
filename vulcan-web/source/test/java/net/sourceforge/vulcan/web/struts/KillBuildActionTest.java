@@ -21,6 +21,8 @@ package net.sourceforge.vulcan.web.struts;
 import junit.framework.AssertionFailedError;
 import net.sourceforge.vulcan.SimplePrincipal;
 import net.sourceforge.vulcan.core.ProjectBuilder;
+import net.sourceforge.vulcan.dto.ProjectConfigDto;
+import net.sourceforge.vulcan.event.Event;
 import net.sourceforge.vulcan.metadata.SvnRevision;
 import net.sourceforge.vulcan.scheduler.BuildDaemon;
 import net.sourceforge.vulcan.scheduler.thread.BuildDaemonImpl;
@@ -29,6 +31,7 @@ import net.sourceforge.vulcan.scheduler.thread.BuildDaemonImpl;
 public class KillBuildActionTest extends MockApplicationContextStrutsTestCase {
 	boolean abortCalled = false;
 	String abortUsername;
+	ProjectConfigDto currentTarget;
 	
 	BuildDaemon bd = new BuildDaemonImpl() {
 		@Override
@@ -40,12 +43,20 @@ public class KillBuildActionTest extends MockApplicationContextStrutsTestCase {
 		protected ProjectBuilder createBuilder() {
 			throw new UnsupportedOperationException();
 		}
+		@Override
+		public synchronized ProjectConfigDto getCurrentTarget() {
+			return KillBuildActionTest.this.currentTarget;
+		}
 	};
 	@Override
 	public void setUp() throws Exception {
 		super.setUp();
 		
 		setRequestPathInfo("/buildmanagement/kill.do");
+		
+		currentTarget = new ProjectConfigDto();
+		currentTarget.setName("myProject");
+		
 	}
 	
 	public void testKill() throws Exception {
@@ -88,6 +99,8 @@ public class KillBuildActionTest extends MockApplicationContextStrutsTestCase {
 		
 		expect(manager.getBuildDaemon("a"))
 			.andReturn(bd);
+		
+		eventHandler.reportEvent((Event) notNull());
 		
 		replay();
 		

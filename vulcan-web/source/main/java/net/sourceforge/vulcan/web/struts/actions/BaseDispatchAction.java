@@ -27,6 +27,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import net.sourceforge.vulcan.StateManager;
+import net.sourceforge.vulcan.event.AuditEvent;
+import net.sourceforge.vulcan.event.EventHandler;
 import net.sourceforge.vulcan.exception.DuplicateNameException;
 import net.sourceforge.vulcan.exception.StoreException;
 import net.sourceforge.vulcan.metadata.SvnRevision;
@@ -49,6 +51,7 @@ import org.springframework.context.MessageSourceAware;
 public abstract class BaseDispatchAction extends DispatchAction implements MessageSourceAware {
 	private Log auditLog;
 	private Set<String> actionsToAudit;
+	private EventHandler eventHandler;
 	protected StateManager stateManager;
 	private MessageSource messageSource;
 	
@@ -85,6 +88,10 @@ public abstract class BaseDispatchAction extends DispatchAction implements Messa
 	
 	public void setAuditLog(Log auditLog) {
 		this.auditLog = auditLog;
+	}
+	
+	public void setEventHandler(EventHandler eventHandler) {
+		this.eventHandler = eventHandler;
 	}
 	
 	public void setActionsToAudit(Set<String> actionsToAudit) {
@@ -133,6 +140,7 @@ public abstract class BaseDispatchAction extends DispatchAction implements Messa
 		msgs.add(propertyName, message);
 		request.setAttribute(messagesKey, msgs);
 	}
+	
 	protected final void audit(ActionForm form, HttpServletRequest request) {
 		if (auditLog == null || auditLog.isInfoEnabled() == false) {
 			return;
@@ -151,43 +159,36 @@ public abstract class BaseDispatchAction extends DispatchAction implements Messa
 			final String type = configForm.getTargetType();
 
 			//TODO: move this method onto DispatchForm
-			final String msg = createAuditMessage(request, action, type, oldName, newName);
-			
-			auditLog.info(msg);
+			final AuditEvent event = createAuditEvent(this, request, action, type, oldName, newName);
+			final String message = messageSource.getMessage(event.getKey(), event.getArgs(), Locale.getDefault());
+
+			eventHandler.reportEvent(event);
+			auditLog.info(message);
 		}
 	}
 
-	static String createAuditMessage(HttpServletRequest request, String action, String type,
-			String oldName, String newName) {
+	static AuditEvent createAuditEvent(Object source, HttpServletRequest request, String action,
+			String type, String oldName, String newName) {
 		
-		final StringBuilder msgBuf = new StringBuilder();
-		msgBuf.append("User: ");
-
-		msgBuf.append(getUsername(request));
-		
-		msgBuf.append("; Host: ");
-		msgBuf.append(request.getRemoteHost());
-		msgBuf.append("; Action: ");
-		msgBuf.append(action);
-		msgBuf.append("; Type: ");
-		msgBuf.append(type);
+		final String user = getUsername(request);
+		final String host = request.getRemoteHost();
+		String name = null;
+		String oldName1 = null;
+		String messageKey = "audit.without.name";
 		
 		if (oldName != null || newName != null) {
-			msgBuf.append("; Name: ");
+			name = newName;
+			messageKey = "audit.with.name";
 			
-			if (isBlank(oldName) || oldName.equals(newName)) {
-				msgBuf.append(newName);
-			} else {
-				msgBuf.append(oldName);
-				msgBuf.append(" (renamed to ");
-				msgBuf.append(newName);
-				msgBuf.append(")");
+			if (!isBlank(oldName) && !oldName.equals(newName)) {
+				oldName1 = oldName;
+				messageKey = "audit.with.rename";
 			}
 		}
 		
-		return msgBuf.toString();
+		return new AuditEvent(source, messageKey, user, host, action, type, name, oldName1);
 	}
-
+	
 	protected static String getUsername(HttpServletRequest request) {
 		String user;
 		if (request.getUserPrincipal() != null) {

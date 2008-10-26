@@ -18,6 +18,7 @@
  */
 package net.sourceforge.vulcan.web.struts.actions;
 
+import java.util.Locale;
 import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
@@ -25,6 +26,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import net.sourceforge.vulcan.StateManager;
 import net.sourceforge.vulcan.core.ConfigurationStore;
+import net.sourceforge.vulcan.event.AuditEvent;
 import net.sourceforge.vulcan.event.ErrorEvent;
 import net.sourceforge.vulcan.event.EventHandler;
 import net.sourceforge.vulcan.web.struts.forms.ImportConfigFileForm;
@@ -34,12 +36,15 @@ import org.apache.struts.action.Action;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
+import org.springframework.context.MessageSource;
+import org.springframework.context.MessageSourceAware;
 
-public class ImportConfigAction extends Action {
+public class ImportConfigAction extends Action implements MessageSourceAware {
 	private Log auditLog;
 	private EventHandler eventHandler;
 	private StateManager stateManager;
 	private ConfigurationStore configurationStore;
+	private MessageSource messageSource;
 	
 	@Override
 	public ActionForward execute(ActionMapping mapping, ActionForm form, HttpServletRequest request, HttpServletResponse response) throws Exception {
@@ -50,7 +55,10 @@ public class ImportConfigAction extends Action {
 		configurationStore.importConfiguration(fileForm.getConfigFile().getInputStream());
 		
 		if (auditLog.isInfoEnabled()) {
-			auditLog.info(BaseDispatchAction.createAuditMessage(request, "import", "vulcan-configuration", null, null));
+			final AuditEvent event = BaseDispatchAction.createAuditEvent(this, request, "import", "vulcan-configuration", null, null);
+			eventHandler.reportEvent(event);
+			
+			auditLog.info(messageSource.getMessage(event.getKey(), event.getArgs(), Locale.getDefault()));
 		}
 		
 		try {
@@ -65,8 +73,10 @@ public class ImportConfigAction extends Action {
 	public void setAuditLog(Log auditLog) {
 		this.auditLog = auditLog;
 	}
+	
 	public void setActionsToAudit(Set<String> actionsToAudit) {
 	}
+	
 	public void setEventHandler(EventHandler eventHandler) {
 		this.eventHandler = eventHandler;
 	}
@@ -77,5 +87,9 @@ public class ImportConfigAction extends Action {
 	
 	public void setConfigurationStore(ConfigurationStore store) {
 		this.configurationStore = store;
+	}
+	
+	public void setMessageSource(MessageSource messageSource) {
+		this.messageSource = messageSource;
 	}
 }
