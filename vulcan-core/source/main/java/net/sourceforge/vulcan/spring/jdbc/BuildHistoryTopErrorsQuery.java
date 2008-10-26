@@ -37,7 +37,6 @@ class BuildHistoryTopErrorsQuery extends MappingSqlQuery implements BuilderQuery
 	private final int maxResultCount;
 	private Object[] parameterValues;
 	
-	@SuppressWarnings("unchecked")
 	public BuildHistoryTopErrorsQuery(DataSource dataSource, BuildOutcomeQueryDto query, int maxResultCount) {
 		this.maxResultCount = maxResultCount;
 		setDataSource(dataSource);

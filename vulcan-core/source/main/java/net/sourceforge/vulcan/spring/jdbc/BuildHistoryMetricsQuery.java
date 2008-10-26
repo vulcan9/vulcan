@@ -40,7 +40,6 @@ class BuildHistoryMetricsQuery extends MappingSqlQuery implements BuilderQuery {
 	private static Log LOG = LogFactory.getLog(BuildHistoryMetricsQuery.class);
 	private Object[] parameterValues;
 	
-	@SuppressWarnings("unchecked")
 	public BuildHistoryMetricsQuery(DataSource dataSource, BuildOutcomeQueryDto query) {
 		setDataSource(dataSource);
 		HistoryQueryBuilder.buildQuery(HistoryQueryBuilder.BUILD_HISTORY_METRICS_SQL, query, this);
