@@ -62,7 +62,7 @@
 	
 	<bean name="eventPool" class="net.sourceforge.vulcan.spring.SpringEventPool">
 		<property name="maxSize">
-			<value>20</value>
+			<value>200</value>
 		</property>
 	</bean>
 	
