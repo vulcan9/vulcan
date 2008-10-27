@@ -60,13 +60,10 @@
 		<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-US">
 			<head>
 				<title><xsl:value-of select="$title"/></title>
-				<xsl:if test="/project/status='BUILDING'">
-					<meta http-equiv="Refresh">
-						<xsl:attribute name="content">
-							<xsl:value-of select="$reloadInterval"/>
-						</xsl:attribute>
-					</meta>
+				<!--
+				<xsl:if test="/project/status='BUILDING' and $reloadInterval &gt; 0">
 				</xsl:if>
+				-->
 			</head>
 			<body>
 				<form class="hidden" action="#" method="get">

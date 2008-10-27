@@ -1,7 +1,14 @@
-div.header {
+#brand, #primary-nav, #utility-nav {
 	display: none !important;
 }
-
+#site-info {
+	font-size: 75%;
+	color: darkgray;
+}
+#site-info a {
+	text-decoration: none;
+	color: inherit;
+}
 div.content {
 	margin: 0 !important;
 	position: relative !important;

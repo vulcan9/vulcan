@@ -7,21 +7,5 @@
 
 	<jsp:directive.attribute name="styleClass" required="false" type="java.lang.String" rtexprvalue="false"/>
 	
-	<table class="wrapper ${styleClass}">
-		<tbody>
-			<tr class="wrapper">
-				<td class="wrapper">    
-				    <div class="bubble ${styleClass}">
-						<div class="upper-left">&amp;nbsp;</div>
-						<div class="upper-right">&amp;nbsp;</div>
-				
-						<jsp:doBody/>
-						
-						<div class="lower-left">&amp;nbsp;</div>
-						<div class="lower-right">&amp;nbsp;</div>
-					</div>
-				</td>
-			</tr>
-		</tbody>
-	</table>
+	<jsp:doBody/>
 </jsp:root>

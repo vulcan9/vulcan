@@ -1,6 +1,6 @@
 /*
  * Vulcan Build Manager
- * Copyright (C) 2005-2006 Chris Eldredge
+ * Copyright (C) 2005-2008 Chris Eldredge
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,78 +21,34 @@
   * in order to allow the codebase to stay readable.
   */
 
-/* MSIE does not support the CSS :before { content: "..." } technique. */
+/* MSIE <= 7 does not support the CSS :before { content: "..." } technique. */
 function addContentBefore() {
-	for (var i=0; i<document.styleSheets.length; i++) {
-		for (var j=0; j<document.styleSheets[i].rules.length; j++) {
-			var rule = document.styleSheets[i].rules[j];
-			
-			/* MSIE 6/7 converts :before to :unknown. */
-			var index = rule.selectorText.indexOf(":unknown");
-			
-			if (index >= 0) {
-				var selector = rule.selectorText.substring(0, index);
-
-				if (!rule.style.content) {
-					continue;
-				}
-
-				/* Obtain content property, and remove quotes. */
-				var content = rule.style.content.substring(
-					1, rule.style.content.length - 1);
-					
-				var tags = $(selector).prepend(content);
-			}
-		}
-	}
-}
-
-/* MSIE does not support the last-child pseudo selector */
-function addStyleClassToLastChildren() {
-	var theads = document.getElementsByTagName("thead");
-
-	for (var i=0; i<theads.length; i++) {
-		var headers = theads[i].getElementsByTagName("th");
-
-		if (headers && headers.length) {
-			var last = headers[headers.length-1];
-
-			var cls = last.className;
-
-			if (cls) {
-				cls += " ";
-			} else {
-				cls = "";
-			}
-			cls += " last-child";
-
-			last.className = cls;
-		}
-	}
+	$("#utility-nav li").not(".username").prepend("|");
 }
 
 /* MSIE sends the inner text of a button instead of the value attribute.
  * This breaks server-side actions on buttons that have been i18nized.
  */
 function submitFormHandler(e) {
-	var o = getTarget(e);
-	if (o && o.getAttribute("actual-value")) {
-		var value = o.getAttribute("actual-value");
-		
-		var submit = document.getElementById("ieSubmit");
-		submit.value = value;
-		submit.click();
+	var value = $(this).attr("actual-value");
+	
+	if (value) {
+		$("#ieSubmit").attr("value", value);
+		$("#ieSubmit").click();
 	}
 	
 	return preventDefaultHandler(e);
 }
 
 function fixLayoutForIE() {
-	addContentBefore();
-	addStyleClassToLastChildren();
-	registerHandlerByTagNameAndClass("button", "ie-submit-button", "click", submitFormHandler);
+	if (navigator && navigator.appName == "Microsoft Internet Explorer") {
+		if (/MSIE [4567]/.exec(navigator.appVersion)) {
+			addContentBefore();
+		}
+	}
+	
+	$("button.ie-submit-button").click(submitFormHandler);
 }
 
-if (navigator && navigator.appName == "Microsoft Internet Explorer") {
-	customAddEventListener(window, 'load', fixLayoutForIE);
-}
+$(document).ready(fixLayoutForIE);
+

@@ -14,15 +14,11 @@
 
 <body>
 
-<div class="vulcan-logo">
-	<html:img page="/images/vulcan-logo.png" alt="Vulcan Logo"/>
-</div>
-
 <v:bubble>
 <table>
 	<caption>About Vulcan</caption>
 	<tbody>
-		<tr><td><pre>Vulcan, Copyright (C) 2005-2007 Chris Eldredge
+		<tr><td><pre>Vulcan, Copyright (C) 2005-2008 Chris Eldredge
 Vulcan comes with ABSOLUTELY NO WARRANTY.
 This is free software, and you are welcome
 to redistribute it under certain conditions;

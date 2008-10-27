@@ -51,6 +51,7 @@ function getTarget(event) {
 	
 	return this;
 }
+
 function findAncestorByTagName(node, tagName) {
 	if (node.tagName.toLowerCase() == tagName) {
 		return node;
@@ -249,16 +250,34 @@ function preventShiftClickTextSelectionHandler(event) {
 	return true;
 }
 
+
+function setPreference(event) {
+	event.preventDefault();
+	
+	if (event.canceled) return false;
+	
+	var url = $(this).attr("href");
+	$("#content").loadCustom(url, null, "#content");
+	
+	return false;
+}
+
 function confirmHandler(event) {
 	if (!confirm(window.confirmMessage)) {
+		event.canceled = true;
 		return preventDefaultHandler(event);
 	}
+	return true;
 }
 
 function preventDefaultHandler(event) {
 	if (event && event.preventDefault) {
 		event.preventDefault();
 	}
+	if (event && event.stopPropagation) {
+		event.stopPropagation();
+	}
+	
 	return false;
 }
 
@@ -307,7 +326,7 @@ function launchHelpHandler(event) {
 }
 
 function setDirtyHandler() {
-	console.debug("form data has been changed");
+	if (console && console.debug) console.debug("form data has been changed");
 	window.hasPendingChanges = true;
 }
 
@@ -316,15 +335,58 @@ function setDirtyHandler() {
  * since the user is submitting the pending changes.
  */
 function clearPendingChangesFlagHandler(event) {
-	console.debug("clearPendingChange");
+	if (console && console.debug) console.debug("clearPendingChange");
 	window.hasPendingChanges = false;
 }
 
 function warnPendingChangesHandler(event) {
-	console.debug("warnPendingChanges");
+	if (console && console.debug) console.debug("warnPendingChanges");
 	if (window.hasPendingChanges) {
 		event.returnValue = window.confirmUnsavedChangesMessage;
 	}
+}
+
+jQuery.fn.loadCustom = function (url, params, selector) {
+	var target = this;
+	
+	$("#loading-message").show();
+	
+	jQuery.get(url, params, function(data, textStatus) {
+		var contents;
+
+		if (data && data.getElementById) {
+			contents = $(document.importNode(data.getElementsByTagName("body")[0], true)).find(selector);
+		} else {
+			contents = jQuery("<div/>").append(data.replace(/<script(.|\s)*?\/script>/g, "")).find(selector);
+		}
+
+		// show the loading message in the new contents
+		contents.find("#loading-message").show();
+
+		target.replaceWith(contents);
+
+		registerAjaxHandlers();
+		
+		// so we can fade it out after replacing.
+		$("#loading-message").fadeOut("slow");
+	});
+}
+
+function toggleProjectLabel(event) {
+	event.preventDefault();
+	$(this).toggleClass("project-label-active");
+}
+
+function refreshDashboard(e, interval, url) {
+	if (console && console.debug) console.debug("refresh " + new Date());
+	
+	if (!interval) {
+		$("#content").loadCustom(window.refreshUrl, null, "#content");
+	} else {
+		window.refreshInterval = interval;
+		window.refreshUrl = url;
+	}
+	window.setTimeout(refreshDashboard, window.refreshInterval);
 }
 
 function registerHandler(type, value, handler) {
@@ -358,6 +420,13 @@ function registerHandlerByTagNameAndClass(tagName, styleClass, eventType, handle
 	}
 }
 
+function registerAjaxHandlers() {
+	$("a.confirm").click(confirmHandler);
+	//$("a.project-label").click(toggleProjectLabel).click(setPreference);
+	$(".dashboard a.confirm").click(setPreference);
+	$(".dashboard thead a").click(setPreference);
+}
+
 function registerHandlers() {
 	registerHandler('submit', 'Delete', confirmHandler);
 	registerHandler('button', 'Add', addRow);
@@ -375,7 +444,6 @@ function registerHandlers() {
 		window.hasPendingChanges = (pendingChanges.value == "true");
 	}
 	
-	registerHandlerByTagNameAndClass('a', 'confirm', 'click', confirmHandler);
 	registerHandlerByTagNameAndClass('label', '.*', 'mousedown', preventShiftClickTextSelectionHandler);
 	
 	var windowLaunchMode = getMetaContent("popupMode");
@@ -497,7 +565,7 @@ function updateBreadcrumbs() {
 	try {
 		location = iframe.contentWindow.location.href;
 	} catch (e) {
-		if (console) console.warn("unable to retrieve location.href from iframe");
+		if (console && console.warn) console.warn("unable to retrieve location.href from iframe");
 		// if iframe navigated to another domain, ignore error
 		location = "";
 	}
@@ -556,6 +624,6 @@ function customAddEventListener(target, eventType, callback) {
 }
 
 $(document).ready(registerHandlers);
+$(document).ready(registerAjaxHandlers);
 $(document).ready(getConfirmMessages);
 customAddEventListener(window, "beforeunload", warnPendingChangesHandler);
-

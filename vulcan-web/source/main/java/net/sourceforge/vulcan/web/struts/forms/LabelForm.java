@@ -1,6 +1,6 @@
 /*
  * Vulcan Build Manager
- * Copyright (C) 2005-2007 Chris Eldredge
+ * Copyright (C) 2005-2008 Chris Eldredge
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,6 +26,7 @@ public class LabelForm extends MultipleProjectConfigForm implements DispatchForm
 	private String originalName;
 	private String action;
 
+	@Override
 	public String getName() {
 		return name;
 	}
@@ -34,6 +35,7 @@ public class LabelForm extends MultipleProjectConfigForm implements DispatchForm
 		this.name = name;
 	}
 
+	@Override
 	public String getOriginalName() {
 		return originalName;
 	}
@@ -42,14 +44,17 @@ public class LabelForm extends MultipleProjectConfigForm implements DispatchForm
 		this.originalName = oldName;
 	}
 
+	@Override
 	public String getAction() {
 		return action;
 	}
 
+	@Override
 	public void setAction(String action) {
 		this.action = action;
 	}
 	
+	@Override
 	public String getTargetType() {
 		return "project label";
 	}

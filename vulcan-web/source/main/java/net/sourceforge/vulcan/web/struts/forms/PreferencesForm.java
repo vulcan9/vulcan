@@ -1,6 +1,6 @@
 /*
  * Vulcan Build Manager
- * Copyright (C) 2005-2007 Chris Eldredge
+ * Copyright (C) 2005-2008 Chris Eldredge
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -36,6 +36,7 @@ import org.apache.struts.action.ActionMapping;
 @SvnRevision(id="$Id$", url="$HeadURL$")
 public class PreferencesForm extends ActionForm {
 	private PreferencesDto config;
+	private String toggleLabel;
 	private List<String> availableStylesheets;
 	
 	public PreferencesDto getConfig() {
@@ -62,11 +63,20 @@ public class PreferencesForm extends ActionForm {
 			config = new PreferencesDto();
 		}
 		
+		toggleLabel = null;
 		availableStylesheets = findAvailableStylesheets();
 	}
 
 	public List<String> getAvailableStylesheets() {
 		return availableStylesheets;
+	}
+	
+	public String getToggleLabel() {
+		return toggleLabel;
+	}
+	
+	public void setToggleLabel(String toggleLabel) {
+		this.toggleLabel = toggleLabel;
 	}
 	
 	@SuppressWarnings("unchecked")

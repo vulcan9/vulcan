@@ -6,11 +6,11 @@
 		<pattern>/rss.jsp</pattern>
 	</excludes>
 	
-    <decorator name="setup" page="setup.jsp">
-        <pattern>/admin/setup/*</pattern>
-    </decorator>
-    
-    <decorator name="main" page="main.jsp">
-        <pattern>/*</pattern>
-    </decorator>
+	<decorator name="main" page="main.jsp">
+		<pattern>/*</pattern>
+	</decorator>
+	
+	<decorator name="setup" page="setup.jsp">
+		<pattern>/admin/setup/*</pattern>
+	</decorator>
 </decorators>

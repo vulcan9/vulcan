@@ -33,7 +33,7 @@
 	</xsl:variable>
 		
 	<xsl:template match="/">
-		<table id="projectTable">
+		<table class="dashboard">
 			<caption><xsl:value-of select="$caption" disable-output-escaping="yes"/></caption>
 			<thead>
 				<tr>
