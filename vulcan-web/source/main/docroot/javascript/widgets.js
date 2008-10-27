@@ -422,8 +422,7 @@ function registerHandlerByTagNameAndClass(tagName, styleClass, eventType, handle
 
 function registerAjaxHandlers() {
 	$("a.confirm").click(confirmHandler);
-	//$("a.project-label").click(toggleProjectLabel).click(setPreference);
-	$(".dashboard a.confirm").click(setPreference);
+	$(".dashboard a.async").click(setPreference);
 	$(".dashboard thead a").click(setPreference);
 }
 
@@ -464,8 +463,8 @@ function registerHandlers() {
 	}
 	
 	$("table.sortable").tablesorter({
-		cssAsc: "sorted-ascending",
-		cssDesc: "sorted-descending",
+		cssAsc: "sorted-descending", // tablesort plugin seems to have these backwards...
+		cssDesc: "sorted-ascending",
 		cssHeader: "",
 		textExtraction: function(node) {
 			var text = $(node).text();

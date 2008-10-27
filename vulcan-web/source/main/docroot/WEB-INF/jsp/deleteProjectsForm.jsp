@@ -18,7 +18,7 @@
 
 <v:bubble styleClass="">
 <html:form action="/admin/setup/deleteProjects" method="post">
-<table class="projectConfig">
+<table>
 	<caption><spring:message code="captions.delete.projects"/></caption>
 	<tbody>
 		<tr>

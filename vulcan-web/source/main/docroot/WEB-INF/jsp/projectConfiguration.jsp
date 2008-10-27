@@ -24,7 +24,7 @@
 
 <v:bubble>
 <html:form action="/admin/setup/manageProjectConfig" method="post">
-<table class="projectConfig">
+<table>
 	<caption><spring:message code="captions.project.config"/></caption>
 	<tbody>
 	<tr>

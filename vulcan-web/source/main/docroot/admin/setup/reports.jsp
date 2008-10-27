@@ -20,65 +20,69 @@
 	<c:url var="action" value="/admin/setup/saveArtifactLocations.do"/>
 	
 	<form action="${action}" method="post">
-		<v:bubble>
+		<div class="build-reports" id="mousecoords">
 			<span class="caption">Reports</span>
-			<ul id="reports-list">
-				<li class="hidden" id="prototype">
-					<span class="buttons">
-						<button type="button" class="edit" title="Edit">Edit</button>
-						<button type="button" class="remove" title="Remove">Remove</button>
-						<input type="hidden" name="prototype_name" class="name" value=""/>
-						<input type="hidden" name="prototype_desc" class="desc" value=""/>
-						<input type="hidden" name="prototype_path" class="path" value=""/>
-					</span>
-					<span class="name">${item.name}</span>
-					<span class="desc">${item.description}</span>
-				</li>
-				<c:forEach items="${stateManager.config.artifactLocations}" var="item">
-					<li>
-						<span class="buttons">
+			<table id="reports-list">
+				<tbody>
+					<tr class="hidden" id="prototype">
+						<td class="name">${item.name}</td>
+						<td class="desc">${item.description}</td>
+						<td class="buttons">
 							<button type="button" class="edit" title="Edit">Edit</button>
 							<button type="button" class="remove" title="Remove">Remove</button>
-							<input type="hidden" name="name" class="name" value="${item.name}"/>
-							<input type="hidden" name="desc" class="desc" value="${item.description}"/>
-							<input type="hidden" name="path" class="path" value="${item.path}"/>
-						</span>
-						<span class="name">${item.name}</span>
-						<span class="desc">${item.description}</span>
-					</li>
-				</c:forEach>
-			</ul>
-			<div>
-				<button type="button" class="add">Add</button>
-				<button type="submit">Save</button>
-			</div>
-		</v:bubble>
+							<input type="hidden" name="prototype_name" class="name" value=""/>
+							<input type="hidden" name="prototype_desc" class="desc" value=""/>
+							<input type="hidden" name="prototype_path" class="path" value=""/>
+						</td>
+					</tr>
+					<c:forEach items="${stateManager.config.artifactLocations}" var="item">
+						<tr>
+							<td class="name">${item.name}</td>
+							<td class="desc">${item.description}</td>
+							<td class="buttons">
+								<button type="button" class="edit" title="Edit">Edit</button>
+								<button type="button" class="remove" title="Remove">Remove</button>
+								<input type="hidden" name="name" class="name" value="${item.name}"/>
+								<input type="hidden" name="desc" class="desc" value="${item.description}"/>
+								<input type="hidden" name="path" class="path" value="${item.path}"/>
+							</td>
+						</tr>
+					</c:forEach>
+					<tr class="new" id="insertion-point">
+						<td colspan="2"><c:out value=""/></td>
+						<td class="buttons">
+							<button type="button" class="add">New</button>
+						</td>
+					</tr>
+					<tr class="new">
+						<td colspan="3"><button type="submit">Save</button></td>
+					</tr>
+				</tbody>
+			</table>
 		
-		<div id="buildReportEditFields" class="hidden">
-		<v:bubble>
-		<table>
-			<tbody>
-				<tr>
-					<th>Name</th>
-					<td><input type="text" id="artifact_name"/></td>
-				</tr>
-				<tr>
-					<th>Description</th>
-					<td><input type="text" id="artifact_desc"/></td>
-				</tr>
-				<tr>
-					<th>Path</th>
-					<td><input type="text" id="artifact_path"/></td>
-				</tr>
-				<tr>
-					<td colspan="2">
-						<button type="button" id="artifact_save">Ok</button>
-						<button type="button" id="artifact_cancel">Cancel</button>
-					</td>
-				</tr>
-			</tbody>
-		</table>
-		</v:bubble>
+			<table id="buildReportEditFields" class="hidden">
+				<caption>Edit Report</caption>
+				<tbody>
+					<tr>
+						<th>Name</th>
+						<td><input type="text" id="artifact_name"/></td>
+					</tr>
+					<tr>
+						<th>Description</th>
+						<td><input type="text" id="artifact_desc"/></td>
+					</tr>
+					<tr>
+						<th>Path</th>
+						<td><input type="text" id="artifact_path"/></td>
+					</tr>
+					<tr>
+						<td colspan="2">
+							<button type="button" id="artifact_save">Ok</button>
+							<button type="button" id="artifact_cancel">Cancel</button>
+						</td>
+					</tr>
+				</tbody>
+			</table>
 		</div>
 	</form>
 	
@@ -87,11 +91,13 @@
 			var name = "";
 			var desc = "";
 			var path = "";
+			var caption = "Edit Build Report";
 			
 			if ($(this).hasClass("add")) {
 				window.artifactRow = null;
+				caption = "Add New Build Report";
 			} else {
-				var row = $($(this).parents("li").get(0));
+				var row = $($(this).parents("tr").get(0));
 				name = row.find("input.name").val();
 				desc = row.find("input.desc").val();
 				path = row.find("input.path").val();
@@ -103,10 +109,11 @@
 			$("#artifact_desc").val(desc);
 			$("#artifact_path").val(path);
 			
+			$("#buildReportEditFields caption").text(caption);
 			$("#buildReportEditFields").fadeIn();
 		}
 		
-		function dismissLightbox(e) {
+		function dismissFields(e) {
 			$("#buildReportEditFields").fadeOut();
 		}
 		
@@ -118,21 +125,21 @@
 				row.find("input.name").attr("name", "name");
 				row.find("input.desc").attr("name", "desc");
 				row.find("input.path").attr("name", "path");
-				$("#reports-list").append(row);
+				$("#insertion-point").before(row);
 			}
 			
-			row.find("span.name").text($("#artifact_name").val());
-			row.find("span.desc").text($("#artifact_desc").val());
+			row.find("td.name").text($("#artifact_name").val());
+			row.find("td.desc").text($("#artifact_desc").val());
 			
 			row.find("input.name").val($("#artifact_name").val());
 			row.find("input.desc").val($("#artifact_desc").val());
 			row.find("input.path").val($("#artifact_path").val());
 			
-			return dismissLightbox(e);
+			return dismissFields(e);
 		}
 		
 		function removeArtifact(e) {
-			$($(this).parents("li").get(0)).remove();
+			$($(this).parents("tr").get(0)).remove();
 		}
 		
 		$(document).ready(function() {
@@ -140,11 +147,16 @@
 			$("button.edit").click(editArtifact);
 			$("button.remove").click(removeArtifact);
 			
-			$("#artifact_cancel").click(dismissLightbox);
+			$("#artifact_cancel").click(dismissFields);
 			$("#artifact_save").click(saveArtifact);
 			
 			$("#reports-list").sortable({
-				revert: true
+				cursor: "move",
+				items: "tr:not(.new)",
+				revert: true,
+				start: function(e, ui) {
+					ui.helper.addClass("dragging");
+				}
 			});
 		});
 	</script>

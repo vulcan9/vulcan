@@ -68,151 +68,147 @@
 	</c:otherwise>
 </c:choose>
 
-<c:if test="${preferences.showBuildDaemons}">
-<v:bubble>
-<table class="dashboard">
-	<caption><spring:message code="captions.build.daemons"/></caption>
-	<thead>
-		<tr>
-			<th><spring:message code="th.build.daemon.name"/></th>
-			<th><spring:message code="th.build.daemon.project"/></th>
-			<th><spring:message code="th.build.daemon.status"/></th>
-			<th><spring:message code="th.build.daemon.detail"/></th>
-			<th><spring:message code="th.control"/></th>
-		</tr>
-	</thead>
-	<tbody>
-	<c:forEach items="${stateManager.buildDaemons}" var="daemon">
-		<c:set var="isBuilding" value="${daemon.building}"/>
-		<tr>
-			<td>${daemon.name}</td>
-			<td>
-				<c:if test="${isBuilding}">
-					${daemon.currentTarget.name}
-				</c:if>
-			</td>
-			<td>
-				<c:choose>
-					<c:when test="${isBuilding}">
-						<c:set var="key" value="${daemon.phaseMessageKey}"/>
-						<c:if test="${key == null}">
-							<c:set var="key" value="build.phase.build"/>
-						</c:if>
-						<spring:message code="${key}"/>
-					</c:when>
-					<c:otherwise>
-						<spring:message code="build.daemon.idle"/>
-					</c:otherwise>										
-				</c:choose>
-			</td>
-			<td>
-				<c:if test="${daemon.detail ne null}">
-					<spring:message code="${daemon.detail}" arguments="${daemon.detailArgs}"/>
-				</c:if>
-			</td>
-			<td>
-				<c:if test="${isBuilding}">
-					<html:link forward="killBuild" paramId="daemonName"
-							paramName="daemon" paramProperty="name"
-							styleClass="confirm">
-						<spring:message code="link.build.abort"/>
-					</html:link>
-				</c:if>				
-			</td>
-		</tr>
-	</c:forEach>
-	</tbody>
-</table>
-</v:bubble>
-</c:if>
-
-<c:if test="${preferences.showBuildQueue}">
-<v:bubble>
-<table class="dashboard">
-	<caption><spring:message code="captions.build.queue"/></caption>
-	<thead>
-		<tr>
-			<th><spring:message code="th.project.name"/></th>
-			<th><spring:message code="th.project.status"/></th>
-		</tr>
-	</thead>
-	<tbody>
-		<c:set var="pendingTargets" value="${stateManager.buildManager.pendingTargets}"/>
-		<c:choose>
-			<c:when test="${empty pendingTargets}">
-				<tr>
-					<td colspan="2"><spring:message code="label.empty"/></td>
-				</tr>
-			</c:when>
-			<c:when test="${not empty pendingTargets}">
-				<c:set var="hasPending" value="false"/>
-				<c:forEach items="${pendingTargets}" var="status">
-					<tr>
-						<td>${status.name}</td>
-						<td>
-							<c:if test="${status.inQueue}">
-								<spring:message code="build.queue.project.waiting"/>
-								<c:set var="hasPending" value="true"/>
-							</c:if>
-							<c:if test="${status.building}">
-								<spring:message code="build.queue.project.building"/>
-							</c:if>
-						</td>
-					</tr>
-				</c:forEach>
-				<c:if test="${hasPending}">
-					<tr>
-						<td colspan="2">
-							<html:link forward="flushQueue" styleClass="confirm"><spring:message code="link.flush.queue"/></html:link>					
-						</td>
-					</tr>
-				</c:if>
-			</c:when>
-		</c:choose>
-	</tbody>
-</table>
-</v:bubble>
-</c:if>
-
-<c:if test="${preferences.showSchedulers}">
-<v:bubble>
-<table class="dashboard">
-	<caption><spring:message code="captions.schedulers"/></caption>
-	<thead>
-		<tr>
-			<th><spring:message code="th.scheduler.name"/></th>
-			<th><spring:message code="th.scheduler.timestamp"/></th>
-			<th><spring:message code="th.control"/></th>
-		</tr>
-	</thead>
-	<tbody>
-	<spring:message code="scheduler.timestamp.pattern" var="schedPattern"/>
-	<c:forEach items="${stateManager.schedulers}" var="sched">
-		<fmt:formatDate value="${sched.nextExecutionDate}" var="date" pattern="${schedPattern}"/>
-		<tr>
-			<td>${sched.name}</td>
-			<td>
-				<c:out value="${date}" default="(paused)"/>
-			</td>
-			<td>
-				<html:link forward="toggleScheduler" paramId="schedulerName"
-							paramName="sched" paramProperty="name">
+<div id="current-activity">
+	<c:if test="${preferences.showBuildDaemons}">
+	<table class="dashboard">
+		<caption><spring:message code="captions.build.daemons"/></caption>
+		<thead>
+			<tr>
+				<th><spring:message code="th.build.daemon.name"/></th>
+				<th><spring:message code="th.build.daemon.project"/></th>
+				<th><spring:message code="th.build.daemon.status"/></th>
+				<th><spring:message code="th.build.daemon.detail"/></th>
+				<th><spring:message code="th.control"/></th>
+			</tr>
+		</thead>
+		<tbody>
+		<c:forEach items="${stateManager.buildDaemons}" var="daemon">
+			<c:set var="isBuilding" value="${daemon.building}"/>
+			<tr>
+				<td>${daemon.name}</td>
+				<td>
+					<c:if test="${isBuilding}">
+						${daemon.currentTarget.name}
+					</c:if>
+				</td>
+				<td>
 					<c:choose>
-						<c:when test="${date ne null}">
-							<spring:message code="label.pause.scheduler"/>
+						<c:when test="${isBuilding}">
+							<c:set var="key" value="${daemon.phaseMessageKey}"/>
+							<c:if test="${key == null}">
+								<c:set var="key" value="build.phase.build"/>
+							</c:if>
+							<spring:message code="${key}"/>
 						</c:when>
 						<c:otherwise>
-							<spring:message code="label.unpause.scheduler"/>
-						</c:otherwise>
+							<spring:message code="build.daemon.idle"/>
+						</c:otherwise>										
 					</c:choose>
-				</html:link>
-			</td>
-		</tr>
-	</c:forEach>
-	</tbody>
-</table>
-</v:bubble>
-</c:if>
+				</td>
+				<td>
+					<c:if test="${daemon.detail ne null}">
+						<spring:message code="${daemon.detail}" arguments="${daemon.detailArgs}"/>
+					</c:if>
+				</td>
+				<td>
+					<c:if test="${isBuilding}">
+						<html:link forward="killBuild" paramId="daemonName"
+								paramName="daemon" paramProperty="name"
+								styleClass="confirm async">
+							<spring:message code="link.build.abort"/>
+						</html:link>
+					</c:if>				
+				</td>
+			</tr>
+		</c:forEach>
+		</tbody>
+	</table>
+	</c:if>
+	
+	<c:if test="${preferences.showBuildQueue}">
+	<table class="dashboard">
+		<caption><spring:message code="captions.build.queue"/></caption>
+		<thead>
+			<tr>
+				<th><spring:message code="th.project.name"/></th>
+				<th><spring:message code="th.project.status"/></th>
+			</tr>
+		</thead>
+		<tbody>
+			<c:set var="pendingTargets" value="${stateManager.buildManager.pendingTargets}"/>
+			<c:choose>
+				<c:when test="${empty pendingTargets}">
+					<tr>
+						<td colspan="2"><spring:message code="label.empty"/></td>
+					</tr>
+				</c:when>
+				<c:when test="${not empty pendingTargets}">
+					<c:set var="hasPending" value="false"/>
+					<c:forEach items="${pendingTargets}" var="status">
+						<tr>
+							<td>${status.name}</td>
+							<td>
+								<c:if test="${status.inQueue}">
+									<spring:message code="build.queue.project.waiting"/>
+									<c:set var="hasPending" value="true"/>
+								</c:if>
+								<c:if test="${status.building}">
+									<spring:message code="build.queue.project.building"/>
+								</c:if>
+							</td>
+						</tr>
+					</c:forEach>
+					<c:if test="${hasPending}">
+						<tr>
+							<td colspan="2">
+								<html:link forward="flushQueue" styleClass="confirm async"><spring:message code="link.flush.queue"/></html:link>					
+							</td>
+						</tr>
+					</c:if>
+				</c:when>
+			</c:choose>
+		</tbody>
+	</table>
+	</c:if>
+	
+	<c:if test="${preferences.showSchedulers}">
+	<table class="dashboard">
+		<caption><spring:message code="captions.schedulers"/></caption>
+		<thead>
+			<tr>
+				<th><spring:message code="th.scheduler.name"/></th>
+				<th><spring:message code="th.scheduler.timestamp"/></th>
+				<th><spring:message code="th.control"/></th>
+			</tr>
+		</thead>
+		<tbody>
+		<spring:message code="scheduler.timestamp.pattern" var="schedPattern"/>
+		<c:forEach items="${stateManager.schedulers}" var="sched">
+			<fmt:formatDate value="${sched.nextExecutionDate}" var="date" pattern="${schedPattern}"/>
+			<tr>
+				<td>${sched.name}</td>
+				<td>
+					<c:out value="${date}" default="(paused)"/>
+				</td>
+				<td>
+					<html:link forward="toggleScheduler" paramId="schedulerName"
+								paramName="sched" paramProperty="name" styleClass="async">
+						<c:choose>
+							<c:when test="${date ne null}">
+								<spring:message code="label.pause.scheduler"/>
+							</c:when>
+							<c:otherwise>
+								<spring:message code="label.unpause.scheduler"/>
+							</c:otherwise>
+						</c:choose>
+					</html:link>
+				</td>
+			</tr>
+		</c:forEach>
+		</tbody>
+	</table>
+	</c:if>
+</div>
 </c:otherwise>
 </c:choose>
 </body>

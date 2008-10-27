@@ -17,7 +17,7 @@
 
 <v:bubble>
 <html:form action="/admin/setup/manageLabels" method="post">
-<table class="projectConfig">
+<table>
 	<caption><spring:message code="captions.project.label"/></caption>
 	<tbody>
 		<tr>

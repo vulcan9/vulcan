@@ -91,14 +91,17 @@
 	<jsp:include page="/WEB-INF/jsp/sitemesh/topnav.jsp" flush="true"/>
 
 	<div id="content" class="container">
-		<c:if test="${showSetupMenu}">
-			<jsp:include page="/WEB-INF/jsp/sitemesh/setupMenu.jsp" flush="true"/>
-		</c:if>
-		
-		<decorator:body/>
-		
-		<!-- IE can't handle a self closing div tag. -->
-		<div style="clear: both;"><c:out value=""/></div>
+		<c:choose>
+			<c:when test="${showSetupMenu}">
+				<jsp:include page="/WEB-INF/jsp/sitemesh/setupMenu.jsp" flush="true"/>
+				<div id="setup-content">
+					<decorator:body/>
+				</div>
+			</c:when>
+			<c:otherwise>
+				<decorator:body/>
+			</c:otherwise>
+		</c:choose>
 	</div>
 	
 	<div id="site-info" class="container">
