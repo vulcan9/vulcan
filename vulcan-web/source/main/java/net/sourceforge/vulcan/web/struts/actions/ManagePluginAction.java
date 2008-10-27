@@ -1,6 +1,6 @@
 /*
  * Vulcan Build Manager
- * Copyright (C) 2005-2006 Chris Eldredge
+ * Copyright (C) 2005-2008 Chris Eldredge
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -239,7 +239,7 @@ public final class ManagePluginAction extends BaseDispatchAction {
 		
 		bw.setPropertyValue(arrayProperty, tmp);
 		
-		configForm.putLocationInRequest(request);
+		configForm.putBreadCrumbsInRequest(request);
 		
 		return mapping.findForward("configure");
 	}

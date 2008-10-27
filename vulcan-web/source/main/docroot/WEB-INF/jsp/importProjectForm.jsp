@@ -22,7 +22,6 @@
 
 <body>
 
-<v:bubble styleClass="">
 <html:form action="/admin/setup/createProjectFromUrl" method="post">
 <table>
 	<caption><spring:message code="captions.import.project"/></caption>
@@ -145,17 +144,16 @@
 				<html:hidden property="authenticationRequired"/>
 			</td>
 		</tr>
-		<tr>
-			<td colspan="2">
-				<div id="status" class="ajax hidden">
-					<span class="processing"><spring:message code="ajax.processing"/></span>
-				</div>
-			</td>
-		</tr>
 	</tbody>
 </table>
 </html:form>
-</v:bubble>
+
+<div id="status" class="hidden">
+	<html:img page="/images/progressbar.gif" alt="Processing..."/>
+	<p class="processing">
+		<spring:message code="ajax.processing"/>
+	</p>
+</div>
 	
 <v:messages/>
 </body>

@@ -36,9 +36,9 @@
 					</tr>
 					<tr>
 						<td class="buttons" colspan="2">
-							<v:button name="action" value="lock"><spring:message code="label.lock.projects"/></v:button>
-							<v:button name="action" value="unlock"><spring:message code="label.unlock.projects"/></v:button>
-							<v:button name="action" value="clear"><spring:message code="label.lock.projects.remove"/></v:button>
+							<v:button name="action" value="lock"><spring:message code="button.lock.projects"/></v:button>
+							<v:button name="action" value="unlock"><spring:message code="button.unlock.projects"/></v:button>
+							<v:button name="action" value="clear"><spring:message code="button.lock.projects.remove"/></v:button>
 						</td>
 					</tr>
 				</tbody>

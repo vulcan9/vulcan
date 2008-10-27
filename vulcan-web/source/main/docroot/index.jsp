@@ -20,13 +20,14 @@
 		<jsp:attribute name="href"><c:url value="/rss.jsp"/></jsp:attribute>
 	</jsp:element>
 	<c:if test="${preferences.reloadInterval > 0}">
-		<jsp:element name="meta">
-			<jsp:attribute name="http-equiv">Refresh</jsp:attribute>
-			<jsp:attribute name="content">${preferences.reloadInterval}</jsp:attribute>
-		</jsp:element>
+	<script type="text/javascript">refreshDashboard(null, ${preferences.reloadInterval * 1000}, "<c:url value="/"/>");</script>
 	</c:if>
 </head>
 <body>
+
+<div id="loading-message">
+	<spring:message code="ajax.loading"/>
+</div>
 
 <c:choose>
 <c:when test="${not stateManager.running and not buildOutcomeConverter.running}">
@@ -47,7 +48,6 @@
 	</v:bubble>
 </c:when>
 <c:otherwise>
-<div class="tables">
 
 <c:choose>
 	<c:when test="${preferences.groupByLabel}">
@@ -70,7 +70,7 @@
 
 <c:if test="${preferences.showBuildDaemons}">
 <v:bubble>
-<table class="buildDaemons">
+<table class="dashboard">
 	<caption><spring:message code="captions.build.daemons"/></caption>
 	<thead>
 		<tr>
@@ -128,7 +128,7 @@
 
 <c:if test="${preferences.showBuildQueue}">
 <v:bubble>
-<table class="buildQueue">
+<table class="dashboard">
 	<caption><spring:message code="captions.build.queue"/></caption>
 	<thead>
 		<tr>
@@ -176,7 +176,7 @@
 
 <c:if test="${preferences.showSchedulers}">
 <v:bubble>
-<table class="schedulers">
+<table class="dashboard">
 	<caption><spring:message code="captions.schedulers"/></caption>
 	<thead>
 		<tr>
@@ -213,7 +213,6 @@
 </table>
 </v:bubble>
 </c:if>
-</div>
 </c:otherwise>
 </c:choose>
 </body>

@@ -1,6 +1,6 @@
 /*
  * Vulcan Build Manager
- * Copyright (C) 2005-2006 Chris Eldredge
+ * Copyright (C) 2005-2008 Chris Eldredge
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -90,6 +90,89 @@ public class ManagePreferencesActionTest extends MockApplicationContextStrutsTes
 		assertNotNull(prefs);
 		
 		final PreferencesDto expected = new PreferencesDto();
+		
+		assertEquals(expected, prefs);
+	}
+	
+	public void testToggleLabelOff() throws Exception {
+		final PreferencesDto old = new PreferencesDto();
+		old.setLabels(new String[] {"x", "y", "z"});
+		old.setGroupByLabel(true);
+		
+		request.getSession().setAttribute(Keys.PREFERENCES, old);
+		
+		addRequestParameter("action", "save");
+		addRequestParameter("toggleLabel", "x");
+		
+		replay();
+		
+		actionPerform();
+		
+		verify();
+
+		verifyForward("dashboard");
+		
+		final PreferencesDto prefs = (PreferencesDto) request.getSession().getAttribute(Keys.PREFERENCES);
+		assertNotNull(prefs);
+		
+		final PreferencesDto expected = (PreferencesDto) old.copy();
+		
+		expected.setLabels(new String[] {"y", "z"});
+		
+		assertEquals(expected, prefs);
+	}
+	
+	public void testToggleLabelOn() throws Exception {
+		final PreferencesDto old = new PreferencesDto();
+		old.setLabels(new String[] {"y", "z"});
+		old.setGroupByLabel(true);
+		
+		request.getSession().setAttribute(Keys.PREFERENCES, old);
+		
+		addRequestParameter("action", "save");
+		addRequestParameter("toggleLabel", "x");
+		
+		replay();
+		
+		actionPerform();
+		
+		verify();
+
+		verifyForward("dashboard");
+		
+		final PreferencesDto prefs = (PreferencesDto) request.getSession().getAttribute(Keys.PREFERENCES);
+		assertNotNull(prefs);
+		
+		final PreferencesDto expected = (PreferencesDto) old.copy();
+		
+		expected.setLabels(new String[] {"x", "y", "z"});
+		
+		assertEquals(expected, prefs);
+	}
+	
+	public void testToggleLabelOnNullLabels() throws Exception {
+		final PreferencesDto old = new PreferencesDto();
+		old.setLabels(null);
+		
+		request.getSession().setAttribute(Keys.PREFERENCES, old);
+		
+		addRequestParameter("action", "save");
+		addRequestParameter("toggleLabel", "x");
+		
+		replay();
+		
+		actionPerform();
+		
+		verify();
+
+		verifyForward("dashboard");
+		
+		final PreferencesDto prefs = (PreferencesDto) request.getSession().getAttribute(Keys.PREFERENCES);
+		assertNotNull(prefs);
+		
+		final PreferencesDto expected = (PreferencesDto) old.copy();
+		
+		expected.setLabels(new String[] {"x"});
 		
 		assertEquals(expected, prefs);
 	}

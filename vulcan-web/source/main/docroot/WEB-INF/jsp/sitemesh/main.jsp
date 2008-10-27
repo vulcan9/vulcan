@@ -61,11 +61,17 @@
 		<jsp:attribute name="src"><c:url value="/javascript/widgets.js"/></jsp:attribute>
 		<jsp:body/>
 	</jsp:element>
+	<!-- IE specific javascript.  Use c:out to render comments since these comments
+		are removed by jspx or sitemesh (not really sure which) -->
+	<c:out value="&lt;!--[if lte IE 8]&gt;" escapeXml="false"/>
 	<jsp:element name="script">
 		<jsp:attribute name="type">text/javascript</jsp:attribute>
 		<jsp:attribute name="src"><c:url value="/javascript/ieHacks.js"/></jsp:attribute>
 		<jsp:body/>
 	</jsp:element>
+	<c:out value="&lt;![endif]--&gt;" escapeXml="false"/>
+	
+	
 	<jsp:element name="meta">
 		<jsp:attribute name="name">confirmMessage</jsp:attribute>
 		<jsp:attribute name="content"><spring:message code="confirmation"/></jsp:attribute>
@@ -82,14 +88,22 @@
 </head>
 
 <body>
-	<jsp:include page="/WEB-INF/jsp/sitemesh/banner.jsp" flush="true"/>
-	
-	<div class="content" id="content">
+	<jsp:include page="/WEB-INF/jsp/sitemesh/topnav.jsp" flush="true"/>
+
+	<div id="content" class="container">
 		<c:if test="${showSetupMenu}">
 			<jsp:include page="/WEB-INF/jsp/sitemesh/setupMenu.jsp" flush="true"/>
 		</c:if>
 		
 		<decorator:body/>
+		
+		<!-- IE can't handle a self closing div tag. -->
+		<div style="clear: both;"><c:out value=""/></div>
+	</div>
+	
+	<div id="site-info" class="container">
+		<p><a href="http://code.google.com/p/vulcan/" class="help">Vulcan</a> ${stateManager.version} Copyright (c) 2005-2008</p>
+		<p><a href="http://www.gnu.org/licenses/old-licenses/gpl-2.0.html" class="help">GNU General Public License v2</a></p>
 	</div>
 </body>
 </html>

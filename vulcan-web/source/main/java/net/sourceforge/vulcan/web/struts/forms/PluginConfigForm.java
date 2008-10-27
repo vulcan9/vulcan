@@ -1,6 +1,6 @@
 /*
  * Vulcan Build Manager
- * Copyright (C) 2005-2006 Chris Eldredge
+ * Copyright (C) 2005-2008 Chris Eldredge
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -88,7 +88,7 @@ public final class PluginConfigForm extends ValidatorForm implements DispatchFor
 	private Map<String, String> hiddenPasswords = new HashMap<String, String>();
 	
 	private List<String> availableProjects;
-	private List<String> location = new ArrayList<String>();
+	private List<String> breadCrumbs = new ArrayList<String>();
 
 	private boolean forceDirty;
 	
@@ -106,16 +106,16 @@ public final class PluginConfigForm extends ValidatorForm implements DispatchFor
 		
 		if ("pluginConfig".equals(focus)) {
 			cls = pluginConfig.getClass();
-			this.location.clear();
-			this.location.add("Setup");
+			this.breadCrumbs.clear();
+			this.breadCrumbs.add("Setup");
 			
 			if (isProjectPlugin()) {
-				this.location.add("Projects");
-				this.location.add(projectName);
-				this.location.add(this.pluginConfig.getPluginName());
+				this.breadCrumbs.add("Projects");
+				this.breadCrumbs.add(projectName);
+				this.breadCrumbs.add(this.pluginConfig.getPluginName());
 			} else {
-				this.location.add("Plugins");
-				this.location.add(this.pluginConfig.getPluginName());
+				this.breadCrumbs.add("Plugins");
+				this.breadCrumbs.add(this.pluginConfig.getPluginName());
 			}
 		} else {
 			cls = PropertyUtils.getPropertyType(this, focus);
@@ -144,7 +144,7 @@ public final class PluginConfigForm extends ValidatorForm implements DispatchFor
 		if (isNested()) {
 			for (PropertyDescriptor pd : propertyDescriptors) {
 				if (focus.startsWith(pd.getName())) {
-					location.add(pd.getDisplayName());
+					breadCrumbs.add(pd.getDisplayName());
 				}
 			}
 		}
@@ -164,15 +164,19 @@ public final class PluginConfigForm extends ValidatorForm implements DispatchFor
 			types.put(name, getTypeAndPrepare(name, pd));
 		}
 		
-		putLocationInRequest(request);
+		putBreadCrumbsInRequest(request);
 	}
 	
 	public Object getFocusObject() {
 		return getProperty(focus);
 	}
 
-	public void putLocationInRequest(HttpServletRequest request) {
-		request.setAttribute("location", StringUtils.join(this.location.iterator(), " > "));
+	public String[] getBreadCrumbs() {
+		return breadCrumbs.toArray(new String[breadCrumbs.size()]);
+	}
+	
+	public void putBreadCrumbsInRequest(HttpServletRequest request) {
+		request.setAttribute("location", StringUtils.join(this.breadCrumbs.iterator(), " > "));
 	}
 
 	@Override

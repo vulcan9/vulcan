@@ -1,19 +1,17 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 
-<div class="detail-menu"
+<div class="setup-menu"
 	xmlns:jsp="http://java.sun.com/JSP/Page"
 	xmlns:c="http://java.sun.com/jsp/jstl/core"
 	xmlns:html="http://struts.apache.org/tags-html"
 	xmlns:spring="http://www.springframework.org/tags"
 	xmlns:v="http://vulcan.sourceforge.net/j2ee/jsp/tags">
 	
-<jsp:directive.page session="false"/>
-<jsp:output omit-xml-declaration="true"/>
+	<jsp:directive.page session="false"/>
+	<jsp:output omit-xml-declaration="true"/>
+	
+	<html:xhtml/>
 
-<html:xhtml/>
-
-<v:bubble styleClass="setup">
-<div>
 	<span class="caption"><spring:message code="label.setup.menu"/></span>
 	
 	<ul class="detail-menu">
@@ -23,6 +21,7 @@
 			<ul>
 				<li><html:link forward="importProjectConfig"><spring:message code="link.import.project"/></html:link></li>
 				<li><html:link forward="createProjectConfig"><spring:message code="label.project.new"/></html:link></li>
+				<li><html:link page="/buildmanagement/manageLocks.jsp"><spring:message code="label.lock.projects"/></html:link></li>
 				<li><html:link forward="deleteProjects"><spring:message code="label.delete.projects"/></html:link></li>
 				<li><html:link forward="editBuildReports"><spring:message code="label.setup.build.reports"/></html:link></li>
 				<li><spring:message code="label.projects"/>
@@ -111,6 +110,4 @@
 		<li><html:link forward="importConfig"><spring:message code="link.import.config"/></html:link></li>
 		<li><html:link forward="viewConfig"><spring:message code="link.view.config"/></html:link></li>
 	</ul>
-</div>
-</v:bubble>
 </div>

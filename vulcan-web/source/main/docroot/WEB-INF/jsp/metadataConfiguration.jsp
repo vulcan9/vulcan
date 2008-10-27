@@ -3,6 +3,7 @@
 <html
 	xmlns:jsp="http://java.sun.com/JSP/Page"
 	xmlns:c="http://java.sun.com/jsp/jstl/core"
+	xmlns:fn="http://java.sun.com/jsp/jstl/functions"
 	xmlns:html="http://struts.apache.org/tags-html"
 	xmlns:bean="http://struts.apache.org/tags-bean"
 	xmlns:v="http://vulcan.sourceforge.net/j2ee/jsp/tags">
@@ -23,7 +24,7 @@
 <v:bubble>
 <html:form action="/admin/setup/managePlugin" method="post">
 <table class="dynamicEdit">
-	<caption><c:out value="${location}" escapeXml="true"/></caption>
+	<caption><c:out value="${fn:join(pluginConfigForm.breadCrumbs, ' &gt; ')}" escapeXml="true"/></caption>
 	<tbody>
 		<c:forEach items="${pluginConfigForm.allProperties}" var="desc">
 			<tr>

@@ -51,6 +51,11 @@
 	</tag-file>
 	
 	<tag-file>
+		<name>topNavSection</name>
+		<path>/WEB-INF/tags/topNavSection.tag</path>
+	</tag-file>
+	
+	<tag-file>
 		<name>projectCheckboxes</name>
 		<path>/WEB-INF/tags/projectCheckboxes.tag</path>
 	</tag-file>
@@ -72,6 +77,12 @@
 		<name>getActionErrorPropertyList</name>
 		<function-class>net.sourceforge.vulcan.web.JstlFunctions</function-class>
 		<function-signature>java.util.List getActionErrorPropertyList(javax.servlet.http.HttpServletRequest)</function-signature>
+	</function>
+	
+	<function>
+		<name>getOutcomeByBuildNumber</name>
+		<function-class>net.sourceforge.vulcan.web.JstlFunctions</function-class>
+		<function-signature>java.util.List getOutcomeByBuildNumber(java.lang.String, int)</function-signature>
 	</function>
 	
 	<function>
