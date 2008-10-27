@@ -23,7 +23,7 @@
 	
 <v:bubble>
 <html:form action="/admin/setup/managePlugin" method="post">
-<table class="dynamicEdit">
+<table>
 	<caption><c:out value="${fn:join(pluginConfigForm.breadCrumbs, ' &gt; ')}" escapeXml="true"/></caption>
 	<tbody>
 		<c:forEach items="${pluginConfigForm.allProperties}" var="desc">

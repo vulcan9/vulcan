@@ -15,7 +15,7 @@
 	
 	<v:bubble styleClass="">
 		<html:form action="/buildmanagement/manageLocks" method="post">
-			<table class="projectConfig">
+			<table>
 				<caption><spring:message code="captions.manage.project.locks"/></caption>
 				<tbody>
 					<tr>

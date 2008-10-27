@@ -15,6 +15,14 @@ th {
 	font-weight: normal;
 }
 
+tbody th {
+	text-align: left;
+}
+
+ul {
+	margin-left: 2.5em;
+}
+
 li ul {
 	margin-left: 4ex;
 }
@@ -33,7 +41,7 @@ a.external {
 	padding-right: 14px;
 }
 
-caption,span.caption {
+caption, .caption {
 	padding-bottom: 2ex;
 	font-weight: bold;
 	text-align: left;
@@ -145,7 +153,9 @@ div.container,ul#primary-nav,ul#utility-nav {
 
 #content {
 	padding-top: 2ex;
+	padding-bottom: 5ex;
 	position: relative;
+	overflow: hidden;
 }
 
 #site-info {
@@ -172,7 +182,32 @@ img.health {
 	margin-left: 1ex;
 }
 
-/*** Import Projects *******************************************************/
+/***** Setup Layout *********************************************************************************/
+div#setup-menu {
+	float: left;
+	min-width: 30ex;
+	width: 20%;
+	background-color: white;
+}
+
+div#setup-content {
+	margin-bottom: 10ex;
+}
+
+ul.detail-menu {
+	list-style: none;
+	padding-left: 4px;
+	padding-right: 4px;
+	margin-left: 0;
+}
+
+ul.detail-menu>li {
+	margin-bottom: 2ex;
+	padding-left: 0;
+	margin-left: 0;
+}
+
+/***** Import Projects ******************************************************************************/
 div#status {
 	margin-top: 4ex;
 }
@@ -182,18 +217,47 @@ div#status img {
 	left: -6px;
 }
 
-.processing,.status-detail {
+.processing, .status-detail {
 	color: #7E97A6;
+}
+
+/***** Build Reports ********************************************************************************/
+table#reports-list {
+	margin-bottom: 2ex;
+}
+
+table#reports-list td {
+	width: 33%;
+}
+
+tr.dragging td.desc, tr.dragging td.buttons {
+	display: none;
+}
+
+table#buildReportEditFields {
+	margin-top: 4ex;
 }
 
 /***** Dashboard ************************************************************************************/
 table.dashboard {
 	margin-bottom: 4ex;
-	min-width: 60%;
 }
 
 table.dashboard td {
 	text-align: center;
+}
+
+table.projects {
+	float: left;
+}
+
+div#current-activity {
+	float: right;
+	width: 30%;
+}
+
+div#current-activity table {
+	width: 100%;
 }
 
 .build-outcome-message {
@@ -328,11 +392,6 @@ ul.issue-list li {
 	margin-left: 0.75em;
 }
 
-ul.modified-paths {
-	margin: 0;
-	padding-left: 15px;
-}
-
 ul.options,ul.projectBuildOptions,div.projectCheckboxes ul,ul.metaDataOptions,ul.object-array,ul.primitive-array,ul.dateRanges
 	{
 	list-style: none;
@@ -349,24 +408,6 @@ ul.dateRanges li {
 
 ul.options li {
 	display: inline;
-}
-
-div.setup-menu {
-	float: left;
-	margin-right: 2em;
-}
-
-ul.detail-menu {
-	list-style: none;
-	padding-left: 4px;
-	padding-right: 4px;
-	margin-left: 0;
-}
-
-ul.detail-menu>li {
-	margin-bottom: 2ex;
-	padding-left: 0;
-	margin-left: 0;
 }
 
 input[type=radio]+label {
@@ -396,12 +437,12 @@ table.sortable thead th, th.sortable a:link, th.sortable a {
 	padding-right: 21px;
 }
 
-.sorted-ascending,th.age .sorted-descending {
-	background-image: url("../images/desc.gif") !important;
+.sorted-ascending, th.age .sorted-descending {
+	background-image: url("../images/asc.gif") !important;
 }
 
-.sorted-descending,th.age .sorted-ascending {
-	background-image: url("../images/asc.gif") !important;
+.sorted-descending, th.age .sorted-ascending {
+	background-image: url("../images/desc.gif") !important;
 }
 
 table.error,table.warning,table.message,table.buildHistoryReportForm,table.manualBuild
@@ -433,14 +474,6 @@ td.component-version {
 
 table.build-messages tbody td {
 	font-size: smaller;
-}
-
-table.projectConfig {
-	width: 60em;
-}
-
-table.dynamicEdit {
-	width: 50em;
 }
 
 table.builds {
@@ -506,11 +539,6 @@ input[type="checkbox"]+label+div {
 	margin-left: 2ex;
 }
 
-span.banner {
-	font-size: larger;
-	font-weight: bold;
-}
-
 .description {
 	font-style: italic;
 }
@@ -534,34 +562,6 @@ input[type=submit] {
 	margin-left: 1em;
 }
 
-div#lightbox {
-	position: absolute;
-	display: none;
-	left: 0;
-	top: 0;
-	right: 0;
-	bottom: 0;
-	background-color: white;
-}
-
-ul#reports-list {
-	padding: 0;
-}
-
-ul#reports-list li {
-	list-style: none;
-	width: 400px;
-	height: 45px;
-	background-color: white;
-}
-
-ul#reports-list li span.name {
-	margin-right: 3ex;
-}
-
-span.buttons {
-	float: right;
-}
 
 ul.tabs {
 	margin: 0;
