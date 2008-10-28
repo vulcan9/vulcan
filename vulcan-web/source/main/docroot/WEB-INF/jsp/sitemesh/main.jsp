@@ -4,6 +4,7 @@
 	xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-US"
 	xmlns:jsp="http://java.sun.com/JSP/Page"
 	xmlns:c="http://java.sun.com/jsp/jstl/core"
+	xmlns:fn="http://java.sun.com/jsp/jstl/functions"
 	xmlns:spring="http://www.springframework.org/tags"
 	xmlns:decorator="http://www.opensymphony.com/sitemesh/decorator">
 	
@@ -40,7 +41,8 @@
 		<jsp:attribute name="type">image/vnd.microsoft.ico</jsp:attribute>
 		<jsp:attribute name="href"><c:url value="/images/favicon.ico"/></jsp:attribute>
 	</jsp:element>
-	<script type="text/javascript">window.contextRoot = '<c:url value="/"/>';</script>
+	<c:url value="/" var="contextRoot"/>
+	<script type="text/javascript">window.contextRoot = '${fn:substringBefore(contextRoot, ';')}';</script>
 	<jsp:element name="script">
 		<jsp:attribute name="type">text/javascript</jsp:attribute>
 		<jsp:attribute name="src"><c:url value="/javascript/jquery-1.2.6.js"/></jsp:attribute>
@@ -61,6 +63,7 @@
 		<jsp:attribute name="src"><c:url value="/javascript/widgets.js"/></jsp:attribute>
 		<jsp:body/>
 	</jsp:element>
+	
 	<!-- IE specific javascript.  Use c:out to render comments since these comments
 		are removed by jspx or sitemesh (not really sure which) -->
 	<c:out value="&lt;!--[if lte IE 8]&gt;" escapeXml="false"/>
