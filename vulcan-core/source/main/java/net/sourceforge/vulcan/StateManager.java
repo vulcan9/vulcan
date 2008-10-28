@@ -24,6 +24,7 @@ import java.util.Set;
 
 import net.sourceforge.vulcan.dto.BuildArtifactLocationDto;
 import net.sourceforge.vulcan.dto.ConfigUpdatesDto;
+import net.sourceforge.vulcan.dto.LockDto;
 import net.sourceforge.vulcan.dto.PluginConfigDto;
 import net.sourceforge.vulcan.dto.PluginProfileDto;
 import net.sourceforge.vulcan.dto.ProjectConfigDto;
@@ -53,16 +54,23 @@ public interface StateManager {
 	 * Increment the lockCount for each specified project.
 	 * @param message Comment describing why a lock is being added
 	 * @param projectNames Array of one or more projects to lock
+	 * @return unique ID for lock that was added.
 	 */
-	public void lockProjects(String message, String... projectNames);
+	public long lockProjects(String message, String... projectNames);
 	
 	/**
-	 * Decrement the lockCount for each specified project.
-	 * @param resetLockCounts When true, lockCount will be set to zero.  When false,
-	 * lockCount will be decremented (or will remain at zero for projects that were not locked).
-	 * @param projectNames Array of one or more projects to unlock.
+	 * Remove a lock.
+	 * @param lockId ID obtained from lockProjects.
 	 */
-	public void unlockProjects(boolean resetLockCounts, String... projectNames);
+	public void removeProjectLock(Long... lockId);
+	
+	public List<LockDto> getProjectLocks();
+	
+	/**
+	 * Remove all locks for each specified project.
+	 * @param projectNames
+	 */
+	public void clearProjectLocks(String... projectNames);
 	
 	public void applyMultipleUpdates(ConfigUpdatesDto updates) throws DuplicateNameException, StoreException, PluginNotFoundException;
 	

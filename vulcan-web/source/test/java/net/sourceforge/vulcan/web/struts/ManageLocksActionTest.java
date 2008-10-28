@@ -51,6 +51,7 @@ public class ManageLocksActionTest extends MockApplicationContextStrutsTestCase 
 		buildManager.isBuildingOrInQueue("a", "b");
 		expectLastCall().andReturn(false);
 		manager.lockProjects("locked for QA", "a", "b");
+		expectLastCall().andReturn(1234l);
 		
 		replay();
 		
@@ -95,6 +96,7 @@ public class ManageLocksActionTest extends MockApplicationContextStrutsTestCase 
 		buildManager.isBuildingOrInQueue("a", "b");
 		expectLastCall().andReturn(false);
 		manager.lockProjects("messages.project.locked.by.user", "a", "b");
+		expectLastCall().andReturn(9876l);
 		
 		replay();
 		
@@ -106,6 +108,8 @@ public class ManageLocksActionTest extends MockApplicationContextStrutsTestCase 
 		verifyActionMessages(new String[] {"messages.save.success"});
 		
 		verifyForward("success");
+		
+		assertEquals(request.getAttribute("lockId"), 9876l);
 	}
 	
 	public void testLockFailsWhenBuilding() throws Exception {
@@ -128,13 +132,8 @@ public class ManageLocksActionTest extends MockApplicationContextStrutsTestCase 
 		verifyForward("failure");
 	}
 	
-	public void testLockFailsWhenBuildingRestResponse() throws Exception {
-		addRequestParameter("action", "lock");
-		addRequestParameter("projectNames", new String[] {"a", "b"});
-		addRequestParameter("message", "locked for QA");
-		
-		buildManager.isBuildingOrInQueue("a", "b");
-		expectLastCall().andReturn(true);
+	public void testUnlockRequiresLockId() throws Exception {
+		addRequestParameter("action", "unlock");
 		
 		replay();
 		
@@ -142,17 +141,31 @@ public class ManageLocksActionTest extends MockApplicationContextStrutsTestCase 
 		
 		verify();
 		
-		verifyActionErrors(new String[] {"errors.cannot.lock.project"});
-		verifyNoActionMessages();
+		assertPropertyHasError("lockId", "errors.required");
 		
-		verifyForward("failure");
+		verifyInputForward();
+	}
+	
+	public void testUnlockBadLockId() throws Exception {
+		addRequestParameter("action", "unlock");
+		addRequestParameter("lockId", "not a number");
+		
+		replay();
+		
+		actionPerform();
+		
+		verify();
+		
+		assertPropertyHasError("lockId", "errors.integer");
+		
+		verifyInputForward();
 	}
 	
 	public void testUnlock() throws Exception {
 		addRequestParameter("action", "unlock");
-		addRequestParameter("projectNames", new String[] {"a", "b"});
+		addRequestParameter("lockId", new String[] {"1234", "9876"});
 		
-		manager.unlockProjects(false, "a", "b");
+		manager.removeProjectLock(1234l, 9876l);
 		
 		replay();
 		
@@ -170,7 +183,7 @@ public class ManageLocksActionTest extends MockApplicationContextStrutsTestCase 
 		addRequestParameter("action", "clear");
 		addRequestParameter("projectNames", new String[] {"a", "b"});
 		
-		manager.unlockProjects(true, "a", "b");
+		manager.clearProjectLocks("a", "b");
 		
 		replay();
 		

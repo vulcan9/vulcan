@@ -18,8 +18,6 @@
  */
 package net.sourceforge.vulcan.web.struts.actions;
 
-import java.util.Date;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -27,6 +25,7 @@ import javax.servlet.http.HttpSession;
 import net.sourceforge.vulcan.StateManager;
 import net.sourceforge.vulcan.core.BuildManager;
 import net.sourceforge.vulcan.core.ConfigurationStore;
+import net.sourceforge.vulcan.dto.LockDto;
 import net.sourceforge.vulcan.dto.PluginConfigDto;
 import net.sourceforge.vulcan.dto.ProjectConfigDto;
 import net.sourceforge.vulcan.exception.ProjectNeedsDependencyException;
@@ -106,14 +105,15 @@ public final class ManageProjectConfigAction extends BaseDispatchAction {
 		final ProjectConfigDto config = configForm.getProjectConfig();
 		final StateManager mgr = stateManager;
 		
-		if (configForm.isDirty()) {
+		if (configForm.isDirty() || configForm.lockWasAdded()) {
 			if (configForm.lockWasAdded()) {
 				if (buildManager.isBuildingOrInQueue(configForm.getOriginalName())) {
 					saveError(request, ActionMessages.GLOBAL_MESSAGE,
 							new ActionMessage("errors.cannot.lock.project"));
 					return mapping.getInputForward();
 				}
-				config.setLockMessage(formatMessage("messages.project.locked.by.user", getUsername(request), new Date()));
+				final LockDto lock = new LockDto(formatMessage("messages.project.locked.by.user", getUsername(request)), 0);
+				config.addLock(lock);
 			}
 
 			mgr.updateProjectConfig(configForm.getOriginalName(), config, true);

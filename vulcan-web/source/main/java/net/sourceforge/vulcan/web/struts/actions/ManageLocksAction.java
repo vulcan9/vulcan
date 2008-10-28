@@ -18,7 +18,9 @@
  */
 package net.sourceforge.vulcan.web.struts.actions;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -44,6 +46,12 @@ public final class ManageLocksAction extends BaseDispatchAction {
 		
 		final MultipleProjectConfigForm configForm = (MultipleProjectConfigForm) form;
 
+		if (configForm.getProjectNames() == null || configForm.getProjectNames().length == 0) {
+			saveError(request, "projectNames",
+					new ActionMessage("errors.required"));
+			return mapping.getInputForward();
+		}
+
 		try {
 			if (buildManager.isBuildingOrInQueue(configForm.getProjectNames())) {
 				request.setAttribute("restResponseCode", HttpServletResponse.SC_CONFLICT);
@@ -57,8 +65,9 @@ public final class ManageLocksAction extends BaseDispatchAction {
 				message = formatMessage("messages.project.locked.by.user", getUsername(request), new Date());
 			}
 			
-			stateManager.lockProjects(message, configForm.getProjectNames());
-		
+			final long lockId = stateManager.lockProjects(message, configForm.getProjectNames());
+			request.setAttribute("lockId", lockId);
+			
 			saveSuccessMessage(request);
 			return mapping.findForward("success");
 		} catch (NoSuchProjectException e) {
@@ -70,30 +79,39 @@ public final class ManageLocksAction extends BaseDispatchAction {
 	
 	public ActionForward unlock(ActionMapping mapping, ActionForm form,
 			HttpServletRequest request, HttpServletResponse response) throws Exception {
+
+		final String[] idStrings = request.getParameterValues("lockId");
+		if (idStrings==null || idStrings.length == 0) {
+			saveError(request, "lockId",
+					new ActionMessage("errors.required"));
+			return mapping.getInputForward();
+		}
 		
-		return doUnlock(mapping, form, request, false);
+		final List<Long> ids = new ArrayList<Long>(idStrings.length);
+		
+		try {
+			for (String str : idStrings) {
+				ids.add(Long.valueOf(str));
+			}
+		} catch (NumberFormatException e) {
+			saveError(request, "lockId",
+					new ActionMessage("errors.integer"));
+			return mapping.getInputForward();
+		}
+		
+		stateManager.removeProjectLock(ids.toArray(new Long[ids.size()]));
+		
+		saveSuccessMessage(request);
+		return mapping.findForward("success");
 	}
 
 	public ActionForward clear(ActionMapping mapping, ActionForm form,
 			HttpServletRequest request, HttpServletResponse response) throws Exception {
 		
-		return doUnlock(mapping, form, request, true);
-	}
-	
-	@Override
-	protected ActionForward unspecified(ActionMapping mapping, ActionForm form,
-			HttpServletRequest request, HttpServletResponse response)
-			throws Exception {
-		saveError(request, "action", new ActionMessage("errors.required"));
-		return mapping.getInputForward();
-	}
-	
-	private ActionForward doUnlock(ActionMapping mapping, ActionForm form,
-			HttpServletRequest request, boolean resetLockCounts) {
 		final MultipleProjectConfigForm configForm = (MultipleProjectConfigForm) form;
-
+		
 		try {
-			stateManager.unlockProjects(resetLockCounts, configForm.getProjectNames());
+			stateManager.clearProjectLocks(configForm.getProjectNames());
 			
 			saveSuccessMessage(request);
 			return mapping.findForward("success");
@@ -102,6 +120,14 @@ public final class ManageLocksAction extends BaseDispatchAction {
 					new ActionMessage("errors.no.such.project", e.getMessage()));
 			return mapping.getInputForward();
 		}
+	}
+	
+	@Override
+	protected ActionForward unspecified(ActionMapping mapping, ActionForm form,
+			HttpServletRequest request, HttpServletResponse response)
+			throws Exception {
+		saveError(request, "action", new ActionMessage("errors.required"));
+		return mapping.getInputForward();
 	}
 	
 	public void setBuildManager(BuildManager buildManager) {

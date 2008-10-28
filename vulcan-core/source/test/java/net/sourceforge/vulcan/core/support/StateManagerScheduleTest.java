@@ -22,6 +22,7 @@ import java.util.Date;
 import java.util.List;
 
 import net.sourceforge.vulcan.ProjectManager;
+import net.sourceforge.vulcan.dto.LockDto;
 import net.sourceforge.vulcan.dto.ProjectConfigDto;
 import net.sourceforge.vulcan.dto.SchedulerConfigDto;
 import net.sourceforge.vulcan.exception.DuplicateNameException;
@@ -350,7 +351,7 @@ public class StateManagerScheduleTest extends StateManagerTestBase {
 		final ProjectConfigDto d = new ProjectConfigDto();
 		d.setName("d");
 		d.setSchedulerNames(new String[] {"mock"});
-		d.setLockCount(1);
+		d.addLock(new LockDto());
 
 		stateMgr.addSchedulerConfig(sched);
 		stateMgr.addProjectConfig(a);

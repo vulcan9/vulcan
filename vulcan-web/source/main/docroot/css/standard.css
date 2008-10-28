@@ -41,6 +41,10 @@ a.external {
 	padding-right: 14px;
 }
 
+table+table {
+	margin-top: 4ex;
+}
+
 caption, .caption {
 	padding-bottom: 2ex;
 	font-weight: bold;
