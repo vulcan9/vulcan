@@ -49,6 +49,8 @@ public final class ProjectConfigForm extends ConfigForm {
 	String previousBuildToolPluginId;
 	String focus;
 	
+	boolean locked;
+	
 	public ProjectConfigForm() {
 		super(new ProjectConfigDto());
 	}
@@ -56,20 +58,18 @@ public final class ProjectConfigForm extends ConfigForm {
 		return "project";
 	}
 	public boolean isLocked() {
-		return getProjectConfig().isLocked();
+		return locked;
 	}
 	public void setLocked(boolean locked) {
+		this.locked = locked;
 		if (locked) {
 			final ProjectConfigDto cur = getProjectConfig();
 			final ProjectConfigDto prev = (ProjectConfigDto) getOriginal();
 			
 			final int lockCount = prev.getLockCount();
 			
-			if (lockCount == 0) {
-				cur.setLockCount(1);
-			} else {
-				cur.setLockCount(lockCount);
-				cur.setLockMessage(prev.getLockMessage());
+			if (lockCount != 0) {
+				cur.setLocks(prev.getLocks());
 			}
 		}
 	}
@@ -125,6 +125,13 @@ public final class ProjectConfigForm extends ConfigForm {
 		return isLocked() && (prev == null || (prev != null && !prev.isLocked()));
 	}
 
+	@Override
+	protected void resetInternal(ActionMapping mapping,
+			HttpServletRequest request) {
+		super.resetInternal(mapping, request);
+		locked = false;
+	}
+	
 	@Override
 	protected void initializeConfig(NamedObject config, NamedObject previousConfig) {
 		if (previousConfig == null) {

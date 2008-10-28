@@ -18,6 +18,7 @@
  */
 package net.sourceforge.vulcan.core.support;
 
+import java.beans.PropertyDescriptor;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -26,13 +27,12 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 
-import java.beans.PropertyDescriptor;
-
 import net.sourceforge.vulcan.core.ProjectNameChangeListener;
 import net.sourceforge.vulcan.dto.BuildArtifactLocationDto;
 import net.sourceforge.vulcan.dto.BuildManagerConfigDto;
 import net.sourceforge.vulcan.dto.BuildToolConfigDto;
 import net.sourceforge.vulcan.dto.ConfigUpdatesDto;
+import net.sourceforge.vulcan.dto.LockDto;
 import net.sourceforge.vulcan.dto.PluginConfigDto;
 import net.sourceforge.vulcan.dto.PluginProfileDto;
 import net.sourceforge.vulcan.dto.PluginProfileDtoStub;
@@ -567,18 +567,17 @@ public class StateManagerImplTest extends StateManagerTestBase
 		stateMgr.lockProjects("xyz", "b");
 		
 		assertEquals(0, a.getLockCount());
-		assertEquals(null, a.getLockMessage());
 		
 		assertEquals(1, b.getLockCount());
-		assertEquals("xyz", b.getLockMessage());
+		assertEquals("xyz", b.getLocks().get(0).getMessage());
 		
 		stateMgr.lockProjects("xyz2", "a", "b");
 
 		assertEquals(1, a.getLockCount());
-		assertEquals("xyz2", a.getLockMessage());
+		assertEquals("xyz2", a.getLocks().get(0).getMessage());
 		
 		assertEquals(2, b.getLockCount());
-		assertEquals("xyz2", b.getLockMessage());
+		assertEquals("xyz2", b.getLocks().get(1).getMessage());
 	}
 	
 	public void testLockProjectsNotFoundIdemponent() throws Exception {
@@ -593,56 +592,33 @@ public class StateManagerImplTest extends StateManagerTestBase
 		}
 		
 		assertEquals(0, a.getLockCount());
-		assertEquals(null, a.getLockMessage());
-	}
-	
-	public void testUnlockProjectsNotFoundIdemponent() throws Exception {
-		final ProjectConfigDto a = createProjectDto("a");
-		a.setLockCount(22);
-		a.setLockMessage("foo");
-		
-		stateMgr.addProjectConfig(a);
-
-		try {
-			stateMgr.unlockProjects(true, "a", "b");
-			fail("Expected exception");
-		} catch (NoSuchProjectException e) {
-		}
-		
-		assertEquals(22, a.getLockCount());
-		assertEquals("foo", a.getLockMessage());
 	}
 	
 	public void testUnlockProjects() throws Exception {
 		final ProjectConfigDto a = createProjectDto("a");
 		final ProjectConfigDto b = createProjectDto("b");
 
-		a.setLockCount(1);
-		a.setLockMessage("msg");
-		
-		b.setLockCount(12);
-		b.setLockMessage("msg");
+		a.addLock(new LockDto("msg", 1));
+		b.addLock(new LockDto("msg", 2));
+		b.addLock(new LockDto("msg", 1));
+		b.addLock(new LockDto("msg", 3));
 		
 		stateMgr.addProjectConfig(a);
 		stateMgr.addProjectConfig(b);
 
-		stateMgr.unlockProjects(false, "b", "a");
+		stateMgr.removeProjectLock(1l);
 		
 		assertEquals(0, a.getLockCount());
-		assertEquals(null, a.getLockMessage());
 		
-		assertEquals(11, b.getLockCount());
-		assertEquals("msg", b.getLockMessage());
+		assertEquals(2, b.getLockCount());
 		
-		stateMgr.unlockProjects(false, "a");
+		stateMgr.removeProjectLock(2l);
 
-		assertEquals(0, a.getLockCount());
-		assertEquals(null, a.getLockMessage());
+		assertEquals(1, b.getLockCount());
 		
-		stateMgr.unlockProjects(true, "b");
+		stateMgr.removeProjectLock(3l);
 
 		assertEquals(0, b.getLockCount());
-		assertEquals(null, b.getLockMessage());
 	}
 	
 	private ProjectConfigDto createProjectDto(String name) {

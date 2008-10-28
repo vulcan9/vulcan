@@ -52,6 +52,7 @@ import net.sourceforge.vulcan.dto.BuildArtifactLocationDto;
 import net.sourceforge.vulcan.dto.BuildManagerConfigDto;
 import net.sourceforge.vulcan.dto.ComponentVersionDto;
 import net.sourceforge.vulcan.dto.ConfigUpdatesDto;
+import net.sourceforge.vulcan.dto.LockDto;
 import net.sourceforge.vulcan.dto.NamedObject;
 import net.sourceforge.vulcan.dto.PluginConfigDto;
 import net.sourceforge.vulcan.dto.PluginProfileDto;
@@ -322,55 +323,89 @@ public abstract class StateManagerImpl implements StateManager, ProjectManager {
 			writeLock.unlock();
 		}
 	}
-	public void lockProjects(String message, String... projectNames) {
+	
+	public List<LockDto> getProjectLocks() {
+		final Set<LockDto> set = new HashSet<LockDto>();
+		
+		try {
+			readLock.lock();
+			
+			for (ProjectConfigDto project : config.getProjects()) {
+				set.addAll(project.getLocks());
+			}
+		} finally {
+			readLock.unlock();
+		}
+		
+		final List<LockDto> list = new ArrayList<LockDto>(set);
+		Collections.sort(list, new Comparator<LockDto>() {
+			public int compare(LockDto o1, LockDto o2) {
+				return ((Long)o1.getId()).compareTo(o2.getId());
+			}
+		});
+		
+		return list;
+	}
+	
+	public long lockProjects(String message, String... projectNames) {
 		try {
 			writeLock.lock();
 			final List<ProjectConfigDto> projects = new ArrayList<ProjectConfigDto>();
 			
-			// get all projects in case one doesn't exist.
+			// get all projects in case one doesn't exist (throw NoSuchProjectException).
+			for (String name : projectNames) {
+				projects.add(getProjectConfig(name));
+			}
+			
+			long id = System.currentTimeMillis();
+			
+			final LockDto lock = new LockDto();
+			lock.setMessage(message);
+			lock.setId(id);
+			
+			// make changes
+			for (ProjectConfigDto project : projects) {
+				project.addLock(lock);
+			}
+			
+			return id;
+		} finally {
+			writeLock.unlock();
+		}
+	}
+	
+	public void removeProjectLock(Long... lockIds) {
+		try {
+			writeLock.lock();
+			
+			// make changes
+			for (ProjectConfigDto project : config.getProjects()) {
+				project.removeLock(lockIds);
+			}
+		} finally {
+			writeLock.unlock();
+		}
+	}
+	
+	public void clearProjectLocks(String... projectNames) {
+		try {
+			writeLock.lock();
+			final List<ProjectConfigDto> projects = new ArrayList<ProjectConfigDto>();
+			
+			// get all projects in case one doesn't exist (throw NoSuchProjectException).
 			for (String name : projectNames) {
 				projects.add(getProjectConfig(name));
 			}
 			
 			// make changes
 			for (ProjectConfigDto project : projects) {
-				project.setLockCount(project.getLockCount()+1);
-				project.setLockMessage(message);
+				project.clearLocks();
 			}
 		} finally {
 			writeLock.unlock();
 		}
 	}
-	public void unlockProjects(boolean resetLockCounts, String... projectNames) {
-		try {
-			writeLock.lock();
-			final List<ProjectConfigDto> projects = new ArrayList<ProjectConfigDto>();
-			
-			// get all projects in case one doesn't exist.
-			for (String name : projectNames) {
-				projects.add(getProjectConfig(name));
-			}
-			
-			// make changes
-			for (ProjectConfigDto project : projects) {
-				int count;
-				if (resetLockCounts) {
-					count = 0;
-				} else {
-					count = project.getLockCount() - 1;
-					if (count < 0) {
-						count = 0;
-					}
-				}
-				project.setLockCount(count);
-				if (count <= 0) {
-					project.setLockMessage(null);
-				}
-			}
-		} finally {
-			writeLock.unlock();
-		}
-	}
+	
 	public void applyProjectLabel(String label, Collection<String> projectNames) throws StoreException {
 		try {
 			writeLock.lock();

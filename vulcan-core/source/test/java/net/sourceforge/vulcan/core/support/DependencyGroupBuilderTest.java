@@ -23,6 +23,7 @@ import net.sourceforge.vulcan.ProjectManager;
 import net.sourceforge.vulcan.core.DependencyBuildPolicy;
 import net.sourceforge.vulcan.core.DependencyGroup;
 import net.sourceforge.vulcan.core.WorkingCopyUpdateStrategy;
+import net.sourceforge.vulcan.dto.LockDto;
 import net.sourceforge.vulcan.dto.ProjectConfigDto;
 import net.sourceforge.vulcan.dto.ProjectConfigDto.UpdateStrategy;
 import net.sourceforge.vulcan.exception.ProjectsLockedException;
@@ -51,7 +52,7 @@ public class DependencyGroupBuilderTest extends EasyMockTestCase {
 		check(dg, DependencyBuildPolicy.AS_NEEDED, true, false, WorkingCopyUpdateStrategy.Default);
 	}
 	public void testThrowsOnLockedProject() throws Exception {
-		projects[0].setLockCount(1);
+		projects[0].addLock(new LockDto());
 		try {
 			check(null, DependencyBuildPolicy.AS_NEEDED, true, false, WorkingCopyUpdateStrategy.Default);
 			fail("Expected exception");
@@ -61,8 +62,8 @@ public class DependencyGroupBuilderTest extends EasyMockTestCase {
 		}
 	}
 	public void testThrowsOnLockedProjectIncludesAllLocked() throws Exception {
-		projects[0].setLockCount(1);
-		projects[1].setLockCount(1);
+		projects[0].addLock(new LockDto());
+		projects[1].addLock(new LockDto());
 		try {
 			check(null, DependencyBuildPolicy.AS_NEEDED, true, false, WorkingCopyUpdateStrategy.Default);
 			fail("Expected exception");
@@ -76,7 +77,8 @@ public class DependencyGroupBuilderTest extends EasyMockTestCase {
 		EasyMock.expect(projectMgr.getProjectConfig("b")).andReturn(projects[1]);
 		
 		projects[0].setDependencies(new String[] {"b"});
-		projects[1].setLockCount(1);
+		projects[1].addLock(new LockDto());
+		
 		try {
 			check(null, DependencyBuildPolicy.FORCE, false, false, WorkingCopyUpdateStrategy.Default);
 			fail("Expected exception");
@@ -89,7 +91,7 @@ public class DependencyGroupBuilderTest extends EasyMockTestCase {
 		EasyMock.expect(projectMgr.getProjectConfig("b")).andReturn(projects[1]);
 		
 		projects[0].setDependencies(new String[] {"b"});
-		projects[1].setLockCount(1);
+		projects[1].addLock(new LockDto());
 		
 		final DependencyGroup dg = new DependencyGroupImpl();
 		dg.addTarget(projects[0]);

@@ -86,7 +86,12 @@
 									<message><spring:message code="${status.messageKey}" arguments="${status.messageArgs}" htmlEscape="true"/></message>
 								</c:if>
 								<build-number><c:out value="${status.buildNumber}"/></build-number>
-								<locked message="${v:getProjectLockMessage(projectName)}">
+								
+								<c:set var="lockMessage">
+									<c:out value="${v:getProjectLockMessage(projectName)}" escapeXml="true"/>
+								</c:set>
+								
+								<locked message="${lockMessage}">
 									<c:out value="${v:isProjectLocked(projectName)}"/>
 								</locked>
 								<c:if test="${status.revision != null}">

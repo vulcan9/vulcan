@@ -31,7 +31,10 @@
 						<jsp:body>${projectName}</jsp:body>
 					</jsp:element>
 					<c:if test="${v:isProjectLocked(projectName)}">
-						<html:img page="/images/lock.png" alt="Locked" title="${v:getProjectLockMessage(projectName)}"/>
+						<c:set var="title">
+							<c:out value="${v:getProjectLockMessage(projectName)}" escapeXml="true"/>
+						</c:set>
+						<html:img page="/images/lock.png" alt="Locked" title="${title}"/>
 					</c:if>
 				</li>
 			</c:forEach>

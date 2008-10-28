@@ -74,7 +74,6 @@
 	</jsp:element>
 	<c:out value="&lt;![endif]--&gt;" escapeXml="false"/>
 	
-	
 	<jsp:element name="meta">
 		<jsp:attribute name="name">confirmMessage</jsp:attribute>
 		<jsp:attribute name="content"><spring:message code="confirmation"/></jsp:attribute>

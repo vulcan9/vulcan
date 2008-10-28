@@ -20,7 +20,12 @@ package net.sourceforge.vulcan.dto;
 
 import static org.apache.commons.lang.ArrayUtils.EMPTY_STRING_ARRAY;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 
 import net.sourceforge.vulcan.metadata.SvnRevision;
@@ -67,10 +72,10 @@ public class ProjectConfigDto extends NameDto {
 	String requestedBy;
 	boolean isScheduledBuild;
 	
-	int lockCount;
-	String lockMessage;
-	
 	Set<String> labels = new HashSet<String>();
+
+	List<LockDto> locks;
+	List<LockDto> readOnlyLocks = Collections.emptyList();
 	
 	public String getId() {
 		return getName();
@@ -212,20 +217,63 @@ public class ProjectConfigDto extends NameDto {
 	public void setLabels(Set<String> labels) {
 		this.labels = labels;
 	}
-	public boolean isLocked() {
-		return lockCount > 0;
+	
+	public List<LockDto> getLocks() {
+		return readOnlyLocks;
 	}
+	
+	public void setLocks(List<LockDto> locks) {
+		if (locks == null) {
+			this.locks = null;
+			this.readOnlyLocks = Collections.emptyList();
+		} else {
+			this.locks = new ArrayList<LockDto>(locks);
+			this.readOnlyLocks = Collections.unmodifiableList(this.locks);
+		}
+	}
+	
 	public int getLockCount() {
-		return lockCount;
+		return readOnlyLocks.size();
 	}
+	
+	public boolean isLocked() {
+		return getLockCount() > 0;
+	}
+	
+	public void addLock(LockDto lock) {
+		if (locks == null) {
+			locks = new ArrayList<LockDto>();
+			readOnlyLocks = Collections.unmodifiableList(locks);
+		}
+		locks.add(lock);
+	}
+	
+	public void removeLock(Long... lockIds) {
+		if (locks == null) {
+			return;
+		}
+		;
+		
+		final Set<Long> ids = new HashSet<Long>(Arrays.asList(lockIds));
+		
+		for (Iterator<LockDto> itr = locks.iterator(); itr.hasNext(); ) {
+			if (ids.contains(itr.next().getId())) {
+				itr.remove();
+			}
+		}
+	}
+	
+	public void clearLocks() {
+		if (locks != null) {
+			locks.clear();
+		}
+	}
+	
+	@Deprecated
 	public void setLockCount(int lockCount)
 	{
-		this.lockCount = lockCount;
 	}
-	public String getLockMessage() {
-		return lockMessage;
-	}
+	@Deprecated
 	public void setLockMessage(String lockMessage) {
-		this.lockMessage = lockMessage;
 	}
 }

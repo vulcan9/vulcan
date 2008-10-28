@@ -39,6 +39,7 @@ import javax.servlet.jsp.PageContext;
 
 import net.sourceforge.vulcan.StateManager;
 import net.sourceforge.vulcan.core.BuildManager;
+import net.sourceforge.vulcan.dto.LockDto;
 import net.sourceforge.vulcan.dto.ProjectStatusDto;
 import net.sourceforge.vulcan.metadata.SvnRevision;
 
@@ -131,7 +132,17 @@ public abstract class JstlFunctions {
 	
 	public static String getProjectLockMessage(String projectName) {
 		final StateManager mgr = (StateManager) webApplicationContext.getBean(Keys.STATE_MANAGER, StateManager.class);
-		return mgr.getProjectConfig(projectName).getLockMessage();
+		final List<LockDto> locks = mgr.getProjectConfig(projectName).getLocks();
+		
+		final StringBuilder sb = new StringBuilder();
+		
+		for (LockDto lock : locks) {
+			if (sb.length() > 0) {
+				sb.append("; ");
+			}
+			sb.append(lock.getMessage());
+		}
+		return sb.toString();
 	}
 	
 	@SuppressWarnings("unchecked")

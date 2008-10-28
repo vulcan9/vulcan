@@ -7,7 +7,11 @@
 	xmlns:v="http://vulcan.sourceforge.net/j2ee/jsp/tags">
 
 	<jsp:directive.page contentType="application/xml" session="false"/>
-	
+
+	<c:if test="${lockId ne null}">
+		<lock-id>${lockId}</lock-id>
+	</c:if>
+		
 	<c:set var="keys" value="${v:getActionErrorPropertyList(pageContext.request)}"/>
 	
 	<c:if test="${not empty keys}">

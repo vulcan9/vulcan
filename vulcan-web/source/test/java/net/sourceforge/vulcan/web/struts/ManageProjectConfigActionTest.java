@@ -29,6 +29,7 @@ import java.util.Locale;
 
 import net.sourceforge.vulcan.PluginManager;
 import net.sourceforge.vulcan.dto.BuildToolConfigDto;
+import net.sourceforge.vulcan.dto.LockDto;
 import net.sourceforge.vulcan.dto.ProjectConfigDto;
 import net.sourceforge.vulcan.dto.RepositoryAdaptorConfigDto;
 import net.sourceforge.vulcan.exception.DuplicateNameException;
@@ -239,8 +240,7 @@ public class ManageProjectConfigActionTest extends MockApplicationContextStrutsT
 		addRequestParameter("locked", "true");
 		
 		ProjectConfigDto updated = (ProjectConfigDto) config.copy();
-		updated.setLockCount(1);
-		updated.setLockMessage("messages.project.locked.by.user");
+		updated.addLock(new LockDto("messages.project.locked.by.user", 0));
 		
 		expect(buildManager.isBuildingOrInQueue(config.getName())).andReturn(false);
 		
@@ -288,8 +288,7 @@ public class ManageProjectConfigActionTest extends MockApplicationContextStrutsT
 		ProjectConfigDto config = new ProjectConfigDto();
 		config.setName("my project");
 		config.setWorkDir("dir");
-		config.setLockCount(42);
-		config.setLockMessage("some pre-existing reason.");
+		config.setLocks(Arrays.asList(new LockDto(), new LockDto()));
 		ProjectConfigForm form = new ProjectConfigForm();
 		form.populate(config, false);
 		form.setStore(configurationStore);
@@ -321,8 +320,7 @@ public class ManageProjectConfigActionTest extends MockApplicationContextStrutsT
 		ProjectConfigDto config = new ProjectConfigDto();
 		config.setName("my project");
 		config.setWorkDir("dir");
-		config.setLockCount(42);
-		config.setLockMessage("something pre-existing reason.");
+		config.setLocks(Arrays.asList(new LockDto(), new LockDto()));
 		ProjectConfigForm form = new ProjectConfigForm();
 		form.populate(config, false);
 		form.setStore(configurationStore);
@@ -335,8 +333,7 @@ public class ManageProjectConfigActionTest extends MockApplicationContextStrutsT
 		addRequestParameter("config.workDir", config.getWorkDir());
 		
 		ProjectConfigDto updated = (ProjectConfigDto) config.copy();
-		updated.setLockCount(0);
-		updated.setLockMessage(null);
+		updated.setLocks(null);
 		
 		manager.updateProjectConfig(config.getName(), updated, true);
 		
