@@ -112,47 +112,47 @@
 	<c:choose>
 		<c:when test="${transform}">
 			<c:import url="/xsl/projects.xsl" var="xslt"/>
-	
-			<v:bubble>
-				<x:transform xslt="${xslt}" doc="${statusXml}">
-					<x:param name="contextRoot"><c:url value="/"/></x:param>
-					<x:param name="caption">
-						<spring:message code="captions.projects.status"/>
-						<c:if test="${caption ne null}">
-							<c:out value=" - ${caption}"/>
-						</c:if>
-					</x:param>
-					<x:param name="sortUrl">
-						<c:url value="/managePreferences.do?action=save"/>
-					</x:param>
-					<x:param name="detailLink">
-						<c:url value="/viewProjectStatus.do?transform=xhtml&amp;projectName="/>
-					</x:param>
-					<x:param name="nameHeader">
-						<spring:message code="th.project.name"/>
-					</x:param>
-					<x:param name="buildNumberHeader">
-						<spring:message code="th.build.number"/>
-					</x:param>
-					<x:param name="ageHeader">
-						<spring:message code="th.age"/>
-					</x:param>
-					<x:param name="tagHeader">
-						<spring:message code="th.tagName"/>
-					</x:param>
-					<x:param name="revisionHeader">
-						<spring:message code="th.revision"/>
-					</x:param>
-					<x:param name="statusHeader">
-						<spring:message code="th.project.status"/>
-					</x:param>
-					<x:param name="timestampLabel">
-						<spring:message code="label.build.timestamp"/>
-					</x:param>
-					<x:param name="sortSelect">${preferences.sortColumn}</x:param>
-					<x:param name="sortOrder">${preferences.sortOrder}</x:param>
-				</x:transform>
-			</v:bubble>
+			<x:transform xslt="${xslt}" doc="${statusXml}">
+				<x:param name="contextRoot">
+					<c:url value="/" var="contextRoot"/>
+					${fn:substringBefore(contextRoot, ';')}
+				</x:param>
+				<x:param name="caption">
+					<spring:message code="captions.projects.status"/>
+					<c:if test="${caption ne null}">
+						<c:out value=" - ${caption}"/>
+					</c:if>
+				</x:param>
+				<x:param name="sortUrl">
+					<c:url value="/managePreferences.do?action=save"/>
+				</x:param>
+				<x:param name="detailLink">
+					<c:url value="/viewProjectStatus.do?transform=xhtml&amp;projectName="/>
+				</x:param>
+				<x:param name="nameHeader">
+					<spring:message code="th.project.name"/>
+				</x:param>
+				<x:param name="buildNumberHeader">
+					<spring:message code="th.build.number"/>
+				</x:param>
+				<x:param name="ageHeader">
+					<spring:message code="th.age"/>
+				</x:param>
+				<x:param name="tagHeader">
+					<spring:message code="th.tagName"/>
+				</x:param>
+				<x:param name="revisionHeader">
+					<spring:message code="th.revision"/>
+				</x:param>
+				<x:param name="statusHeader">
+					<spring:message code="th.project.status"/>
+				</x:param>
+				<x:param name="timestampLabel">
+					<spring:message code="label.build.timestamp"/>
+				</x:param>
+				<x:param name="sortSelect">${preferences.sortColumn}</x:param>
+				<x:param name="sortOrder">${preferences.sortOrder}</x:param>
+			</x:transform>
 		</c:when>
 		<c:otherwise>
 			<c:out value="${statusXml}" escapeXml="false"/>
