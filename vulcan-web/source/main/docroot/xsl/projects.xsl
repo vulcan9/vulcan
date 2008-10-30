@@ -191,34 +191,5 @@
 				</xsl:if>
 			</xsl:element>
 		</tr>
-		<xsl:if test="estimated-build-time/@millis &gt; 0">
-			<xsl:variable name="pctDone" select="format-number(1 - estimated-build-time/@remaining-millis div estimated-build-time/@millis, '##%')"/>
-			<tr>
-				<td colspan="6" class="progress-bar">
-					<xsl:attribute name="title">
-						<xsl:value-of select="$pctDone"/>
-					</xsl:attribute>
-					
-					<div class="progress-bar">
-						<xsl:attribute name="class">
-							<xsl:text>progress-bar-</xsl:text>
-							<xsl:choose>
-								<xsl:when test="errors-present">
-									<xsl:text>failure</xsl:text>
-								</xsl:when>
-								<xsl:otherwise>
-									<xsl:text>success</xsl:text>
-								</xsl:otherwise>
-							</xsl:choose>
-						</xsl:attribute>
-						<xsl:attribute name="style">
-							<xsl:text>width:</xsl:text>
-							<xsl:value-of select="$pctDone"/>
-						</xsl:attribute>
-						<xsl:text>.</xsl:text>
-					</div>
-				</td>
-			</tr>
-		</xsl:if>
 	</xsl:template>
 </xsl:stylesheet>

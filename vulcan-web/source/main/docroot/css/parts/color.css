@@ -1,5 +1,5 @@
 /* Colors: */
-caption, .caption, .header {
+caption, .caption {
 	color: #E56630;
 }
 
@@ -37,14 +37,16 @@ html, body {
 	background-color: white;
 }
 
-h2.build-stats {
+h4.build-stats {
 	color: gray;
-	font-size: 10pt;
-	font-weight: normal;
 }
 
 .success, .PASS {
 	color: #43F143;
+}
+
+div.progress-bar {
+	border: 1px solid #E7E7E7;
 }
 
 div.progress-bar-success {
@@ -90,4 +92,8 @@ input[type=text].new-label {
 
 .test-namespace {
 	color: gray;
+}
+
+.idle, .time-remaining {
+	color: #666;
 }
