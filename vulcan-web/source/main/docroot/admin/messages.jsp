@@ -14,27 +14,32 @@
 <html:xhtml/>
 
 <body>
+	<c:set var="messages" value="${v:getEvents('AUDIT,INFO,WARNING,ERROR')}"/>
 	<c:choose>
-		<c:when test="${empty eventPool['WARNING'] and empty eventPool['ERROR'] and empty eventPool['AUDIT']}">
-			<v:bubble styleClass="message"><spring:message code="messages.none"/></v:bubble>
+		<c:when test="${empty messages}">
+			<spring:message code="messages.none"/>
 		</c:when>
 		<c:otherwise>
-			<c:forEach items="${eventPool['ERROR']}" var="msg">
-				<div class="error">
-					<fmt:formatDate value="${msg.date}" type="both"/>:  <spring:message code="${msg.key}" arguments="${msg.args}" htmlEscape="true"/>
-				</div>
-			</c:forEach>	
-			<c:forEach items="${eventPool['WARNING']}" var="msg">
-				<div class="warning">
-					<fmt:formatDate value="${msg.date}" type="both"/>:  <spring:message code="${msg.key}" arguments="${msg.args}" htmlEscape="true"/>
-				</div>
-			</c:forEach>
-			<c:forEach items="${eventPool['AUDIT']}" var="msg">
-				<div>
-					<fmt:formatDate value="${msg.date}" type="both"/>:  <spring:message code="${msg.key}" arguments="${msg.args}" htmlEscape="true"/>
-				</div>
-			</c:forEach>	
-			<div><html:link styleClass="confirm" forward="clearMessages"><spring:message code="link.clear.messages"/></html:link></div>
+			<table class="sortable">
+				<caption>System Messages</caption>
+				<thead>
+					<tr>
+						<th class="timestamp">Date</th>
+						<th>Type</th>
+						<th>Message</th>
+					</tr>
+				</thead>
+				<tbody>
+					<c:forEach items="${messages}" var="msg">
+						<tr>
+							<td class="timestamp"><fmt:formatDate value="${msg.date}" type="both"/></td>
+							<td>${msg.class.name}</td>
+							<td><spring:message code="${msg.key}" arguments="${msg.args}" htmlEscape="true"/></td>
+						</tr>
+					</c:forEach>
+				</tbody>
+			</table>	
+			<html:link styleClass="confirm" forward="clearMessages"><spring:message code="link.clear.messages"/></html:link>
 		</c:otherwise>
 	</c:choose>
 </body>

@@ -28,7 +28,7 @@ import net.sourceforge.vulcan.core.DependencyGroup;
 import net.sourceforge.vulcan.core.support.DependencyGroupImpl;
 import net.sourceforge.vulcan.dto.ProjectConfigDto;
 import net.sourceforge.vulcan.event.EventHandler;
-import net.sourceforge.vulcan.event.WarningEvent;
+import net.sourceforge.vulcan.event.InfoEvent;
 import net.sourceforge.vulcan.exception.AlreadyScheduledException;
 
 import org.easymock.EasyMock;
@@ -80,10 +80,10 @@ public class ScheduleProjectsJobTest extends EasyMockTestCase {
 		bm.add(dg);
 		EasyMock.expectLastCall().andThrow(e);
 		
-		eh.reportEvent(new WarningEvent(job, "Scheduler.interval.too.short", new Object[] {"job"}) {
+		eh.reportEvent(new InfoEvent(job, "Scheduler.interval.too.short", new Object[] {"job"}) {
 			@Override
 			public boolean equals(Object obj) {
-				final WarningEvent o = (WarningEvent) obj;
+				final InfoEvent o = (InfoEvent) obj;
 				if (o.getKey().equals(getKey()) && o.getSource().equals(getSource())
 						&& Arrays.equals(o.getArgs(), getArgs())) {
 					return true;

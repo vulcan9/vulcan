@@ -19,13 +19,8 @@
 package net.sourceforge.vulcan.spring;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 import net.sourceforge.vulcan.event.Event;
 import net.sourceforge.vulcan.event.EventPool;
@@ -40,22 +35,23 @@ import org.springframework.jmx.export.annotation.ManagedOperationParameter;
 import org.springframework.jmx.export.annotation.ManagedOperationParameters;
 import org.springframework.jmx.export.annotation.ManagedResource;
 
-
 @SvnRevision(id="$Id$", url="$HeadURL$")
 @ManagedResource(objectName="vulcan:name=eventPool")
 public final class SpringEventPool implements EventPool, ApplicationListener {
 	List<Event> events = new ArrayList<Event>();
 	int maxSize = 20;
 	
-	public List<Event> get(Object key) {
-		final EventType type = EventType.valueOf(key.toString());
-		return getEvents(type);
-	}
-	
 	@ManagedOperation
 	@ManagedOperationParameters({@ManagedOperationParameter(name="type", description="")})
-	public List<Event> getEvents(String type) {
-		return get(type);
+	public List<Event> getEvents(String types) {
+		final String[] typeStrings = types.split(",");
+		final EventType[] eventTypes = new EventType[typeStrings.length];
+		
+		for (int i = 0; i < eventTypes.length; i++) {
+			eventTypes[i] = EventType.valueOf(typeStrings[i]);
+		}
+		
+		return getEvents(eventTypes);
 	}
 	
 	public List<Event> getEvents(EventType type) {
@@ -67,7 +63,7 @@ public final class SpringEventPool implements EventPool, ApplicationListener {
 		
 		return list;
 	}
-	public synchronized List<Event> getEvents(EventType[] types) {
+	public synchronized List<Event> getEvents(EventType... types) {
 		List<Event> list = new ArrayList<Event>();
 		
 		for (Event e : events) {
@@ -85,7 +81,7 @@ public final class SpringEventPool implements EventPool, ApplicationListener {
 			if (events.size() == maxSize) {
 				events.remove(0);
 			}
-			events.add(((EventBridge)event).getEvent());
+			events.add(0, ((EventBridge)event).getEvent());
 		}
 	}
 	@ManagedAttribute
@@ -98,46 +94,11 @@ public final class SpringEventPool implements EventPool, ApplicationListener {
 		
 		final int size = events.size();
 		if (size > maxSize) {
-			events = events.subList(size-maxSize, size);
+			events = new ArrayList<Event>(events.subList(0, maxSize));
 		}
-	}
-	public Set<EventType> keySet() {
-		return new HashSet<EventType>(Arrays.asList(EventType.values()));
 	}
 	@ManagedOperation
 	public synchronized void clear() {
 		events.clear();
-	}
-	public boolean containsKey(Object key) {
-		try {
-			EventType.valueOf(key.toString());
-			return true;
-		} catch (IllegalArgumentException e) {
-			return false;
-		}
-	}
-	public boolean containsValue(Object value) {
-		throw new UnsupportedOperationException();
-	}
-	public Set<Entry<EventType, List<Event>>> entrySet() {
-		throw new UnsupportedOperationException();
-	}
-	public boolean isEmpty() {
-		throw new UnsupportedOperationException();
-	}
-	public List<Event> put(EventType key, List<Event> value) {
-		throw new UnsupportedOperationException();
-	}
-	public void putAll(Map<? extends EventType, ? extends List<Event>> t) {
-		throw new UnsupportedOperationException();
-	}
-	public int size() {
-		throw new UnsupportedOperationException();
-	}
-	public List<Event> remove(Object key) {
-		throw new UnsupportedOperationException();
-	}
-	public Collection<List<Event>> values() {
-		throw new UnsupportedOperationException();
 	}
 }
