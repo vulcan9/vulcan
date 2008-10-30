@@ -27,8 +27,8 @@ public enum EventType {
 	BUILD(BuildCompletedEvent.class),
 	MESSAGE(MessageEvent.class),
 	ERROR(ErrorEvent.class),
-	WARNING(WarningEvent.class);
-	
+	WARNING(WarningEvent.class),
+	INFO(InfoEvent.class);
 	
 	private final Class<? extends Event> eventClass;
 

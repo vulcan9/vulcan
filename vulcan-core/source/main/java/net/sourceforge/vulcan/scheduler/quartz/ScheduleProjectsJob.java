@@ -24,7 +24,7 @@ import net.sourceforge.vulcan.core.DependencyBuildPolicy;
 import net.sourceforge.vulcan.core.DependencyGroup;
 import net.sourceforge.vulcan.dto.ProjectConfigDto;
 import net.sourceforge.vulcan.event.EventHandler;
-import net.sourceforge.vulcan.event.WarningEvent;
+import net.sourceforge.vulcan.event.InfoEvent;
 import net.sourceforge.vulcan.exception.AlreadyScheduledException;
 import net.sourceforge.vulcan.exception.ProjectsLockedException;
 import net.sourceforge.vulcan.metadata.SvnRevision;
@@ -89,7 +89,7 @@ public class ScheduleProjectsJob extends QuartzJobBean implements Job {
 		} catch (ProjectsLockedException ignore) {
 			// This is a very unlikely race condition.
 		} catch (AlreadyScheduledException e) {
-			eventHandler.reportEvent(new WarningEvent(
+			eventHandler.reportEvent(new InfoEvent(
 					this,
 					"Scheduler.interval.too.short",
 					new Object[] {name}));

@@ -41,6 +41,8 @@ import net.sourceforge.vulcan.StateManager;
 import net.sourceforge.vulcan.core.BuildManager;
 import net.sourceforge.vulcan.dto.LockDto;
 import net.sourceforge.vulcan.dto.ProjectStatusDto;
+import net.sourceforge.vulcan.event.Event;
+import net.sourceforge.vulcan.event.EventPool;
 import net.sourceforge.vulcan.metadata.SvnRevision;
 
 import org.apache.struts.Globals;
@@ -175,6 +177,12 @@ public abstract class JstlFunctions {
 		return mgr.getStatusByBuildNumber(projectName, buildNumber);
 	}
 	
+	public static List<Event> getEvents(String eventTypes) {
+		final EventPool eventPool = (EventPool) webApplicationContext.getBean(Keys.EVENT_POOL, EventPool.class);
+		
+		return eventPool.getEvents(eventTypes);
+	}
+
 	private static List<String> getProjectNamesByLabels(StateManager mgr, Iterable<String> itr) {
 		final Set<String> set = new HashSet<String>();
 		boolean empty = true;

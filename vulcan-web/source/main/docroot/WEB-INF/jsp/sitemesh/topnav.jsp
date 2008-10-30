@@ -28,12 +28,12 @@
 	</c:if>
 	<v:topNavSection name="messages" page="/admin/messages.jsp" messageKey="link.messages" prefix="/admin/messages">
 		<c:choose>
-			<c:when test="${not empty eventPool['ERROR']}">
+			<c:when test="${not empty v:getEvents('ERROR')}">
 				<spring:message var="linkTitle" code="health.error"/>
 				<html:img page="/images/error.gif" alt="errors" title="${linkTitle}" styleClass="health"/>
 			</c:when>
 			<c:otherwise>
-				<c:if test="${not empty eventPool['WARNING']}">
+				<c:if test="${not empty v:getEvents('WARNING')}">
 					<spring:message var="linkTitle" code="health.warning"/>
 					<html:img page="/images/warning.gif" alt="errors" title="${linkTitle}" styleClass="health"/>
 				</c:if>

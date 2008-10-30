@@ -1,6 +1,6 @@
 /*
  * Vulcan Build Manager
- * Copyright (C) 2005-2006 Chris Eldredge
+ * Copyright (C) 2005-2008 Chris Eldredge
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,24 +18,15 @@
  */
 package net.sourceforge.vulcan.event;
 
-import java.util.List;
-
 import net.sourceforge.vulcan.metadata.SvnRevision;
 
-
-/**
- * Implementation Note:  This interface extends Map in order to allow JSTL to access
- * events of various types using expressions such as ${eventPool['ERROR']}.  Only the
- * "get" and "containsKey" methods need to be implemented.  Other methods derived
- * from Map may throw UnsupportedOperationException.
- */
 @SvnRevision(id="$Id$", url="$HeadURL$")
-public interface EventPool {
-	/**
-	 * @param types comma delimited list of EventType enum values to return.
-	 * @return List of matching events, sorted by reverse chronological order (newest events first).
-	 */
-	List<Event> getEvents(String types);
-	List<Event> getEvents(EventType... types);
-	void clear();
+public class InfoEvent extends MessageEvent {
+	public InfoEvent(final Object source, final String messageKey) {
+		this(source, messageKey, new Object[0]);
+	}
+	public InfoEvent(final Object source, final String messageKey,
+			final Object[] messageArgs) {
+		super(source, messageKey, messageArgs);
+	}
 }

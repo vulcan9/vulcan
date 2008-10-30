@@ -97,8 +97,8 @@ public class SpringEventPoolTest extends TestCase {
 		
 		assertEquals(2, pool.getEvents(EventType.ALL).size());
 		
-		assertSame(middle.getEvent(), pool.getEvents(EventType.ALL).get(0));
-		assertSame(mostRecent.getEvent(), pool.getEvents(EventType.ALL).get(1));
+		assertSame(mostRecent.getEvent(), pool.getEvents(EventType.ALL).get(0));
+		assertSame(middle.getEvent(), pool.getEvents(EventType.ALL).get(1));
 
 		pool.setMaxSize(1);
 		
@@ -128,24 +128,24 @@ public class SpringEventPoolTest extends TestCase {
 			}
 		}));
 		
-		List<Event> blist = pool.get("BUILD");
+		List<Event> blist = pool.getEvents("BUILD");
 		
 		assertEquals(2, blist.size());
 		
-		// Build events should come back in reverse chron. order (newest first)
+		// Build events should come back in reverse chronological order (newest first)
 		assertSame(buildCompletedEvent2, blist.get(0));
 		assertSame(buildCompletedEvent1, blist.get(1));
 	}
 
 	public void testGetInvalidType() {
 		try {
-			pool.get("NONESUCH");
+			pool.getEvents("NONESUCH");
 			fail("expected exception");
 		} catch (IllegalArgumentException e) {
 		}
 
 		try {
-			pool.get(null);
+			pool.getEvents((String)null);
 			fail("expected exception");
 		} catch (NullPointerException e) {
 		}
@@ -171,5 +171,27 @@ public class SpringEventPoolTest extends TestCase {
 		List<Event> list = pool.getEvents(EventType.ALL);
 		
 		assertEquals(3, list.size());
+	}
+	public void testSplitsTypesByComma() {
+		pool.onApplicationEvent(new EventBridge(new BuildCompletedEvent(this, null, null, null)));
+		pool.onApplicationEvent(new EventBridge(new ErrorEvent(this, null, null)));
+		pool.onApplicationEvent(new EventBridge(new Event() {
+			public Object getSource() {
+				return this;
+			}
+			public String getKey() {
+				return null;
+			}
+			public Object[] getArgs() {
+				return null;
+			}
+			public Date getDate() {
+				return null;
+			}
+		}));
+		
+		List<Event> list = pool.getEvents(EventType.BUILD.name() + "," + EventType.ERROR.name());
+		
+		assertEquals(2, list.size());
 	}
 }
