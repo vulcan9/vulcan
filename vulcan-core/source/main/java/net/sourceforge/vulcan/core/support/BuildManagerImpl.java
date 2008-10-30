@@ -388,6 +388,14 @@ public class BuildManagerImpl implements BuildManager {
 		try {
 			boolean removed = false;
 			
+			// adding this behavior to avoid putting build queue in permanent illegal state
+			if (!tgt.hasNext()) {
+				LOG.error("Target was empty and should have been removed by now.");
+				queue.remove(i);
+				
+				return null;
+			}
+			
 			config = tgt.next();
 			if (!tgt.hasNext()) {
 				removed = true;
