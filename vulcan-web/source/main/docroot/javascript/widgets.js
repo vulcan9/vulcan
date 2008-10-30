@@ -380,12 +380,16 @@ function toggleProjectLabel(event) {
 function refreshDashboard(e, interval, url) {
 	if (console && console.debug) console.debug("refresh " + new Date());
 	
+	// if interval is undefined, an event fired
 	if (!interval) {
 		$("#content").loadCustom(window.refreshUrl, null, "#content");
 	} else {
+		// otherwise we're being initialized
 		window.refreshInterval = interval;
 		window.refreshUrl = url;
 	}
+	
+	//TODO: probably should cancel timeout if an error happens during loadCustom
 	window.setTimeout(refreshDashboard, window.refreshInterval);
 }
 

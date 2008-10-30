@@ -20,8 +20,10 @@
 		<jsp:attribute name="href"><c:url value="/rss.jsp"/></jsp:attribute>
 	</jsp:element>
 	<c:if test="${preferences.reloadInterval > 0}">
-	<script type="text/javascript">refreshDashboard(null, ${preferences.reloadInterval * 1000}, "<c:url value="/"/>");</script>
+		<script type="text/javascript">refreshDashboard(null, ${preferences.reloadInterval * 1000}, "<c:url value="/"/>");</script>
 	</c:if>
+	<!--  get the current time for calculating elapsed times and such. -->
+	<jsp:useBean id="now" class="java.util.Date" scope="request"/>
 </head>
 <body>
 
@@ -70,47 +72,63 @@
 
 <div id="current-activity">
 	<c:if test="${preferences.showBuildDaemons}">
-	<table class="dashboard">
-		<caption><spring:message code="captions.build.daemons"/></caption>
-		<thead>
-			<tr>
-				<th><spring:message code="th.build.daemon.name"/></th>
-				<th><spring:message code="th.build.daemon.project"/></th>
-				<th><spring:message code="th.build.daemon.status"/></th>
-				<th><spring:message code="th.build.daemon.detail"/></th>
-				<th><spring:message code="th.control"/></th>
-			</tr>
-		</thead>
-		<tbody>
+		<c:set var="buildingProjects" value="${stateManager.buildManager.projectsBeingBuilt}"/>
+		
+		<h3 class="caption"><spring:message code="captions.build.daemons"/></h3>
+		<ul>
 		<c:forEach items="${stateManager.buildDaemons}" var="daemon">
 			<c:set var="isBuilding" value="${daemon.building}"/>
-			<tr>
-				<td>${daemon.name}</td>
-				<td>
-					<c:if test="${isBuilding}">
-						${daemon.currentTarget.name}
-					</c:if>
-				</td>
-				<td>
-					<c:choose>
-						<c:when test="${isBuilding}">
-							<c:set var="key" value="${daemon.phaseMessageKey}"/>
-							<c:if test="${key == null}">
-								<c:set var="key" value="build.phase.build"/>
+			<c:set var="target" value="${buildingProjects[daemon.currentTarget.name]}"/>
+			<c:choose>
+				<c:when test="${isBuilding}">
+					<li>
+						<spring:message code="messages.build.deamon.status" arguments="${daemon.name},${target.name}"/>
+						<p class="phase">
+							<spring:message code="${daemon.phaseMessageKey}"/>
+							<c:if test="${daemon.detail ne null}">
+								(<spring:message code="${daemon.detail}" arguments="${daemon.detailArgs}"/>)
 							</c:if>
-							<spring:message code="${key}"/>
-						</c:when>
-						<c:otherwise>
-							<spring:message code="build.daemon.idle"/>
-						</c:otherwise>										
-					</c:choose>
-				</td>
-				<td>
-					<c:if test="${daemon.detail ne null}">
-						<spring:message code="${daemon.detail}" arguments="${daemon.detailArgs}"/>
-					</c:if>
-				</td>
-				<td>
+						</p>
+						<c:if test="${target.estimatedBuildTimeMillis gt 0}">
+							<c:set var="elapsedTime" value="${now.time - target.startDate.time}"/>
+							<c:set var="pct" value="${elapsedTime / target.estimatedBuildTimeMillis}"/>
+							
+							<c:if test="${pct gt 1}">
+								<c:set var="pct" value="1"/>
+							</c:if>
+							
+							<c:set var="statusClass" value="progress-bar-success"/>
+							
+							<c:if test="${not empty target.errors}">
+								<c:set var="statusClass" value="progress-bar-failure"/>
+							</c:if>
+							<div class="progress-bar">
+								<jsp:element name="div">
+									<jsp:attribute name="class">${statusClass}</jsp:attribute>
+									<jsp:attribute name="style">width:<fmt:formatNumber value="${pct}" type="percent"/></jsp:attribute>
+									<jsp:body><c:out value=""/></jsp:body>
+								</jsp:element>
+							</div>
+							<c:if test="${target.estimatedBuildTimeMillis - elapsedTime gt 5}">
+								<p class="time-remaining">
+									About <v:formatElapsedTime value="${target.estimatedBuildTimeMillis - elapsedTime}" verbosity="1"/> remaining.
+								</p>
+							</c:if>
+						</c:if>
+						<html:link forward="killBuild" paramId="daemonName"
+								paramName="daemon" paramProperty="name"
+								styleClass="confirm async cancel-build">
+							<spring:message code="link.build.abort"/>
+						</html:link>
+					</li>
+				</c:when>
+				<c:otherwise>
+					<li class="idle">
+						<spring:message code="messages.build.daemon.idle" arguments="${daemon.name}"/>
+					</li>
+				</c:otherwise>
+			</c:choose>
+<!-- 				<td>
 					<c:if test="${isBuilding}">
 						<html:link forward="killBuild" paramId="daemonName"
 								paramName="daemon" paramProperty="name"
@@ -119,56 +137,55 @@
 						</html:link>
 					</c:if>				
 				</td>
-			</tr>
+			</tr>-->
 		</c:forEach>
-		</tbody>
-	</table>
+		</ul>
 	</c:if>
 	
 	<c:if test="${preferences.showBuildQueue}">
-	<table class="dashboard">
-		<caption><spring:message code="captions.build.queue"/></caption>
-		<thead>
-			<tr>
-				<th><spring:message code="th.project.name"/></th>
-				<th><spring:message code="th.project.status"/></th>
-			</tr>
-		</thead>
-		<tbody>
-			<c:set var="pendingTargets" value="${stateManager.buildManager.pendingTargets}"/>
+		<c:set var="pendingTargets" value="${stateManager.buildManager.pendingTargets}"/>
+		<table class="dashboard">
+			<caption><spring:message code="captions.build.queue"/></caption>
 			<c:choose>
 				<c:when test="${empty pendingTargets}">
 					<tr>
-						<td colspan="2"><spring:message code="label.empty"/></td>
+						<td><spring:message code="label.empty"/></td>
 					</tr>
 				</c:when>
-				<c:when test="${not empty pendingTargets}">
-					<c:set var="hasPending" value="false"/>
-					<c:forEach items="${pendingTargets}" var="status">
+				<c:otherwise>
+					<thead>
 						<tr>
-							<td>${status.name}</td>
-							<td>
-								<c:if test="${status.inQueue}">
-									<spring:message code="build.queue.project.waiting"/>
-									<c:set var="hasPending" value="true"/>
-								</c:if>
-								<c:if test="${status.building}">
-									<spring:message code="build.queue.project.building"/>
-								</c:if>
-							</td>
+							<th><spring:message code="th.project.name"/></th>
+							<th><spring:message code="th.project.status"/></th>
 						</tr>
-					</c:forEach>
-					<c:if test="${hasPending}">
-						<tr>
-							<td colspan="2">
-								<html:link forward="flushQueue" styleClass="confirm async"><spring:message code="link.flush.queue"/></html:link>					
-							</td>
-						</tr>
-					</c:if>
-				</c:when>
+					</thead>
+					<tbody>
+						<c:set var="hasPending" value="false"/>
+						<c:forEach items="${pendingTargets}" var="status">
+							<tr>
+								<td>${status.name}</td>
+								<td>
+									<c:if test="${status.inQueue}">
+										<spring:message code="build.queue.project.waiting"/>
+										<c:set var="hasPending" value="true"/>
+									</c:if>
+									<c:if test="${status.building}">
+										<spring:message code="build.queue.project.building"/>
+									</c:if>
+								</td>
+							</tr>
+						</c:forEach>
+						<c:if test="${hasPending}">
+							<tr>
+								<td colspan="2">
+									<html:link forward="flushQueue" styleClass="confirm async"><spring:message code="link.flush.queue"/></html:link>					
+								</td>
+							</tr>
+						</c:if>
+					</tbody>
+				</c:otherwise>
 			</c:choose>
-		</tbody>
-	</table>
+		</table>
 	</c:if>
 	
 	<c:if test="${preferences.showSchedulers}">

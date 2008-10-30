@@ -5,10 +5,24 @@ body {
 	font-size: 10pt;
 }
 
-h1,h2,h3,ul,ol,p,form,body {
+h1,h2,h3,h4,h5,h6,ul,ol,p,form,body {
 	margin: 0;
 	padding: 0;
 	font-weight: normal;
+}
+
+h3 {
+	font-size: 200%;
+	font-weight: bold;
+}
+
+h5 {
+	font-weight: bold;
+	font-size: 115%;
+}
+
+h6 {
+	font-size: 100%;
 }
 
 th {
@@ -41,7 +55,7 @@ a.external {
 	padding-right: 14px;
 }
 
-table+table {
+table+table, ul+table {
 	margin-top: 4ex;
 }
 
@@ -49,10 +63,7 @@ caption, .caption {
 	padding-bottom: 2ex;
 	font-weight: bold;
 	text-align: left;
-}
-
-span.caption {
-	display: block;
+	font-size: 100%;
 }
 
 #loading-message {
@@ -264,6 +275,33 @@ div#current-activity table {
 	width: 100%;
 }
 
+div#current-activity ul {
+	list-style: none;
+	margin-left: 0;
+}
+
+div#current-activity ul li {
+	margin-bottom: 1ex;
+}
+
+div.progress-bar, p.phase {
+	margin-left: 2ex;
+}
+	
+.progress-bar-success, .progress-bar-failure {
+	height: 5px;
+	overflow: hidden;
+}
+
+p.time-remaining, a.cancel-build {
+	font-size: 85%;
+	text-align: right;
+}
+
+a.cancel-build {
+	float: right;
+}
+
 .build-outcome-message {
 	margin-bottom: 1ex;
 }
@@ -277,17 +315,6 @@ a.issue {
 	font-weight: bold;
 	background: transparent repeat top left;
 	background-image: url("../images/construction.gif");
-}
-
-td.progress-bar {
-	padding: 0;
-	margin: 0;
-	text-align: left !important;
-}
-
-td.progress-bar div {
-	height: 5px;
-	overflow: hidden;
 }
 
 span.error {

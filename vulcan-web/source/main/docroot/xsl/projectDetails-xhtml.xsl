@@ -87,23 +87,27 @@
 					<xsl:apply-templates select="/project/next-index"/>
 				</div>
 				
-				<h1>
+				<h3>
 					<xsl:apply-templates select="/project/name"/><xsl:text> : </xsl:text>
 					<xsl:apply-templates select="/project/status"/>
-				</h1>
+				</h3>
 	
-				<h2 class="build-stats">
+				<h4 class="build-stats">
 					<xsl:value-of select="$buildNumberHeader"/>
 					<xsl:text> </xsl:text>
 					<xsl:value-of select="/project/build-number"/>
-					<xsl:text>, </xsl:text>
-					<xsl:value-of select="$revisionHeader"/>
-					<xsl:text> </xsl:text>
-					<xsl:value-of select="/project/revision"/>
-					<xsl:text> (</xsl:text>
-					<xsl:value-of select="/project/repository-tag-name"/>
-					<xsl:text>)</xsl:text>
-				</h2>
+					<xsl:if test="/project/revision">
+						<xsl:text>, </xsl:text>
+						<xsl:value-of select="$revisionHeader"/>
+						<xsl:text> </xsl:text>
+						<xsl:value-of select="/project/revision"/>
+					</xsl:if>
+					<xsl:if test="/project/repository-tag-name">
+						<xsl:text> (</xsl:text>
+						<xsl:value-of select="/project/repository-tag-name"/>
+						<xsl:text>)</xsl:text>
+					</xsl:if>
+				</h4>
 				
 				<ul class="tabs" id="build-report-tabs">
 					<li class="active"><a id="summary-tab" href="#summary-anchor"><xsl:value-of select="$title"/></a></li>
@@ -274,7 +278,7 @@
 		<div xmlns="http://www.w3.org/1999/xhtml" id="summary-panel" class="tab-panel">
 			<a name="summary-anchor"/>
 			<xsl:if test="/project/message != ''">
-				<h3 class="build-outcome-message">
+				<h5 class="build-outcome-message">
 					<xsl:choose>
 						<xsl:when test="substring-before(/project/message, '&#10;')!=''">
 							<xsl:value-of select="substring-before(/project/message, '&#10;')"/>
@@ -284,13 +288,15 @@
 							<xsl:value-of select="/project/message"/>
 						</xsl:otherwise>
 					</xsl:choose>
-				</h3>
+				</h5>
 			</xsl:if>
 			
 			<div class="build-stats">
 				<dl>
-					<dt><xsl:value-of select="$buildReasonLabel"/></dt>
-					<dd><xsl:value-of select="/project/build-reason"/></dd>
+					<xsl:if test="/project/build-reason">
+						<dt><xsl:value-of select="$buildReasonLabel"/></dt>
+						<dd><xsl:value-of select="/project/build-reason"/></dd>
+					</xsl:if>
 					
 					<dt><xsl:value-of select="$updateTypeLabel"/></dt>
 					<dd><xsl:value-of select="/project/update-type"/></dd>
@@ -672,7 +678,7 @@
 						<tr>
 							<td>
 								<span class="test-name"><xsl:value-of select="@name"/></span>
-								<span class="test-namespace"><xsl:value-of select="@namespace"/></span>
+								<h6 class="test-namespace"><xsl:value-of select="@namespace"/></h6>
 							</td>
 							<td class="build-number">
 								<xsl:choose>
