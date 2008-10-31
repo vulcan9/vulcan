@@ -55,10 +55,6 @@ a.external {
 	padding-right: 14px;
 }
 
-table+table, ul+table {
-	margin-top: 4ex;
-}
-
 caption, .caption {
 	padding-bottom: 2ex;
 	font-weight: bold;
@@ -278,6 +274,7 @@ div#current-activity table {
 div#current-activity ul {
 	list-style: none;
 	margin-left: 0;
+	padding-bottom: 5ex;
 }
 
 div#current-activity ul li {
