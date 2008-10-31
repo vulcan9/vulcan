@@ -21,8 +21,8 @@
 	
 	<form action="${action}" method="post">
 		<div class="build-reports" id="mousecoords">
-			<span class="caption">Reports</span>
 			<table id="reports-list">
+				<caption>Reports</caption>
 				<tbody>
 					<tr class="hidden" id="prototype">
 						<td class="name">${item.name}</td>
