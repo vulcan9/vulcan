@@ -47,6 +47,7 @@ import net.sourceforge.vulcan.dto.ProjectStatusDto.Status;
 import net.sourceforge.vulcan.event.BuildCompletedEvent;
 import net.sourceforge.vulcan.event.ErrorEvent;
 import net.sourceforge.vulcan.event.EventHandler;
+import net.sourceforge.vulcan.event.InfoEvent;
 import net.sourceforge.vulcan.event.Message;
 import net.sourceforge.vulcan.event.WarningEvent;
 import net.sourceforge.vulcan.exception.AlreadyScheduledException;
@@ -475,7 +476,7 @@ public class BuildManagerImpl implements BuildManager {
 		tgt.appendPendingTargets(others);
 
 		if (others.isEmpty()) {
-			eventHandler.reportEvent(new WarningEvent(this, "warnings.duplicate.target.removed",
+			eventHandler.reportEvent(new InfoEvent(this, "warnings.duplicate.target.removed",
 					new String[] {config.getName() }));
 		} else {
 			final List<String> names = new ArrayList<String>(others.size());
