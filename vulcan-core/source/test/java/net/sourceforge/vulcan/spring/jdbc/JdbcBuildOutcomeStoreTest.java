@@ -148,6 +148,18 @@ public class JdbcBuildOutcomeStoreTest extends TestCase {
 		
 		assertPersistence();
 	}
+
+	public void testRenameProject() throws Exception {
+		assertPersistence();
+		
+		store.projectNameChanged(outcome.getName(), "newName");
+		
+		outcome.setName("newName");
+		outcome.setBuildNumber(6);
+		outcome.setId(UUID.randomUUID());
+		
+		assertPersistence();
+	}
 	
 	public void testSaveGeneratesIdOnNull() throws Exception {
 		store.init();

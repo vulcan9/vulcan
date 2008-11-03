@@ -182,6 +182,8 @@ public class JdbcBuildOutcomeStore implements BuildOutcomeStore, ProjectNameChan
 	public void projectNameChanged(String oldName, String newName) {
 		jdbcTemplate.update("update project_names set name=? where name=?",
 				new Object[] {newName, oldName});
+		projectNames.remove(oldName);
+		projectNames.add(newName);
 	}
 	
 	public ConfigurationStore getConfigurationStore() {
