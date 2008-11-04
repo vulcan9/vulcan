@@ -17,6 +17,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 using System;
+using System.IO;
 using System.Net;
 using System.Xml;
 
@@ -35,11 +36,13 @@ namespace SourceForge.Vulcan.Tray
 
 		public delegate void DashboardStatusChangedHandler(object source, DashboardStatusChangedEventArgs e);
 		public event DashboardStatusChangedHandler DashboardStatusChanged;
-		
+
+		private readonly CookieContainer cookieContainer = new CookieContainer();
+
 		private string url;
 		private DashboardStatus lastStatus;
 		private DateTime lastUpdate = DateTime.MinValue;
-		
+
 		public string Url
 		{
 			get { return url; }
@@ -81,14 +84,20 @@ namespace SourceForge.Vulcan.Tray
 
 		internal virtual XmlDocument LoadXml()
 		{
+			HttpWebRequest webreq = ((HttpWebRequest)(WebRequest.Create(url)));
+			webreq.CookieContainer = cookieContainer;
+
 			XmlDocument doc = new XmlDocument();
-			
-			doc.Load(url);
+
+			using (WebResponse response = webreq.GetResponse())
+			{
+				doc.Load(new StreamReader(response.GetResponseStream()));
+			}
 
 			return doc;
 		}
 
-		private void DetectStateChanges(XmlDocument doc)
+		private void DetectStateChanges(XmlNode doc)
 		{
 			XmlNodeList projects = doc.SelectNodes("/projects/project");
 			DateTime newestUpdate = DateTime.MinValue;
@@ -233,7 +242,7 @@ namespace SourceForge.Vulcan.Tray
 		{
 			get { return document; }
 		}
-		
+
 		public DataLoadedEventArgs(XmlDocument document)
 		{
 			this.document = document;
