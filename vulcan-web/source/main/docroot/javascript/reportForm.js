@@ -32,13 +32,17 @@ function ReportForm(form) {
 ReportForm.prototype.initialize = function() {
 	if (window.console && window.console.debug) window.console.debug("ReportForm.initialize");
 	
-	this.rangeTypeControls.change(rangeTypeChanged);
-	this.dateRangeControls.change(dateRangeChanged);
+	this.rangeTypeControls.click(rangeTypeChanged);
+	this.dateRangeControls.click(dateRangeChanged);
 	this.startDateControl.focus(dateRangeFocus);
 	this.endDateControl.focus(dateRangeFocus);
 	
 	rangeTypeChanged();
-	dateRangeChanged.apply(this.dateRangeControls.filter(":checked"), null);
+	
+	var controls = this.dateRangeControls;
+	var active = controls.filter(":checked");
+	
+	dateRangeChanged.apply(active, []);
 }
 
 function rangeTypeChanged() {
@@ -61,9 +65,13 @@ function rangeTypeChanged() {
 	var selectedType = reportForm.rangeTypeControls.filter(":checked").val();
 	var type = selectedType == "index" ? "radio" : "checkbox";
 	
-	reportForm.projectControls.each(function() {
-		this.setAttribute("type", type);
-	});
+	try {
+		reportForm.projectControls.each(function() {
+			this.setAttribute("type", type);
+		});
+	} catch(e) {
+		// Unsupported in IE... ignore.
+	}
 }
 
 function dateRangeChanged() {
@@ -91,8 +99,9 @@ function dateRangeChanged() {
 			return;
 	}
 	
-	reportForm.startDateControl.val((start.getMonth()+1) + "/" + start.getDate() + "/" + start.getFullYear());
-	reportForm.endDateControl.val((end.getMonth()+1) + "/" + end.getDate() + "/" + end.getFullYear());
+	reportForm.startDateControl.get(0).value = (start.getMonth()+1) + "/" + start.getDate() + "/" + start.getFullYear();
+	reportForm.endDateControl.get(0).value = (end.getMonth()+1) + "/" + end.getDate() + "/" + end.getFullYear();
+	
 }
 
 function dateRangeFocus() {
