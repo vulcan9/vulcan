@@ -30,7 +30,7 @@ function ReportForm(form) {
 }
 
 ReportForm.prototype.initialize = function() {
-	if (console && console.debug) console.debug("ReportForm.initialize");
+	if (window.console && window.console.debug) window.console.debug("ReportForm.initialize");
 	
 	this.rangeTypeControls.change(rangeTypeChanged);
 	this.dateRangeControls.change(dateRangeChanged);
@@ -42,10 +42,10 @@ ReportForm.prototype.initialize = function() {
 }
 
 function rangeTypeChanged() {
-	if (console && console.debug) console.debug("rangeTypeChanged this=%o reportForm=%o", this, reportForm);
+	if (window.console && window.console.debug) window.console.debug("rangeTypeChanged this=%o reportForm=%o", this, reportForm);
 	
 	reportForm.rangeTypeControls.each(function(e) {
-		if (console && console.debug) console.debug("%s[%d]: %s", this.name, e, this.checked ? "checked" : "unchecked");
+		if (window.console && window.console.debug) window.console.debug("%s[%d]: %s", this.name, e, this.checked ? "checked" : "unchecked");
 		
 		var tr = $(this).parents("tr").get(0);
 		var controls = $(tr).find("input[name!='" + this.name + "']");
@@ -67,7 +67,7 @@ function rangeTypeChanged() {
 }
 
 function dateRangeChanged() {
-	if (console && console.debug) console.debug("dateRangeChanged start=%o", reportForm.startDateControl);
+	if (window.console && window.console.debug) window.console.debug("dateRangeChanged start=%o", reportForm.startDateControl);
 	
 	var now = new Date();
 	
@@ -96,7 +96,7 @@ function dateRangeChanged() {
 }
 
 function dateRangeFocus() {
-	if (console && console.debug) console.debug("dateRangeFocus");
+	if (window.console && window.console.debug) window.console.debug("dateRangeFocus");
 	$("#dateRangeSpecific").attr("checked", "checked");
 }
 
