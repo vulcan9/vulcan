@@ -18,20 +18,31 @@
  */
 package net.sourceforge.vulcan.web.struts.actions;
 
+import java.util.Locale;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import net.sourceforge.vulcan.StateManager;
+import net.sourceforge.vulcan.event.AuditEvent;
+import net.sourceforge.vulcan.event.EventHandler;
 import net.sourceforge.vulcan.metadata.SvnRevision;
 
+import org.apache.commons.logging.Log;
 import org.apache.struts.action.Action;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
+import org.springframework.context.MessageSource;
+import org.springframework.context.MessageSourceAware;
+
 
 @SvnRevision(id="$Id$", url="$HeadURL$")
-public final class FlushBuildQueueAction extends Action {
+public final class FlushBuildQueueAction extends Action implements MessageSourceAware {
 	private StateManager stateManager;
+	private EventHandler eventHandler;
+	private Log	auditLog;
+	private MessageSource messageSource;
 	
 	@Override
 	public ActionForward execute(ActionMapping mapping, ActionForm form,
@@ -39,14 +50,26 @@ public final class FlushBuildQueueAction extends Action {
 		
 		stateManager.flushBuildQueue();
 		
-		return mapping.findForward("dashboard");
-	}
+		final AuditEvent event = BaseDispatchAction.createAuditEvent(this, request, "flush", "build queue", null, null);
+		eventHandler.reportEvent(event);
+		auditLog.info(messageSource.getMessage(event.getKey(), event.getArgs(), Locale.getDefault()));
 
-	public StateManager getStateManager() {
-		return stateManager;
+		return mapping.findForward("dashboard");
 	}
 
 	public void setStateManager(StateManager stateManager) {
 		this.stateManager = stateManager;
+	}
+	
+	public void setEventHandler(EventHandler eventHandler) {
+		this.eventHandler = eventHandler;
+	}
+	
+	public void setAuditLog(Log auditLog) {
+		this.auditLog = auditLog;
+	}
+	
+	public void setMessageSource(MessageSource messageSource) {
+		this.messageSource = messageSource;
 	}
 }

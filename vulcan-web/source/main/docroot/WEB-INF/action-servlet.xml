@@ -87,6 +87,8 @@
 	<bean name="/buildmanagement/flushBuildQueue"
 			class="net.sourceforge.vulcan.web.struts.actions.FlushBuildQueueAction">
 		<property name="stateManager" ref="stateManager"/>
+		<property name="auditLog" ref="auditLog"/>
+		<property name="eventHandler" ref="eventHandler"/>
 	</bean>
 	
 	<bean name="/buildmanagement/toggleScheduler"

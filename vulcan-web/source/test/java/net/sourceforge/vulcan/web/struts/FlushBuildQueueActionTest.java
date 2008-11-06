@@ -18,6 +18,7 @@
  */
 package net.sourceforge.vulcan.web.struts;
 
+import net.sourceforge.vulcan.event.Event;
 import net.sourceforge.vulcan.metadata.SvnRevision;
 
 @SvnRevision(id="$Id$", url="$HeadURL$")
@@ -31,6 +32,8 @@ public class FlushBuildQueueActionTest extends MockApplicationContextStrutsTestC
 	
 	public void testFlush() throws Exception {
 		manager.flushBuildQueue();
+		eventHandler.reportEvent((Event)notNull());
+		
 		replay();
 		
 		actionPerform();
