@@ -33,6 +33,8 @@ function submitFormHandler(e) {
 	var value = $(this).attr("actual-value");
 	
 	if (value) {
+		clearPendingChangesFlagHandler(e);
+		
 		$("#ieSubmit").attr("value", value);
 		$("#ieSubmit").click();
 	}

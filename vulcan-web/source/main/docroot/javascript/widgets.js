@@ -20,6 +20,18 @@
  * $HeadURL$
  */
 
+function log(message) {
+	if (!window.console) {
+		return;
+	}
+	
+	if (window.console.debug) {
+		window.console.debug(message);
+	} else if (window.console.log) {
+		window.console.log(message);
+	}
+}
+
 function getMetaContent(name, defaultValue) {
 	var meta = $("meta[name='" + name + "']");
 	
@@ -326,7 +338,7 @@ function launchHelpHandler(event) {
 }
 
 function setDirtyHandler() {
-	if (window.console && window.console.debug) window.console.debug("form data has been changed");
+	log("form data has been changed");
 	window.hasPendingChanges = true;
 }
 
@@ -335,14 +347,16 @@ function setDirtyHandler() {
  * since the user is submitting the pending changes.
  */
 function clearPendingChangesFlagHandler(event) {
-	if (window.console && window.console.debug) window.console.debug("clearPendingChange");
+	log("clearPendingChange");
 	window.hasPendingChanges = false;
 }
 
 function warnPendingChangesHandler(event) {
-	if (window.console && window.console.debug) window.console.debug("warnPendingChanges");
+	log("warnPendingChanges");
 	if (window.hasPendingChanges) {
 		event.returnValue = window.confirmUnsavedChangesMessage;
+		
+		return window.confirmUnsavedChangesMessage;
 	}
 }
 
@@ -378,7 +392,7 @@ function toggleProjectLabel(event) {
 }
 
 function refreshDashboard(e, interval, url) {
-	if (window.console && window.console.debug) window.console.debug("refresh " + new Date());
+	log("refresh " + new Date());
 	
 	// if interval is undefined, an event fired
 	if (!interval) {
@@ -568,7 +582,7 @@ function updateBreadcrumbs() {
 	try {
 		location = iframe.contentWindow.location.href;
 	} catch (e) {
-		if (window.console && window.console.warn) window.console.warn("unable to retrieve location.href from iframe");
+		log("unable to retrieve location.href from iframe");
 		// if iframe navigated to another domain, ignore error
 		location = "";
 	}
