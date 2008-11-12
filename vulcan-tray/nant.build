@@ -18,6 +18,15 @@
 		<mkdir dir="${dist.dir}"/>
 		<mkdir dir="${assembly.test.dir}"/>
 		<mkdir dir="${resources.dir}"/>
+
+		<mkdir dir="${assembly.test.dir}"/>
+
+		<copy todir="${assembly.test.dir}">
+			<fileset basedir="${nunit.bin.dir}">
+				<include name="nunit.core.dll"/>
+				<include name="nunit.framework.dll"/>
+			</fileset>
+		</copy>
 		
 		<call target="build-winexe"/>
 		<call target="build-test-assembly"/>
