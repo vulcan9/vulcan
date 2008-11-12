@@ -39,10 +39,10 @@ namespace SourceForge.Vulcan.Tray
 		public void SetUp()
 		{
 			monitor = new StatusMonitorStub();
-			monitor.DataLoadError += new StatusMonitor.DataLoadErrorHandler(monitor_DataLoadError);
-			monitor.DataLoaded += new StatusMonitor.DataLoadedHandler(monitor_DataLoaded);
-			monitor.DashboardStatusChanged += new StatusMonitor.DashboardStatusChangedHandler(monitor_DashboardStatusChanged);
-			monitor.NewBuildAvailable += new StatusMonitor.NewBuildHandler(monitor_NewBuildAvailable);
+			monitor.DataLoadError += monitor_DataLoadError;
+			monitor.DataLoaded += monitor_DataLoaded;
+			monitor.DashboardStatusChanged += monitor_DashboardStatusChanged;
+			monitor.NewBuildAvailable += monitor_NewBuildAvailable;
 			fakeStatus = new XmlDocument();
 
 			projectNodes = fakeStatus.CreateElement("projects");
@@ -218,7 +218,7 @@ namespace SourceForge.Vulcan.Tray
 			set { exception = value; }
 		}
 
-		internal override XmlDocument LoadXml()
+		protected override XmlDocument LoadXml()
 		{
 			if (exception != null)
 			{
