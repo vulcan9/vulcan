@@ -19,7 +19,7 @@
 
 namespace SourceForge.Vulcan.Tray
 {
-	internal class DashboardStatus
+	public class DashboardStatus
 	{
 		private readonly bool failuresPresent;
 		private readonly bool currentlyBuilding;

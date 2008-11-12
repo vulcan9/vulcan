@@ -23,7 +23,7 @@ using System.Xml;
 
 namespace SourceForge.Vulcan.Tray
 {
-	internal class StatusMonitor
+	public class StatusMonitor
 	{
 		public delegate void DataLoadedHandler(object source, DataLoadedEventArgs e);
 		public event DataLoadedHandler DataLoaded;
@@ -82,7 +82,7 @@ namespace SourceForge.Vulcan.Tray
 			DetectStateChanges(doc);
 		}
 
-		internal virtual XmlDocument LoadXml()
+		protected virtual XmlDocument LoadXml()
 		{
 			HttpWebRequest webreq = ((HttpWebRequest)(WebRequest.Create(url)));
 			webreq.CookieContainer = cookieContainer;
@@ -189,7 +189,7 @@ namespace SourceForge.Vulcan.Tray
 		}
 	}
 
-	internal class DashboardStatusChangedEventArgs : EventArgs
+	public class DashboardStatusChangedEventArgs : EventArgs
 	{
 		private readonly DashboardStatus status;
 
@@ -204,7 +204,7 @@ namespace SourceForge.Vulcan.Tray
 		}
 	}
 
-	internal class DataLoadErrorEventArgs : EventArgs 
+	public class DataLoadErrorEventArgs : EventArgs 
 	{
 		private readonly Exception cause;
 
@@ -219,7 +219,7 @@ namespace SourceForge.Vulcan.Tray
 		}
 	}
 
-	internal class NewBuildEventArgs : EventArgs
+	public class NewBuildEventArgs : EventArgs
 	{
 		private readonly XmlNode projectNode;
 		
@@ -234,7 +234,7 @@ namespace SourceForge.Vulcan.Tray
 		}
 	}
 
-	internal class DataLoadedEventArgs : EventArgs
+	public class DataLoadedEventArgs : EventArgs
 	{
 		private readonly XmlDocument document;
 
