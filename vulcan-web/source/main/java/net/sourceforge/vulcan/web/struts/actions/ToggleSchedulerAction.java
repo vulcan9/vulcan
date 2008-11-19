@@ -49,7 +49,16 @@ public final class ToggleSchedulerAction extends BaseAuditAction {
 			(SchedulerConfigDto) stateManager.getSchedulerConfig(schedulerName).copy();
 
 		final String action = schedulerConfig.isPaused() ? "unpause" : "pause";
-		final AuditEvent event = BaseDispatchAction.createAuditEvent(this, request, action, "scheduler", null, schedulerName);
+		
+		final AuditEvent event = new AuditEvent(this,
+				"audit.scheduler.toggle",
+				BaseDispatchAction.getUsername(request),
+				request.getRemoteHost(),
+				action,
+				"scheduler",
+				schedulerName,
+				null);
+
 		eventHandler.reportEvent(event);
 		auditLog.info(messageSource.getMessage(event.getKey(), event.getArgs(), Locale.getDefault()));
 		

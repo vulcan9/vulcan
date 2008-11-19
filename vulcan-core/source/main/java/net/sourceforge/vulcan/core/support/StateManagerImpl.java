@@ -59,6 +59,8 @@ import net.sourceforge.vulcan.dto.PluginProfileDto;
 import net.sourceforge.vulcan.dto.ProjectConfigDto;
 import net.sourceforge.vulcan.dto.SchedulerConfigDto;
 import net.sourceforge.vulcan.dto.StateManagerConfigDto;
+import net.sourceforge.vulcan.event.EventHandler;
+import net.sourceforge.vulcan.event.InfoEvent;
 import net.sourceforge.vulcan.exception.ConfigException;
 import net.sourceforge.vulcan.exception.DuplicateNameException;
 import net.sourceforge.vulcan.exception.NoSuchProjectException;
@@ -81,6 +83,7 @@ public abstract class StateManagerImpl implements StateManager, ProjectManager {
 	ConfigurationStore configurationStore;
 	BuildManager buildManager;
 	PluginManager pluginManager;
+	EventHandler eventHandler;
 	String version;
 	
 	/* State */
@@ -133,6 +136,8 @@ public abstract class StateManagerImpl implements StateManager, ProjectManager {
 			}
 			
 			startBuildDaemons();
+			
+			eventHandler.reportEvent(new InfoEvent(this, "messages.startup"));
 		} finally {
 			writeLock.unlock();
 		}
@@ -799,7 +804,9 @@ public abstract class StateManagerImpl implements StateManager, ProjectManager {
 	public void setPluginManager(PluginManager pluginManager) {
 		this.pluginManager = pluginManager;
 	}
-
+	public void setEventHandler(EventHandler eventHandler) {
+		this.eventHandler = eventHandler;
+	}
 	
 	protected abstract ProjectScheduler createProjectScheduler();
 	protected abstract BuildDaemon createBuildDaemon();

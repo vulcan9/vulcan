@@ -50,7 +50,13 @@ public final class FlushBuildQueueAction extends Action implements MessageSource
 		
 		stateManager.flushBuildQueue();
 		
-		final AuditEvent event = BaseDispatchAction.createAuditEvent(this, request, "flush", "build queue", null, null);
+		final AuditEvent event = new AuditEvent(this,
+				"audit.build.queue.flush",
+				BaseDispatchAction.getUsername(request),
+				request.getRemoteHost(),
+				"flush",
+				"build queue");
+		
 		eventHandler.reportEvent(event);
 		auditLog.info(messageSource.getMessage(event.getKey(), event.getArgs(), Locale.getDefault()));
 

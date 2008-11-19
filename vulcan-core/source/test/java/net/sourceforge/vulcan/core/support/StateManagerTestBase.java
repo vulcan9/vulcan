@@ -31,6 +31,8 @@ import net.sourceforge.vulcan.dto.BuildManagerConfigDto;
 import net.sourceforge.vulcan.dto.ProjectConfigDto;
 import net.sourceforge.vulcan.dto.ProjectStatusDto;
 import net.sourceforge.vulcan.dto.StateManagerConfigDto;
+import net.sourceforge.vulcan.event.Event;
+import net.sourceforge.vulcan.event.EventHandler;
 import net.sourceforge.vulcan.metadata.SvnRevision;
 import net.sourceforge.vulcan.scheduler.BuildDaemon;
 import net.sourceforge.vulcan.scheduler.ProjectScheduler;
@@ -105,6 +107,11 @@ public abstract class StateManagerTestBase extends EasyMockTestCase
 			}
 			public boolean isBuildingOrInQueue(String... originalName) {
 				return false;
+			}
+		});
+		
+		stateMgr.setEventHandler(new EventHandler() {
+			public void reportEvent(Event event) {
 			}
 		});
 		

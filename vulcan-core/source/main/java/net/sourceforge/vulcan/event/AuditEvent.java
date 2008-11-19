@@ -31,6 +31,11 @@ public class AuditEvent extends MessageEvent {
 	final String oldName;
 	
 	public AuditEvent(Object source, String messageKey, String user,
+			String host, String action, String type) {
+		this(source, messageKey, user, host, action, type, null, null);
+	}
+	
+	public AuditEvent(Object source, String messageKey, String user,
 			String host, String action, String type, String name, String oldName) {
 		super(source, messageKey, new String[] {user, host, action, type, name, oldName});
 		this.user = user;
