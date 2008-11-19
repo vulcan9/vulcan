@@ -42,6 +42,7 @@
 		<property name="buildManager" ref="buildManager"/>
 		<property name="pluginManager" ref="pluginManager"/>
 		<property name="configurationStore" ref="configurationStore"/>
+		<property name="eventHandler" ref="eventHandler"/>
 		<property name="projectNameChangeListeners">
 			<list>
 				<ref bean="configurationStore"/>

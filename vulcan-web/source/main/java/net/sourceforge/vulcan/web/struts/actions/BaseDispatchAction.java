@@ -147,16 +147,16 @@ public abstract class BaseDispatchAction extends DispatchAction implements Messa
 		}
 		
 		if (form instanceof DispatchForm) {
-			final DispatchForm configForm = (DispatchForm) form;
+			final DispatchForm dispatchForm = (DispatchForm) form;
 			
-			final String action = configForm.getAction();
+			final String action = dispatchForm.getAction();
 			if (!actionsToAudit.contains(action)) {
 				return;
 			}
 			
-			final String oldName = configForm.getOriginalName();
-			final String newName = configForm.getName();
-			final String type = configForm.getTargetType();
+			final String oldName = dispatchForm.getOriginalName();
+			final String newName = dispatchForm.getName();
+			final String type = dispatchForm.getTargetType();
 
 			//TODO: move this method onto DispatchForm
 			final AuditEvent event = createAuditEvent(this, request, action, type, oldName, newName);
@@ -190,12 +190,12 @@ public abstract class BaseDispatchAction extends DispatchAction implements Messa
 	}
 	
 	protected static String getUsername(HttpServletRequest request) {
-		String user;
-		if (request.getUserPrincipal() != null) {
-			user = request.getUserPrincipal().getName();
-		} else {
+		String user = request.getRemoteUser();
+		
+		if (user == null) {
 			user = "(anonymous)";
 		}
+		
 		return user;
 	}
 }

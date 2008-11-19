@@ -18,6 +18,8 @@
  */
 package net.sourceforge.vulcan.web.struts.actions;
 
+import java.util.Date;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -112,7 +114,7 @@ public final class ManageProjectConfigAction extends BaseDispatchAction {
 							new ActionMessage("errors.cannot.lock.project"));
 					return mapping.getInputForward();
 				}
-				final LockDto lock = new LockDto(formatMessage("messages.project.locked.by.user", getUsername(request)), 0);
+				final LockDto lock = new LockDto(formatMessage("messages.project.locked.by.user", getUsername(request), new Date()), 0);
 				config.addLock(lock);
 			}
 
