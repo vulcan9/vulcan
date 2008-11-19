@@ -38,12 +38,12 @@ import org.apache.commons.lang.builder.ToStringBuilder;
 
 @SvnRevision(id="$Id$", url="$HeadURL$")
 public final class DependencyGroupImpl implements DependencyGroup {
-	private enum Status { PASS, FAIL, CYCLE, PENDING };
+	private enum DependencyStatus { PASS, FAIL, CYCLE, PENDING };
 	
 	final List<Target> targets = new ArrayList<Target>();
 	final Map<String, Integer> dependencyCounts = new HashMap<String, Integer>();
 	
-	final Map<String, Status> results = new HashMap<String, Status>();
+	final Map<String, DependencyStatus> results = new HashMap<String, DependencyStatus>();
 	
 	String name;
 	boolean manualBuild;
@@ -94,12 +94,12 @@ public final class DependencyGroupImpl implements DependencyGroup {
 	
 	public void initializeBuildResults(Map<String, ProjectStatusDto> statusMap) {
 		for (ProjectStatusDto projectStatus : statusMap.values()) {
-			Status status;
+			DependencyStatus status;
 			
 			try {
-				status = Status.valueOf(projectStatus.getStatus().name());
+				status = DependencyStatus.valueOf(projectStatus.getStatus().name());
 			} catch (IllegalArgumentException e) {
-				status = Status.FAIL;
+				status = DependencyStatus.FAIL;
 			}
 			
 			results.put(projectStatus.getName(), status);
@@ -144,7 +144,7 @@ public final class DependencyGroupImpl implements DependencyGroup {
 		
 		final Target target = targets.get(0);
 		for (String name : target.pendingDependencies) {
-			final Status status = results.get(name);
+			final DependencyStatus status = results.get(name);
 			if (status == null) {
 				checkMissing(target, name);
 				continue;
@@ -155,13 +155,13 @@ public final class DependencyGroupImpl implements DependencyGroup {
 						continue;
 					}
 					targets.remove(0);
-					results.put(target.config.getName(), Status.FAIL);
+					results.put(target.config.getName(), DependencyStatus.FAIL);
 					throw new DependencyFailureException(target.config, name);
 				case CYCLE:
 					targets.remove(0);
 					final String[] dependencies = target.config.getDependencies();
 					for (int i = 0; i < dependencies.length; i++) {
-						if (Status.CYCLE.equals(results.get(dependencies[i]))) {
+						if (DependencyStatus.CYCLE.equals(results.get(dependencies[i]))) {
 							throw new DependencyCycleException(target.config, dependencies[i]);		
 						}
 					}
@@ -184,7 +184,7 @@ public final class DependencyGroupImpl implements DependencyGroup {
 		
 		final Target target = targets.remove(0);
 		
-		results.put(target.config.getName(), Status.PENDING);
+		results.put(target.config.getName(), DependencyStatus.PENDING);
 		
 		return target.config; 
 	}
@@ -203,13 +203,13 @@ public final class DependencyGroupImpl implements DependencyGroup {
 		final String name = config.getName();
 		
 		if (success) {
-			results.put(name, Status.PASS);
+			results.put(name, DependencyStatus.PASS);
 			
 			for (final Target target : targets) {
 				target.pendingDependencies.remove(name);
 			}
 		} else {
-			results.put(name, Status.FAIL);
+			results.put(name, DependencyStatus.FAIL);
 		}
 
 		Collections.sort(targets);
@@ -250,8 +250,8 @@ public final class DependencyGroupImpl implements DependencyGroup {
 		for (final Target tgt : targets) {
 			if (name.equals(tgt.config.getName())) {
 				targets.remove(0);
-				results.put(target.config.getName(), Status.CYCLE);
-				results.put(name, Status.CYCLE);
+				results.put(target.config.getName(), DependencyStatus.CYCLE);
+				results.put(name, DependencyStatus.CYCLE);
 				throw new DependencyCycleException(target.config, name);
 			}
 		}

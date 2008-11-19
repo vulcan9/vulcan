@@ -906,6 +906,48 @@ public class BuildManagerImplTest extends TestCase {
 		assertEquals(null, mgr.getStatusByBuildNumber(a.getName(), buildNumber + 1));
 	}
 	
+	/**
+	 * @see http://code.google.com/p/vulcan/issues/detail?id=146
+	 */
+	public void testBlocksDependencyFromRebuilding() throws Exception {
+		ProjectStatusDto status = new ProjectStatusDto();
+		status.setName(a.getName());
+		status.setStatus(Status.PASS);
+		status.setBuildNumber(11);
+		
+		cache.store(status);
+		
+		b.setDependencies(new String[] {a.getName()});
+		
+		dg.addTarget(b);
+		
+		mgr.add(dg);
+		
+		assertSame(b, mgr.getTarget(info1));
+
+		dg = new DependencyGroupImpl();
+		
+		dg.addTarget(a);
+		
+		mgr.add(dg);
+
+		assertSame(null, mgr.getTarget(info2));
+		
+		status = new ProjectStatusDto();
+		
+		status.setName(a.getName());
+		status.setBuildNumber(12);
+		status.setStatus(Status.PASS);
+		
+		mgr.targetCompleted(info1, b, status);
+		
+		assertSame(a, mgr.getTarget(info1));
+
+		mgr.targetCompleted(info1, a, status);
+
+		assertSame(null, mgr.getTarget(info1));
+	}
+	
 	private ProjectStatusDto createFakeStatus(ProjectConfigDto config, RevisionTokenDto rev, Status status1, String key, Object[] args, ChangeLogDto changeLog) {
 		final ProjectStatusDto st = new ProjectStatusDto();
 		st.setName(config.getName());
