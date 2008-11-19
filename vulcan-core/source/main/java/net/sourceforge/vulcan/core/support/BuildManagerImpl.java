@@ -110,7 +110,13 @@ public class BuildManagerImpl implements BuildManager {
 	public ProjectConfigDto getTarget(BuildDaemonInfoDto buildDaemonInfo) {
 		try {
 			writeLock.lock();
-			return getTarget(buildDaemonInfo, 0);
+			
+			final Set<String> dependenciesNeededByActiveBuilds = new HashSet<String>();
+			for (ProjectConfigDto project : activeBuilds) {
+				dependenciesNeededByActiveBuilds.addAll(Arrays.asList(project.getDependencies()));
+			}
+
+			return getTarget(buildDaemonInfo, dependenciesNeededByActiveBuilds, 0);
 		} finally {
 			writeLock.unlock();
 		}
@@ -151,10 +157,10 @@ public class BuildManagerImpl implements BuildManager {
 			}
 		}
 		
-		dg.initializeBuildResults(cache.getLatestOutcomes());
-		
 		try {
 			writeLock.lock();
+			
+			dg.initializeBuildResults(cache.getLatestOutcomes());
 			queue.add(new DependencyTarget(dg));
 		} finally {
 			writeLock.unlock();
@@ -374,7 +380,7 @@ public class BuildManagerImpl implements BuildManager {
 	}
 
 	// must obtain write lock before calling this method
-	private ProjectConfigDto getTarget(BuildDaemonInfoDto buildDaemonInfo, int i) {
+	private ProjectConfigDto getTarget(BuildDaemonInfoDto buildDaemonInfo, Set<String> dependenciesNeededByActiveBuilds, int i) {
 		if (activeDaemons.containsKey(buildDaemonInfo)) {
 			throw new IllegalStateException();
 		}
@@ -398,6 +404,13 @@ public class BuildManagerImpl implements BuildManager {
 			}
 			
 			config = tgt.next();
+			
+			if (config != null && dependenciesNeededByActiveBuilds.contains(config.getName())) {
+				// put it back for later.
+				tgt.push(config);
+				throw new PendingDependencyException();
+			}
+			
 			if (!tgt.hasNext()) {
 				removed = true;
 				queue.remove(i);
@@ -409,7 +422,7 @@ public class BuildManagerImpl implements BuildManager {
 					if (!removed) {
 						queue.remove(i);
 					}
-					return getTarget(buildDaemonInfo, i);
+					return getTarget(buildDaemonInfo, dependenciesNeededByActiveBuilds, i);
 				}
 				
 				if (LOG.isInfoEnabled()) {
@@ -421,7 +434,7 @@ public class BuildManagerImpl implements BuildManager {
 			}
 			return config;
 		} catch (PendingDependencyException e) {
-			return getTarget(buildDaemonInfo, i+1);
+			return getTarget(buildDaemonInfo, dependenciesNeededByActiveBuilds, i+1);
 		}
 	}
 
@@ -517,21 +530,30 @@ public class BuildManagerImpl implements BuildManager {
 		boolean hasNext();
 		boolean containsAny(Collection<String> projectNames);
 		ProjectConfigDto next() throws PendingDependencyException;
+		void push(ProjectConfigDto config);
 		void targetCompleted(ProjectConfigDto config, boolean success);
 		void appendPendingTargets(List<ProjectStatusDto> list);
 		String getName();
 	}
 	private class DependencyTarget implements Target {
 		final DependencyGroup group;
+		ProjectConfigDto pushed;
 		
 		DependencyTarget(DependencyGroup group) {
 			this.group = group;
 		}
 		public boolean hasNext() {
-			return !group.isEmpty();
+			return pushed != null || !group.isEmpty();
 		}
 		public ProjectConfigDto next() throws PendingDependencyException {
 			ProjectConfigDto current = null;
+			
+			if (pushed != null) {
+				current = pushed;
+				pushed = null;
+				return current;
+			}
+			
 			try {
 				current = group.getNextTarget();
 			} catch (DependencyFailureException e) {
@@ -550,6 +572,9 @@ public class BuildManagerImpl implements BuildManager {
 			}
 			
 			return current;
+		}
+		public void push(ProjectConfigDto config) {
+			pushed = config;
 		}
 		public void targetCompleted(ProjectConfigDto config, boolean success) {
 			group.targetCompleted(config, success);
