@@ -580,6 +580,12 @@ public class BuildManagerImpl implements BuildManager {
 			group.targetCompleted(config, success);
 		}
 		public void appendPendingTargets(List<ProjectStatusDto> list) {
+			if (pushed != null) {
+				final ProjectStatusDto pushedStatus = new ProjectStatusDto();
+				pushedStatus.setName(pushed.getName());
+				pushedStatus.setStatus(Status.IN_QUEUE);
+				list.add(pushedStatus);
+			}
 			list.addAll(Arrays.asList(group.getPendingTargets()));
 		}
 		public boolean containsAny(Collection<String> projectNames) {

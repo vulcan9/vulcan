@@ -931,16 +931,27 @@ public class BuildManagerImplTest extends TestCase {
 		
 		mgr.add(dg);
 
+		// a should block until b is done.
 		assertSame(null, mgr.getTarget(info2));
+		
+		// a should still show up in queue.
+		final ProjectStatusDto[] pendingTargets = mgr.getPendingTargets();
+		assertEquals(2, pendingTargets.length);
+		assertEquals(b.getName(), pendingTargets[0].getName());
+		assertEquals(Status.BUILDING, pendingTargets[0].getStatus());
+		assertEquals(a.getName(), pendingTargets[1].getName());
+		assertEquals(Status.IN_QUEUE, pendingTargets[1].getStatus());
 		
 		status = new ProjectStatusDto();
 		
-		status.setName(a.getName());
+		status.setName(b.getName());
 		status.setBuildNumber(12);
 		status.setStatus(Status.PASS);
 		
+		// b is done.
 		mgr.targetCompleted(info1, b, status);
 		
+		// a should unblock
 		assertSame(a, mgr.getTarget(info1));
 
 		mgr.targetCompleted(info1, a, status);
