@@ -23,6 +23,7 @@ Revision: ${ProjectRevision}
 NumericRevision: ${RepositoryRevision}
 ProjectTag: ${ProjectTag}
 Configuration: ${Configuration}
+TargetFramework: ${nant.settings.currentframework}
 Scheduler: ${BuildScheduler}
 BuildUser: ${BuildUser}
 Foo: ${Foo}

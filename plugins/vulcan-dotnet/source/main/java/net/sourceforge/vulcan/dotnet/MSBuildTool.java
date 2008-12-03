@@ -33,12 +33,14 @@ import net.sourceforge.vulcan.core.BuildDetailCallback;
 import net.sourceforge.vulcan.dotnet.dto.DotNetBuildEnvironmentDto;
 import net.sourceforge.vulcan.dotnet.dto.DotNetGlobalConfigDto;
 import net.sourceforge.vulcan.dotnet.dto.DotNetProjectConfigDto;
+import net.sourceforge.vulcan.dotnet.dto.MSBuildConsoleLoggerParametersDto;
 import net.sourceforge.vulcan.dto.ProjectConfigDto;
 import net.sourceforge.vulcan.dto.ProjectStatusDto;
 import net.sourceforge.vulcan.exception.BuildFailedException;
 import net.sourceforge.vulcan.exception.ConfigException;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -73,6 +75,27 @@ public class MSBuildTool extends DotNetBuildToolBase  {
 		final List<String> args = new ArrayList<String>();
 		
 		args.add(buildEnv.getLocation());
+		
+		final String toolsVersion = buildEnv.getToolsVersion();
+		if (StringUtils.isNotBlank(toolsVersion) && !toolsVersion.equalsIgnoreCase("unspecified")) {
+			args.add("/toolsversion:" + toolsVersion);
+		}
+		
+		if (StringUtils.isNotBlank(buildEnv.getMaxJobs())) {
+			args.add("/maxcpucount:" + buildEnv.getMaxJobs());
+		}
+		
+		final MSBuildConsoleLoggerParametersDto clp = dotNetProjectConfig.getConsoleLoggerParameters();
+		
+		if (clp != null && clp.getVerbosity() != null) {
+			args.add("/verbosity:" + clp.getVerbosity().name().toLowerCase());
+		}
+		
+		if (clp != null && clp.getParameters() != null && clp.getParameters().length > 0) {
+			args.add("/consoleloggerparameters:" + StringUtils.join(clp.getParameters(), ";"));
+		}
+		
+		addPropertyIfNecessary(getAntProps(), "TargetFrameworkVersion", dotNetProjectConfig.getTargetFrameworkVersion());
 		
 		addDotNetProperties(args, projectConfig, status);
 		

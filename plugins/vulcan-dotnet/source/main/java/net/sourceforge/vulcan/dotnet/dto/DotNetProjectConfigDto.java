@@ -1,6 +1,6 @@
 /*
  * Vulcan Build Manager
- * Copyright (C) 2005-2006 Chris Eldredge
+ * Copyright (C) 2005-2008 Chris Eldredge
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,8 +25,12 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import org.springframework.beans.BeansException;
+import org.springframework.context.ApplicationContext;
+
 import net.sourceforge.vulcan.ant.AntProjectConfig;
 import net.sourceforge.vulcan.dotnet.DotNetBuildPlugin;
+import net.sourceforge.vulcan.dto.BaseDto;
 import net.sourceforge.vulcan.integration.ConfigChoice;
 
 public class DotNetProjectConfigDto extends AntProjectConfig {
@@ -39,6 +43,8 @@ public class DotNetProjectConfigDto extends AntProjectConfig {
 
 	private BuildConfiguration buildConfiguration = BuildConfiguration.Unspecified;
 	private String buildEnvironment;
+	private String targetFrameworkVersion;
+	private MSBuildConsoleLoggerParametersDto consoleLoggerParameters = new MSBuildConsoleLoggerParametersDto();
 	
 	public DotNetProjectConfigDto() {
 		setBuildScript("");
@@ -70,15 +76,27 @@ public class DotNetProjectConfigDto extends AntProjectConfig {
 		addProperty(pds, "buildEnvironment", "DotNetProjectConfigDto.buildEnvironment.name",
 				"DotNetProjectConfigDto.buildEnvironment.text", locale, props);
 		
+		addProperty(pds, "consoleLoggerParameters", "DotNetProjectConfigDto.consoleLoggerParameters.name",
+				"DotNetProjectConfigDto.consoleLoggerParameters.text", locale);
+		
 		addProperty(pds, "buildConfiguration", "DotNetProjectConfigDto.buildConfiguration.name",
 				"DotNetProjectConfigDto.buildConfiguration.text", locale);
+
+		addProperty(pds, "targetFrameworkVersion", "DotNetProjectConfigDto.targetFrameworkVersion.name",
+				"DotNetProjectConfigDto.targetFrameworkVersion.text", locale);
 
 		addProperty(pds, "antProperties", "DotNetProjectConfigDto.properties.name",
 				"DotNetProjectConfigDto.properties.text", locale);
 		
 		return pds;
 	}
-	
+
+	@Override
+	public BaseDto copy() {
+		final DotNetProjectConfigDto copy = (DotNetProjectConfigDto) super.copy();
+		copy.setConsoleLoggerParameters((MSBuildConsoleLoggerParametersDto) consoleLoggerParameters.copy());
+		return copy;
+	}
 	@Override
 	public String getPluginId() {
 		return DotNetBuildPlugin.PLUGIN_ID;
@@ -92,6 +110,13 @@ public class DotNetProjectConfigDto extends AntProjectConfig {
 		return "DotNetProjectConfiguration";
 	}
 
+	@Override
+	public void setApplicationContext(ApplicationContext applicationContext)
+			throws BeansException {
+		super.setApplicationContext(applicationContext);
+		consoleLoggerParameters.setApplicationContext(applicationContext);
+	}
+	
 	public BuildConfiguration getBuildConfiguration() {
 		return buildConfiguration;
 	}
@@ -100,11 +125,28 @@ public class DotNetProjectConfigDto extends AntProjectConfig {
 		this.buildConfiguration = buildConfiguration;
 	}
 	
+	public String getTargetFrameworkVersion() {
+		return targetFrameworkVersion;
+	}
+	
+	public void setTargetFrameworkVersion(String targetFrameworkVersion) {
+		this.targetFrameworkVersion = targetFrameworkVersion;
+	}
+	
 	public String getBuildEnvironment() {
 		return buildEnvironment;
 	}
 	
 	public void setBuildEnvironment(String buildEnvironment) {
 		this.buildEnvironment = buildEnvironment;
+	}
+	
+	public MSBuildConsoleLoggerParametersDto getConsoleLoggerParameters() {
+		return consoleLoggerParameters;
+	}
+	
+	public void setConsoleLoggerParameters(
+			MSBuildConsoleLoggerParametersDto consoleLoggerParameters) {
+		this.consoleLoggerParameters = consoleLoggerParameters;
 	}
 }

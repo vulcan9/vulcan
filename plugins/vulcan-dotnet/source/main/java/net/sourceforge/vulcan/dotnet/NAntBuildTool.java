@@ -34,6 +34,7 @@ import net.sourceforge.vulcan.dto.ProjectConfigDto;
 import net.sourceforge.vulcan.dto.ProjectStatusDto;
 import net.sourceforge.vulcan.exception.ConfigException;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -62,6 +63,10 @@ public class NAntBuildTool extends DotNetBuildToolBase  {
 		constructLoggerArgs(args);
 		
 		args.add("-logfile:" + logFile.getAbsolutePath());
+		
+		if (StringUtils.isNotBlank(dotNetProjectConfig.getTargetFrameworkVersion())) {
+			args.add("-t:" + dotNetProjectConfig.getTargetFrameworkVersion());
+		}
 		
 		addDotNetProperties(args, projectConfig, status);
 		
