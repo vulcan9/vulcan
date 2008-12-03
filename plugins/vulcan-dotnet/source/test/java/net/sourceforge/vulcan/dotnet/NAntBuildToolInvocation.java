@@ -78,7 +78,7 @@ public class NAntBuildToolInvocation extends TestCase {
 	protected void setUp() throws Exception {
 		super.setUp();
 		
-		buildEnv.setLocation("NAnt");
+		buildEnv.setLocation("NAnt.exe");
 		buildEnv.setType(DotNetBuildEnvironmentDto.DotNetEnvironmentType.NAnt);
 		
 		projectConfig.setWorkDir(TestUtils.resolveRelativePath("source/test/nant-workdir"));
@@ -182,7 +182,7 @@ public class NAntBuildToolInvocation extends TestCase {
 
 		dotNetProjectConfig.setBuildConfiguration(DotNetProjectConfigDto.BuildConfiguration.Unspecified);
 	
-		doEchoTest("", "", "", "", "", "", "", "123", "baz");
+		doEchoTest("", "", "", "", "", "net-2.0", "", "", "123", "baz");
 	}
 
 	public void testSetsDefinedProperties() throws Exception {
@@ -204,7 +204,7 @@ public class NAntBuildToolInvocation extends TestCase {
 		String expectedBuildNumber = "747463";
 		String expectedNumericRevision = "14322";
 		
-		doEchoTest(expectedBuildNumber, "1.4.32.2", expectedNumericRevision, "tags/5.4", "", "Night Time", "", "", "");
+		doEchoTest(expectedBuildNumber, "1.4.32.2", expectedNumericRevision, "tags/5.4", "", "net-2.0", "Night Time", "", "", "");
 	}
 
 
@@ -227,7 +227,7 @@ public class NAntBuildToolInvocation extends TestCase {
 		String expectedBuildNumber = "747463";
 		String expectedNumericRevision = "14322";
 		
-		doEchoTest(expectedBuildNumber, "1.4.32.2", expectedNumericRevision, "tags/5.4", "", "", "Mary", "", "");
+		doEchoTest(expectedBuildNumber, "1.4.32.2", expectedNumericRevision, "tags/5.4", "", "net-2.0", "", "Mary", "", "");
 	}
 	
 	public void testSetPropertyNoValueOrNoEquals() throws Exception {
@@ -236,7 +236,7 @@ public class NAntBuildToolInvocation extends TestCase {
 
 		dotNetProjectConfig.setBuildConfiguration(DotNetProjectConfigDto.BuildConfiguration.Unspecified);
 	
-		doEchoTest("", "", "", "", "", "", "", "", "");
+		doEchoTest("", "", "", "", "", "net-2.0", "", "", "", "");
 	}
 	
 	public void testSetGlobalProperty() throws Exception {
@@ -247,7 +247,7 @@ public class NAntBuildToolInvocation extends TestCase {
 
 		dotNetProjectConfig.setBuildConfiguration(DotNetProjectConfigDto.BuildConfiguration.Unspecified);
 	
-		doEchoTest("", "", "", "", "", "", "", "321", "baz");
+		doEchoTest("", "", "", "", "", "net-2.0", "", "", "321", "baz");
 	}
 
 	public void testOverrideGlobalProperty() throws Exception {
@@ -258,34 +258,40 @@ public class NAntBuildToolInvocation extends TestCase {
 
 		dotNetProjectConfig.setBuildConfiguration(DotNetProjectConfigDto.BuildConfiguration.Unspecified);
 	
-		doEchoTest("", "", "", "", "", "", "", "abc", "");
+		doEchoTest("", "", "", "", "", "net-2.0", "", "", "abc", "");
+	}
+	
+	public void testSetTargetFramework() throws Exception {
+		dotNetProjectConfig.setTargetFrameworkVersion("netcf-2.0");
+	
+		doEchoTest("", "", "", "", "", "netcf-2.0", "", "", "", "");
 	}
 	
 	public void testSetConfiguration() throws Exception {
 		dotNetProjectConfig.setBuildConfiguration(DotNetProjectConfigDto.BuildConfiguration.Debug);
 	
-		doEchoTest("", "", "", "", "Debug", "", "", "", "");
+		doEchoTest("", "", "", "", "Debug", "net-2.0", "", "", "", "");
 	}
 	
 	public void testSetConfigurationInherits() throws Exception {
 		globalConfig.setBuildConfiguration(DotNetGlobalConfigDto.GlobalBuildConfiguration.Release);
 		dotNetProjectConfig.setBuildConfiguration(DotNetProjectConfigDto.BuildConfiguration.Inherit);
 	
-		doEchoTest("", "", "", "", "Release", "", "", "", "");
+		doEchoTest("", "", "", "", "Release", "net-2.0", "", "", "", "");
 	}
 	
 	public void testSetConfigurationOverrideUnspecified() throws Exception {
 		globalConfig.setBuildConfiguration(DotNetGlobalConfigDto.GlobalBuildConfiguration.Release);
 		dotNetProjectConfig.setBuildConfiguration(DotNetProjectConfigDto.BuildConfiguration.Unspecified);
 	
-		doEchoTest("", "", "", "", "", "", "", "", "");
+		doEchoTest("", "", "", "", "", "net-2.0", "", "", "", "");
 	}
 	
 	public void testSetConfigurationOverride() throws Exception {
 		globalConfig.setBuildConfiguration(DotNetGlobalConfigDto.GlobalBuildConfiguration.Release);
 		dotNetProjectConfig.setBuildConfiguration(DotNetProjectConfigDto.BuildConfiguration.Debug);
 	
-		doEchoTest("", "", "", "", "Debug", "", "", "", "");
+		doEchoTest("", "", "", "", "Debug", "net-2.0", "", "", "", "");
 	}
 	
 	public void testBadExecPath() throws Exception {
@@ -301,7 +307,7 @@ public class NAntBuildToolInvocation extends TestCase {
 	private void doEchoTest(
 			String expectedBuildNumber, String expectedRevision,
 			String expectedNumericRevision, String expectedTag,
-			String expectedConfiguration, String expectedScheduler, String expectedBuildUser, String expectedFoo, String expectedBar)
+			String expectedConfiguration, String expectedTargetFramework, String expectedScheduler, String expectedBuildUser, String expectedFoo, String expectedBar)
 			throws BuildFailedException, ConfigException {
 		dotNetProjectConfig.setTargets("echo");
 		
@@ -316,6 +322,7 @@ public class NAntBuildToolInvocation extends TestCase {
 				";NumericRevision: " + expectedNumericRevision +
 				";ProjectTag: " + expectedTag +
 				";Configuration: " + expectedConfiguration +
+				";TargetFramework: " + expectedTargetFramework +
 				";Scheduler: " + expectedScheduler +
 				";BuildUser: " + expectedBuildUser +
 				";Foo: " + expectedFoo +

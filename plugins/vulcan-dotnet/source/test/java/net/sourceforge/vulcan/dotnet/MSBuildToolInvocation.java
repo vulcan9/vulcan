@@ -1,6 +1,6 @@
 /*
  * Vulcan Build Manager
- * Copyright (C) 2005-2006 Chris Eldredge
+ * Copyright (C) 2005-2008 Chris Eldredge
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,37 +22,21 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-import junit.framework.TestCase;
 import net.sourceforge.vulcan.core.BuildDetailCallback;
-import net.sourceforge.vulcan.dotnet.dto.DotNetBuildEnvironmentDto;
 import net.sourceforge.vulcan.dotnet.dto.DotNetGlobalConfigDto;
 import net.sourceforge.vulcan.dotnet.dto.DotNetProjectConfigDto;
 import net.sourceforge.vulcan.dto.BuildMessageDto;
-import net.sourceforge.vulcan.dto.ProjectConfigDto;
-import net.sourceforge.vulcan.dto.ProjectStatusDto;
 import net.sourceforge.vulcan.dto.RevisionTokenDto;
 import net.sourceforge.vulcan.exception.BuildFailedException;
 import net.sourceforge.vulcan.exception.ConfigException;
 
 import org.apache.commons.io.FileUtils;
 
-public class MSBuildToolInvocation extends TestCase {
-	DotNetBuildToolBase tool;
-	
-	DotNetProjectConfigDto dotNetProjectConfig = new DotNetProjectConfigDto();
-	
-	ProjectConfigDto projectConfig = new ProjectConfigDto();
-	
-	ProjectStatusDto status = new ProjectStatusDto();
-	File buildLog;
-	
+public class MSBuildToolInvocation extends MSBuildToolTestBase {
 	List<String> targets = new ArrayList<String>();
 	
 	List<BuildMessageDto> errors = new ArrayList<BuildMessageDto>();
 	List<BuildMessageDto> warnings = new ArrayList<BuildMessageDto>();
-	
-	DotNetGlobalConfigDto globalConfig = new DotNetGlobalConfigDto();
-	DotNetBuildEnvironmentDto buildEnv = new DotNetBuildEnvironmentDto();
 	
 	BuildDetailCallback detailCallback = new BuildDetailCallback() {
 		public void setDetail(String detail) {
@@ -72,28 +56,6 @@ public class MSBuildToolInvocation extends TestCase {
 		}
 	};
 
-	@Override
-	protected void setUp() throws Exception {
-		super.setUp();
-		
-		buildEnv.setLocation("msbuild.exe");
-		
-		projectConfig.setWorkDir("source/test/msbuild-workdir");
-		
-		tool = new MSBuildTool(globalConfig, dotNetProjectConfig, buildEnv, new File("target/vulcan-plugin-includes"));
-		
-		buildLog = File.createTempFile("vulcan-dotnet-unit-test", ".txt");
-		buildLog.delete();
-		
-		buildLog.deleteOnExit();
-		
-		globalConfig.setBuildNumberProperty("");
-		globalConfig.setRevisionProperty("");
-		globalConfig.setNumericRevisionProperty("");
-		globalConfig.setTagProperty("");
-
-	}
-	
 	public void testDefaultTarget() throws Exception {
 		tool.buildProject(projectConfig, status, buildLog, detailCallback);
 	}
@@ -186,7 +148,7 @@ public class MSBuildToolInvocation extends TestCase {
 
 		dotNetProjectConfig.setBuildConfiguration(DotNetProjectConfigDto.BuildConfiguration.Unspecified);
 	
-		doEchoTest("", "", "", "", "", "123", "baz");
+		doEchoTest("", "", "", "", "", "", "123", "baz");
 	}
 
 	public void testSetsRevisionAndTagName() throws Exception {
@@ -204,7 +166,7 @@ public class MSBuildToolInvocation extends TestCase {
 		String expectedBuildNumber = "747463";
 		String expectedNumericRevision = "14322";
 		
-		doEchoTest(expectedBuildNumber, "1.4.32.2", expectedNumericRevision, "tags/5.4", "", "", "");
+		doEchoTest(expectedBuildNumber, "1.4.32.2", expectedNumericRevision, "tags/5.4", "", "", "", "");
 	}
 
 	public void testSetPropertyNoValueOrNoEquals() throws Exception {
@@ -213,7 +175,7 @@ public class MSBuildToolInvocation extends TestCase {
 
 		dotNetProjectConfig.setBuildConfiguration(DotNetProjectConfigDto.BuildConfiguration.Unspecified);
 	
-		doEchoTest("", "", "", "", "", "", "");
+		doEchoTest("", "", "", "", "", "", "", "");
 	}
 	
 	public void testSetGlobalProperty() throws Exception {
@@ -224,7 +186,7 @@ public class MSBuildToolInvocation extends TestCase {
 
 		dotNetProjectConfig.setBuildConfiguration(DotNetProjectConfigDto.BuildConfiguration.Unspecified);
 	
-		doEchoTest("", "", "", "", "", "321", "baz");
+		doEchoTest("", "", "", "", "", "", "321", "baz");
 	}
 
 	public void testOverrideGlobalProperty() throws Exception {
@@ -235,34 +197,40 @@ public class MSBuildToolInvocation extends TestCase {
 
 		dotNetProjectConfig.setBuildConfiguration(DotNetProjectConfigDto.BuildConfiguration.Unspecified);
 	
-		doEchoTest("", "", "", "", "", "abc", "");
+		doEchoTest("", "", "", "", "", "", "abc", "");
+	}
+	
+	public void testSetTargetFramework() throws Exception {
+		dotNetProjectConfig.setTargetFrameworkVersion("v2.0");
+	
+		doEchoTest("", "", "", "", "", "v2.0", "", "");
 	}
 	
 	public void testSetConfiguration() throws Exception {
 		dotNetProjectConfig.setBuildConfiguration(DotNetProjectConfigDto.BuildConfiguration.Debug);
 	
-		doEchoTest("", "", "", "", "Debug", "", "");
+		doEchoTest("", "", "", "", "Debug", "", "", "");
 	}
 	
 	public void testSetConfigurationInherits() throws Exception {
 		globalConfig.setBuildConfiguration(DotNetGlobalConfigDto.GlobalBuildConfiguration.Release);
 		dotNetProjectConfig.setBuildConfiguration(DotNetProjectConfigDto.BuildConfiguration.Inherit);
 	
-		doEchoTest("", "", "", "", "Release", "", "");
+		doEchoTest("", "", "", "", "Release", "", "", "");
 	}
 	
 	public void testSetConfigurationOverrideUnspecified() throws Exception {
 		globalConfig.setBuildConfiguration(DotNetGlobalConfigDto.GlobalBuildConfiguration.Release);
 		dotNetProjectConfig.setBuildConfiguration(DotNetProjectConfigDto.BuildConfiguration.Unspecified);
 	
-		doEchoTest("", "", "", "", "", "", "");
+		doEchoTest("", "", "", "", "", "", "", "");
 	}
 	
 	public void testSetConfigurationOverride() throws Exception {
 		globalConfig.setBuildConfiguration(DotNetGlobalConfigDto.GlobalBuildConfiguration.Release);
 		dotNetProjectConfig.setBuildConfiguration(DotNetProjectConfigDto.BuildConfiguration.Debug);
 	
-		doEchoTest("", "", "", "", "Debug", "", "");
+		doEchoTest("", "", "", "", "Debug", "", "", "");
 	}
 	
 	public void testBadExecPath() throws Exception {
@@ -275,9 +243,10 @@ public class MSBuildToolInvocation extends TestCase {
 			assertEquals("ant.exec.failure", e.getKey());
 		}
 	}
+	
 	private void doEchoTest(
 			String expectedBuildNumber, String expectedRevision,
-			String expectedNumericRevision, String expectedTag, String expectedConfiguration, String expectedFoo, String expectedBar)
+			String expectedNumericRevision, String expectedTag, String expectedConfiguration, String expectedFrameworkVersion, String expectedFoo, String expectedBar)
 			throws BuildFailedException, ConfigException {
 		dotNetProjectConfig.setTargets("Echo");
 		
@@ -289,6 +258,7 @@ public class MSBuildToolInvocation extends TestCase {
 				";NumericRevision: " + expectedNumericRevision +
 				";ProjectTag: " + expectedTag +
 				";Configuration: " + expectedConfiguration +
+				";TargetFrameworkVersion: " + expectedFrameworkVersion +
 				";Foo: " + expectedFoo +
 				";Bar: " + expectedBar, warnings.get(0).getMessage().replaceAll("\r", "").replaceAll("\n", ";"));
 	}

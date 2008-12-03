@@ -109,7 +109,7 @@ public abstract class DotNetBuildToolBase extends AntBuildTool {
 		}
 	}
 
-	private void addPropertyIfNecessary(Map<String, String> antProps, String propertyName, Object value) {
+	protected void addPropertyIfNecessary(Map<String, String> antProps, String propertyName, Object value) {
 		if (isNotBlank(propertyName) && value != null) {
 			antProps.put(propertyName, value.toString());
 		}

@@ -20,20 +20,29 @@ package net.sourceforge.vulcan.dotnet.dto;
 
 import java.beans.PropertyDescriptor;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 import net.sourceforge.vulcan.dotnet.DotNetBuildPlugin;
 import net.sourceforge.vulcan.dto.PluginProfileDto;
+import net.sourceforge.vulcan.integration.ConfigChoice;
 
 public class DotNetBuildEnvironmentDto extends PluginProfileDto {
 	public static enum DotNetEnvironmentType {
 		MSBuild, NAnt
 	}
 	
+	public static List<String> availableToolsVersions =
+		Arrays.asList(new String[] {"Unspecified", "2.0", "3.5"});
+	
 	private String description;
 	private String location;
 	private DotNetEnvironmentType type;
+	private String toolsVersion = "Unspecified";
+	private String maxJobs;
 	
 	@Override
 	public String getPluginId() {
@@ -64,6 +73,16 @@ public class DotNetBuildEnvironmentDto extends PluginProfileDto {
 		
 		addProperty(pds, "type", "DotNetBuildEnvironmentDto.type.name",
 				"DotNetBuildEnvironmentDto.type.text", locale);
+		
+		Map<String, Object> metadata = new HashMap<String, Object>();
+		metadata.put(ATTR_CHOICE_TYPE, ConfigChoice.INLINE);
+		metadata.put(ATTR_AVAILABLE_CHOICES, availableToolsVersions);
+
+		addProperty(pds, "toolsVersion", "DotNetBuildEnvironmentDto.toolsVersion.name",
+				"DotNetBuildEnvironmentDto.toolsVersion.text", locale, metadata);
+		
+		addProperty(pds, "maxJobs", "DotNetBuildEnvironmentDto.maxJobs.name",
+				"DotNetBuildEnvironmentDto.maxJobs.text", locale);
 		
 		return pds;
 	}
@@ -100,5 +119,21 @@ public class DotNetBuildEnvironmentDto extends PluginProfileDto {
 
 	public void setType(DotNetEnvironmentType type) {
 		this.type = type;
+	}
+	
+	public String getToolsVersion() {
+		return toolsVersion;
+	}
+	
+	public void setToolsVersion(String toolsVersion) {
+		this.toolsVersion = toolsVersion;
+	}
+	
+	public String getMaxJobs() {
+		return maxJobs;
+	}
+	
+	public void setMaxJobs(String maxJobs) {
+		this.maxJobs = maxJobs;
 	}
 }

@@ -14,6 +14,7 @@ Revision: $(ProjectRevision)
 NumericRevision: $(RepositoryRevision)
 ProjectTag: $(ProjectTag)
 Configuration: $(Configuration)
+TargetFrameworkVersion: $(TargetFrameworkVersion)
 Foo: $(Foo)
 Bar: $(Bar)"/>
 	</Target>
