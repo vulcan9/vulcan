@@ -154,9 +154,12 @@ namespace SourceForge.Vulcan.DotNet {
 		private void SendMessageWithPriority(MessagePriority prio, string message, string file, int lineNumber, string code, int threadId)
 		{
 			Stack<FileInfo> stack;
-			if (!string.IsNullOrEmpty(file) && !Path.IsPathRooted(file) && projectFiles.TryGetValue(threadId, out stack) && stack.Count > 0)
+			lock(projectFiles)
 			{
-				file = Path.Combine(stack.Peek().DirectoryName, file);
+				if (!string.IsNullOrEmpty(file) && !Path.IsPathRooted(file) && projectFiles.TryGetValue(threadId, out stack) && stack.Count > 0)
+				{
+					file = Path.Combine(stack.Peek().DirectoryName, file);
+				}
 			}
 			reporter.SendMessage("MESSAGE_LOGGED", prio, message,
 													 file, lineNumber, code);
@@ -165,10 +168,13 @@ namespace SourceForge.Vulcan.DotNet {
 		private void PushProjectFile(int threadId, string projectFile)
 		{
 			Stack<FileInfo> stack;
-			if (!projectFiles.TryGetValue(threadId, out stack))
+			lock(projectFiles)
 			{
-				stack = new Stack<FileInfo>();
-				projectFiles[threadId] = stack;
+				if (!projectFiles.TryGetValue(threadId, out stack))
+				{
+					stack = new Stack<FileInfo>();
+					projectFiles[threadId] = stack;
+				}
 			}
 
 			stack.Push(new FileInfo(projectFile));
@@ -177,9 +183,12 @@ namespace SourceForge.Vulcan.DotNet {
 		private void PopProjectFile(int threadId)
 		{
 			Stack<FileInfo> stack;
-			if (projectFiles.TryGetValue(threadId, out stack))
+			lock(projectFiles)
 			{
-				stack.Pop();
+				if (projectFiles.TryGetValue(threadId, out stack))
+				{
+					stack.Pop();
+				}
 			}
 		}
 	}
