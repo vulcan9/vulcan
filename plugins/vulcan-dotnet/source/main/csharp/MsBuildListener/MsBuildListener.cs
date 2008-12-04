@@ -28,7 +28,7 @@ namespace SourceForge.Vulcan.DotNet {
 		private LoggerVerbosity verbosity;
 		private IBuildMessageReporter reporter;
 
-		private readonly Queue<FileInfo> projectFiles = new Queue<FileInfo>();
+		private readonly IDictionary<int, Stack<FileInfo>> projectFiles = new Dictionary<int, Stack<FileInfo>>();
 
 		public string Parameters
 		{
@@ -111,48 +111,76 @@ namespace SourceForge.Vulcan.DotNet {
 		{
 			reporter.SendMessage("BUILD_STARTED", null, null, null, e.Message);
 		}
+
 		public void BuildFinished(object sender, BuildFinishedEventArgs e)
 		{
 			reporter.SendMessage("BUILD_FINISHED", null, null, null, e.Message);
 		}
+
 		public void TargetStarted(object sender, TargetStartedEventArgs e)
 		{
 			reporter.SendMessage("TARGET_STARTED", e.ProjectFile, e.TargetName, null, e.Message);
-			projectFiles.Enqueue(new FileInfo(e.ProjectFile));
+			PushProjectFile(e.ThreadId, e.ProjectFile);
 		}
+
 		public void TargetFinished(object sender, TargetFinishedEventArgs e)
 		{
 			reporter.SendMessage("TARGET_FINISHED", e.ProjectFile, e.TargetName, null, e.Message);
-			projectFiles.Dequeue();
+			PopProjectFile(e.ThreadId);
 		}
+
 		public void TaskStarted(object sender, TaskStartedEventArgs e)
 		{
 			reporter.SendMessage("TASK_STARTED", e.ProjectFile, null, e.TaskName, e.Message);
-			projectFiles.Enqueue(new FileInfo(e.ProjectFile));
+			PushProjectFile(e.ThreadId, e.ProjectFile);
 		}
+
 		public void TaskFinished(object sender, TaskFinishedEventArgs e)
 		{
 			reporter.SendMessage("TASK_FINISHED", e.ProjectFile, null, e.TaskName, e.Message);
-			projectFiles.Dequeue();
+			PopProjectFile(e.ThreadId);
 		}
+
 		public void BuildErrorRaised(object sender, BuildErrorEventArgs e)
 		{
-			SendMessageWithPriority(MessagePriority.ERROR, e.Message, e.File, e.LineNumber, e.Code);
+			SendMessageWithPriority(MessagePriority.ERROR, e.Message, e.File, e.LineNumber, e.Code, e.ThreadId);
 		}
 
 		public void BuildWarningRaised(object sender, BuildWarningEventArgs e)
 		{
-			SendMessageWithPriority(MessagePriority.WARNING, e.Message, e.File, e.LineNumber, e.Code);
+			SendMessageWithPriority(MessagePriority.WARNING, e.Message, e.File, e.LineNumber, e.Code, e.ThreadId);
 		}
 
-		private void SendMessageWithPriority(MessagePriority prio, string message, string file, int lineNumber, string code)
+		private void SendMessageWithPriority(MessagePriority prio, string message, string file, int lineNumber, string code, int threadId)
 		{
-			if (!string.IsNullOrEmpty(file) && !Path.IsPathRooted(file) && projectFiles.Count > 0)
+			Stack<FileInfo> stack;
+			if (!string.IsNullOrEmpty(file) && !Path.IsPathRooted(file) && projectFiles.TryGetValue(threadId, out stack) && stack.Count > 0)
 			{
-				file = Path.Combine(projectFiles.Peek().DirectoryName, file);
+				file = Path.Combine(stack.Peek().DirectoryName, file);
 			}
 			reporter.SendMessage("MESSAGE_LOGGED", prio, message,
 													 file, lineNumber, code);
+		}
+
+		private void PushProjectFile(int threadId, string projectFile)
+		{
+			Stack<FileInfo> stack;
+			if (!projectFiles.TryGetValue(threadId, out stack))
+			{
+				stack = new Stack<FileInfo>();
+				projectFiles[threadId] = stack;
+			}
+
+			stack.Push(new FileInfo(projectFile));
+		}
+
+		private void PopProjectFile(int threadId)
+		{
+			Stack<FileInfo> stack;
+			if (projectFiles.TryGetValue(threadId, out stack))
+			{
+				stack.Pop();
+			}
 		}
 	}
 }
