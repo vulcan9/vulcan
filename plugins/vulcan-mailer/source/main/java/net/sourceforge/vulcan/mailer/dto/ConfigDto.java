@@ -56,7 +56,7 @@ public class ConfigDto extends PluginConfigDto {
 	@Override
 	public BaseDto copy() {
 		final ConfigDto copy = (ConfigDto) super.copy();
-		copy.setProfiles((ProfileDto[]) copyArray(this.profiles));
+		copy.setProfiles(copyArray(this.profiles));
 		copy.setRepositoryEmailMappings((String[]) ArrayUtils.clone(repositoryEmailMappings));
 		return copy;
 	}
