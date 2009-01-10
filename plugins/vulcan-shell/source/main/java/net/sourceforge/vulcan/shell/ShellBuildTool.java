@@ -62,7 +62,7 @@ public class ShellBuildTool implements BuildTool {
 			throw new ConfigException("shell.missing.arguments", null);
 		}
 		
-		final String[] environment = CreateEnvironment(buildStatus);
+		final String[] environment = createEnvironment(buildStatus);
 		final File dir = new File(projectConfig.getWorkDir());
 		
 		final Process process;
@@ -89,7 +89,7 @@ public class ShellBuildTool implements BuildTool {
 		}
 	}
 
-	public String[] CreateEnvironment(ProjectStatusDto status) {
+	public String[] createEnvironment(ProjectStatusDto status) {
 		final Map<String, String> map = new HashMap<String, String>(getCurrentEnvironment());
 		
 		mergeEnvironment(map, globalConfig.getEnvironmentVariables());

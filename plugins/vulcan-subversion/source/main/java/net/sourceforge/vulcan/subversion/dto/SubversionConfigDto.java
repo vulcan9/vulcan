@@ -37,7 +37,7 @@ public class SubversionConfigDto extends RepositoryAdaptorConfigDto {
 	public SubversionConfigDto copy() {
 		final SubversionConfigDto copy = (SubversionConfigDto) super.copy();
 
-		copy.setProfiles((SubversionRepositoryProfileDto[]) copyArray(profiles));
+		copy.setProfiles(copyArray(profiles));
 		
 		return copy;
 	}

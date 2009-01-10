@@ -218,12 +218,10 @@ public class SubversionProjectConfiguratorTest extends TestCase {
 			return SVNURL.parseURIEncoded(root);
 		}
 		@Override
-		@SuppressWarnings("unchecked")
 		public long getDir(String path, long revision, SVNProperties properties, ISVNDirEntryHandler handler) throws SVNException {
 			assertEquals(this.path, path);
 			assertNull(handler);
 			assertNotNull(properties);
-			
 			
 			properties.putAll(bugtraqProps);
 			

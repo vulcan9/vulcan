@@ -130,7 +130,7 @@ public class ShellBuildToolTest extends EasyMockTestCase {
 	}
 	
 	public void testCreateEnvironmentEmpty() throws Exception {
-		String[] env = tool.CreateEnvironment(status);
+		String[] env = tool.createEnvironment(status);
 		
 		assertEquals(0, env.length);
 	}
@@ -138,7 +138,7 @@ public class ShellBuildToolTest extends EasyMockTestCase {
 	public void testInheritsEnvironment() throws Exception {
 		fakeEnv.put("USER", "somebody");
 
-		String[] env = tool.CreateEnvironment(status);
+		String[] env = tool.createEnvironment(status);
 		
 		assertEquals(1, env.length);
 		assertEquals("USER=somebody", env[0]);
@@ -148,7 +148,7 @@ public class ShellBuildToolTest extends EasyMockTestCase {
 		fakeEnv.put("USER", "somebody");
 		globalConfig.setEnvironmentVariables(new String[] {"USER=otherbody"});
 		
-		String[] env = tool.CreateEnvironment(status);
+		String[] env = tool.createEnvironment(status);
 		
 		assertEquals(1, env.length);
 		assertEquals("USER=otherbody", env[0]);
@@ -158,7 +158,7 @@ public class ShellBuildToolTest extends EasyMockTestCase {
 		globalConfig.setEnvironmentVariables(new String[] {"USER=otherbody"});
 		projectPluginConfig.setEnvironmentVariables(new String[] {"USER=projectbody"});
 		
-		String[] env = tool.CreateEnvironment(status);
+		String[] env = tool.createEnvironment(status);
 		
 		assertEquals(1, env.length);
 		assertEquals("USER=projectbody", env[0]);
@@ -167,7 +167,7 @@ public class ShellBuildToolTest extends EasyMockTestCase {
 	public void testTrimsEnvVar() throws Exception {
 		projectPluginConfig.setEnvironmentVariables(new String[] {"	USER =	projectbody 	"});
 		
-		String[] env = tool.CreateEnvironment(status);
+		String[] env = tool.createEnvironment(status);
 		
 		assertEquals(1, env.length);
 		assertEquals("USER=projectbody", env[0]);
@@ -177,7 +177,7 @@ public class ShellBuildToolTest extends EasyMockTestCase {
 		fakeEnv.put("MISSING_EQUALS", "a value that should be supressed");
 		projectPluginConfig.setEnvironmentVariables(new String[] {"MISSING_EQUALS"});
 
-		String[] env = tool.CreateEnvironment(status);
+		String[] env = tool.createEnvironment(status);
 		
 		assertEquals(0, env.length);
 	}
@@ -186,7 +186,7 @@ public class ShellBuildToolTest extends EasyMockTestCase {
 		fakeEnv.put("EMPTY_VALUE", "a value that should be overridden");
 		projectPluginConfig.setEnvironmentVariables(new String[] {"EMPTY_VALUE="});
 
-		String[] env = tool.CreateEnvironment(status);
+		String[] env = tool.createEnvironment(status);
 		
 		assertEquals(0, env.length);
 	}
@@ -204,7 +204,7 @@ public class ShellBuildToolTest extends EasyMockTestCase {
 		status.setTagName("b2.2");
 		status.setRequestedBy("Kate");
 		
-		String[] env = tool.CreateEnvironment(status);
+		String[] env = tool.createEnvironment(status);
 		
 		Arrays.sort(env);
 		
@@ -226,7 +226,7 @@ public class ShellBuildToolTest extends EasyMockTestCase {
 		status.setRequestedBy("Katebot");
 		status.setScheduledBuild(true);
 		
-		String[] env = tool.CreateEnvironment(status);
+		String[] env = tool.createEnvironment(status);
 		
 		Arrays.sort(env);
 		
