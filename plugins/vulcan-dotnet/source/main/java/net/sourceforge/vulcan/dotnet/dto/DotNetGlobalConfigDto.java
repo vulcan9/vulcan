@@ -44,6 +44,7 @@ public class DotNetGlobalConfigDto extends DotNetBaseDto {
 	private String tagProperty = "RepositoryTag";
 	private String schedulerProperty = "Scheduler";
 	private String buildUsernameProperty = "BuildUser";
+	private boolean recordMetrics;
 	
 	@Override
 	public String getHelpTopic() {
@@ -81,6 +82,9 @@ public class DotNetGlobalConfigDto extends DotNetBaseDto {
 		addProperty(pds, "buildUsernameProperty", "DotNetGlobalConfigDto.buildUsername.name",
 				"DotNetGlobalConfigDto.buildUsername.text", locale);
 		
+		addProperty(pds, "recordMetrics", "AntConfig.recordMetrics.name",
+				"AntConfig.recordMetrics.text", locale);
+
 		return pds;
 	}
 
@@ -88,7 +92,7 @@ public class DotNetGlobalConfigDto extends DotNetBaseDto {
 	public BaseDto copy() {
 		final DotNetGlobalConfigDto copy = (DotNetGlobalConfigDto) super.copy();
 		
-		copy.setBuildEnvironments((DotNetBuildEnvironmentDto[]) copyArray(buildEnvironments));
+		copy.setBuildEnvironments(copyArray(buildEnvironments));
 		copy.setProperties((String[]) ArrayUtils.clone(properties));
 		
 		return copy;
@@ -164,5 +168,13 @@ public class DotNetGlobalConfigDto extends DotNetBaseDto {
 	
 	public String getBuildUsernameProperty() {
 		return buildUsernameProperty;
+	}
+	
+	public boolean isRecordMetrics() {
+		return recordMetrics;
+	}
+	
+	public void setRecordMetrics(boolean recordMetrics) {
+		this.recordMetrics = recordMetrics;
 	}
 }

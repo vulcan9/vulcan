@@ -45,6 +45,7 @@ public class AntConfig extends PluginConfigDto {
 	private String tagNamePropertyName = "project.tag";
 	private String buildUserPropertyName = "project.build.user";
 	private String buildSchedulerPropertyName = "project.build.scheduler";
+	private boolean recordMetrics;
 	
 	@Override
 	public String getPluginId() {
@@ -71,6 +72,7 @@ public class AntConfig extends PluginConfigDto {
 		addProperty(pds, "tagNamePropertyName", "AntConfig.tagNamePropertyName.name", "AntConfig.tagNamePropertyName.text", locale);
 		addProperty(pds, "buildUserPropertyName", "AntConfig.buildUsername.name", "AntConfig.buildUsername.text", locale);
 		addProperty(pds, "buildSchedulerPropertyName", "AntConfig.scheduler.name", "AntConfig.scheduler.text", locale);
+		addProperty(pds, "recordMetrics", "AntConfig.recordMetrics.name", "AntConfig.recordMetrics.text", locale);
 		
 		return pds;
 	}
@@ -79,7 +81,7 @@ public class AntConfig extends PluginConfigDto {
 		final AntConfig copy = (AntConfig) super.copy();
 		
 		copy.setAntProperties((String[]) ArrayUtils.clone(antProperties));
-		copy.setJavaHomes((JavaHome[]) copyArray(javaHomes));
+		copy.setJavaHomes(copyArray(javaHomes));
 		
 		return copy;
 	}
@@ -137,6 +139,12 @@ public class AntConfig extends PluginConfigDto {
 	}
 	public void setBuildSchedulerPropertyName(String buildSchedulerPropertyName) {
 		this.buildSchedulerPropertyName = buildSchedulerPropertyName;
+	}
+	public boolean isRecordMetrics() {
+		return recordMetrics;
+	}
+	public void setRecordMetrics(boolean recordMetrics) {
+		this.recordMetrics = recordMetrics;
 	}
 	static String[] trim(String[] antProperties) {
 		for (int i=0; i<antProperties.length; i++) {

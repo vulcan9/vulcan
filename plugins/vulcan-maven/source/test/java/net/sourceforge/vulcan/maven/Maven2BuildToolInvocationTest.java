@@ -26,6 +26,7 @@ import java.util.List;
 import net.sourceforge.vulcan.ant.buildlistener.AntEventSummary;
 import net.sourceforge.vulcan.ant.receiver.EventListener;
 import net.sourceforge.vulcan.core.BuildDetailCallback;
+import net.sourceforge.vulcan.dto.MetricDto;
 import net.sourceforge.vulcan.dto.ProjectStatusDto;
 import net.sourceforge.vulcan.dto.RevisionTokenDto;
 import net.sourceforge.vulcan.exception.BuildFailedException;
@@ -65,6 +66,8 @@ public class Maven2BuildToolInvocationTest extends MavenBuildToolTestBase {
 			lineNumbers.add(line);
 		}
 		public void reportWarning(String arg0, String arg1, Integer arg2, String arg3) {
+		}
+		public void addMetric(MetricDto metric) {
 		}
 	};
 

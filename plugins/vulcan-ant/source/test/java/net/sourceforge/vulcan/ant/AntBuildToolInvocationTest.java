@@ -25,6 +25,7 @@ import java.util.List;
 import net.sourceforge.vulcan.ant.buildlistener.AntEventSummary;
 import net.sourceforge.vulcan.ant.receiver.EventListener;
 import net.sourceforge.vulcan.core.BuildDetailCallback;
+import net.sourceforge.vulcan.dto.MetricDto;
 import net.sourceforge.vulcan.dto.ProjectStatusDto;
 import net.sourceforge.vulcan.dto.RevisionTokenDto;
 import net.sourceforge.vulcan.exception.BuildFailedException;
@@ -55,6 +56,8 @@ public class AntBuildToolInvocationTest extends AntBuildToolTestBase {
 		}
 		public void reportWarning(String message, String arg1, Integer arg2, String arg3) {
 			warnings.add(message);
+		}
+		public void addMetric(MetricDto metric) {
 		}
 	};
 	

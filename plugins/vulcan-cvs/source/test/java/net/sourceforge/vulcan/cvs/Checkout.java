@@ -27,6 +27,7 @@ import net.sourceforge.vulcan.core.BuildDetailCallback;
 import net.sourceforge.vulcan.cvs.dto.CvsConfigDto;
 import net.sourceforge.vulcan.cvs.dto.CvsProjectConfigDto;
 import net.sourceforge.vulcan.cvs.dto.CvsRepositoryProfileDto;
+import net.sourceforge.vulcan.dto.MetricDto;
 import net.sourceforge.vulcan.exception.RepositoryException;
 
 public class Checkout {
@@ -61,6 +62,8 @@ public class Checkout {
 			public void reportError(String arg0, String arg1, Integer arg2, String arg3) {
 			}
 			public void reportWarning(String arg0, String arg1, Integer arg2, String arg3) {
+			}
+			public void addMetric(MetricDto metric) {
 			}
 		});
 	}

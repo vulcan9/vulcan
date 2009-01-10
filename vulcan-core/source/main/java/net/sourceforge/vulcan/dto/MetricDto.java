@@ -46,6 +46,15 @@ public class MetricDto extends BaseDto {
 	private String value;
 	private MetricType type;
 	
+	public MetricDto() {
+	}
+
+	public MetricDto(String messageKey, String value, MetricType type) {
+		this.messageKey = messageKey;
+		this.value = value;
+		this.type = type;
+	}
+	
 	public String getMessageKey() {
 		return messageKey;
 	}

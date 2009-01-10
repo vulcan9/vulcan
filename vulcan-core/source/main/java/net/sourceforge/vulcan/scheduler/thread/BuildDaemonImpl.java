@@ -24,6 +24,7 @@ import net.sourceforge.vulcan.core.BuildDetailCallback;
 import net.sourceforge.vulcan.core.BuildManager;
 import net.sourceforge.vulcan.core.ProjectBuilder;
 import net.sourceforge.vulcan.dto.BuildDaemonInfoDto;
+import net.sourceforge.vulcan.dto.MetricDto;
 import net.sourceforge.vulcan.dto.ProjectConfigDto;
 import net.sourceforge.vulcan.metadata.SvnRevision;
 import net.sourceforge.vulcan.scheduler.BuildDaemon;
@@ -53,6 +54,8 @@ public abstract class BuildDaemonImpl extends AbstractScheduler implements Build
 		public void reportError(String message, String file, Integer lineNumber, String code) {
 		}
 		public void reportWarning(String message, String file, Integer lineNumber, String code) {
+		}
+		public void addMetric(MetricDto metric) {
 		}
 	};
 	
