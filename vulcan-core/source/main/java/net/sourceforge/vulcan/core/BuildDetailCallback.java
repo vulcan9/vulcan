@@ -18,6 +18,7 @@
  */
 package net.sourceforge.vulcan.core;
 
+import net.sourceforge.vulcan.dto.MetricDto;
 import net.sourceforge.vulcan.metadata.SvnRevision;
 
 @SvnRevision(id="$Id$", url="$HeadURL$")
@@ -28,4 +29,5 @@ public interface BuildDetailCallback {
 	
 	void reportError(String message, String file, Integer lineNumber, String code);
 	void reportWarning(String message, String file, Integer lineNumber, String code);
+	void addMetric(MetricDto metric);
 }

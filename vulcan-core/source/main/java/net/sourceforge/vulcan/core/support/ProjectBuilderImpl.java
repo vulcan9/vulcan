@@ -41,6 +41,7 @@ import net.sourceforge.vulcan.core.ConfigurationStore;
 import net.sourceforge.vulcan.core.ProjectBuilder;
 import net.sourceforge.vulcan.dto.BuildDaemonInfoDto;
 import net.sourceforge.vulcan.dto.BuildMessageDto;
+import net.sourceforge.vulcan.dto.MetricDto;
 import net.sourceforge.vulcan.dto.ProjectConfigDto;
 import net.sourceforge.vulcan.dto.ProjectStatusDto;
 import net.sourceforge.vulcan.dto.RevisionTokenDto;
@@ -74,6 +75,7 @@ public class ProjectBuilderImpl implements ProjectBuilder {
 	
 	private List<BuildMessageDto> errors = new ArrayList<BuildMessageDto>();
 	private List<BuildMessageDto> warnings = new ArrayList<BuildMessageDto>();
+	private List<MetricDto> metrics = new ArrayList<MetricDto>();
 	
 	protected boolean building;
 	protected boolean killing;
@@ -146,6 +148,7 @@ public class ProjectBuilderImpl implements ProjectBuilder {
 			buildStatus.setStatus(Status.UP_TO_DATE);
 		} catch (Throwable e) {
 			log.error("unexpected error", e);
+			
 			buildStatus.setStatus(Status.ERROR);
 			buildStatus.setMessageKey("messages.build.uncaught.exception");
 			
@@ -244,6 +247,7 @@ public class ProjectBuilderImpl implements ProjectBuilder {
 		status.setStatus(Status.BUILDING);
 		status.setErrors(errors);
 		status.setWarnings(warnings);
+		status.setMetrics(metrics);
 		
 		return status;
 	}
@@ -479,6 +483,11 @@ public class ProjectBuilderImpl implements ProjectBuilder {
 			}
 		}
 
+		public void addMetric(MetricDto metric) {
+			metrics.add(metric);
+			delegate.addMetric(metric);
+		}
+		
 		public void setDetail(String detail) {
 			delegate.setDetail(detail);
 		}

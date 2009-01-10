@@ -29,6 +29,7 @@ import net.sourceforge.vulcan.dotnet.dto.DotNetBuildEnvironmentDto;
 import net.sourceforge.vulcan.dotnet.dto.DotNetGlobalConfigDto;
 import net.sourceforge.vulcan.dotnet.dto.DotNetProjectConfigDto;
 import net.sourceforge.vulcan.dto.BuildMessageDto;
+import net.sourceforge.vulcan.dto.MetricDto;
 import net.sourceforge.vulcan.dto.ProjectConfigDto;
 import net.sourceforge.vulcan.dto.ProjectStatusDto;
 import net.sourceforge.vulcan.dto.RevisionTokenDto;
@@ -71,6 +72,8 @@ public class NAntBuildToolInvocation extends TestCase {
 		}
 		public void reportWarning(String message, String file, Integer lineNumber, String code) {
 			warnings.add(new BuildMessageDto(message, file, lineNumber, code));
+		}
+		public void addMetric(MetricDto metric) {
 		}
 	};
 

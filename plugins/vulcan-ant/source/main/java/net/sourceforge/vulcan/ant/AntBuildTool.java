@@ -37,9 +37,11 @@ import net.sourceforge.vulcan.ant.receiver.AntEventSource;
 import net.sourceforge.vulcan.ant.receiver.EventListener;
 import net.sourceforge.vulcan.ant.receiver.UdpEventSource;
 import net.sourceforge.vulcan.core.BuildDetailCallback;
+import net.sourceforge.vulcan.dto.MetricDto;
 import net.sourceforge.vulcan.dto.ProjectConfigDto;
 import net.sourceforge.vulcan.dto.ProjectStatusDto;
 import net.sourceforge.vulcan.dto.RevisionTokenDto;
+import net.sourceforge.vulcan.dto.MetricDto.MetricType;
 import net.sourceforge.vulcan.exception.BuildFailedException;
 import net.sourceforge.vulcan.exception.ConfigException;
 
@@ -66,7 +68,7 @@ public class AntBuildTool implements BuildTool {
 	
 	protected File logFile;
 	
-	protected AntEventSource eventSource = new UdpEventSource();
+	protected AntEventSource eventSource;
 	
 	private final Map<String, String> antProps = new HashMap<String, String>();
 	
@@ -96,25 +98,26 @@ public class AntBuildTool implements BuildTool {
 		this.logFile = logFile;
 		
 		this.listener = new DetailCallbackEventListener(detailCallback);
-		this.eventSource.addEventListener(listener);
-		this.eventSource.addEventListener(new EventListener() {
-			private Stack<String> targets = new Stack<String>();
-			public void eventReceived(AntEventSummary event) {
-				final String targetName = event.getTargetName();
-				if (AntBuildEvent.TARGET_STARTED.name().equals(event.getType())) {
-					targets.push(targetName);
-					currentTarget = event.getTargetName();
-				} else if (AntBuildEvent.TARGET_FINISHED.name().equals(event.getType())) {
-					if (targets.isEmpty()) {
-						currentTarget = null;
-					} else {
-						currentTarget = targets.pop();
-					}
-				}
-			}
-		});
 		
 		if (eventSource != null) {
+			this.eventSource.addEventListener(listener);
+			this.eventSource.addEventListener(new EventListener() {
+				private Stack<String> targets = new Stack<String>();
+				public void eventReceived(AntEventSummary event) {
+					final String targetName = event.getTargetName();
+					if (AntBuildEvent.TARGET_STARTED.name().equals(event.getType())) {
+						targets.push(targetName);
+						currentTarget = event.getTargetName();
+					} else if (AntBuildEvent.TARGET_FINISHED.name().equals(event.getType())) {
+						if (targets.isEmpty()) {
+							currentTarget = null;
+						} else {
+							currentTarget = targets.pop();
+						}
+					}
+				}
+			});
+		
 			listenerThread = new Thread("Ant Build Listener") {
 				@Override
 				public void run() {
@@ -137,6 +140,8 @@ public class AntBuildTool implements BuildTool {
 			listenerThread = null;
 		}
 		
+		recordMetrics(detailCallback);
+		
 		try {
 			final String[] args = constructExecutableArgs(projectConfig, status, logFile);
 			
@@ -153,6 +158,16 @@ public class AntBuildTool implements BuildTool {
 		}
 	}
 
+	protected void recordMetrics(BuildDetailCallback detailCallback) {
+		if (!antConfig.isRecordMetrics())
+		{
+			return;
+		}
+		
+		detailCallback.addMetric(new MetricDto("vulcan.metrics.build.script", antProjectConfig.getBuildScript(), MetricType.STRING));
+		detailCallback.addMetric(new MetricDto("vulcan.metrics.build.targets", antProjectConfig.getTargets(), MetricType.STRING));
+	}
+	
 	public final AntEventSource getEventSource() {
 		return eventSource;
 	}

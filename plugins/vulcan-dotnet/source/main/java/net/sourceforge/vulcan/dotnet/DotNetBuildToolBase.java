@@ -20,11 +20,13 @@ package net.sourceforge.vulcan.dotnet;
 
 import static org.apache.commons.lang.StringUtils.isNotBlank;
 
-import java.io.File;
 import java.util.List;
 import java.util.Map;
 
+import java.io.File;
+
 import net.sourceforge.vulcan.ant.AntBuildTool;
+import net.sourceforge.vulcan.ant.AntConfig;
 import net.sourceforge.vulcan.ant.io.ByteSerializer;
 import net.sourceforge.vulcan.ant.receiver.UdpEventSource;
 import net.sourceforge.vulcan.dotnet.dto.DotNetBuildEnvironmentDto;
@@ -43,12 +45,14 @@ public abstract class DotNetBuildToolBase extends AntBuildTool {
 	private String propertySwitch;
 	
 	public DotNetBuildToolBase(DotNetGlobalConfigDto globalConfig, DotNetProjectConfigDto dotNetProjectConfig, DotNetBuildEnvironmentDto buildEnv, File pluginDir) {
-		super(dotNetProjectConfig, null, new UdpEventSource(new ByteSerializer()));
+		super(dotNetProjectConfig, new AntConfig(), new UdpEventSource(new ByteSerializer()));
 		
 		this.globalConfig = globalConfig;
 		this.dotNetProjectConfig = dotNetProjectConfig;
 		this.buildEnv = buildEnv;
 		this.pluginDir = pluginDir;
+		
+		this.antConfig.setRecordMetrics(globalConfig.isRecordMetrics());
 
 	}
 

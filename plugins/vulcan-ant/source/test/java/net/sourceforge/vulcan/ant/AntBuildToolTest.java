@@ -27,8 +27,14 @@ import net.sourceforge.vulcan.ant.buildlistener.Constants;
 import net.sourceforge.vulcan.ant.buildlistener.UdpBuildEventPublisher;
 import net.sourceforge.vulcan.ant.io.ObjectSerializer;
 import net.sourceforge.vulcan.ant.receiver.UdpEventSource;
+import net.sourceforge.vulcan.core.BuildDetailCallback;
+import net.sourceforge.vulcan.dto.MetricDto;
 import net.sourceforge.vulcan.dto.ProjectStatusDto;
+import net.sourceforge.vulcan.dto.MetricDto.MetricType;
 import net.sourceforge.vulcan.exception.ConfigException;
+
+import org.easymock.EasyMock;
+import org.easymock.IMocksControl;
 
 public class AntBuildToolTest extends AntBuildToolTestBase {
 	
@@ -42,6 +48,37 @@ public class AntBuildToolTest extends AntBuildToolTestBase {
 		antConfig.setBuildUserPropertyName(null);
 	}
 	
+	public void testRecordsMetrics() throws Exception {
+		antConfig.setRecordMetrics(true);
+		
+		final IMocksControl control = EasyMock.createStrictControl();
+		
+		BuildDetailCallback cb = control.createMock(BuildDetailCallback.class);
+		
+		cb.addMetric(new MetricDto("vulcan.metrics.build.script", config.getBuildScript(), MetricType.STRING));
+		cb.addMetric(new MetricDto("vulcan.metrics.build.targets", config.getTargets(), MetricType.STRING));
+		
+		control.replay();
+		
+		tool.recordMetrics(cb);
+		
+		control.verify();
+	}
+	
+	public void testDoesNotRecordMetricsWhenOptionNotSet() throws Exception {
+		antConfig.setRecordMetrics(false);
+		
+		final IMocksControl control = EasyMock.createStrictControl();
+		
+		BuildDetailCallback cb = control.createMock(BuildDetailCallback.class);
+		
+		control.replay();
+		
+		tool.recordMetrics(cb);
+		
+		control.verify();
+	}
+
 	public void testThrowsOnScriptNotFound() throws Exception {
 		config.setBuildScript("no-such-script.xml");
 		

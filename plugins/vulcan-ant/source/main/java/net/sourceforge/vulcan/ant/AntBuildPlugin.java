@@ -21,16 +21,11 @@ package net.sourceforge.vulcan.ant;
 import static org.apache.commons.lang.StringUtils.isBlank;
 import static org.apache.commons.lang.StringUtils.isNotBlank;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.jdom.Document;
-import org.jdom.Element;
-import org.springframework.beans.BeansException;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
+import java.io.File;
 
 import net.sourceforge.vulcan.BuildTool;
 import net.sourceforge.vulcan.ProjectBuildConfigurator;
@@ -40,6 +35,12 @@ import net.sourceforge.vulcan.exception.ConfigException;
 import net.sourceforge.vulcan.integration.BuildToolPlugin;
 import net.sourceforge.vulcan.integration.ConfigurablePlugin;
 import net.sourceforge.vulcan.integration.support.PluginSupport;
+
+import org.jdom.Document;
+import org.jdom.Element;
+import org.springframework.beans.BeansException;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 
 public class AntBuildPlugin extends PluginSupport
 		implements BuildToolPlugin, ConfigurablePlugin, ApplicationContextAware {

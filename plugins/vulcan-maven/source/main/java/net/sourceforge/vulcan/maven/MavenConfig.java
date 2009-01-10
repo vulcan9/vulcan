@@ -54,6 +54,7 @@ public class MavenConfig extends AntConfig {
 		addProperty(pds, "tagNamePropertyName", "AntConfig.tagNamePropertyName.name", "AntConfig.tagNamePropertyName.text", locale);
 		addProperty(pds, "buildUserPropertyName", "AntConfig.buildUsername.name", "AntConfig.buildUsername.text", locale);
 		addProperty(pds, "buildSchedulerPropertyName", "AntConfig.scheduler.name", "AntConfig.scheduler.text", locale);
+		addProperty(pds, "recordMetrics", "AntConfig.recordMetrics.name", "AntConfig.recordMetrics.text", locale);
 
 		return pds;
 	}
@@ -62,7 +63,7 @@ public class MavenConfig extends AntConfig {
 	public MavenConfig copy() {
 		final MavenConfig copy = (MavenConfig) super.copy();
 		
-		copy.setMavenHomes((MavenHome[]) copyArray(mavenHomes));
+		copy.setMavenHomes(copyArray(mavenHomes));
 		
 		return copy;
 	}

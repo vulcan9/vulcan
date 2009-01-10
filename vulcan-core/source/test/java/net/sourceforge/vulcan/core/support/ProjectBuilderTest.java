@@ -18,12 +18,6 @@
  */
 package net.sourceforge.vulcan.core.support;
 
-import java.beans.PropertyDescriptor;
-import java.io.File;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.net.InetAddress;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -31,6 +25,13 @@ import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
 import java.util.concurrent.TimeoutException;
+
+import java.beans.PropertyDescriptor;
+import java.io.File;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.net.InetAddress;
+import java.sql.SQLException;
 
 import net.sourceforge.vulcan.BuildTool;
 import net.sourceforge.vulcan.EasyMockTestCase;
@@ -43,9 +44,11 @@ import net.sourceforge.vulcan.dto.BuildDaemonInfoDto;
 import net.sourceforge.vulcan.dto.BuildMessageDto;
 import net.sourceforge.vulcan.dto.BuildToolConfigDto;
 import net.sourceforge.vulcan.dto.ChangeLogDto;
+import net.sourceforge.vulcan.dto.MetricDto;
 import net.sourceforge.vulcan.dto.ProjectConfigDto;
 import net.sourceforge.vulcan.dto.ProjectStatusDto;
 import net.sourceforge.vulcan.dto.RevisionTokenDto;
+import net.sourceforge.vulcan.dto.MetricDto.MetricType;
 import net.sourceforge.vulcan.dto.ProjectStatusDto.Status;
 import net.sourceforge.vulcan.dto.ProjectStatusDto.UpdateType;
 import net.sourceforge.vulcan.exception.BuildFailedException;
@@ -75,6 +78,7 @@ public class ProjectBuilderTest extends EasyMockTestCase {
 	
 	String errorMessage;
 	String warningMessage;
+	MetricDto metric;
 	
 	UpdateType updateType = null;
 	
@@ -86,6 +90,7 @@ public class ProjectBuilderTest extends EasyMockTestCase {
 		public void setDetailMessage(String messageKey, Object[] args) {}
 		public void reportError(String message, String file, Integer lineNumber, String code) {}
 		public void reportWarning(String message, String file, Integer lineNumber, String code) {}
+		public void addMetric(MetricDto metric) {}
 		@Override
 		public boolean equals(Object obj) {
 			return true;
@@ -122,6 +127,9 @@ public class ProjectBuilderTest extends EasyMockTestCase {
 			}
 			if (warningMessage != null) {
 				buildDetailCallback.reportWarning(warningMessage, null, null, null);
+			}
+			if (metric != null) {
+				buildDetailCallback.addMetric(metric);
 			}
 			if (sleepTime > 0) {
 				try {
@@ -221,6 +229,7 @@ public class ProjectBuilderTest extends EasyMockTestCase {
 		buildToolStatus.setRepositoryUrl("http://localhost");
 		buildToolStatus.setErrors(new ArrayList<BuildMessageDto>());
 		buildToolStatus.setWarnings(new ArrayList<BuildMessageDto>());
+		buildToolStatus.setMetrics(new ArrayList<MetricDto>());
 		buildToolStatus.setBuildNumber(0);
 		buildToolStatus.setWorkDir("dir");
 		
@@ -417,6 +426,48 @@ public class ProjectBuilderTest extends EasyMockTestCase {
 		
 		outcome.getErrors().add(new BuildMessageDto(errorMessage, null, null, null));
 		outcome.getWarnings().add(new BuildMessageDto(warningMessage, null, null, null));
+		
+		mgr.targetCompleted(info, project, outcome);
+		
+		checkBuild();
+	}
+	public void testCapturesMetrics() throws Exception {
+		project = new ProjectConfigDto();
+		project.setName("a name");
+		project.setWorkDir("a");
+		project.setRequestedBy("Deborah");
+
+		expect(projectMgr.getRepositoryAdaptor(project)).andReturn(ra);
+
+		expect(ra.getTagName()).andReturn("trunk");
+		expect(ra.getLatestRevision(null)).andReturn(rev0);
+		
+		expect(mgr.getLatestStatus(project.getName())).andReturn(((ProjectStatusDto) null));
+
+		ra.createWorkingCopy(new File("a").getAbsoluteFile(), buildDetailCallback);
+
+		expect(projectMgr.getBuildTool(project)).andReturn(tool);
+
+		metric = new MetricDto();
+		metric.setMessageKey("m.key");
+		metric.setValue("0.99");
+		metric.setType(MetricType.PERCENT);
+		
+		buildToolStatus.setBuildReasonKey("messages.build.reason.repository.changes");
+		buildToolStatus.setRequestedBy("Deborah");
+		buildToolStatus.setWorkDir("a");
+		buildToolStatus.getMetrics().add(metric);
+		
+		tool.buildProject(
+				eq(project),
+				eq(buildToolStatus),
+				eq(logFile),
+				(BuildDetailCallback)notNull());
+		
+
+		final ProjectStatusDto outcome = createFakeBuildOutcome(project.getName(), 0, rev0, "trunk", Status.PASS, null, null, null, "http://localhost", true, "Deborah", "messages.build.reason.repository.changes", null, ProjectStatusDto.UpdateType.Full, project.getWorkDir(), estimatedBuildTimeMillis);
+		
+		outcome.getMetrics().add(metric);
 		
 		mgr.targetCompleted(info, project, outcome);
 		
@@ -986,6 +1037,7 @@ public class ProjectBuilderTest extends EasyMockTestCase {
 		dto.setRequestedBy(requestedBy);
 		dto.setErrors(new ArrayList<BuildMessageDto>());
 		dto.setWarnings(new ArrayList<BuildMessageDto>());
+		dto.setMetrics(new ArrayList<MetricDto>());
 		dto.setBuildReasonKey(reasonKey);
 		dto.setUpdateType(updateType);
 		dto.setWorkDir(workDir);

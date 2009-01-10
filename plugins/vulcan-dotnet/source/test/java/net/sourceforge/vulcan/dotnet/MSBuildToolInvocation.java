@@ -26,6 +26,7 @@ import net.sourceforge.vulcan.core.BuildDetailCallback;
 import net.sourceforge.vulcan.dotnet.dto.DotNetGlobalConfigDto;
 import net.sourceforge.vulcan.dotnet.dto.DotNetProjectConfigDto;
 import net.sourceforge.vulcan.dto.BuildMessageDto;
+import net.sourceforge.vulcan.dto.MetricDto;
 import net.sourceforge.vulcan.dto.RevisionTokenDto;
 import net.sourceforge.vulcan.exception.BuildFailedException;
 import net.sourceforge.vulcan.exception.ConfigException;
@@ -53,6 +54,8 @@ public class MSBuildToolInvocation extends MSBuildToolTestBase {
 		}
 		public void reportWarning(String message, String file, Integer lineNumber, String code) {
 			warnings.add(new BuildMessageDto(message, file, lineNumber, code));
+		}
+		public void addMetric(MetricDto metric) {
 		}
 	};
 

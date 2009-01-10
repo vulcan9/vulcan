@@ -36,7 +36,7 @@ public class CvsConfigDto extends RepositoryAdaptorConfigDto {
 	public BaseDto copy() {
 		final CvsConfigDto copy = (CvsConfigDto) super.copy();
 
-		copy.setProfiles((CvsRepositoryProfileDto[]) copyArray(profiles));
+		copy.setProfiles(copyArray(profiles));
 		
 		return copy;
 	}
