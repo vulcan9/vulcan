@@ -407,6 +407,19 @@ function refreshDashboard(e, interval, url) {
 	window.setTimeout(refreshDashboard, window.refreshInterval);
 }
 
+function toggleMetricColumnVisibility(e) {
+	var id = $(this).attr("id");
+	
+	var header = $("#col_" + id);
+	
+	var table = $(header.parents("table").get(0));
+	
+	var index = 1 + table.find("thead th").index(header);
+	
+	header.toggleClass("hidden");
+	table.find("tbody tr td:nth-child(" + index + ")").toggleClass("hidden");
+}
+
 function registerHandler(type, value, handler) {
 	var inputs = document.getElementsByTagName('input');
 	for (var i=0; i<inputs.length; i++) {
@@ -511,6 +524,8 @@ function registerHandlers() {
 		
 		return false;
 	});
+	
+	$("#metrics-checkboxes input").click(toggleMetricColumnVisibility);
 	
 	$(".report-link").click(function() {
 		setTimeout(function() { showBuildReportPanel("build-directory"); }, 500);

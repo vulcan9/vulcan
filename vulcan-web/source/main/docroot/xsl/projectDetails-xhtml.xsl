@@ -46,9 +46,7 @@
 	<xsl:param name="showBuildDirectory" select="'true'"/>
 	<xsl:param name="workingCopyBuildNumber"/>
 	
-	<xsl:key name="builds-by-message" match="project" use="message"/>
-	
-	<xsl:key name="issue-ids" match="//issue" use="@issue-id"/>
+	<xsl:key name="metrics-labels" match="/build-history/project/metrics/metric" use="@label"/>
 	
 	<xsl:variable name="num-errors" select="count(/project/errors/error)"/>
 	<xsl:variable name="num-warnings" select="count(/project/warnings/warning)"/>
@@ -264,9 +262,6 @@
 			</xsl:when>
 			<xsl:when test="$target='buildHistoryReportSummary'">
 				<xsl:call-template name="buildHistoryReportSummary"/>
-			</xsl:when>
-			<xsl:when test="$target='messageOccurrence'">
-				<xsl:call-template name="messageOccurrence"/>
 			</xsl:when>
 			<xsl:when test="$target='history-outcomes'">
 				<xsl:call-template name="history-outcomes"/>
@@ -715,10 +710,27 @@
 						<xsl:with-param name="target" select="'buildHistoryReportSummary'"/>
 					</xsl:call-template>
 				
-					<xsl:call-template name="bubble">
-						<xsl:with-param name="target" select="'messageOccurrence'"/>
-					</xsl:call-template>
-			
+					<h3 class="caption">Metrics</h3>
+					<ul id="metrics-checkboxes" class="metaDataOptions">
+						<xsl:for-each select="/build-history/project/metrics/metric[generate-id() = generate-id(key('metrics-labels', @label)[1])]">
+							<li>
+								<input type="checkbox" checked="checked">
+									<xsl:attribute name="id">
+										<xsl:text>metric</xsl:text>
+										<xsl:value-of select="position()"/>
+									</xsl:attribute>
+								</input>
+								<label>
+									<xsl:attribute name="for">
+										<xsl:text>metric</xsl:text>
+										<xsl:value-of select="position()"/>
+									</xsl:attribute>
+									<xsl:value-of select="@label"/>
+								</label>
+							</li>
+						</xsl:for-each>
+					</ul>
+					
 					<xsl:call-template name="bubble">
 						<xsl:with-param name="target" select="'history-outcomes'"/>
 					</xsl:call-template>
@@ -752,42 +764,11 @@
 		</table>
 	</xsl:template>
 	
-	<xsl:template name="messageOccurrence">
-		<table xmlns="http://www.w3.org/1999/xhtml">
-			<caption>Message Occurrence</caption>
-			<thead>
-				<tr>
-					<th>Count</th>
-					<th>Rate</th>
-					<th>Message</th>
-				</tr>
-			</thead>
-			<tbody>
-				<xsl:variable name="total" select="count(project)"/>
-				<xsl:for-each select="project[generate-id() = generate-id(key('builds-by-message', message)[1])]">
-					<xsl:sort select="count(key('builds-by-message', message))" data-type="number" order="descending"/>
-					<xsl:variable name="count" select="count(key('builds-by-message', message))"/>
-					<tr>
-						<td>
-							<xsl:value-of select="$count"/>
-						</td>
-						<td>
-							<xsl:value-of select="format-number($count div $total, '##0.#%')"/>
-						</td>
-						<td>
-							<xsl:value-of select="message"/>
-						</td>
-					</tr>
-				</xsl:for-each>
-			</tbody>
-		</table>
-	</xsl:template>
-	
 	<xsl:template name="history-outcomes">
 		<table xmlns="http://www.w3.org/1999/xhtml" class="builds">
 			<caption>Outcomes</caption>
 			<thead>
-				<tr>
+				<tr id="build-data-headers">
 					<th><xsl:value-of select="$projectHeader"/></th>
 					<th><xsl:value-of select="$buildNumberHeader"/></th>
 					<th><xsl:value-of select="$revisionHeader"/></th>
@@ -795,6 +776,15 @@
 					<th class="timestamp"><xsl:value-of select="$timestampHeader"/></th>
 					<th><xsl:value-of select="$statusHeader"/></th>
 					<th><xsl:value-of select="$messageHeader"/></th>
+					<xsl:for-each select="/build-history/project/metrics/metric[generate-id() = generate-id(key('metrics-labels', @label)[1])]">
+						<th>
+							<xsl:attribute name="id">
+								<xsl:text>col_metric</xsl:text>
+								<xsl:value-of select="position()"/>
+							</xsl:attribute>
+							<xsl:value-of select="@label"/>
+						</th>
+					</xsl:for-each>
 				</tr>
 			</thead>
 			<tbody>
@@ -806,6 +796,7 @@
 	</xsl:template>
 	
 	<xsl:template match="/build-history/project">
+		<xsl:variable name="project" select="."/>
 		<tr xmlns="http://www.w3.org/1999/xhtml">
 			<td><xsl:apply-templates select="name"/></td>
 			<td>
@@ -822,6 +813,13 @@
 				<xsl:value-of select="status"/>
 			</xsl:element>
 			<td class="buildMessage"><xsl:apply-templates select="message"/></td>
+			
+			<xsl:for-each select="/build-history/project/metrics/metric[generate-id() = generate-id(key('metrics-labels', @label)[1])]">
+				<xsl:variable name="label" select="@label"/>
+				<td>
+					<xsl:value-of select="$project/metrics/metric[@label=$label]/@value"/>
+				</td>
+			</xsl:for-each>
 		</tr>
 	</xsl:template>
 	
