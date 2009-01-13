@@ -158,7 +158,9 @@ public final class ViewProjectBuildHistoryAction extends ProjectReportBaseAction
 		request.setAttribute("fixedInBuildNumber", reportHelper.getFixedInBuildNumber());
 		request.setAttribute("longestElapsedFailureName", reportHelper.getLongestElapsedFailureName());
 		
+		// put data in session for ajax requests
 		request.getSession().setAttribute(Keys.BUILD_HISTORY, doc);
+		
 		final List<String> availableMetrics = getAvailableMetrics(outcomes);
 		request.setAttribute("availableMetrics", availableMetrics);
 		

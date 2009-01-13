@@ -287,7 +287,11 @@ public class XmlMetricsPlugin implements BuildManagerObserverPlugin, Configurabl
 			metricList.add(m);
 		}
 		
-		status.setMetrics(metricList);
+		if (status.getMetrics() != null) {
+			status.getMetrics().addAll(metricList);
+		} else {
+			status.setMetrics(metricList);
+		}
 	}
 	
 	@SuppressWarnings("unchecked")

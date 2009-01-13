@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.jdom.Element;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.ResourcePatternResolver;
 
@@ -116,6 +117,25 @@ public class XmlMetricsPluginTest extends TestCase implements ResourcePatternRes
 		plugin.preserveTestFailures(currentStatus);
 		
 		assertEquals(null, currentStatus.getTestFailures());
+	}
+	public void testCreatesMetricsListWhenNull() throws Exception {
+		currentStatus.setMetrics(null);
+		
+		plugin.digest(new Element("a"), currentStatus);
+		
+		assertNotNull("currentStatus.getMetrics()", currentStatus.getMetrics());
+	}
+	public void testMergesMetricsWhenAlreadyPresent() throws Exception {
+		final MetricDto metricDto = new MetricDto();
+		
+		final List<MetricDto> metrics = new ArrayList<MetricDto>();
+		metrics.add(metricDto);
+		
+		currentStatus.setMetrics(metrics);
+		
+		plugin.digest(new Element("a"), currentStatus);
+		
+		assertTrue("Should not have removed existing metric", currentStatus.getMetrics().contains(metricDto));
 	}
 	public Resource getResource(String location) {
 		return null;
