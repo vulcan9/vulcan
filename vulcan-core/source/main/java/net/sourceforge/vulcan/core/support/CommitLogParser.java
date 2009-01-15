@@ -41,7 +41,7 @@ class CommitLogParser {
 	
 	void parse(String message) {
 		if (isNotBlank(keywordPattern)) {
-			keywordPattern = "(" + keywordPattern + "|" + urlPattern + ")"; 
+			keywordPattern = "(?:" + keywordPattern + "|" + urlPattern + ")"; 
 		} else {
 			keywordPattern = urlPattern;
 		}
@@ -107,14 +107,15 @@ class CommitLogParser {
 	}
 
 	private String findIssueId(Matcher matcher) {
-		final String lastGroup = matcher.group(matcher.groupCount());
+		return matcher.group(0);
+/*		final String lastGroup = matcher.group(matcher.groupCount());
 		
 		if (lastGroup == null) {
 			return matcher.group(matcher.groupCount() - 1);
 		}
 		
 		return lastGroup;
-	}
+*/	}
 
 	private void appendText(String string) {
 		final int contentSize = messageNode.getContentSize();

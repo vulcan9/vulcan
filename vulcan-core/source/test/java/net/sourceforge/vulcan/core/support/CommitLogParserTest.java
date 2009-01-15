@@ -41,16 +41,27 @@ public class CommitLogParserTest extends TestCase {
 		parser.parse("Fixed bug 92.");
 		
 		assertTextNode("Fixed ", 0);
-		assertIssue("bug 92", "92", 1);
+		assertIssue("bug 92", "bug 92", 1);
+		assertTextNode(".", 2);
+	}
+
+	public void testSingleMatchRegexWithIdPattern() throws Exception {
+		parser.setKeywordPattern("bug (\\d+)");
+		parser.setIdPattern("(\\d+)");
+		parser.parse("Fixed bug 92.");
+		
+		assertTextNode("Fixed bug ", 0);
+		assertIssue("92", "92", 1);
 		assertTextNode(".", 2);
 	}
 	
 	public void testSingleMatchRegexNoTrailingText() throws Exception {
 		parser.setKeywordPattern("bug (\\d+)");
+		parser.setIdPattern("(\\d+)");
 		parser.parse("Fixed bug 92");
 		
-		assertTextNode("Fixed ", 0);
-		assertIssue("bug 92", "92", 1);
+		assertTextNode("Fixed bug ", 0);
+		assertIssue("92", "92", 1);
 		assertEquals(2, parser.getContents().size());
 	}
 	
@@ -58,7 +69,7 @@ public class CommitLogParserTest extends TestCase {
 		parser.setKeywordPattern("bug (\\d+)");
 		parser.parse("bug 92 was fixed.");
 		
-		assertIssue("bug 92", "92", 0);
+		assertIssue("bug 92", "bug 92", 0);
 		assertTextNode(" was fixed.", 1);
 		assertEquals(2, parser.getContents().size());
 	}
@@ -68,20 +79,20 @@ public class CommitLogParserTest extends TestCase {
 		parser.parse("Fixed bug 92 and Bug 95.");
 		
 		assertTextNode("Fixed ", 0);
-		assertIssue("bug 92", "92", 1);
+		assertIssue("bug 92", "bug 92", 1);
 		assertTextNode(" and ", 2);
-		assertIssue("Bug 95", "95", 3);
+		assertIssue("Bug 95", "Bug 95", 3);
 		assertTextNode(".", 4);
 	}
 	
 	public void testDoubleMatchRegexCombined() throws Exception {
-		parser.setKeywordPattern("bug (\\d+)|issue (\\d+)");
+		parser.setKeywordPattern("(bug|issue) \\d+");
 		parser.parse("Fixed bug 92 and issue 95.");
 		
 		assertTextNode("Fixed ", 0);
-		assertIssue("bug 92", "92", 1);
+		assertIssue("bug 92", "bug 92", 1);
 		assertTextNode(" and ", 2);
-		assertIssue("issue 95", "95", 3);
+		assertIssue("issue 95", "issue 95", 3);
 		assertTextNode(".", 4);
 	}
 	
@@ -90,9 +101,9 @@ public class CommitLogParserTest extends TestCase {
 		parser.parse("Fixed bug# 92 and\n Issue #95.");
 		
 		assertTextNode("Fixed ", 0);
-		assertIssue("bug# 92", "92", 1);
+		assertIssue("bug# 92", "bug# 92", 1);
 		assertTextNode(" and\n ", 2);
-		assertIssue("Issue #95", "95", 3);
+		assertIssue("Issue #95", "Issue #95", 3);
 		assertTextNode(".", 4);
 	}
 	
@@ -168,8 +179,17 @@ public class CommitLogParserTest extends TestCase {
 		assertTextNode("Check out the new site at ", 0);
 		assertLink("http://www.example.com", 1);
 		assertTextNode(" (", 2);
-		assertIssue("bug 92", "92", 3);
+		assertIssue("bug 92", "bug 92", 3);
 		assertTextNode(" was fixed).", 4);
+	}
+	
+	public void testChoosesRightCaptureGroupOnMany() throws Exception {
+		parser.setKeywordPattern("(Bug:? |(card|story) \\d+)");
+		parser.parse("Did stuff for card 3.");
+		
+		assertTextNode("Did stuff for ", 0);
+		assertIssue("card 3", "card 3", 1);
+		assertTextNode(".", 2);
 	}
 	
 	public void testMatchUrlWhenIdPatternSet() throws Exception {
