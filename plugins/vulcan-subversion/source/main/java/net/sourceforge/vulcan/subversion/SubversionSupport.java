@@ -19,6 +19,9 @@
 package net.sourceforge.vulcan.subversion;
 
 import static org.apache.commons.lang.StringUtils.isNotBlank;
+
+import java.util.regex.Pattern;
+
 import net.sourceforge.vulcan.dto.ProjectConfigDto;
 import net.sourceforge.vulcan.exception.ConfigException;
 import net.sourceforge.vulcan.exception.RepositoryException;
@@ -108,7 +111,7 @@ public abstract class SubversionSupport extends PluginSupport {
 				sb.append('|');
 			}
 			
-			sb.append(messagePattern.replaceAll("%BUGID%", "(\\\\d+)"));
+			sb.append(Pattern.compile("%BUGID%", Pattern.CASE_INSENSITIVE).matcher(messagePattern).replaceAll("(\\\\d+)"));
 		}
 		
 		return sb.toString();
