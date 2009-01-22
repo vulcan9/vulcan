@@ -38,8 +38,10 @@ import org.tmatesoft.svn.core.SVNErrorMessage;
 import org.tmatesoft.svn.core.SVNException;
 import org.tmatesoft.svn.core.SVNNodeKind;
 import org.tmatesoft.svn.core.SVNProperties;
+import org.tmatesoft.svn.core.SVNPropertyValue;
 import org.tmatesoft.svn.core.SVNURL;
 import org.tmatesoft.svn.core.internal.io.svn.SVNRepositoryImpl;
+import org.tmatesoft.svn.core.wc.SVNPropertyData;
 
 public class SubversionRepositoryAdaptorTest extends TestCase {
 	SubversionRepositoryAdaptor r;
@@ -139,5 +141,15 @@ public class SubversionRepositoryAdaptorTest extends TestCase {
 		assertEquals("bug (\\d+)", r.combinePatterns("bug (\\d+)", null));
 		assertEquals("Bug-ID: (\\d+)", r.combinePatterns(null, "Bug-ID: %BUGID%"));
 		assertEquals("bug (\\d+)|Bug-ID: (\\d+)", r.combinePatterns("bug (\\d+)", "Bug-ID: %BUGID%"));
+	}
+	public void testCombineLogRegexAndMessageCaseInsensitive() throws Exception {
+		assertEquals("Bug-ID: (\\d+)", r.combinePatterns(null, "Bug-ID: %bugid%"));
+	}
+	public void testConvertsPropertyToStringIfNecessary() throws Exception {
+		final String value = "hello world";
+		final SVNPropertyValue data = SVNPropertyValue.create("proprietary", value.getBytes());
+		final SVNPropertyData prop = new SVNPropertyData("proprietary", data, null);
+		
+		assertEquals(value, r.getValueIfNotNull(prop));
 	}
 }

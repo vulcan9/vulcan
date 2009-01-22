@@ -67,6 +67,7 @@ import org.tmatesoft.svn.core.SVNException;
 import org.tmatesoft.svn.core.SVNLogEntry;
 import org.tmatesoft.svn.core.SVNNodeKind;
 import org.tmatesoft.svn.core.SVNProperties;
+import org.tmatesoft.svn.core.SVNPropertyValue;
 import org.tmatesoft.svn.core.SVNURL;
 import org.tmatesoft.svn.core.io.SVNRepository;
 import org.tmatesoft.svn.core.wc.ISVNEventHandler;
@@ -516,9 +517,15 @@ public class SubversionRepositoryAdaptor extends SubversionSupport implements Re
 		bugtraqProps.put(propName, getValueIfNotNull(prop));
 	}
 
-	private String getValueIfNotNull(SVNPropertyData prop) {
+	protected String getValueIfNotNull(SVNPropertyData prop) {
 		if (prop != null) {
-			return prop.getValue().getString();
+			final SVNPropertyValue value = prop.getValue();
+			
+			if (value.isString()) {
+				return value.getString();
+			}
+			
+			return SVNPropertyValue.getPropertyAsString(value);
 		}
 		return StringUtils.EMPTY;
 	}
