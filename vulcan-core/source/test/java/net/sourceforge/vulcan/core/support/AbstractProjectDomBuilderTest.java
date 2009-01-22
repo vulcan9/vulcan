@@ -594,6 +594,7 @@ public class AbstractProjectDomBuilderTest extends EasyMockTestCase {
 	public void testLinkifyBugs() throws Exception {
 		ProjectConfigDto config = new ProjectConfigDto();
 		config.setBugtraqLogRegex1("(bug|issue):?#? ?#?(\\d+)");
+		config.setBugtraqLogRegex2("\\d+");
 		
 		expect(pm.getProjectConfig("a name")).andReturn(config);
 		
@@ -634,9 +635,9 @@ public class AbstractProjectDomBuilderTest extends EasyMockTestCase {
 		
 		out.output(message, os);
 
-		assertEquals("<message>fixed every bug including <issue issue-id=\"4352\">bug 4352</issue>, " +
-				"<issue issue-id=\"12\">issue 12</issue>, <issue issue-id=\"54\">bug #54</issue>, " +
-				"<issue issue-id=\"51\">bug: 51</issue> and <issue issue-id=\"5443\">bug:#5443</issue>.  " +
+		assertEquals("<message>fixed every bug including bug <issue issue-id=\"4352\">4352</issue>, " +
+				"issue <issue issue-id=\"12\">12</issue>, bug #<issue issue-id=\"54\">54</issue>, " +
+				"bug: <issue issue-id=\"51\">51</issue> and bug:#<issue issue-id=\"5443\">5443</issue>.  " +
 				"And stuff.</message>", os.toString());
 		
 		verify();
@@ -644,6 +645,7 @@ public class AbstractProjectDomBuilderTest extends EasyMockTestCase {
 	public void testLinkifyBugsAndUrls() throws Exception {
 		ProjectConfigDto config = new ProjectConfigDto();
 		config.setBugtraqLogRegex1("([Bb]ug|issue):?#? ?#?(\\d+)");
+		config.setBugtraqLogRegex2("\\d+");
 		
 		expect(pm.getProjectConfig("a name")).andReturn(config);
 
@@ -685,7 +687,7 @@ public class AbstractProjectDomBuilderTest extends EasyMockTestCase {
 		out.output(message, os);
 
 		assertEquals("<message>Used new feature found at <link>http://www.example.com</link>" +
-				" <issue issue-id=\"27172\">Bug# 27172</issue>\nWorks great.</message>",
+				" Bug# <issue issue-id=\"27172\">27172</issue>\nWorks great.</message>",
 				os.toString().replaceAll("\r", ""));
 		
 		verify();
