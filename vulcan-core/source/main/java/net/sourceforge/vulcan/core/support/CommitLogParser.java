@@ -95,7 +95,7 @@ class CommitLogParser {
 			if (idMatcher != null) {
 				parse(wholeMatch, idMatcher, false);				
 			} else {
-				appendIssueOrLinkNode(wholeMatch, findIssueId(matcher));
+				appendIssueOrLinkNode(wholeMatch, matcher.group(0));
 			}
 			
 			lastEnd = matcher.end();
@@ -105,17 +105,6 @@ class CommitLogParser {
 			appendText(message.substring(lastEnd));
 		}
 	}
-
-	private String findIssueId(Matcher matcher) {
-		return matcher.group(0);
-/*		final String lastGroup = matcher.group(matcher.groupCount());
-		
-		if (lastGroup == null) {
-			return matcher.group(matcher.groupCount() - 1);
-		}
-		
-		return lastGroup;
-*/	}
 
 	private void appendText(String string) {
 		final int contentSize = messageNode.getContentSize();
