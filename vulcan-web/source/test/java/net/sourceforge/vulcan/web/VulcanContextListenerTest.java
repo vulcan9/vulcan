@@ -36,6 +36,7 @@ public class VulcanContextListenerTest extends ServletTestCase {
 	public void setUp() throws Exception {
 		super.setUp();
 		wac.getBeanFactory().registerSingleton("buildOutcomeConverter", new BuildOutcomeConverter());
+		wac.getBeanFactory().registerSingleton(Keys.BUILD_OUTCOME_STORE, new Object());
 	}
 	@TrainingMethod("trainNoCalls")
 	public void testInitNoWac() {
