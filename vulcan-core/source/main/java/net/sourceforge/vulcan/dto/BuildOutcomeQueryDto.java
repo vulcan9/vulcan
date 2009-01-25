@@ -18,22 +18,27 @@
  */
 package net.sourceforge.vulcan.dto;
 
+import java.util.Date;
 import java.util.Set;
 
+import net.sourceforge.vulcan.dto.ProjectStatusDto.UpdateType;
 import net.sourceforge.vulcan.metadata.SvnRevision;
 
 @SvnRevision(id="$Id$", url="$HeadURL$")
 public class BuildOutcomeQueryDto extends BaseDto {
 	private Set<String> projectNames;
 	
-	private java.util.Date minDate;
-	private java.util.Date maxDate;
+	private Date minDate;
+	private Date maxDate;
 	
 	private Integer minBuildNumber;
 	private Integer maxBuildNumber;
 	
 	private Set<ProjectStatusDto.Status> statuses;
+	private UpdateType updateType;
 
+	private String requestedBy;
+	
 	public Set<String> getProjectNames() {
 		return projectNames;
 	}
@@ -42,11 +47,11 @@ public class BuildOutcomeQueryDto extends BaseDto {
 		this.projectNames = projectNames;
 	}
 
-	public java.util.Date getMinDate() {
+	public Date getMinDate() {
 		return minDate;
 	}
 
-	public void setMinDate(java.util.Date minDate) {
+	public void setMinDate(Date minDate) {
 		this.minDate = minDate;
 	}
 
@@ -80,5 +85,21 @@ public class BuildOutcomeQueryDto extends BaseDto {
 
 	public void setStatuses(Set<ProjectStatusDto.Status> statuses) {
 		this.statuses = statuses;
+	}
+
+	public UpdateType getUpdateType() {
+		return updateType;
+	}
+	
+	public void setUpdateType(UpdateType updateType) {
+		this.updateType = updateType;
+	}
+	
+	public String getRequestedBy() {
+		return requestedBy;
+	}
+	
+	public void setRequestedBy(String requestedBy) {
+		this.requestedBy = requestedBy;
 	}
 }

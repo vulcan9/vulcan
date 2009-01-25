@@ -189,6 +189,57 @@ public class JdbcBuildOutcomeStoreTest extends TestCase {
 		assertPersistence();
 	}
 	
+	public void testLoadBuildSchedulersAndUsers() throws Exception {
+		outcome.setRequestedBy("Brook");
+		outcome.setScheduledBuild(false);
+		
+		storeOutcome();
+		
+		outcome.setId(UUID.randomUUID());
+		outcome.setBuildNumber(42);
+		outcome.setRequestedBy("Cyborg");
+		outcome.setScheduledBuild(true);
+		
+		storeOutcome();
+		
+		List<String> scheds = store.getBuildSchedulers();
+		assertEquals(1, scheds.size());
+		assertEquals("Cyborg", scheds.get(0));
+		
+		List<String> users = store.getBuildUsers();
+		assertEquals(1, users.size());
+		assertEquals("Brook", users.get(0));
+	}
+	
+	public void testLoadBuildUsersIgnoresNull() throws Exception {
+		outcome.setRequestedBy(null);
+		outcome.setScheduledBuild(false);
+		
+		storeOutcome();
+		
+		List<String> scheds = store.getBuildUsers();
+		assertEquals(0, scheds.size());
+	}
+	
+	public void testStoresNewBuildUserAfterInitialized() throws Exception {
+		outcome.setRequestedBy(null);
+		outcome.setScheduledBuild(false);
+		
+		storeOutcome();
+		
+		store.getBuildUsers();
+		
+		outcome.setId(UUID.randomUUID());
+		outcome.setBuildNumber(42);
+		outcome.setRequestedBy("Susan");
+		
+		storeOutcome();
+
+		List<String> users = store.getBuildUsers();
+		assertEquals(1, users.size());
+		assertEquals("Susan", users.get(0));
+	}
+	
 	public void testFindMostRecentBuildNumberByWorkingCopy() throws Exception {
 		outcome.setWorkDir("a work dir");
 		

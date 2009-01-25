@@ -18,6 +18,8 @@
  */
 package net.sourceforge.vulcan.spring.jdbc;
 
+import static org.apache.commons.lang.StringUtils.isNotBlank;
+
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -117,6 +119,18 @@ class HistoryQueryBuilder {
 			sb.append(")");
 
 			params.addAll(statuses);
+		}
+		
+		if (dto.getUpdateType()!=null) {
+			query.declareParameter(new SqlParameter(Types.VARCHAR));
+			sb.append(" and update_type=?");
+			params.add(dto.getUpdateType().name());
+		}
+		
+		if (isNotBlank(dto.getRequestedBy())) {
+			query.declareParameter(new SqlParameter(Types.VARCHAR));
+			sb.append(" and requested_by=?");
+			params.add(dto.getRequestedBy());
 		}
 		
 		query.setParameterValues(params.toArray());

@@ -59,4 +59,10 @@ public interface BuildOutcomeStore {
 
 	@Transactional(readOnly=true)
 	Integer findMostRecentBuildNumberByWorkDir(String workDir);
+
+	@Transactional(readOnly=true)
+	List<String> getBuildUsers();
+
+	@Transactional(readOnly=true)
+	List<String> getBuildSchedulers();
 }

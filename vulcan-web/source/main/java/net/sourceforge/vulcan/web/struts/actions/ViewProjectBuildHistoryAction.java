@@ -64,7 +64,8 @@ public final class ViewProjectBuildHistoryAction extends ProjectReportBaseAction
 		final String[] projectNames = reportForm.getProjectNames();
 		final BuildOutcomeQueryDto query = new BuildOutcomeQueryDto();
 		query.setProjectNames(new HashSet<String>(Arrays.asList(projectNames)));
-		
+		//TODO: move conversion to query into form
+
 		if (reportForm.isDateMode()) {
 			final Date from = reportForm.getStartDateAsDate();
 			final Date to = reportForm.getEndDateAsDate();
@@ -88,14 +89,16 @@ public final class ViewProjectBuildHistoryAction extends ProjectReportBaseAction
 			toLabel = Integer.toString(maxBuildNumber);
 		}
 		
-		final String[] omitTypes = reportForm.getOmitTypes();
-		if (omitTypes.length > 0) {
-			final Set<Status> statuses = new HashSet<Status>();
-			statuses.addAll(Arrays.asList(Status.values()));
-			statuses.removeAll(parseOmittedTypes(omitTypes));
-			
-			query.setStatuses(statuses);
+		final String[] statusTypes = reportForm.getStatusTypes();
+		if (statusTypes.length > 0) {
+			query.setStatuses(parseStatusTypes(statusTypes));
 		}
+		
+		if (StringUtils.isNotEmpty(reportForm.getUpdateType())) {
+			query.setUpdateType(ProjectStatusDto.UpdateType.valueOf(reportForm.getUpdateType()));
+		}
+		
+		query.setRequestedBy(reportForm.getRequestedBy());
 		
 		final List<ProjectStatusDto> outcomes = buildOutcomeStore.loadBuildSummaries(query);
 		
@@ -200,7 +203,7 @@ public final class ViewProjectBuildHistoryAction extends ProjectReportBaseAction
 		return list;
 	}
 
-	private Set<Status> parseOmittedTypes(String[] typeStrings) {
+	private Set<Status> parseStatusTypes(String[] typeStrings) {
 		final Set<Status> types = new HashSet<Status>();
 		
 		for (String omitType : typeStrings) {

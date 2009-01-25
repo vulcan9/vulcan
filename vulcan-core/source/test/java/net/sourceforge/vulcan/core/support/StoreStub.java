@@ -132,4 +132,10 @@ public class StoreStub implements ConfigurationStore, BuildOutcomeStore {
 	public boolean diffExists(String projectName, UUID diffId) {
 		return false;
 	}
+	public List<String> getBuildSchedulers() {
+		return null;
+	}
+	public List<String> getBuildUsers() {
+		return null;
+	}
 }
