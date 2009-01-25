@@ -126,18 +126,65 @@
 			</td>
 		</tr>
 		<tr>
-			<td><spring:message code="label.options"/></td>
+			<td><spring:message code="label.status.types"/></td>
 			<td colspan="3">
 				<ul class="metaDataOptions">
 					<li>
-						<html:multibox property="omitTypes" value="SKIP" styleId="omitSkip"/>
-						<label for="omitSkip"><spring:message code="label.report.omit.skip"/></label>
+						<html:multibox property="statusTypes" value="PASS" styleId="statPass"/>
+						<label for="statPass">PASS</label>
 					</li>
 					<li>
-						<html:multibox property="omitTypes" value="ERROR" styleId="omitError"/>
-						<label for="omitError"><spring:message code="label.report.omit.error"/></label>
+						<html:multibox property="statusTypes" value="FAIL" styleId="statFail"/>
+						<label for="statFail">FAIL</label>
+					</li>
+					<li>
+						<html:multibox property="statusTypes" value="SKIP" styleId="statSkip"/>
+						<label for="statSkip">SKIP</label>
+					</li>
+					<li>
+						<html:multibox property="statusTypes" value="ERROR" styleId="statError"/>
+						<label for="statError">ERROR</label>
 					</li>
 				</ul>
+			</td>
+		</tr>
+		<tr>
+			<td><spring:message code="label.update.method"/></td>
+			<td colspan="3">
+				<ul class="metaDataOptions">
+					<li>
+						<html:radio property="updateType" value="" styleId="allUpdates"/>
+						<label for="allUpdates"><spring:message code="label.update.type.any"/></label>
+					</li>
+					<li>
+						<html:radio property="updateType" value="Full" styleId="fullUpdates"/>
+						<label for="fullUpdates"><spring:message code="label.update.type.full"/></label>
+					</li>
+					<li>
+						<html:radio property="updateType" value="Incremental" styleId="incrUpdates"/>
+						<label for="incrUpdates"><spring:message code="label.update.type.incremental"/></label>
+					</li>
+				</ul>
+			</td>
+		</tr>
+		<tr>
+			<td><spring:message code="label.build.user"/></td>
+			<td colspan="3">
+				<html:select property="requestedBy">
+					<html:option key="select.empty" value=""/>
+					
+					<html:option key="select.build.schedulers" value="_s" disabled="true"/>
+					
+					<c:forEach items="${buildOutcomeStore.buildSchedulers}" var="item">
+						<html:option value="${item}">${item}</html:option>
+					</c:forEach>
+
+					<html:option key="select.build.users" value="_u" disabled="true"/>
+					
+					<c:forEach items="${buildOutcomeStore.buildUsers}" var="item">
+						<html:option value="${item}">${item}</html:option>
+					</c:forEach>
+				</html:select>
 			</td>
 		</tr>
 		<tr>

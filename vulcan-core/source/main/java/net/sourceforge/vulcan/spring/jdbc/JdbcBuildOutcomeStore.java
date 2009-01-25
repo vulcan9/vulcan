@@ -42,6 +42,7 @@ import net.sourceforge.vulcan.exception.StoreException;
 import net.sourceforge.vulcan.metadata.SvnRevision;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.core.io.Resource;
@@ -52,6 +53,8 @@ import org.springframework.jdbc.core.JdbcTemplate;
 public class JdbcBuildOutcomeStore implements BuildOutcomeStore, ProjectNameChangeListener {
 	private static final Log log = LogFactory.getLog(JdbcBuildOutcomeStore.class);
 	private final Set<String> projectNames = new HashSet<String>();
+	private List<String> buildUsers;
+	private List<String> buildSchedulers;
 	
 	/* Dependencies */
 	private ConfigurationStore configurationStore;
@@ -162,7 +165,23 @@ public class JdbcBuildOutcomeStore implements BuildOutcomeStore, ProjectNameChan
 	
 	public UUID storeBuildOutcome(ProjectStatusDto outcome)	throws StoreException {
 		try {
-			return storeBuildOutcomeInternal(outcome);
+			final UUID uuid = storeBuildOutcomeInternal(outcome);
+			
+			final String requestedBy = outcome.getRequestedBy();
+			
+			if (StringUtils.isBlank(requestedBy) || buildUsers == null) {
+				return uuid;
+			}
+			
+			if (outcome.isScheduledBuild()) {
+				buildSchedulers.add(requestedBy);
+				Collections.sort(buildSchedulers);
+			} else {
+				buildUsers.add(requestedBy);
+				Collections.sort(buildUsers);
+			}
+			
+			return uuid;
 		} catch (DataAccessException e) {
 			throw new StoreException(e);
 		}
@@ -210,6 +229,22 @@ public class JdbcBuildOutcomeStore implements BuildOutcomeStore, ProjectNameChan
 		this.createScript = createScript;
 	}
 	
+	public List<String> getBuildSchedulers() {
+		if (buildSchedulers == null) {
+			loadUsersAndBuildSchedulers();
+		}
+		
+		return buildSchedulers;
+	}
+	
+	public List<String> getBuildUsers() {
+		if (buildUsers == null) {
+			loadUsersAndBuildSchedulers();
+		}
+		
+		return buildUsers;
+	}
+
 	public Map<String, String> getSqlQueries() {
 		return sqlQueries;
 	}
@@ -267,6 +302,15 @@ public class JdbcBuildOutcomeStore implements BuildOutcomeStore, ProjectNameChan
 		
 		return outcome.getId();
 	}
+
+	private void loadUsersAndBuildSchedulers() {
+		final RequestUserQuery query = new RequestUserQuery(dataSource);
+		query.execute();
+		
+		buildUsers = query.getUsers();
+		buildSchedulers = query.getSchedulers();
+	}
+	
 
 	private void createTables(final JdbcTemplate jdbcTemplate) {
 		final String script;

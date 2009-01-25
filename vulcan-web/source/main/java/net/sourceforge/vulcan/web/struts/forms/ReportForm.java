@@ -36,6 +36,8 @@ import org.apache.struts.validator.ValidatorForm;
 public class ReportForm extends ValidatorForm {
 	private final DateFormat format = new SimpleDateFormat("MM/dd/yyyy");
 	
+	private final static String[] defaultStatusTypes = { "PASS", "FAIL", "ERROR", "SKIP" };
+	
 	private String rangeType = "date";
 	private String startDate;
 	private String endDate;
@@ -43,8 +45,11 @@ public class ReportForm extends ValidatorForm {
 	private String maxBuildNumber;
 	private String transform;
 	private String[] projectNames;
-	private String[] omitTypes;
-
+	private String[] statusTypes = defaultStatusTypes;
+	private String updateType;
+	private String requestedBy;
+	private String tagName;
+	
 	/*
 	 * This property is only supplied so it is remembered.
 	 * startDate and endDate will be populated by javascript,
@@ -57,11 +62,10 @@ public class ReportForm extends ValidatorForm {
 	@Override
 	public void reset(ActionMapping mapping, HttpServletRequest request) {
 		super.reset(mapping, request);
-		rangeType = "date";
 		
 		if (isNotBlank(request.getParameter("rangeType"))) {
 			projectNames = EMPTY_STRING_ARRAY;
-			omitTypes = EMPTY_STRING_ARRAY;
+			statusTypes = EMPTY_STRING_ARRAY;
 			download = false;
 		}
 	}
@@ -127,11 +131,11 @@ public class ReportForm extends ValidatorForm {
 	public void setProjectNames(String[] projectNames) {
 		this.projectNames = projectNames;
 	}
-	public String[] getOmitTypes() {
-		return omitTypes;
+	public String[] getStatusTypes() {
+		return statusTypes;
 	}
-	public void setOmitTypes(String[] omitTypes) {
-		this.omitTypes = omitTypes;
+	public void setStatusTypes(String[] statusTypes) {
+		this.statusTypes = statusTypes;
 	}
 	public String getTransform() {
 		return transform;
@@ -163,6 +167,25 @@ public class ReportForm extends ValidatorForm {
 	public void setDateRangeSelector(String dateRangeSelector) {
 		this.dateRangeSelector = dateRangeSelector;
 	}
+	public String getUpdateType() {
+		return updateType;
+	}
+	public void setUpdateType(String updateType) {
+		this.updateType = updateType;
+	}
+	public String getRequestedBy() {
+		return requestedBy;
+	}
+	public void setRequestedBy(String requestedBy) {
+		this.requestedBy = requestedBy;
+	}
+	public String getTagName() {
+		return tagName;
+	}
+	public void setTagName(String tagName) {
+		this.tagName = tagName;
+	}
+
 	private Date parseDate(final String string) {
 		synchronized(format) {
 			try {

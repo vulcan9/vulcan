@@ -27,6 +27,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -58,6 +59,8 @@ import org.xml.sax.SAXException;
 
 @SvnRevision(id="$Id$", url="$HeadURL$")
 public abstract class ProjectReportBaseAction extends Action {
+	private static final Pattern bugtraqRegex = Pattern.compile("%bugid%", Pattern.CASE_INSENSITIVE);
+	
 	protected ConfigurationStore configurationStore;
 	protected BuildManager buildManager;
 	protected ProjectDomBuilder projectDomBuilder;
@@ -138,7 +141,9 @@ public abstract class ProjectReportBaseAction extends Action {
 				
 				if (projectConfig != null) {
 					params.put("projectSiteURL", getSiteBaseURL(mapping, request, projectConfig, buildNumber));
-					params.put("issueTrackerURL", projectConfig.getBugtraqUrl());
+					
+					final String bugtraqUrl = bugtraqRegex.matcher(projectConfig.getBugtraqUrl()).replaceAll("%BUGID%");
+					params.put("issueTrackerURL", bugtraqUrl);
 				}
 				
 				final StringWriter tmpWriter = new StringWriter();

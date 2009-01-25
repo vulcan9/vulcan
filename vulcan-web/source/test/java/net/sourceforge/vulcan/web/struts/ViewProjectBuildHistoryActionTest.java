@@ -35,6 +35,7 @@ import net.sourceforge.vulcan.dto.ProjectStatusDto;
 import net.sourceforge.vulcan.dto.TestFailureDto;
 import net.sourceforge.vulcan.dto.MetricDto.MetricType;
 import net.sourceforge.vulcan.dto.ProjectStatusDto.Status;
+import net.sourceforge.vulcan.dto.ProjectStatusDto.UpdateType;
 import net.sourceforge.vulcan.metadata.SvnRevision;
 
 import org.apache.struts.action.ActionMessages;
@@ -253,14 +254,44 @@ public class ViewProjectBuildHistoryActionTest extends MockApplicationContextStr
 		assertEquals("application/xml", response.getContentType());
 		assertEquals("attachment; filename=vulcan-build-history.xml", response.getHeader("Content-Disposition"));
 	}		
+	
 	public void testOmitSkipAndError() throws Exception {
 		addRequestParameter("download", "true");
 		addRequestParameter("projectNames", "Trundle");
 		addRequestParameter("rangeType", "all");
-		addRequestParameter("omitTypes", new String[] {"ERROR", "SKIP"});
+		addRequestParameter("statusTypes", new String[] {"PASS", "FAIL"});
 		
-		query.setStatuses(new HashSet<Status>(Arrays.asList(Status.PASS, Status.FAIL, Status.BUILDING, Status.UP_TO_DATE, Status.IN_QUEUE)));
+		query.setStatuses(new HashSet<Status>(Arrays.asList(Status.PASS, Status.FAIL)));
 		query.setProjectNames(Collections.singleton("Trundle"));
+		
+		buildOutcomeStore.loadBuildSummaries(query);
+		EasyMock.expectLastCall().andReturn(results);
+		
+		projectDomBuilder.createProjectSummaries(results,
+				"0", "*", request.getLocale());
+		
+		expectLastCall().andReturn(dom);
+		
+		replay();
+		
+		actionPerform();
+		
+		verifyNoActionErrors();
+		
+		verify();
+		
+		assertEquals("application/xml", response.getContentType());
+		assertEquals("attachment; filename=vulcan-build-history.xml", response.getHeader("Content-Disposition"));
+	}
+
+	public void testQueryByUpdateType() throws Exception {
+		addRequestParameter("download", "true");
+		addRequestParameter("projectNames", "Trundle");
+		addRequestParameter("rangeType", "all");
+		addRequestParameter("updateType", "Incremental");
+		
+		query.setProjectNames(Collections.singleton("Trundle"));
+		query.setUpdateType(UpdateType.Incremental);
 		
 		buildOutcomeStore.loadBuildSummaries(query);
 		EasyMock.expectLastCall().andReturn(results);
