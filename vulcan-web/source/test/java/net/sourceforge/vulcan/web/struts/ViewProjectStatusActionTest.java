@@ -76,9 +76,9 @@ public class ViewProjectStatusActionTest extends MockApplicationContextStrutsTes
 		getActionServlet().getServletContext().setAttribute(Globals.SERVLET_KEY, "*.foobar");
 		
 		projectConfig.setName("some project");
-		
+		projectConfig.setBugtraqUrl("http://something/%BUGID%");
 		paramMap.put("projectSiteURL", new URL("http://localhost/vulcan-web/site/some%20project/12/"));
-		paramMap.put("issueTrackerURL", "");
+		paramMap.put("issueTrackerURL", projectConfig.getBugtraqUrl());
 		
 		expect(buildManager.getMostRecentBuildNumberByWorkDir((String)anyObject())).andAnswer(new IAnswer<Integer>() {
 			public Integer answer() throws Throwable {
@@ -496,6 +496,28 @@ public class ViewProjectStatusActionTest extends MockApplicationContextStrutsTes
 		paramMap.put("contextRoot", "/vulcan-web");
 		paramMap.put("viewProjectStatusURL", new URL("http://localhost/vulcan-web/viewProjectStatus.do?transform=xhtml"));
 		paramMap.put("workingCopyBuildNumber", 42);
+		
+		final Map<String, ProjectStatusDto> empty = Collections.emptyMap();
+		trainForTransform(empty, "xhtml");
+
+		addRequestParameter("projectName", "some project");
+		addRequestParameter("transform", "xhtml");
+		
+		replay();
+		
+		actionPerform();
+		
+		verify();
+		
+		assertEquals("text/html", response.getContentType());
+	}
+	public void testTransformUppercaseIssueTrackerBugId() throws Exception {
+		projectConfig.setBugtraqUrl("http://%bugid%/");
+		
+		paramMap.put("contextRoot", "/vulcan-web");
+		paramMap.put("viewProjectStatusURL", new URL("http://localhost/vulcan-web/viewProjectStatus.do?transform=xhtml"));
+		paramMap.put("workingCopyBuildNumber", 42);
+		paramMap.put("issueTrackerURL", "http://%BUGID%/");
 		
 		final Map<String, ProjectStatusDto> empty = Collections.emptyMap();
 		trainForTransform(empty, "xhtml");

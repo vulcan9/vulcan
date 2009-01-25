@@ -193,7 +193,7 @@ public final class ProjectConfigForm extends ConfigForm {
 				errors.add("config.bugtraqUrl", new ActionMessage("errors.url"));
 			}
 			
-			if (url.indexOf("%BUGID%") < 0) {
+			if (url.toUpperCase().indexOf("%BUGID%") < 0) {
 				errors.add("config.bugtraqUrl", new ActionMessage("errors.bugtraq.must.contain.id"));
 			}
 		}
