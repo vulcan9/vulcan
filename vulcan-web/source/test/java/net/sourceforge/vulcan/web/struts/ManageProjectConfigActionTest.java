@@ -474,7 +474,7 @@ public class ManageProjectConfigActionTest extends MockApplicationContextStrutsT
 		request.getSession().setAttribute("projectConfigForm", form);
 		
 		addRequestParameter("action", "Update Project");
-		addRequestParameter("config.bugtraqUrl", "nosuchprotocol://localhost/ticket/%BUGID%");
+		addRequestParameter("config.bugtraqUrl", "nosuchprotocol://localhost/ticket/%bugid%");
 		addRequestParameter("commit", "true");
 		
 		replay();
