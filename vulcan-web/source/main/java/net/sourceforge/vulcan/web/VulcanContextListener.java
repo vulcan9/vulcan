@@ -43,7 +43,7 @@ public final class VulcanContextListener implements ServletContextListener {
 		
 		context.setAttribute(Keys.STATE_MANAGER, stateManager);
 		context.setAttribute(Keys.EVENT_POOL, wac.getBean(Keys.EVENT_POOL));
-		context.setAttribute("buildOutcomeStore", wac.getBean("buildOutcomeStore"));
+		context.setAttribute(Keys.BUILD_OUTCOME_STORE, wac.getBean(Keys.BUILD_OUTCOME_STORE));
 		context.setAttribute("buildOutcomeConverter", wac.getBean("buildOutcomeConverter"));
 		
 		JstlFunctions.setWebApplicationContext(wac);

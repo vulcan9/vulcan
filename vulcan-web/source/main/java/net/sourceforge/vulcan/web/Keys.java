@@ -26,6 +26,7 @@ public interface Keys {
 	String PROJECT_MANAGER = "stateManager";
 	String BUILD_MANAGER = "buildManager";
 	String EVENT_POOL = "eventPool";
+	String BUILD_OUTCOME_STORE = "buildOutcomeStore";
 	String EVENT_HANDLER = "eventHandler";
 	
 	String FILE_LIST = "fileList";
