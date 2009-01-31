@@ -88,7 +88,6 @@ ul#primary-nav,ul#utility-nav {
 
 ul#primary-nav {
 	padding-bottom: 3px !important;
-	border-bottom: 4px solid #9DAC39;
 }
 
 ul#utility-nav {
@@ -174,7 +173,6 @@ div.container,ul#primary-nav,ul#utility-nav {
 	text-align: right;
 	margin: 0 5ex;
 	padding-bottom: 2ex;
-	border-top: 4px solid #9DAC39;
 }
 
 #site-info p {
@@ -377,8 +375,9 @@ div.buildHistoryReport table,div.buildHistoryReport caption {
 	margin-left: 0;
 }
 
-div.projectCheckboxes {
-	-moz-column-width: 18em;
+div.projectCheckboxes, div.options {
+	-moz-column-width: 25em;
+	-moz-column-gap: 3em;
 }
 
 div.projectCheckboxes li {
@@ -552,6 +551,10 @@ th.long,th.file {
 
 td.build-number {
 	text-align: center;
+}
+
+td.numeric {
+	text-align: right;
 }
 
 td.dateInputs {

@@ -3,6 +3,14 @@ caption, .caption {
 	color: #E56630;
 }
 
+ul#primary-nav {
+	border-bottom: 4px solid #9DAC39;
+}
+
+#site-info {
+	border-top: 4px solid #9DAC39;
+}
+
 table {
 	border-spacing: 1px;
 	background-color: #E7E7E7;
