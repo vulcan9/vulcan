@@ -18,14 +18,15 @@
  */
 package net.sourceforge.vulcan.web.struts.actions;
 
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.Writer;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.Writer;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -41,6 +42,7 @@ import net.sourceforge.vulcan.web.Keys;
 import net.sourceforge.vulcan.web.struts.forms.ProjectStatusForm;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
@@ -141,7 +143,7 @@ public final class ViewProjectStatusAction extends ProjectReportBaseAction {
 		final Document doc = createDocument(request, status, ids, index, currentlyBuilding);
 		final String transform = statusForm.getTransform();
 		
-		return sendDocument(doc, transform, projectConfig, status.getBuildNumber(), createTransformParameters(request, status), mapping, request, response);
+		return sendDocument(doc, transform, projectConfig, status.getBuildNumber(), createTransformParameters(request, status, view), mapping, request, response);
 	}
 	
 	protected Document createDocument(HttpServletRequest request, ProjectStatusDto status, final List<UUID> ids, int index, boolean currentlyBuilding) {
@@ -221,7 +223,7 @@ public final class ViewProjectStatusAction extends ProjectReportBaseAction {
 		}
 	}
 	
-	private Map<String, Object> createTransformParameters(HttpServletRequest request, ProjectStatusDto status) {
+	private Map<String, Object> createTransformParameters(HttpServletRequest request, ProjectStatusDto status, String view) {
 		final Map<String, Object> params = new HashMap<String, Object>();
 		
 		Integer buildNo = buildManager.getMostRecentBuildNumberByWorkDir(status.getWorkDir());
@@ -240,6 +242,12 @@ public final class ViewProjectStatusAction extends ProjectReportBaseAction {
 				params.put("reloadInterval", Integer.valueOf(prefs.getReloadInterval()));
 			}
 		}
+	
+		if (StringUtils.isBlank(view)) {
+			view = "summary";
+		}
+		
+		params.put("view", view);
 		
 		return params;
 	}

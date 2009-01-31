@@ -596,6 +596,14 @@ function showBuildReportPanel(panelName) {
 	
 	$("#" + panelName + "-tab").parent("li").addClass("active");
 	
+	$("a.build-link").each(function(i, a) {
+		a = $(a);
+		
+		var href = a.attr("href");
+		
+		a.attr("href", href.substring(0, href.lastIndexOf("/")+1) + panelName);
+	});
+	
 	resizeIframe();
 }
 
