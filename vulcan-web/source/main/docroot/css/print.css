@@ -1,4 +1,4 @@
-#brand, #primary-nav, #utility-nav {
+#brand, #primary-nav, #utility-nav, #loading-message, .hidden {
 	display: none !important;
 }
 #site-info {
@@ -33,6 +33,6 @@ div.chart {
 	height: 360px;
 }
 
-div.plotOptions {
+div.plotOptions, #column-selectors {
 	display: none !important;
 }

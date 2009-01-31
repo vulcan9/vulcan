@@ -28,6 +28,7 @@
 	<jsp:element name="link">
 		<jsp:attribute name="rel">stylesheet</jsp:attribute>
 		<jsp:attribute name="type">text/css</jsp:attribute>
+		<jsp:attribute name="media">screen</jsp:attribute>
 		<jsp:attribute name="href">${cssUrl}</jsp:attribute>
 	</jsp:element>
 	<jsp:element name="link">
