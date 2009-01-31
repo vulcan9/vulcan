@@ -11,7 +11,7 @@
 	
 	<rule>
 		<name>xhtml build report</name>
-		<from>^/projects/([^/]+)/(\d+)/(x?html)?$</from>
+		<from>^/projects/([^/]+)/(\d+)/$</from>
 		<to>/viewProjectStatus.do?transform=xhtml&amp;projectName=$1&amp;buildNumber=$2</to>
 	</rule>
 	
@@ -22,9 +22,9 @@
 	</rule>
 	
 	<rule>
-		<name>build log or diff</name>
-		<from>^/projects/([^/]+)/(\d+)/(log|diff)$</from>
-		<to>/viewProjectStatus.do?projectName=$1&amp;buildNumber=$2&amp;view=$3</to>
+		<name>xhtml build report with view</name>
+		<from>^/projects/([^/]+)/(\d+)/(summary|changes|metrics|tests|errors|warnings|browse|log|diff)$</from>
+		<to>/viewProjectStatus.do?projectName=$1&amp;buildNumber=$2&amp;view=$3&amp;transform=xhtml</to>
 	</rule>
 	
 	<rule>
@@ -55,13 +55,7 @@
 	</rule>
 	<rule>
 		<name>build log or diff (latest)</name>
-		<from>^/projects/([^/]+)/(LATEST|NEWEST|RECENT|CURRENT)/(log|diff)$</from>
-		<to>/viewProjectStatus.do?projectName=$1&amp;view=$3</to>
+		<from>^/projects/([^/]+)/(LATEST|NEWEST|RECENT|CURRENT)/(summary|changes|metrics|tests|errors|warnings|browse|log|diff)$</from>
+		<to>/viewProjectStatus.do?projectName=$1&amp;view=$3&amp;transform=xhtml</to>
 	</rule>
-	
-	<rule>
-		<from>^/history/</from>
-		<to>/buildHistoryReport.do</to>
-	</rule>
-	
 </urlrewrite>

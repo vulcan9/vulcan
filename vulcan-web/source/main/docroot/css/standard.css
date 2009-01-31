@@ -625,10 +625,6 @@ caption.panel-caption {
 	display: none;
 }
 
-div#summary-panel {
-	display: block;
-}
-
 span.count {
 	font-size: smaller;
 	color: black;

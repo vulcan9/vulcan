@@ -45,19 +45,50 @@
 	<xsl:param name="buildDirectoryLabel"/>
 	<xsl:param name="showBuildDirectory" select="'true'"/>
 	<xsl:param name="workingCopyBuildNumber"/>
+	<xsl:param name="view"/>
 	
 	<xsl:key name="metrics-labels" match="/build-history/project/metrics/metric" use="@label"/>
 	
 	<xsl:variable name="num-errors" select="count(/project/errors/error)"/>
 	<xsl:variable name="num-warnings" select="count(/project/warnings/warning)"/>
-	<xsl:variable name="num-change-sets" select="count(/project/change-sets/change-set)"/>
+	<xsl:variable name="num-changes" select="count(/project/change-sets/change-set)"/>
 	<xsl:variable name="num-test-failures" select="count(/project/test-failures/test-failure)"/>
 	<xsl:variable name="work-directory" select="/project/work-directory/text()"/>
 	
+	<xsl:variable name="visible-div-id">
+		<xsl:choose>
+			<xsl:when test="$view='changes' and $num-changes &gt; 0">
+				<xsl:text>changes-panel</xsl:text>
+			</xsl:when>
+			<xsl:when test="$view='errors' and $num-errors &gt; 0">
+				<xsl:text>errors-panel</xsl:text>
+			</xsl:when>
+			<xsl:when test="$view='warnings' and $num-warnings &gt; 0">
+				<xsl:text>warnings-panel</xsl:text>
+			</xsl:when>
+			<xsl:when test="$view='tests' and $num-test-failures &gt; 0">
+				<xsl:text>test-failures-panel</xsl:text>
+			</xsl:when>
+			<xsl:when test="$view='metrics' and /project/metrics">
+				<xsl:text>metrics-panel</xsl:text>
+			</xsl:when>
+			<xsl:when test="$view='browse' and $showBuildDirectory">
+				<xsl:text>browse-panel</xsl:text>
+			</xsl:when>
+			<xsl:otherwise>
+				<xsl:text>summary-panel</xsl:text>
+			</xsl:otherwise>
+		</xsl:choose>
+	</xsl:variable>
 	<xsl:template match="/project">
 		<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-US">
 			<head>
 				<title><xsl:value-of select="$title"/></title>
+				<style type="text/css">
+					<xsl:text>div#</xsl:text>
+					<xsl:value-of select="$visible-div-id"/>
+					<xsl:text> {display: block;}</xsl:text>
+				</style>
 				<!--
 				<xsl:if test="/project/status='BUILDING' and $reloadInterval &gt; 0">
 				</xsl:if>
@@ -86,7 +117,8 @@
 				</div>
 				
 				<h3>
-					<xsl:apply-templates select="/project/name"/><xsl:text> : </xsl:text>
+					<xsl:apply-templates select="/project/name"/>
+					<xsl:text> : </xsl:text>
 					<xsl:apply-templates select="/project/status"/>
 				</h3>
 	
@@ -108,25 +140,62 @@
 				</h4>
 				
 				<ul class="tabs" id="build-report-tabs">
-					<li class="active"><a id="summary-tab" href="#summary-anchor"><xsl:value-of select="$title"/></a></li>
-					<li><a id="dependencies-tab" href="#dependencies-anchor">Dependencies</a></li>
-					<xsl:if test="$num-change-sets &gt; 0">
-						<li><a id="change-sets-tab" href="#change-sets-anchor">Commit Log (<xsl:value-of select="$num-change-sets"/>)</a></li>
+					<li>
+						<xsl:if test="$view='summary'">
+							<xsl:attribute name="class">active</xsl:attribute>
+						</xsl:if>
+						<a id="summary-tab" href="#summary-anchor"><xsl:value-of select="$title"/></a>
+					</li>
+					<li>
+						<a id="dependencies-tab" href="#dependencies-anchor">Dependencies</a>
+					</li>
+					<xsl:if test="$num-changes &gt; 0">
+						<li>
+							<xsl:if test="$view='changes'">
+								<xsl:attribute name="class">active</xsl:attribute>
+							</xsl:if>
+							<a id="changes-tab" href="#changes-anchor">Commit Log (<xsl:value-of select="$num-changes"/>)</a>
+						</li>
 					</xsl:if>
 					<xsl:if test="$num-errors &gt; 0">
-						<li><a id="errors-tab" href="#errors-anchor">Errors (<xsl:value-of select="$num-errors"/>)</a></li>
+						<li>
+							<xsl:if test="$view='errors'">
+								<xsl:attribute name="class">active</xsl:attribute>
+							</xsl:if>
+							<a id="errors-tab" href="#errors-anchor">Errors (<xsl:value-of select="$num-errors"/>)</a>
+						</li>
 					</xsl:if>
 					<xsl:if test="$num-warnings &gt; 0">
-						<li><a id="warnings-tab" href="#warnings-anchor">Warnings (<xsl:value-of select="$num-warnings"/>)</a></li>
+						<li>
+							<xsl:if test="$view='warnings'">
+								<xsl:attribute name="class">active</xsl:attribute>
+							</xsl:if>
+							<a id="warnings-tab" href="#warnings-anchor">Warnings (<xsl:value-of select="$num-warnings"/>)</a>
+						</li>
 					</xsl:if>
 					<xsl:if test="$num-test-failures &gt; 0">
-						<li><a id="test-failures-tab" href="#test-failures-anchor"><xsl:value-of select="$testFailureLabel"/> (<xsl:value-of select="$num-test-failures"/>)</a></li>
+						<li>
+							<xsl:if test="$view='tests'">
+								<xsl:attribute name="class">active</xsl:attribute>
+							</xsl:if>
+							<a id="test-failures-tab" href="#test-failures-anchor"><xsl:value-of select="$testFailureLabel"/> (<xsl:value-of select="$num-test-failures"/>)</a>
+						</li>
 					</xsl:if>
 					<xsl:if test="/project/metrics">
-						<li><a id="metrics-tab" href="#metrics-anchor"><xsl:value-of select="$metricsLabel"/></a></li>
+						<li>
+							<xsl:if test="$view='metrics'">
+								<xsl:attribute name="class">active</xsl:attribute>
+							</xsl:if>
+							<a id="metrics-tab" href="#metrics-anchor"><xsl:value-of select="$metricsLabel"/></a>
+						</li>
 					</xsl:if>
 					<xsl:if test="$showBuildDirectory">
-						<li><a id="build-directory-tab" href="#build-directory-anchor">Build Directory</a></li>
+						<li>
+							<xsl:if test="$view='browse'">
+								<xsl:attribute name="class">active</xsl:attribute>
+							</xsl:if>
+							<a id="browse-tab" href="#browse-anchor">Build Directory</a>
+						</li>
 					</xsl:if>
 				</ul>
 				
@@ -141,8 +210,8 @@
 				
 				<xsl:if test="/project/change-sets">
 					<xsl:call-template name="bubble">
-						<xsl:with-param name="target" select="'change-sets'"/>
-						<xsl:with-param name="styleClass" select="'change-sets'"/>
+						<xsl:with-param name="target" select="'changes'"/>
+						<xsl:with-param name="styleClass" select="'changes'"/>
 					</xsl:call-template>
 				</xsl:if>
 				
@@ -174,8 +243,8 @@
 				</xsl:if>
 				
 				<xsl:if test="$showBuildDirectory">
-					<a name="build-directory-anchor"/>
-					<div id="build-directory-panel" class="tab-panel">
+					<a name="browse-anchor"/>
+					<div id="browse-panel" class="tab-panel">
 						<xsl:apply-templates select="/project/work-directory"/>
 						<xsl:choose>
 							<xsl:when test="/project/work-directory[@available='true']">
@@ -210,13 +279,14 @@
 		<xsl:param name="buildNumber" select="."/>
 		<xsl:param name="text" select="$buildNumber"/>
 		
-		<a xmlns="http://www.w3.org/1999/xhtml">
+		<a xmlns="http://www.w3.org/1999/xhtml" class="build-link">
 			<xsl:attribute name="href">
 				<xsl:value-of select="$viewProjectStatusURL"/>
 				<xsl:value-of select="/project/name"/>
 				<xsl:text>/</xsl:text>
 				<xsl:value-of select="$buildNumber"/>
 				<xsl:text>/</xsl:text>
+				<xsl:value-of select="$view"/>
 			</xsl:attribute>
 			<xsl:value-of select="$text"/>
 		</a>
@@ -236,7 +306,7 @@
 			<xsl:when test="$target='revisions'">
 				<xsl:call-template name="revisions"/>
 			</xsl:when>
-			<xsl:when test="$target='change-sets'">
+			<xsl:when test="$target='changes'">
 				<xsl:apply-templates select="/project/change-sets"/>
 			</xsl:when>
 			<xsl:when test="$target='errors'">
@@ -419,8 +489,8 @@
 	</xsl:template>
 	
 	<xsl:template match="change-sets">
-		<div xmlns="http://www.w3.org/1999/xhtml" id="change-sets-panel" class="tab-panel">
-			<a name="change-sets-anchor"/>
+		<div xmlns="http://www.w3.org/1999/xhtml" id="changes-panel" class="tab-panel">
+			<a name="changes-anchor"/>
 			<table class="sortable">
 				<thead>
 					<tr>

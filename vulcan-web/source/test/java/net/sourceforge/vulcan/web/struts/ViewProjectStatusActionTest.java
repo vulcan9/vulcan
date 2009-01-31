@@ -88,6 +88,7 @@ public class ViewProjectStatusActionTest extends MockApplicationContextStrutsTes
 		projectConfig.setName("some project");
 		projectConfig.setBugtraqUrl("http://something/%BUGID%");
 		paramMap.put("issueTrackerURL", projectConfig.getBugtraqUrl());
+		paramMap.put("view", "summary");
 		
 		expect(buildManager.getMostRecentBuildNumberByWorkDir((String)anyObject())).andAnswer(new IAnswer<Integer>() {
 			public Integer answer() throws Throwable {
@@ -543,6 +544,26 @@ public class ViewProjectStatusActionTest extends MockApplicationContextStrutsTes
 
 		addRequestParameter("projectName", "some project");
 		addRequestParameter("transform", "xhtml");
+		
+		replay();
+		
+		actionPerform();
+		
+		verify();
+		
+		assertEquals("text/html", response.getContentType());
+	}
+	public void testTransformSetsView() throws Exception {
+		paramMap.put("contextRoot", "/vulcan-web");
+		paramMap.put("viewProjectStatusURL", new URL("http://localhost/vulcan-web/projects/"));
+		paramMap.put("workingCopyBuildNumber", 42);
+		paramMap.put("view", "metrics");
+		final Map<String, ProjectStatusDto> empty = Collections.emptyMap();
+		trainForTransform(empty, "xhtml");
+
+		addRequestParameter("projectName", "some project");
+		addRequestParameter("transform", "xhtml");
+		addRequestParameter("view", "metrics");
 		
 		replay();
 		
