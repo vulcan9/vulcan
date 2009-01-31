@@ -81,7 +81,7 @@ public class GetCachedBuildHistoryActionTest extends MockApplicationContextStrut
 		
 		final Map<String, ? super Object> params = new HashMap<String, Object>();
 		
-		params.put("viewProjectStatusURL", new URL("http://localhost/viewProjectStatus.do?transform=xyz"));
+		params.put("viewProjectStatusURL", new URL("http://localhost/projects/"));
 		params.put("contextRoot", "");
 		
 		projectDomBuilder.transform(eq(doc), eq(params), eq(request.getLocale()), eq("xyz"), (Result)notNull());
@@ -109,7 +109,7 @@ public class GetCachedBuildHistoryActionTest extends MockApplicationContextStrut
 		
 		params.put("metricLabel1", "Tests executed");
 		params.put("metricLabel2", "Code coverage by line");
-		params.put("viewProjectStatusURL", new URL("http://localhost/viewProjectStatus.do?transform=xyz"));
+		params.put("viewProjectStatusURL", new URL("http://localhost/projects/"));
 		params.put("contextRoot", "");
 		
 		projectDomBuilder.transform(eq(doc), eq(params), eq(request.getLocale()), eq("xyz"), (Result)notNull());

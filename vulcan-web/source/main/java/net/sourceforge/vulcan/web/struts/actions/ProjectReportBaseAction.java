@@ -41,7 +41,6 @@ import net.sourceforge.vulcan.core.ProjectDomBuilder;
 import net.sourceforge.vulcan.dto.ProjectConfigDto;
 import net.sourceforge.vulcan.exception.NoSuchTransformFormatException;
 import net.sourceforge.vulcan.metadata.SvnRevision;
-import net.sourceforge.vulcan.web.JstlFunctions;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
@@ -50,7 +49,6 @@ import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.apache.struts.action.ActionMessage;
 import org.apache.struts.action.ActionMessages;
-import org.apache.struts.taglib.TagUtils;
 import org.apache.struts.util.RequestUtils;
 import org.jdom.Document;
 import org.jdom.output.Format;
@@ -90,28 +88,8 @@ public abstract class ProjectReportBaseAction extends Action {
 	public void setProjectManager(ProjectManager projectManager) {
 		this.projectManager = projectManager;
 	}
-	protected URL getSiteBaseURL(ActionMapping mapping, HttpServletRequest request, ProjectConfigDto projectConfig, int buildNumber) throws MalformedURLException {
-		final StringBuffer buf = new StringBuffer();
-		
-		final String forwardPath = mapping.findForward("site").getPath();
-		
-		buf.append(forwardPath);
-		if (!forwardPath.endsWith("/")) {
-			buf.append('/');	
-		}
-		
-		buf.append(JstlFunctions.encode(projectConfig.getName()));
-		buf.append('/');
-		buf.append(buildNumber);
-		buf.append('/');
-		
-		return RequestUtils.absoluteURL(request, buf.toString());
-	}
 	protected URL getSelfURL(ActionMapping mapping, HttpServletRequest request, String transform) throws MalformedURLException {
 		final StringBuilder buf = new StringBuilder(mapping.findForward("viewProjectStatus").getPath());
-		
-		buf.append("?transform=");
-		buf.append(TagUtils.getInstance().encodeURL(transform));
 		
 		return RequestUtils.absoluteURL(request, buf.toString());
 	}
@@ -140,8 +118,6 @@ public abstract class ProjectReportBaseAction extends Action {
 				params.put("contextRoot", request.getContextPath());
 				
 				if (projectConfig != null) {
-					params.put("projectSiteURL", getSiteBaseURL(mapping, request, projectConfig, buildNumber));
-					
 					final String bugtraqUrl = bugtraqRegex.matcher(projectConfig.getBugtraqUrl()).replaceAll("%BUGID%");
 					params.put("issueTrackerURL", bugtraqUrl);
 				}

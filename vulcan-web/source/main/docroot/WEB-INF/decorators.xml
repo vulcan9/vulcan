@@ -4,6 +4,8 @@
 	<excludes>
 		<pattern>/projects.jsp</pattern>
 		<pattern>/rss.jsp</pattern>
+		<pattern>/site/*</pattern>
+		<pattern>/*/site/*</pattern>
 	</excludes>
 	
 	<decorator name="main" page="main.jsp">

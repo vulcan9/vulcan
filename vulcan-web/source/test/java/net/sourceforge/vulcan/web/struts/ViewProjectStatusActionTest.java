@@ -30,6 +30,8 @@ import java.net.URL;
 
 import javax.xml.transform.Result;
 
+import junit.framework.AssertionFailedError;
+
 import net.sourceforge.vulcan.TestUtils;
 import net.sourceforge.vulcan.dto.PreferencesDto;
 import net.sourceforge.vulcan.dto.ProjectConfigDto;
@@ -41,6 +43,7 @@ import net.sourceforge.vulcan.web.Keys;
 
 import org.apache.struts.Globals;
 import org.apache.struts.action.ActionMessages;
+import org.easymock.EasyMock;
 import org.easymock.IAnswer;
 import org.jdom.Document;
 import org.jdom.Element;
@@ -55,6 +58,7 @@ public class ViewProjectStatusActionTest extends MockApplicationContextStrutsTes
 	File helloFile = new File("");
 	
 	Map<String, Object> paramMap = new HashMap<String, Object>();
+	Map<UUID, ProjectStatusDto> outcomeMap = new HashMap<UUID, ProjectStatusDto>();
 	
 	Integer mostRecentBuildNumberByWorkDir = 42;
 	
@@ -73,16 +77,31 @@ public class ViewProjectStatusActionTest extends MockApplicationContextStrutsTes
 		ids.add(UUID.randomUUID());
 		ids.add(UUID.randomUUID());
 		
+		for (UUID id : ids) {
+			final ProjectStatusDto outcome = new ProjectStatusDto();
+			outcome.setBuildNumber(11);
+			outcomeMap.put(id, outcome);	
+		}
+		
 		getActionServlet().getServletContext().setAttribute(Globals.SERVLET_KEY, "*.foobar");
 		
 		projectConfig.setName("some project");
 		projectConfig.setBugtraqUrl("http://something/%BUGID%");
-		paramMap.put("projectSiteURL", new URL("http://localhost/vulcan-web/site/some%20project/12/"));
 		paramMap.put("issueTrackerURL", projectConfig.getBugtraqUrl());
 		
 		expect(buildManager.getMostRecentBuildNumberByWorkDir((String)anyObject())).andAnswer(new IAnswer<Integer>() {
 			public Integer answer() throws Throwable {
 				return mostRecentBuildNumberByWorkDir;
+			}
+		}).anyTimes();
+		
+		expect(buildManager.getStatus((UUID)notNull())).andAnswer(new IAnswer<ProjectStatusDto>() {
+			public ProjectStatusDto answer() throws Throwable {
+				final Object id = EasyMock.getCurrentArguments()[0];
+				if (outcomeMap.containsKey(id)) {
+					return outcomeMap.get(id);	
+				}
+				throw new AssertionFailedError("Unexpected method call: buildManager.getStatus(" + id + ")");
 			}
 		}).anyTimes();
 	}
@@ -161,9 +180,8 @@ public class ViewProjectStatusActionTest extends MockApplicationContextStrutsTes
 		buildManager.getAvailableStatusIds("some project");
 		expectLastCall().andReturn(ids);
 
-		buildManager.getStatus(ids.get(ids.size()-1));
-		expectLastCall().andReturn(null);
-
+		outcomeMap.put(ids.get(ids.size()-1), null);
+		
 		addRequestParameter("projectName", "some project");
 		
 		replay();
@@ -219,7 +237,7 @@ public class ViewProjectStatusActionTest extends MockApplicationContextStrutsTes
 
 		assertEquals("application/xml", response.getContentType());
 		
-		assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?><project>  <prev-index>2</prev-index></project>",
+		assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?><project>  <previous-build-number>11</previous-build-number></project>",
 				response.getWriterBuffer().toString().trim()
 					.replaceAll("\n", "").replaceAll("\r", ""));
 	}
@@ -246,7 +264,7 @@ public class ViewProjectStatusActionTest extends MockApplicationContextStrutsTes
 
 		assertEquals("application/xml", response.getContentType());
 		
-		assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?><project>  <prev-index>2</prev-index></project>",
+		assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?><project>  <previous-build-number>11</previous-build-number></project>",
 				response.getWriterBuffer().toString().trim()
 					.replaceAll("\n", "").replaceAll("\r", ""));
 	}
@@ -274,7 +292,7 @@ public class ViewProjectStatusActionTest extends MockApplicationContextStrutsTes
 
 		assertEquals("application/xml", response.getContentType());
 		
-		assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?><project>  <prev-index>2</prev-index></project>",
+		assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?><project>  <previous-build-number>11</previous-build-number></project>",
 				response.getWriterBuffer().toString().trim()
 					.replaceAll("\n", "").replaceAll("\r", ""));
 	}
@@ -318,8 +336,7 @@ public class ViewProjectStatusActionTest extends MockApplicationContextStrutsTes
 		buildManager.getAvailableStatusIds("some project");
 		expectLastCall().andReturn(ids);
 		
-		buildManager.getStatus(ids.get(1));
-		expectLastCall().andReturn(status);
+		outcomeMap.put(ids.get(1), status);
 
 		projectDomBuilder.createProjectDocument(status, request.getLocale());
 		expectLastCall().andReturn(dom);
@@ -335,7 +352,7 @@ public class ViewProjectStatusActionTest extends MockApplicationContextStrutsTes
 		
 		assertEquals("application/xml", response.getContentType());
 		
-		assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?><project>  <prev-index>0</prev-index>  <next-index>2</next-index></project>",
+		assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?><project>  <previous-build-number>11</previous-build-number>  <next-build-number>11</next-build-number></project>",
 				response.getWriterBuffer().toString().trim()
 					.replaceAll("\n", "").replaceAll("\r", ""));
 	}
@@ -349,8 +366,7 @@ public class ViewProjectStatusActionTest extends MockApplicationContextStrutsTes
 		buildManager.getAvailableStatusIds("some project");
 		expectLastCall().andReturn(ids);
 		
-		buildManager.getStatus(ids.get(2));
-		expectLastCall().andReturn(status);
+		outcomeMap.put(ids.get(2), status);
 
 		projectDomBuilder.createProjectDocument(status, request.getLocale());
 		expectLastCall().andReturn(dom);
@@ -366,7 +382,7 @@ public class ViewProjectStatusActionTest extends MockApplicationContextStrutsTes
 		
 		assertEquals("application/xml", response.getContentType());
 		
-		assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?><project>  <prev-index>1</prev-index>  <next-index>3</next-index></project>",
+		assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?><project>  <previous-build-number>11</previous-build-number>  <next-build-number>3</next-build-number></project>",
 				response.getWriterBuffer().toString().trim()
 					.replaceAll("\n", "").replaceAll("\r", ""));
 	}
@@ -399,9 +415,36 @@ public class ViewProjectStatusActionTest extends MockApplicationContextStrutsTes
 		
 		assertEquals("application/xml", response.getContentType());
 		
-		assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?><project>  <prev-index>0</prev-index>  <next-index>2</next-index></project>",
+		assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?><project>  <previous-build-number>11</previous-build-number>  <next-build-number>11</next-build-number></project>",
 				response.getWriterBuffer().toString().trim()
 					.replaceAll("\n", "").replaceAll("\r", ""));
+	}
+	public void testGetStatusByBuildNumberNotExist() throws Exception {
+		status.setId(ids.get(1));
+		
+		manager.getProjectConfig("some project");
+		expectLastCall().andReturn(new ProjectConfigDto());
+
+		buildManager.getProjectsBeingBuilt();
+		expectLastCall().andReturn(Collections.emptyMap());
+		
+		buildManager.getAvailableStatusIds("some project");
+		expectLastCall().andReturn(ids);
+
+		buildManager.getStatusByBuildNumber("some project", 1234);
+		expectLastCall().andReturn(null);
+		
+		addRequestParameter("projectName", "some project");
+		addRequestParameter("buildNumber", "1234");
+
+		replay();
+		
+		actionPerform();
+		
+		verify();
+		
+		verifyForward("failure");
+		assertPropertyHasError(ActionMessages.GLOBAL_MESSAGE, "errors.status.not.available.by.build.number");
 	}
 	public void testGetDiff() throws Exception {
 		manager.getProjectConfig("some project");
@@ -415,8 +458,7 @@ public class ViewProjectStatusActionTest extends MockApplicationContextStrutsTes
 		
 		status.setDiffId(UUID.randomUUID());
 		
-		buildManager.getStatus(ids.get(1));
-		expectLastCall().andReturn(status);
+		outcomeMap.put(ids.get(1), status);
 
 		configurationStore.getChangeLog("some project", status.getDiffId());
 		expectLastCall().andReturn(TestUtils.resolveRelativeFile("source/test/servlet/file.txt"));
@@ -449,8 +491,7 @@ public class ViewProjectStatusActionTest extends MockApplicationContextStrutsTes
 		
 		status.setBuildLogId(UUID.randomUUID());
 		
-		buildManager.getStatus(ids.get(1));
-		expectLastCall().andReturn(status);
+		outcomeMap.put(ids.get(1), status);
 
 		configurationStore.getBuildLog("some project", status.getBuildLogId());
 		expectLastCall().andReturn(TestUtils.resolveRelativeFile("source/test/servlet/file.txt"));
@@ -494,7 +535,7 @@ public class ViewProjectStatusActionTest extends MockApplicationContextStrutsTes
 	}
 	public void testTransform() throws Exception {
 		paramMap.put("contextRoot", "/vulcan-web");
-		paramMap.put("viewProjectStatusURL", new URL("http://localhost/vulcan-web/viewProjectStatus.do?transform=xhtml"));
+		paramMap.put("viewProjectStatusURL", new URL("http://localhost/vulcan-web/projects/"));
 		paramMap.put("workingCopyBuildNumber", 42);
 		
 		final Map<String, ProjectStatusDto> empty = Collections.emptyMap();
@@ -515,7 +556,7 @@ public class ViewProjectStatusActionTest extends MockApplicationContextStrutsTes
 		projectConfig.setBugtraqUrl("http://%bugid%/");
 		
 		paramMap.put("contextRoot", "/vulcan-web");
-		paramMap.put("viewProjectStatusURL", new URL("http://localhost/vulcan-web/viewProjectStatus.do?transform=xhtml"));
+		paramMap.put("viewProjectStatusURL", new URL("http://localhost/vulcan-web/projects/"));
 		paramMap.put("workingCopyBuildNumber", 42);
 		paramMap.put("issueTrackerURL", "http://%BUGID%/");
 		
@@ -543,7 +584,7 @@ public class ViewProjectStatusActionTest extends MockApplicationContextStrutsTes
 		paramMap.put("workingCopyBuildNumber", -1);
 		paramMap.put("contextRoot", "/vulcan-web");
 		paramMap.put("reloadInterval", Integer.valueOf(prefs.getReloadInterval()));
-		paramMap.put("viewProjectStatusURL", new URL("http://localhost/vulcan-web/viewProjectStatus.do?transform=xhtml"));
+		paramMap.put("viewProjectStatusURL", new URL("http://localhost/vulcan-web/projects/"));
 		
 		final Map<String, ProjectStatusDto> empty = Collections.emptyMap();
 		trainForTransform(empty, "xhtml");
@@ -562,7 +603,7 @@ public class ViewProjectStatusActionTest extends MockApplicationContextStrutsTes
 	public void testTransformBadFormatType() throws Exception {
 		paramMap.put("workingCopyBuildNumber", 42);
 		paramMap.put("contextRoot", "/vulcan-web");
-		paramMap.put("viewProjectStatusURL", new URL("http://localhost/vulcan-web/viewProjectStatus.do?transform=nonesuch"));
+		paramMap.put("viewProjectStatusURL", new URL("http://localhost/vulcan-web/projects/"));
 		final Map<String, ProjectStatusDto> empty = Collections.emptyMap();
 		trainForTransform(empty, "nonesuch");
 
@@ -588,7 +629,7 @@ public class ViewProjectStatusActionTest extends MockApplicationContextStrutsTes
 		expect(buildManager.getAvailableStatusIds("some project")).andReturn(ids);
 
 		if (!projectsBeingBuilt.containsKey("some project")) {
-			expect(buildManager.getStatus(ids.get(ids.size()-1))).andReturn(status);
+			outcomeMap.put(ids.get(ids.size()-1), status);
 		}
 		
 		expect(projectDomBuilder.createProjectDocument(status, request.getLocale()))

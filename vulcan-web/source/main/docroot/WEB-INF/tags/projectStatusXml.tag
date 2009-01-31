@@ -129,7 +129,7 @@
 	</c:set>
 	<c:choose>
 		<c:when test="${transform}">
-			<c:import url="/xsl/projects.xsl" var="xslt"/>
+			<c:import url="/xsl/ProjectsDashboard.xsl" var="xslt"/>
 			<x:transform xslt="${xslt}" doc="${statusXml}">
 				<x:param name="contextRoot">
 					<c:url value="/" var="contextRoot"/>
@@ -145,7 +145,7 @@
 					<c:url value="/managePreferences.do?action=save"/>
 				</x:param>
 				<x:param name="detailLink">
-					<c:url value="/viewProjectStatus.do?transform=xhtml&amp;projectName="/>
+					<c:url value="/projects/"/>
 				</x:param>
 				<x:param name="nameHeader">
 					<spring:message code="th.project.name"/>
