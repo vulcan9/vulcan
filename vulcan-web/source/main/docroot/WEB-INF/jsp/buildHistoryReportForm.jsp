@@ -192,7 +192,7 @@
 			<td colspan="3">
 				<html:select property="transform" styleClass="transform">
 					<html:option value="OpenFlashChart">Open Flash Chart</html:option>
-					<html:option value="xhtml">XHTML</html:option>
+					<html:option value="DataTable">HTML Data Table</html:option>
 					<html:option value="">XML</html:option>
 				</html:select>
 				<ul class="metaDataOptions">

@@ -37,7 +37,7 @@
 		<forward name="preferences" path="/editPreferences.do"/>
 		<forward name="help" path="http://code.google.com/p/vulcan/wiki/" redirect="true"/>
 		
-		<forward name="viewProjectStatus" path="/viewProjectStatus.do"/>
+		<forward name="viewProjectStatus" path="/projects/"/>
 		
 		<!-- admin forwards -->
 		<forward name="setup" path="/admin/setup/"/>

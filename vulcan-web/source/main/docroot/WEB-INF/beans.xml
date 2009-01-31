@@ -166,7 +166,8 @@
 		</property>
 		<property name="transformResources">
 			<map>
-				<entry key="xhtml" value="xsl/projectDetails-xhtml.xsl"/>
+				<entry key="xhtml" value="xsl/BuildReport.xsl"/>
+				<entry key="DataTable" value="xsl/BuildHistoryDataTable.xsl"/>
 				<entry key="OpenFlashChart-BuildOutcomePieChart" value="xsl/OpenFlashChart-BuildOutcomePieChart.xsl"/>
 				<entry key="OpenFlashChart-BuildDuration" value="xsl/OpenFlashChart-BuildDuration.xsl"/>
 				<entry key="OpenFlashChart-Metrics" value="xsl/OpenFlashChart-Metrics.xsl"/>

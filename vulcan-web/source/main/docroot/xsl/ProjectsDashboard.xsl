@@ -160,7 +160,11 @@
 		<tr>
 			<td>
 				<xsl:element name="a">
-					<xsl:attribute name="href"><xsl:value-of select="$detailLink"/><xsl:value-of select="@name"/></xsl:attribute>
+					<xsl:attribute name="href">
+						<xsl:value-of select="$detailLink"/>
+						<xsl:value-of select="@name"/>
+						<xsl:text>/LATEST/</xsl:text>
+					</xsl:attribute>
 					<xsl:value-of select="@name"/>
 				</xsl:element>
 			</td>

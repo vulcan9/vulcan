@@ -146,12 +146,11 @@
 				<xsl:text>,</xsl:text>
 			</xsl:if>
 			<xsl:text>javascript:showBuildDetails('</xsl:text>
-			<xsl:text><xsl:value-of select="substring-before($viewProjectStatusURL, '?')"/></xsl:text>
-			<xsl:text>?projectName=</xsl:text>
+			<xsl:text><xsl:value-of select="$viewProjectStatusURL"/></xsl:text>
 			<xsl:text><xsl:value-of select="name"/></xsl:text>
-			<xsl:text>%26buildNumber=</xsl:text>
+			<xsl:text>/</xsl:text>
 			<xsl:text><xsl:value-of select="build-number"/></xsl:text>
-			<xsl:text>%26transform=xhtml')</xsl:text>
+			<xsl:text>/')</xsl:text>
 		</xsl:for-each>&amp;
 	</xsl:template>
 	

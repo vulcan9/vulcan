@@ -91,14 +91,16 @@ public final class ViewProjectStatusAction extends ProjectReportBaseAction {
 				}
 			} else {
 				status = buildManager.getStatusByBuildNumber(projectName, buildNumber);
-				index = ids.indexOf(status.getId());
+				if (status != null) {
+					index = ids.indexOf(status.getId());
+				}
 			}
 			
 			if (index < 0) {
-				throw new IllegalStateException(
-						"Build Number " + buildNumber +
-						" is not in the list of available outcomes for project " + 
-						projectName + " ID {" + status.getId() + "}.");
+				BaseDispatchAction.saveError(request, ActionMessages.GLOBAL_MESSAGE,
+						new ActionMessage("errors.status.not.available.by.build.number",
+								new String[] {projectName, Integer.toString(buildNumber), status != null ? status.getId().toString() : ""}));
+				return mapping.findForward("failure");
 			}
 		} else {
 			if (statusForm.isIndexSpecified()) {
@@ -145,20 +147,27 @@ public final class ViewProjectStatusAction extends ProjectReportBaseAction {
 	protected Document createDocument(HttpServletRequest request, ProjectStatusDto status, final List<UUID> ids, int index, boolean currentlyBuilding) {
 		final Document doc = projectDomBuilder.createProjectDocument(status, request.getLocale());
 		
-		if (index > 0) {
-			final Element e = new Element("prev-index");
-			e.setText(Integer.toString(index-1));
-			doc.getRootElement().addContent(e);
-		}
-		
 		if (ids != null) {
+			if (index > 0) {
+				final Element e = new Element("previous-build-number");
+				
+				e.setText(buildManager.getStatus(ids.get(index-1)).getBuildNumber().toString());
+				doc.getRootElement().addContent(e);
+			}
+			
 			final int size = ids.size();
 			final boolean inRange = index+1 < size;
 			final boolean currentlyBuilindgInRange = currentlyBuilding && index + 1 == size;
 			
 			if (inRange || currentlyBuilindgInRange) {
-				final Element e = new Element("next-index");
-				e.setText(Integer.toString(index+1));
+				final Element e = new Element("next-build-number");
+				
+				if (inRange) {
+					e.setText(buildManager.getStatus(ids.get(index+1)).getBuildNumber().toString());
+				} else {
+					e.setText(Integer.toString(index + 1));
+				}
+				
 				doc.getRootElement().addContent(e);
 			}
 		}
@@ -168,7 +177,7 @@ public final class ViewProjectStatusAction extends ProjectReportBaseAction {
 	protected void sendDiff(HttpServletRequest request, HttpServletResponse response, ProjectStatusDto status) throws IOException {
 		InputStream is = null;
 		
-		if (status != null) {
+		if (status != null && status.getDiffId() != null) {
 			UUID diffId = status.getDiffId();
 			try {
 				is = new FileInputStream(configurationStore.getChangeLog(status.getName(), diffId));
@@ -183,7 +192,7 @@ public final class ViewProjectStatusAction extends ProjectReportBaseAction {
 	protected void sendLog(HttpServletRequest request, HttpServletResponse response, ProjectStatusDto status) throws IOException {
 		InputStream is = null;
 		
-		if (status != null) {
+		if (status != null && status.getBuildLogId() != null) {
 			UUID logId = status.getBuildLogId();
 			try {
 				is = new FileInputStream(configurationStore.getBuildLog(status.getName(), logId));

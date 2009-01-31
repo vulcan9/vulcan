@@ -76,13 +76,13 @@
 				</form>
 				
 				<div class="build-nav">
-					<xsl:apply-templates select="/project/prev-index"/>
+					<xsl:apply-templates select="/project/previous-build-number"/>
 					<xsl:text> </xsl:text>
 					<xsl:value-of select="$buildNumberHeader"/>
 					<xsl:text> </xsl:text>
 					<xsl:value-of select="/project/build-number"/>
 					<xsl:text> </xsl:text>
-					<xsl:apply-templates select="/project/next-index"/>
+					<xsl:apply-templates select="/project/next-build-number"/>
 				</div>
 				
 				<h3>
@@ -190,10 +190,7 @@
 										<xsl:text>.</xsl:text>
 									</span>
 								</xsl:if>
-								<iframe id="iframe" name="iframe" frameborder="0">
-									<xsl:attribute name="src">
-										<xsl:value-of select="$projectSiteURL"/>
-									</xsl:attribute>
+								<iframe id="iframe" name="iframe" frameborder="0" src="site/">
 									<xsl:text></xsl:text>
 								</iframe>
 							</xsl:when>
@@ -211,19 +208,16 @@
 	
 	<xsl:template name="buildLink">
 		<xsl:param name="buildNumber" select="."/>
-		<xsl:param name="byIndex" select="false()"/>
 		<xsl:param name="text" select="$buildNumber"/>
 		
 		<a xmlns="http://www.w3.org/1999/xhtml">
-			<xsl:choose>
-				<xsl:when test="$byIndex">
-					<xsl:attribute name="href"><xsl:value-of select="$viewProjectStatusURL"/>&amp;projectName=<xsl:value-of select="/project/name"/>&amp;index=<xsl:value-of select="$buildNumber"/></xsl:attribute>
-				</xsl:when>
-				<xsl:otherwise>
-					<xsl:attribute name="href"><xsl:value-of select="$viewProjectStatusURL"/>&amp;projectName=<xsl:value-of select="/project/name"/>&amp;buildNumber=<xsl:value-of select="$buildNumber"/></xsl:attribute>
-				</xsl:otherwise>
-			</xsl:choose>
-			
+			<xsl:attribute name="href">
+				<xsl:value-of select="$viewProjectStatusURL"/>
+				<xsl:value-of select="/project/name"/>
+				<xsl:text>/</xsl:text>
+				<xsl:value-of select="$buildNumber"/>
+				<xsl:text>/</xsl:text>
+			</xsl:attribute>
 			<xsl:value-of select="$text"/>
 		</a>
 	</xsl:template>
@@ -259,12 +253,6 @@
 			</xsl:when>
 			<xsl:when test="$target='test-failures'">
 				<xsl:apply-templates select="/project/test-failures"/>
-			</xsl:when>
-			<xsl:when test="$target='buildHistoryReportSummary'">
-				<xsl:call-template name="buildHistoryReportSummary"/>
-			</xsl:when>
-			<xsl:when test="$target='history-outcomes'">
-				<xsl:call-template name="history-outcomes"/>
 			</xsl:when>
 		</xsl:choose>
 	</xsl:template>
@@ -319,11 +307,9 @@
 					</xsl:if>
 				</dl>
 				<xsl:if test="/project/build-log-available">
-					<xsl:element name="a">
-							<xsl:attribute name="href"><xsl:value-of select="$viewProjectStatusURL"/>&amp;projectName=<xsl:value-of select="/project/name"/>&amp;buildNumber=<xsl:value-of select="/project/build-number"/>&amp;view=log</xsl:attribute>
-							<xsl:attribute name="class">external</xsl:attribute>
-							<xsl:value-of select="$buildLogLabel"/>
-					</xsl:element>
+					<a href="log" class="external">
+						<xsl:value-of select="$buildLogLabel"/>
+					</a>
 				</xsl:if>
 			</div>
 			
@@ -380,7 +366,7 @@
 						<td>
 							<a target="iframe" class="report-link">
 								<xsl:attribute name="href">
-									<xsl:value-of select="$projectSiteURL"/>
+									<xsl:text>site/</xsl:text>
 									<xsl:value-of select="./path"/>
 								</xsl:attribute>
 								<xsl:value-of select="./name"/>
@@ -418,19 +404,17 @@
 		</span>
 	</xsl:template>
 	
-	<xsl:template match="next-index">
+	<xsl:template match="next-build-number">
 		<xsl:call-template name="buildLink">
 			<xsl:with-param name="buildNumber" select="."/>
 			<xsl:with-param name="text" select="$nextBuildLabel"/>
-			<xsl:with-param name="byIndex" select="true()"/>
 		</xsl:call-template>
 	</xsl:template>
 	
-	<xsl:template match="prev-index">
+	<xsl:template match="previous-build-number">
 		<xsl:call-template name="buildLink">
 			<xsl:with-param name="buildNumber" select="."/>
 			<xsl:with-param name="text" select="$prevBuildLabel"/>
-			<xsl:with-param name="byIndex" select="true()"/>
 		</xsl:call-template>
 	</xsl:template>
 	
@@ -471,11 +455,9 @@
 				<ul> 
 					<xsl:if test="/project/diff-available">
 						<li>
-							<xsl:element name="a">
-								<xsl:attribute name="href"><xsl:value-of select="$viewProjectStatusURL"/>&amp;projectName=<xsl:value-of select="/project/name"/>&amp;buildNumber=<xsl:value-of select="/project/build-number"/>&amp;view=diff</xsl:attribute>
-								<xsl:attribute name="class">external</xsl:attribute>
+							<a href="diff" class="external">
 								<xsl:value-of select="$diffHeader"/>
-							</xsl:element>
+							</a>
 						</li>
 					</xsl:if>
 					<xsl:if test="/project/repository-url">
@@ -535,7 +517,13 @@
 				<td><xsl:apply-templates select="@name"/></td>
 				<td>
 					<a>
-						<xsl:attribute name="href"><xsl:value-of select="$viewProjectStatusURL"/>&amp;projectName=<xsl:value-of select="@name"/>&amp;buildNumber=<xsl:value-of select="@build-number"/></xsl:attribute>
+						<xsl:attribute name="href">
+							<xsl:value-of select="$viewProjectStatusURL"/>
+							<xsl:value-of select="@name"/>
+							<xsl:text>/</xsl:text>
+							<xsl:value-of select="@build-number"/>
+							<xsl:text>/</xsl:text>
+						</xsl:attribute>
 						<xsl:apply-templates select="@build-number"/>
 					</a>
 				</td>
@@ -695,132 +683,6 @@
 			</table>
 			<div style="clear: left;"><xsl:text> </xsl:text></div>
 		</div>
-	</xsl:template>
-	
-	<xsl:template match="/build-history">
-		<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-US">
-			<head>
-				<title>Build History Report</title>
-				<link rel="stylesheet" href="css/standard.css" type="text/css"/>
-			</head>
-			<body>
-				<div class="buildHistoryReport">
-				
-					<xsl:call-template name="bubble">
-						<xsl:with-param name="target" select="'buildHistoryReportSummary'"/>
-					</xsl:call-template>
-				
-					<h3 class="caption">Metrics</h3>
-					<ul id="metrics-checkboxes" class="metaDataOptions">
-						<xsl:for-each select="/build-history/project/metrics/metric[generate-id() = generate-id(key('metrics-labels', @label)[1])]">
-							<li>
-								<input type="checkbox" checked="checked">
-									<xsl:attribute name="id">
-										<xsl:text>metric</xsl:text>
-										<xsl:value-of select="position()"/>
-									</xsl:attribute>
-								</input>
-								<label>
-									<xsl:attribute name="for">
-										<xsl:text>metric</xsl:text>
-										<xsl:value-of select="position()"/>
-									</xsl:attribute>
-									<xsl:value-of select="@label"/>
-								</label>
-							</li>
-						</xsl:for-each>
-					</ul>
-					
-					<xsl:call-template name="bubble">
-						<xsl:with-param name="target" select="'history-outcomes'"/>
-					</xsl:call-template>
-				</div>
-			</body>
-		</html>
-	</xsl:template>
-	
-	<xsl:template name="buildHistoryReportSummary">
-		<table class="buildHistoryReportSummary" xmlns="http://www.w3.org/1999/xhtml">
-			<caption>Report Summary</caption>
-			<tbody>
-				<tr>
-					<th>From</th>
-					<td><xsl:value-of select="@from"/></td>
-				</tr>
-				<tr>
-					<th>To</th>
-					<td><xsl:value-of select="@to"/></td>
-				</tr>
-				<tr>
-					<th>Success Rate</th>
-					<td>
-						<xsl:value-of select="format-number(count(/build-history/project/status[text()='PASS']) div count(/build-history/project), '##0.#%')"/>
-						(<xsl:value-of select="count(/build-history/project/status[text()='PASS'])"/>
-						/
-						<xsl:value-of select="count(/build-history/project)"/>)
-					</td>
-				</tr>
-			</tbody>
-		</table>
-	</xsl:template>
-	
-	<xsl:template name="history-outcomes">
-		<table xmlns="http://www.w3.org/1999/xhtml" class="builds">
-			<caption>Outcomes</caption>
-			<thead>
-				<tr id="build-data-headers">
-					<th><xsl:value-of select="$projectHeader"/></th>
-					<th><xsl:value-of select="$buildNumberHeader"/></th>
-					<th><xsl:value-of select="$revisionHeader"/></th>
-					<th><xsl:value-of select="$repositoryTagNameHeader"/></th>
-					<th class="timestamp"><xsl:value-of select="$timestampHeader"/></th>
-					<th><xsl:value-of select="$statusHeader"/></th>
-					<th><xsl:value-of select="$messageHeader"/></th>
-					<xsl:for-each select="/build-history/project/metrics/metric[generate-id() = generate-id(key('metrics-labels', @label)[1])]">
-						<th>
-							<xsl:attribute name="id">
-								<xsl:text>col_metric</xsl:text>
-								<xsl:value-of select="position()"/>
-							</xsl:attribute>
-							<xsl:value-of select="@label"/>
-						</th>
-					</xsl:for-each>
-				</tr>
-			</thead>
-			<tbody>
-				<xsl:apply-templates select="/build-history/project">
-					<xsl:sort select="timestamp/@millis" order="ascending" data-type="number"/>
-				</xsl:apply-templates>
-			</tbody>
-		</table>
-	</xsl:template>
-	
-	<xsl:template match="/build-history/project">
-		<xsl:variable name="project" select="."/>
-		<tr xmlns="http://www.w3.org/1999/xhtml">
-			<td><xsl:apply-templates select="name"/></td>
-			<td>
-				<a>
-					<xsl:attribute name="href"><xsl:value-of select="$viewProjectStatusURL"/>&amp;projectName=<xsl:value-of select="name"/>&amp;buildNumber=<xsl:value-of select="build-number"/></xsl:attribute>
-					<xsl:apply-templates select="build-number"/>
-				</a>
-			</td>
-			<td><xsl:apply-templates select="revision"/></td>
-			<td><xsl:apply-templates select="repository-tag-name"/></td>
-			<td class="timestamp"><xsl:apply-templates select="timestamp"/></td>
-			<xsl:element name="td">
-				<xsl:attribute name="class"><xsl:value-of select="status"/> status</xsl:attribute>
-				<xsl:value-of select="status"/>
-			</xsl:element>
-			<td class="buildMessage"><xsl:apply-templates select="message"/></td>
-			
-			<xsl:for-each select="/build-history/project/metrics/metric[generate-id() = generate-id(key('metrics-labels', @label)[1])]">
-				<xsl:variable name="label" select="@label"/>
-				<td>
-					<xsl:value-of select="$project/metrics/metric[@label=$label]/@value"/>
-				</td>
-			</xsl:for-each>
-		</tr>
 	</xsl:template>
 	
 	<xsl:template name="replace-string">
