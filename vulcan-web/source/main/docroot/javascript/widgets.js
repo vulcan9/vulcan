@@ -158,7 +158,7 @@ function addRow(o) {
 	input.type = 'checkbox';
 	input.name = 'select-' + name;
 	
-	customAddEventListener(input, 'click', checkRows);
+	$(input).click(checkRows);
 	
 	td.appendChild(input);
 	tr.appendChild(td);
@@ -231,9 +231,16 @@ function checkRows(e) {
 		var on = all[window.previousIndex].checked;
 
 		for (var c=i+1; c<=j; c++) {
-			all[c].checked = on;
+			if (all[c].checked != on) {
+				all[c].checked = on;
+				
+				// fire event handler for each checkbox
+				$(all[c]).trigger("toggle");
+			}
 		}
 	}
+	
+	$(target).trigger("toggle");
 	
 	window.previousIndex = i;
 	window.previousName = this.name;
@@ -463,8 +470,11 @@ function registerHandlers() {
 	registerHandler('button', 'Remove', removeRow);
 	registerHandler('button', 'Move Up', moveUpRows);
 	registerHandler('button', 'Move Down', moveDownRows);
-	registerHandler('checkbox', null, checkRows);
-	registerHandler('radio', null, checkRows);
+	
+	$("#metrics-checkboxes input[type='checkbox']").bind("toggle", toggleMetricColumnVisibility);
+	
+	$("input[type='checkbox']").click(checkRows);
+	$("input[type='radio']").click(checkRows);
 	
 	var pendingChanges = document.getElementById('pendingChanges');
 	if (pendingChanges != null) {
@@ -524,8 +534,6 @@ function registerHandlers() {
 		
 		return false;
 	});
-	
-	$("#metrics-checkboxes input").click(toggleMetricColumnVisibility);
 	
 	$(".report-link").click(function() {
 		setTimeout(function() { showBuildReportPanel("build-directory"); }, 500);
