@@ -35,6 +35,7 @@ import net.sourceforge.vulcan.dto.BuildOutcomeQueryDto;
 import net.sourceforge.vulcan.dto.ChangeLogDto;
 import net.sourceforge.vulcan.dto.ChangeSetDto;
 import net.sourceforge.vulcan.dto.MetricDto;
+import net.sourceforge.vulcan.dto.ProjectStatusDto;
 import net.sourceforge.vulcan.dto.RevisionTokenDto;
 import net.sourceforge.vulcan.dto.TestFailureDto;
 import net.sourceforge.vulcan.dto.MetricDto.MetricType;
@@ -159,6 +160,30 @@ public class JdbcBuildOutcomeStoreTest extends TestCase {
 		outcome.setId(UUID.randomUUID());
 		
 		assertPersistence();
+	}
+
+	/**
+	 * See http://code.google.com/p/vulcan/issues/detail?id=155
+	 */
+	public void testRenameProjectMergesExisting() throws Exception {
+		assertPersistence();
+
+		final String existingName = outcome.getName();
+		final String otherName = existingName + "-2";
+		
+		outcome.setName(otherName);
+		outcome.setId(UUID.randomUUID());
+		
+		assertPersistence();
+		
+		store.projectNameChanged(otherName, existingName);
+
+		final BuildOutcomeQueryDto query = new BuildOutcomeQueryDto();
+		query.setProjectNames(Collections.singleton(existingName));
+		
+		final List<ProjectStatusDto> list = store.loadBuildSummaries(query);
+		
+		assertEquals(1, list.size());
 	}
 	
 	public void testSaveGeneratesIdOnNull() throws Exception {
