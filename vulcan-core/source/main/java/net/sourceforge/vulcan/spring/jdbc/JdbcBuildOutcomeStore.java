@@ -1,6 +1,6 @@
 /*
  * Vulcan Build Manager
- * Copyright (C) 2005-2007 Chris Eldredge
+ * Copyright (C) 2005-2009 Chris Eldredge
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -199,10 +199,22 @@ public class JdbcBuildOutcomeStore implements BuildOutcomeStore, ProjectNameChan
 	}
 	
 	public void projectNameChanged(String oldName, String newName) {
+		if (projectNames.contains(newName)) {
+			int i=2;
+			while (projectNames.contains(newName + "_" + i)) {
+				i++;
+			}
+			
+			jdbcTemplate.update("update project_names set name=? where name=?",
+				new Object[] {newName + "_" + i, newName});
+			
+			projectNames.add(newName + "_" + i);
+		}
+		
 		jdbcTemplate.update("update project_names set name=? where name=?",
-				new Object[] {newName, oldName});
-		projectNames.remove(oldName);
+			new Object[] {newName, oldName});
 		projectNames.add(newName);
+		projectNames.remove(oldName);
 	}
 	
 	public ConfigurationStore getConfigurationStore() {
