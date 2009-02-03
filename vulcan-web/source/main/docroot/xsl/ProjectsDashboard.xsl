@@ -161,9 +161,10 @@
 			<td>
 				<xsl:element name="a">
 					<xsl:attribute name="href">
-						<xsl:value-of select="$detailLink"/>
-						<xsl:value-of select="@name"/>
-						<xsl:text>/LATEST/</xsl:text>
+						<xsl:call-template name="concat-link">
+							<xsl:with-param name="prefix" select="$detailLink"/>
+							<xsl:with-param name="suffix" select="concat(@name, '/LATEST/')"/>
+						</xsl:call-template>
 					</xsl:attribute>
 					<xsl:value-of select="@name"/>
 				</xsl:element>
@@ -195,5 +196,22 @@
 				</xsl:if>
 			</xsl:element>
 		</tr>
+	</xsl:template>
+	
+	<xsl:template name="concat-link">
+		<xsl:param name="prefix"/>
+		<xsl:param name="suffix"/>
+		
+		<xsl:choose>
+			<xsl:when test="substring-before($prefix, ';jsessionid=')">
+				<xsl:value-of select="substring-before($prefix, ';jsessionid=')"/>
+				<xsl:value-of select="$suffix"/>
+				<xsl:text>;jsessionid=</xsl:text>
+				<xsl:value-of select="substring-after($prefix, ';jsessionid=')"/>
+			</xsl:when>
+			<xsl:otherwise>
+				<xsl:value-of select="concat($prefix, $suffix)"/>
+			</xsl:otherwise>
+		</xsl:choose>
 	</xsl:template>
 </xsl:stylesheet>
