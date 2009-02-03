@@ -75,7 +75,15 @@
 			<test-failure>
 				<xsl:value-of select="substring($suite-name, 2, string-length($suite-name) - 2)"/>
 				<xsl:text>.</xsl:text>
-				<xsl:value-of select="substring-before(substring(., 2), '()')"/>
+				<xsl:choose>
+					<xsl:when test="substring-before(., '()')">
+						<xsl:value-of select="substring-before(substring(., 2), '()')"/>
+					</xsl:when>
+					<xsl:otherwise>
+						<xsl:value-of select="substring(., 2, string-length(.)-2)"/>
+					</xsl:otherwise>
+				</xsl:choose>
+				
 			</test-failure>
 		</xsl:for-each>
 	</xsl:template>
