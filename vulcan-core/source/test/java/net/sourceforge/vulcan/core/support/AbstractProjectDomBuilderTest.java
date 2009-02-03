@@ -21,6 +21,7 @@ package net.sourceforge.vulcan.core.support;
 import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
 import java.io.StringWriter;
+import java.text.DateFormat;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -319,6 +320,7 @@ public class AbstractProjectDomBuilderTest extends EasyMockTestCase {
 
 		final Element tstamp = assertContainsChildWithText(elem, "timestamp", "01:56");
 		assertEquals(Long.toString(date.getTime()), tstamp.getAttributeValue("millis"));
+		assertEquals(DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.SHORT).format(date), tstamp.getAttributeValue("text"));
 		
 		final Element elapsed = assertContainsChildWithText(elem, "elapsed-time", "00:01:37");
 		assertEquals("97000", elapsed.getAttributeValue("millis"));
