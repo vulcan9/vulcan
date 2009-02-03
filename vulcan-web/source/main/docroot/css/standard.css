@@ -165,7 +165,6 @@ div.container,ul#primary-nav,ul#utility-nav {
 	padding-top: 2ex;
 	padding-bottom: 5ex;
 	position: relative;
-	overflow: hidden;
 }
 
 #site-info {
@@ -245,6 +244,10 @@ tr.dragging td.desc, tr.dragging td.buttons {
 
 table#buildReportEditFields {
 	margin-top: 4ex;
+}
+
+table#revisions {
+	margin-bottom: 2ex;
 }
 
 /***** Dashboard ************************************************************************************/
@@ -371,13 +374,9 @@ div.link {
 	margin-bottom: 1em;
 }
 
-div.buildHistoryReport table,div.buildHistoryReport caption {
-	margin-left: 0;
-}
-
 div.projectCheckboxes, div.options {
-	-moz-column-width: 25em;
-	-moz-column-gap: 3em;
+	-moz-column-width: 12em;
+	-moz-column-gap: 1em;
 }
 
 div.projectCheckboxes li {
@@ -457,6 +456,8 @@ table.sortable thead th, th.sortable a:link, th.sortable a {
 	cursor: pointer;
 	background: transparent no-repeat center right url("../images/sortable.gif");
 	padding-right: 21px;
+	white-space: nowrap;
+	
 }
 
 .sorted-ascending,.sorted-descending {
@@ -472,8 +473,7 @@ table.sortable thead th, th.sortable a:link, th.sortable a {
 	background-image: url("../images/desc.gif") !important;
 }
 
-table.error,table.warning,table.message,table.buildHistoryReportForm,table.manualBuild
-	{
+table.error,table.warning,table.message,table.buildHistoryReportForm,table.manualBuild {
 	margin-left: auto;
 	margin-right: auto;
 }
@@ -501,10 +501,6 @@ td.component-version {
 
 table.build-messages tbody td {
 	font-size: smaller;
-}
-
-table.builds {
-	width: 100%;
 }
 
 table .error {
