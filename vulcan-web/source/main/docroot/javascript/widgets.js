@@ -475,6 +475,15 @@ function registerHandlers() {
 	
 	$("input[type='checkbox']").click(checkRows);
 	$("input[type='radio']").click(checkRows);
+
+	$("#txtNewLabel").focus(function() {
+		$("#chkNewLabel").attr("checked", "checked");
+	});
+	$("#txtNewLabel").blur(function() {
+		if ($(this).val() == "") {
+			$("#chkNewLabel").removeAttr("checked");
+		}
+	});
 	
 	var pendingChanges = document.getElementById('pendingChanges');
 	if (pendingChanges != null) {

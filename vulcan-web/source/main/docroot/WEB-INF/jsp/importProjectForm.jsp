@@ -123,16 +123,19 @@
 					<c:forEach items="${stateManager.projectLabels}" var="label">
 						<li>
 							<html:multibox property="labels" value="${label}"
-								styleId="sched${v:mangle(label)}"/>
+								styleId="lbl${v:mangle(label)}"/>
 							<jsp:element name="label">
-								<jsp:attribute name="for">sched${v:mangle(label)}</jsp:attribute>
+								<jsp:attribute name="for">lbl${v:mangle(label)}</jsp:attribute>
 								<jsp:body><c:out value="${label}" escapeXml="true"/></jsp:body>
 							</jsp:element>
 						</li>
 					</c:forEach>
 					<li>
-						<spring:message code="label.new"/>
-						<html:text property="newLabel" styleClass="new-label"/>
+						<input type="checkbox" name="newLabel" id="chkNewLabel"/>
+						<label for="txtNewLabel">
+							<spring:message code="label.new"/>:
+						</label>
+						<html:text property="newLabel" styleClass="new-label" styleId="txtNewLabel"/>
 					</li>
 					</ul>
 				</div>
