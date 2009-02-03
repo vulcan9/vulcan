@@ -109,7 +109,7 @@
         <SUITE_NAME> Suite_3 </SUITE_NAME> 
         <CUNIT_RUN_TEST_RECORD> 
           <CUNIT_RUN_TEST_FAILURE> 
-            <TEST_NAME> testShutdown() </TEST_NAME> 
+            <TEST_NAME> testShutdown </TEST_NAME> 
             <FILE_NAME> test/suite3.c </FILE_NAME> 
             <LINE_NUMBER> 11 </LINE_NUMBER> 
             <CONDITION> CU_FAIL("Not implemented.") </CONDITION> 
