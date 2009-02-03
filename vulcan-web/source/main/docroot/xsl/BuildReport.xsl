@@ -122,7 +122,7 @@
 					<xsl:apply-templates select="/project/status"/>
 				</h3>
 	
-				<h4 class="build-stats">
+				<p class="build-stats">
 					<xsl:value-of select="$buildNumberHeader"/>
 					<xsl:text> </xsl:text>
 					<xsl:value-of select="/project/build-number"/>
@@ -137,7 +137,13 @@
 						<xsl:value-of select="/project/repository-tag-name"/>
 						<xsl:text>)</xsl:text>
 					</xsl:if>
-				</h4>
+				</p>
+				<xsl:if test="/project/timestamp/@text">
+					<p class="build-stats">
+						<xsl:text>Finished on </xsl:text>
+						<xsl:value-of select="/project/timestamp/@text"/>
+					</p>
+				</xsl:if>
 				
 				<ul class="tabs" id="build-report-tabs">
 					<li>
@@ -145,9 +151,6 @@
 							<xsl:attribute name="class">active</xsl:attribute>
 						</xsl:if>
 						<a id="summary-tab" href="#summary-anchor"><xsl:value-of select="$title"/></a>
-					</li>
-					<li>
-						<a id="dependencies-tab" href="#dependencies-anchor">Dependencies</a>
 					</li>
 					<xsl:if test="$num-changes &gt; 0">
 						<li>
@@ -202,10 +205,6 @@
 				<xsl:call-template name="bubble">
 					<xsl:with-param name="target" select="'summary'"/>
 					<xsl:with-param name="styleClass" select="'build-summary'"/>
-				</xsl:call-template>
-				
-				<xsl:call-template name="bubble">
-					<xsl:with-param name="target" select="'revisions'"/>
 				</xsl:call-template>
 				
 				<xsl:if test="/project/change-sets">
@@ -303,9 +302,6 @@
 			<xsl:when test="$target='summary'">
 				<xsl:call-template name="summary"/>
 			</xsl:when>
-			<xsl:when test="$target='revisions'">
-				<xsl:call-template name="revisions"/>
-			</xsl:when>
 			<xsl:when test="$target='changes'">
 				<xsl:apply-templates select="/project/change-sets"/>
 			</xsl:when>
@@ -331,7 +327,7 @@
 		<div xmlns="http://www.w3.org/1999/xhtml" id="summary-panel" class="tab-panel">
 			<a name="summary-anchor"/>
 			<xsl:if test="/project/message != ''">
-				<h5 class="build-outcome-message">
+				<h4 class="build-outcome-message">
 					<xsl:choose>
 						<xsl:when test="substring-before(/project/message, '&#10;')!=''">
 							<xsl:value-of select="substring-before(/project/message, '&#10;')"/>
@@ -341,7 +337,7 @@
 							<xsl:value-of select="/project/message"/>
 						</xsl:otherwise>
 					</xsl:choose>
-				</h5>
+				</h4>
 			</xsl:if>
 			
 			<div class="build-stats">
@@ -376,6 +372,35 @@
 						</dd>
 					</xsl:if>
 				</dl>
+				
+				<table id="revisions">
+					<caption><xsl:value-of select="$revisionCaption"/></caption>
+					<thead>
+						<tr>
+							<th><xsl:value-of select="$projectHeader"/></th>
+							<th><xsl:value-of select="$buildNumberHeader"/></th>
+							<th><xsl:value-of select="$revisionHeader"/></th>
+							<th><xsl:value-of select="$repositoryTagNameHeader"/></th>
+							<th><xsl:value-of select="$timestampHeader"/></th>
+							<th><xsl:value-of select="$statusHeader"/></th>
+						</tr>
+					</thead>
+					<tbody>
+						<xsl:apply-templates select="/project/dependencies"/>
+						<tr>
+							<td><xsl:apply-templates select="/project/name"/></td>
+							<td><xsl:apply-templates select="/project/build-number"/></td>
+							<td><xsl:apply-templates select="/project/revision"/></td>
+							<td><xsl:apply-templates select="/project/repository-tag-name"/></td>
+							<td><xsl:apply-templates select="/project/timestamp"/></td>
+							<xsl:element name="td">
+								<xsl:attribute name="class"><xsl:value-of select="/project/status"/> status</xsl:attribute>
+								<xsl:value-of select="/project/status"/>
+							</xsl:element>
+						</tr>
+					</tbody>
+				</table>
+				
 				<xsl:if test="/project/build-log-available">
 					<a href="log" class="external">
 						<xsl:value-of select="$buildLogLabel"/>
@@ -391,39 +416,6 @@
 			
 			<!-- IE7 can't figure out <div/>.  Render <div> </div> instead. -->
 			<div style="clear: left;"><xsl:text> </xsl:text></div>
-		</div>
-	</xsl:template>
-	
-	<xsl:template name="revisions">
-		<div xmlns="http://www.w3.org/1999/xhtml" id="dependencies-panel" class="tab-panel">
-			<a name="dependencies-anchor"/>
-			<table>
-				<caption class="panel-caption"><xsl:value-of select="$revisionCaption"/></caption>
-				<thead>
-					<tr>
-						<th><xsl:value-of select="$projectHeader"/></th>
-						<th><xsl:value-of select="$buildNumberHeader"/></th>
-						<th><xsl:value-of select="$revisionHeader"/></th>
-						<th><xsl:value-of select="$repositoryTagNameHeader"/></th>
-						<th><xsl:value-of select="$timestampHeader"/></th>
-						<th><xsl:value-of select="$statusHeader"/></th>
-					</tr>
-				</thead>
-				<tbody>
-					<xsl:apply-templates select="/project/dependencies"/>
-					<tr>
-						<td><xsl:apply-templates select="/project/name"/></td>
-						<td><xsl:apply-templates select="/project/build-number"/></td>
-						<td><xsl:apply-templates select="/project/revision"/></td>
-						<td><xsl:apply-templates select="/project/repository-tag-name"/></td>
-						<td><xsl:apply-templates select="/project/timestamp"/></td>
-						<xsl:element name="td">
-							<xsl:attribute name="class"><xsl:value-of select="/project/status"/> status</xsl:attribute>
-							<xsl:value-of select="/project/status"/>
-						</xsl:element>
-					</tr>
-				</tbody>
-			</table>
 		</div>
 	</xsl:template>
 	
@@ -731,7 +723,7 @@
 						<tr>
 							<td>
 								<span class="test-name"><xsl:value-of select="@name"/></span>
-								<h6 class="test-namespace"><xsl:value-of select="@namespace"/></h6>
+								<h5 class="test-namespace"><xsl:value-of select="@namespace"/></h5>
 							</td>
 							<td class="build-number">
 								<xsl:choose>
