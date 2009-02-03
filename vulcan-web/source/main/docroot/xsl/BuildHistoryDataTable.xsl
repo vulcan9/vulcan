@@ -54,14 +54,11 @@
 				<title>Build History Report</title>
 			</head>
 			<body>
-				<div class="buildHistoryReport">
+				<xsl:call-template name="buildHistoryReportSummary"/>
+			
+				<xsl:call-template name="columnVisibilitySelectors"/>
 				
-					<xsl:call-template name="buildHistoryReportSummary"/>
-				
-					<xsl:call-template name="columnVisibilitySelectors"/>
-					
-					<xsl:call-template name="buildHistoryTable"/>
-				</div>
+				<xsl:call-template name="buildHistoryTable"/>
 			</body>
 		</html>
 	</xsl:template>
@@ -162,7 +159,7 @@
 	</xsl:template>
 	
 	<xsl:template name="buildHistoryTable">
-		<table xmlns="http://www.w3.org/1999/xhtml" class="builds">
+		<table xmlns="http://www.w3.org/1999/xhtml" class="builds sortable">
 			<caption>Outcomes</caption>
 			<thead>
 				<tr id="build-data-headers">
@@ -170,7 +167,7 @@
 					<th id="col_build_number"><xsl:value-of select="$buildNumberHeader"/></th>
 					<th id="col_revision"><xsl:value-of select="$revisionHeader"/></th>
 					<th id="col_tag"><xsl:value-of select="$repositoryTagNameHeader"/></th>
-					<th id="col_tstamp" class="timestamp"><xsl:value-of select="$timestampHeader"/></th>
+					<th id="col_tstamp" class="timestamp sorted-ascending"><xsl:value-of select="$timestampHeader"/></th>
 					<th id="col_elapsed_time"><xsl:value-of select="'Elapsed Time'"/></th>
 					<th id="col_status"><xsl:value-of select="$statusHeader"/></th>
 					<th id="col_message"><xsl:value-of select="$messageHeader"/></th>
