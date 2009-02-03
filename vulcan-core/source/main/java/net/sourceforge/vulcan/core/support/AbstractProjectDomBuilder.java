@@ -451,8 +451,11 @@ public abstract class AbstractProjectDomBuilder implements ProjectDomBuilder {
 		
 		final Date completionDate = status.getCompletionDate();
 		if (completionDate != null) {
+			final DateFormat textualDateFormat = DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.SHORT, locale);
+			
 			final Element timestampNode = addChildNodeWithText(root, "timestamp", format.format(completionDate));
 			timestampNode.setAttribute("millis", Long.toString(completionDate.getTime()));
+			timestampNode.setAttribute("text", textualDateFormat.format(completionDate));
 		}
 		
 		final String messageKey = status.getMessageKey();
