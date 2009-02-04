@@ -545,7 +545,7 @@ function registerHandlers() {
 	});
 	
 	$(".report-link").click(function() {
-		setTimeout(function() { showBuildReportPanel("build-directory"); }, 500);
+		setTimeout(function() { showBuildReportPanel("browse"); }, 500);
 	});
 	
 	window.iframe = document.getElementById("iframe");
