@@ -24,6 +24,7 @@ import java.util.regex.Pattern;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -58,6 +59,8 @@ public class ContentTypeFilter extends OncePerRequestFilter {
 	public static final String PARAM_SUPPRESS_CONTENT_TYPES = "suppressContentTypes";
 	public static final String PARAM_DETECT_BROWSER = "detectBrowser";
 	
+	static final String ATTR_DISABLE_SUPPRESSION = ContentTypeFilter.class.getName() + ":DisableSuppression";
+	
 	private static final Pattern userAgentRegex = Pattern.compile(".*MSIE ([\\d]*).*");
 	
 	private String defaultContentType;
@@ -84,6 +87,15 @@ public class ContentTypeFilter extends OncePerRequestFilter {
 		this.detectBrowser = detectBrowser;
 	}
 
+	public static void disableContentTypeSupression(ServletRequest request) {
+		request.setAttribute(ATTR_DISABLE_SUPPRESSION, Boolean.TRUE);
+	}
+
+	public static boolean isContentTypeSupressionEnabled(ServletRequest request) {
+		Boolean value = (Boolean) request.getAttribute(ATTR_DISABLE_SUPPRESSION);
+		return value == null || Boolean.FALSE.equals(value);
+	}
+
 	@Override
 	protected void initFilterBean() throws ServletException {
 		if (detectBrowser && legacyContentType == null) {
@@ -106,7 +118,7 @@ public class ContentTypeFilter extends OncePerRequestFilter {
 		final String contentType = detectContentType(request);
 		
 		final HttpServletResponseContentTypeWrapper responseWrapper =
-			new HttpServletResponseContentTypeWrapper(response, suppressContentTypes, contentType);
+			new HttpServletResponseContentTypeWrapper(request, response, suppressContentTypes, contentType);
 		
 		response.addHeader("Cache-Control", "max-age=0");
 		

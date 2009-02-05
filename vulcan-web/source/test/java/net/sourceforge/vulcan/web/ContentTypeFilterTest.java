@@ -50,7 +50,7 @@ public class ContentTypeFilterTest extends ServletFilterTestCase {
 			@Override
 			public void doFilter(ServletRequest request, ServletResponse response) throws ServletException, IOException {
 				if (disableInRepsonse) {
-					((HttpServletResponseContentTypeWrapper)response).disableContentTypeSupression();
+					ContentTypeFilter.disableContentTypeSupression(request);
 				}
 				if (chainContentType != null) {
 					response.setContentType(chainContentType);
@@ -61,8 +61,6 @@ public class ContentTypeFilterTest extends ServletFilterTestCase {
 	}
 
 	boolean disableInRepsonse;
-	
-	
 	
 	String userAgent = "Mozilla 72.2";
 	String chainContentType;

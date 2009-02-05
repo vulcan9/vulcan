@@ -18,6 +18,7 @@
  */
 package net.sourceforge.vulcan.web;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpServletResponseWrapper;
 
@@ -25,12 +26,13 @@ import net.sourceforge.vulcan.metadata.SvnRevision;
 
 @SvnRevision(id="$Id$", url="$HeadURL$")
 public final  class HttpServletResponseContentTypeWrapper extends HttpServletResponseWrapper {
-	final String[] suppressContentTypes;
-	final String overrideContentType;
-	boolean disableConetntTypeSupression;
+	private final String[] suppressContentTypes;
+	private final String overrideContentType;
+	private final HttpServletRequest request;
 	
-	HttpServletResponseContentTypeWrapper(HttpServletResponse response, String[] suppressContentTypes, String overrideContentType) {
+	HttpServletResponseContentTypeWrapper(HttpServletRequest request, HttpServletResponse response, String[] suppressContentTypes, String overrideContentType) {
 		super(response);
+		this.request = request;
 		this.suppressContentTypes = suppressContentTypes;
 		this.overrideContentType = overrideContentType;
 	}
@@ -38,7 +40,7 @@ public final  class HttpServletResponseContentTypeWrapper extends HttpServletRes
 	public void setContentType(String requestType) {
 		String type = requestType;
 		
-		if (!disableConetntTypeSupression) {
+		if (ContentTypeFilter.isContentTypeSupressionEnabled(request)) {
 			for (String s : suppressContentTypes) {
 				if (type.startsWith(s)) {
 					type = this.overrideContentType;
@@ -48,8 +50,5 @@ public final  class HttpServletResponseContentTypeWrapper extends HttpServletRes
 		}
 		
 		super.setContentType(type);
-	}
-	public void disableContentTypeSupression() {
-		disableConetntTypeSupression = true;
 	}
 }

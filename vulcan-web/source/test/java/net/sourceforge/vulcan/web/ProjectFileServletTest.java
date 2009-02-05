@@ -40,9 +40,6 @@ public class ProjectFileServletTest extends ServletTestCase {
 
 	final Date modDate = new Date(1132616904000L);
 	
-	final HttpServletResponseContentTypeWrapper responseWrapper =
-		new HttpServletResponseContentTypeWrapper(response, new String[0], "something");
-	
 	File fakeFile;
 	
 	ProjectFileServlet servlet = new ProjectFileServlet() {
@@ -457,13 +454,13 @@ public class ProjectFileServletTest extends ServletTestCase {
 		
 		replay();
 		
-		servlet.doGet(request, responseWrapper);
+		servlet.doGet(request, response);
 		
 		verify();
 
 		assertEquals("sometext", os.toString().trim());
 		assertEquals("application/x-some-custom-mime-type", response.getContentType());
-		assertTrue(responseWrapper.disableConetntTypeSupression);
+		assertFalse("contentTypeSupressionEnabled", ContentTypeFilter.isContentTypeSupressionEnabled(request));
 	}
 	public void testSendsRedirectOnMissingWhenFallbackSet() throws Exception {
 		request.setRequestURI("/myApp/myProject");
@@ -531,7 +528,7 @@ public class ProjectFileServletTest extends ServletTestCase {
 		
 		replay();
 		
-		servlet.doGet(request, responseWrapper);
+		servlet.doGet(request, response);
 		
 		verify();
 		
@@ -544,6 +541,6 @@ public class ProjectFileServletTest extends ServletTestCase {
 		assertEquals("file", files[1].getName());
 		
 		assertEquals("/WEB-INF/jsp/fileList.jsp", requestedPath);
-		assertFalse(responseWrapper.disableConetntTypeSupression);
+		assertTrue("contentTypeSupressionEnabled", ContentTypeFilter.isContentTypeSupressionEnabled(request));
 	}
 }
