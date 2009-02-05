@@ -212,7 +212,7 @@
 			<td><xsl:apply-templates select="revision"/></td>
 			<td><xsl:apply-templates select="repository-tag-name"/></td>
 			<td class="timestamp"><xsl:apply-templates select="timestamp"/></td>
-			<td><xsl:apply-templates select="elapsed-time"/></td>
+			<td class="numeric"><xsl:apply-templates select="elapsed-time"/></td>
 			<xsl:element name="td">
 				<xsl:attribute name="class"><xsl:value-of select="status"/> status</xsl:attribute>
 				<xsl:value-of select="status"/>
