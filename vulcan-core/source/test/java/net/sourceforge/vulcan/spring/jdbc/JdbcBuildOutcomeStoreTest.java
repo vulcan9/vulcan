@@ -265,6 +265,25 @@ public class JdbcBuildOutcomeStoreTest extends TestCase {
 		assertEquals("Susan", users.get(0));
 	}
 	
+	public void testStoresNewBuildUserAfterInitializedUnlessAlreadyDefined() throws Exception {
+		outcome.setRequestedBy("Susan");
+		outcome.setScheduledBuild(false);
+		
+		storeOutcome();
+		
+		store.getBuildUsers();
+		
+		outcome.setId(UUID.randomUUID());
+		outcome.setBuildNumber(42);
+		outcome.setRequestedBy("Susan");
+		
+		storeOutcome();
+
+		List<String> users = store.getBuildUsers();
+		assertEquals(1, users.size());
+		assertEquals("Susan", users.get(0));
+	}
+	
 	public void testFindMostRecentBuildNumberByWorkingCopy() throws Exception {
 		outcome.setWorkDir("a work dir");
 		
