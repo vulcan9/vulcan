@@ -173,10 +173,10 @@ public class JdbcBuildOutcomeStore implements BuildOutcomeStore, ProjectNameChan
 				return uuid;
 			}
 			
-			if (outcome.isScheduledBuild()) {
+			if (outcome.isScheduledBuild() && !buildSchedulers.contains(requestedBy)) {
 				buildSchedulers.add(requestedBy);
 				Collections.sort(buildSchedulers);
-			} else {
+			} else if (!outcome.isScheduledBuild() && !buildUsers.contains(requestedBy)){
 				buildUsers.add(requestedBy);
 				Collections.sort(buildUsers);
 			}
