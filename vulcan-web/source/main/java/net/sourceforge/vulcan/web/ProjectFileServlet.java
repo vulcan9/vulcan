@@ -163,7 +163,7 @@ public class ProjectFileServlet extends HttpServlet {
 			return;
 		}
 		
-		setContentType(response, pathInfo);
+		setContentType(request, response, pathInfo);
 		
 		final Date lastModifiedDate = new Date(file.lastModified());
 		
@@ -320,10 +320,8 @@ public class ProjectFileServlet extends HttpServlet {
 		return buf.toString();
 	}
 
-	private void setContentType(HttpServletResponse response, final String pathInfo) {
-		if (response instanceof HttpServletResponseContentTypeWrapper) {
-			((HttpServletResponseContentTypeWrapper)response).disableContentTypeSupression();
-		}
+	private void setContentType(HttpServletRequest request, HttpServletResponse response, final String pathInfo) {
+		ContentTypeFilter.disableContentTypeSupression(request);
 		
 		final String contentType = getServletContext().getMimeType(pathInfo);
 		
