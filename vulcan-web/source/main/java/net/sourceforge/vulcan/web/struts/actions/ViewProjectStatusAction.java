@@ -167,7 +167,7 @@ public final class ViewProjectStatusAction extends ProjectReportBaseAction {
 				if (inRange) {
 					e.setText(buildManager.getStatus(ids.get(index+1)).getBuildNumber().toString());
 				} else {
-					e.setText(Integer.toString(index + 1));
+					e.setText(Integer.toString(status.getBuildNumber()+1));
 				}
 				
 				doc.getRootElement().addContent(e);

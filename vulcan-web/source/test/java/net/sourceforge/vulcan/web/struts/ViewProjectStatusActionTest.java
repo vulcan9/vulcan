@@ -383,7 +383,7 @@ public class ViewProjectStatusActionTest extends MockApplicationContextStrutsTes
 		
 		assertEquals("application/xml", response.getContentType());
 		
-		assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?><project>  <previous-build-number>11</previous-build-number>  <next-build-number>3</next-build-number></project>",
+		assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?><project>  <previous-build-number>11</previous-build-number>  <next-build-number>13</next-build-number></project>",
 				response.getWriterBuffer().toString().trim()
 					.replaceAll("\n", "").replaceAll("\r", ""));
 	}
