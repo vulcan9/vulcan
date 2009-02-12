@@ -27,7 +27,7 @@
 					<xsl:for-each select="project/metrics/metric[@label=$metricLabel1]/@value">
 						<xsl:sort data-type="number" select="." order="ascending"/>
 						<xsl:if test="position()=1">
-							<xsl:value-of select="ceiling(. * 0.95)"/>
+							<xsl:value-of select="floor(. * 0.95)"/>
 						</xsl:if>
 					</xsl:for-each>
 				</xsl:when>
@@ -64,7 +64,7 @@
 					<xsl:for-each select="project/metrics/metric[@label=$metricLabel2]/@value">
 						<xsl:sort data-type="number" select="." order="ascending"/>
 						<xsl:if test="position()=1">
-							<xsl:value-of select="ceiling(. * 0.95)"/>
+							<xsl:value-of select="floor(. * 0.95)"/>
 						</xsl:if>
 					</xsl:for-each>
 				</xsl:otherwise>
@@ -270,6 +270,9 @@
 						is hex ascii for %. -->
 					<xsl:value-of select="format-number(metrics/metric[@label=$metricLabel]/@value, '#.##%')"/>
 					<xsl:text>25</xsl:text>
+				</xsl:when>
+				<xsl:when test="metrics/metric[@label=$metricLabel]/@type='number'">
+					<xsl:value-of select="format-number(metrics/metric[@label=$metricLabel]/@value, '#.####')"/>
 				</xsl:when>
 				<xsl:otherwise>			
 					<xsl:value-of select="metrics/metric[@label=$metricLabel]/@value"/>
