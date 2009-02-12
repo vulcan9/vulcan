@@ -42,6 +42,7 @@
 		}
 		div.plotOptions select {
 			margin-right: 1em;
+			max-width: 30%;
 		}
 		caption {
 			background-color: white !important;
