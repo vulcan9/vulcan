@@ -106,15 +106,17 @@
 					</input>
 				</form>
 				
-				<div class="build-nav">
-					<xsl:apply-templates select="/project/previous-build-number"/>
-					<xsl:text> </xsl:text>
-					<xsl:value-of select="$buildNumberHeader"/>
-					<xsl:text> </xsl:text>
-					<xsl:value-of select="/project/build-number"/>
-					<xsl:text> </xsl:text>
-					<xsl:apply-templates select="/project/next-build-number"/>
-				</div>
+				<xsl:if test="/project/previous-build-number or /project/next-build-number">
+					<div class="build-nav">
+						<xsl:apply-templates select="/project/previous-build-number"/>
+						<xsl:text> </xsl:text>
+						<xsl:value-of select="$buildNumberHeader"/>
+						<xsl:text> </xsl:text>
+						<xsl:value-of select="/project/build-number"/>
+						<xsl:text> </xsl:text>
+						<xsl:apply-templates select="/project/next-build-number"/>
+					</div>
+				</xsl:if>
 				
 				<h3>
 					<xsl:apply-templates select="/project/name"/>
@@ -242,6 +244,7 @@
 				</xsl:if>
 				
 				<xsl:if test="$showBuildDirectory">
+					<a name="browse-panel"/>
 					<div id="browse-panel" class="tab-panel">
 						<xsl:apply-templates select="/project/work-directory"/>
 						<xsl:choose>
@@ -324,6 +327,7 @@
 
 	<xsl:template name="summary">
 		<div xmlns="http://www.w3.org/1999/xhtml" id="summary-panel" class="tab-panel">
+			<a name="summary-panel"/>
 			<xsl:if test="/project/message != ''">
 				<h4 class="build-outcome-message">
 					<xsl:choose>
@@ -480,7 +484,9 @@
 	
 	<xsl:template match="change-sets">
 		<div xmlns="http://www.w3.org/1999/xhtml" id="changes-panel" class="tab-panel">
+			<a name="changes-panel"/>
 			<table class="sortable">
+				<caption class="panel-caption">Commit Log (<xsl:value-of select="$num-changes"/>)</caption>
 				<thead>
 					<tr>
 						<th><xsl:value-of select="$revisionHeader"/></th>
@@ -599,6 +605,7 @@
 	
 	<xsl:template match="/project/errors">
 		<div xmlns="http://www.w3.org/1999/xhtml" id="errors-panel" class="tab-panel">
+			<a name="errors-panel"/>
 			<xsl:call-template name="build-messages">
 				<xsl:with-param name="caption" select="'Build Errors'"/>
 			</xsl:call-template>
@@ -607,6 +614,7 @@
 	
 	<xsl:template match="/project/warnings">
 		<div xmlns="http://www.w3.org/1999/xhtml" id="warnings-panel" class="tab-panel">
+			<a name="warnings-panel"/>
 			<xsl:call-template name="build-messages">
 				<xsl:with-param name="caption" select="'Build Warnings'"/>
 			</xsl:call-template>
@@ -676,7 +684,9 @@
 	
 	<xsl:template match="/project/metrics">
 		<div xmlns="http://www.w3.org/1999/xhtml" class="tab-panel" id="metrics-panel">
+			<a name="metrics-panel"/>
 			<table>
+				<caption class="panel-caption"><xsl:value-of select="$metricsLabel"/></caption>
 				<tbody>
 					<xsl:for-each select="./metric">
 						<tr>
@@ -704,7 +714,9 @@
 	
 	<xsl:template match="/project/test-failures">
 		<div class="tab-panel" id="tests-panel" xmlns="http://www.w3.org/1999/xhtml">
+			<a name="tests-panel"/>
 			<table>
+				<caption class="panel-caption"><xsl:value-of select="$testFailureLabel"/></caption>
 				<thead>
 					<tr>
 						<th class="long"><xsl:value-of select="$testNameLabel"/></th>
