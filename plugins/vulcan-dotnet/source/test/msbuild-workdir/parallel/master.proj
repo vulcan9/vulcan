@@ -1,0 +1,5 @@
+<Project DefaultTargets="Build" ToolsVersion="3.5" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+	<Target Name="Build">
+		<MSBuild Projects="a\subproject.csproj;b\subproject.csproj" BuildInParallel="True"/>
+	</Target>
+</Project>

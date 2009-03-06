@@ -1,6 +1,6 @@
 /*
  * Vulcan Build Manager
- * Copyright (C) 2005-2006 Chris Eldredge
+ * Copyright (C) 2005-2009 Chris Eldredge
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -48,6 +48,7 @@ public class MSBuildTool extends DotNetBuildToolBase  {
 	static final Log LOG = LogFactory.getLog(MSBuildTool.class);
 
 	private static final String MSBUILD_LOGGER_CLASS_NAME = "SourceForge.Vulcan.DotNet.MsBuildListener";
+	private static final String MSBUILD_3_5_LOGGER_CLASS_NAME = "SourceForge.Vulcan.DotNet.MsBuildNodeLogger";
 	
 	private Thread logThread;
 	private String projectName;
@@ -170,11 +171,20 @@ public class MSBuildTool extends DotNetBuildToolBase  {
 		UdpEventSource eventSource = (UdpEventSource) this.eventSource;
 		
 		final StringBuilder sb = new StringBuilder("/logger:");
-		sb.append(MSBUILD_LOGGER_CLASS_NAME);
+		final String assemblyFile;
+		
+		if (StringUtils.isNotBlank(this.buildEnv.getMaxJobs()) && Integer.valueOf(this.buildEnv.getMaxJobs()) > 1) {
+			sb.append(MSBUILD_3_5_LOGGER_CLASS_NAME);
+			assemblyFile = "MsBuild35Listener.dll";
+		} else {
+			sb.append(MSBUILD_LOGGER_CLASS_NAME);
+			assemblyFile = "MsBuildListener.dll";
+		}
+		
 		sb.append(",");
 		sb.append(pluginDir.getAbsolutePath());
 		sb.append(File.separatorChar);
-		sb.append("MsBuildListener.dll");
+		sb.append(assemblyFile);
 		sb.append(";");
 		sb.append("hostname=");
 		sb.append(eventSource.getHostname());

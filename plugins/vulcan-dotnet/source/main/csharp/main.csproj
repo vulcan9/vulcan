@@ -30,7 +30,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Microsoft.Build.Framework" />
+    <Reference Include="Microsoft.Build.Framework, Version=3.5.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
     <Reference Include="NAnt.Core, Version=0.85.2478.0, Culture=neutral">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\..\..\..\..\Program Files (x86)\nant-0.85\bin\NAnt.Core.dll</HintPath>
@@ -45,6 +45,7 @@
     <Compile Include="ListenerBase\PacketBuilder.cs" />
     <Compile Include="ListenerBase\UdpBuildReporter.cs" />
     <Compile Include="MsBuildListener\MsBuildListener.cs" />
+    <Compile Include="MsBuildListener\MsBuildNodeLogger.cs" />
     <Compile Include="NantBuildListener\NAntListener.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -1,6 +1,6 @@
 /*
  * Vulcan Build Manager
- * Copyright (C) 2005-2006 Chris Eldredge
+ * Copyright (C) 2005-2009 Chris Eldredge
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,7 +28,7 @@ namespace SourceForge.Vulcan.DotNet {
 		private LoggerVerbosity verbosity;
 		private IBuildMessageReporter reporter;
 
-		private readonly IDictionary<int, Stack<FileInfo>> projectFiles = new Dictionary<int, Stack<FileInfo>>();
+		private readonly Stack<FileInfo> projectFiles = new Stack<FileInfo>();
 
 		public string Parameters
 		{
@@ -111,85 +111,61 @@ namespace SourceForge.Vulcan.DotNet {
 		{
 			reporter.SendMessage("BUILD_STARTED", null, null, null, e.Message);
 		}
-
 		public void BuildFinished(object sender, BuildFinishedEventArgs e)
 		{
 			reporter.SendMessage("BUILD_FINISHED", null, null, null, e.Message);
 		}
-
-		public void TargetStarted(object sender, TargetStartedEventArgs e)
+		public virtual void TargetStarted(object sender, TargetStartedEventArgs e)
 		{
 			reporter.SendMessage("TARGET_STARTED", e.ProjectFile, e.TargetName, null, e.Message);
-			PushProjectFile(e.ThreadId, e.ProjectFile);
+			projectFiles.Push(new FileInfo(e.ProjectFile));
 		}
-
-		public void TargetFinished(object sender, TargetFinishedEventArgs e)
+		public virtual void TargetFinished(object sender, TargetFinishedEventArgs e)
 		{
 			reporter.SendMessage("TARGET_FINISHED", e.ProjectFile, e.TargetName, null, e.Message);
-			PopProjectFile(e.ThreadId);
+			projectFiles.Pop();
 		}
-
-		public void TaskStarted(object sender, TaskStartedEventArgs e)
+		public virtual void TaskStarted(object sender, TaskStartedEventArgs e)
 		{
 			reporter.SendMessage("TASK_STARTED", e.ProjectFile, null, e.TaskName, e.Message);
-			PushProjectFile(e.ThreadId, e.ProjectFile);
+			projectFiles.Push(new FileInfo(e.ProjectFile));
 		}
-
-		public void TaskFinished(object sender, TaskFinishedEventArgs e)
+		public virtual void TaskFinished(object sender, TaskFinishedEventArgs e)
 		{
 			reporter.SendMessage("TASK_FINISHED", e.ProjectFile, null, e.TaskName, e.Message);
-			PopProjectFile(e.ThreadId);
+			projectFiles.Pop();
 		}
-
 		public void BuildErrorRaised(object sender, BuildErrorEventArgs e)
 		{
-			SendMessageWithPriority(MessagePriority.ERROR, e.Message, e.File, e.LineNumber, e.Code, e.ThreadId);
+			SendMessageWithPriority(e, MessagePriority.ERROR, e.File, e.LineNumber, e.Code);
 		}
 
 		public void BuildWarningRaised(object sender, BuildWarningEventArgs e)
 		{
-			SendMessageWithPriority(MessagePriority.WARNING, e.Message, e.File, e.LineNumber, e.Code, e.ThreadId);
+			SendMessageWithPriority(e, MessagePriority.WARNING, e.File, e.LineNumber, e.Code);
 		}
 
-		private void SendMessageWithPriority(MessagePriority prio, string message, string file, int lineNumber, string code, int threadId)
+		protected virtual FileInfo GetCurrentProjectFile(BuildEventArgs e)
 		{
-			Stack<FileInfo> stack;
-			lock(projectFiles)
+			if (projectFiles.Count == 0)
 			{
-				if (!string.IsNullOrEmpty(file) && !Path.IsPathRooted(file) && projectFiles.TryGetValue(threadId, out stack) && stack.Count > 0)
+				return null;
+			}
+			return projectFiles.Peek();
+		}
+
+		private void SendMessageWithPriority(BuildEventArgs e, MessagePriority prio, string file, int lineNumber, string code)
+		{
+			if (!string.IsNullOrEmpty(file) && !Path.IsPathRooted(file))
+			{
+				FileInfo projectFile = GetCurrentProjectFile(e);
+				if (projectFile != null)
 				{
-					file = Path.Combine(stack.Peek().DirectoryName, file);
+					file = Path.Combine(projectFile.DirectoryName, file);	
 				}
 			}
-			reporter.SendMessage("MESSAGE_LOGGED", prio, message,
+			reporter.SendMessage("MESSAGE_LOGGED", prio, e.Message,
 													 file, lineNumber, code);
-		}
-
-		private void PushProjectFile(int threadId, string projectFile)
-		{
-			Stack<FileInfo> stack;
-			lock(projectFiles)
-			{
-				if (!projectFiles.TryGetValue(threadId, out stack))
-				{
-					stack = new Stack<FileInfo>();
-					projectFiles[threadId] = stack;
-				}
-			}
-
-			stack.Push(new FileInfo(projectFile));
-		}
-
-		private void PopProjectFile(int threadId)
-		{
-			Stack<FileInfo> stack;
-			lock(projectFiles)
-			{
-				if (projectFiles.TryGetValue(threadId, out stack))
-				{
-					stack.Pop();
-				}
-			}
 		}
 	}
 }
