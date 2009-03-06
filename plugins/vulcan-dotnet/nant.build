@@ -58,6 +58,26 @@
 				<include name="${assembly.info.file}"/>
 				<include name="source/main/csharp/ListenerBase/*.cs"/>
 				<include name="source/main/csharp/MsBuildListener/*.cs"/>
+				<exclude name="source/main/csharp/MsBuildListener/MsBuildNodeLogger.cs"/>
+			</sources>
+			<references>
+				<include name="Microsoft.Build.Framework.dll"/>
+			</references>
+		</csc>
+		
+		<csc
+			target="library"
+			debug="${build.debug}"
+			output="${assembly.target.dir}/MsBuild35Listener.dll">
+
+			<nowarn>
+				<warning number="0618"/>
+			</nowarn>
+
+			<sources failonempty="true">
+				<include name="${assembly.info.file}"/>
+				<include name="source/main/csharp/ListenerBase/*.cs"/>
+				<include name="source/main/csharp/MsBuildListener/*.cs"/>
 			</sources>
 			<references>
 				<include name="Microsoft.Build.Framework.dll"/>
