@@ -33,6 +33,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
+import java.util.TimeZone;
 import java.util.UUID;
 
 import javax.xml.transform.ErrorListener;
@@ -72,6 +73,8 @@ import org.jdom.transform.JDOMSource;
 
 @SvnRevision(id="$Id$", url="$HeadURL$")
 public class AbstractProjectDomBuilderTest extends EasyMockTestCase {
+	TimeZone defaultTimeZone;
+	
 	Map<String, String> messages = new HashMap<String, String>();
 	
 	ProjectStatusDto projectStatus = new ProjectStatusDto();
@@ -169,6 +172,15 @@ public class AbstractProjectDomBuilderTest extends EasyMockTestCase {
 		builder.setEventHandler(eh);
 		builder.setProjectManager(pm);
 		builder.setBuildManager(bm);
+		
+		defaultTimeZone = AbstractProjectDomBuilder.TIMEZONE; 
+		AbstractProjectDomBuilder.TIMEZONE = TimeZone.getTimeZone("Greenwhich");
+	}
+	
+	@Override
+	protected void tearDown() throws Exception {
+		AbstractProjectDomBuilder.TIMEZONE = defaultTimeZone;
+		super.tearDown();
 	}
 	
 	public void testNotNull() throws Exception {
@@ -199,7 +211,7 @@ public class AbstractProjectDomBuilderTest extends EasyMockTestCase {
 		
 		assertContainsChildWithText(elem, "name", projectStatus.getName());
 		assertContainsChildWithText(elem, "status", projectStatus.getStatus().name());
-		final Element tstamp = assertContainsChildWithText(elem, "timestamp", "01:56");
+		final Element tstamp = assertContainsChildWithText(elem, "timestamp", "06:56");
 		assertEquals(Long.toString(date.getTime()), tstamp.getAttributeValue("millis"));
 		
 		assertContainsChildWithText(elem, "message", "fake build outcome message");
@@ -318,7 +330,7 @@ public class AbstractProjectDomBuilderTest extends EasyMockTestCase {
 		
 		assertContainsChildWithText(elem, "name", projectStatus.getName());
 
-		final Element tstamp = assertContainsChildWithText(elem, "timestamp", "01:56");
+		final Element tstamp = assertContainsChildWithText(elem, "timestamp", "06:56");
 		assertEquals(Long.toString(date.getTime()), tstamp.getAttributeValue("millis"));
 		assertEquals(DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.SHORT).format(date), tstamp.getAttributeValue("text"));
 		
@@ -464,7 +476,7 @@ public class AbstractProjectDomBuilderTest extends EasyMockTestCase {
 		final Element child = logs.getChild("change-set");
 		assertEquals("fake revision", child.getAttributeValue("revision"));
 		assertEquals("jane", child.getAttributeValue("author"));
-		assertContainsChildWithText(child, "timestamp", "02:12");
+		assertContainsChildWithText(child, "timestamp", "07:12");
 		assertContainsChildWithText(child, "message", "fixed every bug ever in the entire project");
 		
 		final Element modifiedPaths = child.getChild("modified-paths");
@@ -913,8 +925,8 @@ public class AbstractProjectDomBuilderTest extends EasyMockTestCase {
 		assertEquals("build-history", root.getName());
 		
 		assertEquals(1, root.getChildren("project").size());
-		assertEquals("18:05", root.getAttributeValue("from"));
-		assertEquals("01:25", root.getAttributeValue("to"));
+		assertEquals("23:05", root.getAttributeValue("from"));
+		assertEquals("06:25", root.getAttributeValue("to"));
 	}
 	private Element assertContainsChildWithText(final Element parent, String childNodeName, String text) {
 		final Element child = parent.getChild(childNodeName);
