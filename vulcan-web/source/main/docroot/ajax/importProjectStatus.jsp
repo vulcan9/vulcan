@@ -8,6 +8,7 @@
 	xmlns:spring="http://www.springframework.org/tags"
 	xmlns:v="http://vulcan.sourceforge.net/j2ee/jsp/tags">
 
+	<html:xhtml/>
 	<jsp:output omit-xml-declaration="true"/>
 	<jsp:directive.page contentType="application/xml"/>
 
