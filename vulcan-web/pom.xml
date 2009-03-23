@@ -71,6 +71,13 @@
 							</includes>
 						</resource>
 						<resource>
+							<directory>${basedir}/../vulcan-core/source/main/sql</directory>
+							<targetPath>WEB-INF/sql</targetPath>
+							<includes>
+								<include>**/*</include>
+							</includes>
+						</resource>
+						<resource>
 							<directory>${project.build.directory}</directory>
 							<targetPath>WEB-INF</targetPath>
 							<includes>
