@@ -43,7 +43,10 @@
 		<jsp:attribute name="href"><c:url value="/images/favicon.ico"/></jsp:attribute>
 	</jsp:element>
 	<c:url value="/" var="contextRoot"/>
-	<script type="text/javascript">window.contextRoot = '${fn:substringBefore(contextRoot, ';')}';</script>
+	<c:if test="${fn:substringBefore(contextRoot, ';') != ''}">
+		<c:set var="contextRoot" value="${fn:substringBefore(contextRoot, ';')}"/>
+	</c:if>
+	<script type="text/javascript">window.contextRoot = '${contextRoot}';</script>
 	<jsp:element name="script">
 		<jsp:attribute name="type">text/javascript</jsp:attribute>
 		<jsp:attribute name="src"><c:url value="/javascript/jquery-1.2.6.js"/></jsp:attribute>
