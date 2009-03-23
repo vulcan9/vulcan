@@ -324,8 +324,8 @@ function launchWindowHandler(event, href, launchMode, windowName) {
 		name = windowName;
 	}
 
-	var width = screen.width * 4 / 5;
-	var height = screen.height * 4 / 5;
+	var width = parseInt(screen.width * 4 / 5);
+	var height = parseInt(screen.height * 4 / 5);
 	
 	var childWindow = window.open(href, name, "width=" + width + ",height=" + height
 		+ ",resizable=yes,scrollbars=yes,status=yes,location=yes,menubar=yes,titlebar=yes,toolbar=yes");
