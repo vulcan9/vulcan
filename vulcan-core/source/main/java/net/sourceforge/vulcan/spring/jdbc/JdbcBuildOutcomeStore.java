@@ -18,8 +18,6 @@
  */
 package net.sourceforge.vulcan.spring.jdbc;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -41,17 +39,12 @@ import net.sourceforge.vulcan.dto.ProjectStatusDto.UpdateType;
 import net.sourceforge.vulcan.exception.StoreException;
 import net.sourceforge.vulcan.metadata.SvnRevision;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.springframework.core.io.Resource;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 @SvnRevision(id="$Id$", url="$HeadURL$")
 public class JdbcBuildOutcomeStore implements BuildOutcomeStore, ProjectNameChangeListener {
-	private static final Log log = LogFactory.getLog(JdbcBuildOutcomeStore.class);
 	private final Set<String> projectNames = new HashSet<String>();
 	private List<String> buildUsers;
 	private List<String> buildSchedulers;
@@ -59,7 +52,6 @@ public class JdbcBuildOutcomeStore implements BuildOutcomeStore, ProjectNameChan
 	/* Dependencies */
 	private ConfigurationStore configurationStore;
 	private DataSource dataSource;
-	private Resource createScript;
 	private Map<String, String> sqlQueries;
 	
 	/* Helpers */
@@ -92,15 +84,8 @@ public class JdbcBuildOutcomeStore implements BuildOutcomeStore, ProjectNameChan
 		testFailureInserter = new TestFailureInserter(dataSource);
 		changeSetInserter = new ChangeSetInserter(dataSource);
 		
-		try {
-			final ProjectNamesQuery projectNamesQuery = new ProjectNamesQuery(dataSource);
-			projectNames.addAll(projectNamesQuery.execute());
-		} catch (DataAccessException e) {
-			log.info("Failed to query data source for project names: " + e.getMessage() + 
-					"\nAssuming tables have not been created.  Attempting to create tables now.");
-			// assume tables are not present.
-			createTables(new JdbcTemplate(dataSource));
-		}
+		final ProjectNamesQuery projectNamesQuery = new ProjectNamesQuery(dataSource);
+		projectNames.addAll(projectNamesQuery.execute());
 	}
 
 	public Map<String, List<UUID>> getBuildOutcomeIDs() {
@@ -233,14 +218,6 @@ public class JdbcBuildOutcomeStore implements BuildOutcomeStore, ProjectNameChan
 		this.dataSource = dataSource;
 	}
 
-	public Resource getCreateScript() {
-		return createScript;
-	}
-	
-	public void setCreateScript(Resource createScript) {
-		this.createScript = createScript;
-	}
-	
 	public List<String> getBuildSchedulers() {
 		if (buildSchedulers == null) {
 			loadUsersAndBuildSchedulers();
@@ -321,27 +298,5 @@ public class JdbcBuildOutcomeStore implements BuildOutcomeStore, ProjectNameChan
 		
 		buildUsers = query.getUsers();
 		buildSchedulers = query.getSchedulers();
-	}
-	
-
-	private void createTables(final JdbcTemplate jdbcTemplate) {
-		final String script;
-		
-		InputStream inputStream = null;
-		
-		try {
-			try {
-				inputStream = createScript.getInputStream();
-				script = IOUtils.toString(inputStream);
-			} finally {
-				if (inputStream != null) {
-					inputStream.close();
-				}
-			}
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		}
-		
-		jdbcTemplate.execute(script);
 	}
 }

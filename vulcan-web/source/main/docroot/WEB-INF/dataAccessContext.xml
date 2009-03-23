@@ -30,8 +30,7 @@
 	
 	<!-- buildOutcomeStore definition and transaction configuration -->
 	<bean id="buildOutcomeStore" class="net.sourceforge.vulcan.spring.jdbc.JdbcBuildOutcomeStore"
-			init-method="init">
-		<property name="createScript" value="classpath:net/sourceforge/vulcan/resources/create_tables.sql"/>
+			init-method="init" depends-on="schemaMigrator">
 		<property name="dataSource" ref="dataSource"/>
 		<property name="configurationStore" ref="configurationStore"/>
 		<!--  sqlQueries is defined by one of the sql dialect contexts imported above. -->

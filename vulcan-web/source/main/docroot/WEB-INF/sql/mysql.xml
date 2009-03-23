@@ -6,6 +6,13 @@
 	$HeadURL: https://vulcan.googlecode.com/svn/trunk/vulcan-web/source/main/docroot/WEB-INF/applicationContext.xml $
 -->
 <beans>
+	<bean id="schemaMigrator" class="net.sourceforge.vulcan.spring.jdbc.JdbcSchemaMigrator"
+			init-method="updateSchema">
+		<property name="createTablesScript" value="/WEB-INF/sql/mysql/create_tables.sql"/>
+		<property name="migrationScripts" value="/WEB-INF/sql/mysql/S*.sql"/>
+		<property name="dataSource" ref="dataSource"/>
+	</bean>
+	
 	<bean id="sqlQueries" class="org.springframework.beans.factory.config.MapFactoryBean">
 		<property name="sourceMap">
 			<map>

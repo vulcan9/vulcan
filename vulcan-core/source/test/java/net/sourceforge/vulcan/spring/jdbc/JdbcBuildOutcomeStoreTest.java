@@ -43,7 +43,7 @@ import net.sourceforge.vulcan.dto.ProjectStatusDto.Status;
 import net.sourceforge.vulcan.dto.ProjectStatusDto.UpdateType;
 import net.sourceforge.vulcan.exception.StoreException;
 
-import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.SingleConnectionDataSource;
@@ -84,7 +84,6 @@ public class JdbcBuildOutcomeStoreTest extends TestCase {
 		});
 		
 		store.setDataSource(dataSource);
-		store.setCreateScript(new ClassPathResource("net/sourceforge/vulcan/resources/create_tables.sql"));
 
 		final Map<String, String> queries = new HashMap<String, String>();
 		queries.put("select.average.build.time", "select avg(elapsed) from (select top 10 datediff('ms', start_date, completion_date) as elapsed " +
@@ -101,8 +100,16 @@ public class JdbcBuildOutcomeStoreTest extends TestCase {
 		outcome.setMessageKey("r.x.t");
 		outcome.setStartDate(new Date(10004000l));
 		outcome.setCompletionDate(new Date(20004000l));
+		
+		final JdbcSchemaMigrator migrator = new JdbcSchemaMigrator();
+		migrator.setCreateTablesScript(JdbcSchemaMigratorTest.resolveSqlScript("create_tables.sql"));
+		
+		Resource[] scripts = JdbcSchemaMigratorTest.getMigrationScripts();
+		migrator.setMigrationScripts(scripts);
+		migrator.setDataSource(dataSource);
+		migrator.updateSchema();
 	}
-	
+
 	@Override
 	protected void tearDown() throws Exception {
 		new JdbcTemplate(dataSource).execute("shutdown;");
