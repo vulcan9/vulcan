@@ -40,8 +40,8 @@
 			
 			<li>
 				<jsp:element name="a">
-					<jsp:attribute name="href">${name}</jsp:attribute>
-					<jsp:body>${name}</jsp:body>
+					<jsp:attribute name="href"><c:out value="${name}" escapeXml="true"/></jsp:attribute>
+					<jsp:body><c:out value="${name}" escapeXml="true"/></jsp:body>
 				</jsp:element>
 			</li>
 		</c:forEach>
