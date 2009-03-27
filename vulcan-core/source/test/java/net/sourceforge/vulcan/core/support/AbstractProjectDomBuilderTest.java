@@ -546,11 +546,17 @@ public class AbstractProjectDomBuilderTest extends EasyMockTestCase {
 	public void testTestFailures() throws Exception {
 		replay();
 
-		final TestFailureDto f = new TestFailureDto();
-		f.setName("a.b.c.testBroken");
-		f.setBuildNumber(95843);
+		final TestFailureDto f1 = new TestFailureDto();
+		f1.setName("a.b.c.testBroken");
+		f1.setBuildNumber(95843);
+
+		final TestFailureDto f2 = new TestFailureDto();
+		f2.setName("c.testBroken");
+		f2.setBuildNumber(95);
+		f2.setMessage("expected 1 but was not.");
+		f2.setDetails("the stack trace, etc");
 		
-		projectStatus.setTestFailures(Arrays.asList(f));
+		projectStatus.setTestFailures(Arrays.asList(f1, f2));
 		
 		final Document doc = doCall();
 
@@ -561,10 +567,20 @@ public class AbstractProjectDomBuilderTest extends EasyMockTestCase {
 		final Element failures = root.getChild("test-failures");
 		
 		assertNotNull(failures);
-		assertEquals(1, failures.getContentSize());
-		assertEquals("testBroken", failures.getChild("test-failure").getAttributeValue("name"));
-		assertEquals("a.b.c", failures.getChild("test-failure").getAttributeValue("namespace"));
-		assertEquals("95843", failures.getChild("test-failure").getAttributeValue("first-build"));
+		assertEquals(2, failures.getContentSize());
+		Element xf1 = (Element) failures.getChildren("test-failure").get(0);
+		assertEquals("testBroken", xf1.getAttributeValue("name"));
+		assertEquals("a.b.c", xf1.getAttributeValue("namespace"));
+		assertEquals("95843", xf1.getAttributeValue("first-build"));
+		assertEquals("", xf1.getAttributeValue("message"));
+		assertEquals("", xf1.getText());
+		
+		Element xf2 = (Element) failures.getChildren("test-failure").get(1);
+		assertEquals("testBroken", xf2.getAttributeValue("name"));
+		assertEquals("c", xf2.getAttributeValue("namespace"));
+		assertEquals("95", xf2.getAttributeValue("first-build"));
+		assertEquals("expected 1 but was not.", xf2.getAttributeValue("message"));
+		assertEquals("the stack trace, etc", xf2.getText());
 	}
 	public void testInvalidBugtraqRegex() throws Exception {
 		ProjectConfigDto config = new ProjectConfigDto();

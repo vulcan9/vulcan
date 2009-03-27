@@ -32,10 +32,12 @@ class TestFailureInserter extends SqlUpdate {
 	public TestFailureInserter(DataSource dataSource) {
 		setDataSource(dataSource);
 		setSql("insert into test_failures " +
-				"(build_id, name, first_consecutive_build_number) " +
-				"values (?, ?, ?)");
+				"(build_id, name, message, details, first_consecutive_build_number) " +
+				"values (?, ?, ?, ?, ?)");
 		
 		declareParameter(new SqlParameter(Types.NUMERIC));
+		declareParameter(new SqlParameter(Types.VARCHAR));
+		declareParameter(new SqlParameter(Types.VARCHAR));
 		declareParameter(new SqlParameter(Types.VARCHAR));
 		declareParameter(new SqlParameter(Types.NUMERIC));
 		
@@ -45,17 +47,26 @@ class TestFailureInserter extends SqlUpdate {
 	public int insert(int buildId, List<TestFailureDto> failures) {
 		int count = 0;
 		
-		final Object[] params = new Object[3];
+		final Object[] params = new Object[5];
 		
 		params[0] = buildId;
 
 		for (TestFailureDto dto : failures) {
 			params[1] = dto.getName();
-			params[2] = dto.getBuildNumber();
+			params[2] = truncate(dto.getMessage(), JdbcBuildOutcomeStore.MAX_TEST_FAILURE_MESSAGE_LENGTH);
+			params[3] = truncate(dto.getDetails(), JdbcBuildOutcomeStore.MAX_TEST_FAILURE_DETAILS_LENGTH);
+			params[4] = dto.getBuildNumber();
 			
 			count += update(params);
 		}
 		
 		return count;
+	}
+
+	private String truncate(String str, int max) {
+		if (str.length() > max) {
+			return str.substring(0, max);
+		}
+		return str;
 	}
 }

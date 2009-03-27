@@ -244,8 +244,8 @@
 				</xsl:if>
 				
 				<xsl:if test="$showBuildDirectory">
-					<a name="browse-panel"/>
 					<div id="browse-panel" class="tab-panel">
+						<a name="browse-panel"/>
 						<xsl:apply-templates select="/project/work-directory"/>
 						<xsl:choose>
 							<xsl:when test="/project/work-directory[@available='true']">
@@ -714,22 +714,18 @@
 	
 	<xsl:template match="/project/test-failures">
 		<div class="tab-panel" id="tests-panel" xmlns="http://www.w3.org/1999/xhtml">
-			<a name="tests-panel"/>
+			<a name="tests-panel"><xsl:text> </xsl:text></a>
 			<table>
 				<caption class="panel-caption"><xsl:value-of select="$testFailureLabel"/></caption>
 				<thead>
 					<tr>
-						<th class="long"><xsl:value-of select="$testNameLabel"/></th>
 						<th><xsl:value-of select="$testFailureBuildNumberLabel"/></th>
+						<th class="long"><xsl:value-of select="$testNameLabel"/></th>
 					</tr>
 				</thead>
 				<tbody>
 					<xsl:for-each select="./test-failure">
 						<tr>
-							<td>
-								<span class="test-name"><xsl:value-of select="@name"/></span>
-								<h5 class="test-namespace"><xsl:value-of select="@namespace"/></h5>
-							</td>
 							<td class="build-number">
 								<xsl:choose>
 									<xsl:when test="@first-build = /project/build-number">
@@ -744,11 +740,28 @@
 									</xsl:otherwise>
 								</xsl:choose>
 							</td>
+							<td>
+								<xsl:if test="@namespace!=''">
+									<span class="test-namespace">
+										<xsl:value-of select="@namespace"/>
+										<xsl:text>.</xsl:text>
+									</span>
+								</xsl:if>
+								<span class="test-name"><xsl:value-of select="@name"/></span>
+								
+								<p class="test-failure-message"><xsl:value-of select="@message"/></p>
+								
+								<xsl:if test="text()!=''">
+									<pre class="test-failure-details">
+										<xsl:value-of select="text()"/>
+									</pre>
+								</xsl:if>
+								
+							</td>
 						</tr>
 					</xsl:for-each>
 				</tbody>
 			</table>
-			<div style="clear: left;"><xsl:text> </xsl:text></div>
 		</div>
 	</xsl:template>
 	
@@ -759,7 +772,6 @@
 
 		<xsl:choose>
 			<xsl:when test="contains($text, $from)">
-
 				<xsl:variable name="before" select="substring-before($text, $from)"/>
 				<xsl:variable name="after" select="substring-after($text, $from)"/>
 				<xsl:variable name="prefix" select="concat($before, $to)"/>

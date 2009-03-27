@@ -87,10 +87,12 @@ public abstract class TransformTestCase extends TestCase implements ResourcePatt
 		
 		fail("Did not find <metric key='" + key + "' type='" + type + "' value='" + value + "'/>");
 	}
-	protected static void assertContainsTestFailure(Document doc, String name) {
+	protected static void assertContainsTestFailure(Document doc, String name, String expectedMessage, String expectedDetails) {
 		final List<Element> children = getChildren(doc);
 		for (Element e : children) {
 			if (name.equals(e.getText())) {
+				assertEquals(expectedMessage, e.getChildText("message"));
+				assertEquals(expectedDetails, e.getChildText("details"));
 				return;
 			}
 		}

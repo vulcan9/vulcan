@@ -60,6 +60,22 @@
 		
 		<xsl:for-each select="$nodes">
 			<test-failure>
+				<!-- junit -->
+				<xsl:if test="./failure/@message">
+					<message><xsl:value-of select="./failure/@message"/></message>
+					<details><xsl:value-of select="./failure/text()"/></details>
+				</xsl:if>
+				<xsl:if test="./error">
+					<message><xsl:value-of select="./error/@message"/></message>
+					<details><xsl:value-of select="./error/text()"/></details>
+				</xsl:if>
+				
+				<!--  nunit -->
+				<xsl:if test="./failure/message">
+					<message><xsl:value-of select="./failure/message/text()"/></message>
+					<details><xsl:value-of select="./failure/stack-trace/text()"/></details>
+				</xsl:if>
+				
 				<xsl:if test="$appendSuiteName">
 					<xsl:value-of select="../@name"/>
 					<xsl:text>.</xsl:text>
@@ -70,17 +86,26 @@
 	</xsl:template>
 	
 	<xsl:template name="list-failures-cunit">
-		<xsl:for-each select="//CUNIT_RUN_TEST_FAILURE/TEST_NAME">
+		<xsl:for-each select="//CUNIT_RUN_TEST_FAILURE">
 			<xsl:variable name="suite-name" select="ancestor::CUNIT_RUN_SUITE//SUITE_NAME/text()"/>
 			<test-failure>
+				<message>
+					<xsl:value-of select="substring(CONDITION, 2, string-length(CONDITION)-2)"/>
+				</message>
+				<details>
+					<xsl:value-of select="substring(FILE_NAME, 2, string-length(FILE_NAME)-2)"/>
+					<xsl:text>:</xsl:text>
+					<xsl:value-of select="substring(LINE_NUMBER, 2, string-length(LINE_NUMBER)-2)"/>
+				</details>
+				
 				<xsl:value-of select="substring($suite-name, 2, string-length($suite-name) - 2)"/>
 				<xsl:text>.</xsl:text>
 				<xsl:choose>
-					<xsl:when test="substring-before(., '()')">
-						<xsl:value-of select="substring-before(substring(., 2), '()')"/>
+					<xsl:when test="substring-before(TEST_NAME, '()')">
+						<xsl:value-of select="substring-before(substring(TEST_NAME, 2), '()')"/>
 					</xsl:when>
 					<xsl:otherwise>
-						<xsl:value-of select="substring(., 2, string-length(.)-2)"/>
+						<xsl:value-of select="substring(TEST_NAME, 2, string-length(TEST_NAME)-2)"/>
 					</xsl:otherwise>
 				</xsl:choose>
 				

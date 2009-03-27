@@ -88,8 +88,8 @@ public class SeleniumTransformTest extends TransformTestCase {
 		
 		final Document t = plugin.transform(doc);
 
-		assertContainsTestFailure(t, "SomeSampleSeleniumSuite.BarTest");
-		assertContainsTestFailure(t, "SomeSampleSeleniumSuite.ZipTest");
+		assertContainsTestFailure(t, "SomeSampleSeleniumSuite.BarTest", null, null);
+		assertContainsTestFailure(t, "SomeSampleSeleniumSuite.ZipTest", null, null);
 	}
 	
 	public void testTransformTestsWithFailuresGetsFailedTestNamesMultipeSuites() throws Exception {
@@ -102,8 +102,8 @@ public class SeleniumTransformTest extends TransformTestCase {
 		
 		final Document t = plugin.transform(doc);
 
-		assertContainsTestFailure(t, "SomeSampleSeleniumSuite.BarTest");
-		assertContainsTestFailure(t, "AnotherSampleSeleniumSuite.ZipTest");
+		assertContainsTestFailure(t, "SomeSampleSeleniumSuite.BarTest", null, null);
+		assertContainsTestFailure(t, "AnotherSampleSeleniumSuite.ZipTest", null, null);
 	}
 	
 	private void addSeleniumTest(Element suite, String name, boolean passed) {

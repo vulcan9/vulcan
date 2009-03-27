@@ -77,6 +77,8 @@ public class DigestTest extends TransformTestCase {
 
 		final Element t1 = new Element("test-failure");
 		t1.setText(name);
+		addElementWithText(t1, "message", "the message");
+		addElementWithText(t1, "details", "the stack trace");
 		
 		e.addContent(t1);
 		
@@ -87,6 +89,8 @@ public class DigestTest extends TransformTestCase {
 		assertEquals(1, failures.size());
 		assertEquals(name, failures.get(0).getName());
 		assertEquals((Integer)465, failures.get(0).getBuildNumber());
+		assertEquals("the message", failures.get(0).getMessage());
+		assertEquals("the stack trace", failures.get(0).getDetails());
 	}
 	
 	public void testDigestTestFailureSorts() throws Exception {
@@ -140,5 +144,11 @@ public class DigestTest extends TransformTestCase {
 		assertEquals(1, failures.size());
 		assertEquals(name, failures.get(0).getName());
 		assertEquals((Integer)461, failures.get(0).getBuildNumber());
+	}
+
+	private void addElementWithText(final Element elem, String nodeName, String text) {
+		final Element child = new Element(nodeName);
+		child.setText(text);
+		elem.addContent(child);
 	}
 }
