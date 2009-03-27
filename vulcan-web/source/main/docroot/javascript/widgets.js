@@ -372,24 +372,39 @@ jQuery.fn.loadCustom = function (url, params, selector) {
 	
 	$("#loading-message").show();
 	
-	jQuery.get(url, params, function(data, textStatus) {
-		var contents;
+	jQuery.ajax({
+		type: "GET",
+		url: url,
+		params: params,
+		success: function(data, textStatus) {
+			var contents;
+	
+			if (data && data.getElementById) {
+				contents = $(document.importNode(data.getElementsByTagName("body")[0], true)).find(selector);
+			} else {
+				contents = jQuery("<div/>").append(data.replace(/<script(.|\s)*?\/script>/g, "")).find(selector);
+			}
+	
+			// show the loading message in the new contents
+			contents.find("#loading-message").show();
+	
+			target.replaceWith(contents);
 
-		if (data && data.getElementById) {
-			contents = $(document.importNode(data.getElementsByTagName("body")[0], true)).find(selector);
-		} else {
-			contents = jQuery("<div/>").append(data.replace(/<script(.|\s)*?\/script>/g, "")).find(selector);
+			registerAjaxHandlers();
+			
+			// so we can fade it out after replacing.
+			$("#loading-message").fadeOut("slow");
+		},
+		error: function(data, textStatus) {
+			if (data && (data.status == 302 || data.status == 0)) {
+				// Firefox shows a 302 Moved Permanently.  IE shows a 0.
+				// Fall back to non-ajax GET.
+				window.location = url;
+				return;
+			} else {
+				$("#loading-message").html("error: " + data.statusText);
+			}
 		}
-
-		// show the loading message in the new contents
-		contents.find("#loading-message").show();
-
-		target.replaceWith(contents);
-
-		registerAjaxHandlers();
-		
-		// so we can fade it out after replacing.
-		$("#loading-message").fadeOut("slow");
 	});
 }
 
