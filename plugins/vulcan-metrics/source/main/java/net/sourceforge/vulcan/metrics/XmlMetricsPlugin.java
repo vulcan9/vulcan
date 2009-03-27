@@ -306,19 +306,22 @@ public class XmlMetricsPlugin implements BuildManagerObserverPlugin, Configurabl
 		final List<TestFailureDto> testFailureList = new ArrayList<TestFailureDto>();
 		final Map<String, Integer> firstFailures = hashExistingTestFailures(status);
 		
-		for (Element c : testFailures) {
-			final TestFailureDto f = new TestFailureDto();
-			final String name = c.getText();
+		for (Element elem : testFailures) {
+			final TestFailureDto dto = new TestFailureDto();
+			final String name = elem.getText();
 			
-			f.setName(name);
+			dto.setName(name);
 			
 			if (firstFailures.containsKey(name)) {
-				f.setBuildNumber(firstFailures.get(name));
+				dto.setBuildNumber(firstFailures.get(name));
 			} else {
-				f.setBuildNumber(buildNumber);
+				dto.setBuildNumber(buildNumber);
 			}
 			
-			testFailureList.add(f);
+			dto.setMessage(elem.getChildText("message"));
+			dto.setDetails(elem.getChildText("details"));
+			
+			testFailureList.add(dto);
 		}
 		
 		Collections.sort(testFailureList, new Comparator<TestFailureDto>() {

@@ -80,6 +80,9 @@
         <CUNIT_RUN_TEST_RECORD> 
           <CUNIT_RUN_TEST_FAILURE> 
             <TEST_NAME> testFixedFalse() </TEST_NAME> 
+            <FILE_NAME> test/suite12.c </FILE_NAME> 
+            <LINE_NUMBER> 156 </LINE_NUMBER> 
+            <CONDITION> IsValidSample(1234, &amp;num)==true </CONDITION> 
           </CUNIT_RUN_TEST_FAILURE> 
         </CUNIT_RUN_TEST_RECORD> 
         <CUNIT_RUN_TEST_RECORD> 

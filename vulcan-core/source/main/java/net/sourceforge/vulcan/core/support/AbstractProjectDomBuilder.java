@@ -275,6 +275,18 @@ public abstract class AbstractProjectDomBuilder implements ProjectDomBuilder {
 				}
 				
 				failureElement.setAttribute("first-build", failure.getBuildNumber().toString());
+				String message = failure.getMessage();
+				if (message == null) {
+					message = StringUtils.EMPTY;
+				}
+				failureElement.setAttribute("message", message);
+				
+				String details = failure.getDetails();
+				if (details == null) {
+					details = StringUtils.EMPTY;
+				}
+				
+				failureElement.setText(details);
 				
 				testFailuresRoot.addContent(failureElement);
 			}

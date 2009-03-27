@@ -1,6 +1,6 @@
 /*
  * Vulcan Build Manager
- * Copyright (C) 2005-2006 Chris Eldredge
+ * Copyright (C) 2005-2009 Chris Eldredge
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,11 +18,9 @@
  */
 package net.sourceforge.vulcan.metrics;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Iterator;
-import java.util.List;
 
+import junit.framework.AssertionFailedError;
 import net.sourceforge.vulcan.TestUtils;
 import net.sourceforge.vulcan.dto.MetricDto.MetricType;
 
@@ -37,8 +35,8 @@ public class CUnitTransformTest extends TransformTestCase {
 		super.setUp();
 		SAXBuilder builder = new SAXBuilder();
 		builder.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
-		Document coverageDoc = builder.build(TestUtils.resolveRelativeFile("source/test/xml/cunit-sample.xml"));
-		doc.getRootElement().addContent(coverageDoc.detachRootElement());
+		Document sample = builder.build(TestUtils.resolveRelativeFile("source/test/xml/cunit-sample.xml"));
+		doc.getRootElement().addContent(sample.detachRootElement());
 	}
 	
 	public void testCounts() throws Exception {
@@ -50,19 +48,26 @@ public class CUnitTransformTest extends TransformTestCase {
 	
 	public void testFailingTestNames() throws Exception {
 		final Document t = plugin.transform(doc);
-		assertTestFailureNames(t, "Suite_2.testFixedFalse", "Suite_3.testShutdown");
+		
+		Element failure = getTestFailureByName(t, "Suite_2.testFixedFalse");
+		assertEquals("IsValidSample(1234, &num)==true", failure.getChildText("message"));
+		assertEquals("test/suite12.c:156", failure.getChildText("details"));
+		
+		failure = getTestFailureByName(t, "Suite_3.testShutdown");
+		assertEquals("CU_FAIL(\"Not implemented.\")", failure.getChildText("message"));
+		assertEquals("test/suite3.c:11", failure.getChildText("details"));
 	}
 
 	@SuppressWarnings("unchecked")
-	private void assertTestFailureNames(final Document t, String... expected) {
-		List<String> names = new ArrayList<String>();
-		
+	private Element getTestFailureByName(final Document t, String name) {
 		for (Iterator<Element> itr = t.getRootElement().getChildren("test-failure").iterator(); itr.hasNext(); ) {
 			Element e = itr.next();
-			names.add(e.getText());
+			if (name.equals(e.getText())) {
+				return e;
+			}
 		}
 		
-		assertEquals(Arrays.asList(expected), names);
+		throw new AssertionFailedError("expected test-failre[@name='" + name + "']");
 	}
 	
 }

@@ -33,7 +33,7 @@ import org.springframework.jdbc.object.MappingSqlQuery;
 
 class TestFailureQuery extends MappingSqlQuery {
 	public TestFailureQuery(DataSource dataSource) {
-		super(dataSource, "select name, first_consecutive_build_number " +
+		super(dataSource, "select name, message, details, first_consecutive_build_number " +
 				"from test_failures where build_id = ?");
 		declareParameter(new SqlParameter("build_id", Types.NUMERIC));
 		compile();
@@ -60,6 +60,8 @@ class TestFailureQuery extends MappingSqlQuery {
 		final TestFailureDto dto = new TestFailureDto();
 		
 		dto.setName(rs.getString("name"));
+		dto.setMessage(rs.getString("message"));
+		dto.setDetails(rs.getString("details"));
 		dto.setBuildNumber(rs.getInt("first_consecutive_build_number"));
 		
 		return dto;

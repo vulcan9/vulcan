@@ -45,6 +45,9 @@ import org.springframework.jdbc.core.JdbcTemplate;
 
 @SvnRevision(id="$Id$", url="$HeadURL$")
 public class JdbcBuildOutcomeStore implements BuildOutcomeStore, ProjectNameChangeListener {
+	public static int MAX_TEST_FAILURE_MESSAGE_LENGTH = 1024;
+	public static int MAX_TEST_FAILURE_DETAILS_LENGTH = 4096;
+	
 	private final Set<String> projectNames = new HashSet<String>();
 	private List<String> buildUsers;
 	private List<String> buildSchedulers;

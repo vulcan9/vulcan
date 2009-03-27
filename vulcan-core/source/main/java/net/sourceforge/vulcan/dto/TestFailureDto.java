@@ -1,6 +1,6 @@
 /*
  * Vulcan Build Manager
- * Copyright (C) 2005-2006 Chris Eldredge
+ * Copyright (C) 2005-2009 Chris Eldredge
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,20 +29,34 @@ import net.sourceforge.vulcan.metadata.SvnRevision;
 @SvnRevision(id="$Id: ProjectStatusDto.java 296 2007-03-15 19:43:16Z chris.eldredge $", url="$HeadURL: https://vulcan.googlecode.com/svn/trunk/vulcan-core/source/main/java/net/sourceforge/vulcan/dto/ProjectStatusDto.java $")
 public class TestFailureDto extends BaseDto {
 	private String name;
+	private String message;
+	private String details;
 	private Integer buildNumber;
 	private Integer count;
 	
-	public Integer getBuildNumber() {
-		return buildNumber;
-	}
-	public void setBuildNumber(Integer buildNumber) {
-		this.buildNumber = buildNumber;
-	}
 	public String getName() {
 		return name;
 	}
 	public void setName(String name) {
 		this.name = name;
+	}
+	public String getMessage() {
+		return message;
+	}
+	public void setMessage(String message) {
+		this.message = message;
+	}
+	public String getDetails() {
+		return details;
+	}
+	public void setDetails(String details) {
+		this.details = details;
+	}
+	public Integer getBuildNumber() {
+		return buildNumber;
+	}
+	public void setBuildNumber(Integer buildNumber) {
+		this.buildNumber = buildNumber;
 	}
 	public Integer getCount() {
 		return count;

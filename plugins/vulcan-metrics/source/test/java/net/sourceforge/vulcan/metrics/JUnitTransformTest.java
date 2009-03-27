@@ -22,8 +22,13 @@ import net.sourceforge.vulcan.dto.MetricDto.MetricType;
 
 import org.jdom.Document;
 import org.jdom.Element;
+import org.jdom.Text;
 
 public class JUnitTransformTest extends TransformTestCase {
+	private static final String ERROR_DETAILS = "java.lang.Exception: unanticipated exception text\n	at net.sourceforge.vulcan.Example.method";
+	private static final String ERROR_MESSAGE = "unanticipated exception text";
+	private static final String ASSERTION_FAILURE_DETAILS = "junit.framework.AssertionFailedError: message again\n	at junit.framework.Assert.fail(Assert.java:47)";
+	private static final String ASSERTION_FAILURE_MESSAGE = "expected:<22> but was:<44>";
 	Element suite = new Element("testsuite");
 	
 	@Override
@@ -61,7 +66,7 @@ public class JUnitTransformTest extends TransformTestCase {
 		
 		assertContainsMetric(t, "vulcan.metrics.tests.executed", MetricType.NUMBER, "1", true);
 		assertContainsMetric(t, "vulcan.metrics.tests.failed", MetricType.NUMBER, "1", true);
-		assertContainsTestFailure(t, "net.sourceforge.vulcan.metrics.FakeSuite.Foo");
+		assertContainsTestFailure(t, "net.sourceforge.vulcan.metrics.FakeSuite.Foo", ASSERTION_FAILURE_MESSAGE, ASSERTION_FAILURE_DETAILS);
 	}
 	public void testTransformJUnitError() throws Exception {
 		doc.getRootElement().addContent(suite);
@@ -71,7 +76,7 @@ public class JUnitTransformTest extends TransformTestCase {
 		
 		assertContainsMetric(t, "vulcan.metrics.tests.executed", MetricType.NUMBER, "1", true);
 		assertContainsMetric(t, "vulcan.metrics.tests.failed", MetricType.NUMBER, "1", true);
-		assertContainsTestFailure(t, "net.sourceforge.vulcan.metrics.FakeSuite.Foo");
+		assertContainsTestFailure(t, "net.sourceforge.vulcan.metrics.FakeSuite.Foo", ERROR_MESSAGE, ERROR_DETAILS);
 	}
 	public void testTransformJUnitMultipleSuites() throws Exception {
 		doc.getRootElement().addContent(suite);
@@ -126,15 +131,16 @@ public class JUnitTransformTest extends TransformTestCase {
 		
 		assertContainsMetric(t, "vulcan.metrics.tests.executed", MetricType.NUMBER, "4", true);
 		assertContainsMetric(t, "vulcan.metrics.tests.failed", MetricType.NUMBER, "2", true);
-		assertContainsTestFailure(t, "SourceForge.Vulcan.DotNet.FakeTest.Sample2");
-		assertContainsTestFailure(t, "SourceForge.Vulcan.DotNet.FakeTest.Sample4");
+		assertContainsTestFailure(t, "SourceForge.Vulcan.DotNet.FakeTest.Sample2", null, null);
+		assertContainsTestFailure(t, "SourceForge.Vulcan.DotNet.FakeTest.Sample4", null, null);
 	}
 	
 	public void testTransformTotalsAcrossJunitAndNunit() throws Exception {
 		Element target1 = addNUnitTestSuite();
 
 		addNunitTestCase(target1, "SourceForge.Vulcan.DotNet.FakeTest.Sample1", "True", "True");
-		addNunitTestCase(target1, "SourceForge.Vulcan.DotNet.FakeTest.Sample2", "True", "False");
+		Element failure = addNunitTestCase(target1, "SourceForge.Vulcan.DotNet.FakeTest.Sample2", "True", "False");
+		addNunitFailureMessage(failure, "the message", "the stack trace");
 		
 		Element target2 = addNUnitTestSuite();
 		addNunitTestCase(target2, "SourceForge.Vulcan.DotNet.FakeTest.Sample3", "True", "True");
@@ -147,9 +153,10 @@ public class JUnitTransformTest extends TransformTestCase {
 		
 		assertContainsMetric(t, "vulcan.metrics.tests.executed", MetricType.NUMBER, "5", true);
 		assertContainsMetric(t, "vulcan.metrics.tests.failed", MetricType.NUMBER, "3", true);
+		assertContainsTestFailure(t, "SourceForge.Vulcan.DotNet.FakeTest.Sample2", "the message", "the stack trace");
 	}
 	
-	private void addNunitTestCase(Element suite, String name, String executed, String success) {
+	private Element addNunitTestCase(Element suite, String name, String executed, String success) {
 		final Element testCase = new Element("test-case");
 		testCase.setAttribute("name", name);
 		testCase.setAttribute("executed", executed);
@@ -158,8 +165,21 @@ public class JUnitTransformTest extends TransformTestCase {
 		}
 		
 		suite.addContent(testCase);
+		
+		return testCase;
 	}
 
+	private void addNunitFailureMessage(Element testCase, String message, String stackTrace) {
+		final Element failure = new Element("failure");
+		final Element messageNode = new Element("message");
+		messageNode.addContent(new Text(message));
+		failure.addContent(messageNode);
+		final Element stackTraceNode = new Element("stack-trace");
+		stackTraceNode.addContent(new Text(stackTrace));
+		failure.addContent(stackTraceNode);
+		testCase.addContent(failure);
+	}
+	
 	private Element addNUnitTestSuite() {
 		final Element testResults = new Element("test-results");
 		doc.getRootElement().addContent(testResults);
@@ -186,9 +206,15 @@ public class JUnitTransformTest extends TransformTestCase {
 		testCase.setAttribute("name", name);
 		
 		if (fail) {
-			testCase.addContent(new Element("failure"));
+			final Element node = new Element("failure");
+			node.setAttribute("message", ASSERTION_FAILURE_MESSAGE);
+			node.addContent(new Text(ASSERTION_FAILURE_DETAILS));
+			testCase.addContent(node);
 		} else if (error) {
-			testCase.addContent(new Element("error"));
+			final Element node = new Element("error");
+			node.setAttribute("message", ERROR_MESSAGE);
+			node.addContent(new Text(ERROR_DETAILS));
+			testCase.addContent(node);
 		}
 		
 		suite.addContent(testCase);

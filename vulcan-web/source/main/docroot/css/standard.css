@@ -16,10 +16,6 @@ h3 {
 	font-weight: bold;
 }
 
-h5 {
-	font-size: 115%;
-}
-
 h6 {
 	font-size: 100%;
 }
@@ -351,7 +347,7 @@ div.file-upload {
 }
 
 /* monospace */
-.diff,.log,.issue,.issue-unlinked,table.build-messages tbody td {
+.diff,.log,.issue,.issue-unlinked,table.build-messages tbody td,.test-failure-details {
 	font-family: "Monaco", "Lucida Console", "Bitstream Vera Sans Mono",
 		"DejaVu Sans Mono", monospace;
 }
@@ -362,11 +358,18 @@ div.file-upload {
 
 .test-name {
 	font-size: larger;
-	display: block;
 }
 
-.test-namespace {
-	font-style: italic;
+.test-namespace, .test-failure-message {
+	font-size: larger;
+}
+
+.test-failure-message {
+	margin-top: 2ex;
+}
+
+.test-failure-details {
+	font-size: 75%;
 }
 
 div.link {

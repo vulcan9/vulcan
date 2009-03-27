@@ -98,7 +98,7 @@ input[type=text].new-label {
 	color: red;
 }
 
-.test-namespace {
+.test-namespace, .test-failure-details {
 	color: gray;
 }
 

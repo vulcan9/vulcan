@@ -585,7 +585,7 @@ function resizeIframe() {
 		height = document.body.clientHeight;
 	}
 
-	height = (height - iframe.offsetTop - 20);
+	height = (height - iframe.offsetTop - 200);
 	if (height < 300) {
 		height = 300;
 	}

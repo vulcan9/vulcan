@@ -43,6 +43,7 @@ import net.sourceforge.vulcan.dto.ProjectStatusDto.Status;
 import net.sourceforge.vulcan.dto.ProjectStatusDto.UpdateType;
 import net.sourceforge.vulcan.exception.StoreException;
 
+import org.apache.commons.lang.StringUtils;
 import org.springframework.core.io.Resource;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -457,12 +458,35 @@ public class JdbcBuildOutcomeStoreTest extends TestCase {
 		final TestFailureDto tf = new TestFailureDto();
 		tf.setName("a name of a test");
 		tf.setBuildNumber(outcome.getBuildNumber());
-		
+		tf.setMessage("a message");
+		tf.setDetails("some stack traces");
+
 		list.add(tf);
 		
 		outcome.setTestFailures(list);
 		
 		assertPersistence();
+	}
+	
+	public void testSaveTestFailuresTruncatesLongMessageAndDetails() throws Exception {
+		final List<TestFailureDto> list = new ArrayList<TestFailureDto>();
+		
+		final TestFailureDto tf = new TestFailureDto();
+		tf.setName("a name of a test");
+		tf.setBuildNumber(outcome.getBuildNumber());
+		tf.setMessage(StringUtils.repeat("blegh ", JdbcBuildOutcomeStore.MAX_TEST_FAILURE_MESSAGE_LENGTH * 2));
+		tf.setDetails(StringUtils.repeat("blah ", JdbcBuildOutcomeStore.MAX_TEST_FAILURE_DETAILS_LENGTH * 2));
+
+		list.add(tf);
+		
+		outcome.setTestFailures(list);
+		
+		final JdbcBuildOutcomeDto loadedOutcome = storeOutcome();
+
+		final TestFailureDto loadedFailure = loadedOutcome.getTestFailures().get(0);
+		
+		assertEquals(JdbcBuildOutcomeStore.MAX_TEST_FAILURE_MESSAGE_LENGTH, loadedFailure.getMessage().length());
+		assertEquals(JdbcBuildOutcomeStore.MAX_TEST_FAILURE_DETAILS_LENGTH, loadedFailure.getDetails().length());
 	}
 	
 	public void testSaveCommitLog() throws Exception {

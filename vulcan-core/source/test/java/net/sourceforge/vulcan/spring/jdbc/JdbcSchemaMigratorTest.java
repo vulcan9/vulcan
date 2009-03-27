@@ -39,6 +39,7 @@ public class JdbcSchemaMigratorTest extends TestCase {
 	SingleConnectionDataSource dataSource = new SingleConnectionDataSource();
 	JdbcSchemaMigrator migrator = new JdbcSchemaMigrator();
 	
+	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 		final Properties props = new Properties();
@@ -56,6 +57,7 @@ public class JdbcSchemaMigratorTest extends TestCase {
 		migrator.setCreateTablesScript(resource);
 	}
 
+	@Override
 	protected void tearDown() throws Exception {
 		new JdbcTemplate(dataSource).execute("shutdown;");
 		super.tearDown();
