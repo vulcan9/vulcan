@@ -173,13 +173,13 @@ public class AbstractProjectDomBuilderTest extends EasyMockTestCase {
 		builder.setProjectManager(pm);
 		builder.setBuildManager(bm);
 		
-		defaultTimeZone = AbstractProjectDomBuilder.TIMEZONE; 
-		AbstractProjectDomBuilder.TIMEZONE = TimeZone.getTimeZone("Greenwhich");
+		defaultTimeZone = AbstractProjectDomBuilder.SYSTEM_TIMEZONE; 
+		AbstractProjectDomBuilder.SYSTEM_TIMEZONE = TimeZone.getTimeZone("Greenwhich");
 	}
 	
 	@Override
 	protected void tearDown() throws Exception {
-		AbstractProjectDomBuilder.TIMEZONE = defaultTimeZone;
+		AbstractProjectDomBuilder.SYSTEM_TIMEZONE = defaultTimeZone;
 		super.tearDown();
 	}
 	
@@ -322,7 +322,7 @@ public class AbstractProjectDomBuilderTest extends EasyMockTestCase {
 	public void testElapsedTime() throws Exception {
 		replay();
 
-		projectStatus.setStartDate(new Date(projectStatus.getCompletionDate().getTime() - 97000));
+		projectStatus.setStartDate(new Date(projectStatus.getCompletionDate().getTime() - 9700000));
 		
 		final Document doc = doCall();
 
@@ -334,8 +334,8 @@ public class AbstractProjectDomBuilderTest extends EasyMockTestCase {
 		assertEquals(Long.toString(date.getTime()), tstamp.getAttributeValue("millis"));
 		assertEquals(DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.SHORT).format(date), tstamp.getAttributeValue("text"));
 		
-		final Element elapsed = assertContainsChildWithText(elem, "elapsed-time", "00:01:37");
-		assertEquals("97000", elapsed.getAttributeValue("millis"));
+		final Element elapsed = assertContainsChildWithText(elem, "elapsed-time", "02:41:40");
+		assertEquals("9700000", elapsed.getAttributeValue("millis"));
 		
 		verify();
 	}
