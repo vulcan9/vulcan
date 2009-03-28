@@ -73,7 +73,8 @@ import org.xml.sax.SAXException;
 
 @SvnRevision(id="$Id$", url="$HeadURL$")
 public abstract class AbstractProjectDomBuilder implements ProjectDomBuilder {
-	static TimeZone TIMEZONE = TimeZone.getDefault();
+	static TimeZone SYSTEM_TIMEZONE = TimeZone.getDefault();
+	static TimeZone GMT_TIMEZONE = TimeZone.getTimeZone("Greenwhich");
 	
 	private ProjectManager projectManager;
 	private BuildManager buildManager;
@@ -85,7 +86,7 @@ public abstract class AbstractProjectDomBuilder implements ProjectDomBuilder {
 			locale = Locale.getDefault();
 		}
 		final DateFormat format = new SimpleDateFormat(formatMessage("build.timestamp.format", null, locale), locale);
-		format.setTimeZone(TIMEZONE);
+		format.setTimeZone(SYSTEM_TIMEZONE);
 		
 		final Element root = new Element("project");
 		final Document doc = new Document(root);
@@ -138,7 +139,7 @@ public abstract class AbstractProjectDomBuilder implements ProjectDomBuilder {
 		}
 		
 		final DateFormat format = new SimpleDateFormat(formatMessage("build.timestamp.format", null, locale), locale);
-		format.setTimeZone(TIMEZONE);
+		format.setTimeZone(SYSTEM_TIMEZONE);
 		
 		final Element root = new Element("build-history");
 		final Document doc = new Document(root);
@@ -543,7 +544,7 @@ public abstract class AbstractProjectDomBuilder implements ProjectDomBuilder {
 		elapsed.setAttribute("millis", Long.toString(elapsedMillis));
 		
 		final DateFormat format = new SimpleDateFormat(formatMessage("build.time.elapsed.format", null, locale), locale);
-		format.setTimeZone(TIMEZONE);
+		format.setTimeZone(GMT_TIMEZONE);
 		
 		elapsed.setText(format.format(elapsedMillis));
 		
