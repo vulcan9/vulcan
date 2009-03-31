@@ -347,7 +347,7 @@ div.file-upload {
 }
 
 /* monospace */
-.diff,.log,.issue,.issue-unlinked,table.build-messages tbody td,.test-failure-details {
+.diff,.log,.issue,.issue-unlinked,table.build-messages tbody td,.test-failure-message,.test-failure-details {
 	font-family: "Monaco", "Lucida Console", "Bitstream Vera Sans Mono",
 		"DejaVu Sans Mono", monospace;
 }
@@ -360,7 +360,7 @@ div.file-upload {
 	font-size: larger;
 }
 
-.test-namespace, .test-failure-message {
+.test-namespace {
 	font-size: larger;
 }
 

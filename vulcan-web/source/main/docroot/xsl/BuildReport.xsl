@@ -749,7 +749,16 @@
 								</xsl:if>
 								<span class="test-name"><xsl:value-of select="@name"/></span>
 								
-								<p class="test-failure-message"><xsl:value-of select="@message"/></p>
+								<xsl:if test="@message">
+									<!-- Want word wrap but preserve line breaks too.  Preformatted text does not do that. -->
+									<p class="test-failure-message">
+										<xsl:call-template name="replace-string">
+											<xsl:with-param name="text" select="@message"/>
+											<xsl:with-param name="from" select="'&#10;'"/>
+											<xsl:with-param name="to" select="'&lt;br/&gt;'"/>
+										</xsl:call-template>
+									</p>
+								</xsl:if>
 								
 								<xsl:if test="text()!=''">
 									<pre class="test-failure-details">
@@ -769,7 +778,7 @@
 		<xsl:param name="text"/>
 		<xsl:param name="from"/>
 		<xsl:param name="to"/>
-
+		
 		<xsl:choose>
 			<xsl:when test="contains($text, $from)">
 				<xsl:variable name="before" select="substring-before($text, $from)"/>
@@ -777,7 +786,8 @@
 				<xsl:variable name="prefix" select="concat($before, $to)"/>
 			
 				<xsl:value-of select="$before"/>
-				<xsl:value-of select="$to"/>
+				<xsl:value-of select="$to" disable-output-escaping="yes"/>
+				
 				<xsl:call-template name="replace-string">
 					<xsl:with-param name="text" select="$after"/>
 					<xsl:with-param name="from" select="$from"/>
