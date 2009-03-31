@@ -468,6 +468,22 @@ public class JdbcBuildOutcomeStoreTest extends TestCase {
 		assertPersistence();
 	}
 	
+	public void testSaveTestFailuresNullMessageAndTrace() throws Exception {
+		final List<TestFailureDto> list = new ArrayList<TestFailureDto>();
+		
+		final TestFailureDto tf = new TestFailureDto();
+		tf.setName("a name of a test");
+		tf.setBuildNumber(outcome.getBuildNumber());
+		tf.setMessage(null);
+		tf.setDetails(null);
+
+		list.add(tf);
+		
+		outcome.setTestFailures(list);
+		
+		assertPersistence();
+	}
+	
 	public void testSaveTestFailuresTruncatesLongMessageAndDetails() throws Exception {
 		final List<TestFailureDto> list = new ArrayList<TestFailureDto>();
 		

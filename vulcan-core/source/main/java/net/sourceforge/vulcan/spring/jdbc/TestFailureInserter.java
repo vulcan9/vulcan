@@ -64,6 +64,10 @@ class TestFailureInserter extends SqlUpdate {
 	}
 
 	private String truncate(String str, int max) {
+		if (str == null) {
+			return null;
+		}
+		
 		if (str.length() > max) {
 			return str.substring(0, max);
 		}
