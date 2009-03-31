@@ -115,6 +115,10 @@ public class ProjectBuilderImpl implements ProjectBuilder {
 		
 		previousStatus = buildManager.getLatestStatus(currentTarget.getName());
 		
+		if (log.isDebugEnabled() && previousStatus != null) {
+			log.debug("Project " + currentTarget.getName() + " previous build " + previousStatus.getBuildNumber() + " completed " + previousStatus.getCompletionDate());
+		}
+		
 		try {
 			buildStatus = createBuildStatus(currentTarget);
 			

@@ -303,7 +303,7 @@ public class BuildManagerImpl implements BuildManager {
 		final String projectName = config.getName();
 		
 		if (LOG.isInfoEnabled()) {
-			LOG.info("Project " + config.getName() + " completed build with status " + outcome.getStatus().name() + ".");
+			LOG.info("Project " + config.getName() + " completed build " + outcome.getBuildNumber() + " with status " + outcome.getStatus().name() + ".");
 		}
 
 		try {
@@ -317,40 +317,42 @@ public class BuildManagerImpl implements BuildManager {
 			readLock.unlock();
 		}
 
-		boolean passed;
+		boolean passed = false;
 		
-		switch (outcome.getStatus()) {
-			case PASS:
-				passed = true;
-				break;
-			case UP_TO_DATE:
-				passed = getLatestStatus(projectName).getStatus().equals(Status.PASS);
-				break;
-			default:
-				passed = false;
-		}
-
 		try {
-			writeLock.lock();
-			final Target target = activeDaemons.remove(info);
-			
-			target.targetCompleted(config, passed);
-			
-			projectsBeingBuilt.remove(projectName);
-			
-			if (!activeBuilds.remove(config)) {
-				throw new IllegalStateException();
+			switch (outcome.getStatus()) {
+				case PASS:
+					passed = true;
+					break;
+				case UP_TO_DATE:
+					passed = getLatestStatus(projectName).getStatus().equals(Status.PASS);
+					break;
+				default:
+					passed = false;
 			}
-		} finally {
-			writeLock.unlock();
-		}
-		
-		if (!outcome.getStatus().equals(Status.UP_TO_DATE)) {
-			fireBuildCompleted(info, config, outcome);
+			
+			if (!outcome.getStatus().equals(Status.UP_TO_DATE)) {
+				fireBuildCompleted(info, config, outcome);
+			}
+		} finally {		
+			try {
+				writeLock.lock();
+				final Target target = activeDaemons.remove(info);
+				
+				target.targetCompleted(config, passed);
+				
+				projectsBeingBuilt.remove(projectName);
+				
+				if (!activeBuilds.remove(config)) {
+					throw new IllegalStateException();
+				}
+			} finally {
+				writeLock.unlock();
+			}
 		}
 	}
 
-	private void fireBuildCompleted(final BuildDaemonInfoDto info,
+	private void fireFailedDependencyCompleted(final BuildDaemonInfoDto info,
 			final ProjectConfigDto config, final RevisionTokenDto revision,
 			final Status status, final Message message, ChangeLogDto changeLog) {
 		
@@ -557,11 +559,11 @@ public class BuildManagerImpl implements BuildManager {
 			try {
 				current = group.getNextTarget();
 			} catch (DependencyFailureException e) {
-				fireBuildCompleted(null, e.getProjectConfig(), null, Status.SKIP, e, null);
+				fireFailedDependencyCompleted(null, e.getProjectConfig(), null, Status.SKIP, e, null);
 			} catch (PendingDependencyException e) {
 				throw e;
 			} catch (DependencyException e) {
-				fireBuildCompleted(null, null, null, Status.SKIP, e, null);
+				fireFailedDependencyCompleted(null, null, null, Status.SKIP, e, null);
 			}
 
 			if (current != null) {
