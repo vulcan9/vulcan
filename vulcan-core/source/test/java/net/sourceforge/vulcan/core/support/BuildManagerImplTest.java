@@ -264,6 +264,48 @@ public class BuildManagerImplTest extends TestCase {
 		assertNull(status.getLastGoodBuildNumber());
 	}
 	
+	public void testStillBuildingWhileEventIsPublishing() throws Exception {
+		final boolean[] flag = new boolean[1];
+		
+		mgr.eventHandler = new EventHandler() {
+			public void reportEvent(Event event) {
+				flag[0] = mgr.isBuildingOrInQueue(a.getName()); 
+			}
+		};
+		
+		mgr.add(a);
+		
+		ProjectConfigDto config = mgr.getTarget(info1);
+		mgr.targetCompleted(info1, config, createFakeStatus(config, rev0, Status.PASS, null, null, null));
+
+		assertEquals("mgr.isBuildingOrInQueue('" + a.getName() + "')", true, flag[0]);
+	}
+	
+	static class TestException extends RuntimeException {
+	}
+	
+	public void testCleansUpOnExceptionInEventHandler() throws Exception {
+		mgr.eventHandler = new EventHandler() {
+			public void reportEvent(Event event) {
+				throw new TestException(); 
+			}
+		};
+		
+		mgr.add(a);
+		
+		ProjectConfigDto config = mgr.getTarget(info1);
+		
+		try {
+			mgr.targetCompleted(info1, config, createFakeStatus(config, rev0, Status.PASS, null, null, null));
+			fail("expected TestException");
+		} catch (TestException e) {
+		}
+
+		assertEquals("mgr.isBuildingOrInQueue('" + a.getName() + "')", false, mgr.isBuildingOrInQueue(a.getName()));
+		assertEquals("mgr.getPendingTargets().length", 0, mgr.getPendingTargets().length);
+		
+	}
+	
 	public void testTargetCompletedFiresEventWithDetailedStatus() throws Exception {
 		a.setDependencies(new String[] {"b"});
 		

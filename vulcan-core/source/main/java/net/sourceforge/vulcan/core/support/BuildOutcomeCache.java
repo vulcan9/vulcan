@@ -40,9 +40,13 @@ import net.sourceforge.vulcan.exception.StoreException;
 import net.sourceforge.vulcan.metadata.SvnRevision;
 
 import org.apache.commons.collections.map.LRUMap;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 @SvnRevision(id="$Id$", url="$HeadURL$")
 public class BuildOutcomeCache implements ProjectNameChangeListener {
+	private static final Log log = LogFactory.getLog(BuildOutcomeCache.class);
+	
 	private final Lock readLock;
 	private final Lock writeLock;
 	
@@ -297,6 +301,11 @@ public class BuildOutcomeCache implements ProjectNameChangeListener {
 	
 	private void store(String name, ProjectStatusDto statusDto) throws StoreException {
 		final UUID id = buildOutcomeStore.storeBuildOutcome(statusDto);
+		
+		if (log.isDebugEnabled()) {
+			log.debug("Latest build for project " + name + " is " + statusDto.getBuildNumber());
+		}
+		
 		latestOutcomes.put(name, id);
 		outcomes.put(id, statusDto);
 		workDirBuildNumbers.put(statusDto.getWorkDir(), statusDto.getBuildNumber());
