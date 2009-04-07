@@ -47,6 +47,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 public class JdbcBuildOutcomeStore implements BuildOutcomeStore, ProjectNameChangeListener {
 	public static int MAX_TEST_FAILURE_MESSAGE_LENGTH = 1024;
 	public static int MAX_TEST_FAILURE_DETAILS_LENGTH = 4096;
+	public static int MAX_COMMIT_MESSAGE_LENGTH = 2048;
 	
 	private final Set<String> projectNames = new HashSet<String>();
 	private List<String> buildUsers;
@@ -293,6 +294,17 @@ public class JdbcBuildOutcomeStore implements BuildOutcomeStore, ProjectNameChan
 		}
 		
 		return outcome.getId();
+	}
+
+	static String truncate(String str, int max) {
+		if (str == null) {
+			return null;
+		}
+		
+		if (str.length() > max) {
+			return str.substring(0, max);
+		}
+		return str;
 	}
 
 	private void loadUsersAndBuildSchedulers() {

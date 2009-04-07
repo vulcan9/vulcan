@@ -524,6 +524,22 @@ public class JdbcBuildOutcomeStoreTest extends TestCase {
 		assertPersistence();
 	}
 	
+	public void testSaveCommitLogTruncatesLongMessage() throws Exception {
+		final ChangeLogDto log = new ChangeLogDto();
+		final ChangeSetDto a = new ChangeSetDto();
+		a.setMessage(StringUtils.repeat("did some stuff", JdbcBuildOutcomeStore.MAX_COMMIT_MESSAGE_LENGTH));
+		a.setRevisionLabel("1.42");
+		
+		log.setChangeSets(Arrays.asList(a));
+		
+		outcome.setChangeLog(log);
+		
+		final JdbcBuildOutcomeDto loadedOutcome = storeOutcome();
+		
+		final ChangeSetDto change = loadedOutcome.getChangeLog().getChangeSets().get(0);
+		assertEquals(JdbcBuildOutcomeStore.MAX_COMMIT_MESSAGE_LENGTH, change.getMessage().length());
+	}
+	
 	public void testSaveCommitLogWithFiles() throws Exception {
 		final ChangeLogDto log = new ChangeLogDto();
 		final ChangeSetDto a = new ChangeSetDto();

@@ -53,24 +53,13 @@ class TestFailureInserter extends SqlUpdate {
 
 		for (TestFailureDto dto : failures) {
 			params[1] = dto.getName();
-			params[2] = truncate(dto.getMessage(), JdbcBuildOutcomeStore.MAX_TEST_FAILURE_MESSAGE_LENGTH);
-			params[3] = truncate(dto.getDetails(), JdbcBuildOutcomeStore.MAX_TEST_FAILURE_DETAILS_LENGTH);
+			params[2] = JdbcBuildOutcomeStore.truncate(dto.getMessage(), JdbcBuildOutcomeStore.MAX_TEST_FAILURE_MESSAGE_LENGTH);
+			params[3] = JdbcBuildOutcomeStore.truncate(dto.getDetails(), JdbcBuildOutcomeStore.MAX_TEST_FAILURE_DETAILS_LENGTH);
 			params[4] = dto.getBuildNumber();
 			
 			count += update(params);
 		}
 		
 		return count;
-	}
-
-	private String truncate(String str, int max) {
-		if (str == null) {
-			return null;
-		}
-		
-		if (str.length() > max) {
-			return str.substring(0, max);
-		}
-		return str;
 	}
 }
