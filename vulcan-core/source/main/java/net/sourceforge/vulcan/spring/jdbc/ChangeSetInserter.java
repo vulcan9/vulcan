@@ -61,7 +61,7 @@ class ChangeSetInserter extends SqlUpdate {
 		
 		for (ChangeSetDto dto : changeSets) {
 			params[1] = index;
-			params[2] = dto.getMessage();
+			params[2] = JdbcBuildOutcomeStore.truncate(dto.getMessage(), JdbcBuildOutcomeStore.MAX_COMMIT_MESSAGE_LENGTH);
 			params[3] = dto.getRevisionLabel();
 			params[4] = dto.getTimestamp();
 			params[5] = dto.getAuthor();
