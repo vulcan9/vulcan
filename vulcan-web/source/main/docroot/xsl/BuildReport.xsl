@@ -96,113 +96,117 @@
 			</head>
 			<body>
 				<form class="hidden" action="#" method="get">
-					<input name="work-directory" id="work-directory" type="hidden">
-						<xsl:attribute name="value"><xsl:value-of select="$work-directory"/></xsl:attribute>
-						<xsl:text> </xsl:text>
-					</input>
-					<input id="repository-url" type="hidden">
-						<xsl:attribute name="value"><xsl:value-of select="/project/repository-url"/></xsl:attribute>
-						<xsl:text> </xsl:text>
-					</input>
+					<div>
+						<input name="work-directory" id="work-directory" type="hidden">
+							<xsl:attribute name="value"><xsl:value-of select="$work-directory"/></xsl:attribute>
+							<xsl:text> </xsl:text>
+						</input>
+						<input id="repository-url" type="hidden">
+							<xsl:attribute name="value"><xsl:value-of select="/project/repository-url"/></xsl:attribute>
+							<xsl:text> </xsl:text>
+						</input>
+					</div>
 				</form>
-				
-				<xsl:if test="/project/previous-build-number or /project/next-build-number">
-					<div class="build-nav">
-						<xsl:apply-templates select="/project/previous-build-number"/>
-						<xsl:text> </xsl:text>
+
+				<div id="build-report-header">				
+					<xsl:if test="/project/previous-build-number or /project/next-build-number">
+						<div class="build-nav">
+							<xsl:apply-templates select="/project/previous-build-number"/>
+							<xsl:text> </xsl:text>
+							<xsl:value-of select="$buildNumberHeader"/>
+							<xsl:text> </xsl:text>
+							<xsl:value-of select="/project/build-number"/>
+							<xsl:text> </xsl:text>
+							<xsl:apply-templates select="/project/next-build-number"/>
+						</div>
+					</xsl:if>
+					
+					<h3>
+						<xsl:apply-templates select="/project/name"/>
+						<xsl:text> : </xsl:text>
+						<xsl:apply-templates select="/project/status"/>
+					</h3>
+		
+					<p class="build-stats">
 						<xsl:value-of select="$buildNumberHeader"/>
 						<xsl:text> </xsl:text>
 						<xsl:value-of select="/project/build-number"/>
-						<xsl:text> </xsl:text>
-						<xsl:apply-templates select="/project/next-build-number"/>
-					</div>
-				</xsl:if>
-				
-				<h3>
-					<xsl:apply-templates select="/project/name"/>
-					<xsl:text> : </xsl:text>
-					<xsl:apply-templates select="/project/status"/>
-				</h3>
-	
-				<p class="build-stats">
-					<xsl:value-of select="$buildNumberHeader"/>
-					<xsl:text> </xsl:text>
-					<xsl:value-of select="/project/build-number"/>
-					<xsl:if test="/project/revision">
-						<xsl:text>, </xsl:text>
-						<xsl:value-of select="$revisionHeader"/>
-						<xsl:text> </xsl:text>
-						<xsl:value-of select="/project/revision"/>
-					</xsl:if>
-					<xsl:if test="/project/repository-tag-name">
-						<xsl:text> (</xsl:text>
-						<xsl:value-of select="/project/repository-tag-name"/>
-						<xsl:text>)</xsl:text>
-					</xsl:if>
-				</p>
-				<xsl:if test="/project/timestamp/@text">
-					<p class="build-stats">
-						<xsl:text>Finished on </xsl:text>
-						<xsl:value-of select="/project/timestamp/@text"/>
-					</p>
-				</xsl:if>
-				
-				<ul class="tabs" id="build-report-tabs">
-					<li>
-						<xsl:if test="$view='summary'">
-							<xsl:attribute name="class">active</xsl:attribute>
+						<xsl:if test="/project/revision">
+							<xsl:text>, </xsl:text>
+							<xsl:value-of select="$revisionHeader"/>
+							<xsl:text> </xsl:text>
+							<xsl:value-of select="/project/revision"/>
 						</xsl:if>
-						<a id="summary-tab" href="#summary-panel"><xsl:value-of select="$title"/></a>
-					</li>
-					<xsl:if test="$num-changes &gt; 0">
+						<xsl:if test="/project/repository-tag-name">
+							<xsl:text> (</xsl:text>
+							<xsl:value-of select="/project/repository-tag-name"/>
+							<xsl:text>)</xsl:text>
+						</xsl:if>
+					</p>
+					<xsl:if test="/project/timestamp/@text">
+						<p class="build-stats">
+							<xsl:text>Finished on </xsl:text>
+							<xsl:value-of select="/project/timestamp/@text"/>
+						</p>
+					</xsl:if>
+					
+					<ul class="tabs" id="build-report-tabs">
 						<li>
-							<xsl:if test="$view='changes'">
+							<xsl:if test="$view='summary'">
 								<xsl:attribute name="class">active</xsl:attribute>
 							</xsl:if>
-							<a id="changes-tab" href="#changes-panel">Commit Log (<xsl:value-of select="$num-changes"/>)</a>
+							<a id="summary-tab" href="#summary-panel"><xsl:value-of select="$title"/></a>
 						</li>
-					</xsl:if>
-					<xsl:if test="$num-errors &gt; 0">
-						<li>
-							<xsl:if test="$view='errors'">
-								<xsl:attribute name="class">active</xsl:attribute>
-							</xsl:if>
-							<a id="errors-tab" href="#errors-panel">Errors (<xsl:value-of select="$num-errors"/>)</a>
-						</li>
-					</xsl:if>
-					<xsl:if test="$num-warnings &gt; 0">
-						<li>
-							<xsl:if test="$view='warnings'">
-								<xsl:attribute name="class">active</xsl:attribute>
-							</xsl:if>
-							<a id="warnings-tab" href="#warnings-panel">Warnings (<xsl:value-of select="$num-warnings"/>)</a>
-						</li>
-					</xsl:if>
-					<xsl:if test="$num-test-failures &gt; 0">
-						<li>
-							<xsl:if test="$view='tests'">
-								<xsl:attribute name="class">active</xsl:attribute>
-							</xsl:if>
-							<a id="tests-tab" href="#tests-panel"><xsl:value-of select="$testFailureLabel"/> (<xsl:value-of select="$num-test-failures"/>)</a>
-						</li>
-					</xsl:if>
-					<xsl:if test="/project/metrics">
-						<li>
-							<xsl:if test="$view='metrics'">
-								<xsl:attribute name="class">active</xsl:attribute>
-							</xsl:if>
-							<a id="metrics-tab" href="#metrics-panel"><xsl:value-of select="$metricsLabel"/></a>
-						</li>
-					</xsl:if>
-					<xsl:if test="$showBuildDirectory">
-						<li>
-							<xsl:if test="$view='browse'">
-								<xsl:attribute name="class">active</xsl:attribute>
-							</xsl:if>
-							<a id="browse-tab" href="#browse-panel">Build Directory</a>
-						</li>
-					</xsl:if>
-				</ul>
+						<xsl:if test="$num-changes &gt; 0">
+							<li>
+								<xsl:if test="$view='changes'">
+									<xsl:attribute name="class">active</xsl:attribute>
+								</xsl:if>
+								<a id="changes-tab" href="#changes-panel">Commit Log (<xsl:value-of select="$num-changes"/>)</a>
+							</li>
+						</xsl:if>
+						<xsl:if test="$num-errors &gt; 0">
+							<li>
+								<xsl:if test="$view='errors'">
+									<xsl:attribute name="class">active</xsl:attribute>
+								</xsl:if>
+								<a id="errors-tab" href="#errors-panel">Errors (<xsl:value-of select="$num-errors"/>)</a>
+							</li>
+						</xsl:if>
+						<xsl:if test="$num-warnings &gt; 0">
+							<li>
+								<xsl:if test="$view='warnings'">
+									<xsl:attribute name="class">active</xsl:attribute>
+								</xsl:if>
+								<a id="warnings-tab" href="#warnings-panel">Warnings (<xsl:value-of select="$num-warnings"/>)</a>
+							</li>
+						</xsl:if>
+						<xsl:if test="$num-test-failures &gt; 0">
+							<li>
+								<xsl:if test="$view='tests'">
+									<xsl:attribute name="class">active</xsl:attribute>
+								</xsl:if>
+								<a id="tests-tab" href="#tests-panel"><xsl:value-of select="$testFailureLabel"/> (<xsl:value-of select="$num-test-failures"/>)</a>
+							</li>
+						</xsl:if>
+						<xsl:if test="/project/metrics">
+							<li>
+								<xsl:if test="$view='metrics'">
+									<xsl:attribute name="class">active</xsl:attribute>
+								</xsl:if>
+								<a id="metrics-tab" href="#metrics-panel"><xsl:value-of select="$metricsLabel"/></a>
+							</li>
+						</xsl:if>
+						<xsl:if test="$showBuildDirectory">
+							<li>
+								<xsl:if test="$view='browse'">
+									<xsl:attribute name="class">active</xsl:attribute>
+								</xsl:if>
+								<a id="browse-tab" href="#browse-panel">Build Directory</a>
+							</li>
+						</xsl:if>
+					</ul>
+				</div>
 				
 				<xsl:call-template name="bubble">
 					<xsl:with-param name="target" select="'summary'"/>
