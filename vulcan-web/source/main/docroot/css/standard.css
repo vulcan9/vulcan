@@ -67,11 +67,14 @@ caption, .caption {
 }
 
 /***** Layout ************************************************************************************/
+#top-nav {
+	position: relative;
+	padding: 5ex 0 3ex 5ex;
+}
+
 #brand {
 	height: 58px;
 	width: 225px;
-	margin-top: 5ex;
-	margin-left: 10ex;
 	overflow: hidden;
 	z-index: 10;
 }
@@ -81,21 +84,24 @@ ul#primary-nav,ul#utility-nav {
 	text-align: right;
 }
 
+
 ul#primary-nav {
-	padding-bottom: 3px !important;
+	position: absolute;
+	bottom: -3px;
+	right: 0;
 }
 
 ul#utility-nav {
 	position: absolute;
 	top: 1ex;
-	right: 5ex;
-	left: 15ex;
+	right: 0;
+	left: 10ex;
 	border-top: 3px solid #e7e7e7;
 }
 
 ul#primary-nav li {
+	float: left;
 	margin-right: 4ex;
-	padding: 1ex 2ex 3px 2ex;
 }
 
 ul#primary-nav li.active {
@@ -109,13 +115,15 @@ ul#primary-nav li.active a {
 ul#primary-nav li a {
 	color: #666;
 	font-weight: bold;
+	display: block;
+	padding: 5px 15px 5px 15px;
 }
 
-ul#utility-nav li,ul#primary-nav li {
+ul#utility-nav li {
 	display: inline;
 }
 
-ul#primary-nav li:last-child,ul#utility-nav li:last-child {
+ul#utility-nav li:last-child {
 	margin-right: 5ex;
 }
 
@@ -148,11 +156,8 @@ ul#utility-nav li.username+li:before {
 	content: "";
 }
 
-div.container,ul#primary-nav {
+div.container {
 	margin: 0 5ex;
-}
-
-div.container,ul#primary-nav,ul#utility-nav {
 	min-width: 860px;
 }
 
@@ -592,30 +597,41 @@ input[type=submit] {
 }
 
 
+#build-report-header {
+	position: relative;
+	padding-bottom: 8ex;
+}
+
 ul.tabs {
 	margin: 0;
 	margin-top: 20px;
 	padding: 0;
+	list-style-type: none;
+	position: absolute;
+	bottom: -1px;
 }
 
 ul.tabs li {
-	display: inline;
+	float: left;
 	background-color: #ccc;
 	margin-left: 10px;
-	padding: 10px;
 	border: 1px solid black;
+}
+
+ul.tabs li a {
+	display: block;
+	padding: 10px;
 }
 
 ul.tabs li.active {
 	background-color: white;
-	padding-bottom: 11px;
+	padding-bottom: 1px;
 	border-bottom: none;
 }
 
 div.tab-panel {
 	display: none;
 	border: 1px solid black;
-	margin-top: 10px;
 	padding: 10px;
 }
 

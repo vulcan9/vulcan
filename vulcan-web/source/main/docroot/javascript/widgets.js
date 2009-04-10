@@ -556,6 +556,8 @@ function registerHandlers() {
 		
 		showBuildReportPanel(panelName);
 		
+		$(this).blur();
+		
 		return false;
 	});
 	
