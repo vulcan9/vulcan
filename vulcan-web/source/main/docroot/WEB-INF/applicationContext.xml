@@ -6,7 +6,9 @@
 	$HeadURL$
 -->
 <beans>
+	<!-- 
 	<import resource="mbeanContext.xml"/>
+	 -->
 	<import resource="dataAccessContext.xml"/>
 	<import resource="beans.xml"/>
 	
