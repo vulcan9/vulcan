@@ -106,6 +106,18 @@ public class VulcanContextListenerTest extends ServletTestCase {
 		assertNull("Did not remove eventPool instance", servletContext.getAttribute(Keys.EVENT_POOL));
 	}
 	
+	public void testDestroyContextAfterFailureNoOp() throws Exception {
+		l.stateManager = null;
+		
+		replay();
+		
+		l.contextDestroyed(event);
+		
+		verify();
+		
+		assertNull("Shutdown should do nothing.", loggedThrowable);
+	}
+	
 	public void testDestroyContextCallsShutDownLogs() throws Exception {
 		final StoreException e = new StoreException(new RuntimeException("failed"));
 		

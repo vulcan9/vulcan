@@ -54,6 +54,11 @@ public final class VulcanContextListener implements ServletContextListener {
 		context.removeAttribute(Keys.STATE_MANAGER);
 		context.removeAttribute(Keys.EVENT_POOL);
 		
+		if (stateManager == null) {
+			// startup probably failed.
+			return;
+		}
+		
 		try {
 			stateManager.shutdown();
 		} catch (Exception e) {
