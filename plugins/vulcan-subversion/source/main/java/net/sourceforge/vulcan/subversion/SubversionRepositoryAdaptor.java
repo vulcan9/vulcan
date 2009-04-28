@@ -91,6 +91,8 @@ public class SubversionRepositoryAdaptor extends SubversionSupport implements Re
 	
 	private final StateManager stateManager;
 	
+	private List<ChangeSetDto> changeSets;
+	
 	boolean canceling = false;
 	
 	public SubversionRepositoryAdaptor(SubversionConfigDto globalConfig, ProjectConfigDto projectConfig, SubversionProjectConfigDto config, StateManager stateManager) throws ConfigException {
@@ -194,27 +196,21 @@ public class SubversionRepositoryAdaptor extends SubversionSupport implements Re
 		 *  Get the revision of the newest log entry for this path.
 		 *  See Issue 95 (http://code.google.com/p/vulcan/issues/detail?id=95).
 		 */
-		final SVNLogClient logClient = new SVNLogClient(
-				svnRepository.getAuthenticationManager(), options);
+		revision = getMostRecentLogRevision(lastChangedRevision);
 		
-		final ISVNLogEntryHandler handler = new ISVNLogEntryHandler() {
-			public void handleLogEntry(SVNLogEntry logEntry) throws SVNException {
-				revision = logEntry.getRevision();
+		if (config.getCheckoutDepth() != CheckoutDepth.Infinity) {
+			/* Issue 151 (http://code.google.com/p/vulcan/issues/detail?id=151):
+			 * Need to filter out irrelevant commits from sparse working copy.
+			 */
+			getChangeLog(previousRevision, new RevisionTokenDto(revision), null);
+			
+			if (changeSets.size() > 0) {
+				String label = changeSets.get(changeSets.size()-1).getRevisionLabel();
+				revision = Long.valueOf(label.substring(1));
+			} else {
+				// No commit logs matched means we're effectively at the old revision.
+				revision = previousRevision.getRevision();
 			}
-		};
-		
-		try {
-			logClient.doLog(SVNURL.parseURIEncoded(profile.getRootUrl()),
-					new String[] {lineOfDevelopment.getComputedRelativePath()},
-					SVNRevision.HEAD, SVNRevision.HEAD, SVNRevision.create(lastChangedRevision),
-					true, false, 1, handler);
-		} catch (SVNException e) {
-			throw new RepositoryException(e);
-		}
-		
-		// If for some reason there were zero log entries, default to Last Changed Revision.
-		if (revision < 0) {
-			revision = lastChangedRevision;
 		}
 		
 		return new RevisionTokenDto(revision, "r" + revision);
@@ -323,8 +319,16 @@ public class SubversionRepositoryAdaptor extends SubversionSupport implements Re
 		final SVNRevision r1 = SVNRevision.create(first.getRevision().longValue());
 		final SVNRevision r2 = SVNRevision.create(revision);
 		
-		final List<ChangeSetDto> changeSets = fetchChangeSets(r1, r2);
-		fetchDifferences(SVNRevision.create(diffStartRevision), r2, diffOutputStream);
+		if (changeSets == null) {
+			changeSets = fetchChangeSets(r1, r2);
+			
+			final SparseChangeLogFilter filter = new SparseChangeLogFilter(this.config);
+			filter.removeIrrelevantChangeSets(changeSets);
+		}
+		
+		if (diffOutputStream != null) {
+			fetchDifferences(SVNRevision.create(diffStartRevision), r2, diffOutputStream);
+		}
 		
 		final ChangeLogDto changeLog = new ChangeLogDto();
 		
@@ -381,7 +385,37 @@ public class SubversionRepositoryAdaptor extends SubversionSupport implements Re
 	public void setTagName(String tagName) {
 		lineOfDevelopment.setAlternateTagName(tagName);
 	}
-	
+
+	protected long getMostRecentLogRevision(final long lastChangedRevision)	throws RepositoryException {
+		final long[] commitRev = new long[1];
+		commitRev[0] = -1;
+		
+		final SVNLogClient logClient = new SVNLogClient(
+				svnRepository.getAuthenticationManager(), options);
+		
+		final ISVNLogEntryHandler handler = new ISVNLogEntryHandler() {
+			public void handleLogEntry(SVNLogEntry logEntry) throws SVNException {
+				commitRev[0] = logEntry.getRevision();
+			}
+		};
+		
+		try {
+			logClient.doLog(SVNURL.parseURIEncoded(profile.getRootUrl()),
+					new String[] {lineOfDevelopment.getComputedRelativePath()},
+					SVNRevision.HEAD, SVNRevision.HEAD, SVNRevision.create(lastChangedRevision),
+					true, false, 1, handler);
+		} catch (SVNException e) {
+			throw new RepositoryException(e);
+		}
+		
+		// If for some reason there were zero log entries, default to Last Changed Revision.
+		if (commitRev[0] < 0) {
+			commitRev[0] = lastChangedRevision;
+		}
+		
+		return commitRev[0];
+	}
+
 	protected List<ChangeSetDto> fetchChangeSets(final SVNRevision r1, final SVNRevision r2) throws RepositoryException {
 		final SVNLogClient logClient = new SVNLogClient(svnRepository.getAuthenticationManager(), options);
 		logClient.setEventHandler(eventHandler);

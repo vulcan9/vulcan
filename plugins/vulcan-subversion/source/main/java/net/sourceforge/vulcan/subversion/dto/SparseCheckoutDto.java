@@ -32,6 +32,14 @@ public class SparseCheckoutDto extends PluginConfigDto implements Comparable<Spa
 	private String directoryName = StringUtils.EMPTY;
 	private CheckoutDepth checkoutDepth	= CheckoutDepth.Empty;
 	
+	public SparseCheckoutDto() {
+	}
+	
+	public SparseCheckoutDto(String directoryName, CheckoutDepth depth) {
+		setDirectoryName(directoryName);
+		setCheckoutDepth(depth);
+	}
+	
 	@Override
 	public String getPluginId() {
 		return SubversionConfigDto.PLUGIN_ID;
