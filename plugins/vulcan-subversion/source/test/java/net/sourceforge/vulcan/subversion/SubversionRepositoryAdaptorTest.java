@@ -147,8 +147,6 @@ public class SubversionRepositoryAdaptorTest extends TestCase {
 	public void testGetLatestRevisionFiltersSparseLogs() throws Exception {
 		fakeSVNDirEntry = new SVNDirEntry(fakeURL, fakeURL, "trunk", SVNNodeKind.DIR, 0, false, 100l, new Date(), "author");
 		
-		fakeMostRecentLogRevision = 101l;
-		
 		repoConfig.setCheckoutDepth(CheckoutDepth.Empty);
 		
 		ChangeSetDto change = new ChangeSetDto();
@@ -175,8 +173,6 @@ public class SubversionRepositoryAdaptorTest extends TestCase {
 	public void testGetLatestRevisionFiltersSparseLogsNoneMatch() throws Exception {
 		fakeSVNDirEntry = new SVNDirEntry(fakeURL, fakeURL, "trunk", SVNNodeKind.DIR, 0, false, 100l, new Date(), "author");
 		
-		fakeMostRecentLogRevision = 101l;
-		
 		repoConfig.setCheckoutDepth(CheckoutDepth.Empty);
 		
 		ChangeSetDto change = new ChangeSetDto();
@@ -193,6 +189,23 @@ public class SubversionRepositoryAdaptorTest extends TestCase {
 		r = new TestableSubversionRepositoryAdaptor();
 		
 		assertEquals(r1.getRevision(), r.getLatestRevision(r1).getRevision());
+	}
+	
+	public void testGetLatestRevisionSparseIgnoresException() throws Exception {
+		fakeSVNDirEntry = new SVNDirEntry(fakeURL, fakeURL, "trunk", SVNNodeKind.DIR, 0, false, 100l, new Date(), "author");
+		
+		repoConfig.setCheckoutDepth(CheckoutDepth.Empty);
+		fakeChangeSets = null;
+		
+		repoConfig.setPath("/");
+		repoConfig.setCheckoutDepth(CheckoutDepth.Empty);
+		repoConfig.setFolders(new SparseCheckoutDto[] {new SparseCheckoutDto("some/included", CheckoutDepth.Infinity)});
+
+		fakeMostRecentLogRevision = 200l;
+		
+		r = new TestableSubversionRepositoryAdaptor();
+		
+		assertEquals(fakeMostRecentLogRevision, r.getLatestRevision(r1).getRevision().longValue());
 	}
 	
 	public void testNonFatalException() throws Exception {
@@ -271,6 +284,9 @@ public class SubversionRepositoryAdaptorTest extends TestCase {
 
 		@Override
 		protected List<ChangeSetDto> fetchChangeSets(SVNRevision r1, SVNRevision r2) throws RepositoryException {
+			if (fakeChangeSets == null) {
+				throw new RepositoryException("the path doesn't exist at that revision", new SVNException(SVNErrorMessage.UNKNOWN_ERROR_MESSAGE));
+			}
 			return fakeChangeSets;
 		}
 		

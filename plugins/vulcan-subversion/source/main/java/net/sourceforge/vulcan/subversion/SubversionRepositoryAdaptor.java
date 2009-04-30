@@ -202,14 +202,19 @@ public class SubversionRepositoryAdaptor extends SubversionSupport implements Re
 			/* Issue 151 (http://code.google.com/p/vulcan/issues/detail?id=151):
 			 * Need to filter out irrelevant commits from sparse working copy.
 			 */
-			getChangeLog(previousRevision, new RevisionTokenDto(revision), null);
 			
-			if (changeSets.size() > 0) {
-				String label = changeSets.get(changeSets.size()-1).getRevisionLabel();
-				revision = Long.valueOf(label.substring(1));
-			} else {
-				// No commit logs matched means we're effectively at the old revision.
-				revision = previousRevision.getRevision();
+			try {
+				getChangeLog(previousRevision, new RevisionTokenDto(revision), null);
+				if (changeSets.size() > 0) {
+					String label = changeSets.get(changeSets.size()-1).getRevisionLabel();
+					revision = Long.valueOf(label.substring(1));
+				} else {
+					// No commit logs matched means we're effectively at the old revision.
+					revision = previousRevision.getRevision();
+				}
+			} catch (RepositoryException e) {
+				// Probably the  path does not exist at the previousRevision.
+				changeSets = null;
 			}
 		}
 		
