@@ -61,9 +61,10 @@ public class ProfileDto extends PluginConfigDto {
 		addProperty(pds, "description", "ProfileDto.description.name", "ProfileDto.description.description", locale);
 		addProperty(pds, "locale", "ProfileDto.locale.name", "ProfileDto.locale.description", locale);
 		addProperty(pds, "emailAddresses", "ProfileDto.emailAddresses.name", "ProfileDto.emailAddresses.description", locale);
+		addProperty(pds, "onlyEmailChangeAuthors", "ProfileDto.onlyEmailChangeAuthors.name", "ProfileDto.onlyEmailChangeAuthors.description", locale);
 		addProperty(pds, "policy", "ProfileDto.policy.name", "ProfileDto.policy.description", locale);
 		addProperty(pds, "onlyOnChange", "ProfileDto.onlyOnChange.name", "ProfileDto.onlyOnChange.description", locale);
-		addProperty(pds, "onlyEmailChangeAuthors", "ProfileDto.onlyEmailChangeAuthors.name", "ProfileDto.onlyEmailChangeAuthors.description", locale);
+		
 		addProperty(pds, "projects", "ProfileDto.projects.name", "ProfileDto.projects.description", locale,
 				Collections.singletonMap(PluginConfigDto.ATTR_CHOICE_TYPE, ConfigChoice.PROJECTS));
 
