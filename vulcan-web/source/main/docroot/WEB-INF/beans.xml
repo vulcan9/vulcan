@@ -167,6 +167,7 @@
 		<property name="transformResources">
 			<map>
 				<entry key="xhtml" value="xsl/BuildReport.xsl"/>
+				<entry key="email" value="xsl/BuildReportEmail.xsl"/>
 				<entry key="DataTable" value="xsl/BuildHistoryDataTable.xsl"/>
 				<entry key="OpenFlashChart-BuildOutcomePieChart" value="xsl/OpenFlashChart-BuildOutcomePieChart.xsl"/>
 				<entry key="OpenFlashChart-BuildDuration" value="xsl/OpenFlashChart-BuildDuration.xsl"/>

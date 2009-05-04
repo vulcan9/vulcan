@@ -26,6 +26,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -78,6 +79,7 @@ public class EmailPlugin implements BuildManagerObserverPlugin, ConfigurablePlug
     EventHandler eventHandler;
     MessageAssembler messageAssembler;
     String cssLocation;
+    String stylesheet;
     ApplicationContext ctx;
 
     ConfigDto config = new ConfigDto();
@@ -197,6 +199,14 @@ public class EmailPlugin implements BuildManagerObserverPlugin, ConfigurablePlug
         this.cssLocation = cssLocation;
     }
 
+    public String getStylesheet() {
+		return stylesheet;
+	}
+    
+    public void setStylesheet(String stylesheet) {
+		this.stylesheet = stylesheet;
+	}
+    
     void sendMessage(MimeMessage message) throws AddressException, MessagingException {
         Transport.send(message);
     }
@@ -250,19 +260,24 @@ public class EmailPlugin implements BuildManagerObserverPlugin, ConfigurablePlug
     protected List<String> getEmailAddresses(ProjectStatusDto status, ProfileDto profile) {
         if (profile.isOnlyEmailChangeAuthors()) {
             ChangeLogDto changeLog = status.getChangeLog();
-            Set<String> addresses = new LinkedHashSet<String>();
-            if (changeLog != null) {
+            if (changeLog == null) {
+            	return Collections.emptyList();
+            }
+            
+            final Set<String> addresses = new LinkedHashSet<String>();
+            final List<ChangeSetDto> changeSets = changeLog.getChangeSets();
 
-                List<ChangeSetDto> changeSets = changeLog.getChangeSets();
+            final Map<String, String> map = getChangeAuthorEmailMap();
 
-                Map<String, String> map = getChangeAuthorEmailMap();
-
-                String[] profileAddresses = profile.getEmailAddresses();
-                for (ChangeSetDto changeSet : changeSets) {
-                    String author = changeSet.getAuthor().trim();
-                    if (map.containsKey(author) && ArrayUtils.contains(profileAddresses, map.get(author))) {
-                        addresses.add(map.get(author));
-                    }
+            final String[] profileAddresses = profile.getEmailAddresses();
+            for (ChangeSetDto changeSet : changeSets) {
+                final String author = changeSet.getAuthor().trim();
+                if (!map.containsKey(author)) {
+                	continue;
+                }
+                final String address = map.get(author);
+				if (ArrayUtils.contains(profileAddresses, address)) {
+                    addresses.add(address);
                 }
             }
             return new ArrayList<String>(addresses);
@@ -372,7 +387,7 @@ public class EmailPlugin implements BuildManagerObserverPlugin, ConfigurablePlug
 			params.put("issueTrackerURL", trackerURL.toExternalForm());	
 		}
 
-		projectDomBuilder.transform(projectDom, params, locale, "xhtml", xhtmlResult);
+		projectDomBuilder.transform(projectDom, params, locale, stylesheet, xhtmlResult);
 
         final Document xhtmlDom = xhtmlResult.getDocument();
 
@@ -418,7 +433,7 @@ public class EmailPlugin implements BuildManagerObserverPlugin, ConfigurablePlug
     private URL generateStatusURL() throws MalformedURLException {
         final StringBuilder buf = getVulcanRootURL();
 
-        buf.append("viewProjectStatus.do?transform=xhtml");
+        buf.append("projects/");
 
         return new URL(buf.toString());
     }

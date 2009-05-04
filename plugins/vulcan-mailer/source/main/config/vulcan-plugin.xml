@@ -13,9 +13,7 @@
 		<property name="projectDomBuilder">
 			<ref parent="projectDomBuilder"/>
 		</property>
-		<property name="cssLocation">
-			<value>/css/email.css</value>
-		</property>
+		<property name="stylesheet" value="email"/>
 	</bean>
 	
 	<bean id="messageSource" class="org.springframework.context.support.ReloadableResourceBundleMessageSource">
