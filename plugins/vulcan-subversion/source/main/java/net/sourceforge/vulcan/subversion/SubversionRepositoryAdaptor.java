@@ -170,14 +170,13 @@ public class SubversionRepositoryAdaptor extends SubversionSupport implements Re
 				public boolean askYesNo(String arg0, String arg1, boolean arg2) {
 					throw new UnsupportedOperationException();
 				}
-				
 			});
 		}
 	}
 
 	public RevisionTokenDto getLatestRevision(RevisionTokenDto previousRevision) throws RepositoryException {
 		final String path = lineOfDevelopment.getComputedRelativePath();
-		final SVNDirEntry info;
+		SVNDirEntry info;
 		
 		try {
 			info = svnRepository.info(path, revision);
@@ -196,26 +195,46 @@ public class SubversionRepositoryAdaptor extends SubversionSupport implements Re
 		 *  Get the revision of the newest log entry for this path.
 		 *  See Issue 95 (http://code.google.com/p/vulcan/issues/detail?id=95).
 		 */
-		revision = getMostRecentLogRevision(lastChangedRevision);
+		final long mostRecentLogRevision = getMostRecentLogRevision(lastChangedRevision);
 		
-		if (config.getCheckoutDepth() != CheckoutDepth.Infinity) {
-			/* Issue 151 (http://code.google.com/p/vulcan/issues/detail?id=151):
-			 * Need to filter out irrelevant commits from sparse working copy.
-			 */
-			
-			try {
-				getChangeLog(previousRevision, new RevisionTokenDto(revision), null);
-				if (changeSets.size() > 0) {
-					String label = changeSets.get(changeSets.size()-1).getRevisionLabel();
-					revision = Long.valueOf(label.substring(1));
-				} else {
-					// No commit logs matched means we're effectively at the old revision.
-					revision = previousRevision.getRevision();
+		if (config.getCheckoutDepth() == CheckoutDepth.Infinity) {
+			revision = mostRecentLogRevision;
+			return new RevisionTokenDto(revision, "r" + revision);
+		}
+		
+		/* Issue 151 (http://code.google.com/p/vulcan/issues/detail?id=151):
+		 * Need to filter out irrelevant commits from sparse working copy.
+		 */
+		
+		try {
+			getChangeLog(previousRevision, new RevisionTokenDto(revision), null);
+			if (changeSets.size() > 0) {
+				String label = changeSets.get(changeSets.size()-1).getRevisionLabel();
+				revision = Long.valueOf(label.substring(1));
+			} else {
+				// No commit logs matched means we're effectively at the old revision.
+				// Need to check if the old revision exists on this path in case we're building
+				// from a different branch/tag.
+				try {
+					info = svnRepository.info(path, previousRevision.getRevision());
+				} catch (SVNException e) {
+					throw new RepositoryException(e);
 				}
-			} catch (RepositoryException e) {
-				// Probably the  path does not exist at the previousRevision.
-				changeSets = null;
+				
+				if (info != null) {
+					revision = previousRevision.getRevision();	
+				} else {
+					// Path doesn't exist at that revision.  Use most recent commit
+					// even though it didn't match our sparse working copy.
+					revision = mostRecentLogRevision;
+				}
+				
 			}
+		} catch (RepositoryException e) {
+			// Probably the  path does not exist at the previousRevision.
+			revision = mostRecentLogRevision;
+			
+			changeSets = null;
 		}
 		
 		return new RevisionTokenDto(revision, "r" + revision);
@@ -327,8 +346,10 @@ public class SubversionRepositoryAdaptor extends SubversionSupport implements Re
 		if (changeSets == null) {
 			changeSets = fetchChangeSets(r1, r2);
 			
-			final SparseChangeLogFilter filter = new SparseChangeLogFilter(this.config);
-			filter.removeIrrelevantChangeSets(changeSets);
+			if (this.config.getCheckoutDepth() != CheckoutDepth.Infinity) {
+				final SparseChangeLogFilter filter = new SparseChangeLogFilter(this.config, this.lineOfDevelopment);
+				filter.removeIrrelevantChangeSets(changeSets);
+			}
 		}
 		
 		if (diffOutputStream != null) {

@@ -31,9 +31,9 @@ import net.sourceforge.vulcan.subversion.dto.SubversionProjectConfigDto;
 public class SparseChangeLogFilter {
 	private final List<SparseCheckoutDto> folders;
 	
-	public SparseChangeLogFilter(SubversionProjectConfigDto config)
+	public SparseChangeLogFilter(SubversionProjectConfigDto config, LineOfDevelopment lineOfDevelopment)
 	{
-		String rootPath = config.getPath();
+		String rootPath = lineOfDevelopment.getComputedRelativePath();
 		
 		if (!rootPath.startsWith("/")) {
 			rootPath = "/" + rootPath;
@@ -74,7 +74,14 @@ public class SparseChangeLogFilter {
 		for (String path : changeSet.getModifiedPaths()) {
 			for (SparseCheckoutDto folder : folders) {
 				final String sparseDir = folder.getDirectoryName();
+				
+				// If the root path matches the folder (without trailing slash), we matched.
+				if (sparseDir.substring(0, sparseDir.length()-1).equals(path)) {
+					return true;
+				}
+				
 				if (!path.startsWith(sparseDir)) {
+					// Not even close.
 					continue;
 				}
 			
