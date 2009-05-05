@@ -32,7 +32,7 @@ import net.sourceforge.vulcan.subversion.dto.SubversionProjectConfigDto;
 public class SparseChangeLogFilterTest extends TestCase {
 	ChangeSetDto change1;
 	SubversionProjectConfigDto config = new SubversionProjectConfigDto();
-
+	LineOfDevelopment line = new LineOfDevelopment();
 	
 	@Override
 	protected void setUp() throws Exception {
@@ -41,6 +41,10 @@ public class SparseChangeLogFilterTest extends TestCase {
 		change1.setModifiedPaths(new String[] {"/trunk/Scripts/Build"});
 		config.setCheckoutDepth(CheckoutDepth.Infinity);
 		config.setPath("/trunk");
+		
+		line.setPath("/trunk");
+		line.setTagFolderNames(Collections.singleton("tags"));
+		line.setRepositoryRoot("http://localhost/svn");
 	}
 	
 	public void testIncludesOnInfiniteDepth() throws Exception {
@@ -49,7 +53,7 @@ public class SparseChangeLogFilterTest extends TestCase {
 		config.setCheckoutDepth(CheckoutDepth.Infinity);
 		
 		final List<ChangeSetDto> result = new ArrayList<ChangeSetDto>(list);
-		new SparseChangeLogFilter(config).removeIrrelevantChangeSets(result);
+		new SparseChangeLogFilter(config, line).removeIrrelevantChangeSets(result);
 		
 		assertEquals(list, result);
 	}
@@ -60,7 +64,30 @@ public class SparseChangeLogFilterTest extends TestCase {
 		config.setCheckoutDepth(CheckoutDepth.Files);
 		
 		final List<ChangeSetDto> result = new ArrayList<ChangeSetDto>(list);
-		new SparseChangeLogFilter(config).removeIrrelevantChangeSets(result);
+		new SparseChangeLogFilter(config, line).removeIrrelevantChangeSets(result);
+		
+		assertEquals(list, result);
+	}
+	
+	public void testIncludesTopLevelOnEmpty() throws Exception {
+		List<ChangeSetDto> list = makeList(makeChangeSet("/trunk"));
+		
+		config.setCheckoutDepth(CheckoutDepth.Empty);
+		
+		final List<ChangeSetDto> result = new ArrayList<ChangeSetDto>(list);
+		new SparseChangeLogFilter(config, line).removeIrrelevantChangeSets(result);
+		
+		assertEquals(list, result);
+	}
+	
+	public void testIncludesTopLevelAlternateTag() throws Exception {
+		List<ChangeSetDto> list = makeList(makeChangeSet("/tags/1.0"));
+		line.setAlternateTagName("tags/1.0");
+		
+		config.setCheckoutDepth(CheckoutDepth.Empty);
+		
+		final List<ChangeSetDto> result = new ArrayList<ChangeSetDto>(list);
+		new SparseChangeLogFilter(config, line).removeIrrelevantChangeSets(result);
 		
 		assertEquals(list, result);
 	}
@@ -71,7 +98,7 @@ public class SparseChangeLogFilterTest extends TestCase {
 		config.setCheckoutDepth(CheckoutDepth.Files);
 		
 		final List<ChangeSetDto> result = new ArrayList<ChangeSetDto>(list);
-		new SparseChangeLogFilter(config).removeIrrelevantChangeSets(result);
+		new SparseChangeLogFilter(config, line).removeIrrelevantChangeSets(result);
 		
 		assertEquals(Collections.emptyList(), result);
 	}
@@ -83,7 +110,7 @@ public class SparseChangeLogFilterTest extends TestCase {
 		config.setCheckoutDepth(CheckoutDepth.Files);
 		
 		final List<ChangeSetDto> result = new ArrayList<ChangeSetDto>(list);
-		new SparseChangeLogFilter(config).removeIrrelevantChangeSets(result);
+		new SparseChangeLogFilter(config, line).removeIrrelevantChangeSets(result);
 		
 		assertEquals(list, result);
 	}
@@ -95,7 +122,7 @@ public class SparseChangeLogFilterTest extends TestCase {
 		config.setCheckoutDepth(CheckoutDepth.Files);
 		
 		final List<ChangeSetDto> result = new ArrayList<ChangeSetDto>(list);
-		new SparseChangeLogFilter(config).removeIrrelevantChangeSets(result);
+		new SparseChangeLogFilter(config, line).removeIrrelevantChangeSets(result);
 		
 		assertEquals(list, result);
 	}
@@ -106,7 +133,7 @@ public class SparseChangeLogFilterTest extends TestCase {
 		config.setCheckoutDepth(CheckoutDepth.Immediates);
 		
 		final List<ChangeSetDto> result = new ArrayList<ChangeSetDto>(list);
-		new SparseChangeLogFilter(config).removeIrrelevantChangeSets(result);
+		new SparseChangeLogFilter(config, line).removeIrrelevantChangeSets(result);
 		
 		assertEquals(Collections.emptyList(), result);
 	}
@@ -117,7 +144,7 @@ public class SparseChangeLogFilterTest extends TestCase {
 		config.setCheckoutDepth(CheckoutDepth.Infinity);
 		
 		final List<ChangeSetDto> result = new ArrayList<ChangeSetDto>(list);
-		new SparseChangeLogFilter(config).removeIrrelevantChangeSets(result);
+		new SparseChangeLogFilter(config, line).removeIrrelevantChangeSets(result);
 		
 		assertEquals(Collections.emptyList(), result);
 	}
@@ -128,7 +155,7 @@ public class SparseChangeLogFilterTest extends TestCase {
 		config.setCheckoutDepth(CheckoutDepth.Empty);
 		
 		final List<ChangeSetDto> result = new ArrayList<ChangeSetDto>(list);
-		new SparseChangeLogFilter(config).removeIrrelevantChangeSets(result);
+		new SparseChangeLogFilter(config, line).removeIrrelevantChangeSets(result);
 		
 		assertEquals(Collections.emptyList(), result);
 	}
@@ -141,7 +168,7 @@ public class SparseChangeLogFilterTest extends TestCase {
 		config.setFolders(makeFolders(new SparseCheckoutDto("folder", CheckoutDepth.Files)));
 		
 		final List<ChangeSetDto> result = new ArrayList<ChangeSetDto>(list);
-		new SparseChangeLogFilter(config).removeIrrelevantChangeSets(result);
+		new SparseChangeLogFilter(config, line).removeIrrelevantChangeSets(result);
 		
 		assertEquals(list, result);
 	}
@@ -154,7 +181,7 @@ public class SparseChangeLogFilterTest extends TestCase {
 		config.setFolders(makeFolders(new SparseCheckoutDto("folder", CheckoutDepth.Files)));
 		
 		final List<ChangeSetDto> result = new ArrayList<ChangeSetDto>(list);
-		new SparseChangeLogFilter(config).removeIrrelevantChangeSets(result);
+		new SparseChangeLogFilter(config, line).removeIrrelevantChangeSets(result);
 		
 		assertEquals(Collections.emptyList(), result);
 	}

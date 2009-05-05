@@ -23,7 +23,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import junit.framework.TestCase;
 import net.sourceforge.vulcan.dto.ChangeLogDto;
@@ -63,7 +65,9 @@ public class SubversionRepositoryAdaptorTest extends TestCase {
 	RevisionTokenDto r2 = new RevisionTokenDto(200l, "r200");
 	
 	SVNURL fakeURL;
-	SVNDirEntry fakeSVNDirEntry;
+	
+	Map<Long, SVNDirEntry> fakeSVNDirEntries = new HashMap<Long, SVNDirEntry>();
+	
 	List<ChangeSetDto> fakeChangeSets = new ArrayList<ChangeSetDto>();
 	long fakeMostRecentLogRevision;
 	
@@ -136,7 +140,7 @@ public class SubversionRepositoryAdaptorTest extends TestCase {
 	}
 	
 	public void testGetLatestRevisionUsesLogRevision() throws Exception {
-		fakeSVNDirEntry = new SVNDirEntry(fakeURL, fakeURL, "trunk", SVNNodeKind.DIR, 0, false, 100l, new Date(), "author");
+		fakeSVNDirEntries.put(-1l, new SVNDirEntry(fakeURL, fakeURL, "trunk", SVNNodeKind.DIR, 0, false, 100l, new Date(), "author"));
 		
 		fakeMostRecentLogRevision = 101l;
 		r = new TestableSubversionRepositoryAdaptor();
@@ -145,7 +149,7 @@ public class SubversionRepositoryAdaptorTest extends TestCase {
 	}
 	
 	public void testGetLatestRevisionFiltersSparseLogs() throws Exception {
-		fakeSVNDirEntry = new SVNDirEntry(fakeURL, fakeURL, "trunk", SVNNodeKind.DIR, 0, false, 100l, new Date(), "author");
+		fakeSVNDirEntries.put(-1l, new SVNDirEntry(fakeURL, fakeURL, "trunk", SVNNodeKind.DIR, 0, false, 100l, new Date(), "author"));
 		
 		repoConfig.setCheckoutDepth(CheckoutDepth.Empty);
 		
@@ -171,7 +175,8 @@ public class SubversionRepositoryAdaptorTest extends TestCase {
 	}
 	
 	public void testGetLatestRevisionFiltersSparseLogsNoneMatch() throws Exception {
-		fakeSVNDirEntry = new SVNDirEntry(fakeURL, fakeURL, "trunk", SVNNodeKind.DIR, 0, false, 100l, new Date(), "author");
+		fakeSVNDirEntries.put(-1l, new SVNDirEntry(fakeURL, fakeURL, "trunk", SVNNodeKind.DIR, 0, false, 100l, new Date(), "author"));
+		fakeSVNDirEntries.put(r1.getRevision(), new SVNDirEntry(fakeURL, fakeURL, "trunk", SVNNodeKind.DIR, 0, false, 100l, new Date(), "author"));
 		
 		repoConfig.setCheckoutDepth(CheckoutDepth.Empty);
 		
@@ -191,8 +196,29 @@ public class SubversionRepositoryAdaptorTest extends TestCase {
 		assertEquals(r1.getRevision(), r.getLatestRevision(r1).getRevision());
 	}
 	
+	public void testGetLatestRevisionFiltersSparseLogsNoneMatchAndPreviousRevisionInvalidForPath() throws Exception {
+		fakeSVNDirEntries.put(-1l, new SVNDirEntry(fakeURL, fakeURL, "trunk", SVNNodeKind.DIR, 0, false, 100l, new Date(), "author"));
+		
+		repoConfig.setCheckoutDepth(CheckoutDepth.Empty);
+		
+		ChangeSetDto change = new ChangeSetDto();
+		change.setModifiedPaths(new String[] {"/some/excluded/path"});
+		change.setRevisionLabel("r125");
+		fakeChangeSets.add(change);
+		
+		repoConfig.setPath("/");
+		repoConfig.setCheckoutDepth(CheckoutDepth.Empty);
+		repoConfig.setFolders(new SparseCheckoutDto[] {new SparseCheckoutDto("some/included", CheckoutDepth.Infinity)});
+
+		fakeMostRecentLogRevision = 200l;
+		
+		r = new TestableSubversionRepositoryAdaptor();
+		
+		assertEquals((Long)200l, r.getLatestRevision(r1).getRevision());
+	}
+	
 	public void testGetLatestRevisionSparseIgnoresException() throws Exception {
-		fakeSVNDirEntry = new SVNDirEntry(fakeURL, fakeURL, "trunk", SVNNodeKind.DIR, 0, false, 100l, new Date(), "author");
+		fakeSVNDirEntries.put(-1l, new SVNDirEntry(fakeURL, fakeURL, "trunk", SVNNodeKind.DIR, 0, false, 100l, new Date(), "author"));
 		
 		repoConfig.setCheckoutDepth(CheckoutDepth.Empty);
 		fakeChangeSets = null;
@@ -277,7 +303,7 @@ public class SubversionRepositoryAdaptorTest extends TestCase {
 			super(globalConfig, projectConfig, repoConfig, null, SubversionRepositoryAdaptorTest.this.profile, new SVNRepositoryImpl(fakeURL, null) {
 				@Override
 				public SVNDirEntry info(String path, long revision) throws SVNException {
-					return fakeSVNDirEntry;
+					return fakeSVNDirEntries.get(revision);
 				}
 			});
 		}
