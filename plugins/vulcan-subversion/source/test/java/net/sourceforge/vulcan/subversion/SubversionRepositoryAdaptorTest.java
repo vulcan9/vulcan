@@ -148,6 +148,17 @@ public class SubversionRepositoryAdaptorTest extends TestCase {
 		assertEquals(fakeMostRecentLogRevision, r.getLatestRevision(r1).getRevision().longValue());
 	}
 	
+	public void testGetLatestRevisionUsesLogRevisionPreviousRevisionNull() throws Exception {
+		repoConfig.setCheckoutDepth(CheckoutDepth.Empty);
+		
+		fakeSVNDirEntries.put(-1l, new SVNDirEntry(fakeURL, fakeURL, "trunk", SVNNodeKind.DIR, 0, false, 100l, new Date(), "author"));
+		
+		fakeMostRecentLogRevision = 101l;
+		r = new TestableSubversionRepositoryAdaptor();
+		
+		assertEquals(fakeMostRecentLogRevision, r.getLatestRevision(null).getRevision().longValue());
+	}
+	
 	public void testGetLatestRevisionFiltersSparseLogs() throws Exception {
 		fakeSVNDirEntries.put(-1l, new SVNDirEntry(fakeURL, fakeURL, "trunk", SVNNodeKind.DIR, 0, false, 100l, new Date(), "author"));
 		
