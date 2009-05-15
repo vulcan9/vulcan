@@ -197,7 +197,7 @@ public class SubversionRepositoryAdaptor extends SubversionSupport implements Re
 		 */
 		final long mostRecentLogRevision = getMostRecentLogRevision(lastChangedRevision);
 		
-		if (config.getCheckoutDepth() == CheckoutDepth.Infinity) {
+		if (config.getCheckoutDepth() == CheckoutDepth.Infinity || previousRevision == null) {
 			revision = mostRecentLogRevision;
 			return new RevisionTokenDto(revision, "r" + revision);
 		}
