@@ -196,9 +196,9 @@ public class SubversionRepositoryAdaptor extends SubversionSupport implements Re
 		 *  See Issue 95 (http://code.google.com/p/vulcan/issues/detail?id=95).
 		 */
 		final long mostRecentLogRevision = getMostRecentLogRevision(lastChangedRevision);
+		revision = mostRecentLogRevision;
 		
 		if (config.getCheckoutDepth() == CheckoutDepth.Infinity || previousRevision == null) {
-			revision = mostRecentLogRevision;
 			return new RevisionTokenDto(revision, "r" + revision);
 		}
 		
@@ -341,7 +341,7 @@ public class SubversionRepositoryAdaptor extends SubversionSupport implements Re
 	
 	public ChangeLogDto getChangeLog(RevisionTokenDto first, RevisionTokenDto last, OutputStream diffOutputStream) throws RepositoryException {
 		final SVNRevision r1 = SVNRevision.create(first.getRevision().longValue());
-		final SVNRevision r2 = SVNRevision.create(revision);
+		final SVNRevision r2 = SVNRevision.create(last.getRevision().longValue());
 		
 		if (changeSets == null) {
 			changeSets = fetchChangeSets(r1, r2);

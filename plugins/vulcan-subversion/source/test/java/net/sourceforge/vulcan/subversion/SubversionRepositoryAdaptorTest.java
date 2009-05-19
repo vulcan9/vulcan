@@ -324,6 +324,12 @@ public class SubversionRepositoryAdaptorTest extends TestCase {
 			if (fakeChangeSets == null) {
 				throw new RepositoryException("the path doesn't exist at that revision", new SVNException(SVNErrorMessage.UNKNOWN_ERROR_MESSAGE));
 			}
+			if (r1.equals(SVNRevision.UNDEFINED)) {
+				fail("r1 is undefined");
+			}
+			if (r2.equals(SVNRevision.UNDEFINED)) {
+				fail("r2 is undefined");
+			}
 			return fakeChangeSets;
 		}
 		
