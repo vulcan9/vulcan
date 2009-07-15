@@ -18,8 +18,6 @@
  */
 package net.sourceforge.vulcan.web;
 
-import java.util.Arrays;
-
 import junit.framework.TestCase;
 import net.sourceforge.vulcan.dto.PreferencesDto;
 import net.sourceforge.vulcan.metadata.SvnRevision;
@@ -35,6 +33,7 @@ public class DefaultPreferencesStoreTest extends TestCase {
 	protected void setUp() throws Exception {
 		super.setUp();
 		prefs.setLabels(new String[] {"x", "y"});
+		prefs.setDashboardColumns(new String[] {"name", "status"});
 		prefs.setGroupByLabel(true);
 		prefs.setReloadInterval(543);
 		prefs.setPopupMode("modePopup");
@@ -59,16 +58,16 @@ public class DefaultPreferencesStoreTest extends TestCase {
 		assertEquals(prefs, store.convertFromString("bad data"));
 	}
 	
-	public void testRoundTripTruncatesEquals() throws Exception {
-		final String data = store.convertToString(prefs);
-		assertTrue(data.endsWith("=="));
-		final PreferencesDto out = store.convertFromString(data.substring(0, data.length()-2));
+	public void testSetsDefaultColumnsWhenNoneDefined() throws Exception {
+		store.setDefaultPreferences((PreferencesDto) prefs.copy());
+		final PreferencesDto expected = (PreferencesDto) prefs.copy();
 		
-		assertEquals(Arrays.asList(prefs.getLabels()), Arrays.asList(out.getLabels()));
-		assertEquals(prefs.getPopupMode(), out.getPopupMode());
-		assertEquals(prefs.getReloadInterval(), out.getReloadInterval());
-		assertEquals(prefs.getSortColumn(), out.getSortColumn());
-		assertEquals(prefs.getSortOrder(), out.getSortOrder());
-		assertEquals(prefs.getStylesheet(), out.getStylesheet());
+		expected.setPopupMode("not default");
+		prefs.setPopupMode("not default");
+		prefs.setDashboardColumns(null);
+		final String data = store.convertToString(prefs);
+		final PreferencesDto out = store.convertFromString(data);
+
+		assertEquals(expected, out);
 	}
 }

@@ -24,12 +24,12 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 
+import net.sourceforge.vulcan.dto.PreferencesDto;
+import net.sourceforge.vulcan.metadata.SvnRevision;
+
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
-import net.sourceforge.vulcan.dto.PreferencesDto;
-import net.sourceforge.vulcan.metadata.SvnRevision;
 
 @SvnRevision(id="$Id$", url="$HeadURL$")
 public class DefaultPreferencesStore implements PreferencesStore {
@@ -42,22 +42,25 @@ public class DefaultPreferencesStore implements PreferencesStore {
 			final ByteArrayOutputStream os = new ByteArrayOutputStream();
 			final ObjectOutputStream oos = new ObjectOutputStream(os);
 			oos.writeObject(prefs);
-			oos.close();
-			os.flush();
-			return new String(Base64.encodeBase64(os.toByteArray()));
+			
+			return new String(Base64.encodeBase64(os.toByteArray(), false), "us-ascii");
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
 	}
 
 	public PreferencesDto convertFromString(String data) {
-		if (!data.endsWith("==")) {
-			data += "==";
-		}
 		try {
-			final ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(Base64.decodeBase64(data.getBytes())));
+			final ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(Base64.decodeBase64(data.getBytes("us-ascii"))));
 		
-			return (PreferencesDto) ois.readObject();
+			final PreferencesDto prefs = (PreferencesDto) ois.readObject();
+			
+			// if the user preferences did not have default columns, set them now.
+			if (prefs.getDashboardColumns() == null) {
+				prefs.setDashboardColumns(defaultPreferences.getDashboardColumns());
+			}
+			
+			return prefs;
 		} catch (Exception e) {
 			LOG.error("Failed to load user preferences", e);
 			return defaultPreferences;

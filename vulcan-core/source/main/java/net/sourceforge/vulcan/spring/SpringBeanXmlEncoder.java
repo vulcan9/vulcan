@@ -148,13 +148,13 @@ public final class SpringBeanXmlEncoder implements BeanEncoder {
 		}
 	}
 	void encodeObject(final Element node, final Object object) {
-		if (object instanceof List) {
+		if (object instanceof List<?>) {
 			encodeList(node, "list", (List<?>) object);
 		} else if (object instanceof Object[]) {
 			encodeList(node, "list", Arrays.asList((Object[])object));
-		} else if (object instanceof Set) {
+		} else if (object instanceof Set<?>) {
 			encodeList(node, "set", (Collection<?>) object);
-		} else if (object instanceof Map) {
+		} else if (object instanceof Map<?,?>) {
 			encodeMap(node, (Map<?,?>)object);
 		} else if (object instanceof UUID) {
 			encodeUUID(node, (UUID)object);
@@ -229,7 +229,7 @@ public final class SpringBeanXmlEncoder implements BeanEncoder {
 		if (object == null) {
 			propertyNode.addContent(new Element("null"));
 			return;
-		} else if (object instanceof Enum) {
+		} else if (object instanceof Enum<?>) {
 			encodeEnum(propertyNode, (Enum<?>)object);
 			return;
 		}

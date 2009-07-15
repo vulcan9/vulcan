@@ -22,6 +22,8 @@ import java.util.Collections;
 import java.util.Locale;
 import java.util.Map;
 
+import java.io.FileNotFoundException;
+
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.sax.SAXSource;
@@ -69,6 +71,13 @@ public class SpringProjectDomBuilder extends AbstractProjectDomBuilder implement
 			final SAXSource source = new SAXSource(
 					XMLReaderFactory.createXMLReader(),
 					new InputSource(resource.getInputStream()));
+
+			try {
+				// Try to tell the xsl where it is for the sake of xsl:include
+				source.setSystemId(resource.getFile().getAbsolutePath());	
+			} catch (FileNotFoundException ignore) {
+				// Not all resources are backed by files.
+			}
 			
 			return transformerFactory.newTransformer(source);
 		} catch (Exception e) {

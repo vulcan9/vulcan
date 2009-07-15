@@ -1,48 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0">
+<xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0"
+	xmlns:vulcan="xalan://net.sourceforge.vulcan.web.XslHelper"
+	extension-element-prefixes="vulcan"
+	exclude-result-prefixes="vulcan">
 	
 	<xsl:output method="xml" media-type="text/html" version="1.0"
 		encoding="UTF-8" omit-xml-declaration="no"/>
 	
+	<xsl:include href="common.xsl"/>
+	
 	<xsl:param name="contextRoot"/>
-	<xsl:param name="title"/>
 	<xsl:param name="projectSiteURL"/>
 	<xsl:param name="viewProjectStatusURL"/>
 	<xsl:param name="issueTrackerURL"/>
-	<xsl:param name="issueListHeader"/>
-	<xsl:param name="nextBuildLabel"/>
-	<xsl:param name="prevBuildLabel"/>
-	<xsl:param name="sandboxLabel"/>
-	<xsl:param name="buildLogLabel"/>
-	<xsl:param name="revisionCaption"/>
-	<xsl:param name="changeSetCaption"/>
-	<xsl:param name="projectHeader"/>
-	<xsl:param name="revisionHeader"/>
-	<xsl:param name="buildNumberHeader"/>
-	<xsl:param name="authorHeader"/>
-	<xsl:param name="timestampHeader"/>
-	<xsl:param name="messageHeader"/>
-	<xsl:param name="pathsHeader"/>
-	<xsl:param name="diffHeader"/>
-	<xsl:param name="statusHeader"/>
-	<xsl:param name="lastGoodBuildNumberLabel"/>
-	<xsl:param name="repositoryUrlLabel"/>
-	<xsl:param name="repositoryTagNameHeader"/>
-	<xsl:param name="currentlyBuildingMessage"/>
-	<xsl:param name="buildRequestedByLabel"/>
-	<xsl:param name="buildScheduledByLabel"/>
-	<xsl:param name="elapsedTimeLabel"/>
-	<xsl:param name="buildReasonLabel"/>
-	<xsl:param name="updateTypeLabel"/>
-	<xsl:param name="warningsLabel"/>
-	<xsl:param name="errorsLabel"/>
-	<xsl:param name="metricsLabel"/>
-	<xsl:param name="testFailureLabel"/>
-	<xsl:param name="testNameLabel"/>
-	<xsl:param name="testFailureBuildNumberLabel"/>
-	<xsl:param name="newTestFailureLabel"/>
+	
 	<xsl:param name="reloadInterval"/>
-	<xsl:param name="buildDirectoryLabel"/>
 	<xsl:param name="showBuildDirectory" select="'true'"/>
 	<xsl:param name="workingCopyBuildNumber"/>
 	<xsl:param name="view"/>
@@ -83,7 +55,9 @@
 	<xsl:template match="/project">
 		<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-US">
 			<head>
-				<title><xsl:value-of select="$title"/></title>
+				<title>
+					<xsl:value-of select="vulcan:getMessage($messageSource, 'label.build.summary')"/>
+				</title>
 				<style type="text/css">
 					<xsl:text>div#</xsl:text>
 					<xsl:value-of select="$visible-div-id"/>
@@ -113,7 +87,7 @@
 						<div class="build-nav">
 							<xsl:apply-templates select="/project/previous-build-number"/>
 							<xsl:text> </xsl:text>
-							<xsl:value-of select="$buildNumberHeader"/>
+							<xsl:value-of select="vulcan:getMessage($messageSource, 'th.build.number')"/>
 							<xsl:text> </xsl:text>
 							<xsl:value-of select="/project/build-number"/>
 							<xsl:text> </xsl:text>
@@ -128,12 +102,12 @@
 					</h3>
 		
 					<p class="build-stats">
-						<xsl:value-of select="$buildNumberHeader"/>
+						<xsl:value-of select="vulcan:getMessage($messageSource, 'th.build.number')"/>
 						<xsl:text> </xsl:text>
 						<xsl:value-of select="/project/build-number"/>
 						<xsl:if test="/project/revision">
 							<xsl:text>, </xsl:text>
-							<xsl:value-of select="$revisionHeader"/>
+							<xsl:value-of select="vulcan:getMessage($messageSource, 'th.revision')"/>
 							<xsl:text> </xsl:text>
 							<xsl:value-of select="/project/revision"/>
 						</xsl:if>
@@ -155,7 +129,9 @@
 							<xsl:if test="$view='summary'">
 								<xsl:attribute name="class">active</xsl:attribute>
 							</xsl:if>
-							<a id="summary-tab" href="#summary-panel"><xsl:value-of select="$title"/></a>
+							<a id="summary-tab" href="#summary-panel">
+								<xsl:value-of select="vulcan:getMessage($messageSource, 'label.build.summary')"/>
+							</a>
 						</li>
 						<xsl:if test="$num-changes &gt; 0">
 							<li>
@@ -186,7 +162,7 @@
 								<xsl:if test="$view='tests'">
 									<xsl:attribute name="class">active</xsl:attribute>
 								</xsl:if>
-								<a id="tests-tab" href="#tests-panel"><xsl:value-of select="$testFailureLabel"/> (<xsl:value-of select="$num-test-failures"/>)</a>
+								<a id="tests-tab" href="#tests-panel"><xsl:value-of select="vulcan:getMessage($messageSource, 'label.test.failures')"/> (<xsl:value-of select="$num-test-failures"/>)</a>
 							</li>
 						</xsl:if>
 						<xsl:if test="/project/metrics">
@@ -194,7 +170,7 @@
 								<xsl:if test="$view='metrics'">
 									<xsl:attribute name="class">active</xsl:attribute>
 								</xsl:if>
-								<a id="metrics-tab" href="#metrics-panel"><xsl:value-of select="$metricsLabel"/></a>
+								<a id="metrics-tab" href="#metrics-panel"><xsl:value-of select="vulcan:getMessage($messageSource, 'label.metrics')"/></a>
 							</li>
 						</xsl:if>
 						<xsl:if test="$showBuildDirectory">
@@ -349,28 +325,28 @@
 			<div class="build-stats">
 				<dl>
 					<xsl:if test="/project/build-reason">
-						<dt><xsl:value-of select="$buildReasonLabel"/></dt>
+						<dt><xsl:value-of select="vulcan:getMessage($messageSource, 'label.build.reason')"/></dt>
 						<dd><xsl:value-of select="/project/build-reason"/></dd>
 					</xsl:if>
 					
-					<dt><xsl:value-of select="$updateTypeLabel"/></dt>
+					<dt><xsl:value-of select="vulcan:getMessage($messageSource, 'label.update.type')"/></dt>
 					<dd><xsl:value-of select="/project/update-type"/></dd>
 					
 					<xsl:if test="/project/build-requested-by">
-						<dt><xsl:value-of select="$buildRequestedByLabel"/></dt>
+						<dt><xsl:value-of select="vulcan:getMessage($messageSource, 'label.build.request.username')"/></dt>
 						<dd><xsl:value-of select="/project/build-requested-by"/></dd>
 					</xsl:if>
 								
 					<xsl:if test="/project/build-scheduled-by">
-						<dt><xsl:value-of select="$buildScheduledByLabel"/></dt>
+						<dt><xsl:value-of select="vulcan:getMessage($messageSource, 'label.build.scheduled.by')"/></dt>
 						<dd><xsl:value-of select="/project/build-scheduled-by"/></dd>
 					</xsl:if>
 					
-					<dt><xsl:value-of select="$elapsedTimeLabel"/></dt>
+					<dt><xsl:value-of select="vulcan:getMessage($messageSource, 'label.build.elapsed.time')"/></dt>
 					<dd><xsl:value-of select="/project/elapsed-time"/></dd>
 					
 					<xsl:if test="/project/last-good-build-number">
-						<dt><xsl:value-of select="$lastGoodBuildNumberLabel"/></dt>
+						<dt><xsl:value-of select="vulcan:getMessage($messageSource, 'label.last.good.build.number')"/></dt>
 						<dd>
 							<xsl:call-template name="buildLink">
 								<xsl:with-param name="buildNumber" select="/project/last-good-build-number"/>
@@ -380,15 +356,15 @@
 				</dl>
 				
 				<table id="revisions">
-					<caption><xsl:value-of select="$revisionCaption"/></caption>
+					<caption><xsl:value-of select="vulcan:getMessage($messageSource, 'captions.revisions')"/></caption>
 					<thead>
 						<tr>
-							<th><xsl:value-of select="$projectHeader"/></th>
-							<th><xsl:value-of select="$buildNumberHeader"/></th>
-							<th><xsl:value-of select="$revisionHeader"/></th>
-							<th><xsl:value-of select="$repositoryTagNameHeader"/></th>
-							<th><xsl:value-of select="$timestampHeader"/></th>
-							<th><xsl:value-of select="$statusHeader"/></th>
+							<th><xsl:value-of select="vulcan:getMessage($messageSource, 'th.project')"/></th>
+							<th><xsl:value-of select="vulcan:getMessage($messageSource, 'th.build.number')"/></th>
+							<th><xsl:value-of select="vulcan:getMessage($messageSource, 'th.revision')"/></th>
+							<th><xsl:value-of select="vulcan:getMessage($messageSource, 'th.repository.tag.name')"/></th>
+							<th><xsl:value-of select="vulcan:getMessage($messageSource, 'th.timestamp')"/></th>
+							<th><xsl:value-of select="vulcan:getMessage($messageSource, 'th.project.status')"/></th>
 						</tr>
 					</thead>
 					<tbody>
@@ -409,7 +385,7 @@
 				
 				<xsl:if test="/project/build-log-available">
 					<a href="log" class="external">
-						<xsl:value-of select="$buildLogLabel"/>
+						<xsl:value-of select="vulcan:getMessage($messageSource, 'label.build.log')"/>
 					</a>
 				</xsl:if>
 			</div>
@@ -459,7 +435,7 @@
 	
 	<xsl:template match="work-directory">
 		<div xmlns="http://www.w3.org/1999/xhtml">
-			<xsl:value-of select="$buildDirectoryLabel"/>
+			<xsl:value-of select="vulcan:getMessage($messageSource, 'label.work.directory')"/>
 			<xsl:text> </xsl:text>
 			<span id="build-directory-root"><xsl:value-of select="."/></span>
 			<span id="build-directory-bread-crumbs"><xsl:text> </xsl:text></span>
@@ -468,21 +444,25 @@
 	
 	<xsl:template name="currently-building">
 		<span class="warning" xmlns="http://www.w3.org/1999/xhtml">
-			<xsl:value-of select="$currentlyBuildingMessage"/>
+			<xsl:value-of select="vulcan:getMessage($messageSource, 'messages.project.currently.building')"/>
 		</span>
 	</xsl:template>
 	
 	<xsl:template match="next-build-number">
 		<xsl:call-template name="buildLink">
 			<xsl:with-param name="buildNumber" select="."/>
-			<xsl:with-param name="text" select="$nextBuildLabel"/>
+			<xsl:with-param name="text">
+				<xsl:value-of select="vulcan:getMessage($messageSource, 'label.build.next')"/>
+			</xsl:with-param>
 		</xsl:call-template>
 	</xsl:template>
 	
 	<xsl:template match="previous-build-number">
 		<xsl:call-template name="buildLink">
 			<xsl:with-param name="buildNumber" select="."/>
-			<xsl:with-param name="text" select="$prevBuildLabel"/>
+			<xsl:with-param name="text">
+				<xsl:value-of select="vulcan:getMessage($messageSource, 'label.build.prev')"/>
+			</xsl:with-param>
 		</xsl:call-template>
 	</xsl:template>
 	
@@ -493,11 +473,11 @@
 				<caption class="panel-caption">Commit Log (<xsl:value-of select="$num-changes"/>)</caption>
 				<thead>
 					<tr>
-						<th><xsl:value-of select="$revisionHeader"/></th>
-						<th><xsl:value-of select="$authorHeader"/></th>
-						<th class="timestamp"><xsl:value-of select="$timestampHeader"/></th>
-						<th><xsl:value-of select="$messageHeader"/></th>
-						<th><xsl:value-of select="$pathsHeader"/></th>
+						<th><xsl:value-of select="vulcan:getMessage($messageSource, 'th.revision')"/></th>
+						<th><xsl:value-of select="vulcan:getMessage($messageSource, 'th.author')"/></th>
+						<th class="timestamp"><xsl:value-of select="vulcan:getMessage($messageSource, 'th.timestamp')"/></th>
+						<th><xsl:value-of select="vulcan:getMessage($messageSource, 'th.message')"/></th>
+						<th><xsl:value-of select="vulcan:getMessage($messageSource, 'th.paths')"/></th>
 					</tr>
 				</thead>
 				<tbody>
@@ -525,7 +505,7 @@
 					<xsl:if test="/project/diff-available">
 						<li>
 							<a href="diff" class="external">
-								<xsl:value-of select="$diffHeader"/>
+								<xsl:value-of select="vulcan:getMessage($messageSource, 'label.diff')"/>
 							</a>
 						</li>
 					</xsl:if>
@@ -534,7 +514,7 @@
 							<xsl:element name="a">
 								<xsl:attribute name="href"><xsl:value-of select="/project/repository-url"/></xsl:attribute>
 								<xsl:attribute name="class">external</xsl:attribute>
-								<xsl:value-of select="$repositoryUrlLabel"/>
+								<xsl:value-of select="vulcan:getMessage($messageSource, 'label.repository.url')"/>
 							</xsl:element>
 						</li>
 					</xsl:if>
@@ -690,7 +670,7 @@
 		<div xmlns="http://www.w3.org/1999/xhtml" class="tab-panel" id="metrics-panel">
 			<a name="metrics-panel"/>
 			<table>
-				<caption class="panel-caption"><xsl:value-of select="$metricsLabel"/></caption>
+				<caption class="panel-caption"><xsl:value-of select="vulcan:getMessage($messageSource, 'label.metrics')"/></caption>
 				<tbody>
 					<xsl:for-each select="./metric">
 						<tr>
@@ -720,11 +700,11 @@
 		<div class="tab-panel" id="tests-panel" xmlns="http://www.w3.org/1999/xhtml">
 			<a name="tests-panel"><xsl:text> </xsl:text></a>
 			<table>
-				<caption class="panel-caption"><xsl:value-of select="$testFailureLabel"/></caption>
+				<caption class="panel-caption"><xsl:value-of select="vulcan:getMessage($messageSource, 'label.test.failures')"/></caption>
 				<thead>
 					<tr>
-						<th><xsl:value-of select="$testFailureBuildNumberLabel"/></th>
-						<th class="long"><xsl:value-of select="$testNameLabel"/></th>
+						<th><xsl:value-of select="vulcan:getMessage($messageSource, 'label.test.failure.build.number')"/></th>
+						<th class="long"><xsl:value-of select="vulcan:getMessage($messageSource, 'label.test.failure.name')"/></th>
 					</tr>
 				</thead>
 				<tbody>
@@ -734,7 +714,7 @@
 								<xsl:choose>
 									<xsl:when test="@first-build = /project/build-number">
 										<span class="new-test-failure">
-											<xsl:value-of select="$newTestFailureLabel"/>
+											<xsl:value-of select="vulcan:getMessage($messageSource, 'label.test.failure.new')"/>
 										</span>
 									</xsl:when>
 									<xsl:otherwise>

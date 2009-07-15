@@ -31,6 +31,11 @@
 					<label><c:out value="${label}"/></label>
 				</c:forEach>
 			</selected-labels>
+			<visible-columns>
+				<c:forEach items="${preferences.dashboardColumns}" var="col">
+					<label><c:out value="${col}"/></label>
+				</c:forEach>
+			</visible-columns>
 						
 			<c:forEach items="${projects}" var="projectName">
 				<jsp:element name="project">
@@ -117,6 +122,19 @@
 								<c:if test="${buildOutcome.tagName != null}">
 									<repository-tag-name><c:out value="${buildOutcome.tagName}"/></repository-tag-name>
 								</c:if>
+								
+								<c:if test="${! empty buildOutcome.metrics}">
+									<metrics>
+										<c:forEach items="${buildOutcome.metrics}" var="metric">
+											<jsp:element name="metric">
+												<jsp:attribute name="key">${metric.messageKey}</jsp:attribute>
+												<jsp:attribute name="label"><spring:message code="${metric.messageKey}"/></jsp:attribute>
+												<jsp:attribute name="value"><c:out value="${metric.value}"/></jsp:attribute>
+												<jsp:attribute name="type"><c:out value="${metric.type}"/></jsp:attribute>
+											</jsp:element>
+										</c:forEach>
+									</metrics>
+								</c:if>
 							</c:when>
 							<c:otherwise>
 								<status>Not Built</status>
@@ -130,43 +148,17 @@
 	<c:choose>
 		<c:when test="${transform}">
 			<c:import url="/xsl/ProjectsDashboard.xsl" var="xslt"/>
-			<x:transform xslt="${xslt}" doc="${statusXml}">
+			<x:transform xslt="${xslt}" doc="${statusXml}" xsltSystemId="/xsl/ProjectDashboard.xsl">
+				<x:param name="locale" value="${pageContext.request.locale}"/>
 				<x:param name="contextRoot">
 					<c:url value="/" var="contextRoot"/>
 					${fn:substringBefore(contextRoot, ';')}
-				</x:param>
-				<x:param name="caption">
-					<spring:message code="captions.projects.status"/>
-					<c:if test="${caption ne null}">
-						<c:out value=" - ${caption}"/>
-					</c:if>
 				</x:param>
 				<x:param name="sortUrl">
 					<c:url value="/managePreferences.do?action=save"/>
 				</x:param>
 				<x:param name="detailLink">
 					<c:url value="/projects/"/>
-				</x:param>
-				<x:param name="nameHeader">
-					<spring:message code="th.project.name"/>
-				</x:param>
-				<x:param name="buildNumberHeader">
-					<spring:message code="th.build.number"/>
-				</x:param>
-				<x:param name="ageHeader">
-					<spring:message code="th.age"/>
-				</x:param>
-				<x:param name="tagHeader">
-					<spring:message code="th.tagName"/>
-				</x:param>
-				<x:param name="revisionHeader">
-					<spring:message code="th.revision"/>
-				</x:param>
-				<x:param name="statusHeader">
-					<spring:message code="th.project.status"/>
-				</x:param>
-				<x:param name="timestampLabel">
-					<spring:message code="label.build.timestamp"/>
 				</x:param>
 				<x:param name="sortSelect">${preferences.sortColumn}</x:param>
 				<x:param name="sortOrder">${preferences.sortOrder}</x:param>

@@ -62,8 +62,6 @@ public class ProjectFileServlet extends HttpServlet {
 	private class PathInfo {
 		String projectName;
 		int buildNumber;
-		int secondSlash;
-		int thirdSlash;
 	}
 	
 	ProjectManager projectManager;
@@ -227,9 +225,6 @@ public class ProjectFileServlet extends HttpServlet {
 		if (thirdSlash < 0) {
 			thirdSlash = pathInfo.length();	
 		}
-		
-		info.secondSlash = secondSlash;
-		info.thirdSlash = thirdSlash;
 		
 		info.projectName = pathInfo.substring(1, secondSlash);
 		info.buildNumber = -1;

@@ -895,8 +895,6 @@ public class AbstractProjectDomBuilderTest extends EasyMockTestCase {
 		
 		messages.put("key.msg", "fake\nlog\r");
 		
-		builder.setTransformMessageKeys(Collections.singletonMap("paramName", "key.msg"));
-		
 		final Document doc = new Document();
 		final Result result = new StreamResult(new StringWriter());
 

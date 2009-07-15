@@ -6,8 +6,6 @@
 	
 	<xsl:strip-space elements="*"/>
 	
-	<xsl:param name="viewProjectStatusURL"/>
-	
 	<xsl:key name="builds-by-outcome" match="/build-history/project" use="status"/>
 	
 	<xsl:variable name="totalSamples" select="count(/build-history/project)"/>
