@@ -1,18 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0" xmlns:math="http://exslt.org/math">
+<xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0"
+	xmlns:math="http://exslt.org/math"
+	xmlns:vulcan="xalan://net.sourceforge.vulcan.web.XslHelper"
+	extension-element-prefixes="vulcan math"
+	exclude-result-prefixes="vulcan math">
 	
 	<xsl:output method="text" media-type="text/plain" version="1.0"
 		encoding="UTF-8" omit-xml-declaration="yes"/>
+
+	<xsl:include href="common.xsl"/>
 	
 	<xsl:strip-space elements="*"/>
 	
-	<xsl:param name="buildNumberHeader"/>
 	<xsl:param name="projectSiteURL"/>
 	<xsl:param name="viewProjectStatusURL"/>
-	<xsl:param name="elapsedTimeLabel"/>
-	<xsl:param name="lblCompleted"/>
-	<xsl:param name="lblBuildDuration"/>
-	<xsl:param name="updateTypeLabel"/>
 	
 	<xsl:key name="builds-by-project-name-and-update-type" match="/build-history/project" use="concat(name,'-',update-type)"/>
 	<xsl:key name="builds-by-timestamp" match="/build-history/project" use="timestamp/@millis"/>
@@ -32,7 +33,7 @@
 		
 		&amp;y_min=0&amp;
 		<xsl:text>&amp;y_max=</xsl:text>
-		<xsl:text><xsl:value-of select="$maxDuration"/></xsl:text>
+		<xsl:value-of select="$maxDuration"/>
 		<xsl:text>&amp;</xsl:text>
 
 <xsl:text>
@@ -45,7 +46,7 @@
 &amp;x_label_style=10,#164166,2,1&amp;
 
 &amp;y_legend=</xsl:text>
-<xsl:value-of select="$lblBuildDuration"/>
+<xsl:value-of select="vulcan:getMessage($messageSource, 'label.build.duration')"/>
 <xsl:text>,12,#164166&amp;
 &amp;y_ticks=5,10,5&amp;
 </xsl:text>
@@ -122,23 +123,23 @@
 			<xsl:if test="position()!=1">
 				<xsl:text>,</xsl:text>
 			</xsl:if>
-			<xsl:text><xsl:value-of select="name"/></xsl:text>
+			<xsl:value-of select="name"/>
 			<xsl:text>&lt;br&gt;</xsl:text>
-			<xsl:value-of select="$buildNumberHeader"/>
+			<xsl:value-of select="vulcan:getMessage($messageSource, 'th.build.number')"/>
 			<xsl:text> </xsl:text>
-			<xsl:text><xsl:value-of select="build-number"/></xsl:text>
+			<xsl:value-of select="build-number"/>
 			<xsl:text>&lt;br&gt;</xsl:text>
-			<xsl:value-of select="$lblCompleted"/>
+			<xsl:value-of select="vulcan:getMessage($messageSource, 'label.build.completed')"/>
 			<xsl:text> </xsl:text>
-			<xsl:text><xsl:value-of select="timestamp"/></xsl:text>
+			<xsl:value-of select="timestamp"/>
 			<xsl:text>&lt;br&gt;</xsl:text>
-			<xsl:value-of select="$updateTypeLabel"/>
+			<xsl:value-of select="vulcan:getMessage($messageSource, 'label.update.type')"/>
 			<xsl:text> </xsl:text>
-			<xsl:text><xsl:value-of select="update-type"/></xsl:text>
+			<xsl:value-of select="update-type"/>
 			<xsl:text>&lt;br&gt;</xsl:text>
-			<xsl:value-of select="$elapsedTimeLabel"/>
+			<xsl:value-of select="vulcan:getMessage($messageSource, 'th.build.elapsed.time')"/>
 			<xsl:text> </xsl:text>
-			<xsl:text><xsl:value-of select="elapsed-time"/></xsl:text>
+			<xsl:value-of select="elapsed-time"/>
 		</xsl:for-each>&amp;
 
 		&amp;links<xsl:value-of select="$suffix"/>=<xsl:for-each select="$samples">
@@ -146,10 +147,10 @@
 				<xsl:text>,</xsl:text>
 			</xsl:if>
 			<xsl:text>javascript:showBuildDetails('</xsl:text>
-			<xsl:text><xsl:value-of select="$viewProjectStatusURL"/></xsl:text>
-			<xsl:text><xsl:value-of select="name"/></xsl:text>
+			<xsl:value-of select="$viewProjectStatusURL"/>
+			<xsl:value-of select="name"/>
 			<xsl:text>/</xsl:text>
-			<xsl:text><xsl:value-of select="build-number"/></xsl:text>
+			<xsl:value-of select="build-number"/>
 			<xsl:text>/')</xsl:text>
 		</xsl:for-each>&amp;
 	</xsl:template>

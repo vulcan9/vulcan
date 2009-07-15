@@ -32,6 +32,7 @@ public class PreferencesDto extends BaseDto {
 	private boolean showBuildQueue;
 	private boolean showSchedulers;
 	private String[] labels;
+	private String[] dashboardColumns;
 	
 	public String getSortColumn() {
 		return sortColumn;
@@ -92,5 +93,11 @@ public class PreferencesDto extends BaseDto {
 	}
 	public void setShowSchedulers(boolean showSchedulers) {
 		this.showSchedulers = showSchedulers;
+	}
+	public String[] getDashboardColumns() {
+		return dashboardColumns;
+	}
+	public void setDashboardColumns(String[] dashboardColumns) {
+		this.dashboardColumns = dashboardColumns;
 	}
 }

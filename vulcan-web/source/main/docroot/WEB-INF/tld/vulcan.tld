@@ -98,6 +98,12 @@
 	</function>
 	
 	<function>
+		<name>getAvailableDashboardColumns</name>
+		<function-class>net.sourceforge.vulcan.web.JstlFunctions</function-class>
+		<function-signature>java.util.List getAvailableDashboardColumns(javax.servlet.jsp.PageContext)</function-signature>
+	</function>
+	
+	<function>
 		<name>isProjectLocked</name>
 		<function-class>net.sourceforge.vulcan.web.JstlFunctions</function-class>
 		<function-signature>boolean isProjectLocked(java.lang.String)</function-signature>

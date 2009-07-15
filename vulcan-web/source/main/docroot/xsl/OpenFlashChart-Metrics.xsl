@@ -1,8 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0" xmlns:math="http://exslt.org/math">
+<xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0"
+	xmlns:math="http://exslt.org/math"
+	xmlns:vulcan="xalan://net.sourceforge.vulcan.web.XslHelper"
+	extension-element-prefixes="vulcan math"
+	exclude-result-prefixes="vulcan math">
 	
 	<xsl:output method="text" media-type="text/plain" version="1.0"
 		encoding="UTF-8" omit-xml-declaration="yes"/>
+	
+	<xsl:include href="common.xsl"/>
 	
 	<xsl:strip-space elements="*"/>
 	
@@ -87,10 +93,10 @@
 		</xsl:variable>
 		
 		<xsl:text>&amp;y_min=</xsl:text>
-		<xsl:text><xsl:value-of select="$minValue1"/></xsl:text>
+		<xsl:value-of select="$minValue1"/>
 		<xsl:text>&amp;</xsl:text>
 		<xsl:text>&amp;y_max=</xsl:text>
-		<xsl:text><xsl:value-of select="$maxValue1"/></xsl:text>
+		<xsl:value-of select="$maxValue1"/>
 		<xsl:text>&amp;</xsl:text>
 
 		&amp;bg_colour=#FFFFFF&amp;
@@ -251,17 +257,17 @@
 			<xsl:if test="position()!=1">
 				<xsl:text>,</xsl:text>
 			</xsl:if>
-			<xsl:text><xsl:value-of select="name"/></xsl:text>
+			<xsl:value-of select="name"/>
 			<xsl:text>&lt;br&gt;</xsl:text>
-			<xsl:value-of select="$buildNumberHeader"/>
+			<xsl:value-of select="vulcan:getMessage($messageSource, 'th.build.number')"/>
 			<xsl:text> </xsl:text>
-			<xsl:text><xsl:value-of select="build-number"/></xsl:text>
+			<xsl:value-of select="build-number"/>
 			<xsl:text>&lt;br&gt;</xsl:text>
-			<xsl:value-of select="$lblCompleted"/>
+			<xsl:value-of select="vulcan:getMessage($messageSource, 'label.build.completed')"/>
 			<xsl:text> </xsl:text>
-			<xsl:text><xsl:value-of select="timestamp"/></xsl:text>
+			<xsl:value-of select="timestamp"/>
 			<xsl:text>&lt;br&gt;</xsl:text>
-			<xsl:text><xsl:value-of select="$metricLabel"/></xsl:text>
+			<xsl:value-of select="$metricLabel"/>
 			<xsl:text>:</xsl:text>
 			<xsl:choose>
 				<xsl:when test="metrics/metric[@label=$metricLabel]/@type='percent'">
@@ -285,10 +291,10 @@
 				<xsl:text>,</xsl:text>
 			</xsl:if>
 			<xsl:text>javascript:showBuildDetails('</xsl:text>
-			<xsl:text><xsl:value-of select="$viewProjectStatusURL"/></xsl:text>
-			<xsl:text><xsl:value-of select="name"/></xsl:text>
+			<xsl:value-of select="$viewProjectStatusURL"/>
+			<xsl:value-of select="name"/>
 			<xsl:text>/</xsl:text>
-			<xsl:text><xsl:value-of select="build-number"/></xsl:text>
+			<xsl:value-of select="build-number"/>
 			<xsl:text>/')</xsl:text>
 		</xsl:for-each>&amp;
 		

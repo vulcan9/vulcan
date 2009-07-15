@@ -242,6 +242,10 @@ tr.dragging td.desc, tr.dragging td.buttons {
 	display: none;
 }
 
+ol li.dragging {
+	list-style: none;
+}
+
 table#buildReportEditFields {
 	margin-top: 4ex;
 }
@@ -653,4 +657,11 @@ iframe {
 	border: none;
 	width: 100%;
 	/* height set by javascript */
+}
+
+#dashboard-columns {
+	list-style-position: inside;
+	min-width: 40em;
+	-moz-column-width: 12em;
+	-moz-column-gap: 1em;
 }

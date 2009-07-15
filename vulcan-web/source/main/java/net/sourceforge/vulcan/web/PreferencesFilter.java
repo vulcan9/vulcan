@@ -53,8 +53,6 @@ public class PreferencesFilter extends OncePerRequestFilter {
 	}
 
 	private void setupPreferences(HttpServletRequest request) {
-		final String cookieData = getCookieData(request, Keys.PREFERENCES);
-		
 		final HttpSession session = request.getSession(false);
 		
 		if (session != null && session.getAttribute(Keys.PREFERENCES) != null) {
@@ -62,6 +60,8 @@ public class PreferencesFilter extends OncePerRequestFilter {
 		}
 		
 		final PreferencesDto prefs;
+		
+		final String cookieData = getCookieData(request, Keys.PREFERENCES);
 		
 		if (cookieData == null) {
 			prefs = store.getDefaultPreferences();

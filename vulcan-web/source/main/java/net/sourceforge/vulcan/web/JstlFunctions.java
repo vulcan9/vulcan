@@ -23,8 +23,6 @@ import static org.apache.commons.lang.time.DateUtils.MILLIS_PER_HOUR;
 import static org.apache.commons.lang.time.DateUtils.MILLIS_PER_MINUTE;
 import static org.apache.commons.lang.time.DateUtils.MILLIS_PER_SECOND;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -33,6 +31,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.jsp.PageContext;
@@ -40,6 +41,8 @@ import javax.servlet.jsp.PageContext;
 import net.sourceforge.vulcan.StateManager;
 import net.sourceforge.vulcan.core.BuildManager;
 import net.sourceforge.vulcan.dto.LockDto;
+import net.sourceforge.vulcan.dto.MetricDto;
+import net.sourceforge.vulcan.dto.PreferencesDto;
 import net.sourceforge.vulcan.dto.ProjectStatusDto;
 import net.sourceforge.vulcan.event.Event;
 import net.sourceforge.vulcan.event.EventPool;
@@ -117,7 +120,7 @@ public abstract class JstlFunctions {
 
 			sb.append(units);
 			sb.append(" ");
-			sb.append(formatTimeUnit(pageContext, messageKey,  units > 1));
+			sb.append(formatMessage(pageContext, messageKey,  units > 1));
 			
 			if (++count == verbosity) {
 				break;
@@ -172,6 +175,58 @@ public abstract class JstlFunctions {
 		return getProjectNamesByLabels(mgr, itr);
 	}
 
+	public static List<String> getAvailableDashboardColumns(PageContext pageContext) {
+		final List<String> availableColumns = new ArrayList<String>();
+		
+		availableColumns.addAll(Arrays.asList(new String[] {
+				"dashboard.columns.name", "dashboard.columns.age", "dashboard.columns.failure.age",
+				"dashboard.columns.timestamp", "dashboard.columns.build-number",
+				"dashboard.columns.revision", "dashboard.columns.repository-tag-name",
+				"dashboard.columns.status"}));
+		
+		availableColumns.addAll(getAvailableMetrics(pageContext));
+
+		final PreferencesDto prefs = (PreferencesDto) pageContext.findAttribute(Keys.PREFERENCES);
+		
+		if (prefs != null) {
+			// Start with the chosen columns in the chosen order.
+			final List<String> userSorted = new ArrayList<String> (Arrays.asList(prefs.getDashboardColumns()));
+			
+			// Remove any columns that are no longer valid.
+			userSorted.retainAll(availableColumns);
+			
+			// Remove duplicates from set of unselected columns.
+			availableColumns.removeAll(userSorted);
+			
+			// Add the unselected columns to the end of the list.
+			userSorted.addAll(availableColumns);
+			
+			return userSorted;
+		}
+		
+		return availableColumns;
+	}
+	
+	public static List<String> getAvailableMetrics(PageContext pageContext) {
+		final StateManager mgr = (StateManager) webApplicationContext.getBean(Keys.STATE_MANAGER, StateManager.class);
+		final BuildManager buildMgr = (BuildManager) webApplicationContext.getBean("buildManager", BuildManager.class);
+		final Set<String> metrics = new HashSet<String>();
+		
+		for (String projectName : mgr.getProjectConfigNames()) {
+			final ProjectStatusDto status = buildMgr.getLatestStatus(projectName);
+			if (status == null || status.getMetrics() == null) {
+				continue;
+			}
+			for (MetricDto metric : status.getMetrics()) {
+				metrics.add(metric.getMessageKey());
+			}
+		}
+		
+		final List<String> metricsList = new ArrayList<String> (metrics);
+		Collections.sort(metricsList);	
+		return metricsList;
+	}
+	
 	public static ProjectStatusDto getOutcomeByBuildNumber(String projectName, int buildNumber) {
 		final BuildManager mgr = (BuildManager) webApplicationContext.getBean("buildManager", BuildManager.class);
 		return mgr.getStatusByBuildNumber(projectName, buildNumber);
@@ -210,7 +265,7 @@ public abstract class JstlFunctions {
 		JstlFunctions.webApplicationContext = webApplicationContext;
 	}
 	
-	private static String formatTimeUnit(PageContext pageContext, String key, boolean plural) {
+	private static String formatMessage(PageContext pageContext, String key, boolean plural) {
 		if (plural) {
 			key += "s";
 		}

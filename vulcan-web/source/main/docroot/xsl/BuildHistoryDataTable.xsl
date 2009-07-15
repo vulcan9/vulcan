@@ -1,50 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0">
+<xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0"
+	xmlns:vulcan="xalan://net.sourceforge.vulcan.web.XslHelper"
+	extension-element-prefixes="vulcan"
+	exclude-result-prefixes="vulcan">
 	
 	<xsl:output method="xml" media-type="text/html" version="1.0"
 		encoding="UTF-8" omit-xml-declaration="no"/>
+		
+	<xsl:include href="common.xsl"/>
 	
 	<xsl:param name="contextRoot"/>
-	<xsl:param name="title"/>
-	<xsl:param name="projectSiteURL"/>
 	<xsl:param name="viewProjectStatusURL"/>
-	<xsl:param name="issueTrackerURL"/>
-	<xsl:param name="issueListHeader"/>
-	<xsl:param name="nextBuildLabel"/>
-	<xsl:param name="prevBuildLabel"/>
-	<xsl:param name="sandboxLabel"/>
-	<xsl:param name="buildLogLabel"/>
-	<xsl:param name="revisionCaption"/>
-	<xsl:param name="changeSetCaption"/>
-	<xsl:param name="projectHeader"/>
-	<xsl:param name="revisionHeader"/>
-	<xsl:param name="buildNumberHeader"/>
-	<xsl:param name="authorHeader"/>
-	<xsl:param name="timestampHeader"/>
-	<xsl:param name="messageHeader"/>
-	<xsl:param name="pathsHeader"/>
-	<xsl:param name="diffHeader"/>
-	<xsl:param name="statusHeader"/>
-	<xsl:param name="lastGoodBuildNumberLabel"/>
-	<xsl:param name="repositoryUrlLabel"/>
-	<xsl:param name="repositoryTagNameHeader"/>
-	<xsl:param name="currentlyBuildingMessage"/>
-	<xsl:param name="buildRequestedByLabel"/>
-	<xsl:param name="buildScheduledByLabel"/>
-	<xsl:param name="elapsedTimeLabel"/>
-	<xsl:param name="buildReasonLabel"/>
-	<xsl:param name="updateTypeLabel"/>
-	<xsl:param name="warningsLabel"/>
-	<xsl:param name="errorsLabel"/>
-	<xsl:param name="metricsLabel"/>
-	<xsl:param name="testFailureLabel"/>
-	<xsl:param name="testNameLabel"/>
-	<xsl:param name="testFailureBuildNumberLabel"/>
-	<xsl:param name="newTestFailureLabel"/>
-	<xsl:param name="reloadInterval"/>
-	<xsl:param name="buildDirectoryLabel"/>
-	<xsl:param name="showBuildDirectory" select="'true'"/>
-	<xsl:param name="workingCopyBuildNumber"/>
 	
 	<xsl:key name="metrics-labels" match="/build-history/project/metrics/metric" use="@label"/>
 	
@@ -96,19 +62,19 @@
 					<ul id="metrics-checkboxes" class="metaDataOptions">
 						<li>
 							<input type="checkbox" checked="checked" id="build_number"/>
-							<label for="build_number"><xsl:value-of select="$buildNumberHeader"/></label>
+							<label for="build_number"><xsl:value-of select="vulcan:getMessage($messageSource, 'th.build.number')"/></label>
 						</li>
 						<li>
 							<input type="checkbox" checked="checked" id="revision"/>
-							<label for="revision"><xsl:value-of select="$revisionHeader"/></label>
+							<label for="revision"><xsl:value-of select="vulcan:getMessage($messageSource, 'th.revision')"/></label>
 						</li>
 						<li>
 							<input type="checkbox" checked="checked" id="tag"/>
-							<label for="tag"><xsl:value-of select="$repositoryTagNameHeader"/></label>
+							<label for="tag"><xsl:value-of select="vulcan:getMessage($messageSource, 'th.repository.tag.name')"/></label>
 						</li>
 						<li>
 							<input type="checkbox" checked="checked" id="tstamp"/>
-							<label for="tstamp"><xsl:value-of select="$timestampHeader"/></label>
+							<label for="tstamp"><xsl:value-of select="vulcan:getMessage($messageSource, 'th.timestamp')"/></label>
 						</li>
 						<li>
 							<input type="checkbox" checked="checked" id="elapsed_time"/>
@@ -116,11 +82,11 @@
 						</li>
 						<li>
 							<input type="checkbox" checked="checked" id="status"/>
-							<label for="status"><xsl:value-of select="$statusHeader"/></label>
+							<label for="status"><xsl:value-of select="vulcan:getMessage($messageSource, 'th.project.status')"/></label>
 						</li>
 						<li>
 							<input type="checkbox" checked="checked" id="message"/>
-							<label for="message"><xsl:value-of select="$messageHeader"/></label>
+							<label for="message"><xsl:value-of select="vulcan:getMessage($messageSource, 'th.message')"/></label>
 						</li>
 						<li>
 							<input type="checkbox" checked="checked" id="update_type"/>
@@ -163,14 +129,14 @@
 			<caption>Outcomes</caption>
 			<thead>
 				<tr id="build-data-headers">
-					<th><xsl:value-of select="$projectHeader"/></th>
-					<th id="col_build_number"><xsl:value-of select="$buildNumberHeader"/></th>
-					<th id="col_revision"><xsl:value-of select="$revisionHeader"/></th>
-					<th id="col_tag"><xsl:value-of select="$repositoryTagNameHeader"/></th>
-					<th id="col_tstamp" class="timestamp sorted-ascending"><xsl:value-of select="$timestampHeader"/></th>
-					<th id="col_elapsed_time"><xsl:value-of select="'Elapsed Time'"/></th>
-					<th id="col_status"><xsl:value-of select="$statusHeader"/></th>
-					<th id="col_message"><xsl:value-of select="$messageHeader"/></th>
+					<th><xsl:value-of select="vulcan:getMessage($messageSource, 'th.project')"/></th>
+					<th id="col_build_number"><xsl:value-of select="vulcan:getMessage($messageSource, 'th.build.number')"/></th>
+					<th id="col_revision"><xsl:value-of select="vulcan:getMessage($messageSource, 'th.revision')"/></th>
+					<th id="col_tag"><xsl:value-of select="vulcan:getMessage($messageSource, 'th.repository.tag.name')"/></th>
+					<th id="col_tstamp" class="timestamp sorted-ascending"><xsl:value-of select="vulcan:getMessage($messageSource, 'th.timestamp')"/></th>
+					<th id="col_elapsed_time"><xsl:value-of select="vulcan:getMessage($messageSource, 'th.build.elapsed.time')"/></th>
+					<th id="col_status"><xsl:value-of select="vulcan:getMessage($messageSource, 'th.status')"/></th>
+					<th id="col_message"><xsl:value-of select="vulcan:getMessage($messageSource, 'th.message')"/></th>
 					<th id="col_update_type">Build Type</th>
 					<th id="col_requested_by">Scheduler / User</th>
 					<th id="col_work_dir">Build Directory</th>

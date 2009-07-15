@@ -79,7 +79,6 @@ public abstract class AbstractProjectDomBuilder implements ProjectDomBuilder {
 	private ProjectManager projectManager;
 	private BuildManager buildManager;
 	private EventHandler eventHandler;
-	private Map<String, String> transformMessageKeys = Collections.emptyMap();
 	
 	public final Document createProjectDocument(ProjectStatusDto status, Locale locale) {
 		if (locale == null) {
@@ -169,8 +168,6 @@ public abstract class AbstractProjectDomBuilder implements ProjectDomBuilder {
 	public String transform(Document document, Map<String, ?> transformParameters, Locale locale, String format, Result result) throws SAXException, IOException, TransformerException, NoSuchTransformFormatException {
 		final Transformer transformer = createTransformer(format);
 		
-		applyParameters(transformer, locale);
-		
 		if (transformParameters != null) {
 			for (String key : transformParameters.keySet()) {
 				transformer.setParameter(key, transformParameters.get(key));
@@ -189,9 +186,6 @@ public abstract class AbstractProjectDomBuilder implements ProjectDomBuilder {
 	}
 	public void setEventHandler(EventHandler eventHandler) {
 		this.eventHandler = eventHandler;
-	}
-	public void setTransformMessageKeys(Map<String, String> transformMessageKeys) {
-		this.transformMessageKeys = transformMessageKeys;
 	}
 	
 	protected abstract Transformer createTransformer(String format) throws NoSuchTransformFormatException;
@@ -214,12 +208,6 @@ public abstract class AbstractProjectDomBuilder implements ProjectDomBuilder {
 		return new AxisLabelGenerator(min, max, locale);
 	}
 	
-	private void applyParameters(Transformer transformer, Locale locale) {
-		for (Map.Entry<String, String> e: transformMessageKeys.entrySet()) {
-			transformer.setParameter(e.getKey(),
-					formatMessage(e.getValue(), null, locale));
-		}
-	}
 	private static void addBuildMessages(Element root, String type, List<BuildMessageDto> messages) {
 		if (messages != null && !messages.isEmpty()) {
 			final Element listElem = new Element(type + "s");

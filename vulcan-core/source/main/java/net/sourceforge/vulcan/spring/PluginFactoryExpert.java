@@ -45,7 +45,7 @@ public class PluginFactoryExpert implements SpringBeanXmlEncoder.FactoryExpert {
 		return pluginManagerBeanName;
 	}
 	public String getFactoryMethod(Object bean) {
-		if (bean instanceof Enum) {
+		if (bean instanceof Enum<?>) {
 			return CREATE_ENUM;
 		}
 		return CREATE_OBJECT;
@@ -62,7 +62,7 @@ public class PluginFactoryExpert implements SpringBeanXmlEncoder.FactoryExpert {
 		args.add(id);
 		args.add(bean.getClass().getName());
 		
-		if (bean instanceof Enum) {
+		if (bean instanceof Enum<?>) {
 			args.add(((Enum<?>)bean).name());
 		}
 		return args;

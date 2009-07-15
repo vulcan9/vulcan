@@ -8,8 +8,6 @@
 	xmlns:spring="http://www.springframework.org/tags"
 	xmlns:v="http://vulcan.sourceforge.net/j2ee/jsp/tags">
 
-<jsp:directive.page session="false"/>
-
 <html:xhtml/>
 
 <head>
@@ -116,6 +114,22 @@
 					</td>
 				</tr>
 				<tr>
+					<th>
+						<spring:message code="label.dashboard.columns"/>
+					</th>
+					<td>
+						<p class="tip"><spring:message code="tip.dashboard.columns.dragndrop"/></p>
+						<ol id="dashboard-columns">
+							<c:forEach items="${v:getAvailableDashboardColumns(pageContext)}" var="column">
+								<li>
+									<html:multibox property="config.dashboardColumns" value="${column}" styleId="${v:mangle(column)}"/>
+									<label for="${v:mangle(column)}"><spring:message code="${column}"/></label>
+								</li>
+							</c:forEach>
+						</ol>
+					</td>
+				</tr>
+				<tr>
 					<td colspan="2">
 						<button type="submit" name="action" value="save"><spring:message code="button.save"/></button>
 						<input type="hidden" name="fullReset" value="true"/>
@@ -128,5 +142,17 @@
 	</html:form>
 </v:bubble>
 
+<script type="text/javascript">
+$(document).ready(function() {
+	$("#dashboard-columns").sortable({
+		cursor: "move",
+		items: "li",
+		revert: false,
+		start: function(e, ui) {
+			ui.helper.addClass("dragging");
+		}
+	});
+});
+</script>
 </body>
 </html>
