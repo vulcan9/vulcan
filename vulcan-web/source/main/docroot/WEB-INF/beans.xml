@@ -27,6 +27,16 @@
 				<property name="popupMode" value="${preferences.default.popupMode}"/>
 				<property name="reloadInterval" value="${preferences.default.reloadInterval}"/>
 				<property name="stylesheet" value="${preferences.default.stylesheet}"/>
+				<property name="dashboardColumns">
+					<list>
+						<value>dashboard.columns.name</value>
+						<value>dashboard.columns.age</value>
+						<value>dashboard.columns.build-number</value>
+						<value>dashboard.columns.revision</value>
+						<value>dashboard.columns.repository-tag-name</value>
+						<value>dashboard.columns.status</value>
+					</list>
+				</property>
 			</bean>
 		</property>
 	</bean>
@@ -172,46 +182,6 @@
 				<entry key="OpenFlashChart-BuildOutcomePieChart" value="xsl/OpenFlashChart-BuildOutcomePieChart.xsl"/>
 				<entry key="OpenFlashChart-BuildDuration" value="xsl/OpenFlashChart-BuildDuration.xsl"/>
 				<entry key="OpenFlashChart-Metrics" value="xsl/OpenFlashChart-Metrics.xsl"/>
-			</map>
-		</property>
-		<property name="transformMessageKeys">
-			<map>
-				<entry key="title" value="label.build.summary"/>
-				<entry key="nextBuildLabel" value="label.build.next"/>
-				<entry key="prevBuildLabel" value="label.build.prev"/>
-				<entry key="sandboxLabel" value="label.sandbox"/>
-				<entry key="buildLogLabel" value="label.build.log"/>
-				<entry key="revisionCaption" value="captions.revisions"/>
-				<entry key="changeSetCaption" value="captions.changeSets"/>
-				<entry key="projectHeader" value="th.project"/>
-				<entry key="revisionHeader" value="th.revision"/>
-				<entry key="buildNumberHeader" value="th.build.number"/>
-				<entry key="lblCompleted" value="label.build.completed"/>
-				<entry key="authorHeader" value="th.author"/>
-				<entry key="timestampHeader" value="th.timestamp"/>
-				<entry key="messageHeader" value="th.message"/>
-				<entry key="pathsHeader" value="th.paths"/>
-				<entry key="diffHeader" value="label.diff"/>
-				<entry key="statusHeader" value="th.project.status"/>
-				<entry key="lastGoodBuildNumberLabel" value="label.last.good.build.number"/>
-				<entry key="repositoryUrlLabel" value="label.repository.url"/>
-				<entry key="repositoryTagNameHeader" value="th.repository.tag.name"/>
-				<entry key="currentlyBuildingMessage" value="messages.project.currently.building"/>
-				<entry key="buildRequestedByLabel" value="label.build.request.username"/>
-				<entry key="buildScheduledByLabel" value="label.build.scheduled.by"/>
-				<entry key="elapsedTimeLabel" value="label.build.elapsed.time"/>
-				<entry key="lblBuildDuration" value="label.build.duration"/>
-				<entry key="issueListHeader" value="label.issue.list"/>
-				<entry key="errorsLabel" value="label.errors.occurred"/>
-				<entry key="warningsLabel" value="label.warnings.occurred"/>
-				<entry key="buildReasonLabel" value="label.build.reason"/>
-				<entry key="updateTypeLabel" value="label.update.type"/>
-				<entry key="metricsLabel" value="label.metrics"/>
-				<entry key="testFailureLabel" value="label.test.failures"/>
-				<entry key="testNameLabel" value="label.test.failure.name"/>
-				<entry key="testFailureBuildNumberLabel" value="label.test.failure.build.number"/>
-				<entry key="newTestFailureLabel" value="label.test.failure.new"/>
-				<entry key="buildDirectoryLabel" value="label.work.directory"/>
 			</map>
 		</property>
 	</bean>
