@@ -188,7 +188,7 @@ public abstract class JstlFunctions {
 
 		final PreferencesDto prefs = (PreferencesDto) pageContext.findAttribute(Keys.PREFERENCES);
 		
-		if (prefs != null) {
+		if (prefs != null && prefs.getDashboardColumns() != null) {
 			// Start with the chosen columns in the chosen order.
 			final List<String> userSorted = new ArrayList<String> (Arrays.asList(prefs.getDashboardColumns()));
 			
