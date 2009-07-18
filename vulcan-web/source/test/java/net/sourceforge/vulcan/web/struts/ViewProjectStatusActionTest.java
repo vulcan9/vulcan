@@ -535,6 +535,7 @@ public class ViewProjectStatusActionTest extends MockApplicationContextStrutsTes
 		assertPropertyHasError(ActionMessages.GLOBAL_MESSAGE, "errors.request.invalid");
 	}
 	public void testTransform() throws Exception {
+		paramMap.put("locale", request.getLocale().toString());
 		paramMap.put("contextRoot", "/vulcan-web");
 		paramMap.put("viewProjectStatusURL", new URL("http://localhost/vulcan-web/projects/"));
 		paramMap.put("workingCopyBuildNumber", 42);
@@ -554,6 +555,7 @@ public class ViewProjectStatusActionTest extends MockApplicationContextStrutsTes
 		assertEquals("text/html", response.getContentType());
 	}
 	public void testTransformSetsView() throws Exception {
+		paramMap.put("locale", request.getLocale().toString());
 		paramMap.put("contextRoot", "/vulcan-web");
 		paramMap.put("viewProjectStatusURL", new URL("http://localhost/vulcan-web/projects/"));
 		paramMap.put("workingCopyBuildNumber", 42);
@@ -576,6 +578,7 @@ public class ViewProjectStatusActionTest extends MockApplicationContextStrutsTes
 	public void testTransformUppercaseIssueTrackerBugId() throws Exception {
 		projectConfig.setBugtraqUrl("http://%bugid%/");
 		
+		paramMap.put("locale", request.getLocale().toString());
 		paramMap.put("contextRoot", "/vulcan-web");
 		paramMap.put("viewProjectStatusURL", new URL("http://localhost/vulcan-web/projects/"));
 		paramMap.put("workingCopyBuildNumber", 42);
@@ -602,6 +605,7 @@ public class ViewProjectStatusActionTest extends MockApplicationContextStrutsTes
 		prefs.setReloadInterval(3424);
 		request.getSession().setAttribute(Keys.PREFERENCES, prefs);
 		
+		paramMap.put("locale", request.getLocale().toString());
 		paramMap.put("workingCopyBuildNumber", -1);
 		paramMap.put("contextRoot", "/vulcan-web");
 		paramMap.put("reloadInterval", Integer.valueOf(prefs.getReloadInterval()));
@@ -622,6 +626,7 @@ public class ViewProjectStatusActionTest extends MockApplicationContextStrutsTes
 		assertEquals("text/html", response.getContentType());
 	}
 	public void testTransformBadFormatType() throws Exception {
+		paramMap.put("locale", request.getLocale().toString());
 		paramMap.put("workingCopyBuildNumber", 42);
 		paramMap.put("contextRoot", "/vulcan-web");
 		paramMap.put("viewProjectStatusURL", new URL("http://localhost/vulcan-web/projects/"));

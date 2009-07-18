@@ -1,6 +1,6 @@
 /*
  * Vulcan Build Manager
- * Copyright (C) 2005-2006 Chris Eldredge
+ * Copyright (C) 2005-2009 Chris Eldredge
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -53,6 +53,7 @@ import org.apache.struts.util.RequestUtils;
 import org.jdom.Document;
 import org.jdom.output.Format;
 import org.jdom.output.XMLOutputter;
+import org.springframework.context.MessageSource;
 import org.xml.sax.SAXException;
 
 @SvnRevision(id="$Id$", url="$HeadURL$")
@@ -63,6 +64,7 @@ public abstract class ProjectReportBaseAction extends Action {
 	protected BuildManager buildManager;
 	protected ProjectDomBuilder projectDomBuilder;
 	protected ProjectManager projectManager;
+	protected MessageSource messageSource;
 	
 	public ConfigurationStore getConfigurationStore() {
 		return configurationStore;
@@ -87,6 +89,12 @@ public abstract class ProjectReportBaseAction extends Action {
 	}
 	public void setProjectManager(ProjectManager projectManager) {
 		this.projectManager = projectManager;
+	}
+	public MessageSource getMessageSource() {
+		return messageSource;
+	}
+	public void setMessageSource(MessageSource messageSource) {
+		this.messageSource = messageSource;
 	}
 	protected URL getSelfURL(ActionMapping mapping, HttpServletRequest request, String transform) throws MalformedURLException {
 		final StringBuilder buf = new StringBuilder(mapping.findForward("viewProjectStatus").getPath());
@@ -114,6 +122,7 @@ public abstract class ProjectReportBaseAction extends Action {
 					params.putAll(transformParams);
 				}
 				
+				params.put("locale", request.getLocale().toString());
 				params.put("viewProjectStatusURL", getSelfURL(mapping, request, transform));
 				params.put("contextRoot", request.getContextPath());
 				
