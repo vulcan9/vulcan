@@ -1,6 +1,6 @@
 /*
  * Vulcan Build Manager
- * Copyright (C) 2005-2006 Chris Eldredge
+ * Copyright (C) 2005-2009 Chris Eldredge
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -38,6 +38,7 @@ import net.sourceforge.vulcan.dto.ProjectStatusDto;
 import net.sourceforge.vulcan.dto.RevisionTokenDto;
 import net.sourceforge.vulcan.dto.ProjectStatusDto.Status;
 import net.sourceforge.vulcan.event.BuildCompletedEvent;
+import net.sourceforge.vulcan.event.BuildStartingEvent;
 import net.sourceforge.vulcan.event.Event;
 import net.sourceforge.vulcan.event.EventHandler;
 import net.sourceforge.vulcan.exception.AlreadyScheduledException;
@@ -185,9 +186,36 @@ public class BuildManagerImplTest extends TestCase {
 		
 		final ProjectStatusDto status = new ProjectStatusDto();
 		
-		mgr.registerBuildStatus(info1, a, status);
+		mgr.registerBuildStatus(info1, null, a, status);
 		
 		assertSame(status, mgr.getProjectsBeingBuilt().get(a.getName()));
+	}
+	public void testRegisterStatusRegistersBuilder() throws Exception {
+		mgr.add(a);
+		ProjectConfigDto target = mgr.getTarget(info1);
+		
+		final ProjectStatusDto status = new ProjectStatusDto();
+		
+		final ProjectBuilderImpl builder = new ProjectBuilderImpl();
+		mgr.registerBuildStatus(info1, builder, target, status);
+		
+		assertSame(builder, mgr.getProjectBuilder(target.getName()));
+	}
+	public void testRegisterStatusFiresEvent() throws Exception {
+		mgr.add(a);
+		ProjectConfigDto target = mgr.getTarget(info1);
+		
+		final ProjectStatusDto status = new ProjectStatusDto();
+		
+		mgr.registerBuildStatus(info1, null, target, status);
+		
+		assertNotNull("Expected event to be fired but was not", event);
+		assertTrue("Expected instanceof BuildStartingEvent but was " + event.getClass().getName(), event instanceof BuildStartingEvent);
+		
+		BuildStartingEvent ev = (BuildStartingEvent) event;
+		assertSame(info1, ev.getBuildDaemonInfo());
+		assertSame(status, ev.getStatus());
+		assertSame(target, ev.getProjectConfig());
 	}
 	public void testGetTargetDoesNotAddNullToActive() throws Exception {
 		b.setDependencies(new String[] {"a"});
@@ -926,7 +954,7 @@ public class BuildManagerImplTest extends TestCase {
 		mgr.add(dg);
 
 		assertSame(a, mgr.getTarget(info1));
-		mgr.registerBuildStatus(info1, a, status);
+		mgr.registerBuildStatus(info1, null, a, status);
 		
 		assertSame(status, mgr.getStatusByBuildNumber(a.getName(), buildNumber));
 	}
@@ -943,7 +971,7 @@ public class BuildManagerImplTest extends TestCase {
 		mgr.add(dg);
 
 		assertSame(a, mgr.getTarget(info1));
-		mgr.registerBuildStatus(info1, a, status);
+		mgr.registerBuildStatus(info1, null, a, status);
 		
 		assertEquals(null, mgr.getStatusByBuildNumber(a.getName(), buildNumber + 1));
 	}

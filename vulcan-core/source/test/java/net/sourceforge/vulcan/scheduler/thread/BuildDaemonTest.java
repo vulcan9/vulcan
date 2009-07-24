@@ -1,6 +1,6 @@
 /*
  * Vulcan Build Manager
- * Copyright (C) 2005-2006 Chris Eldredge
+ * Copyright (C) 2005-2009 Chris Eldredge
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -115,7 +115,7 @@ public class BuildDaemonTest extends EasyMockTestCase {
 		expect(mgr.getLatestStatus(null)).andReturn(null).anyTimes();
 
 		mgr.registerBuildStatus((BuildDaemonInfoDto)notNull(),
-				(ProjectConfigDto)notNull(), (ProjectStatusDto)notNull());
+				(ProjectBuilder)notNull(), (ProjectConfigDto)notNull(), (ProjectStatusDto)notNull());
 		
 
 		mgr.targetCompleted(
@@ -174,7 +174,7 @@ public class BuildDaemonTest extends EasyMockTestCase {
 		expect(mgr.getLatestStatus(null)).andReturn(null).anyTimes();
 
 		mgr.registerBuildStatus((BuildDaemonInfoDto)notNull(),
-				(ProjectConfigDto)notNull(), (ProjectStatusDto)notNull());
+				(ProjectBuilder)notNull(), (ProjectConfigDto)notNull(), (ProjectStatusDto)notNull());
 
 		mgr.targetCompleted(
 				(BuildDaemonInfoDto) anyObject(),
@@ -200,7 +200,7 @@ public class BuildDaemonTest extends EasyMockTestCase {
 		expect(mgr.getLatestStatus(null)).andReturn(null).anyTimes();
 		
 		mgr.registerBuildStatus((BuildDaemonInfoDto)notNull(),
-				(ProjectConfigDto)notNull(), (ProjectStatusDto)notNull());
+				(ProjectBuilder)notNull(), (ProjectConfigDto)notNull(), (ProjectStatusDto)notNull());
 		
 		
 		mgr.targetCompleted(
@@ -234,7 +234,7 @@ public class BuildDaemonTest extends EasyMockTestCase {
 		expect(mgr.getLatestStatus(null)).andReturn(null).anyTimes();
 
 		mgr.registerBuildStatus((BuildDaemonInfoDto)notNull(),
-				(ProjectConfigDto)notNull(), (ProjectStatusDto)notNull());
+				(ProjectBuilder)notNull(), (ProjectConfigDto)notNull(), (ProjectStatusDto)notNull());
 		
 
 		mgr.targetCompleted(

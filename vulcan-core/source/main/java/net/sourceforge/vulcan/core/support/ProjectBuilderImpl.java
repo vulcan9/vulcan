@@ -1,6 +1,6 @@
 /*
  * Vulcan Build Manager
- * Copyright (C) 2005-2006 Chris Eldredge
+ * Copyright (C) 2005-2009 Chris Eldredge
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -37,6 +37,8 @@ import net.sourceforge.vulcan.RepositoryAdaptor;
 import net.sourceforge.vulcan.core.BuildDetailCallback;
 import net.sourceforge.vulcan.core.BuildManager;
 import net.sourceforge.vulcan.core.BuildOutcomeStore;
+import net.sourceforge.vulcan.core.BuildPhase;
+import net.sourceforge.vulcan.core.BuildStatusListener;
 import net.sourceforge.vulcan.core.ConfigurationStore;
 import net.sourceforge.vulcan.core.ProjectBuilder;
 import net.sourceforge.vulcan.dto.BuildDaemonInfoDto;
@@ -72,6 +74,8 @@ public class ProjectBuilderImpl implements ProjectBuilder {
 	private long deleteFailureSleepTime;
 	private BuildPhase currentPhase;
 	protected UpdateType updateType;
+	
+	private List<BuildStatusListener> buildListeners = new ArrayList<BuildStatusListener>();
 	
 	private List<BuildMessageDto> errors = new ArrayList<BuildMessageDto>();
 	private List<BuildMessageDto> warnings = new ArrayList<BuildMessageDto>();
@@ -122,7 +126,7 @@ public class ProjectBuilderImpl implements ProjectBuilder {
 		try {
 			buildStatus = createBuildStatus(currentTarget);
 			
-			buildManager.registerBuildStatus(info, currentTarget, buildStatus);
+			buildManager.registerBuildStatus(info, this, currentTarget, buildStatus);
 			
 			buildProject(currentTarget);
 			buildStatus.setStatus(Status.PASS);
@@ -204,7 +208,16 @@ public class ProjectBuilderImpl implements ProjectBuilder {
 	public synchronized boolean isKilling() {
 		return killing;
 	}
-
+	public void addBuildStatusListener(BuildStatusListener listener) {
+		synchronized(buildListeners) {
+			buildListeners.add(listener);
+		}
+	}
+	public boolean removeBuildStatusListener(BuildStatusListener listener) {
+		synchronized(buildListeners) {
+			return buildListeners.remove(listener);
+		}
+	}
 	public ConfigurationStore getConfigurationStore() {
 		return configurationStore;
 	}
@@ -436,6 +449,9 @@ public class ProjectBuilderImpl implements ProjectBuilder {
 	protected final void doPhase(BuildPhase phase, PhaseCallback callback) throws Exception {
 		currentPhase = phase;
 		buildDetailCallback.setPhaseMessageKey(phase.getMessageKey());
+		for (BuildStatusListener listener : getCurrentBuildListeners()) {
+			listener.onBuildPhaseChanged(phase);
+		}
 		try {
 			callback.execute();
 		} catch (InterruptedException e) {
@@ -455,6 +471,12 @@ public class ProjectBuilderImpl implements ProjectBuilder {
 		}
 	}
 	
+	private List<BuildStatusListener> getCurrentBuildListeners() {
+		synchronized(buildListeners) {
+			return new ArrayList<BuildStatusListener>(buildListeners);
+		}
+	}
+
 	protected interface PhaseCallback {
 		void execute() throws Exception;
 	}
@@ -476,14 +498,22 @@ public class ProjectBuilderImpl implements ProjectBuilder {
 		public void reportError(String message, String file, Integer lineNumber, String code) {
 			if (!suppressErrors) {
 				delegate.reportError(message, file, lineNumber, code);
-				errors.add(new BuildMessageDto(message, file, lineNumber, code));
+				final BuildMessageDto error = new BuildMessageDto(message, file, lineNumber, code);
+				errors.add(error);
+				for (BuildStatusListener listener : getCurrentBuildListeners()) {
+					listener.onErrorLogged(error);
+				}
 			}
 		}
 
 		public void reportWarning(String message, String file, Integer lineNumber, String code) {
 			if (!suppressWarnings) {
 				delegate.reportWarning(message, file, lineNumber, code);
-				warnings.add(new BuildMessageDto(message, file, lineNumber, code));
+				final BuildMessageDto warning = new BuildMessageDto(message, file, lineNumber, code);
+				warnings.add(warning);
+				for (BuildStatusListener listener : getCurrentBuildListeners()) {
+					listener.onWarningLogged(warning);
+				}
 			}
 		}
 

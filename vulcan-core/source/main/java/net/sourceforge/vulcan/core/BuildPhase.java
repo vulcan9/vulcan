@@ -16,15 +16,24 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-package net.sourceforge.vulcan.integration;
+package net.sourceforge.vulcan.core;
 
-import net.sourceforge.vulcan.event.BuildCompletedEvent;
-import net.sourceforge.vulcan.event.BuildStartingEvent;
-import net.sourceforge.vulcan.metadata.SvnRevision;
+public enum BuildPhase {
+	CheckForUpdates("build.phase.check.updates"),
+	CleanWorkingCopy("build.phase.clean"),
+	CheckoutWorkingCopy("build.phase.checkout"),
+	UpdateWorkingCopy("build.phase.update"),
+	GetChangeLog("build.phase.changelog"),
+	Build("build.phase.build"),
+	Publish("build.phase.publish");
+	
+	private final String messageKey;
 
-
-@SvnRevision(id="$Id$", url="$HeadURL$")
-public interface BuildManagerObserverPlugin extends Plugin {
-	public void onBuildStarting(BuildStartingEvent event);
-	public void onBuildCompleted(BuildCompletedEvent event);
+	BuildPhase(String messageKey) {
+		this.messageKey = messageKey;
+	}
+	
+	public String getMessageKey() {
+		return messageKey;
+	}
 }

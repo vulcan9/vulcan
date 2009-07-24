@@ -16,15 +16,15 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-package net.sourceforge.vulcan.integration;
+package net.sourceforge.vulcan.core;
 
-import net.sourceforge.vulcan.event.BuildCompletedEvent;
-import net.sourceforge.vulcan.event.BuildStartingEvent;
-import net.sourceforge.vulcan.metadata.SvnRevision;
+import net.sourceforge.vulcan.dto.BuildMessageDto;
 
-
-@SvnRevision(id="$Id$", url="$HeadURL$")
-public interface BuildManagerObserverPlugin extends Plugin {
-	public void onBuildStarting(BuildStartingEvent event);
-	public void onBuildCompleted(BuildCompletedEvent event);
+/**
+ * Interface for subscribing to build status updates during a build.
+ */
+public interface BuildStatusListener {
+	public void onBuildPhaseChanged(BuildPhase phase);
+	public void onErrorLogged(BuildMessageDto error);
+	public void onWarningLogged(BuildMessageDto warning);
 }

@@ -1,6 +1,6 @@
 /*
  * Vulcan Build Manager
- * Copyright (C) 2005-2006 Chris Eldredge
+ * Copyright (C) 2005-2009 Chris Eldredge
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -39,6 +39,8 @@ import net.sourceforge.vulcan.ProjectManager;
 import net.sourceforge.vulcan.RepositoryAdaptor;
 import net.sourceforge.vulcan.core.BuildDetailCallback;
 import net.sourceforge.vulcan.core.BuildManager;
+import net.sourceforge.vulcan.core.BuildPhase;
+import net.sourceforge.vulcan.core.BuildStatusListener;
 import net.sourceforge.vulcan.core.ProjectBuilder;
 import net.sourceforge.vulcan.dto.BuildDaemonInfoDto;
 import net.sourceforge.vulcan.dto.BuildMessageDto;
@@ -208,8 +210,8 @@ public class ProjectBuilderTest extends EasyMockTestCase {
 		expect(ra.getRepositoryUrl()).andReturn("http://localhost").anyTimes();
 		expect(projectMgr.getPluginModificationDate((String)anyObject())).andReturn(null).anyTimes();
 
-		mgr.registerBuildStatus((BuildDaemonInfoDto)notNull(), (ProjectConfigDto)notNull(),
-				(ProjectStatusDto)notNull());
+		mgr.registerBuildStatus((BuildDaemonInfoDto)notNull(), (ProjectBuilder) notNull(),
+				(ProjectConfigDto)notNull(), (ProjectStatusDto)notNull());
 		expectLastCall().anyTimes();
 		
 		info.setHostname(InetAddress.getLocalHost());
@@ -395,6 +397,23 @@ public class ProjectBuilderTest extends EasyMockTestCase {
 		project.setWorkDir("a");
 		project.setRequestedBy("Deborah");
 
+		
+		final List<BuildPhase> listenedPhases = new ArrayList<BuildPhase>();
+		final List<BuildMessageDto> listenedErrors = new ArrayList<BuildMessageDto>();
+		final List<BuildMessageDto> listenedWarnings = new ArrayList<BuildMessageDto>();
+		
+		builder.addBuildStatusListener(new BuildStatusListener() {
+			public void onBuildPhaseChanged(BuildPhase phase) {
+				listenedPhases.add(phase);
+			}
+			public void onErrorLogged(BuildMessageDto error) {
+				listenedErrors.add(error);
+			}
+			public void onWarningLogged(BuildMessageDto warning) {
+				listenedWarnings.add(warning);
+			}
+		});
+		
 		expect(projectMgr.getRepositoryAdaptor(project)).andReturn(ra);
 
 		expect(ra.getTagName()).andReturn("trunk");
@@ -430,6 +449,10 @@ public class ProjectBuilderTest extends EasyMockTestCase {
 		mgr.targetCompleted(info, project, outcome);
 		
 		checkBuild();
+		
+		assertTrue("expected listenedPhases.size() > 0 but was " + listenedPhases.size(), listenedPhases.size() > 0);
+		assertTrue("expected listenedErrors.size() > 0 but was " + listenedErrors.size(), listenedErrors.size() > 0);
+		assertTrue("expected listenedWarnings.size() > 0 but was " + listenedWarnings.size(), listenedWarnings.size() > 0);
 	}
 	public void testCapturesMetrics() throws Exception {
 		project = new ProjectConfigDto();
@@ -941,7 +964,7 @@ public class ProjectBuilderTest extends EasyMockTestCase {
 		previousStatus.setCompletionDate(new Date(1));
 		expect(mgr.getLatestStatus(project.getName())).andReturn(previousStatus);
 
-		mgr.registerBuildStatus(eq(info), eq(project), (ProjectStatusDto)notNull());
+		mgr.registerBuildStatus(eq(info), eq(builder), eq(project), (ProjectStatusDto)notNull());
 		
 		expect(projectMgr.getRepositoryAdaptor(project)).andReturn(ra);
 
@@ -999,7 +1022,7 @@ public class ProjectBuilderTest extends EasyMockTestCase {
 
 		final ProjectStatusDto completedOutcome = createFakeBuildOutcome(project.getName(), 43, null,
 				null, Status.ERROR, "messages.build.uncaught.exception",
-				new String[]{project.getName(), re.getMessage(), ProjectBuilder.BuildPhase.Build.name()},
+				new String[]{project.getName(), re.getMessage(), BuildPhase.Build.name()},
 				null, null, true, null, null, null, ProjectStatusDto.UpdateType.Full, project.getWorkDir(), estimatedBuildTimeMillis);
 		
 		mgr.targetCompleted((BuildDaemonInfoDto)anyObject(), eq(project), eq(completedOutcome));

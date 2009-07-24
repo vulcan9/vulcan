@@ -1,6 +1,6 @@
 /*
  * Vulcan Build Manager
- * Copyright (C) 2005-2006 Chris Eldredge
+ * Copyright (C) 2005-2009 Chris Eldredge
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -35,6 +35,8 @@ import net.sourceforge.vulcan.dto.ComponentVersionDto;
 import net.sourceforge.vulcan.dto.PluginConfigDto;
 import net.sourceforge.vulcan.dto.PluginMetaDataDto;
 import net.sourceforge.vulcan.event.BuildCompletedEvent;
+import net.sourceforge.vulcan.event.BuildEvent;
+import net.sourceforge.vulcan.event.BuildStartingEvent;
 import net.sourceforge.vulcan.event.EventHandler;
 import net.sourceforge.vulcan.exception.PluginLoadFailureException;
 import net.sourceforge.vulcan.exception.PluginNotConfigurableException;
@@ -201,7 +203,7 @@ public class SpringPluginManagerTest extends EasyMockTestCase {
 	static boolean initCalled = false;
 	static boolean destroyCalled = false;
 	static boolean nameChangeCalled = false;
-	static BuildCompletedEvent event = null;
+	static BuildEvent event = null;
 	static PluginConfigDto configBean = new PluginStub();
 	
 	public static class MockPlugin implements BuildManagerObserverPlugin, ProjectNameChangeListener {
@@ -220,6 +222,9 @@ public class SpringPluginManagerTest extends EasyMockTestCase {
 		}
 		public void end() {
 			destroyCalled = true;
+		}
+		public void onBuildStarting(BuildStartingEvent evt) {
+			event = evt;
 		}
 		public void onBuildCompleted(BuildCompletedEvent evt) {
 			event = evt;
