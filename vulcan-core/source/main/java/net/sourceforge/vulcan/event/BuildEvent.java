@@ -18,6 +18,8 @@
  */
 package net.sourceforge.vulcan.event;
 
+import java.util.Date;
+
 import net.sourceforge.vulcan.dto.BuildDaemonInfoDto;
 import net.sourceforge.vulcan.dto.ProjectConfigDto;
 import net.sourceforge.vulcan.dto.ProjectStatusDto;
@@ -25,10 +27,42 @@ import net.sourceforge.vulcan.metadata.SvnRevision;
 
 
 @SvnRevision(id="$Id$", url="$HeadURL$")
-public class BuildCompletedEvent extends BuildEvent {
-	public BuildCompletedEvent(final Object source,
+public abstract class BuildEvent implements Event {
+	final transient Object source;
+	final BuildDaemonInfoDto buildDaemonInfo;
+	final ProjectConfigDto projectConfig;
+	final ProjectStatusDto status;
+	final Date date;
+	
+	public BuildEvent(final Object source,
 			final BuildDaemonInfoDto buildDaemonInfo,
 			final ProjectConfigDto projectConfig, final ProjectStatusDto status) {
-		super(source, buildDaemonInfo, projectConfig, status);
+		this.source = source;
+		this.buildDaemonInfo = buildDaemonInfo;
+		this.projectConfig = projectConfig;
+		this.status = status;
+		this.date = new Date();
+	}
+	
+	public BuildDaemonInfoDto getBuildDaemonInfo() {
+		return buildDaemonInfo;
+	}
+	public ProjectConfigDto getProjectConfig() {
+		return projectConfig;
+	}
+	public Object getSource() {
+		return source;
+	}
+	public ProjectStatusDto getStatus() {
+		return status;
+	}
+	public Object[] getArgs() {
+		return status.getMessageArgs();
+	}
+	public String getKey() {
+		return status.getMessageKey();
+	}
+	public Date getDate() {
+		return date;
 	}
 }

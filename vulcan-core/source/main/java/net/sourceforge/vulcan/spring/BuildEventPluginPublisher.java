@@ -1,6 +1,6 @@
 /*
  * Vulcan Build Manager
- * Copyright (C) 2005-2006 Chris Eldredge
+ * Copyright (C) 2005-2009 Chris Eldredge
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import net.sourceforge.vulcan.event.BuildCompletedEvent;
+import net.sourceforge.vulcan.event.BuildStartingEvent;
 import net.sourceforge.vulcan.event.Event;
 import net.sourceforge.vulcan.integration.BuildManagerObserverPlugin;
 import net.sourceforge.vulcan.integration.MetricsPlugin;
@@ -56,10 +57,19 @@ public class BuildEventPluginPublisher implements ApplicationListener {
 			return;
 		}
 		final Event event = ((EventBridge)springEvent).getEvent();
-		if (!(event instanceof BuildCompletedEvent)) {
+		
+		final BuildStartingEvent buildStartingEvent;
+		final BuildCompletedEvent buildCompletedEvent;
+		
+		if (event instanceof BuildStartingEvent) {
+			buildStartingEvent = (BuildStartingEvent) event;
+			buildCompletedEvent = null;
+		} else if (event instanceof BuildCompletedEvent) {
+			buildCompletedEvent = (BuildCompletedEvent) event;
+			buildStartingEvent = null;
+		} else {
 			return;
 		}
-		final BuildCompletedEvent buildEvent = (BuildCompletedEvent) event;
 		
 		final List<BuildManagerObserverPlugin> copy;
 		synchronized(observers) {
@@ -67,7 +77,11 @@ public class BuildEventPluginPublisher implements ApplicationListener {
 		}
 		
 		for (BuildManagerObserverPlugin plugin : copy) {
-			plugin.onBuildCompleted(buildEvent);
+			if (buildStartingEvent != null) {
+				plugin.onBuildStarting(buildStartingEvent);
+			} else {
+				plugin.onBuildCompleted(buildCompletedEvent);
+			}
 		}
 	}
 }

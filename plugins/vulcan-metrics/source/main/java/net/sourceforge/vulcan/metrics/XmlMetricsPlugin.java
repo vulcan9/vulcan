@@ -1,6 +1,6 @@
 /*
  * Vulcan Build Manager
- * Copyright (C) 2005-2006 Chris Eldredge
+ * Copyright (C) 2005-2009 Chris Eldredge
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -39,6 +39,7 @@ import net.sourceforge.vulcan.dto.ProjectStatusDto;
 import net.sourceforge.vulcan.dto.TestFailureDto;
 import net.sourceforge.vulcan.dto.MetricDto.MetricType;
 import net.sourceforge.vulcan.event.BuildCompletedEvent;
+import net.sourceforge.vulcan.event.BuildStartingEvent;
 import net.sourceforge.vulcan.event.ErrorEvent;
 import net.sourceforge.vulcan.event.EventHandler;
 import net.sourceforge.vulcan.integration.BuildManagerObserverPlugin;
@@ -86,6 +87,9 @@ public class XmlMetricsPlugin implements BuildManagerObserverPlugin, Configurabl
 		loadTransformers();
 	}
 
+	public void onBuildStarting(BuildStartingEvent event) {
+	}
+	
 	public void onBuildCompleted(BuildCompletedEvent event) {
 		try {
 			refreshTransformers();

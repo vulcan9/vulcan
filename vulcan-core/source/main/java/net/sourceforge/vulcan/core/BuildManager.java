@@ -1,6 +1,6 @@
 /*
  * Vulcan Build Manager
- * Copyright (C) 2005-2006 Chris Eldredge
+ * Copyright (C) 2005-2009 Chris Eldredge
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -40,7 +40,7 @@ public interface BuildManager {
 	 * This instance can be referenced during the build to obtain up-to-date information
 	 * about the outcome while the build is executing.
 	 */
-	void registerBuildStatus(BuildDaemonInfoDto info, ProjectConfigDto currentTarget, ProjectStatusDto buildStatus);
+	void registerBuildStatus(BuildDaemonInfoDto info, ProjectBuilder builder, ProjectConfigDto currentTarget, ProjectStatusDto buildStatus);
 
 	void add(DependencyGroup dg) throws AlreadyScheduledException;
 
@@ -65,6 +65,8 @@ public interface BuildManager {
 	ProjectStatusDto getStatus(UUID statusId);
 	
 	ProjectStatusDto getStatusByBuildNumber(String projectName, int buildNumber);
+	
+	ProjectBuilder getProjectBuilder(String projectName);
 	
 	List<UUID> getAvailableStatusIds(String projectName);
 	

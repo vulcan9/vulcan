@@ -1,6 +1,6 @@
 /*
  * Vulcan Build Manager
- * Copyright (C) 2005-2006 Chris Eldredge
+ * Copyright (C) 2005-2009 Chris Eldredge
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -37,6 +37,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import net.sourceforge.vulcan.core.BuildManager;
 import net.sourceforge.vulcan.core.DependencyException;
 import net.sourceforge.vulcan.core.DependencyGroup;
+import net.sourceforge.vulcan.core.ProjectBuilder;
 import net.sourceforge.vulcan.dto.BuildDaemonInfoDto;
 import net.sourceforge.vulcan.dto.BuildManagerConfigDto;
 import net.sourceforge.vulcan.dto.ChangeLogDto;
@@ -45,6 +46,7 @@ import net.sourceforge.vulcan.dto.ProjectStatusDto;
 import net.sourceforge.vulcan.dto.RevisionTokenDto;
 import net.sourceforge.vulcan.dto.ProjectStatusDto.Status;
 import net.sourceforge.vulcan.event.BuildCompletedEvent;
+import net.sourceforge.vulcan.event.BuildStartingEvent;
 import net.sourceforge.vulcan.event.ErrorEvent;
 import net.sourceforge.vulcan.event.EventHandler;
 import net.sourceforge.vulcan.event.InfoEvent;
@@ -79,6 +81,7 @@ public class BuildManagerImpl implements BuildManager {
 	final List<Target> queue = new ArrayList<Target>();
 	final List<ProjectConfigDto> activeBuilds = new ArrayList<ProjectConfigDto>();
 	final Map<BuildDaemonInfoDto, Target> activeDaemons = new HashMap<BuildDaemonInfoDto, Target>();
+	final Map<String, ProjectBuilder> projectBuilders = new HashMap<String, ProjectBuilder>();
 	final Map<String, ProjectStatusDto> projectsBeingBuilt = new HashMap<String, ProjectStatusDto>();
 	
 	public BuildManagerImpl() {
@@ -122,7 +125,7 @@ public class BuildManagerImpl implements BuildManager {
 		}
 	}
 
-	public void registerBuildStatus(BuildDaemonInfoDto info, ProjectConfigDto target, ProjectStatusDto buildStatus) {
+	public void registerBuildStatus(BuildDaemonInfoDto info, ProjectBuilder builder, ProjectConfigDto target, ProjectStatusDto buildStatus) {
 		try {
 			writeLock.lock();
 
@@ -131,9 +134,12 @@ public class BuildManagerImpl implements BuildManager {
 			}
 			
 			projectsBeingBuilt.put(target.getName(), buildStatus);
+			projectBuilders.put(target.getName(), builder);
 		} finally {
 			writeLock.unlock();
 		}
+		
+		eventHandler.reportEvent(new BuildStartingEvent(this, info, target, buildStatus));
 	}
 	
 	public void add(DependencyGroup dg) throws AlreadyScheduledException {
@@ -273,6 +279,14 @@ public class BuildManagerImpl implements BuildManager {
 			readLock.unlock();
 		}
 	}
+	public ProjectBuilder getProjectBuilder(String projectName) {
+		try {
+			readLock.lock();
+			return projectBuilders.get(projectName);
+		} finally {
+			readLock.unlock();
+		}
+	}
 	public EventHandler getEventHandler() {
 		return eventHandler;
 	}
@@ -342,6 +356,7 @@ public class BuildManagerImpl implements BuildManager {
 				target.targetCompleted(config, passed);
 				
 				projectsBeingBuilt.remove(projectName);
+				projectBuilders.remove(projectName);
 				
 				if (!activeBuilds.remove(config)) {
 					throw new IllegalStateException();

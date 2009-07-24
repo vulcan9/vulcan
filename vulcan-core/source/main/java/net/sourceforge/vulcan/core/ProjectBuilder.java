@@ -1,6 +1,6 @@
 /*
  * Vulcan Build Manager
- * Copyright (C) 2005-2006 Chris Eldredge
+ * Copyright (C) 2005-2009 Chris Eldredge
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,26 +24,6 @@ import net.sourceforge.vulcan.metadata.SvnRevision;
 
 @SvnRevision(id="$Id$", url="$HeadURL$")
 public interface ProjectBuilder {
-	public static enum BuildPhase {
-		CheckForUpdates("build.phase.check.updates"),
-		CleanWorkingCopy("build.phase.clean"),
-		CheckoutWorkingCopy("build.phase.checkout"),
-		UpdateWorkingCopy("build.phase.update"),
-		GetChangeLog("build.phase.changelog"),
-		Build("build.phase.build"),
-		Publish("build.phase.publish");
-		
-		private final String messageKey;
-
-		BuildPhase(String messageKey) {
-			this.messageKey = messageKey;
-		}
-		
-		public String getMessageKey() {
-			return messageKey;
-		}
-	}
-	
 	public void build(BuildDaemonInfoDto info, ProjectConfigDto projectConfig, BuildDetailCallback buildDetailCallback);
 
 	public boolean isBuilding();
@@ -54,4 +34,7 @@ public interface ProjectBuilder {
 	 * user requested it.
 	 */
 	public void abortCurrentBuild(boolean timeout, String requestUsername);
+	
+	public void addBuildStatusListener(BuildStatusListener listener);
+	public boolean removeBuildStatusListener(BuildStatusListener listener);
 }

@@ -16,15 +16,19 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-package net.sourceforge.vulcan.integration;
+package net.sourceforge.vulcan.event;
 
-import net.sourceforge.vulcan.event.BuildCompletedEvent;
-import net.sourceforge.vulcan.event.BuildStartingEvent;
+import net.sourceforge.vulcan.dto.BuildDaemonInfoDto;
+import net.sourceforge.vulcan.dto.ProjectConfigDto;
+import net.sourceforge.vulcan.dto.ProjectStatusDto;
 import net.sourceforge.vulcan.metadata.SvnRevision;
 
 
 @SvnRevision(id="$Id$", url="$HeadURL$")
-public interface BuildManagerObserverPlugin extends Plugin {
-	public void onBuildStarting(BuildStartingEvent event);
-	public void onBuildCompleted(BuildCompletedEvent event);
+public class BuildStartingEvent extends BuildEvent {
+	public BuildStartingEvent(final Object source,
+			final BuildDaemonInfoDto buildDaemonInfo,
+			final ProjectConfigDto projectConfig, final ProjectStatusDto status) {
+		super(source, buildDaemonInfo, projectConfig, status);
+	}
 }

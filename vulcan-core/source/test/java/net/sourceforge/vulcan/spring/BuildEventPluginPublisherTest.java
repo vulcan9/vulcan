@@ -1,6 +1,6 @@
 /*
  * Vulcan Build Manager
- * Copyright (C) 2005-2006 Chris Eldredge
+ * Copyright (C) 2005-2009 Chris Eldredge
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,6 +20,7 @@ package net.sourceforge.vulcan.spring;
 
 import net.sourceforge.vulcan.EasyMockTestCase;
 import net.sourceforge.vulcan.event.BuildCompletedEvent;
+import net.sourceforge.vulcan.event.BuildStartingEvent;
 import net.sourceforge.vulcan.integration.BuildManagerObserverPlugin;
 import net.sourceforge.vulcan.integration.MetricsPlugin;
 
@@ -28,7 +29,8 @@ public class BuildEventPluginPublisherTest extends EasyMockTestCase {
 	BuildManagerObserverPlugin d1 = createMock(BuildManagerObserverPlugin.class);
 	BuildManagerObserverPlugin d2 = createMock(BuildManagerObserverPlugin.class);
 	
-	BuildCompletedEvent event = new BuildCompletedEvent(this, null, null, null);
+	BuildStartingEvent startingEvent = new BuildStartingEvent(this, null, null, null);
+	BuildCompletedEvent completeEvent = new BuildCompletedEvent(this, null, null, null);
 	
 	@Override
 	protected void setUp() throws Exception {
@@ -37,24 +39,34 @@ public class BuildEventPluginPublisherTest extends EasyMockTestCase {
 	}
 	
 	public void train() throws Exception {
-		d1.onBuildCompleted(event);
-		d2.onBuildCompleted(event);
+		d1.onBuildCompleted(completeEvent);
+		d2.onBuildCompleted(completeEvent);
 	}
 	
 	@TrainingMethod("train")
 	public void testCallsInOrder() throws Exception {
 		pub.add(new PublishPlugin(d1));
 		pub.add(new PublishPlugin(d2));
-		pub.onApplicationEvent(new EventBridge(event));
+		pub.onApplicationEvent(new EventBridge(completeEvent));
 	}
 	
 	@TrainingMethod("train")
 	public void testCallsReportersFirst() throws Exception {
 		pub.add(new PublishPlugin(d2));
 		pub.add(new ReportPlugin(d1));
-		pub.onApplicationEvent(new EventBridge(event));
+		pub.onApplicationEvent(new EventBridge(completeEvent));
 	}
 	
+	public void trainStarting() throws Exception {
+		d1.onBuildStarting(startingEvent);
+	}
+	
+	@TrainingMethod("trainStarting")
+	public void testCallsBuildStarting() throws Exception {
+		pub.add(new PublishPlugin(d1));
+		pub.onApplicationEvent(new EventBridge(startingEvent));
+	}
+
 	public static class PublishPlugin implements BuildManagerObserverPlugin {
 		private final BuildManagerObserverPlugin delegate;
 		
@@ -66,6 +78,9 @@ public class BuildEventPluginPublisherTest extends EasyMockTestCase {
 		}
 		public String getName() {
 			return null;
+		}
+		public void onBuildStarting(BuildStartingEvent event) {
+			delegate.onBuildStarting(event);
 		}
 		public void onBuildCompleted(BuildCompletedEvent event) {
 			delegate.onBuildCompleted(event);
