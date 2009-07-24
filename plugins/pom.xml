@@ -26,6 +26,7 @@
 		<module>vulcan-cvs</module>
 		<module>vulcan-dotnet</module>
 		<module>vulcan-filesystem</module>
+		<module>vulcan-jabber</module>
 		<module>vulcan-mailer</module>
 		<module>vulcan-maven</module>
 		<module>vulcan-metrics</module>
