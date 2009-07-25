@@ -22,51 +22,83 @@ import java.util.HashMap;
 import java.util.Map;
 
 import net.sourceforge.vulcan.core.BuildManager;
+import net.sourceforge.vulcan.core.BuildStatusListener;
+import net.sourceforge.vulcan.dto.PluginConfigDto;
 import net.sourceforge.vulcan.dto.ProjectStatusDto;
 import net.sourceforge.vulcan.event.BuildCompletedEvent;
 import net.sourceforge.vulcan.event.BuildStartingEvent;
-import net.sourceforge.vulcan.event.EventHandler;
 import net.sourceforge.vulcan.integration.BuildManagerObserverPlugin;
+import net.sourceforge.vulcan.integration.ConfigurablePlugin;
+import net.sourceforge.vulcan.jabber.JabberPluginConfig.ProjectsToMonitor;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-public class JabberPlugin implements BuildManagerObserverPlugin {
+public class JabberPlugin implements BuildManagerObserverPlugin, ConfigurablePlugin {
 	final static Log LOG = LogFactory.getLog(JabberPlugin.class);
 	
 	public static final String PLUGIN_ID = "net.sourceforge.vulcan.jabber";
 	public static final String PLUGIN_NAME = "Jabber Instant Messaging";
 	
-	private EventHandler eventHandler;
+	private final Map<String, BuildStatusListener> instances = new HashMap<String, BuildStatusListener>();
 	
-	private final Map<String, JabberBuildStatusListener> instances = new HashMap<String, JabberBuildStatusListener>();
+	JabberPluginConfig config = new JabberPluginConfig();
+	
+	private JabberClient client;
+	private ScreenNameResolver screenNameResolver;
+	
+	public void setClient(JabberClient client) {
+		this.client = client;
+	}
+
+	public void setScreenNameResolver(ScreenNameResolver screenNameResolver) {
+		this.screenNameResolver = screenNameResolver;
+	}
+
+	public JabberPluginConfig getConfiguration() {
+		return config;
+	}
+	
+	public void setConfiguration(PluginConfigDto bean) {
+		config = (JabberPluginConfig) bean;
+		client.refreshConnection(config.getServer(), config.getPort(), config.getUsername(), config.getPassword());
+	}
 	
 	public void onBuildStarting(BuildStartingEvent event) {
 		final ProjectStatusDto status = event.getStatus();
-		LOG.info("Project " + status.getName() + " starting build");
+
+		if (!isProjectMonitored(status.getName())) {
+			return;
+		}
+		
+		client.refreshConnection(config.getServer(), config.getPort(), config.getUsername(), config.getPassword());
 		
 		final BuildManager mgr = (BuildManager)event.getSource();
-		final JabberBuildStatusListener listener = new JabberBuildStatusListener(status);
+		final JabberBuildStatusListener listener = new JabberBuildStatusListener(client, screenNameResolver, status);
+		
+		listener.addRecipients(config.getRecipients());
 		
 		mgr.getProjectBuilder(status.getName()).addBuildStatusListener(listener);
-		synchronized (instances) {
-			instances.put(status.getName(), listener);
-		}
+		
+		addBuildListener(status.getName(), listener);
 	}
 
 	public void onBuildCompleted(BuildCompletedEvent event) {
-		final BuildManager mgr = (BuildManager)event.getSource();
-		final ProjectStatusDto status = event.getStatus();
-		final String projectName = status.getName();
+		final String projectName = event.getStatus().getName();
 		
-		final JabberBuildStatusListener listener;
-		
+		final BuildStatusListener listener;
+
 		synchronized (instances) {
 			listener = instances.remove(projectName);
 		}
+
+		if (listener == null) {
+			return;
+		}
 		
+		final BuildManager mgr = (BuildManager)event.getSource();
+
 		mgr.getProjectBuilder(projectName).removeBuildStatusListener(listener);
-		LOG.info("Project " + projectName + " finished build with result " + status.getStatus().name());
 	}
 
 	public String getId() {
@@ -77,11 +109,23 @@ public class JabberPlugin implements BuildManagerObserverPlugin {
 		return PLUGIN_NAME;
 	}
 
-	public EventHandler getEventHandler() {
-		return eventHandler;
+	private boolean isProjectMonitored(String projectName) {
+		if (config.getProjectsToMonitor() == ProjectsToMonitor.All) {
+			return true;
+		}
+		
+		for (String s : config.getSelectedProjects()) {
+			if (projectName.equals(s)) {
+				return true;
+			}
+		}
+		
+		return false;
 	}
-	
-	public void setEventHandler(EventHandler eventHandler) {
-		this.eventHandler = eventHandler;
+
+	void addBuildListener(String name, BuildStatusListener listener) {
+		synchronized (instances) {
+			instances.put(name, listener);
+		}
 	}
 }

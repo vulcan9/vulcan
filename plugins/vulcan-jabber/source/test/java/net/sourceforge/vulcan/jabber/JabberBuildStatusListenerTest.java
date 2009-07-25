@@ -1,0 +1,136 @@
+/*
+ * Vulcan Build Manager
+ * Copyright (C) 2005-2009 Chris Eldredge
+ * 
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+package net.sourceforge.vulcan.jabber;
+
+import java.util.Arrays;
+
+import net.sourceforge.vulcan.EasyMockTestCase;
+import net.sourceforge.vulcan.core.BuildPhase;
+import net.sourceforge.vulcan.dto.ChangeLogDto;
+import net.sourceforge.vulcan.dto.ChangeSetDto;
+import net.sourceforge.vulcan.dto.ProjectStatusDto;
+
+public class JabberBuildStatusListenerTest extends EasyMockTestCase {
+	
+	JabberBuildStatusListener listener;
+	JabberClient client = createStrictMock(JabberClient.class);
+	ScreenNameResolver resolver = createStrictMock(ScreenNameResolver.class);
+	ProjectStatusDto status = new ProjectStatusDto();
+	ChangeLogDto changeLog = new ChangeLogDto();
+	ChangeSetDto commit1;
+	ChangeSetDto commit2;
+	ChangeSetDto commit3;
+	ChangeSetDto commit4;
+	
+	@Override
+	protected void setUp() throws Exception {
+		super.setUp();
+	
+		listener = new JabberBuildStatusListener(client, resolver, status);
+		
+		commit1 = makeChangeSet("Sam");
+		commit2 = makeChangeSet("Jesse");
+		commit3 = makeChangeSet("Sam");
+		commit4 = makeChangeSet("Sydney");
+	}
+	
+	private ChangeSetDto makeChangeSet(String author) {
+		final ChangeSetDto dto = new ChangeSetDto();
+		dto.setAuthor(author);
+		return dto;
+	}
+
+	public void testMapsAuthorsToRecipientsOnBuildStarted() throws Exception {
+		status.setChangeLog(changeLog);
+		changeLog.setChangeSets(Arrays.asList(commit1, commit2, commit3, commit4));
+		
+		listener.addRecipients("permanentjoe");
+		
+		expect(resolver.lookupByAuthor(Arrays.asList("Sam", "Jesse", "Sydney"))).andReturn(Arrays.asList("sam82", "sidthekid"));
+		
+		replay();
+		
+		listener.onBuildPhaseChanged(BuildPhase.Build);
+		
+		verify();
+		
+		assertEquals(Arrays.asList("permanentjoe", "sam82", "sidthekid"), listener.getRecipients());
+	}
+
+	public void testSkipsNullAndBlank() throws Exception {
+		status.setChangeLog(changeLog);
+		commit2.setAuthor("");
+		commit4.setAuthor(null);
+		changeLog.setChangeSets(Arrays.asList(commit1, commit2, commit3, commit4));
+		
+		listener.addRecipients("permanentjoe");
+		
+		expect(resolver.lookupByAuthor(Arrays.asList("Sam"))).andReturn(Arrays.asList("sam82"));
+		
+		replay();
+		
+		listener.onBuildPhaseChanged(BuildPhase.Build);
+		
+		verify();
+		
+		assertEquals(Arrays.asList("permanentjoe", "sam82"), listener.getRecipients());
+	}
+	
+	public void testMapsAuthorsToRecipientsOnBuildStartedNullChangeLog() throws Exception {
+		listener.addRecipients("permanentjoe");
+		
+		status.setChangeLog(null);
+		
+		replay();
+		
+		listener.onBuildPhaseChanged(BuildPhase.Build);
+		
+		verify();
+		
+		assertEquals(Arrays.asList("permanentjoe"), listener.getRecipients());
+	}
+	
+	public void testMapsAuthorsToRecipientsOnBuildStartedNullChangeSets() throws Exception {
+		listener.addRecipients("permanentjoe");
+		
+		changeLog.setChangeSets(null);
+		status.setChangeLog(changeLog);
+		
+		replay();
+		
+		listener.onBuildPhaseChanged(BuildPhase.Build);
+		
+		verify();
+		
+		assertEquals(Arrays.asList("permanentjoe"), listener.getRecipients());
+	}
+	
+	public void testDoesNotLookupOnOtherPhases() throws Exception {
+		listener.addRecipients("permanentjoe");
+		
+		replay();
+		
+		listener.onBuildPhaseChanged(BuildPhase.GetChangeLog);
+		listener.onBuildPhaseChanged(BuildPhase.Publish);
+		
+		verify();
+		
+		assertEquals(Arrays.asList("permanentjoe"), listener.getRecipients());
+	}
+}

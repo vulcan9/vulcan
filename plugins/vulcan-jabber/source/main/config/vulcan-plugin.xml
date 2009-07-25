@@ -3,8 +3,15 @@
 	"http://www.springframework.org/dtd/spring-beans.dtd">
 <beans>
 	<bean name="plugin" class="net.sourceforge.vulcan.jabber.JabberPlugin">
-		<property name="eventHandler">
-			<ref parent="eventHandler"/>
+		<property name="client">
+			<bean class="net.sourceforge.vulcan.jabber.XmppClient">
+				<property name="eventHandler">
+					<ref parent="eventHandler"/>
+				</property>
+			</bean>
+		</property>
+		<property name="screenNameResolver">
+			<bean class="net.sourceforge.vulcan.jabber.DictionaryScreenNameResolver"/>
 		</property>
 	</bean>
 	
