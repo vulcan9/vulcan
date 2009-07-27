@@ -108,7 +108,7 @@ public class JabberPluginTest extends EasyMockTestCase {
 	public void testRemovesBuildListener() throws Exception {
 		final boolean[] detachedFlag = new boolean[1];
 		
-		plugin.addBuildListener(status.getName(), new JabberBuildStatusListener(null, null, null, status) {
+		plugin.addBuildListener(status.getName(), new JabberBuildStatusListener(null, null, null, config, status) {
 			@Override
 			public void detach() {
 				detachedFlag[0] = true;
