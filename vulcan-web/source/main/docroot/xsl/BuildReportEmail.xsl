@@ -1,5 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0">
+<xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0"
+	xmlns:vulcan="xalan://net.sourceforge.vulcan.web.XslHelper"
+	extension-element-prefixes="vulcan"
+	exclude-result-prefixes="vulcan">
+	
+	<xsl:include href="common.xsl"/>
 	
 	<xsl:output method="xml" media-type="text/html" version="1.0"
 		encoding="UTF-8" omit-xml-declaration="yes"/>
@@ -7,22 +12,6 @@
 	<xsl:param name="title"/>
 	<xsl:param name="viewProjectStatusURL"/>
 	<xsl:param name="issueTrackerURL"/>
-	<xsl:param name="issueListHeader"/>
-	<xsl:param name="revisionCaption"/>
-	<xsl:param name="changeSetCaption"/>
-	<xsl:param name="projectHeader"/>
-	<xsl:param name="revisionHeader"/>
-	<xsl:param name="buildNumberHeader"/>
-	<xsl:param name="authorHeader"/>
-	<xsl:param name="timestampHeader"/>
-	<xsl:param name="messageHeader"/>
-	<xsl:param name="pathsHeader"/>
-	<xsl:param name="lastGoodBuildNumberLabel"/>
-	<xsl:param name="errorsLabel"/>
-	<xsl:param name="metricsLabel"/>
-	<xsl:param name="testFailureLabel"/>
-	<xsl:param name="testNameLabel"/>
-	<xsl:param name="testFailureBuildNumberLabel"/>
 	
 	<xsl:variable name="num-errors" select="count(/project/errors/error)"/>
 	<xsl:variable name="num-warnings" select="count(/project/warnings/warning)"/>
@@ -73,12 +62,12 @@
 			</head>
 			<body>
 				<p class="meta">
-					<xsl:value-of select="$buildNumberHeader"/>
+					<xsl:value-of select="vulcan:getMessage($messageSource, 'th.build.number')"/>
 					<xsl:text> </xsl:text>
 					<xsl:value-of select="/project/build-number"/>
 					<xsl:if test="/project/revision">
 						<xsl:text>, </xsl:text>
-						<xsl:value-of select="$revisionHeader"/>
+						<xsl:value-of select="vulcan:getMessage($messageSource, 'th.revision')"/>
 						<xsl:text> </xsl:text>
 						<xsl:value-of select="/project/revision"/>
 					</xsl:if>
@@ -167,9 +156,9 @@
 		<table>
 			<thead>
 				<tr>
-					<th><xsl:value-of select="$authorHeader"/></th>
-					<th><xsl:value-of select="$revisionHeader"/></th>
-					<th><xsl:value-of select="$messageHeader"/></th>
+					<th><xsl:value-of select="vulcan:getMessage($messageSource, 'th.author')"/></th>
+					<th><xsl:value-of select="vulcan:getMessage($messageSource, 'th.revision')"/></th>
+					<th><xsl:value-of select="vulcan:getMessage($messageSource, 'th.message')"/></th>
 				</tr>
 			</thead>
 			<tbody>
@@ -267,7 +256,7 @@
 	</xsl:template>
 	
 	<xsl:template match="/project/test-failures">
-		<h2><xsl:value-of select="$testFailureLabel"/></h2>
+		<h2><xsl:value-of select="vulcan:getMessage($messageSource, 'label.test.failures')"/></h2>
 		<dl xmlns="http://www.w3.org/1999/xhtml">
 		<xsl:for-each select="./test-failure">
 				<dt>
