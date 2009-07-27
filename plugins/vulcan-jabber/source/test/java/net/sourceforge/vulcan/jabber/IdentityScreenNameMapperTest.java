@@ -18,8 +18,18 @@
  */
 package net.sourceforge.vulcan.jabber;
 
+import java.util.Arrays;
 import java.util.List;
 
-public interface ScreenNameResolver {
-	public List<String> lookupByAuthor(Iterable<String> uniques);
+import junit.framework.TestCase;
+
+public class IdentityScreenNameMapperTest extends TestCase {
+	public void testIdentity() throws Exception {
+		final IdentityScreenNameMapper mapper = new IdentityScreenNameMapper();
+		final List<String> list = Arrays.asList("Sam", "Jill");
+		final List<String> result = mapper.lookupByAuthor(list);
+		
+		assertEquals(list, result);
+		assertNotSame(list, result);
+	}
 }

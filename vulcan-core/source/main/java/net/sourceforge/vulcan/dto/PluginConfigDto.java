@@ -37,7 +37,7 @@ public abstract class PluginConfigDto extends BaseDto implements ApplicationCont
 	public static String ATTR_AVAILABLE_CHOICES = "net.sourceforge.vulcan.integration.CHOICES";
 	public static String ATTR_WIDGET_TYPE = "net.sourceforge.vulcan.integration.WIDGET_TYPE";
 
-	public static enum Widget { PASSWORD };
+	public static enum Widget { PASSWORD, DROPDOWN, TEXTAREA };
 	
 	protected ApplicationContext applicationContext;
 	

@@ -21,12 +21,15 @@ package net.sourceforge.vulcan.jabber;
 import java.beans.PropertyDescriptor;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 import net.sourceforge.vulcan.dto.BaseDto;
 import net.sourceforge.vulcan.dto.PluginConfigDto;
 import net.sourceforge.vulcan.integration.ConfigChoice;
+import net.sourceforge.vulcan.metadata.Transient;
 
 import org.apache.commons.lang.ArrayUtils;
 
@@ -36,13 +39,35 @@ public class JabberPluginConfig extends PluginConfigDto {
 		Specify
 	}
 	
+	public static enum ScreenNameMapper {
+		Dictionay(new DictionaryScreenNameMapperConfig()),
+		Identity(new IdentityScreenNameMapperConfig()),
+		Jdbc(new JdbcScreenNameMapperConfig());
+		
+		private final PluginConfigDto defaultConfig;
+		
+		ScreenNameMapper(PluginConfigDto defaultConfig) {
+			this.defaultConfig = defaultConfig;
+		}
+		
+		public PluginConfigDto getDefaultConfig() {
+			return defaultConfig;
+		}
+	}
+	
 	private String server = "";
 	private int port = 5222;
 	private String username = "";
 	private String password = "";
+	private String vulcanUrl = "http://localhost:8080/vulcan";
+	
+	private ScreenNameMapper screenNameMapper = ScreenNameMapper.Dictionay;
 	private String[] recipients = {};
 	private ProjectsToMonitor projectsToMonitor = ProjectsToMonitor.All;
 	private String[] selectedProjects = {};
+	private Map<ScreenNameMapper, ? super PluginConfigDto> screenNameMapperConfig = new HashMap<ScreenNameMapper, PluginConfigDto>();
+	private String messageFormat = "You may have broken the build!  See {url} for more info.";
+	private String otherUsersMessageFormat = "These users were also notified: {users}.";
 	
 	@Override
 	public String getPluginId() {
@@ -63,9 +88,18 @@ public class JabberPluginConfig extends PluginConfigDto {
 		addProperty(pds, "username", "JabberPluginConfig.username.name", "JabberPluginConfig.username.description", locale);
 		addProperty(pds, "password", "JabberPluginConfig.password.name", "JabberPluginConfig.password.description", locale,
 				Collections.singletonMap(ATTR_WIDGET_TYPE, Widget.PASSWORD));
-
+		
+		addProperty(pds, "vulcanUrl", "JabberPluginConfig.vulcanUrl.name", "JabberPluginConfig.vulcanUrl.description", locale);
+		addProperty(pds, "messageFormat", "JabberPluginConfig.messageFormat.name", "JabberPluginConfig.messageFormat.description", locale,
+				Collections.singletonMap(ATTR_WIDGET_TYPE, Widget.TEXTAREA));
+		addProperty(pds, "otherUsersMessageFormat", "JabberPluginConfig.otherUsersMessageFormat.name", "JabberPluginConfig.otherUsersMessageFormat.description", locale,
+				Collections.singletonMap(ATTR_WIDGET_TYPE, Widget.TEXTAREA));
+		
+		addProperty(pds, "screenNameMapper", "JabberPluginConfig.screenNameMapper.name", "JabberPluginConfig.screenNameMapper.description", locale,
+				Collections.singletonMap(ATTR_WIDGET_TYPE, Widget.DROPDOWN));
+		addProperty(pds, "screenNameMapperConfig", "JabberPluginConfig.screenNameMapperConfig.name", "JabberPluginConfig.screenNameMapperConfig.description", locale);
+		
 		addProperty(pds, "projectsToMonitor", "JabberPluginConfig.projectsToMonitor.name", "JabberPluginConfig.projectsToMonitor.description", locale);
-	
 		addProperty(pds, "selectedProjects", "JabberPluginConfig.selectedProjects.name", "JabberPluginConfig.selectedProjects.description", locale,
 				Collections.singletonMap(ATTR_CHOICE_TYPE, ConfigChoice.PROJECTS));
 
@@ -140,5 +174,65 @@ public class JabberPluginConfig extends PluginConfigDto {
 
 	public void setRecipients(String[] recipients) {
 		this.recipients = recipients;
+	}
+	
+	public String getVulcanUrl() {
+		return vulcanUrl;
+	}
+	
+	public void setVulcanUrl(String vulcanUrl) {
+		this.vulcanUrl = vulcanUrl;
+	}
+
+	public String getMessageFormat() {
+		return messageFormat;
+	}
+	
+	public void setMessageFormat(String messageFormat) {
+		this.messageFormat = messageFormat;
+	}
+
+	public String getOtherUsersMessageFormat() {
+		return otherUsersMessageFormat;
+	}
+	
+	public void setOtherUsersMessageFormat(String otherUsersMessageFormat) {
+		this.otherUsersMessageFormat = otherUsersMessageFormat;
+	}
+	
+	public ScreenNameMapper getScreenNameMapper() {
+		return screenNameMapper;
+	}
+	
+	public void setScreenNameMapper(ScreenNameMapper screenNameMapper) {
+		this.screenNameMapper = screenNameMapper;
+	}
+	
+	public Map<ScreenNameMapper, ? super PluginConfigDto> getScreenNameMapperConfigs() {
+		return screenNameMapperConfig;
+	}
+	
+	public void setScreenNameMapperConfigs(
+			Map<ScreenNameMapper, ? super PluginConfigDto> screenNameMapperConfig) {
+		this.screenNameMapperConfig = screenNameMapperConfig;
+	}
+	
+	@Transient
+	public PluginConfigDto getScreenNameMapperConfig() {
+		PluginConfigDto dto = (PluginConfigDto) screenNameMapperConfig.get(screenNameMapper);
+		
+		if (dto == null) {
+			dto = screenNameMapper.getDefaultConfig();
+			
+			screenNameMapperConfig.put(screenNameMapper, dto);
+		}
+		
+		dto.setApplicationContext(applicationContext);
+		
+		return dto;
+	}
+	
+	public void setScreenNameMapperConfig(PluginConfigDto config) {
+		screenNameMapperConfig.put(screenNameMapper, config);
 	}
 }

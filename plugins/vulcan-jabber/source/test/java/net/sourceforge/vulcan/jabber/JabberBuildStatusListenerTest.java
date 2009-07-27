@@ -30,7 +30,7 @@ public class JabberBuildStatusListenerTest extends EasyMockTestCase {
 	
 	JabberBuildStatusListener listener;
 	JabberClient client = createStrictMock(JabberClient.class);
-	ScreenNameResolver resolver = createStrictMock(ScreenNameResolver.class);
+	ScreenNameMapper resolver = createStrictMock(ScreenNameMapper.class);
 	ProjectStatusDto status = new ProjectStatusDto();
 	ChangeLogDto changeLog = new ChangeLogDto();
 	ChangeSetDto commit1;
@@ -43,6 +43,9 @@ public class JabberBuildStatusListenerTest extends EasyMockTestCase {
 		super.setUp();
 	
 		listener = new JabberBuildStatusListener(client, resolver, status);
+		listener.setVulcanUrl("http://localhost.localdomain:8080/vulcan");
+		listener.setMessageFormat("You broke the build (way to go).  See {url} for more info.");
+		listener.setOtherUsersMessageFormat("These jokers also got notice: {users}.");
 		
 		commit1 = makeChangeSet("Sam");
 		commit2 = makeChangeSet("Jesse");
@@ -132,5 +135,29 @@ public class JabberBuildStatusListenerTest extends EasyMockTestCase {
 		verify();
 		
 		assertEquals(Arrays.asList("permanentjoe"), listener.getRecipients());
+	}
+	
+	public void testFormatNoticeSingleUser() throws Exception {
+		status.setName("my project");
+		status.setBuildNumber(24);
+		
+		String message = listener.formatNotificationMessage(null, "permanentjoe");
+		
+		assertEquals("You broke the build (way to go).  See " +
+				"http://localhost.localdomain:8080/vulcan/projects/my+project/24/errors " +
+				"for more info.", message);
+	}
+	
+	public void testFormatNoticeMutliUser() throws Exception {
+		status.setName("my project");
+		status.setBuildNumber(24);
+		listener.addRecipients("two", "three");
+		
+		String message = listener.formatNotificationMessage(null, "permanentjoe");
+		
+		assertEquals("You broke the build (way to go).  See " +
+				"http://localhost.localdomain:8080/vulcan/projects/my+project/24/errors " +
+				"for more info.\n" +
+				"These jokers also got notice: two, three.", message);
 	}
 }

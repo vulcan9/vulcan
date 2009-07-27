@@ -10,9 +10,6 @@
 				</property>
 			</bean>
 		</property>
-		<property name="screenNameResolver">
-			<bean class="net.sourceforge.vulcan.jabber.DictionaryScreenNameResolver"/>
-		</property>
 	</bean>
 	
 	<bean id="messageSource" class="org.springframework.context.support.ReloadableResourceBundleMessageSource">
