@@ -22,7 +22,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import net.sourceforge.vulcan.core.BuildManager;
-import net.sourceforge.vulcan.core.BuildStatusListener;
+import net.sourceforge.vulcan.core.ProjectBuilder;
 import net.sourceforge.vulcan.dto.PluginConfigDto;
 import net.sourceforge.vulcan.dto.ProjectStatusDto;
 import net.sourceforge.vulcan.event.BuildCompletedEvent;
@@ -40,7 +40,7 @@ public class JabberPlugin implements BuildManagerObserverPlugin, ConfigurablePlu
 	public static final String PLUGIN_ID = "net.sourceforge.vulcan.jabber";
 	public static final String PLUGIN_NAME = "Jabber Instant Messaging";
 	
-	private final Map<String, BuildStatusListener> instances = new HashMap<String, BuildStatusListener>();
+	private final Map<String, JabberBuildStatusListener> instances = new HashMap<String, JabberBuildStatusListener>();
 	
 	JabberPluginConfig config = new JabberPluginConfig();
 	
@@ -83,7 +83,9 @@ public class JabberPlugin implements BuildManagerObserverPlugin, ConfigurablePlu
 				screenNameResolver = new IdentityScreenNameMapper();
 				break;
 		}
-		final JabberBuildStatusListener listener = new JabberBuildStatusListener(client, screenNameResolver, status);
+		
+		final ProjectBuilder projectBuilder = mgr.getProjectBuilder(status.getName());
+		final JabberBuildStatusListener listener = new JabberBuildStatusListener(client, projectBuilder, screenNameResolver, status);
 		
 		listener.setMessageFormat(config.getMessageFormat());
 		listener.setOtherUsersMessageFormat(config.getOtherUsersMessageFormat());
@@ -91,7 +93,7 @@ public class JabberPlugin implements BuildManagerObserverPlugin, ConfigurablePlu
 		
 		listener.addRecipients(config.getRecipients());
 		
-		mgr.getProjectBuilder(status.getName()).addBuildStatusListener(listener);
+		listener.attach();
 		
 		addBuildListener(status.getName(), listener);
 	}
@@ -99,7 +101,7 @@ public class JabberPlugin implements BuildManagerObserverPlugin, ConfigurablePlu
 	public void onBuildCompleted(BuildCompletedEvent event) {
 		final String projectName = event.getStatus().getName();
 		
-		final BuildStatusListener listener;
+		final JabberBuildStatusListener listener;
 
 		synchronized (instances) {
 			listener = instances.remove(projectName);
@@ -108,10 +110,8 @@ public class JabberPlugin implements BuildManagerObserverPlugin, ConfigurablePlu
 		if (listener == null) {
 			return;
 		}
-		
-		final BuildManager mgr = (BuildManager)event.getSource();
 
-		mgr.getProjectBuilder(projectName).removeBuildStatusListener(listener);
+		listener.detach();
 	}
 
 	public String getId() {
@@ -136,7 +136,7 @@ public class JabberPlugin implements BuildManagerObserverPlugin, ConfigurablePlu
 		return false;
 	}
 
-	void addBuildListener(String name, BuildStatusListener listener) {
+	void addBuildListener(String name, JabberBuildStatusListener listener) {
 		synchronized (instances) {
 			instances.put(name, listener);
 		}

@@ -106,16 +106,22 @@ public class JabberPluginTest extends EasyMockTestCase {
 	}
 	
 	public void testRemovesBuildListener() throws Exception {
-		plugin.addBuildListener(status.getName(), listener);
+		final boolean[] detachedFlag = new boolean[1];
 		
-		expect(buildManager.getProjectBuilder(status.getName())).andReturn(projectBuilder);
-		expect(projectBuilder.removeBuildStatusListener(listener)).andReturn(true);
+		plugin.addBuildListener(status.getName(), new JabberBuildStatusListener(null, null, null, status) {
+			@Override
+			public void detach() {
+				detachedFlag[0] = true;
+			}
+		});
 		
 		replay();
 		
 		plugin.onBuildCompleted(new BuildCompletedEvent(buildManager, buildDaemonInfo, target, status));
 		
 		verify();
+		
+		assertTrue(detachedFlag[0]);
 	}
 	
 	public void testDoesNotRemoveMissingBuildListener() throws Exception {

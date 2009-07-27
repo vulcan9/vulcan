@@ -22,6 +22,8 @@ import java.util.Arrays;
 
 import net.sourceforge.vulcan.EasyMockTestCase;
 import net.sourceforge.vulcan.core.BuildPhase;
+import net.sourceforge.vulcan.core.ProjectBuilder;
+import net.sourceforge.vulcan.dto.BuildMessageDto;
 import net.sourceforge.vulcan.dto.ChangeLogDto;
 import net.sourceforge.vulcan.dto.ChangeSetDto;
 import net.sourceforge.vulcan.dto.ProjectStatusDto;
@@ -31,6 +33,7 @@ public class JabberBuildStatusListenerTest extends EasyMockTestCase {
 	JabberBuildStatusListener listener;
 	JabberClient client = createStrictMock(JabberClient.class);
 	ScreenNameMapper resolver = createStrictMock(ScreenNameMapper.class);
+	ProjectBuilder projectBuilder = createStrictMock(ProjectBuilder.class);
 	ProjectStatusDto status = new ProjectStatusDto();
 	ChangeLogDto changeLog = new ChangeLogDto();
 	ChangeSetDto commit1;
@@ -42,7 +45,7 @@ public class JabberBuildStatusListenerTest extends EasyMockTestCase {
 	protected void setUp() throws Exception {
 		super.setUp();
 	
-		listener = new JabberBuildStatusListener(client, resolver, status);
+		listener = new JabberBuildStatusListener(client, projectBuilder, resolver, status);
 		listener.setVulcanUrl("http://localhost.localdomain:8080/vulcan");
 		listener.setMessageFormat("You broke the build (way to go).  See {url} for more info.");
 		listener.setOtherUsersMessageFormat("These jokers also got notice: {users}.");
@@ -141,7 +144,11 @@ public class JabberBuildStatusListenerTest extends EasyMockTestCase {
 		status.setName("my project");
 		status.setBuildNumber(24);
 		
+		replay();
+
 		String message = listener.formatNotificationMessage(null, "permanentjoe");
+		
+		verify();
 		
 		assertEquals("You broke the build (way to go).  See " +
 				"http://localhost.localdomain:8080/vulcan/projects/my+project/24/errors " +
@@ -153,11 +160,45 @@ public class JabberBuildStatusListenerTest extends EasyMockTestCase {
 		status.setBuildNumber(24);
 		listener.addRecipients("two", "three");
 		
+		replay();
+
 		String message = listener.formatNotificationMessage(null, "permanentjoe");
+
+		verify();
 		
 		assertEquals("You broke the build (way to go).  See " +
 				"http://localhost.localdomain:8080/vulcan/projects/my+project/24/errors " +
 				"for more info.\n" +
 				"These jokers also got notice: two, three.", message);
+	}
+	
+	public void testAttach() throws Exception {
+		projectBuilder.addBuildStatusListener(listener);
+		
+		replay();
+		
+		listener.attach();
+		
+		verify();
+	}
+	
+	public void testDetach() throws Exception {
+		expect(projectBuilder.removeBuildStatusListener(listener)).andReturn(true);
+		
+		replay();
+		
+		listener.detach();
+		
+		verify();
+	}
+	
+	public void testDetachAfterFirstError() throws Exception {
+		expect(projectBuilder.removeBuildStatusListener(listener)).andReturn(true);
+		
+		replay();
+		
+		listener.onErrorLogged(new BuildMessageDto());
+		
+		verify();
 	}
 }

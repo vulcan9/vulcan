@@ -26,6 +26,7 @@ import java.util.List;
 
 import net.sourceforge.vulcan.core.BuildPhase;
 import net.sourceforge.vulcan.core.BuildStatusListener;
+import net.sourceforge.vulcan.core.ProjectBuilder;
 import net.sourceforge.vulcan.dto.BuildMessageDto;
 import net.sourceforge.vulcan.dto.ChangeSetDto;
 import net.sourceforge.vulcan.dto.ProjectStatusDto;
@@ -48,9 +49,12 @@ class JabberBuildStatusListener implements BuildStatusListener {
 	private String messageFormat;
 
 	private String otherUsersMessageFormat;
+
+	private final ProjectBuilder projectBuilder;
 	
-	public JabberBuildStatusListener(JabberClient client, ScreenNameMapper screenNameResolver, ProjectStatusDto status) {
+	public JabberBuildStatusListener(JabberClient client, ProjectBuilder projectBuilder, ScreenNameMapper screenNameResolver, ProjectStatusDto status) {
 		this.client = client;
+		this.projectBuilder = projectBuilder;
 		this.screenNameResolver = screenNameResolver;
 		this.status = status;
 	}
@@ -77,11 +81,21 @@ class JabberBuildStatusListener implements BuildStatusListener {
 		for (String recipient : recipients) {
 			client.sendMessage(recipient, formatNotificationMessage(error, recipient));
 		}
+		
+		detach();
 	}
 
 	public void onWarningLogged(BuildMessageDto warning) {
 	}
 
+	public void attach() {
+		projectBuilder.addBuildStatusListener(this);
+	}
+
+	public void detach() {
+		projectBuilder.removeBuildStatusListener(this);
+	}
+	
 	public void addRecipients(String... recipients) {
 		addRecipients(Arrays.asList(recipients));
 	}
