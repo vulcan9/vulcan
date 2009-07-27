@@ -341,7 +341,6 @@ public final class PluginConfigForm extends ValidatorForm implements DispatchFor
 		
 		if (Widget.PASSWORD.equals(widget)) {
 			hidePassword(propertyName);
-			return "password";
 		}
 		
 		if (c.isArray()) {
@@ -356,9 +355,15 @@ public final class PluginConfigForm extends ValidatorForm implements DispatchFor
 		} else if (isBoolean(c)) {
 			return "boolean";
 		} else if (isPrimitive(c)) {
+			if (widget != null) {
+				return widget.name().toLowerCase();
+			}
 			return "primitive";
 		} else if (Enum.class.isAssignableFrom(c)) {
 			populateEnumChoices(propertyName, c);
+			if (widget != null) {
+				return widget.name().toLowerCase();
+			}
 			return "enum";
 		}
 		return "object";

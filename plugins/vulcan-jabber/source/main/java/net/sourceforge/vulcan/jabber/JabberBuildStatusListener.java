@@ -18,6 +18,8 @@
  */
 package net.sourceforge.vulcan.jabber;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -36,12 +38,18 @@ class JabberBuildStatusListener implements BuildStatusListener {
 	final static Log LOG = LogFactory.getLog(JabberPlugin.class);
 	
 	private final JabberClient client;
-	private final ScreenNameResolver screenNameResolver;
+	private final ScreenNameMapper screenNameResolver;
 	private final ProjectStatusDto status;
 
 	private final List<String> recipients = new ArrayList<String>();
+
+	private String vulcanUrl;
+
+	private String messageFormat;
+
+	private String otherUsersMessageFormat;
 	
-	public JabberBuildStatusListener(JabberClient client, ScreenNameResolver screenNameResolver, ProjectStatusDto status) {
+	public JabberBuildStatusListener(JabberClient client, ScreenNameMapper screenNameResolver, ProjectStatusDto status) {
 		this.client = client;
 		this.screenNameResolver = screenNameResolver;
 		this.status = status;
@@ -67,10 +75,10 @@ class JabberBuildStatusListener implements BuildStatusListener {
 	
 	public void onErrorLogged(BuildMessageDto error) {
 		for (String recipient : recipients) {
-			client.sendMessage(recipient, error.getMessage());
+			client.sendMessage(recipient, formatNotificationMessage(error, recipient));
 		}
 	}
-	
+
 	public void onWarningLogged(BuildMessageDto warning) {
 	}
 
@@ -78,11 +86,77 @@ class JabberBuildStatusListener implements BuildStatusListener {
 		addRecipients(Arrays.asList(recipients));
 	}
 	
-	private void addRecipients(List<String> recipients) {
+	public void addRecipients(List<String> recipients) {
 		this.recipients.addAll(recipients);
 	}
 	
 	public List<String> getRecipients() {
 		return recipients;
+	}
+	
+	public String getVulcanUrl() {
+		return vulcanUrl;
+	}
+	
+	public void setVulcanUrl(String vulcanUrl) {
+		this.vulcanUrl = vulcanUrl;
+	}
+
+	public String getMessageFormat() {
+		return messageFormat;
+	}
+	
+	public void setMessageFormat(String messageFormat) {
+		this.messageFormat = messageFormat;
+	}
+
+	public String getOtherUsersMessageFormat() {
+		return otherUsersMessageFormat;
+	}
+	
+	public void setOtherUsersMessageFormat(String otherUsersMessageFormat) {
+		this.otherUsersMessageFormat = otherUsersMessageFormat;
+	}
+	
+	String formatNotificationMessage(BuildMessageDto error, String recipient) {
+		String url = generateBuildReportUrl();
+		
+		StringBuilder sb = new StringBuilder();
+		
+		sb.append(messageFormat.replace("{url}", url));
+
+		if (StringUtils.isBlank(otherUsersMessageFormat)) {
+			return sb.toString();
+		}
+		
+		final List<String> others = new ArrayList<String>(recipients);
+		others.remove(recipient);
+		if (!others.isEmpty()) {
+			sb.append("\n");
+			sb.append(otherUsersMessageFormat.replace("{users}", StringUtils.join(others.iterator(), ", ")));
+		}
+		
+		return sb.toString();
+	}
+
+	String generateBuildReportUrl() {
+		final StringBuilder sb = new StringBuilder(vulcanUrl);
+		if (sb.charAt(sb.length()-1) != '/') {
+			sb.append('/');
+		}
+		sb.append("projects/");
+		
+		try {
+			sb.append(URLEncoder.encode(status.getName(), "utf-8"));
+		} catch (UnsupportedEncodingException e) {
+			throw new RuntimeException(e);
+		}
+		
+		sb.append("/");
+		sb.append(status.getBuildNumber());
+		sb.append("/errors");
+		
+		String url = sb.toString();
+		return url;
 	}
 }

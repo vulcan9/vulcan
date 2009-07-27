@@ -48,6 +48,21 @@
 								<jsp:attribute name="value"><c:out value="${value}" escapeXml="true"/></jsp:attribute>
 							</jsp:element>
 						</c:when>
+						<c:when test="${pluginConfigForm.types[desc.name] == 'textarea'}">
+							<c:catch var="jspe">
+								<bean:define id="value" name="pluginConfigForm"
+									property="${desc.name}"/>
+							</c:catch>
+							<c:if test="${value == null}">
+								<c:set var="value" value=""/>
+							</c:if>						
+							<jsp:element name="textarea">
+								<jsp:attribute name="name">${desc.name}</jsp:attribute>
+								<jsp:attribute name="cols">60</jsp:attribute>
+								<jsp:attribute name="rows">10</jsp:attribute>
+								<jsp:body><c:out value="${value}" escapeXml="true"/></jsp:body>
+							</jsp:element>
+						</c:when>
 						<c:when test="${pluginConfigForm.types[desc.name] == 'password'}">
 							<html:password property="${desc.name}"/>
 						</c:when>
@@ -55,8 +70,8 @@
 							<html:checkbox property="${desc.name}"/>
 						</c:when>
 						<c:when test="${pluginConfigForm.types[desc.name] == 'enum'}">
-							<c:forEach items="${pluginConfigForm.choices[desc.name]}" var="choice">
-								<ul class="metaDataOptions">
+							<ul class="metaDataOptions">
+								<c:forEach items="${pluginConfigForm.choices[desc.name]}" var="choice">
 									<li>
 										<html:radio property="${desc.name}" value="${choice}"
 											styleId="radio.${v:mangle(desc.name)}.${choice}"/>
@@ -65,8 +80,15 @@
 											<jsp:body>${choice}</jsp:body>
 										</jsp:element>
 									</li>
-								</ul>
-							</c:forEach>
+								</c:forEach>
+							</ul>
+						</c:when>
+						<c:when test="${pluginConfigForm.types[desc.name] == 'dropdown'}">
+							<html:select property="${desc.name}">
+								<c:forEach items="${pluginConfigForm.choices[desc.name]}" var="choice">
+									<html:option value="${choice}">${choice}</html:option>
+								</c:forEach>
+							</html:select>
 						</c:when>
 						<c:when test="${pluginConfigForm.types[desc.name] == 'object'}">
 							<html:submit property="action" value="Configure"

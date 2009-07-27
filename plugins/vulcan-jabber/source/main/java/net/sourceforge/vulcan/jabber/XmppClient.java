@@ -18,6 +18,8 @@
  */
 package net.sourceforge.vulcan.jabber;
 
+import java.text.MessageFormat;
+
 import net.sourceforge.vulcan.event.ErrorEvent;
 import net.sourceforge.vulcan.event.EventHandler;
 
@@ -27,13 +29,14 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jivesoftware.smack.Chat;
 import org.jivesoftware.smack.ChatManager;
+import org.jivesoftware.smack.ChatManagerListener;
 import org.jivesoftware.smack.ConnectionConfiguration;
 import org.jivesoftware.smack.MessageListener;
 import org.jivesoftware.smack.XMPPConnection;
 import org.jivesoftware.smack.XMPPException;
 import org.jivesoftware.smack.packet.Message;
 
-public class XmppClient implements JabberClient {
+public class XmppClient implements JabberClient, MessageListener {
 	private static final Log LOG = LogFactory.getLog(XmppClient.class);
 	
 	private final Object lock = new Object();
@@ -76,10 +79,7 @@ public class XmppClient implements JabberClient {
 				return;
 			}
 			final ChatManager chatManager = connection.getChatManager();
-			final Chat chat = chatManager.createChat(recipient, new MessageListener() {
-				public void processMessage(Chat arg0, Message arg1) {
-				}
-			});
+			final Chat chat = chatManager.createChat(recipient, this);
 			try {
 				chat.sendMessage(message);
 			} catch (XMPPException e) {
@@ -88,6 +88,10 @@ public class XmppClient implements JabberClient {
 		}
 	}
 	
+	public void processMessage(Chat chat, Message msg) {
+		LOG.debug(MessageFormat.format("Message ({2}) from {0}: {1}", chat.getParticipant(), msg.getBody(), msg.getType()));
+	}
+
 	public EventHandler getEventHandler() {
 		return eventHandler;
 	}
@@ -104,6 +108,11 @@ public class XmppClient implements JabberClient {
 		try {
 			connection.connect();
 			connection.login(username, password);
+			connection.getChatManager().addChatListener(new ChatManagerListener() {
+				public void chatCreated(Chat chat, boolean arg1) {
+					chat.addMessageListener(XmppClient.this);
+				}
+			});
 			LOG.info("Logged into " + server + ":" + port + " as " + username);
 		} catch (XMPPException e) {
 			eventHandler.reportEvent(new ErrorEvent(this, "jabber.errors.connect",

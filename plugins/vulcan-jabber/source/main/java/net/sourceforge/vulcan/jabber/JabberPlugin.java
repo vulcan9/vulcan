@@ -45,14 +45,9 @@ public class JabberPlugin implements BuildManagerObserverPlugin, ConfigurablePlu
 	JabberPluginConfig config = new JabberPluginConfig();
 	
 	private JabberClient client;
-	private ScreenNameResolver screenNameResolver;
 	
 	public void setClient(JabberClient client) {
 		this.client = client;
-	}
-
-	public void setScreenNameResolver(ScreenNameResolver screenNameResolver) {
-		this.screenNameResolver = screenNameResolver;
 	}
 
 	public JabberPluginConfig getConfiguration() {
@@ -74,7 +69,25 @@ public class JabberPlugin implements BuildManagerObserverPlugin, ConfigurablePlu
 		client.refreshConnection(config.getServer(), config.getPort(), config.getUsername(), config.getPassword());
 		
 		final BuildManager mgr = (BuildManager)event.getSource();
+		
+		final ScreenNameMapper screenNameResolver;
+		
+		switch(config.getScreenNameMapper()) {
+			case Dictionay:
+				screenNameResolver = new DictionaryScreenNameMapper((DictionaryScreenNameMapperConfig) config.getScreenNameMapperConfig());
+				break;
+			case Jdbc:
+				screenNameResolver = new JdbcScreenNameMapper((JdbcScreenNameMapperConfig) config.getScreenNameMapperConfig());
+				break;
+			default:
+				screenNameResolver = new IdentityScreenNameMapper();
+				break;
+		}
 		final JabberBuildStatusListener listener = new JabberBuildStatusListener(client, screenNameResolver, status);
+		
+		listener.setMessageFormat(config.getMessageFormat());
+		listener.setOtherUsersMessageFormat(config.getOtherUsersMessageFormat());
+		listener.setVulcanUrl(config.getVulcanUrl());
 		
 		listener.addRecipients(config.getRecipients());
 		

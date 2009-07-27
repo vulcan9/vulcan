@@ -18,11 +18,28 @@
  */
 package net.sourceforge.vulcan.jabber;
 
+import java.beans.PropertyDescriptor;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 
-public class DictionaryScreenNameResolver implements ScreenNameResolver {
-	public List<String> lookupByAuthor(Iterable<String> uniques) {
+import net.sourceforge.vulcan.dto.PluginConfigDto;
+
+public class IdentityScreenNameMapperConfig extends PluginConfigDto {
+
+	@Override
+	public String getPluginId() {
+		return JabberPlugin.PLUGIN_ID;
+	}
+
+	@Override
+	public String getPluginName() {
+		return JabberPlugin.PLUGIN_NAME;
+	}
+
+	@Override
+	public List<PropertyDescriptor> getPropertyDescriptors(Locale locale) {
 		return Collections.emptyList();
 	}
+
 }
