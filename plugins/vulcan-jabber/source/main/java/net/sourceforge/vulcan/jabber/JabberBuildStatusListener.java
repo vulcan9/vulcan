@@ -143,9 +143,19 @@ class JabberBuildStatusListener implements BuildStatusListener {
 			return sb.toString();
 		}
 		
-		final List<String> others = new ArrayList<String>(recipients);
-		others.remove(recipient);
+		final List<String> others = new ArrayList<String>();
+		for (String s : recipients) {
+			if (!s.equals(recipient)) {
+				final int index = s.indexOf('@');
+				if (index > 0) {
+					s = s.substring(0, index);
+				}
+				
+				others.add(s);
+			}
+		}
 		if (!others.isEmpty()) {
+			
 			sb.append("\n");
 			sb.append(otherUsersMessageFormat.replace("{users}", StringUtils.join(others.iterator(), ", ")));
 		}
