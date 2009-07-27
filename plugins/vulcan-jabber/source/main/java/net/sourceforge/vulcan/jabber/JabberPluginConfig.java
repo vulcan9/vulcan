@@ -38,6 +38,11 @@ public class JabberPluginConfig extends PluginConfigDto {
 		Specify
 	}
 	
+	public static enum EventsToMonitor {
+		Errors,
+		Warnings
+	}
+	
 	public static enum ScreenNameMapper {
 		Dictionay(new DictionaryScreenNameMapperConfig()),
 		Identity(new IdentityScreenNameMapperConfig()),
@@ -67,6 +72,10 @@ public class JabberPluginConfig extends PluginConfigDto {
 	private Map<ScreenNameMapper, ? super PluginConfigDto> screenNameMapperConfig = new HashMap<ScreenNameMapper, PluginConfigDto>();
 	private String messageFormat = "You may have broken the build!  See {url} for more info.";
 	private String otherUsersMessageFormat = "These users were also notified: {users}.";
+	
+	private EventsToMonitor[] eventsToMonitor = { EventsToMonitor.Errors };
+	private String errorRegex = "";
+	private String warningRegex = "";
 	
 	@Override
 	public String getPluginId() {
@@ -102,6 +111,10 @@ public class JabberPluginConfig extends PluginConfigDto {
 		addProperty(pds, "selectedProjects", "JabberPluginConfig.selectedProjects.name", "JabberPluginConfig.selectedProjects.description", locale,
 				Collections.singletonMap(ATTR_CHOICE_TYPE, ConfigChoice.PROJECTS));
 
+		addProperty(pds, "eventsToMonitor", "JabberPluginConfig.eventsToMonitor.name", "JabberPluginConfig.eventsToMonitor.description", locale);
+		addProperty(pds, "errorRegex", "JabberPluginConfig.errorRegex.name", "JabberPluginConfig.errorRegex.description", locale);
+		addProperty(pds, "warningRegex", "JabberPluginConfig.warningRegex.name", "JabberPluginConfig.warningRegex.description", locale);
+		
 		addProperty(pds, "recipients", "JabberPluginConfig.recipients.name", "JabberPluginConfig.recipients.description", locale);
 		
 		return pds;
@@ -111,6 +124,7 @@ public class JabberPluginConfig extends PluginConfigDto {
 	public JabberPluginConfig copy() {
 		final JabberPluginConfig copy = (JabberPluginConfig) super.copy();
 		copy.setSelectedProjects((String[]) ArrayUtils.clone(getSelectedProjects()));
+		copy.setEventsToMonitor((EventsToMonitor[]) ArrayUtils.clone(getEventsToMonitor()));
 		for (ScreenNameMapper key : screenNameMapperConfig.keySet()) {
 			final PluginConfigDto pluginConfigDto = (PluginConfigDto) screenNameMapperConfig.get(key);
 			copy.screenNameMapperConfig.put(key, (PluginConfigDto) pluginConfigDto.copy());
@@ -237,5 +251,29 @@ public class JabberPluginConfig extends PluginConfigDto {
 	
 	public void setScreenNameMapperConfig(PluginConfigDto config) {
 		screenNameMapperConfig.put(screenNameMapper, config);
+	}
+	
+	public EventsToMonitor[] getEventsToMonitor() {
+		return eventsToMonitor;
+	}
+	
+	public void setEventsToMonitor(EventsToMonitor[] eventsToMonitor) {
+		this.eventsToMonitor = eventsToMonitor;
+	}
+	
+	public String getWarningRegex() {
+		return warningRegex;
+	}
+	
+	public void setWarningRegex(String warningRegex) {
+		this.warningRegex = warningRegex;
+	}
+	
+	public String getErrorRegex() {
+		return errorRegex;
+	}
+	
+	public void setErrorRegex(String errorRegex) {
+		this.errorRegex = errorRegex;
 	}
 }

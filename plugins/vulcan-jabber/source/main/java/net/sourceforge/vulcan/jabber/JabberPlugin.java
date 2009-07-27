@@ -86,13 +86,7 @@ public class JabberPlugin implements BuildManagerObserverPlugin, ConfigurablePlu
 		}
 		
 		final ProjectBuilder projectBuilder = mgr.getProjectBuilder(status.getName());
-		final JabberBuildStatusListener listener = new JabberBuildStatusListener(client, projectBuilder, screenNameResolver, status);
-		
-		listener.setMessageFormat(config.getMessageFormat());
-		listener.setOtherUsersMessageFormat(config.getOtherUsersMessageFormat());
-		listener.setVulcanUrl(config.getVulcanUrl());
-		
-		listener.addRecipients(config.getRecipients());
+		final JabberBuildStatusListener listener = new JabberBuildStatusListener(client, projectBuilder, screenNameResolver, config, status);
 		
 		listener.attach();
 		

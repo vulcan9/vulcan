@@ -27,10 +27,12 @@ import net.sourceforge.vulcan.dto.BuildMessageDto;
 import net.sourceforge.vulcan.dto.ChangeLogDto;
 import net.sourceforge.vulcan.dto.ChangeSetDto;
 import net.sourceforge.vulcan.dto.ProjectStatusDto;
+import net.sourceforge.vulcan.jabber.JabberPluginConfig.EventsToMonitor;
 
 public class JabberBuildStatusListenerTest extends EasyMockTestCase {
 	
 	JabberBuildStatusListener listener;
+	JabberPluginConfig config = new JabberPluginConfig();
 	JabberClient client = createStrictMock(JabberClient.class);
 	ScreenNameMapper resolver = createStrictMock(ScreenNameMapper.class);
 	ProjectBuilder projectBuilder = createStrictMock(ProjectBuilder.class);
@@ -45,15 +47,19 @@ public class JabberBuildStatusListenerTest extends EasyMockTestCase {
 	protected void setUp() throws Exception {
 		super.setUp();
 	
-		listener = new JabberBuildStatusListener(client, projectBuilder, resolver, status);
-		listener.setVulcanUrl("http://localhost.localdomain:8080/vulcan");
-		listener.setMessageFormat("You broke the build (way to go).  See {url} for more info.");
-		listener.setOtherUsersMessageFormat("These jokers also got notice: {users}.");
+		config.setVulcanUrl("http://localhost.localdomain:8080/vulcan");
+		config.setMessageFormat("You broke the build (way to go).  See {url} for more info.");
+		config.setOtherUsersMessageFormat("These jokers also got notice: {users}.");
+		
+		listener = new JabberBuildStatusListener(client, projectBuilder, resolver, config, status);
 		
 		commit1 = makeChangeSet("Sam");
 		commit2 = makeChangeSet("Jesse");
 		commit3 = makeChangeSet("Sam");
 		commit4 = makeChangeSet("Sydney");
+		
+		status.setName("my project");
+		status.setBuildNumber(24);
 	}
 	
 	private ChangeSetDto makeChangeSet(String author) {
@@ -141,12 +147,10 @@ public class JabberBuildStatusListenerTest extends EasyMockTestCase {
 	}
 	
 	public void testFormatNoticeSingleUser() throws Exception {
-		status.setName("my project");
-		status.setBuildNumber(24);
 		
 		replay();
 
-		String message = listener.formatNotificationMessage(null, "permanentjoe");
+		String message = listener.formatNotificationMessage(null, "permanentjoe", "errors");
 		
 		verify();
 		
@@ -156,13 +160,11 @@ public class JabberBuildStatusListenerTest extends EasyMockTestCase {
 	}
 	
 	public void testFormatNoticeMutliUser() throws Exception {
-		status.setName("my project");
-		status.setBuildNumber(24);
 		listener.addRecipients("two", "three");
 		
 		replay();
 
-		String message = listener.formatNotificationMessage(null, "permanentjoe");
+		String message = listener.formatNotificationMessage(null, "permanentjoe", "errors");
 
 		verify();
 		
@@ -173,13 +175,11 @@ public class JabberBuildStatusListenerTest extends EasyMockTestCase {
 	}
 	
 	public void testFormatNoticeMutliUserDropsGateway() throws Exception {
-		status.setName("my project");
-		status.setBuildNumber(24);
 		listener.addRecipients("two@aim.example.com");
 		
 		replay();
 
-		String message = listener.formatNotificationMessage(null, "permanentjoe");
+		String message = listener.formatNotificationMessage(null, "permanentjoe", "errors");
 
 		verify();
 		
@@ -218,4 +218,87 @@ public class JabberBuildStatusListenerTest extends EasyMockTestCase {
 		
 		verify();
 	}
+	
+	public void testSendsMessageOnErrorsEnabled() throws Exception {
+		config.setEventsToMonitor(new EventsToMonitor[] {EventsToMonitor.Errors});
+		client.sendMessage(eq("user"), (String) notNull());
+		
+		expect(projectBuilder.removeBuildStatusListener(listener)).andReturn(true);
+		
+		replay();
+
+		listener.addRecipients("user");
+		listener.onErrorLogged(new BuildMessageDto());
+		
+		verify();
+	}
+	
+	public void testDoesNotSendMessageOnErrorsDisabled() throws Exception {
+		config.setEventsToMonitor(new EventsToMonitor[] {});
+		
+		replay();
+
+		listener.addRecipients("user");
+		listener.onErrorLogged(new BuildMessageDto());
+		
+		verify();
+	}
+	
+	public void testSendsMessageOnWarningEnabled() throws Exception {
+		config.setEventsToMonitor(new EventsToMonitor[] {EventsToMonitor.Warnings});
+		client.sendMessage(eq("user"), (String) notNull());
+		
+		expect(projectBuilder.removeBuildStatusListener(listener)).andReturn(true);
+		
+		replay();
+
+		listener.addRecipients("user");
+		listener.onWarningLogged(new BuildMessageDto());
+		
+		verify();
+	}
+	
+	public void testDoesNotSendMessageOnWarningDisabled() throws Exception {
+		config.setEventsToMonitor(new EventsToMonitor[] {});
+		
+		replay();
+
+		listener.addRecipients("user");
+		listener.onWarningLogged(new BuildMessageDto());
+		
+		verify();
+	}
+	
+	public void testDoesNotSendMessageOnWarningNoMatch() throws Exception {
+		config.setWarningRegex("no match my friend");
+		config.setEventsToMonitor(new EventsToMonitor[] {EventsToMonitor.Warnings});
+		
+		replay();
+
+		listener.addRecipients("user");
+		final BuildMessageDto warning = new BuildMessageDto();
+		warning.setMessage("I thought I warned you.");
+		listener.onWarningLogged(warning);
+		
+		verify();
+	}
+	
+	public void testSendsMessageOnWarningEnabledMatchPattern() throws Exception {
+		config.setWarningRegex("Match");
+		config.setEventsToMonitor(new EventsToMonitor[] {EventsToMonitor.Warnings});
+		client.sendMessage(eq("user"), (String) notNull());
+		
+		expect(projectBuilder.removeBuildStatusListener(listener)).andReturn(true);
+		
+		replay();
+
+		listener.addRecipients("user");
+		final BuildMessageDto warning = new BuildMessageDto();
+		warning.setMessage("Got a match?");
+		listener.onWarningLogged(warning);
+
+		
+		verify();
+	}
+
 }

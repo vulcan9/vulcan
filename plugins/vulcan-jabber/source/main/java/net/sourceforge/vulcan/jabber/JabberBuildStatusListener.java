@@ -23,6 +23,7 @@ import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import net.sourceforge.vulcan.core.BuildPhase;
 import net.sourceforge.vulcan.core.BuildStatusListener;
@@ -30,10 +31,12 @@ import net.sourceforge.vulcan.core.ProjectBuilder;
 import net.sourceforge.vulcan.dto.BuildMessageDto;
 import net.sourceforge.vulcan.dto.ChangeSetDto;
 import net.sourceforge.vulcan.dto.ProjectStatusDto;
+import net.sourceforge.vulcan.jabber.JabberPluginConfig.EventsToMonitor;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 
 class JabberBuildStatusListener implements BuildStatusListener {
 	final static Log LOG = LogFactory.getLog(JabberPlugin.class);
@@ -44,19 +47,21 @@ class JabberBuildStatusListener implements BuildStatusListener {
 
 	private final List<String> recipients = new ArrayList<String>();
 
-	private String vulcanUrl;
-
-	private String messageFormat;
-
-	private String otherUsersMessageFormat;
-
 	private final ProjectBuilder projectBuilder;
+
+	private final JabberPluginConfig config;
 	
-	public JabberBuildStatusListener(JabberClient client, ProjectBuilder projectBuilder, ScreenNameMapper screenNameResolver, ProjectStatusDto status) {
+	private Pattern errorRegex;
+	private Pattern warningRegex;
+	
+	public JabberBuildStatusListener(JabberClient client, ProjectBuilder projectBuilder, ScreenNameMapper screenNameResolver, JabberPluginConfig config, ProjectStatusDto status) {
 		this.client = client;
 		this.projectBuilder = projectBuilder;
 		this.screenNameResolver = screenNameResolver;
+		this.config = config;
 		this.status = status;
+		
+		addRecipients(config.getRecipients());
 	}
 	
 	public void onBuildPhaseChanged(BuildPhase phase) {
@@ -78,14 +83,19 @@ class JabberBuildStatusListener implements BuildStatusListener {
 	}
 	
 	public void onErrorLogged(BuildMessageDto error) {
-		for (String recipient : recipients) {
-			client.sendMessage(recipient, formatNotificationMessage(error, recipient));
+		if (errorRegex == null && StringUtils.isNotBlank(config.getErrorRegex())) {
+			errorRegex = Pattern.compile(config.getErrorRegex(), Pattern.CASE_INSENSITIVE);
 		}
 		
-		detach();
+		onBuildMessageLogged(EventsToMonitor.Errors, errorRegex, error, "errors");
 	}
 
 	public void onWarningLogged(BuildMessageDto warning) {
+		if (warningRegex == null && StringUtils.isNotBlank(config.getWarningRegex())) {
+			warningRegex = Pattern.compile(config.getWarningRegex(), Pattern.CASE_INSENSITIVE);
+		}
+		
+		onBuildMessageLogged(EventsToMonitor.Warnings, warningRegex, warning, "warnings");
 	}
 
 	public void attach() {
@@ -109,31 +119,19 @@ class JabberBuildStatusListener implements BuildStatusListener {
 	}
 	
 	public String getVulcanUrl() {
-		return vulcanUrl;
+		return config.getVulcanUrl();
 	}
 	
-	public void setVulcanUrl(String vulcanUrl) {
-		this.vulcanUrl = vulcanUrl;
-	}
-
 	public String getMessageFormat() {
-		return messageFormat;
-	}
-	
-	public void setMessageFormat(String messageFormat) {
-		this.messageFormat = messageFormat;
+		return config.getMessageFormat();
 	}
 
 	public String getOtherUsersMessageFormat() {
-		return otherUsersMessageFormat;
+		return config.getOtherUsersMessageFormat();
 	}
 	
-	public void setOtherUsersMessageFormat(String otherUsersMessageFormat) {
-		this.otherUsersMessageFormat = otherUsersMessageFormat;
-	}
-	
-	String formatNotificationMessage(BuildMessageDto error, String recipient) {
-		String url = generateBuildReportUrl();
+	String formatNotificationMessage(BuildMessageDto error, String recipient, String view) {
+		String url = generateBuildReportUrl(view);
 		
 		final List<String> others = new ArrayList<String>();
 		for (String s : recipients) {
@@ -151,25 +149,25 @@ class JabberBuildStatusListener implements BuildStatusListener {
 		
 		final StringBuilder sb = new StringBuilder();
 		
-		sb.append(substituteParameters(messageFormat, url, users));
+		sb.append(substituteParameters(getMessageFormat(), url, users));
 
 		if (!others.isEmpty()) {
 			sb.append("\n");
 			
-			sb.append(substituteParameters(otherUsersMessageFormat, url, users));
+			sb.append(substituteParameters(getOtherUsersMessageFormat(), url, users));
 		}
 		
 		return sb.toString();
 	}
 
-	private String substituteParameters(String template, String url, String users) {
+	String substituteParameters(String template, String url, String users) {
 		return template.
 			replace("{url}", url).
 			replace("{users}", users);
 	}
 
-	String generateBuildReportUrl() {
-		final StringBuilder sb = new StringBuilder(vulcanUrl);
+	String generateBuildReportUrl(String view) {
+		final StringBuilder sb = new StringBuilder(getVulcanUrl());
 		if (sb.charAt(sb.length()-1) != '/') {
 			sb.append('/');
 		}
@@ -183,9 +181,33 @@ class JabberBuildStatusListener implements BuildStatusListener {
 		
 		sb.append("/");
 		sb.append(status.getBuildNumber());
-		sb.append("/errors");
+		sb.append("/");
+		sb.append(view);
 		
 		String url = sb.toString();
 		return url;
+	}
+
+	private void onBuildMessageLogged(EventsToMonitor type, Pattern regex, BuildMessageDto message, String view) {
+		if (!isEventMonitored(type)) {
+			return;
+		}
+		if (regex != null && !regex.matcher(message.getMessage()).find()) {
+			return;
+		}
+		for (String recipient : recipients) {
+			client.sendMessage(recipient, formatNotificationMessage(message, recipient, view));
+		}
+		
+		detach();
+	}
+
+	private boolean isEventMonitored(EventsToMonitor type) {
+		for (EventsToMonitor e : config.getEventsToMonitor()) {
+			if (e == type) {
+				return true;
+			}
+		}
+		return false;
 	}
 }
