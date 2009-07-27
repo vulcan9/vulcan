@@ -155,8 +155,8 @@
 				<c:otherwise>
 					<thead>
 						<tr>
-							<th><spring:message code="th.project.name"/></th>
-							<th><spring:message code="th.project.status"/></th>
+							<th><spring:message code="th.project"/></th>
+							<th><spring:message code="th.status"/></th>
 						</tr>
 					</thead>
 					<tbody>

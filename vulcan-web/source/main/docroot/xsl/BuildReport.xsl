@@ -364,7 +364,7 @@
 							<th><xsl:value-of select="vulcan:getMessage($messageSource, 'th.revision')"/></th>
 							<th><xsl:value-of select="vulcan:getMessage($messageSource, 'th.repository.tag.name')"/></th>
 							<th><xsl:value-of select="vulcan:getMessage($messageSource, 'th.timestamp')"/></th>
-							<th><xsl:value-of select="vulcan:getMessage($messageSource, 'th.project.status')"/></th>
+							<th><xsl:value-of select="vulcan:getMessage($messageSource, 'th.status')"/></th>
 						</tr>
 					</thead>
 					<tbody>
@@ -475,7 +475,7 @@
 					<tr>
 						<th><xsl:value-of select="vulcan:getMessage($messageSource, 'th.revision')"/></th>
 						<th><xsl:value-of select="vulcan:getMessage($messageSource, 'th.author')"/></th>
-						<th class="timestamp"><xsl:value-of select="vulcan:getMessage($messageSource, 'th.timestamp')"/></th>
+						<th class="timestamp"><xsl:value-of select="vulcan:getMessage($messageSource, 'th.commit.timestamp')"/></th>
 						<th><xsl:value-of select="vulcan:getMessage($messageSource, 'th.message')"/></th>
 						<th><xsl:value-of select="vulcan:getMessage($messageSource, 'th.paths')"/></th>
 					</tr>
