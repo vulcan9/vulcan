@@ -23,6 +23,7 @@ import java.util.Map;
 
 import net.sourceforge.vulcan.core.BuildManager;
 import net.sourceforge.vulcan.core.ProjectBuilder;
+import net.sourceforge.vulcan.core.ProjectNameChangeListener;
 import net.sourceforge.vulcan.dto.PluginConfigDto;
 import net.sourceforge.vulcan.dto.ProjectStatusDto;
 import net.sourceforge.vulcan.event.BuildCompletedEvent;
@@ -34,7 +35,7 @@ import net.sourceforge.vulcan.jabber.JabberPluginConfig.ProjectsToMonitor;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-public class JabberPlugin implements BuildManagerObserverPlugin, ConfigurablePlugin {
+public class JabberPlugin implements BuildManagerObserverPlugin, ConfigurablePlugin, ProjectNameChangeListener {
 	final static Log LOG = LogFactory.getLog(JabberPlugin.class);
 	
 	public static final String PLUGIN_ID = "net.sourceforge.vulcan.jabber";
@@ -114,6 +115,16 @@ public class JabberPlugin implements BuildManagerObserverPlugin, ConfigurablePlu
 		listener.detach();
 	}
 
+	public void projectNameChanged(String oldName, String newName) {
+		final String[] projects = config.getSelectedProjects();
+		
+		for (int i = 0; i < projects.length; i++) {
+			if (oldName.equals(projects[i])) {
+				projects[i] = newName;
+			}
+		}
+	}
+	
 	public String getId() {
 		return PLUGIN_ID;
 	}
