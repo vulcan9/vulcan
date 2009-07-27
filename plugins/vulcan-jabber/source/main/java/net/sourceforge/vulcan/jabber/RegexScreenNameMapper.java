@@ -18,18 +18,31 @@
  */
 package net.sourceforge.vulcan.jabber;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
-import junit.framework.TestCase;
+public class RegexScreenNameMapper implements ScreenNameMapper {
+	private final RegexScreenNameMapperConfig config;
 
-public class IdentityScreenNameMapperTest extends TestCase {
-	public void testIdentity() throws Exception {
-		final IdentityScreenNameMapper mapper = new IdentityScreenNameMapper();
-		final List<String> list = Arrays.asList("Sam", "Jill");
-		final List<String> result = mapper.lookupByAuthor(list);
-		
-		assertEquals(list, result);
-		assertNotSame(list, result);
+	public RegexScreenNameMapper(RegexScreenNameMapperConfig config) {
+		this.config = config;
 	}
+
+	public List<String> lookupByAuthor(Iterable<String> uniques) {
+		final Pattern pattern = Pattern.compile(config.getRegex(), Pattern.CASE_INSENSITIVE);
+		
+		final List<String> list = new ArrayList<String>();
+		
+		for (String s : uniques) {
+			final Matcher matcher = pattern.matcher(s);
+			if (matcher.matches()) {
+				list.add(matcher.replaceFirst(config.getReplacement()));
+			}
+		}
+		
+		return list;
+	}
+
 }

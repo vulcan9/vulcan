@@ -19,14 +19,20 @@
 package net.sourceforge.vulcan.jabber;
 
 import java.beans.PropertyDescriptor;
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 
 import net.sourceforge.vulcan.dto.PluginConfigDto;
+import net.sourceforge.vulcan.exception.ValidationException;
 
-public class IdentityScreenNameMapperConfig extends PluginConfigDto {
+public class RegexScreenNameMapperConfig extends PluginConfigDto {
 
+	private String regex = "(.*)";
+	private String replacement = "$1";
+	
 	@Override
 	public String getPluginId() {
 		return JabberPlugin.PLUGIN_ID;
@@ -39,11 +45,43 @@ public class IdentityScreenNameMapperConfig extends PluginConfigDto {
 
 	@Override
 	public List<PropertyDescriptor> getPropertyDescriptors(Locale locale) {
-		return Collections.emptyList();
+		final List<PropertyDescriptor> pds = new ArrayList<PropertyDescriptor>();
+
+		addProperty(pds, "regex", "RegexScreenNameMapperConfig.regex.name", "RegexScreenNameMapperConfig.regex.description", locale);
+		addProperty(pds, "replacement", "RegexScreenNameMapperConfig.replacement.name", "RegexScreenNameMapperConfig.replacement.description", locale);
+		
+		return pds;
+	}
+	
+	@Override
+	public void validate() throws ValidationException {
+		super.validate();
+		
+		try {
+			Pattern.compile(regex);
+		} catch (PatternSyntaxException e) {
+			throw new ValidationException("regex", "jabber.validation.regex", null);
+		}
 	}
 	
 	@Override
 	public String getHelpTopic() {
-		return "JabberIdentityScreenNameMapperConfig";
+		return "JabberRegexScreenNameMapperConfig";
+	}
+	
+	public String getRegex() {
+		return regex;
+	}
+	
+	public void setRegex(String regex) {
+		this.regex = regex;
+	}
+	
+	public String getReplacement() {
+		return replacement;
+	}
+	
+	public void setReplacement(String replacement) {
+		this.replacement = replacement;
 	}
 }

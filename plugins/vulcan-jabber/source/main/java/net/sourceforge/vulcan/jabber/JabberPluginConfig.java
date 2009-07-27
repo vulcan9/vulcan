@@ -18,6 +18,8 @@
  */
 package net.sourceforge.vulcan.jabber;
 
+import static org.apache.commons.lang.StringUtils.isNotBlank;
+
 import java.beans.PropertyDescriptor;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -25,8 +27,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 
 import net.sourceforge.vulcan.dto.PluginConfigDto;
+import net.sourceforge.vulcan.exception.ValidationException;
 import net.sourceforge.vulcan.integration.ConfigChoice;
 import net.sourceforge.vulcan.metadata.Transient;
 
@@ -45,7 +50,7 @@ public class JabberPluginConfig extends PluginConfigDto {
 	
 	public static enum ScreenNameMapper {
 		Dictionay(new DictionaryScreenNameMapperConfig()),
-		Identity(new IdentityScreenNameMapperConfig()),
+		Identity(new RegexScreenNameMapperConfig()),
 		Jdbc(new JdbcScreenNameMapperConfig());
 		
 		private final PluginConfigDto defaultConfig;
@@ -135,6 +140,27 @@ public class JabberPluginConfig extends PluginConfigDto {
 		return copy;
 	}
 	
+	@Override
+	public void validate() throws ValidationException {
+		super.validate();
+		
+		try {
+			if (isNotBlank(errorRegex)) {
+				Pattern.compile(errorRegex);
+			}
+		} catch (PatternSyntaxException e) {
+			throw new ValidationException("errorRegex", "jabber.validation.regex", null);
+		}
+		
+		try {
+			if (isNotBlank(warningRegex)) {
+				Pattern.compile(warningRegex);
+			}
+		} catch (PatternSyntaxException e) {
+			throw new ValidationException("warningRegex", "jabber.validation.regex", null);
+		}
+	}
+
 	@Override
 	public String getHelpTopic() {
 		return "JabberPluginConfig";

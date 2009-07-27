@@ -81,7 +81,7 @@ public class JabberPlugin implements BuildManagerObserverPlugin, ConfigurablePlu
 				screenNameResolver = new JdbcScreenNameMapper((JdbcScreenNameMapperConfig) config.getScreenNameMapperConfig());
 				break;
 			default:
-				screenNameResolver = new IdentityScreenNameMapper();
+				screenNameResolver = new RegexScreenNameMapper((RegexScreenNameMapperConfig) config.getScreenNameMapperConfig());
 				break;
 		}
 		
