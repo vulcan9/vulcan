@@ -65,7 +65,8 @@ public class GetSubversionRevisionMojo	extends AbstractMojo {
 		final Attribute node = (Attribute) selector.selectSingleNode(contents);
 		
 		if (node == null) {
-			throw new IllegalStateException("Failed to obtain Last-Changed-Revision from working copy");
+			//throw new IllegalStateException("Failed to obtain Last-Changed-Revision from working copy");
+			return 0;
 		}
 		
 		return node.getLongValue();

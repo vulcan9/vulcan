@@ -28,6 +28,12 @@
 	</rule>
 	
 	<rule>
+		<name>xhtml build report with transform</name>
+		<from>^/projects/([^/]+)/(\d+)/(.*)$</from>
+		<to>/viewProjectStatus.do?projectName=$1&amp;buildNumber=$2&amp;transform=$3</to>
+	</rule>
+	
+	<rule>
 		<name>working copy redirect with slash</name>
 		<from>^/projects/([^/]+)/(\d+)/site$</from>
 		<to last="true" type="redirect">%{context-path}/projects/$1/$2/site/</to>
@@ -54,8 +60,12 @@
 		<to>/viewProjectStatus.do?projectName=$1</to>
 	</rule>
 	<rule>
-		<name>build log or diff (latest)</name>
 		<from>^/projects/([^/]+)/(LATEST|NEWEST|RECENT|CURRENT)/(summary|changes|metrics|tests|errors|warnings|browse|log|diff)$</from>
 		<to>/viewProjectStatus.do?projectName=$1&amp;view=$3&amp;transform=xhtml</to>
+	</rule>
+	<rule>
+		<name>xhtml build report with transform (latest)</name>
+		<from>^/projects/([^/]+)/(LATEST|NEWEST|RECENT|CURRENT)/(.*)$</from>
+		<to>/viewProjectStatus.do?projectName=$1&amp;transform=$3</to>
 	</rule>
 </urlrewrite>
