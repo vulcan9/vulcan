@@ -50,7 +50,7 @@ public class JabberPluginConfig extends PluginConfigDto {
 	
 	public static enum ScreenNameMapper {
 		Dictionay(new DictionaryScreenNameMapperConfig()),
-		Identity(new RegexScreenNameMapperConfig()),
+		Regex(new RegexScreenNameMapperConfig()),
 		Jdbc(new JdbcScreenNameMapperConfig());
 		
 		private final PluginConfigDto defaultConfig;
