@@ -29,7 +29,7 @@ public class XmppClientTest extends TestCase {
 	
 	XmppClient client = new XmppClient() {
 		@Override
-		void connect(String server, int port, String username, String password) {
+		void connect(String server, int port, String serviceName, String username, String password) {
 			connectCount++;
 			if (!failToConnectFlag) {
 				connection = new XMPPConnection("fake") {
@@ -43,59 +43,59 @@ public class XmppClientTest extends TestCase {
 	};
 	
 	public void testConnect() throws Exception {
-		client.refreshConnection("example.com", 5222, "user", "pass");
+		client.refreshConnection("example.com", 5222, null, "user", "pass");
 		
 		assertEquals(1, connectCount);
 	}
 	
 	public void testConnectNullPassword() throws Exception {
-		client.refreshConnection("example.com", 5222, null, null);
+		client.refreshConnection("example.com", 5222, null, null, null);
 		
 		assertEquals(1, connectCount);
 	}
 	
 	public void testDoesNotConnectOnEmptyServer() throws Exception {
-		client.refreshConnection("", 5222, null, null);
+		client.refreshConnection("", 5222, null, null, null);
 		
 		assertEquals(0, connectCount);
 	}
 	
 	public void testDoesNotReconnectOnUnmodifiedSettings() throws Exception {
-		client.refreshConnection("example.com", 5222, "user", "pass");
-		client.refreshConnection("example.com", 5222, "user", "pass");
+		client.refreshConnection("example.com", 5222, null, "user", "pass");
+		client.refreshConnection("example.com", 5222, null, "user", "pass");
 		
 		assertEquals(1, connectCount);
 	}
 	
 	public void testDoesReconnectOnUnmodifiedSettingsFailedConnection() throws Exception {
 		failToConnectFlag = true;
-		client.refreshConnection("example.com", 5222, "user", "pass");
+		client.refreshConnection("example.com", 5222, null, "user", "pass");
 		failToConnectFlag = false;
-		client.refreshConnection("example.com", 5222, "user", "pass");
+		client.refreshConnection("example.com", 5222, null, "user", "pass");
 		
 		assertEquals(2, connectCount);
 	}
 	
 	public void testDisconectsOldConnectionBeforeMakingNewOne() throws Exception {
-		client.refreshConnection("example.com", 5222, "user", "pass");
-		client.refreshConnection("example.com", 5222, "user", "fixed");
+		client.refreshConnection("example.com", 5222, null, "user", "pass");
+		client.refreshConnection("example.com", 5222, null, "user", "fixed");
 		
 		assertEquals(1, disconnectCount);
 		assertEquals(2, connectCount);
 	}
 	
 	public void testDisconectsOldConnection() throws Exception {
-		client.refreshConnection("example.com", 5222, "user", "pass");
-		client.refreshConnection("", 5222, "", "");
+		client.refreshConnection("example.com", 5222, null, "user", "pass");
+		client.refreshConnection("", 5222, null, "", "");
 		
 		assertEquals(1, disconnectCount);
 		assertEquals(1, connectCount);
 	}
 	
 	public void testForgetsOldInfoOnDisconnect() throws Exception {
-		client.refreshConnection("example.com", 5222, "user", "pass");
-		client.refreshConnection("", 5222, "user", "pass");
-		client.refreshConnection("example.com", 5222, "user", "pass");
+		client.refreshConnection("example.com", 5222, null, "user", "pass");
+		client.refreshConnection("", 5222, null, "user", "pass");
+		client.refreshConnection("example.com", 5222, null, "user", "pass");
 		
 		assertEquals(1, disconnectCount);
 		assertEquals(2, connectCount);

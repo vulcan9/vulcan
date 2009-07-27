@@ -18,8 +18,8 @@
  */
 package net.sourceforge.vulcan.jabber;
 
-import net.sourceforge.vulcan.dto.PluginConfigDto;
 import junit.framework.TestCase;
+import net.sourceforge.vulcan.dto.PluginConfigDto;
 
 public class JabberPluginConfigTest extends TestCase {
 
@@ -28,6 +28,8 @@ public class JabberPluginConfigTest extends TestCase {
 		final PluginConfigDto aa = a.getScreenNameMapperConfig();
 		
 		final JabberPluginConfig b = a.copy();
+		
+		assertNotSame(a.getScreenNameMapperConfigs(), b.getScreenNameMapperConfigs());
 		
 		assertNotSame(aa, b.getScreenNameMapperConfig());
 	}

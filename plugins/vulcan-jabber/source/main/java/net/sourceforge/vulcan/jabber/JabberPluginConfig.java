@@ -61,6 +61,7 @@ public class JabberPluginConfig extends PluginConfigDto {
 	
 	private String server = "";
 	private int port = 5222;
+	private String serviceName = "";
 	private String username = "";
 	private String password = "";
 	private String vulcanUrl = "http://localhost:8080/vulcan";
@@ -93,6 +94,7 @@ public class JabberPluginConfig extends PluginConfigDto {
 
 		addProperty(pds, "server", "JabberPluginConfig.server.name", "JabberPluginConfig.server.description", locale);
 		addProperty(pds, "port", "JabberPluginConfig.port.name", "JabberPluginConfig.port.description", locale);
+		addProperty(pds, "serviceName", "JabberPluginConfig.serviceName.name", "JabberPluginConfig.serviceName.description", locale);
 		addProperty(pds, "username", "JabberPluginConfig.username.name", "JabberPluginConfig.username.description", locale);
 		addProperty(pds, "password", "JabberPluginConfig.password.name", "JabberPluginConfig.password.description", locale,
 				Collections.singletonMap(ATTR_WIDGET_TYPE, Widget.PASSWORD));
@@ -125,6 +127,7 @@ public class JabberPluginConfig extends PluginConfigDto {
 		final JabberPluginConfig copy = (JabberPluginConfig) super.copy();
 		copy.setSelectedProjects((String[]) ArrayUtils.clone(getSelectedProjects()));
 		copy.setEventsToMonitor((EventsToMonitor[]) ArrayUtils.clone(getEventsToMonitor()));
+		copy.screenNameMapperConfig = new HashMap<ScreenNameMapper, PluginConfigDto>();
 		for (ScreenNameMapper key : screenNameMapperConfig.keySet()) {
 			final PluginConfigDto pluginConfigDto = (PluginConfigDto) screenNameMapperConfig.get(key);
 			copy.screenNameMapperConfig.put(key, (PluginConfigDto) pluginConfigDto.copy());
@@ -275,5 +278,13 @@ public class JabberPluginConfig extends PluginConfigDto {
 	
 	public void setErrorRegex(String errorRegex) {
 		this.errorRegex = errorRegex;
+	}
+	
+	public String getServiceName() {
+		return serviceName;
+	}
+	
+	public void setServiceName(String serviceName) {
+		this.serviceName = serviceName;
 	}
 }

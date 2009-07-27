@@ -44,11 +44,11 @@ public class XmppClient implements JabberClient, MessageListener {
 	private String connectionString;
 	protected XMPPConnection connection;
 	
-	public void refreshConnection(String server, int port, String username, String password) {
+	public void refreshConnection(String server, int port, String serviceName, String username, String password) {
 		if (password == null) {
 			password = StringUtils.EMPTY;
 		}
-		final String connectionString = server + ":" + port + ":" + username + ":" + DigestUtils.shaHex(password);
+		final String connectionString = server + ":" + port + ":" + serviceName + ":" + username + ":" + DigestUtils.shaHex(password);
 		
 		synchronized(lock) {
 			if (connectionString.equals(this.connectionString)) {
@@ -66,7 +66,7 @@ public class XmppClient implements JabberClient, MessageListener {
 				return;
 			}
 			
-			connect(server, port, username, password);
+			connect(server, port, serviceName, username, password);
 			if (connection == null) {
 				this.connectionString = null;
 			}
@@ -100,11 +100,11 @@ public class XmppClient implements JabberClient, MessageListener {
 		this.eventHandler = eventHandler;
 	}
 	
-	void connect(String server, int port, String username, String password) {
-		ConnectionConfiguration config = new ConnectionConfiguration(server, port);
+	void connect(String server, int port, String serviceName, String username, String password) {
+		ConnectionConfiguration config = new ConnectionConfiguration(server, port, serviceName);
 
 		connection = new XMPPConnection(config);
-
+		
 		try {
 			connection.connect();
 			connection.login(username, password);
