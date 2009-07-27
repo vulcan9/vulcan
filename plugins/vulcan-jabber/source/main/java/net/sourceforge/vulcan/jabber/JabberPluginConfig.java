@@ -26,7 +26,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-import net.sourceforge.vulcan.dto.BaseDto;
 import net.sourceforge.vulcan.dto.PluginConfigDto;
 import net.sourceforge.vulcan.integration.ConfigChoice;
 import net.sourceforge.vulcan.metadata.Transient;
@@ -109,9 +108,13 @@ public class JabberPluginConfig extends PluginConfigDto {
 	}
 	
 	@Override
-	public BaseDto copy() {
+	public JabberPluginConfig copy() {
 		final JabberPluginConfig copy = (JabberPluginConfig) super.copy();
 		copy.setSelectedProjects((String[]) ArrayUtils.clone(getSelectedProjects()));
+		for (ScreenNameMapper key : screenNameMapperConfig.keySet()) {
+			final PluginConfigDto pluginConfigDto = (PluginConfigDto) screenNameMapperConfig.get(key);
+			copy.screenNameMapperConfig.put(key, (PluginConfigDto) pluginConfigDto.copy());
+		}
 		return copy;
 	}
 	

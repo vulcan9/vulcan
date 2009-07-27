@@ -58,6 +58,11 @@ public class DictionaryScreenNameMapperConfig extends PluginConfigDto {
 		return copy;
 	}
 	
+	@Override
+	public String getHelpTopic() {
+		return "JabberDictionaryScreenNameMapperConfig";
+	}
+
 	public String[] getEntries() {
 		return entries;
 	}
