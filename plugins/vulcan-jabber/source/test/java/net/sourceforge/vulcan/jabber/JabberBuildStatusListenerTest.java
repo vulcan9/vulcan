@@ -172,6 +172,23 @@ public class JabberBuildStatusListenerTest extends EasyMockTestCase {
 				"These jokers also got notice: two, three.", message);
 	}
 	
+	public void testFormatNoticeMutliUserDropsGateway() throws Exception {
+		status.setName("my project");
+		status.setBuildNumber(24);
+		listener.addRecipients("two@aim.example.com");
+		
+		replay();
+
+		String message = listener.formatNotificationMessage(null, "permanentjoe");
+
+		verify();
+		
+		assertEquals("You broke the build (way to go).  See " +
+				"http://localhost.localdomain:8080/vulcan/projects/my+project/24/errors " +
+				"for more info.\n" +
+				"These jokers also got notice: two.", message);
+	}
+	
 	public void testAttach() throws Exception {
 		projectBuilder.addBuildStatusListener(listener);
 		
