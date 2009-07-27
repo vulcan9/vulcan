@@ -135,14 +135,6 @@ class JabberBuildStatusListener implements BuildStatusListener {
 	String formatNotificationMessage(BuildMessageDto error, String recipient) {
 		String url = generateBuildReportUrl();
 		
-		StringBuilder sb = new StringBuilder();
-		
-		sb.append(messageFormat.replace("{url}", url));
-
-		if (StringUtils.isBlank(otherUsersMessageFormat)) {
-			return sb.toString();
-		}
-		
 		final List<String> others = new ArrayList<String>();
 		for (String s : recipients) {
 			if (!s.equals(recipient)) {
@@ -154,13 +146,26 @@ class JabberBuildStatusListener implements BuildStatusListener {
 				others.add(s);
 			}
 		}
+
+		final String users = StringUtils.join(others.iterator(), ", ");
+		
+		final StringBuilder sb = new StringBuilder();
+		
+		sb.append(substituteParameters(messageFormat, url, users));
+
 		if (!others.isEmpty()) {
-			
 			sb.append("\n");
-			sb.append(otherUsersMessageFormat.replace("{users}", StringUtils.join(others.iterator(), ", ")));
+			
+			sb.append(substituteParameters(otherUsersMessageFormat, url, users));
 		}
 		
 		return sb.toString();
+	}
+
+	private String substituteParameters(String template, String url, String users) {
+		return template.
+			replace("{url}", url).
+			replace("{users}", users);
 	}
 
 	String generateBuildReportUrl() {

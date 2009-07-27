@@ -41,5 +41,9 @@ public class IdentityScreenNameMapperConfig extends PluginConfigDto {
 	public List<PropertyDescriptor> getPropertyDescriptors(Locale locale) {
 		return Collections.emptyList();
 	}
-
+	
+	@Override
+	public String getHelpTopic() {
+		return "JabberIdentityScreenNameMapperConfig";
+	}
 }

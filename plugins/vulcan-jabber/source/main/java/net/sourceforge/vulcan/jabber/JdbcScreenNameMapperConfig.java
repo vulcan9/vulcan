@@ -29,7 +29,7 @@ import net.sourceforge.vulcan.dto.PluginConfigDto;
 public class JdbcScreenNameMapperConfig extends PluginConfigDto {
 
 	private String jndiName = "";
-	private String sql = "";
+	private String sql = "SELECT im_name FROM employees WHERE login = ?";
 	
 	@Override
 	public String getPluginId() {
@@ -50,6 +50,11 @@ public class JdbcScreenNameMapperConfig extends PluginConfigDto {
 				Collections.singletonMap(ATTR_WIDGET_TYPE, Widget.TEXTAREA));
 		
 		return pds;
+	}
+	
+	@Override
+	public String getHelpTopic() {
+		return "JabberJdbcScreenNameMapperConfig";
 	}
 
 	public String getJndiName() {
