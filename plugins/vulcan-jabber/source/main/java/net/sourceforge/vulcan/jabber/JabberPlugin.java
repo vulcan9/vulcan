@@ -57,7 +57,7 @@ public class JabberPlugin implements BuildManagerObserverPlugin, ConfigurablePlu
 	
 	public void setConfiguration(PluginConfigDto bean) {
 		config = (JabberPluginConfig) bean;
-		client.refreshConnection(config.getServer(), config.getPort(), config.getUsername(), config.getPassword());
+		client.refreshConnection(config.getServer(), config.getPort(), config.getServiceName(), config.getUsername(), config.getPassword());
 	}
 	
 	public void onBuildStarting(BuildStartingEvent event) {
@@ -67,7 +67,7 @@ public class JabberPlugin implements BuildManagerObserverPlugin, ConfigurablePlu
 			return;
 		}
 		
-		client.refreshConnection(config.getServer(), config.getPort(), config.getUsername(), config.getPassword());
+		client.refreshConnection(config.getServer(), config.getPort(), config.getServiceName(), config.getUsername(), config.getPassword());
 		
 		final BuildManager mgr = (BuildManager)event.getSource();
 		

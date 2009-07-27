@@ -57,7 +57,7 @@ public class JabberPluginTest extends EasyMockTestCase {
 	}
 	
 	public void testSetConfigConnectsClient() throws Exception {
-		client.refreshConnection("example.com", 5222, "user", "pass");
+		client.refreshConnection("example.com", 5222, "", "user", "pass");
 		
 		replay();
 		
@@ -67,7 +67,7 @@ public class JabberPluginTest extends EasyMockTestCase {
 	}
 	
 	public void testAddsBuildListener() throws Exception {
-		client.refreshConnection("example.com", 5222, "user", "pass");
+		client.refreshConnection("example.com", 5222, "", "user", "pass");
 		
 		expect(buildManager.getProjectBuilder(status.getName())).andReturn(projectBuilder);
 		projectBuilder.addBuildStatusListener((BuildStatusListener) notNull());
@@ -93,7 +93,7 @@ public class JabberPluginTest extends EasyMockTestCase {
 	public void testAddsBuildListenerToSelectedProject() throws Exception {
 		config.setProjectsToMonitor(ProjectsToMonitor.Specify);
 		config.setSelectedProjects(new String[] {status.getName()});
-		client.refreshConnection("example.com", 5222, "user", "pass");
+		client.refreshConnection("example.com", 5222, "", "user", "pass");
 		
 		expect(buildManager.getProjectBuilder(status.getName())).andReturn(projectBuilder);
 		projectBuilder.addBuildStatusListener((BuildStatusListener) notNull());
