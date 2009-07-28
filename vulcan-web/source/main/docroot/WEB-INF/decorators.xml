@@ -3,6 +3,7 @@
 <decorators defaultdir="/WEB-INF/jsp/sitemesh">
 	<excludes>
 		<pattern>/projects.jsp</pattern>
+		<pattern>/projects/*/email</pattern>
 		<pattern>/rss.jsp</pattern>
 		<pattern>/site/*</pattern>
 		<pattern>/*/site/*</pattern>

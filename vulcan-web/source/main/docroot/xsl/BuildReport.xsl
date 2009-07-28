@@ -225,7 +225,6 @@
 				
 				<xsl:if test="$showBuildDirectory">
 					<div id="browse-panel" class="tab-panel">
-						<a name="browse-panel"/>
 						<xsl:apply-templates select="/project/work-directory"/>
 						<xsl:choose>
 							<xsl:when test="/project/work-directory[@available='true']">
@@ -307,7 +306,6 @@
 
 	<xsl:template name="summary">
 		<div xmlns="http://www.w3.org/1999/xhtml" id="summary-panel" class="tab-panel">
-			<a name="summary-panel"/>
 			<xsl:if test="/project/message != ''">
 				<h4 class="build-outcome-message">
 					<xsl:choose>
@@ -468,7 +466,6 @@
 	
 	<xsl:template match="change-sets">
 		<div xmlns="http://www.w3.org/1999/xhtml" id="changes-panel" class="tab-panel">
-			<a name="changes-panel"/>
 			<table class="sortable">
 				<caption class="panel-caption">Commit Log (<xsl:value-of select="$num-changes"/>)</caption>
 				<thead>
@@ -589,7 +586,6 @@
 	
 	<xsl:template match="/project/errors">
 		<div xmlns="http://www.w3.org/1999/xhtml" id="errors-panel" class="tab-panel">
-			<a name="errors-panel"/>
 			<xsl:call-template name="build-messages">
 				<xsl:with-param name="caption" select="'Build Errors'"/>
 			</xsl:call-template>
@@ -598,7 +594,6 @@
 	
 	<xsl:template match="/project/warnings">
 		<div xmlns="http://www.w3.org/1999/xhtml" id="warnings-panel" class="tab-panel">
-			<a name="warnings-panel"/>
 			<xsl:call-template name="build-messages">
 				<xsl:with-param name="caption" select="'Build Warnings'"/>
 			</xsl:call-template>
@@ -668,7 +663,6 @@
 	
 	<xsl:template match="/project/metrics">
 		<div xmlns="http://www.w3.org/1999/xhtml" class="tab-panel" id="metrics-panel">
-			<a name="metrics-panel"/>
 			<table>
 				<caption class="panel-caption"><xsl:value-of select="vulcan:getMessage($messageSource, 'label.metrics')"/></caption>
 				<tbody>
@@ -698,7 +692,6 @@
 	
 	<xsl:template match="/project/test-failures">
 		<div class="tab-panel" id="tests-panel" xmlns="http://www.w3.org/1999/xhtml">
-			<a name="tests-panel"><xsl:text> </xsl:text></a>
 			<table>
 				<caption class="panel-caption"><xsl:value-of select="vulcan:getMessage($messageSource, 'label.test.failures')"/></caption>
 				<thead>
