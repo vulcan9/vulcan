@@ -82,6 +82,7 @@ public class XmppClient implements JabberClient, MessageListener {
 			final Chat chat = chatManager.createChat(recipient, this);
 			try {
 				chat.sendMessage(message);
+				LOG.debug(MessageFormat.format("Sent message to {0}: {1}", recipient, message));
 			} catch (XMPPException e) {
 				eventHandler.reportEvent(new ErrorEvent(this, "jabber.errors.send", new Object[] {recipient, e.getMessage()}, e));
 			}
