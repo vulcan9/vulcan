@@ -53,6 +53,8 @@ class JabberBuildStatusListener implements BuildStatusListener {
 	
 	private Pattern errorRegex;
 	private Pattern warningRegex;
+
+	private boolean attached;
 	
 	public JabberBuildStatusListener(JabberClient client, ProjectBuilder projectBuilder, ScreenNameMapper screenNameResolver, JabberPluginConfig config, ProjectStatusDto status) {
 		this.client = client;
@@ -100,10 +102,12 @@ class JabberBuildStatusListener implements BuildStatusListener {
 
 	public void attach() {
 		projectBuilder.addBuildStatusListener(this);
+		attached = true;
 	}
 
 	public void detach() {
 		projectBuilder.removeBuildStatusListener(this);
+		attached = false;
 	}
 	
 	public void addRecipients(String... recipients) {
@@ -130,7 +134,7 @@ class JabberBuildStatusListener implements BuildStatusListener {
 		return config.getOtherUsersMessageFormat();
 	}
 	
-	String formatNotificationMessage(BuildMessageDto error, String recipient, String view) {
+	String formatNotificationMessage(String recipient, String view) {
 		String url = generateBuildReportUrl(view);
 		
 		final List<String> others = new ArrayList<String>();
@@ -188,7 +192,7 @@ class JabberBuildStatusListener implements BuildStatusListener {
 		return url;
 	}
 
-	private void onBuildMessageLogged(EventsToMonitor type, Pattern regex, BuildMessageDto message, String view) {
+	protected void onBuildMessageLogged(EventsToMonitor type, Pattern regex, BuildMessageDto message, String view) {
 		if (!isEventMonitored(type)) {
 			return;
 		}
@@ -196,7 +200,7 @@ class JabberBuildStatusListener implements BuildStatusListener {
 			return;
 		}
 		for (String recipient : recipients) {
-			client.sendMessage(recipient, formatNotificationMessage(message, recipient, view));
+			client.sendMessage(recipient, formatNotificationMessage(recipient, view));
 		}
 		
 		detach();
@@ -209,5 +213,9 @@ class JabberBuildStatusListener implements BuildStatusListener {
 			}
 		}
 		return false;
+	}
+
+	public boolean isAttached() {
+		return attached;
 	}
 }

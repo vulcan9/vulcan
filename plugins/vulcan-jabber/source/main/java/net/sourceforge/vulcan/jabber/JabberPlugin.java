@@ -26,10 +26,12 @@ import net.sourceforge.vulcan.core.ProjectBuilder;
 import net.sourceforge.vulcan.core.ProjectNameChangeListener;
 import net.sourceforge.vulcan.dto.PluginConfigDto;
 import net.sourceforge.vulcan.dto.ProjectStatusDto;
+import net.sourceforge.vulcan.dto.ProjectStatusDto.Status;
 import net.sourceforge.vulcan.event.BuildCompletedEvent;
 import net.sourceforge.vulcan.event.BuildStartingEvent;
 import net.sourceforge.vulcan.integration.BuildManagerObserverPlugin;
 import net.sourceforge.vulcan.integration.ConfigurablePlugin;
+import net.sourceforge.vulcan.jabber.JabberPluginConfig.EventsToMonitor;
 import net.sourceforge.vulcan.jabber.JabberPluginConfig.ProjectsToMonitor;
 
 import org.apache.commons.logging.Log;
@@ -106,7 +108,16 @@ public class JabberPlugin implements BuildManagerObserverPlugin, ConfigurablePlu
 			return;
 		}
 
-		listener.detach();
+		if (listener.isAttached()) {
+			final Status result = event.getStatus().getStatus();
+			
+			if (result == Status.ERROR || result == Status.FAIL) {
+				listener.onBuildMessageLogged(EventsToMonitor.Errors, null, null, "");
+			}
+			
+			listener.detach();	
+		}
+		
 	}
 
 	public void projectNameChanged(String oldName, String newName) {

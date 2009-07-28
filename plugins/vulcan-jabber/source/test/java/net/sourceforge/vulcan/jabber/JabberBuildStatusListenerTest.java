@@ -150,7 +150,7 @@ public class JabberBuildStatusListenerTest extends EasyMockTestCase {
 		
 		replay();
 
-		String message = listener.formatNotificationMessage(null, "permanentjoe", "errors");
+		String message = listener.formatNotificationMessage("permanentjoe", "errors");
 		
 		verify();
 		
@@ -164,7 +164,7 @@ public class JabberBuildStatusListenerTest extends EasyMockTestCase {
 		
 		replay();
 
-		String message = listener.formatNotificationMessage(null, "permanentjoe", "errors");
+		String message = listener.formatNotificationMessage("permanentjoe", "errors");
 
 		verify();
 		
@@ -179,7 +179,7 @@ public class JabberBuildStatusListenerTest extends EasyMockTestCase {
 		
 		replay();
 
-		String message = listener.formatNotificationMessage(null, "permanentjoe", "errors");
+		String message = listener.formatNotificationMessage("permanentjoe", "errors");
 
 		verify();
 		
