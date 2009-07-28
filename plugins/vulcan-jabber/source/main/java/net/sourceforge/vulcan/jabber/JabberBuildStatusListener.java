@@ -22,7 +22,9 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 import net.sourceforge.vulcan.core.BuildPhase;
@@ -115,7 +117,17 @@ class JabberBuildStatusListener implements BuildStatusListener {
 	}
 	
 	public void addRecipients(List<String> recipients) {
-		this.recipients.addAll(recipients);
+		final Set<String> uniques = new HashSet<String>();
+		
+		for (String s : this.recipients) {
+			uniques.add(s.toLowerCase());
+		}
+		
+		for (String s : recipients) {
+			if (!uniques.contains(s.toLowerCase())) {
+				this.recipients.add(s);				
+			}
+		}
 	}
 	
 	public List<String> getRecipients() {

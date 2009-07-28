@@ -85,6 +85,23 @@ public class JabberBuildStatusListenerTest extends EasyMockTestCase {
 		assertEquals(Arrays.asList("permanentjoe", "sam82", "sidthekid"), listener.getRecipients());
 	}
 
+	public void testMapsAuthorsToRecipientsOnBuildStartedRemovesDupesCaseInsensitive() throws Exception {
+		status.setChangeLog(changeLog);
+		changeLog.setChangeSets(Arrays.asList(commit1, commit2, commit3, commit4));
+		
+		listener.addRecipients("permanentjoe");
+		
+		expect(resolver.lookupByAuthor(Arrays.asList("Sam", "Jesse", "Sydney"))).andReturn(Arrays.asList("sam82", "PermanentJoe"));
+		
+		replay();
+		
+		listener.onBuildPhaseChanged(BuildPhase.Build);
+		
+		verify();
+		
+		assertEquals(Arrays.asList("permanentjoe", "sam82"), listener.getRecipients());
+	}
+
 	public void testSkipsNullAndBlank() throws Exception {
 		status.setChangeLog(changeLog);
 		commit2.setAuthor("");
