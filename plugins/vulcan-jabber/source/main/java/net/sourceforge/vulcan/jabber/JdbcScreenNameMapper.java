@@ -18,7 +18,6 @@
  */
 package net.sourceforge.vulcan.jabber;
 
-import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,8 +26,8 @@ import javax.sql.DataSource;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.RowCallbackHandler;
 import org.springframework.jndi.JndiObjectFactoryBean;
 
 public class JdbcScreenNameMapper  implements ScreenNameMapper {
@@ -47,18 +46,10 @@ public class JdbcScreenNameMapper  implements ScreenNameMapper {
 		try {
 			final JdbcTemplate template = createJdbcTemplate();
 			
-			
-			final boolean[] found = new boolean[1];
-			
 			for (String author : authors) {
-				found[0] = false;
-				template.query(config.getSql(), new String[] {author}, new RowCallbackHandler() {
-					public void processRow(ResultSet rs) throws java.sql.SQLException {
-						screenNames.add(rs.getString(1));
-						found[0] = true;
-					}
-				});
-				if (!found[0]) {
+				try {
+					screenNames.add((String) template.queryForObject(config.getSql(), new Object[] {author}, String.class));
+				} catch (IncorrectResultSizeDataAccessException e) {
 					LOG.info("No screen name found for commit author " + author);
 				}
 			}
