@@ -20,6 +20,7 @@ package net.sourceforge.vulcan.jabber;
 
 import junit.framework.TestCase;
 import net.sourceforge.vulcan.dto.PluginConfigDto;
+import net.sourceforge.vulcan.exception.ValidationException;
 
 public class JabberPluginConfigTest extends TestCase {
 
@@ -32,5 +33,42 @@ public class JabberPluginConfigTest extends TestCase {
 		assertNotSame(a.getScreenNameMapperConfigs(), b.getScreenNameMapperConfigs());
 		
 		assertNotSame(aa, b.getScreenNameMapperConfig());
+	}
+	
+	public void testValidateTemplates() throws Exception {
+		final JabberPluginConfig a = new JabberPluginConfig();
+		
+		a.setMessageFormat("some format");
+		
+		a.validate();
+	}
+	
+	public void testValidateTemplateInvalid() throws Exception {
+		final JabberPluginConfig a = new JabberPluginConfig();
+		
+		a.setMessageFormat("{Message,notapattern,notaformat}");
+		
+		try {
+			a.validate();
+			fail("expected exception");
+		} catch (ValidationException e) {
+			assertEquals("messageFormat", e.getPropertyName());
+		}
+		
+	}
+	
+	public void testValidateTemplateInvalidParamName() throws Exception {
+		final JabberPluginConfig a = new JabberPluginConfig();
+		
+		a.setMessageFormat("{NotValid}");
+		
+		try {
+			a.validate();
+			fail("expected exception");
+		} catch (ValidationException e) {
+			assertEquals("messageFormat", e.getPropertyName());
+			assertEquals("NotValid", e.getArgs()[0]);
+		}
+		
 	}
 }

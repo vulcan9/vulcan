@@ -88,7 +88,7 @@ public class JabberPlugin implements BuildManagerObserverPlugin, ConfigurablePlu
 		}
 		
 		final ProjectBuilder projectBuilder = mgr.getProjectBuilder(status.getName());
-		final JabberBuildStatusListener listener = new JabberBuildStatusListener(client, projectBuilder, screenNameResolver, config, status);
+		final JabberBuildStatusListener listener = new JabberBuildStatusListener(projectBuilder, client, screenNameResolver, config, status);
 		
 		listener.attach();
 		
