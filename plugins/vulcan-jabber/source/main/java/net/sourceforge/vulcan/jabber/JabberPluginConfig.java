@@ -30,7 +30,9 @@ import java.util.Map;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
+import net.sourceforge.vulcan.dto.BuildMessageDto;
 import net.sourceforge.vulcan.dto.PluginConfigDto;
+import net.sourceforge.vulcan.dto.ProjectStatusDto;
 import net.sourceforge.vulcan.exception.ValidationException;
 import net.sourceforge.vulcan.integration.ConfigChoice;
 import net.sourceforge.vulcan.metadata.Transient;
@@ -76,8 +78,8 @@ public class JabberPluginConfig extends PluginConfigDto {
 	private ProjectsToMonitor projectsToMonitor = ProjectsToMonitor.All;
 	private String[] selectedProjects = {};
 	private Map<ScreenNameMapper, ? super PluginConfigDto> screenNameMapperConfig = new HashMap<ScreenNameMapper, PluginConfigDto>();
-	private String messageFormat = "You may have broken the build!  See {url} for more info.";
-	private String otherUsersMessageFormat = "These users were also notified: {users}.";
+	private String messageFormat = "You may have broken the build!  See {Link} for more info.";
+	private String buildMasterMessageFormat = "One of these users broke the build: {Users}.";
 	
 	private EventsToMonitor[] eventsToMonitor = { EventsToMonitor.Errors };
 	private String errorRegex = "";
@@ -107,7 +109,7 @@ public class JabberPluginConfig extends PluginConfigDto {
 		addProperty(pds, "vulcanUrl", "JabberPluginConfig.vulcanUrl.name", "JabberPluginConfig.vulcanUrl.description", locale);
 		addProperty(pds, "messageFormat", "JabberPluginConfig.messageFormat.name", "JabberPluginConfig.messageFormat.description", locale,
 				Collections.singletonMap(ATTR_WIDGET_TYPE, Widget.TEXTAREA));
-		addProperty(pds, "otherUsersMessageFormat", "JabberPluginConfig.otherUsersMessageFormat.name", "JabberPluginConfig.otherUsersMessageFormat.description", locale,
+		addProperty(pds, "buildMasterMessageFormat", "JabberPluginConfig.buildMasterMessageFormat.name", "JabberPluginConfig.buildMasterMessageFormat.description", locale,
 				Collections.singletonMap(ATTR_WIDGET_TYPE, Widget.TEXTAREA));
 		
 		addProperty(pds, "screenNameMapper", "JabberPluginConfig.screenNameMapper.name", "JabberPluginConfig.screenNameMapper.description", locale,
@@ -158,6 +160,32 @@ public class JabberPluginConfig extends PluginConfigDto {
 			}
 		} catch (PatternSyntaxException e) {
 			throw new ValidationException("warningRegex", "jabber.validation.regex", null);
+		}
+		
+		
+		final ProjectStatusDto sampleStatus = new ProjectStatusDto();
+		sampleStatus.setName("example project");
+		sampleStatus.setBuildNumber(1001);
+		final BuildMessageDto sampleMessage = new BuildMessageDto();
+		sampleMessage.setMessage("expected identifier");
+		sampleMessage.setFile("SampleFile");
+		sampleMessage.setLineNumber(123);
+		sampleMessage.setCode("CODE12");
+		
+		validateTemplate("messageFormat", getMessageFormat(), sampleStatus, sampleMessage);
+		validateTemplate("messageFormat", getBuildMasterMessageFormat(), sampleStatus, sampleMessage);
+	}
+
+	private void validateTemplate(String propertyName, String template, ProjectStatusDto sampleStatus, BuildMessageDto sampleMessage) throws ValidationException {
+		try {
+			JabberBuildStatusListener.substituteParameters(template, "http://example.com", "user1", sampleMessage, sampleStatus);	
+		} catch (IllegalArgumentException e) {
+			final String invalidParamName = "can't parse argument number ";
+			if (e.getMessage().startsWith(invalidParamName)) {
+				throw new ValidationException(propertyName, "jabber.validation.template.param.name", new String[] {e.getMessage().substring(invalidParamName.length())});	
+			}
+			throw new ValidationException(propertyName, "jabber.validation.template.format", new String[] {e.getMessage()});
+			
 		}
 	}
 
@@ -238,12 +266,17 @@ public class JabberPluginConfig extends PluginConfigDto {
 		this.messageFormat = messageFormat;
 	}
 
-	public String getOtherUsersMessageFormat() {
-		return otherUsersMessageFormat;
+	public String getBuildMasterMessageFormat() {
+		return buildMasterMessageFormat;
 	}
 	
+	public void setBuildMasterMessageFormat(String buildMasterMessageFormat) {
+		this.buildMasterMessageFormat = buildMasterMessageFormat;
+	}
+	
+	@Deprecated
 	public void setOtherUsersMessageFormat(String otherUsersMessageFormat) {
-		this.otherUsersMessageFormat = otherUsersMessageFormat;
+		this.buildMasterMessageFormat = otherUsersMessageFormat;
 	}
 	
 	public ScreenNameMapper getScreenNameMapper() {
