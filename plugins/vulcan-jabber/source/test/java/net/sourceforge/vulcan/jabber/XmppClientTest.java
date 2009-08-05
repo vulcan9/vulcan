@@ -100,4 +100,8 @@ public class XmppClientTest extends TestCase {
 		assertEquals(1, disconnectCount);
 		assertEquals(2, connectCount);
 	}
+	
+	public void testEscapeHtmlEntitiesInMessage() throws Exception {
+		assertEquals("This &amp; that &lt;blat&gt;!", client.escape("This & that <blat>!"));
+	}
 }
