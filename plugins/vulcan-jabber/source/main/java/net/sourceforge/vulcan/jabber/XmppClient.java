@@ -24,6 +24,7 @@ import net.sourceforge.vulcan.event.ErrorEvent;
 import net.sourceforge.vulcan.event.EventHandler;
 
 import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -82,7 +83,7 @@ public class XmppClient implements JabberClient, MessageListener {
 			final Chat chat = chatManager.createChat(recipient, this);
 			try {
 				chat.sendMessage(message);
-				LOG.debug(MessageFormat.format("Sent message to {0}: {1}", recipient, message));
+				LOG.debug(MessageFormat.format("Sent message to {0}: {1}", recipient, escape(message)));
 			} catch (XMPPException e) {
 				eventHandler.reportEvent(new ErrorEvent(this, "jabber.errors.send", new Object[] {recipient, e.getMessage()}, e));
 			}
@@ -121,5 +122,9 @@ public class XmppClient implements JabberClient, MessageListener {
 			
 			connection = null;
 		}
+	}
+	
+	String escape(String string) {
+		return StringEscapeUtils.escapeHtml(string);
 	}
 }
