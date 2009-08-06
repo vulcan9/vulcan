@@ -18,7 +18,6 @@
  */
 package net.sourceforge.vulcan.jabber;
 
-import java.text.MessageFormat;
 import java.util.Arrays;
 
 import net.sourceforge.vulcan.EasyMockTestCase;
@@ -45,16 +44,14 @@ public class JabberBuildStatusListenerTest extends EasyMockTestCase {
 	ChangeSetDto commit3;
 	ChangeSetDto commit4;
 	
-	String url = "http://example.com/vulcan/projects/foo/LATEST/";
-	
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 	
 		config.setVulcanUrl("http://localhost.localdomain:8080/vulcan");
-		config.setMessageFormat("You broke the build (way to go).  See {Link} for more info.\n" +
+		config.getTemplateConfig().setNotifyCommitterTemplate("You broke the build (way to go).  See {Link} for more info.\n" +
 				"These jokers also got notice: {Users}.");
-		config.setBuildMasterMessageFormat("One of these users prolly broke the build: {Users}.");
+		config.getTemplateConfig().setNotifyBuildMasterTemplate("One of these users prolly broke the build: {Users}.");
 		
 		listener = new JabberBuildStatusListener(projectBuilder, client, resolver, config, status);
 		
@@ -65,12 +62,6 @@ public class JabberBuildStatusListenerTest extends EasyMockTestCase {
 		
 		status.setName("my project");
 		status.setBuildNumber(24);
-		
-		error.setMessage("expected ;");
-		error.setCode("FC1024");
-		error.setFile("MyModule.fcs");
-		error.setLineNumber(37);
-		
 	}
 	
 	private ChangeSetDto makeChangeSet(String author) {
@@ -238,94 +229,6 @@ public class JabberBuildStatusListenerTest extends EasyMockTestCase {
 		verify();
 		
 		assertEquals("One of these users prolly broke the build: two.", message);
-	}
-	
-	public void testFormatMessage() throws Exception {
-		final String pattern = "{0,choice,0#|0<We also notified {1}.}";
-		
-		assertEquals("", MessageFormat.format(pattern, new Object[] {0, ""}));
-		assertEquals("We also notified Fred.", MessageFormat.format(pattern, new Object[] {1, "Fred"}));
-		assertEquals("We also notified Fred, Bill.", MessageFormat.format(pattern, new Object[] {2, "Fred, Bill"}));
-	}
-	
-	public void testFormatMessageSimple() throws Exception {
-		assertEquals(error.getMessage(), JabberBuildStatusListener.substituteParameters("{Message}", url, "", error, status));
-	}
-	
-	public void testFormatNumber() throws Exception {
-		error.setLineNumber(1024);
-		assertEquals("1,024", JabberBuildStatusListener.substituteParameters("{LineNumber,number}", url, "", error, status));
-	}
-	
-	public void testFormatParamNameCaseInsensitive() throws Exception {
-		error.setLineNumber(1024);
-		assertEquals("1,024", JabberBuildStatusListener.substituteParameters("{linenumber,number}", url, "", error, status));
-	}
-	
-	public void testFormatChoice() throws Exception {
-		final String format = "{LineNumber,choice,-1#|0<Line {LineNumber, number}}";
-		
-		error.setLineNumber(null);
-		
-		assertEquals("", JabberBuildStatusListener.substituteParameters(format, url, "", error, status));
-		
-		error.setLineNumber(0);
-		
-		assertEquals("", JabberBuildStatusListener.substituteParameters(format, url, "", error, status));
-		
-		error.setLineNumber(1);
-		
-		assertEquals("Line 1", JabberBuildStatusListener.substituteParameters(format, url, "", error, status));
-		
-		error.setLineNumber(1024);
-		
-		assertEquals("Line 1,024", JabberBuildStatusListener.substituteParameters(format, url, "", error, status));
-	}
-	
-	public void testFormatBlankable() throws Exception {
-		final String format = "{Users?,choice,0#|0<We also notified {Users}.}";
-		
-		assertEquals("", JabberBuildStatusListener.substituteParameters(format, url, "", error, status));
-		
-		error.setLineNumber(0);
-		
-		assertEquals("We also notified Sam.", JabberBuildStatusListener.substituteParameters(format, url, "Sam", error, status));
-	}
-	
-	public void testFormatBlankableSimplified() throws Exception {
-		final String format = "{Users?,We also notified {Users}.}";
-		
-		assertEquals("", JabberBuildStatusListener.substituteParameters(format, url, "", error, status));
-		
-		error.setLineNumber(0);
-		
-		assertEquals("We also notified Sam.", JabberBuildStatusListener.substituteParameters(format, url, "Sam", error, status));
-	}
-	
-	public void testFormatAllParams() throws Exception {
-		final String format =
-			"You broke ''{ProjectName}''{Users?, (or {Users} did)}.\n" +
-			"{File?,{File}}{LineNumber?,': line '{LineNumber}}{Code?,': '{Code}}: {Message}\n" +
-			"See {Link} for more info.  This was build {BuildNumber}.";
-		
-		final String s = JabberBuildStatusListener.substituteParameters(format, url, "Sam", error, status);
-		
-		assertEquals("You broke 'my project' (or Sam did).\n" +
-				"MyModule.fcs: line 37: FC1024: expected ;\n" +
-				"See http://example.com/vulcan/projects/foo/LATEST/ for more info.  This was build 24.", s);
-	}
-	
-	public void testFormatBlankableSimplifiedCompound() throws Exception {
-		final String format = "{File?,In {File}}{LineNumber?,:line {LineNumber}}";
-		
-		error.setFile("");
-		error.setLineNumber(null);
-		
-		assertEquals("", JabberBuildStatusListener.substituteParameters(format, url, "", error, status));
-		
-		error.setLineNumber(123);
-		error.setFile("Foo.java");
-		assertEquals("In Foo.java:line 123", JabberBuildStatusListener.substituteParameters(format, url, "Sam", error, status));
 	}
 	
 	public void testAttach() throws Exception {

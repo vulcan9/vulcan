@@ -56,6 +56,7 @@ public class JabberPluginTest extends EasyMockTestCase {
 		config.setPassword("pass");
 		config.setProjectsToMonitor(ProjectsToMonitor.All);
 		plugin.setClient(client);
+		plugin.setResponder(new JabberResponder());
 		plugin.config = config;
 		
 		target.setName("a");

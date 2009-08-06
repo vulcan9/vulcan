@@ -19,6 +19,8 @@
 package net.sourceforge.vulcan.jabber;
 
 import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.List;
 
 import net.sourceforge.vulcan.event.ErrorEvent;
 import net.sourceforge.vulcan.event.EventHandler;
@@ -44,6 +46,7 @@ public class XmppClient implements JabberClient, MessageListener {
 	private EventHandler eventHandler;
 	private String connectionString;
 	protected XMPPConnection connection;
+	private final List<JabberChatListener> listeners = new ArrayList<JabberChatListener>();
 	
 	public void refreshConnection(String server, int port, String serviceName, String username, String password) {
 		if (password == null) {
@@ -92,8 +95,19 @@ public class XmppClient implements JabberClient, MessageListener {
 	
 	public void processMessage(Chat chat, Message msg) {
 		LOG.debug(MessageFormat.format("Message ({2}) from {0}: {1}", chat.getParticipant(), msg.getBody(), msg.getType()));
+		synchronized(lock) {
+			for (JabberChatListener l : listeners) {
+				l.messageReceived(chat.getParticipant(), msg.getBody());
+			}
+		}
 	}
 
+	public void addMessageReceivedListener(JabberChatListener listener) {
+		synchronized(lock) {
+			listeners.add(listener);
+		}
+	}
+	
 	public EventHandler getEventHandler() {
 		return eventHandler;
 	}
