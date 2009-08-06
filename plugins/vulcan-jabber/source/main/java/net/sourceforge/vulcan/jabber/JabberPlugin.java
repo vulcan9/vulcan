@@ -51,18 +51,25 @@ public class JabberPlugin implements BuildManagerObserverPlugin, ConfigurablePlu
 	JabberPluginConfig config = new JabberPluginConfig();
 	
 	private JabberClient client;
+	private JabberResponder responder;
 	
 	public void setClient(JabberClient client) {
 		this.client = client;
 	}
 
+	public void setResponder(JabberResponder responder) {
+		this.responder = responder;
+	}
+	
 	public JabberPluginConfig getConfiguration() {
 		return config;
 	}
 	
 	public void setConfiguration(PluginConfigDto bean) {
 		config = (JabberPluginConfig) bean;
+		
 		client.refreshConnection(config.getServer(), config.getPort(), config.getServiceName(), config.getUsername(), config.getPassword());
+		responder.setConfiguration(config);
 	}
 	
 	public void onBuildStarting(BuildStartingEvent event) {
