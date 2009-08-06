@@ -25,6 +25,7 @@ import java.net.URLEncoder;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -59,6 +60,8 @@ class JabberBuildStatusListener implements BuildStatusListener {
 	private Pattern warningRegex;
 
 	private boolean attached;
+
+	private List<ProjectStatusDto> previousFailures = Collections.emptyList();
 	
 	public JabberBuildStatusListener(ProjectBuilder projectBuilder, JabberClient client, ScreenNameMapper screenNameResolver, JabberPluginConfig config, ProjectStatusDto status) {
 		this.projectBuilder = projectBuilder;
@@ -77,11 +80,16 @@ class JabberBuildStatusListener implements BuildStatusListener {
 		
 		final List<String> uniques = new ArrayList<String>();
 		
-		for (ChangeSetDto commit : status.getChangeLog().getChangeSets()) {
-			final String author = commit.getAuthor();
+		final List<ProjectStatusDto> outcomes = new ArrayList<ProjectStatusDto>(previousFailures);
+		outcomes.add(status);
 		
-			if (!StringUtils.isEmpty(author) && !uniques.contains(author)) {
-				uniques.add(author);
+		for (ProjectStatusDto outcome : outcomes) {
+			for (ChangeSetDto commit : outcome.getChangeLog().getChangeSets()) {
+				final String author = commit.getAuthor();
+			
+				if (!StringUtils.isEmpty(author) && !uniques.contains(author)) {
+					uniques.add(author);
+				}
 			}
 		}
 		
@@ -262,5 +270,13 @@ class JabberBuildStatusListener implements BuildStatusListener {
 
 	public boolean isAttached() {
 		return attached;
+	}
+
+	public List<ProjectStatusDto> getPreviousFailures() {
+		return previousFailures;
+	}
+	
+	public void setPreviousFailures(List<ProjectStatusDto> previousFailures) {
+		this.previousFailures = previousFailures;
 	}
 }

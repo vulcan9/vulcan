@@ -18,6 +18,7 @@
  */
 package net.sourceforge.vulcan.jabber;
 
+import java.util.Arrays;
 import java.util.regex.Pattern;
 
 import net.sourceforge.vulcan.EasyMockTestCase;
@@ -45,6 +46,7 @@ public class JabberPluginTest extends EasyMockTestCase {
 	BuildDaemonInfoDto buildDaemonInfo = new BuildDaemonInfoDto();
 	ProjectConfigDto target = new ProjectConfigDto();
 	ProjectStatusDto status = new ProjectStatusDto();
+	ProjectStatusDto prevStatus = new ProjectStatusDto();
 	
 	@Override
 	public void setUp() {
@@ -58,6 +60,10 @@ public class JabberPluginTest extends EasyMockTestCase {
 		
 		target.setName("a");
 		status.setName("a");
+		status.setBuildNumber(10);
+		prevStatus.setName(status.getName());
+		prevStatus.setBuildNumber(status.getBuildNumber() - 1);
+		prevStatus.setStatus(Status.PASS);
 	}
 	
 	public void testSetConfigConnectsClient() throws Exception {
@@ -74,6 +80,7 @@ public class JabberPluginTest extends EasyMockTestCase {
 		client.refreshConnection("example.com", 5222, "", "user", "pass");
 		
 		expect(buildManager.getProjectBuilder(status.getName())).andReturn(projectBuilder);
+		expect(buildManager.getLatestStatus(status.getName())).andReturn(null);
 		projectBuilder.addBuildStatusListener((BuildStatusListener) notNull());
 		
 		replay();
@@ -100,6 +107,7 @@ public class JabberPluginTest extends EasyMockTestCase {
 		client.refreshConnection("example.com", 5222, "", "user", "pass");
 		
 		expect(buildManager.getProjectBuilder(status.getName())).andReturn(projectBuilder);
+		expect(buildManager.getLatestStatus(status.getName())).andReturn(prevStatus);
 		projectBuilder.addBuildStatusListener((BuildStatusListener) notNull());
 		
 		replay();
@@ -107,6 +115,95 @@ public class JabberPluginTest extends EasyMockTestCase {
 		plugin.onBuildStarting(new BuildStartingEvent(buildManager, buildDaemonInfo, target, status));
 		
 		verify();
+	}
+	
+	public void testGetsPreviousFailuresNullLastGoodBuildNumber() throws Exception {
+		prevStatus.setStatus(Status.FAIL);
+		
+		config.setProjectsToMonitor(ProjectsToMonitor.Specify);
+		config.setSelectedProjects(new String[] {status.getName()});
+		client.refreshConnection("example.com", 5222, "", "user", "pass");
+		
+		expect(buildManager.getProjectBuilder(status.getName())).andReturn(projectBuilder);
+		expect(buildManager.getLatestStatus(status.getName())).andReturn(prevStatus);
+		projectBuilder.addBuildStatusListener((BuildStatusListener) notNull());
+		
+		replay();
+		
+		plugin.onBuildStarting(new BuildStartingEvent(buildManager, buildDaemonInfo, target, status));
+		
+		verify();
+		
+		assertEquals(Arrays.asList(prevStatus), plugin.getBuildListener(status.getName()).getPreviousFailures());
+	}
+	
+	public void testGetsPreviousFailuresLastGoodBuildNumberSingle() throws Exception {
+		prevStatus.setStatus(Status.FAIL);
+		prevStatus.setLastGoodBuildNumber(prevStatus.getBuildNumber()-1);
+		
+		config.setProjectsToMonitor(ProjectsToMonitor.Specify);
+		config.setSelectedProjects(new String[] {status.getName()});
+		client.refreshConnection("example.com", 5222, "", "user", "pass");
+		
+		expect(buildManager.getProjectBuilder(status.getName())).andReturn(projectBuilder);
+		expect(buildManager.getLatestStatus(status.getName())).andReturn(prevStatus);
+		projectBuilder.addBuildStatusListener((BuildStatusListener) notNull());
+		
+		replay();
+		
+		plugin.onBuildStarting(new BuildStartingEvent(buildManager, buildDaemonInfo, target, status));
+		
+		verify();
+		
+		assertEquals(Arrays.asList(prevStatus), plugin.getBuildListener(status.getName()).getPreviousFailures());
+	}
+	
+	public void testGetsPreviousFailuresLastGoodBuildNumberMutli() throws Exception {
+		prevStatus.setStatus(Status.FAIL);
+		prevStatus.setLastGoodBuildNumber(prevStatus.getBuildNumber()-3);
+		
+		config.setProjectsToMonitor(ProjectsToMonitor.Specify);
+		config.setSelectedProjects(new String[] {status.getName()});
+		client.refreshConnection("example.com", 5222, "", "user", "pass");
+		
+		expect(buildManager.getProjectBuilder(status.getName())).andReturn(projectBuilder);
+		expect(buildManager.getLatestStatus(status.getName())).andReturn(prevStatus);
+		expect(buildManager.getStatusByBuildNumber(status.getName(), prevStatus.getBuildNumber()-2)).andReturn(prevStatus);
+		expect(buildManager.getStatusByBuildNumber(status.getName(), prevStatus.getBuildNumber()-1)).andReturn(prevStatus);
+		
+		projectBuilder.addBuildStatusListener((BuildStatusListener) notNull());
+		
+		replay();
+		
+		plugin.onBuildStarting(new BuildStartingEvent(buildManager, buildDaemonInfo, target, status));
+		
+		verify();
+		
+		assertEquals(Arrays.asList(prevStatus, prevStatus, prevStatus), plugin.getBuildListener(status.getName()).getPreviousFailures());
+	}
+	
+	public void testGetsPreviousFailuresLastGoodBuildNumberMutliIgnoresMissing() throws Exception {
+		prevStatus.setStatus(Status.FAIL);
+		prevStatus.setLastGoodBuildNumber(prevStatus.getBuildNumber()-3);
+		
+		config.setProjectsToMonitor(ProjectsToMonitor.Specify);
+		config.setSelectedProjects(new String[] {status.getName()});
+		client.refreshConnection("example.com", 5222, "", "user", "pass");
+		
+		expect(buildManager.getProjectBuilder(status.getName())).andReturn(projectBuilder);
+		expect(buildManager.getLatestStatus(status.getName())).andReturn(prevStatus);
+		expect(buildManager.getStatusByBuildNumber(status.getName(), prevStatus.getBuildNumber()-2)).andReturn(null);
+		expect(buildManager.getStatusByBuildNumber(status.getName(), prevStatus.getBuildNumber()-1)).andReturn(prevStatus);
+		
+		projectBuilder.addBuildStatusListener((BuildStatusListener) notNull());
+		
+		replay();
+		
+		plugin.onBuildStarting(new BuildStartingEvent(buildManager, buildDaemonInfo, target, status));
+		
+		verify();
+		
+		assertEquals(Arrays.asList(prevStatus, prevStatus), plugin.getBuildListener(status.getName()).getPreviousFailures());
 	}
 	
 	public void testSendsMessageOnBuildFailureWhenAttached() throws Exception {

@@ -18,7 +18,10 @@
  */
 package net.sourceforge.vulcan.jabber;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import net.sourceforge.vulcan.core.BuildManager;
@@ -71,8 +74,6 @@ public class JabberPlugin implements BuildManagerObserverPlugin, ConfigurablePlu
 		
 		client.refreshConnection(config.getServer(), config.getPort(), config.getServiceName(), config.getUsername(), config.getPassword());
 		
-		final BuildManager mgr = (BuildManager)event.getSource();
-		
 		final ScreenNameMapper screenNameResolver;
 		
 		switch(config.getScreenNameMapper()) {
@@ -87,8 +88,15 @@ public class JabberPlugin implements BuildManagerObserverPlugin, ConfigurablePlu
 				break;
 		}
 		
+		final BuildManager mgr = (BuildManager)event.getSource();
+		
 		final ProjectBuilder projectBuilder = mgr.getProjectBuilder(status.getName());
+		
 		final JabberBuildStatusListener listener = new JabberBuildStatusListener(projectBuilder, client, screenNameResolver, config, status);
+		
+		final List<ProjectStatusDto> previousFailures = getPreviousBuildFailures(mgr, status);
+
+		listener.setPreviousFailures(previousFailures);
 		
 		listener.attach();
 		
@@ -156,5 +164,37 @@ public class JabberPlugin implements BuildManagerObserverPlugin, ConfigurablePlu
 		synchronized (instances) {
 			instances.put(name, listener);
 		}
+	}
+	
+	JabberBuildStatusListener getBuildListener(String name) {
+		synchronized (instances) {
+			return instances.get(name);
+			
+		}
+	}
+
+	private List<ProjectStatusDto> getPreviousBuildFailures(final BuildManager mgr, final ProjectStatusDto current) {
+		final ProjectStatusDto previousBuild = mgr.getLatestStatus(current.getName());
+		
+		if (previousBuild == null || previousBuild.getStatus() != Status.FAIL) {
+			return Collections.emptyList();
+		}
+		
+		final List<ProjectStatusDto> previousFailures = new ArrayList<ProjectStatusDto>();
+		
+		Integer lastGoodBuildNumber = previousBuild.getLastGoodBuildNumber();
+		if (lastGoodBuildNumber == null) {
+			lastGoodBuildNumber = previousBuild.getBuildNumber();
+		}
+		
+		for (int i = lastGoodBuildNumber+1; i<previousBuild.getBuildNumber(); i++) {
+			final ProjectStatusDto failure = mgr.getStatusByBuildNumber(current.getName(), i);
+			if (failure != null) {
+				previousFailures.add(failure);
+			}
+		}
+		
+		previousFailures.add(previousBuild);
+		return previousFailures;
 	}
 }
