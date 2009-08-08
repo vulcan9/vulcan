@@ -29,7 +29,7 @@
 	-->
 	
 	<!-- buildOutcomeStore definition and transaction configuration -->
-	<bean id="buildOutcomeStore" class="net.sourceforge.vulcan.spring.jdbc.JdbcBuildOutcomeStore"
+	<bean id="buildOutcomeStoreTarget" class="net.sourceforge.vulcan.spring.jdbc.JdbcBuildOutcomeStore"
 			init-method="init" depends-on="schemaMigrator">
 		<property name="dataSource" ref="dataSource"/>
 		<property name="configurationStore" ref="configurationStore"/>
@@ -37,16 +37,15 @@
 		<property name="sqlQueries" ref="sqlQueries"/>
 	</bean>
 
-	<bean class="org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator"/>
-
-	<bean class="org.springframework.transaction.interceptor.TransactionAttributeSourceAdvisor">
-		<property name="transactionInterceptor" ref="txInterceptor"/>
-	</bean>
-
-	<bean id="txInterceptor" class="org.springframework.transaction.interceptor.TransactionInterceptor">
+	<bean id="buildOutcomeStore" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
 		<property name="transactionManager" ref="txManager"/>
-		<property name="transactionAttributeSource">
-			<bean class="org.springframework.transaction.annotation.AnnotationTransactionAttributeSource"/>
+		<property name="target" ref="buildOutcomeStoreTarget"/>
+		<property name="transactionAttributes">
+			<props>
+				<prop key="store*">PROPAGATION_REQUIRED,-net.sourceforge.vulcan.exception.StoreException</prop>
+				<prop key="projectNameChanged">PROPAGATION_REQUIRED</prop>
+				<prop key="*">PROPAGATION_SUPPORTS,readOnly</prop>
+			</props>
 		</property>
-	</bean>	
+	</bean>
 </beans>

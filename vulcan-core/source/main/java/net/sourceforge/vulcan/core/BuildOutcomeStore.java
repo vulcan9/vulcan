@@ -35,34 +35,23 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly=true)
 @SvnRevision(id="$Id$", url="$HeadURL$")
 public interface BuildOutcomeStore {
-	
-	@Transactional(readOnly=false, rollbackFor=StoreException.class)
 	UUID storeBuildOutcome(ProjectStatusDto outcome) throws StoreException;
 	
-	@Transactional(readOnly=true)
 	ProjectStatusDto loadBuildOutcome(UUID id) throws StoreException;
 	
-	@Transactional(readOnly=true)
 	List<ProjectStatusDto> loadBuildSummaries(BuildOutcomeQueryDto query);
 
-	@Transactional(readOnly=true)
 	List<BuildMessageDto> loadTopBuildErrors(BuildOutcomeQueryDto query, int maxResultCount);
 	
-	@Transactional(readOnly=true)
 	List<TestFailureDto> loadTopTestFailures(BuildOutcomeQueryDto query, int maxResultCount);
 	
-	@Transactional(readOnly=true)
 	Long loadAverageBuildTimeMillis(String name, UpdateType updateType);
 	
-	@Transactional(readOnly=true)
 	Map<String, List<UUID>> getBuildOutcomeIDs();
 
-	@Transactional(readOnly=true)
 	Integer findMostRecentBuildNumberByWorkDir(String workDir);
 
-	@Transactional(readOnly=true)
 	List<String> getBuildUsers();
 
-	@Transactional(readOnly=true)
 	List<String> getBuildSchedulers();
 }
