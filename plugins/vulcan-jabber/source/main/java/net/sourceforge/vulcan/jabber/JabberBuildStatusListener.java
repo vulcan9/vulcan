@@ -23,9 +23,11 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 
@@ -47,6 +49,7 @@ class JabberBuildStatusListener implements BuildStatusListener {
 	
 	private final ProjectBuilder projectBuilder;
 	private final JabberClient client;
+	private final JabberResponder responder;
 	private final ScreenNameMapper screenNameResolver;
 	private final JabberPluginConfig config;
 	private final ProjectStatusDto status;
@@ -60,10 +63,13 @@ class JabberBuildStatusListener implements BuildStatusListener {
 	private boolean attached;
 
 	private List<ProjectStatusDto> previousFailures = Collections.emptyList();
+
+	private Map<String, String> screenNameMap = Collections.emptyMap();
 	
-	public JabberBuildStatusListener(ProjectBuilder projectBuilder, JabberClient client, ScreenNameMapper screenNameResolver, JabberPluginConfig config, ProjectStatusDto status) {
+	public JabberBuildStatusListener(ProjectBuilder projectBuilder, JabberClient client, JabberResponder responder, ScreenNameMapper screenNameResolver, JabberPluginConfig config, ProjectStatusDto status) {
 		this.projectBuilder = projectBuilder;
 		this.client = client;
+		this.responder = responder;
 		this.screenNameResolver = screenNameResolver;
 		this.config = config;
 		this.status = status;
@@ -71,7 +77,7 @@ class JabberBuildStatusListener implements BuildStatusListener {
 		addRecipients(config.getRecipients());
 	}
 	
-	public void onBuildPhaseChanged(BuildPhase phase) {
+	public void onBuildPhaseChanged(Object source, BuildPhase phase) {
 		if (phase != BuildPhase.Build || status.getChangeLog() == null || status.getChangeLog().getChangeSets() == null) {
 			return;
 		}
@@ -82,6 +88,10 @@ class JabberBuildStatusListener implements BuildStatusListener {
 		outcomes.add(status);
 		
 		for (ProjectStatusDto outcome : outcomes) {
+			if (outcome.getChangeLog() == null || outcome.getChangeLog().getChangeSets() == null) {
+				continue;
+			}
+			
 			for (ChangeSetDto commit : outcome.getChangeLog().getChangeSets()) {
 				final String author = commit.getAuthor();
 			
@@ -91,10 +101,12 @@ class JabberBuildStatusListener implements BuildStatusListener {
 			}
 		}
 		
-		addCommitters(screenNameResolver.lookupByAuthor(uniques));
+		screenNameMap = screenNameResolver.lookupByAuthor(uniques);
+		
+		addCommitters(screenNameMap.values());
 	}
 	
-	public void onErrorLogged(BuildMessageDto error) {
+	public void onErrorLogged(Object source, BuildMessageDto error) {
 		if (errorRegex == null && StringUtils.isNotBlank(config.getErrorRegex())) {
 			errorRegex = Pattern.compile(config.getErrorRegex(), Pattern.CASE_INSENSITIVE);
 		}
@@ -102,7 +114,7 @@ class JabberBuildStatusListener implements BuildStatusListener {
 		onBuildMessageLogged(EventsToMonitor.Errors, errorRegex, error, "errors");
 	}
 
-	public void onWarningLogged(BuildMessageDto warning) {
+	public void onWarningLogged(Object source, BuildMessageDto warning) {
 		if (warningRegex == null && StringUtils.isNotBlank(config.getWarningRegex())) {
 			warningRegex = Pattern.compile(config.getWarningRegex(), Pattern.CASE_INSENSITIVE);
 		}
@@ -120,7 +132,7 @@ class JabberBuildStatusListener implements BuildStatusListener {
 		attached = false;
 	}
 	
-	public void addCommitters(List<String> committers) {
+	public void addCommitters(Collection<String> committers) {
 		this.committers.addAll(committers);
 		addRecipients(committers);
 	}
@@ -128,7 +140,7 @@ class JabberBuildStatusListener implements BuildStatusListener {
 		addRecipients(Arrays.asList(recipients));
 	}
 	
-	public void addRecipients(List<String> recipients) {
+	public void addRecipients(Collection<String> recipients) {
 		final Set<String> uniques = new HashSet<String>();
 		
 		for (String s : this.recipients) {
@@ -206,6 +218,9 @@ class JabberBuildStatusListener implements BuildStatusListener {
 		if (regex != null && !regex.matcher(message.getMessage()).find()) {
 			return;
 		}
+		
+		responder.linkUsersToBrokenBuild(status.getName(), status.getBuildNumber(), screenNameMap);
+		
 		for (String recipient : recipients) {
 			client.sendMessage(recipient, formatNotificationMessage(recipient, view, message));
 		}
@@ -213,6 +228,10 @@ class JabberBuildStatusListener implements BuildStatusListener {
 		detach();
 	}
 
+	void setScreenNameMap(Map<String, String> screenNameMap) {
+		this.screenNameMap = screenNameMap;
+	}
+	
 	private boolean isEventMonitored(EventsToMonitor type) {
 		for (EventsToMonitor e : config.getEventsToMonitor()) {
 			if (e == type) {

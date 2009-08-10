@@ -226,7 +226,7 @@ public class JabberPluginTest extends EasyMockTestCase {
 	private void doBuildCompletedTest(Status result, final boolean isAttached, boolean expectMessage, boolean expectDetach) {
 		final boolean[] callFlags = new boolean[2];
 		
-		plugin.addBuildListener(status.getName(), new JabberBuildStatusListener(null, null, null, config, status) {
+		plugin.addBuildListener(status.getName(), new JabberBuildStatusListener(null, null, null, null, config, status) {
 			@Override
 			protected void onBuildMessageLogged(EventsToMonitor type,
 					Pattern regex, BuildMessageDto message, String view) {

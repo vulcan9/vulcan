@@ -19,6 +19,7 @@
 package net.sourceforge.vulcan.spring.jdbc;
 
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -50,6 +51,8 @@ public class JdbcBuildOutcomeStore implements BuildOutcomeStore, ProjectNameChan
 	public static int MAX_COMMIT_MESSAGE_LENGTH = 2048;
 	
 	private final Set<String> projectNames = new HashSet<String>();
+	private final Set<String> brokenBuildUsers = new HashSet<String>();
+	
 	private List<String> buildUsers;
 	private List<String> buildSchedulers;
 	
@@ -88,8 +91,11 @@ public class JdbcBuildOutcomeStore implements BuildOutcomeStore, ProjectNameChan
 		testFailureInserter = new TestFailureInserter(dataSource);
 		changeSetInserter = new ChangeSetInserter(dataSource);
 		
-		final ProjectNamesQuery projectNamesQuery = new ProjectNamesQuery(dataSource);
+		final LookupTableQuery projectNamesQuery = new LookupTableQuery(dataSource, "project_names", "name");
 		projectNames.addAll(projectNamesQuery.execute());
+
+		final LookupTableQuery usersQuery = new LookupTableQuery(dataSource, "users", "username");
+		brokenBuildUsers.addAll(usersQuery.execute());
 	}
 
 	public Map<String, List<UUID>> getBuildOutcomeIDs() {
@@ -152,7 +158,7 @@ public class JdbcBuildOutcomeStore implements BuildOutcomeStore, ProjectNameChan
 		return result;
 	}
 	
-	public UUID storeBuildOutcome(ProjectStatusDto outcome)	throws StoreException {
+	public synchronized UUID storeBuildOutcome(ProjectStatusDto outcome)	throws StoreException {
 		try {
 			final UUID uuid = storeBuildOutcomeInternal(outcome);
 			
@@ -176,6 +182,23 @@ public class JdbcBuildOutcomeStore implements BuildOutcomeStore, ProjectNameChan
 		}
 	}
 
+	public synchronized void claimBrokenBuild(UUID id, String userName, Date claimDate) {
+		boolean brokenByNameAdded = false;
+		
+		if (!brokenBuildUsers.contains(userName)) {
+			jdbcTemplate.update("insert into users (username) values (?)", new Object[] {userName});
+			brokenByNameAdded = true;
+		}
+
+		jdbcTemplate.update("update builds set broken_by_user_id=(select id from users " +
+				"where username=?), claimed_date=? where uuid=?", new Object[] {
+				userName, claimDate, id.toString()});
+		
+		if (brokenByNameAdded) {
+			brokenBuildUsers.add(userName);
+		}
+	}
+	
 	public Integer findMostRecentBuildNumberByWorkDir(String workDir) {
 		final int result = jdbcTemplate.queryForInt("select ifnull(max(build_number), -1) from builds where work_dir=?",
 				new Object[] { workDir });
@@ -187,7 +210,7 @@ public class JdbcBuildOutcomeStore implements BuildOutcomeStore, ProjectNameChan
 		return result;
 	}
 	
-	public void projectNameChanged(String oldName, String newName) {
+	public synchronized void projectNameChanged(String oldName, String newName) {
 		if (projectNames.contains(newName)) {
 			int i=2;
 			while (projectNames.contains(newName + "_" + i)) {
@@ -247,12 +270,19 @@ public class JdbcBuildOutcomeStore implements BuildOutcomeStore, ProjectNameChan
 	}
 	
 	private UUID storeBuildOutcomeInternal(ProjectStatusDto outcome) {
-		boolean nameAdded = false;
+		boolean projectNameAdded = false;
+		boolean brokenByNameAdded = false;
 		final String projectName = outcome.getName();
 		
 		if (!projectNames.contains(projectName)) {
 			jdbcTemplate.update("insert into project_names (name) values (?)", new Object[] {projectName});
-			nameAdded = true;
+			projectNameAdded = true;
+		}
+		
+		final String brokenBy = outcome.getBrokenBy();
+		if (StringUtils.isNotBlank(brokenBy) && !brokenBuildUsers.contains(brokenBy)) {
+			jdbcTemplate.update("insert into users (username) values (?)", new Object[] {brokenBy});
+			brokenByNameAdded = true;
 		}
 		
 		if (outcome.getId() == null) {
@@ -289,10 +319,13 @@ public class JdbcBuildOutcomeStore implements BuildOutcomeStore, ProjectNameChan
 			changeSetInserter.insert(primaryKey, outcome.getChangeLog().getChangeSets());
 		}
 		
-		if (nameAdded) {
+		if (projectNameAdded) {
 			projectNames.add(projectName);
 		}
 		
+		if (brokenByNameAdded) {
+			brokenBuildUsers.add(brokenBy);
+		}
 		return outcome.getId();
 	}
 

@@ -20,6 +20,7 @@ package net.sourceforge.vulcan.core.support;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -117,6 +118,19 @@ public class BuildOutcomeCache implements ProjectNameChangeListener {
 		}
 	}
 	
+	public void claimBrokenBuild(ProjectStatusDto outcome, String claimUser) {
+		final Date date = new Date();
+		writeLock.lock();
+		try {
+			buildOutcomeStore.claimBrokenBuild(outcome.getId(), claimUser, date);
+			
+			outcome.setBrokenBy(claimUser);
+			outcome.setClaimDate(date);
+		} finally {
+			writeLock.unlock();
+		}
+	}
+
 	public List<UUID> getOutcomeIds(String projectName) {
 		try {
 			readLock.lock();
@@ -322,7 +336,6 @@ public class BuildOutcomeCache implements ProjectNameChangeListener {
 		ids.add(id);
 		statusDto.setId(id);
 	}
-	
 	
 	private ProjectStatusDto findOutcomeByNumber(final List<UUID> outcomeIds, int buildNumber, int guess, Set<Integer> visitedIndexes) {
 		final int numOutcomes = outcomeIds.size();

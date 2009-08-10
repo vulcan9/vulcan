@@ -21,6 +21,7 @@ package net.sourceforge.vulcan.spring;
 import java.util.ArrayList;
 import java.util.List;
 
+import net.sourceforge.vulcan.event.BrokenBuildClaimedEvent;
 import net.sourceforge.vulcan.event.BuildCompletedEvent;
 import net.sourceforge.vulcan.event.BuildStartingEvent;
 import net.sourceforge.vulcan.event.Event;
@@ -60,13 +61,20 @@ public class BuildEventPluginPublisher implements ApplicationListener {
 		
 		final BuildStartingEvent buildStartingEvent;
 		final BuildCompletedEvent buildCompletedEvent;
+		final BrokenBuildClaimedEvent brokenBuildClaimedEvent;
 		
 		if (event instanceof BuildStartingEvent) {
 			buildStartingEvent = (BuildStartingEvent) event;
 			buildCompletedEvent = null;
+			brokenBuildClaimedEvent = null;
 		} else if (event instanceof BuildCompletedEvent) {
 			buildCompletedEvent = (BuildCompletedEvent) event;
 			buildStartingEvent = null;
+			brokenBuildClaimedEvent = null;
+		} else if (event instanceof BrokenBuildClaimedEvent) {
+			brokenBuildClaimedEvent = (BrokenBuildClaimedEvent) event;
+			buildStartingEvent = null;
+			buildCompletedEvent = null;
 		} else {
 			return;
 		}
@@ -79,8 +87,10 @@ public class BuildEventPluginPublisher implements ApplicationListener {
 		for (BuildManagerObserverPlugin plugin : copy) {
 			if (buildStartingEvent != null) {
 				plugin.onBuildStarting(buildStartingEvent);
-			} else {
+			} else if (buildCompletedEvent != null) {
 				plugin.onBuildCompleted(buildCompletedEvent);
+			} else {
+				plugin.onBrokenBuildClaimed(brokenBuildClaimedEvent);
 			}
 		}
 	}

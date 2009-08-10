@@ -24,7 +24,7 @@ import net.sourceforge.vulcan.dto.BuildMessageDto;
  * Interface for subscribing to build status updates during a build.
  */
 public interface BuildStatusListener {
-	public void onBuildPhaseChanged(BuildPhase phase);
-	public void onErrorLogged(BuildMessageDto error);
-	public void onWarningLogged(BuildMessageDto warning);
+	public void onBuildPhaseChanged(Object source, BuildPhase phase);
+	public void onErrorLogged(Object source, BuildMessageDto error);
+	public void onWarningLogged(Object source, BuildMessageDto warning);
 }

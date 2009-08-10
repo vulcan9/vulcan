@@ -378,31 +378,43 @@ jQuery.fn.loadCustom = function (url, params, selector) {
 		params: params,
 		success: function(data, textStatus) {
 			var contents;
-	
+			var doc;
+			
 			if (data && data.getElementById) {
-				contents = $(document.importNode(data.getElementsByTagName("body")[0], true)).find(selector);
+				doc = $(document.importNode(data.getElementsByTagName("body")[0], true));
 			} else {
-				contents = jQuery("<div/>").append(data.replace(/<script(.|\s)*?\/script>/g, "")).find(selector);
+				doc = jQuery("<div/>").append(data.replace(/<script(.|\s)*?\/script>/g, ""));
 			}
 	
-			// show the loading message in the new contents
+			if (doc) {
+				contents = doc.find(selector);
+				if (contents.length == 0) {
+					contents = doc.find("#errors");
+				}
+			}
+
+			if (!contents || contents.length == 0) {
+				contents = jQuery("<div>Error processing request.</div>");
+			}
+						
+			// show the loading message in the new contents...
 			contents.find("#loading-message").show();
 	
 			target.replaceWith(contents);
 
 			registerAjaxHandlers();
 			
-			// so we can fade it out after replacing.
+			// ...so we can fade it out after replacing.
 			$("#loading-message").fadeOut("slow");
 		},
-		error: function(data, textStatus) {
-			if (data && (data.status == 302 || data.status == 0)) {
+		error: function(request, textStatus) {
+			if (request && (request.status == 302 || request.status == 0)) {
 				// Firefox shows a 302 Moved Permanently.  IE shows a 0.
 				// Fall back to non-ajax GET.
 				window.location = url;
 				return;
 			} else {
-				$("#loading-message").html("error: " + data.statusText);
+				$("#loading-message").html("error: " + request.statusText);
 			}
 		}
 	});

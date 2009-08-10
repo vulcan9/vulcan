@@ -112,6 +112,10 @@ public abstract class StateManagerTestBase extends EasyMockTestCase
 			public ProjectBuilder getProjectBuilder(String projectName) {
 				return null;
 			}
+			public boolean claimBrokenBuild(String projectName,
+					int buildNumber, String claimUser) {
+				return false;
+			}
 		});
 		
 		stateMgr.setEventHandler(new EventHandler() {

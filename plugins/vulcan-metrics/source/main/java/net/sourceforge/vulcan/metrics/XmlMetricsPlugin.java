@@ -38,6 +38,7 @@ import net.sourceforge.vulcan.dto.PluginConfigDto;
 import net.sourceforge.vulcan.dto.ProjectStatusDto;
 import net.sourceforge.vulcan.dto.TestFailureDto;
 import net.sourceforge.vulcan.dto.MetricDto.MetricType;
+import net.sourceforge.vulcan.event.BrokenBuildClaimedEvent;
 import net.sourceforge.vulcan.event.BuildCompletedEvent;
 import net.sourceforge.vulcan.event.BuildStartingEvent;
 import net.sourceforge.vulcan.event.ErrorEvent;
@@ -88,6 +89,9 @@ public class XmlMetricsPlugin implements BuildManagerObserverPlugin, Configurabl
 	}
 
 	public void onBuildStarting(BuildStartingEvent event) {
+	}
+	
+	public void onBrokenBuildClaimed(BrokenBuildClaimedEvent event) {
 	}
 	
 	public void onBuildCompleted(BuildCompletedEvent event) {

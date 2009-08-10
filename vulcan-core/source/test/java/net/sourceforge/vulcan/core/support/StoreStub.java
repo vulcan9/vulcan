@@ -22,6 +22,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -137,5 +138,7 @@ public class StoreStub implements ConfigurationStore, BuildOutcomeStore {
 	}
 	public List<String> getBuildUsers() {
 		return null;
+	}
+	public void claimBrokenBuild(UUID id, String userName, Date d) {
 	}
 }

@@ -50,6 +50,7 @@ import net.sourceforge.vulcan.dto.PluginConfigDto;
 import net.sourceforge.vulcan.dto.ProjectConfigDto;
 import net.sourceforge.vulcan.dto.ProjectStatusDto;
 import net.sourceforge.vulcan.dto.ProjectStatusDto.Status;
+import net.sourceforge.vulcan.event.BrokenBuildClaimedEvent;
 import net.sourceforge.vulcan.event.BuildCompletedEvent;
 import net.sourceforge.vulcan.event.BuildStartingEvent;
 import net.sourceforge.vulcan.event.ErrorEvent;
@@ -129,6 +130,9 @@ public class EmailPlugin implements BuildManagerObserverPlugin, ConfigurablePlug
     }
 
     public void onBuildStarting(BuildStartingEvent event) {
+    }
+    
+    public void onBrokenBuildClaimed(BrokenBuildClaimedEvent event) {
     }
     
     public synchronized void onBuildCompleted(BuildCompletedEvent event) {

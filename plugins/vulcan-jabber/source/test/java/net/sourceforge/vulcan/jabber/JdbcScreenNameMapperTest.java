@@ -19,6 +19,7 @@
 package net.sourceforge.vulcan.jabber;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -61,18 +62,22 @@ public class JdbcScreenNameMapperTest extends TestCase {
 		fakeResults.put("Sam", "imsam84");
 		fakeResults.put("Tara", "tara22");
 		
-		assertEquals(Arrays.asList("imsam84", "tara22"), mapper.lookupByAuthor(Arrays.asList("Sam", "Tara")));
+		Map<String, String> map = new HashMap<String, String>();
+		map.put("Sam", "imsam84");
+		map.put("Tara", "tara22");
+		
+		assertEquals(map, mapper.lookupByAuthor(Arrays.asList("Sam", "Tara")));
 	}
 	
 	public void testHandlesUserNotFound() throws Exception {
 		fakeResults.put("Tara", "tara22");
 		
-		assertEquals(Arrays.asList("tara22"), mapper.lookupByAuthor(Arrays.asList("Sam", "Tara")));
+		assertEquals(Collections.singletonMap("Tara", "tara22"), mapper.lookupByAuthor(Arrays.asList("Sam", "Tara")));
 	}
 	
 	public void testHandlesNamingException() throws Exception {
 		namingException = new NamingException();
 		
-		assertEquals(Arrays.asList(), mapper.lookupByAuthor(Arrays.asList("Sam", "Tara")));
+		assertEquals(Collections.emptyMap(), mapper.lookupByAuthor(Arrays.asList("Sam", "Tara")));
 	}
 }

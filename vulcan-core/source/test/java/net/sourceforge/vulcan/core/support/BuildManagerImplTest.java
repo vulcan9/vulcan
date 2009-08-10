@@ -18,14 +18,14 @@
  */
 package net.sourceforge.vulcan.core.support;
 
+import java.net.InetAddress;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.UUID;
-
-import java.net.InetAddress;
 
 import junit.framework.AssertionFailedError;
 import junit.framework.TestCase;
@@ -940,6 +940,48 @@ public class BuildManagerImplTest extends TestCase {
 		cache.store(status);
 		
 		assertSame(status, mgr.getStatusByBuildNumber(a.getName(), buildNumber));
+	}
+	
+	public void testClaimBrokenBuild() throws Exception {
+		int buildNumber = 5545;
+		ProjectStatusDto status = new ProjectStatusDto();
+		
+		status.setName(a.getName());
+		status.setBuildNumber(buildNumber);
+		cache.store(status);
+		
+		assertTrue(mgr.claimBrokenBuild(a.getName(), buildNumber, "claim_user"));
+		
+		assertEquals("claim_user", status.getBrokenBy());
+		assertNotNull(status.getClaimDate());
+	}
+	
+	public void testClaimBrokenBuildNotFound() throws Exception {
+		int buildNumber = 5545;
+		
+		try {
+			mgr.claimBrokenBuild(a.getName(), buildNumber, "claim_user");
+			fail("expected exception");
+		} catch (IllegalArgumentException e) {
+		}
+	}
+	
+	public void testClaimBrokenBuildAlreadyClaimed() throws Exception {
+		int buildNumber = 5545;
+		ProjectStatusDto status = new ProjectStatusDto();
+		
+		status.setName(a.getName());
+		status.setBuildNumber(buildNumber);
+		final Date date = new Date();
+		status.setClaimDate(date);
+		status.setBrokenBy("aggressive_user");
+		
+		cache.store(status);
+		
+		assertFalse(mgr.claimBrokenBuild(a.getName(), buildNumber, "claim_user"));
+		
+		assertEquals("aggressive_user", status.getBrokenBy());
+		assertEquals(date, status.getClaimDate());
 	}
 	
 	public void testGetStatusByBuildNumberWhenBuilding() throws Exception {

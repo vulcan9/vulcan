@@ -27,6 +27,7 @@ import net.sourceforge.vulcan.dto.BuildManagerConfigDto;
 import net.sourceforge.vulcan.dto.ProjectConfigDto;
 import net.sourceforge.vulcan.dto.ProjectStatusDto;
 import net.sourceforge.vulcan.exception.AlreadyScheduledException;
+import net.sourceforge.vulcan.exception.StoreException;
 import net.sourceforge.vulcan.metadata.SvnRevision;
 
 @SvnRevision(id="$Id$", url="$HeadURL$")
@@ -46,6 +47,13 @@ public interface BuildManager {
 
 	void targetCompleted(BuildDaemonInfoDto info, ProjectConfigDto currentTarget, ProjectStatusDto buildStatus);
 
+	/**
+	 * @return true if the build was previously unclaimed, false
+	 * if it has already been claimed by someone else.
+	 * @throws StoreException 
+	 */
+	boolean claimBrokenBuild(String projectName, int buildNumber, String claimUser);
+	
 	/**
 	 * @return true if any project is currently being built or is in the build queue; false otherwise.
 	 */

@@ -24,6 +24,7 @@
 				<value>lock</value>
 				<value>unlock</value>
 				<value>clear</value>
+				<value>claim</value>
 			</set>
 		</property>
 	</bean>
@@ -168,6 +169,12 @@
 	<bean name="/admin/setup/saveArtifactLocations"
 			class="net.sourceforge.vulcan.web.struts.actions.SaveArtifactLocationsAction">
 		<property name="stateManager" ref="stateManager"/>
+	</bean>
+			
+	<bean name="/wall/claimBrokenBuild"
+			class="net.sourceforge.vulcan.web.struts.actions.ClaimBrokenBuildAction"
+			parent="baseDispatchAction">
+		<property name="buildManager" ref="buildManager"/>
 	</bean>
 </beans>
 	

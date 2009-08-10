@@ -18,6 +18,7 @@
  */
 package net.sourceforge.vulcan.core;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -36,6 +37,8 @@ import org.springframework.transaction.annotation.Transactional;
 @SvnRevision(id="$Id$", url="$HeadURL$")
 public interface BuildOutcomeStore {
 	UUID storeBuildOutcome(ProjectStatusDto outcome) throws StoreException;
+	
+	void claimBrokenBuild(UUID id, String userName, Date claimDate);
 	
 	ProjectStatusDto loadBuildOutcome(UUID id) throws StoreException;
 	
