@@ -29,6 +29,11 @@
 					p.meta {
 						font-size:12px;
 					}
+					p.broken-by {
+						background-color: yellow;
+						font-weight: bold;
+						padding: 1ex;
+					}
 					a.jump {
 						font-size:12px;
 					}
@@ -105,38 +110,41 @@
 						<xsl:text>Full Report</xsl:text>
 					</a>
 					<xsl:text>]</xsl:text>
-
 				</p>
 
+				<xsl:if test="/project/broken-by-user">
+					<xsl:call-template name="bubble">
+						<xsl:with-param name="target" select="'broken-by-user'"/>
+					</xsl:call-template>
+				</xsl:if>
+				
 				<xsl:if test="/project/errors">
 					<xsl:call-template name="bubble">
 						<xsl:with-param name="target" select="'errors'"/>
-						<xsl:with-param name="styleClass" select="'build-errors'"/>
 					</xsl:call-template>
 				</xsl:if>
 
 				<xsl:if test="/project/test-failures">
 					<xsl:call-template name="bubble">
 						<xsl:with-param name="target" select="'test-failures'"/>
-						<xsl:with-param name="styleClass" select="'test-failures'"/>
 					</xsl:call-template>
 				</xsl:if>
 				<xsl:if test="/project/change-sets">
 					<xsl:call-template name="bubble">
 						<xsl:with-param name="target" select="'changes'"/>
-						<xsl:with-param name="styleClass" select="'changes'"/>
 					</xsl:call-template>
 				</xsl:if>
-
 			</body>
 		</html>
 	</xsl:template>
 
 	<xsl:template name="bubble">
 		<xsl:param name="target"/>
-		<xsl:param name="styleClass"/>
 		<hr xmlns="http://www.w3.org/1999/xhtml" />
 		<xsl:choose>
+			<xsl:when test="$target='broken-by-user'">
+				<xsl:apply-templates select="/project/broken-by-user"/>
+			</xsl:when>
 			<xsl:when test="$target='changes'">
 				<xsl:apply-templates select="/project/change-sets"/>
 			</xsl:when>
@@ -149,7 +157,13 @@
 		</xsl:choose>
 	</xsl:template>
 
-
+	<xsl:template match="broken-by-user">
+		<p class="broken-by">
+			<xsl:text>Responsibility for this build failure has been claimed by </xsl:text>
+			<xsl:value-of select="."/>
+		</p>
+	</xsl:template>
+	
 	<xsl:template match="change-sets">
 		<h3 id="commit-log">Commit Log (<xsl:value-of select="$num-changes"/>)</h3>
 		<table>
