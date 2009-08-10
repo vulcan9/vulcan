@@ -18,6 +18,8 @@
  */
 package net.sourceforge.vulcan.core.support;
 
+import static org.apache.commons.lang.StringUtils.isNotBlank;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -45,6 +47,7 @@ import net.sourceforge.vulcan.dto.ProjectConfigDto;
 import net.sourceforge.vulcan.dto.ProjectStatusDto;
 import net.sourceforge.vulcan.dto.RevisionTokenDto;
 import net.sourceforge.vulcan.dto.ProjectStatusDto.Status;
+import net.sourceforge.vulcan.event.BrokenBuildClaimedEvent;
 import net.sourceforge.vulcan.event.BuildCompletedEvent;
 import net.sourceforge.vulcan.event.BuildStartingEvent;
 import net.sourceforge.vulcan.event.ErrorEvent;
@@ -186,6 +189,31 @@ public class BuildManagerImpl implements BuildManager {
 		
 		processTargetComplete(info, config, outcome);
 	}
+	
+	public boolean claimBrokenBuild(String projectName, int buildNumber, String claimUser) {
+		final ProjectStatusDto outcome;
+		
+		try {
+			writeLock.lock();
+			
+			outcome = getStatusByBuildNumber(projectName, buildNumber);
+			
+			if (outcome == null) {
+				throw new IllegalArgumentException("Build " + buildNumber + " for project " + projectName + " not found.");
+			} else if (isNotBlank(outcome.getBrokenBy())) {
+				return false;
+			}
+			
+			cache.claimBrokenBuild(outcome, claimUser);
+		} finally {
+			writeLock.unlock();
+		}
+		
+		eventHandler.reportEvent(new BrokenBuildClaimedEvent(this, outcome));
+		
+		return true;
+	}
+	
 	public boolean isBuildingOrInQueue(String... name) {
 		final Set<String> names = new HashSet<String>(Arrays.asList(name));
 		try {

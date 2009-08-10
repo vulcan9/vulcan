@@ -15,6 +15,7 @@
 	
 	<bean name="responder" class="net.sourceforge.vulcan.jabber.JabberResponder" init-method="init">
 		<property name="client" ref="xmppClient"/>
+		<property name="buildManager" ref="buildManager"/>	<!-- reference from parent context. -->
 		<property name="idleThreshold" value="30000"/>
 	</bean>
 	

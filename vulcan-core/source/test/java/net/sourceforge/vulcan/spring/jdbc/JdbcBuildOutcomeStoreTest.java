@@ -135,6 +135,59 @@ public class JdbcBuildOutcomeStoreTest extends TestCase {
 	public void testSaveSimple() throws Exception {
 		assertPersistence();
 	}
+	
+	public void testSaveWithBrokenByUsesr() throws Exception {
+		outcome.setBrokenBy("lazy user");
+		outcome.setClaimDate(new Date(12314423l));
+		
+		assertPersistence();
+	}
+
+	public void testClaimBrokenBuild() throws Exception {
+		final JdbcBuildOutcomeDto before = storeOutcome();
+		
+		final Date date = new Date(12345l);
+		store.claimBrokenBuild(before.getId(), "lazy user", date);
+		
+		final JdbcBuildOutcomeDto after = store.loadBuildOutcome(before.getId());
+		
+		assertEquals("lazy user", after.getBrokenBy());
+		assertEquals(date, after.getClaimDate());
+	}
+
+	public void testClaimBrokenBuildLeavesOthers() throws Exception {
+		final JdbcBuildOutcomeDto other = storeOutcome();
+		final Date date = new Date(12345l);
+		
+		outcome.setBuildNumber(outcome.getBuildNumber() + 1);
+		outcome.setId(null);
+		
+		final JdbcBuildOutcomeDto before = storeOutcome();
+		
+		store.claimBrokenBuild(before.getId(), "lazy user", date);
+		
+		final JdbcBuildOutcomeDto after = store.loadBuildOutcome(before.getId());
+		
+		assertEquals("lazy user", after.getBrokenBy());
+		assertNotNull(after.getClaimDate());
+		
+		final JdbcBuildOutcomeDto otherAfter = store.loadBuildOutcome(other.getId());
+		
+		assertNull(otherAfter.getBrokenBy());
+		assertNull(otherAfter.getClaimDate());
+		
+	}
+	
+	public void testSaveEmptyBrokenByUsesrDoesNotSetClaimedDate() throws Exception {
+		outcome.setBrokenBy(null);
+		outcome.setClaimDate(new Date(12314423l));
+		
+		final JdbcBuildOutcomeDto result = storeOutcome();
+		
+		outcome.setClaimDate(null);
+		
+		assertPersistence(result);
+	}
 
 	public void testThrowsStoreException() throws Exception {
 		store.init();

@@ -403,13 +403,13 @@ public class ProjectBuilderTest extends EasyMockTestCase {
 		final List<BuildMessageDto> listenedWarnings = new ArrayList<BuildMessageDto>();
 		
 		builder.addBuildStatusListener(new BuildStatusListener() {
-			public void onBuildPhaseChanged(BuildPhase phase) {
+			public void onBuildPhaseChanged(Object source, BuildPhase phase) {
 				listenedPhases.add(phase);
 			}
-			public void onErrorLogged(BuildMessageDto error) {
+			public void onErrorLogged(Object source, BuildMessageDto error) {
 				listenedErrors.add(error);
 			}
-			public void onWarningLogged(BuildMessageDto warning) {
+			public void onWarningLogged(Object source, BuildMessageDto warning) {
 				listenedWarnings.add(warning);
 			}
 		});

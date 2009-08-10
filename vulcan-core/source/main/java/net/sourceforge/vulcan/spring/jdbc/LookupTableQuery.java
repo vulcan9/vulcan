@@ -18,23 +18,19 @@
  */
 package net.sourceforge.vulcan.spring.jdbc;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.List;
 
 import javax.sql.DataSource;
 
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.object.MappingSqlQuery;
 
-class ProjectNamesQuery extends MappingSqlQuery {
-	final Map<String, Integer> projectIdMap = new HashMap<String, Integer>();
+class LookupTableQuery extends MappingSqlQuery {
 	
-	public ProjectNamesQuery(DataSource dataSource) {
-		super(dataSource, "select name from project_names");
+	public LookupTableQuery(DataSource dataSource, String tableName, String columnName) {
+		super(dataSource, "select " + columnName + " from " + tableName);
 		compile();
 	}
 	@Override
@@ -44,6 +40,6 @@ class ProjectNamesQuery extends MappingSqlQuery {
 	}
 	@Override
 	protected Object mapRow(ResultSet rs, int rowNumber) throws SQLException {
-		return rs.getString("name");
+		return rs.getString(1);
 	}
 }

@@ -39,8 +39,9 @@ class HistoryQueryBuilder {
 		"start_date, completion_date, build_number, update_type," +
 		"work_dir, revision, revision_label, last_good_build_number," +
 		"tag_name, repository_url, status_changed, scheduled_build," +
-		"requested_by, revision_unavailable " +
-		"from builds inner join project_names on builds.project_id = project_names.id ";
+		"requested_by, revision_unavailable, users.username as broken_by_user_name, claimed_date " +
+		"from builds inner join project_names on builds.project_id = project_names.id " +
+		"left join users on builds.broken_by_user_id = users.id ";
 	
 	protected final static String BUILD_HISTORY_METRICS_SQL =
 		"select metrics.build_id as build_id, metrics.message_key as message_key, metrics.metric_type as metric_type, metrics.data as data " +

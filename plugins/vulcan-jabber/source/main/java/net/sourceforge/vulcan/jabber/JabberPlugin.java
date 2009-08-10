@@ -30,6 +30,7 @@ import net.sourceforge.vulcan.core.ProjectNameChangeListener;
 import net.sourceforge.vulcan.dto.PluginConfigDto;
 import net.sourceforge.vulcan.dto.ProjectStatusDto;
 import net.sourceforge.vulcan.dto.ProjectStatusDto.Status;
+import net.sourceforge.vulcan.event.BrokenBuildClaimedEvent;
 import net.sourceforge.vulcan.event.BuildCompletedEvent;
 import net.sourceforge.vulcan.event.BuildStartingEvent;
 import net.sourceforge.vulcan.integration.BuildManagerObserverPlugin;
@@ -99,7 +100,7 @@ public class JabberPlugin implements BuildManagerObserverPlugin, ConfigurablePlu
 		
 		final ProjectBuilder projectBuilder = mgr.getProjectBuilder(status.getName());
 		
-		final JabberBuildStatusListener listener = new JabberBuildStatusListener(projectBuilder, client, screenNameResolver, config, status);
+		final JabberBuildStatusListener listener = new JabberBuildStatusListener(projectBuilder, client, responder, screenNameResolver, config, status);
 		
 		final List<ProjectStatusDto> previousFailures = getPreviousBuildFailures(mgr, status);
 
@@ -135,6 +136,11 @@ public class JabberPlugin implements BuildManagerObserverPlugin, ConfigurablePlu
 		
 	}
 
+	public void onBrokenBuildClaimed(BrokenBuildClaimedEvent event) {
+		final ProjectStatusDto status = event.getStatus();
+		responder.notifyBuildClaimed(status.getName(), status.getBuildNumber(), status.getBrokenBy());
+	}
+	
 	public void projectNameChanged(String oldName, String newName) {
 		final String[] projects = config.getSelectedProjects();
 		

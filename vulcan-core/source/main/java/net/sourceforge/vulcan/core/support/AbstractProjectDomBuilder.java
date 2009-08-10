@@ -456,13 +456,7 @@ public abstract class AbstractProjectDomBuilder implements ProjectDomBuilder {
 		addElapsedTime(root, status, locale);
 		
 		final Date completionDate = status.getCompletionDate();
-		if (completionDate != null) {
-			final DateFormat textualDateFormat = DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.SHORT, locale);
-			
-			final Element timestampNode = addChildNodeWithText(root, "timestamp", format.format(completionDate));
-			timestampNode.setAttribute("millis", Long.toString(completionDate.getTime()));
-			timestampNode.setAttribute("text", textualDateFormat.format(completionDate));
-		}
+		addTimestampNode(root, "timestamp", completionDate, format, locale);
 		
 		final String messageKey = status.getMessageKey();
 		if (messageKey != null) {
@@ -504,12 +498,26 @@ public abstract class AbstractProjectDomBuilder implements ProjectDomBuilder {
 					formatMessage(buildReasonKey, status.getBuildReasonArgs(), locale));
 		}
 		
+		if (isNotBlank(status.getBrokenBy())) {
+			addChildNodeWithText(root, "broken-by-user", status.getBrokenBy());
+			addTimestampNode(root, "date-claimed", status.getClaimDate(), format, locale);
+		}
 		if (status.getBuildLogId() != null) {
 			addChildNodeWithText(root, "build-log-available", null);
 		}
 
 		if (status.getDiffId() != null) {
 			addChildNodeWithText(root, "diff-available", null);
+		}
+	}
+
+	private void addTimestampNode(final Element parent, String nodeName, final Date date, final DateFormat format, Locale locale) {
+		if (date != null) {
+			final DateFormat textualDateFormat = DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.SHORT, locale);
+			
+			final Element timestampNode = addChildNodeWithText(parent, nodeName, format.format(date));
+			timestampNode.setAttribute("millis", Long.toString(date.getTime()));
+			timestampNode.setAttribute("text", textualDateFormat.format(date));
 		}
 	}
 	private void addElapsedTime(Element root, ProjectStatusDto status, Locale locale) {

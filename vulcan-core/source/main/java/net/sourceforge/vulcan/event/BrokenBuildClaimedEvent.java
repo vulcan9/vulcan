@@ -16,13 +16,15 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-package net.sourceforge.vulcan.jabber;
+package net.sourceforge.vulcan.event;
 
-import java.util.Map;
+import net.sourceforge.vulcan.dto.ProjectStatusDto;
+import net.sourceforge.vulcan.metadata.SvnRevision;
 
-public interface ScreenNameMapper {
-	/**
-	 * @return Map where the key is the comitter and the value is the screen name.
-	 */
-	public Map<String, String> lookupByAuthor(Iterable<String> uniques);
+
+@SvnRevision(id="$Id$", url="$HeadURL$")
+public class BrokenBuildClaimedEvent extends BuildEvent {
+	public BrokenBuildClaimedEvent(final Object source,	final ProjectStatusDto status) {
+		super(source, null, null, status);
+	}
 }

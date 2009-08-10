@@ -18,8 +18,8 @@
  */
 package net.sourceforge.vulcan.jabber;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -30,19 +30,19 @@ public class RegexScreenNameMapper implements ScreenNameMapper {
 		this.config = config;
 	}
 
-	public List<String> lookupByAuthor(Iterable<String> uniques) {
+	public Map<String, String> lookupByAuthor(Iterable<String> uniques) {
 		final Pattern pattern = Pattern.compile(config.getRegex(), Pattern.CASE_INSENSITIVE);
 		
-		final List<String> list = new ArrayList<String>();
+		final Map<String, String> map = new HashMap<String, String>();
 		
 		for (String s : uniques) {
 			final Matcher matcher = pattern.matcher(s);
 			if (matcher.matches()) {
-				list.add(matcher.replaceFirst(config.getReplacement()));
+				map.put(s, matcher.replaceFirst(config.getReplacement()));
 			}
 		}
 		
-		return list;
+		return map;
 	}
 
 }

@@ -7,6 +7,7 @@
     
     <jsp:directive.tag display-name="messages" dynamic-attributes="false"/>
 
+	<div id="errors">
 	<html:messages message="true" id="msg">
 		<v:bubble styleClass="message"><span class="message">${msg}</span></v:bubble>
 	</html:messages>
@@ -18,5 +19,5 @@
 	<html:messages property="org.apache.struts.action.GLOBAL_MESSAGE" id="msg">
 		<v:bubble styleClass="error"><span class="error">${msg}</span></v:bubble>
 	</html:messages>
-
+	</div>
 </jsp:root>

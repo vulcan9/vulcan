@@ -19,6 +19,9 @@
 package net.sourceforge.vulcan.jabber;
 
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 import net.sourceforge.vulcan.EasyMockTestCase;
 import net.sourceforge.vulcan.core.BuildPhase;
@@ -44,6 +47,8 @@ public class JabberBuildStatusListenerTest extends EasyMockTestCase {
 	ChangeSetDto commit3;
 	ChangeSetDto commit4;
 	
+	Map<String, String> linkedUsers;
+	
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
@@ -53,7 +58,14 @@ public class JabberBuildStatusListenerTest extends EasyMockTestCase {
 				"These jokers also got notice: {Users}.");
 		config.getTemplateConfig().setNotifyBuildMasterTemplate("One of these users prolly broke the build: {Users}.");
 		
-		listener = new JabberBuildStatusListener(projectBuilder, client, resolver, config, status);
+		final JabberResponder responder = new JabberResponder() {
+			@Override
+			public synchronized void linkUsersToBrokenBuild(String projectName, int buildNumber, Map<String, String> users) {
+				linkedUsers = users;
+			}
+		};
+		
+		listener = new JabberBuildStatusListener(projectBuilder, client, responder, resolver, config, status);
 		
 		commit1 = makeChangeSet("Sam");
 		commit2 = makeChangeSet("Jesse");
@@ -75,12 +87,16 @@ public class JabberBuildStatusListenerTest extends EasyMockTestCase {
 		changeLog.setChangeSets(Arrays.asList(commit1, commit2, commit3, commit4));
 		
 		listener.addRecipients("permanentjoe");
+
+		final Map<String, String> map = new HashMap<String, String>();
+		map.put("Sam", "sam82");
+		map.put("Sydney", "sidthekid");
 		
-		expect(resolver.lookupByAuthor(Arrays.asList("Sam", "Jesse", "Sydney"))).andReturn(Arrays.asList("sam82", "sidthekid"));
+		expect(resolver.lookupByAuthor(Arrays.asList("Sam", "Jesse", "Sydney"))).andReturn(map);
 		
 		replay();
 		
-		listener.onBuildPhaseChanged(BuildPhase.Build);
+		listener.onBuildPhaseChanged(null, BuildPhase.Build);
 		
 		verify();
 		
@@ -93,11 +109,14 @@ public class JabberBuildStatusListenerTest extends EasyMockTestCase {
 		
 		listener.addRecipients("permanentjoe");
 		
-		expect(resolver.lookupByAuthor(Arrays.asList("Sam", "Jesse", "Sydney"))).andReturn(Arrays.asList("sam82", "PermanentJoe"));
+		final Map<String, String> map = new HashMap<String, String>();
+		map.put("Sam", "sam82");
+		map.put("Jesse", "PermanentJoe");
+		expect(resolver.lookupByAuthor(Arrays.asList("Sam", "Jesse", "Sydney"))).andReturn(map);
 		
 		replay();
 		
-		listener.onBuildPhaseChanged(BuildPhase.Build);
+		listener.onBuildPhaseChanged(null, BuildPhase.Build);
 		
 		verify();
 		
@@ -119,11 +138,15 @@ public class JabberBuildStatusListenerTest extends EasyMockTestCase {
 		
 		listener.addRecipients("permanentjoe");
 		listener.setPreviousFailures(Arrays.asList(prev1, prev2));
-		expect(resolver.lookupByAuthor(Arrays.asList("Sam", "Sydney", "Jesse"))).andReturn(Arrays.asList("sam82", "PermanentJoe"));
+		
+		final Map<String, String> map = new HashMap<String, String>();
+		map.put("Sam", "sam82");
+		map.put("Jesse", "PermanentJoe");
+		expect(resolver.lookupByAuthor(Arrays.asList("Sam", "Sydney", "Jesse"))).andReturn(map);
 		
 		replay();
 		
-		listener.onBuildPhaseChanged(BuildPhase.Build);
+		listener.onBuildPhaseChanged(null, BuildPhase.Build);
 		
 		verify();
 		
@@ -138,11 +161,11 @@ public class JabberBuildStatusListenerTest extends EasyMockTestCase {
 		
 		listener.addRecipients("permanentjoe");
 		
-		expect(resolver.lookupByAuthor(Arrays.asList("Sam"))).andReturn(Arrays.asList("sam82"));
+		expect(resolver.lookupByAuthor(Arrays.asList("Sam"))).andReturn(Collections.singletonMap("Sam", "sam82"));
 		
 		replay();
 		
-		listener.onBuildPhaseChanged(BuildPhase.Build);
+		listener.onBuildPhaseChanged(null, BuildPhase.Build);
 		
 		verify();
 		
@@ -156,7 +179,7 @@ public class JabberBuildStatusListenerTest extends EasyMockTestCase {
 		
 		replay();
 		
-		listener.onBuildPhaseChanged(BuildPhase.Build);
+		listener.onBuildPhaseChanged(null, BuildPhase.Build);
 		
 		verify();
 		
@@ -171,7 +194,7 @@ public class JabberBuildStatusListenerTest extends EasyMockTestCase {
 		
 		replay();
 		
-		listener.onBuildPhaseChanged(BuildPhase.Build);
+		listener.onBuildPhaseChanged(null, BuildPhase.Build);
 		
 		verify();
 		
@@ -183,8 +206,8 @@ public class JabberBuildStatusListenerTest extends EasyMockTestCase {
 		
 		replay();
 		
-		listener.onBuildPhaseChanged(BuildPhase.GetChangeLog);
-		listener.onBuildPhaseChanged(BuildPhase.Publish);
+		listener.onBuildPhaseChanged(null, BuildPhase.GetChangeLog);
+		listener.onBuildPhaseChanged(null, BuildPhase.Publish);
 		
 		verify();
 		
@@ -256,7 +279,7 @@ public class JabberBuildStatusListenerTest extends EasyMockTestCase {
 		
 		replay();
 		
-		listener.onErrorLogged(new BuildMessageDto());
+		listener.onErrorLogged(this, new BuildMessageDto());
 		
 		verify();
 	}
@@ -264,15 +287,22 @@ public class JabberBuildStatusListenerTest extends EasyMockTestCase {
 	public void testSendsMessageOnErrorsEnabled() throws Exception {
 		config.setEventsToMonitor(new EventsToMonitor[] {EventsToMonitor.Errors});
 		client.sendMessage(eq("user"), (String) notNull());
+		final Map<String, String> map = new HashMap<String, String>();
+		map.put("Sam", "sam82");
+		map.put("Jesse", "PermanentJoe");
+
+		listener.setScreenNameMap(map);
 		
 		expect(projectBuilder.removeBuildStatusListener(listener)).andReturn(true);
 		
 		replay();
 
 		listener.addRecipients("user");
-		listener.onErrorLogged(new BuildMessageDto());
+		listener.onErrorLogged(this, new BuildMessageDto());
 		
 		verify();
+		
+		assertSame(map, linkedUsers);
 	}
 	
 	public void testDoesNotSendMessageOnErrorsDisabled() throws Exception {
@@ -281,7 +311,7 @@ public class JabberBuildStatusListenerTest extends EasyMockTestCase {
 		replay();
 
 		listener.addRecipients("user");
-		listener.onErrorLogged(new BuildMessageDto());
+		listener.onErrorLogged(this, new BuildMessageDto());
 		
 		verify();
 	}
@@ -295,7 +325,7 @@ public class JabberBuildStatusListenerTest extends EasyMockTestCase {
 		replay();
 
 		listener.addRecipients("user");
-		listener.onWarningLogged(new BuildMessageDto());
+		listener.onWarningLogged(this, new BuildMessageDto());
 		
 		verify();
 	}
@@ -306,7 +336,7 @@ public class JabberBuildStatusListenerTest extends EasyMockTestCase {
 		replay();
 
 		listener.addRecipients("user");
-		listener.onWarningLogged(new BuildMessageDto());
+		listener.onWarningLogged(this, new BuildMessageDto());
 		
 		verify();
 	}
@@ -320,7 +350,7 @@ public class JabberBuildStatusListenerTest extends EasyMockTestCase {
 		listener.addRecipients("user");
 		final BuildMessageDto warning = new BuildMessageDto();
 		warning.setMessage("I thought I warned you.");
-		listener.onWarningLogged(warning);
+		listener.onWarningLogged(this, warning);
 		
 		verify();
 	}
@@ -337,7 +367,7 @@ public class JabberBuildStatusListenerTest extends EasyMockTestCase {
 		listener.addRecipients("user");
 		final BuildMessageDto warning = new BuildMessageDto();
 		warning.setMessage("Got a match?");
-		listener.onWarningLogged(warning);
+		listener.onWarningLogged(this, warning);
 
 		
 		verify();

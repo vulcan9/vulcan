@@ -29,13 +29,18 @@ import net.sourceforge.vulcan.dto.ProjectStatusDto;
 public class TemplateFormatter {
 	static BuildMessageDto blankMessage = new BuildMessageDto();
 	static ProjectStatusDto blankStatus = new ProjectStatusDto();
-	
+
 	static String substituteParameters(String template, String url, String users, BuildMessageDto message, ProjectStatusDto status) {
-		if (message == null) {
-			message = blankMessage;
-		}
 		if (status == null) {
 			status = blankStatus;
+		}
+
+		return substituteParameters(template, url, users, null, message, status.getName(), status.getBuildNumber());
+	}
+	
+	static String substituteParameters(String template, String url, String users, String claimUser, BuildMessageDto message, String projectName, Integer buildNumber) {
+		if (message == null) {
+			message = blankMessage;
 		}
 		
 		final Object[] args = {
@@ -45,8 +50,9 @@ public class TemplateFormatter {
 				isNotBlank(message.getCode()) ? 1 : 0, message.getCode(), 
 				isNotBlank(users) ? 1 : 0, users,
 				url, 
-				status.getName(), 
-				status.getBuildNumber()};
+				projectName, 
+				buildNumber,
+				isNotBlank(claimUser) ? 1 : 0, claimUser};
 	
 		template = template.replaceAll("'", "''");
 		template = template.replaceAll("\\{(\\w+)\\?,(?!choice,)", "{$1NotBlank,choice,0#|1#");
@@ -67,7 +73,9 @@ public class TemplateFormatter {
 			replace("{UsersNotBlank", "{8").replace("{Users", "{9").
 			replace("{Link", "{10").
 			replace("{ProjectName", "{11").
-			replace("{BuildNumber", "{12");
+			replace("{BuildNumber", "{12").
+			replace("{ClaimUserNotBlank", "{13").
+			replace("{ClaimUser", "{14");
 		
 		MessageFormat fmt = new MessageFormat(template);
 		

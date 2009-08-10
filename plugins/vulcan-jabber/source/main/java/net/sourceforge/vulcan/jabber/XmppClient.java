@@ -55,17 +55,18 @@ public class XmppClient implements JabberClient, MessageListener {
 		final String connectionString = server + ":" + port + ":" + serviceName + ":" + username + ":" + DigestUtils.shaHex(password);
 		
 		synchronized(lock) {
-			if (connectionString.equals(this.connectionString)) {
+			if (connectionString.equals(this.connectionString) && connection != null && connection.isConnected()) {
 				return;
 			}
 
 			this.connectionString = connectionString;
 			
-			if (connection != null) {
+			if (connection != null && connection.isConnected()) {
 				connection.disconnect();
-				connection = null;
 			}
-
+			
+			connection = null;
+			
 			if (StringUtils.isEmpty(server)) {
 				return;
 			}

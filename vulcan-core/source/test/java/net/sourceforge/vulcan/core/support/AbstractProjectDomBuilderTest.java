@@ -289,6 +289,25 @@ public class AbstractProjectDomBuilderTest extends EasyMockTestCase {
 		
 		assertContainsChildWithText(elem, "build-scheduled-by", "Nightly");
 	}
+	
+	public void testBrokenBuildClaimedByUser() throws Exception {
+		replay();
+
+		projectStatus.setBrokenBy("lazy");
+		final Long ticks = 155544487774234l;
+		final Date date = new Date(ticks);
+		projectStatus.setClaimDate(date);
+		
+		final Document doc = doCall();
+
+		final Element elem = doc.getRootElement();
+		
+		assertContainsChildWithText(elem, "broken-by-user", "lazy");
+		Element claimNode = assertContainsChildWithText(elem, "date-claimed", "10:09");
+		assertEquals(ticks.toString(), claimNode.getAttributeValue("millis"));
+		assertEquals(DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.SHORT).format(date), claimNode.getAttributeValue("text"));
+	}
+	
 	public void testBasicsNull() throws Exception {
 		projectStatus.setChangeLog(null);
 		projectStatus.setStartDate(null);

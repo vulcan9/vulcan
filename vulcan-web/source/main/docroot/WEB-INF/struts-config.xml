@@ -221,6 +221,10 @@
 			<forward name="failure" path="/buildmanagement/manageLocks.jsp"/>
 			<forward name="success" path="/buildmanagement/manageLocks.jsp"/>
 		</action>
+		
+		<action path="/wall/claimBrokenBuild"
+				type="org.springframework.web.struts.DelegatingActionProxy"
+				parameter="action"/>
 	</action-mappings>
 	
 	<controller contentType="" processorClass="net.sourceforge.vulcan.web.struts.RestRequestProcessor"/>

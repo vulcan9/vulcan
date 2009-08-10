@@ -35,6 +35,8 @@ public class JabberTemplatesConfig extends PluginConfigDto {
 	private String notifyBuildMasterTemplate =
 		"One of these users broke the build: {Users}.";
 	private String pithyRetortTemplate = "";
+	private String brokenBuildAcknowledgementTemplate = "";
+	private String brokenBuildClaimedByTemplate = "";
 	
 	@Override
 	public String getPluginId() {
@@ -53,6 +55,10 @@ public class JabberTemplatesConfig extends PluginConfigDto {
 		addProperty(pds, "notifyCommitterTemplate", "JabberTemplatesConfig.notifyCommitterTemplate.name", "JabberTemplatesConfig.notifyCommitterTemplate.description", locale,
 				Collections.singletonMap(ATTR_WIDGET_TYPE, Widget.TEXTAREA));
 		addProperty(pds, "notifyBuildMasterTemplate", "JabberTemplatesConfig.notifyBuildMasterTemplate.name", "JabberTemplatesConfig.notifyBuildMasterTemplate.description", locale,
+				Collections.singletonMap(ATTR_WIDGET_TYPE, Widget.TEXTAREA));
+		addProperty(pds, "brokenBuildAcknowledgementTemplate", "JabberTemplatesConfig.brokenBuildAcknowledgementTemplate.name", "JabberTemplatesConfig.brokenBuildAcknowledgementTemplate.description", locale,
+				Collections.singletonMap(ATTR_WIDGET_TYPE, Widget.TEXTAREA));
+		addProperty(pds, "brokenBuildClaimedByTemplate", "JabberTemplatesConfig.brokenBuildClaimedByTemplate.name", "JabberTemplatesConfig.brokenBuildClaimedByTemplate.description", locale,
 				Collections.singletonMap(ATTR_WIDGET_TYPE, Widget.TEXTAREA));
 		addProperty(pds, "pithyRetortTemplate", "JabberTemplatesConfig.pithyRetortTemplate.name", "JabberTemplatesConfig.pithyRetortTemplate.description", locale,
 				Collections.singletonMap(ATTR_WIDGET_TYPE, Widget.TEXTAREA));
@@ -86,6 +92,8 @@ public class JabberTemplatesConfig extends PluginConfigDto {
 
 		validateTemplate("notifyCommitterTemplate", getNotifyCommitterTemplate(), sampleStatus, sampleMessage);
 		validateTemplate("notifyBuildMasterTemplate", getNotifyBuildMasterTemplate(), sampleStatus, sampleMessage);
+		validateTemplate("brokenBuildAcknowledgementTemplate", getNotifyBuildMasterTemplate(), sampleStatus, sampleMessage);
+		validateTemplate("brokenBuildClaimedByTemplate", getNotifyBuildMasterTemplate(), sampleStatus, sampleMessage);
 		validateTemplate("pithyRetortTemplate", getPithyRetortTemplate(), sampleStatus, sampleMessage);
 	}
 
@@ -124,5 +132,21 @@ public class JabberTemplatesConfig extends PluginConfigDto {
 
 	public void setPithyRetortTemplate(String pithyRetortTemplate) {
 		this.pithyRetortTemplate = pithyRetortTemplate;
+	}
+
+	public String getBrokenBuildAcknowledgementTemplate() {
+		return brokenBuildAcknowledgementTemplate;
+	}
+	
+	public void setBrokenBuildAcknowledgementTemplate(String brokenBuildAcknowledgementTemplate) {
+		this.brokenBuildAcknowledgementTemplate = brokenBuildAcknowledgementTemplate;
+	}
+
+	public String getBrokenBuildClaimedByTemplate() {
+		return brokenBuildClaimedByTemplate;
+	}
+	
+	public void setBrokenBuildClaimedByTemplate(String brokenBuildClaimedByTemplate) {
+		this.brokenBuildClaimedByTemplate = brokenBuildClaimedByTemplate;
 	}
 }

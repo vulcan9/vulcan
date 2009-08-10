@@ -20,6 +20,7 @@ package net.sourceforge.vulcan.spring.jdbc;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Date;
@@ -77,6 +78,12 @@ class BuildQuery extends MappingSqlQuery {
 		dto.setScheduledBuild(rs.getBoolean("scheduled_build"));
 		dto.setStatusChanged(rs.getBoolean("status_changed"));
 		dto.setRequestedBy(rs.getString("requested_by"));
+		dto.setBrokenBy(rs.getString("broken_by_user_name"));
+		
+		final Timestamp claimed_date = rs.getTimestamp("claimed_date");
+		if (StringUtils.isNotBlank(dto.getBrokenBy()) && !rs.wasNull()) {
+			dto.setClaimDate(new Date(claimed_date.getTime()));
+		}
 		
 		final String updateTypeString = rs.getString("update_type");
 		if (!rs.wasNull() && StringUtils.isNotEmpty(updateTypeString)) {

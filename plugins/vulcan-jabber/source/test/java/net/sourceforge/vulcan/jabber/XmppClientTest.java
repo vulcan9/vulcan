@@ -26,16 +26,22 @@ public class XmppClientTest extends TestCase {
 	int connectCount = 0;
 	int disconnectCount = 0;
 	boolean failToConnectFlag = false;
+	boolean connected = false;
 	
 	XmppClient client = new XmppClient() {
 		@Override
 		void connect(String server, int port, String serviceName, String username, String password) {
 			connectCount++;
+			connected = true;
 			if (!failToConnectFlag) {
 				connection = new XMPPConnection("fake") {
 					@Override
 					public void disconnect() {
 						disconnectCount++;
+					}
+					@Override
+					public boolean isConnected() {
+						return connected;
 					}
 				};
 			}
@@ -65,6 +71,16 @@ public class XmppClientTest extends TestCase {
 		client.refreshConnection("example.com", 5222, null, "user", "pass");
 		
 		assertEquals(1, connectCount);
+	}
+	
+	public void testReconnectOnNotConnected() throws Exception {
+		client.refreshConnection("example.com", 5222, null, "user", "pass");
+		
+		connected = false;
+		
+		client.refreshConnection("example.com", 5222, null, "user", "pass");
+		
+		assertEquals(2, connectCount);
 	}
 	
 	public void testDoesReconnectOnUnmodifiedSettingsFailedConnection() throws Exception {

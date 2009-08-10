@@ -18,8 +18,8 @@
  */
 package net.sourceforge.vulcan.jabber;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.naming.NamingException;
 import javax.sql.DataSource;
@@ -40,15 +40,15 @@ public class JdbcScreenNameMapper  implements ScreenNameMapper {
 	}
 
 	@SuppressWarnings("unchecked")
-	public List<String> lookupByAuthor(Iterable<String> authors) {
-		final List<String> screenNames = new ArrayList<String>();
+	public Map<String, String> lookupByAuthor(Iterable<String> authors) {
+		final Map<String, String> screenNames = new HashMap<String, String>();
 		
 		try {
 			final JdbcTemplate template = createJdbcTemplate();
 			
 			for (String author : authors) {
 				try {
-					screenNames.add((String) template.queryForObject(config.getSql(), new Object[] {author}, String.class));
+					screenNames.put(author, (String) template.queryForObject(config.getSql(), new Object[] {author}, String.class));
 				} catch (IncorrectResultSizeDataAccessException e) {
 					LOG.info("No screen name found for commit author " + author);
 				}

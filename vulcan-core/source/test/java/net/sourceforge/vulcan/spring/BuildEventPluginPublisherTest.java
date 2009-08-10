@@ -19,6 +19,7 @@
 package net.sourceforge.vulcan.spring;
 
 import net.sourceforge.vulcan.EasyMockTestCase;
+import net.sourceforge.vulcan.event.BrokenBuildClaimedEvent;
 import net.sourceforge.vulcan.event.BuildCompletedEvent;
 import net.sourceforge.vulcan.event.BuildStartingEvent;
 import net.sourceforge.vulcan.integration.BuildManagerObserverPlugin;
@@ -84,6 +85,10 @@ public class BuildEventPluginPublisherTest extends EasyMockTestCase {
 		}
 		public void onBuildCompleted(BuildCompletedEvent event) {
 			delegate.onBuildCompleted(event);
+		}
+		public void onBrokenBuildClaimed(
+				BrokenBuildClaimedEvent event) {
+			delegate.onBrokenBuildClaimed(event);
 		}
 	}
 	

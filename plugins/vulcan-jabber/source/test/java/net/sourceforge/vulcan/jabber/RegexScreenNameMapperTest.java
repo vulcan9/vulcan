@@ -19,18 +19,24 @@
 package net.sourceforge.vulcan.jabber;
 
 import java.util.Arrays;
-import java.util.List;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 import junit.framework.TestCase;
 
 public class RegexScreenNameMapperTest extends TestCase {
 	public void testIdentity() throws Exception {
 		final RegexScreenNameMapper mapper = new RegexScreenNameMapper(new RegexScreenNameMapperConfig());
-		final List<String> list = Arrays.asList("Sam", "Jill");
-		final List<String> result = mapper.lookupByAuthor(list);
+		final Map<String, String> expected = new HashMap<String, String>();
 		
-		assertEquals(list, result);
-		assertNotSame(list, result);
+		expected.put("Sam", "Sam");
+		expected.put("Jill", "Jill");
+		
+		final Map<String, String> result = mapper.lookupByAuthor(expected.keySet());
+		
+		assertEquals(expected, result);
+		assertNotSame(expected, result);
 	}
 	
 	public void testReplacementWithCapture() throws Exception {
@@ -40,9 +46,9 @@ public class RegexScreenNameMapperTest extends TestCase {
 		config.setReplacement("$1");
 		
 		final RegexScreenNameMapper mapper = new RegexScreenNameMapper(config);
-		final List<String> result = mapper.lookupByAuthor(Arrays.asList("domain\\username"));
+		final Map<String, String> result = mapper.lookupByAuthor(Arrays.asList("domain\\username"));
 		
-		assertEquals(Arrays.asList("username"), result);
+		assertEquals(Collections.singletonMap("domain\\username", "username"), result);
 	}
 	
 	public void testIdentityWithSuffix() throws Exception {
@@ -52,8 +58,8 @@ public class RegexScreenNameMapperTest extends TestCase {
 		config.setReplacement("$1@gmail.com");
 		
 		final RegexScreenNameMapper mapper = new RegexScreenNameMapper(config);
-		final List<String> result = mapper.lookupByAuthor(Arrays.asList("chris.eldredge"));
+		final Map<String, String> result = mapper.lookupByAuthor(Arrays.asList("chris.eldredge"));
 		
-		assertEquals(Arrays.asList("chris.eldredge@gmail.com"), result);
+		assertEquals(Collections.singletonMap("chris.eldredge", "chris.eldredge@gmail.com"), result);
 	}
 }

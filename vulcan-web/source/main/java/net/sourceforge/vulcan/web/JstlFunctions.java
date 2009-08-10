@@ -182,7 +182,8 @@ public abstract class JstlFunctions {
 				"dashboard.columns.name", "dashboard.columns.age", "dashboard.columns.failure.age",
 				"dashboard.columns.timestamp", "dashboard.columns.build-number",
 				"dashboard.columns.revision", "dashboard.columns.repository-tag-name",
-				"dashboard.columns.status"}));
+				"dashboard.columns.status", "dashboard.columns.broken-by",
+				"dashboard.columns.claim-date"}));
 		
 		availableColumns.addAll(getAvailableMetrics(pageContext));
 

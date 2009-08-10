@@ -39,6 +39,8 @@ public class ProjectStatusDto extends NameDto {
 	
 	private String workDir;
 	private Status status;
+	private String brokenBy;
+	private Date claimDate;
 	private String messageKey;
 	private Object[] messageArgs;
 	private String buildReasonKey;
@@ -108,6 +110,18 @@ public class ProjectStatusDto extends NameDto {
 	}
 	public void setLastKnownRevision(RevisionTokenDto lastKnownRevision) {
 		this.lastKnownRevision = lastKnownRevision;
+	}
+	public String getBrokenBy() {
+		return brokenBy;
+	}
+	public void setBrokenBy(String brokenBy) {
+		this.brokenBy = brokenBy;
+	}
+	public Date getClaimDate() {
+		return claimDate;
+	}
+	public void setClaimDate(Date claimDate) {
+		this.claimDate = claimDate;
 	}
 	public String getMessageKey() {
 		return messageKey;

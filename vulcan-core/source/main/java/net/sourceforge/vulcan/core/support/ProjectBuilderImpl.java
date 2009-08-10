@@ -450,7 +450,7 @@ public class ProjectBuilderImpl implements ProjectBuilder {
 		currentPhase = phase;
 		buildDetailCallback.setPhaseMessageKey(phase.getMessageKey());
 		for (BuildStatusListener listener : getCurrentBuildListeners()) {
-			listener.onBuildPhaseChanged(phase);
+			listener.onBuildPhaseChanged(this, phase);
 		}
 		try {
 			callback.execute();
@@ -501,7 +501,7 @@ public class ProjectBuilderImpl implements ProjectBuilder {
 				final BuildMessageDto error = new BuildMessageDto(message, file, lineNumber, code);
 				errors.add(error);
 				for (BuildStatusListener listener : getCurrentBuildListeners()) {
-					listener.onErrorLogged(error);
+					listener.onErrorLogged(ProjectBuilderImpl.this, error);
 				}
 			}
 		}
@@ -512,7 +512,7 @@ public class ProjectBuilderImpl implements ProjectBuilder {
 				final BuildMessageDto warning = new BuildMessageDto(message, file, lineNumber, code);
 				warnings.add(warning);
 				for (BuildStatusListener listener : getCurrentBuildListeners()) {
-					listener.onWarningLogged(warning);
+					listener.onWarningLogged(ProjectBuilderImpl.this, warning);
 				}
 			}
 		}

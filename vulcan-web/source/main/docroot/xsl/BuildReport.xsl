@@ -67,6 +67,24 @@
 				<xsl:if test="/project/status='BUILDING' and $reloadInterval &gt; 0">
 				</xsl:if>
 				-->
+				<script type="text/javascript">
+					function claimBuild(event) {
+						event.preventDefault();
+						
+						if (event.canceled) return false;
+						
+						var url = $(this).attr("href");
+						
+						$("#broken-build-claim").loadCustom(url, null, "#broken-build-claim");
+						
+						return false;
+					}
+					
+					$(document).ready(function() {
+						
+						$("#claimBuild").click(claimBuild);
+					});
+				</script>
 			</head>
 			<body>
 				<form class="hidden" action="#" method="get">
@@ -101,6 +119,32 @@
 						<xsl:apply-templates select="/project/status"/>
 					</h3>
 		
+					<xsl:choose>
+						<xsl:when test="/project/status/text() = 'FAIL' and not(/project/broken-by-user)">
+							<p id="broken-build-claim">
+								<a id="claimBuild">
+									<xsl:attribute name="href">
+										<xsl:value-of select="$contextRoot"/>
+										<xsl:text>/wall/claimBrokenBuild.do?action=claim&amp;projectName=</xsl:text>
+										<xsl:value-of select="/project/name"/>
+										<xsl:text>&amp;buildNumber=</xsl:text>
+										<xsl:value-of select="/project/build-number"/>
+									</xsl:attribute>
+									<xsl:text>Claim responsibility for this build failure</xsl:text> 
+								</a>
+							</p>
+						</xsl:when>
+						<xsl:when test="/project/status/text() = 'FAIL' and /project/broken-by-user">
+							<p id="broken-build-claim">
+								<xsl:text>Responsibility for this failure was claimed by </xsl:text>
+								<xsl:value-of select="/project/broken-by-user"/>
+								<xsl:text> on </xsl:text>
+								<xsl:value-of select="/project/date-claimed/@text"/>
+								<xsl:text>.</xsl:text>
+							</p>
+						</xsl:when>
+					</xsl:choose>
+					
 					<p class="build-stats">
 						<xsl:value-of select="vulcan:getMessage($messageSource, 'th.build.number')"/>
 						<xsl:text> </xsl:text>

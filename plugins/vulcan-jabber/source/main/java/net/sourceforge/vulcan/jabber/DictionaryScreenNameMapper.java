@@ -18,9 +18,7 @@
  */
 package net.sourceforge.vulcan.jabber;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
@@ -39,13 +37,13 @@ public class DictionaryScreenNameMapper implements ScreenNameMapper {
 		digest();
 	}
 
-	public List<String> lookupByAuthor(Iterable<String> uniques) {
-		List<String> names = new ArrayList<String>();
+	public Map<String, String> lookupByAuthor(Iterable<String> uniques) {
+		Map<String, String> names = new HashMap<String, String>();
 		
 		for (String s : uniques) {
 			final String sn = map.get(s.toLowerCase());
 			if (StringUtils.isNotBlank(sn)) {
-				names.add(sn);
+				names.put(s, sn);
 			}
 		}
 		

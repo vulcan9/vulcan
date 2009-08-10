@@ -34,6 +34,7 @@ import net.sourceforge.vulcan.core.BeanEncoder.FactoryExpert;
 import net.sourceforge.vulcan.dto.ComponentVersionDto;
 import net.sourceforge.vulcan.dto.PluginConfigDto;
 import net.sourceforge.vulcan.dto.PluginMetaDataDto;
+import net.sourceforge.vulcan.event.BrokenBuildClaimedEvent;
 import net.sourceforge.vulcan.event.BuildCompletedEvent;
 import net.sourceforge.vulcan.event.BuildEvent;
 import net.sourceforge.vulcan.event.BuildStartingEvent;
@@ -227,6 +228,9 @@ public class SpringPluginManagerTest extends EasyMockTestCase {
 			event = evt;
 		}
 		public void onBuildCompleted(BuildCompletedEvent evt) {
+			event = evt;
+		}
+		public void onBrokenBuildClaimed(BrokenBuildClaimedEvent evt) {
 			event = evt;
 		}
 		public void projectNameChanged(String oldName, String newName) {

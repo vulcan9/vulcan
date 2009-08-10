@@ -123,6 +123,16 @@
 									<repository-tag-name><c:out value="${buildOutcome.tagName}"/></repository-tag-name>
 								</c:if>
 								
+								<c:if test="${buildOutcome.brokenBy != null}">
+									<broken-by>${buildOutcome.brokenBy}</broken-by>
+									<jsp:element name="claim-date">
+										<jsp:attribute name="millis">${buildOutcome.claimDate.time}</jsp:attribute>
+										<jsp:body>
+											<fmt:formatDate value="${buildOutcome.claimDate}" pattern="${timestampPattern}"/>
+										</jsp:body>
+									</jsp:element>
+								</c:if>
+								
 								<c:if test="${! empty buildOutcome.metrics}">
 									<metrics>
 										<c:forEach items="${buildOutcome.metrics}" var="metric">
