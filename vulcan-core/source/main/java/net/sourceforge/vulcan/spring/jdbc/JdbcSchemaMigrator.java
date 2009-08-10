@@ -20,6 +20,7 @@ package net.sourceforge.vulcan.spring.jdbc;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -29,6 +30,7 @@ import java.util.Comparator;
 import javax.sql.DataSource;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.core.io.Resource;
@@ -122,8 +124,7 @@ public class JdbcSchemaMigrator {
 	}
 	
 	void createInitialTables() throws IOException {
-		final String text = loadResource(createTablesScript);
-		jdbcTemplate.execute(text);
+		executeSql(createTablesScript);
 	}
 
 	void runMigrationScripts() throws IOException {
@@ -132,19 +133,33 @@ public class JdbcSchemaMigrator {
 		}
 		
 		for (int i = version; i<migrationScripts.length; i++) {
-			final Resource resource = migrationScripts[i];
-			final String text = loadResource(resource);
-			log.info("Running migration script " + resource.getFilename());
+			executeSql(migrationScripts[i]);
+			version++;
+		}
+	}
+
+	private void executeSql(final Resource resource) throws IOException {
+		final String text = loadResource(resource);
+		log.info("Running migration script " + resource.getFilename());
+		
+		final String[] commands = text.split(";");
+		
+		for (String command : commands) {
+			final String trimmed = command.trim();
+			if (StringUtils.isBlank(trimmed)) {
+				continue;
+			}
 			
 			jdbcTemplate.execute(new StatementCallback() {
 				public Object doInStatement(Statement stmt)	throws SQLException, DataAccessException {
-					stmt.execute(text);
-					stmt.getConnection().commit();
+					stmt.execute(trimmed);
+					final Connection conn = stmt.getConnection();
+					if (!conn.getAutoCommit()) {
+						conn.commit();
+					}
 					return null;
 				}
 			});
-			
-			version++;
 		}
 	}
 
