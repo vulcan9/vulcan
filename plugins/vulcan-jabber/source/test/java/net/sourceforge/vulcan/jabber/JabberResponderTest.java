@@ -288,6 +288,24 @@ public class JabberResponderTest extends EasyMockTestCase {
 		verify();
 	}
 	
+	public void testNotifyDoesNotNotifySameUser() throws Exception {
+		String projectName = "example";
+		int buildNumber = 1134;
+		
+		Map<String, String> users = new HashMap<String, String>();
+		users.put("committer_sam", "iamsam82");
+		users.put("committer_bob", "bob69");
+		
+		client.sendMessage("iamsam82", "Somebody claimed it, so don't worry.");
+		
+		replay();
+		
+		responder.linkUsersToBrokenBuild(projectName, buildNumber, users);
+		responder.notifyBuildClaimed(projectName, buildNumber, "committer_bob");
+		
+		verify();
+	}
+	
 	void doChatTest(String... expectedChats) {
 		for (String s : expectedChats) {
 			reset();

@@ -39,7 +39,6 @@ public class JdbcScreenNameMapper  implements ScreenNameMapper {
 		this.config = config;
 	}
 
-	@SuppressWarnings("unchecked")
 	public Map<String, String> lookupByAuthor(Iterable<String> authors) {
 		final Map<String, String> screenNames = new HashMap<String, String>();
 		
