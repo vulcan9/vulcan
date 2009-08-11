@@ -94,7 +94,9 @@ public class JabberResponder implements JabberChatListener {
 		for (Iterator<BuildClaimTicket> itr = tickets.values().iterator(); itr.hasNext();) {
 			final BuildClaimTicket tkt = itr.next();
 			if (tkt.projectName == projectName) {
-				client.sendMessage(tkt.screenName, TemplateFormatter.substituteParameters(config.getTemplateConfig().getBrokenBuildClaimedByTemplate(), "", "", claimUser, null, projectName, buildNumber));
+				if (!tkt.userName.equals(claimUser)) {
+					client.sendMessage(tkt.screenName, TemplateFormatter.substituteParameters(config.getTemplateConfig().getBrokenBuildClaimedByTemplate(), "", "", claimUser, null, projectName, buildNumber));
+				}
 				itr.remove();
 			}
 		}
