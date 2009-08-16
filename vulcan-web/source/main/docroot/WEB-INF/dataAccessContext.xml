@@ -44,6 +44,7 @@
 			<props>
 				<prop key="store*">PROPAGATION_REQUIRED,-net.sourceforge.vulcan.exception.StoreException</prop>
 				<prop key="projectNameChanged">PROPAGATION_REQUIRED</prop>
+				<prop key="claimBrokenBuild">PROPAGATION_REQUIRED</prop>
 				<prop key="*">PROPAGATION_SUPPORTS,readOnly</prop>
 			</props>
 		</property>
