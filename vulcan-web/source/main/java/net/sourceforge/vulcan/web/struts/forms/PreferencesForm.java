@@ -36,7 +36,7 @@ import org.apache.struts.action.ActionMapping;
 @SvnRevision(id="$Id$", url="$HeadURL$")
 public class PreferencesForm extends ActionForm {
 	private PreferencesDto config;
-	private String toggleLabel;
+	private String item;
 	private List<String> availableStylesheets;
 	
 	public PreferencesDto getConfig() {
@@ -63,7 +63,7 @@ public class PreferencesForm extends ActionForm {
 			config = new PreferencesDto();
 		}
 		
-		toggleLabel = null;
+		item = null;
 		availableStylesheets = findAvailableStylesheets();
 	}
 
@@ -71,12 +71,12 @@ public class PreferencesForm extends ActionForm {
 		return availableStylesheets;
 	}
 	
-	public String getToggleLabel() {
-		return toggleLabel;
+	public String getItem() {
+		return item;
 	}
 	
-	public void setToggleLabel(String toggleLabel) {
-		this.toggleLabel = toggleLabel;
+	public void setItem(String item) {
+		this.item = item;
 	}
 	
 	@SuppressWarnings("unchecked")

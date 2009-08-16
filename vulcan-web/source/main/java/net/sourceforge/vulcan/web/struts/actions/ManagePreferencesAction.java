@@ -22,12 +22,13 @@ import static org.apache.commons.lang.StringUtils.isNotBlank;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
+import java.util.List;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import net.sourceforge.vulcan.dto.PreferencesDto;
 import net.sourceforge.vulcan.metadata.SvnRevision;
 import net.sourceforge.vulcan.web.Keys;
 import net.sourceforge.vulcan.web.PreferencesStore;
@@ -47,24 +48,6 @@ public final class ManagePreferencesAction extends BaseDispatchAction {
 		
 		final PreferencesForm form = (PreferencesForm) actionForm;
 		
-		final String toggleLabel = form.getToggleLabel();
-		if (isNotBlank(toggleLabel)) {
-			final ArrayList<String> labels = new ArrayList<String>();
-			
-			final String[] existingLabels = form.getConfig().getLabels();
-			
-			if (existingLabels != null) {
-				labels.addAll(Arrays.asList(existingLabels));
-			}
-			
-			if (!labels.remove(toggleLabel)) {
-				labels.add(toggleLabel);
-			}
-			
-			Collections.sort(labels);
-			form.getConfig().setLabels(labels.toArray(new String[labels.size()]));
-		}
-		
 		request.removeAttribute(Keys.PREFERENCES);
 		request.getSession().setAttribute(Keys.PREFERENCES, form.getConfig());
 		
@@ -76,7 +59,49 @@ public final class ManagePreferencesAction extends BaseDispatchAction {
 		return mapping.findForward("dashboard");
 	}
 	
+	public ActionForward toggleBuildReportColumn(ActionMapping mapping, ActionForm actionForm,
+			HttpServletRequest request, HttpServletResponse response)
+			throws Exception {
+
+		final PreferencesForm form = (PreferencesForm) actionForm;
+		
+		final PreferencesDto config = form.getConfig();
+		final String[] modified = addOrRemove(config.getBuildHistoryColumns(), form.getItem());
+		config.setBuildHistoryColumns(modified);
+		return save(mapping, actionForm, request, response);
+	}
+	
+	public ActionForward toggleLabel(ActionMapping mapping, ActionForm actionForm,
+			HttpServletRequest request, HttpServletResponse response)
+			throws Exception {
+
+		final PreferencesForm form = (PreferencesForm) actionForm;
+		
+		final String toggleLabel = form.getItem();
+		if (isNotBlank(toggleLabel)) {
+			final String[] list = addOrRemove(form.getConfig().getLabels(), toggleLabel);
+			Arrays.sort(list);
+			form.getConfig().setLabels(list);
+		}
+		
+		return save(mapping, actionForm, request, response);
+	}
+	
 	public void setPreferencesStore(PreferencesStore preferencesStore) {
 		this.preferencesStore = preferencesStore;
+	}
+
+	private String[] addOrRemove(String[] strings, String s) {
+		final List<String> list = new ArrayList<String>();
+		
+		if (strings != null) {
+			list.addAll(Arrays.asList(strings));
+		}
+		
+		if (!list.remove(s)) {
+			list.add(s);
+		}
+		
+		return list.toArray(new String[list.size()]);
 	}
 }

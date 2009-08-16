@@ -65,6 +65,9 @@ public class JstlFunctionsTest extends EasyMockTestCase {
 	public void testManglePlus() throws Exception {
 		assertEquals("full___throttle", JstlFunctions.mangle("full + throttle"));
 	}
+	public void testMangleDos() throws Exception {
+		assertEquals("full_throttle", JstlFunctions.mangle("full.throttle"));
+	}
 	public void testBrackets() throws Exception {
 		assertEquals("fullThrottle_0_", JstlFunctions.mangle("fullThrottle[0]"));
 	}

@@ -62,6 +62,8 @@ public class ViewProjectStatusActionTest extends MockApplicationContextStrutsTes
 	
 	Integer mostRecentBuildNumberByWorkDir = 42;
 	
+	PreferencesDto prefs = new PreferencesDto();
+	
 	@Override
 	public void setUp() throws Exception {
 		super.setUp();
@@ -87,8 +89,11 @@ public class ViewProjectStatusActionTest extends MockApplicationContextStrutsTes
 		
 		projectConfig.setName("some project");
 		projectConfig.setBugtraqUrl("http://something/%BUGID%");
+		paramMap.put("preferences", prefs);
 		paramMap.put("issueTrackerURL", projectConfig.getBugtraqUrl());
 		paramMap.put("view", "summary");
+		
+		request.setAttribute(Keys.PREFERENCES, prefs);
 		
 		expect(buildManager.getMostRecentBuildNumberByWorkDir((String)anyObject())).andAnswer(new IAnswer<Integer>() {
 			public Integer answer() throws Throwable {
@@ -608,6 +613,7 @@ public class ViewProjectStatusActionTest extends MockApplicationContextStrutsTes
 		paramMap.put("locale", request.getLocale().toString());
 		paramMap.put("workingCopyBuildNumber", -1);
 		paramMap.put("contextRoot", "/vulcan-web");
+		paramMap.put("preferences", prefs);
 		paramMap.put("reloadInterval", Integer.valueOf(prefs.getReloadInterval()));
 		paramMap.put("viewProjectStatusURL", new URL("http://localhost/vulcan-web/projects/"));
 		

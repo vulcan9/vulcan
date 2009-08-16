@@ -17,6 +17,46 @@
 		</property>
 	</bean>
 
+	<bean id="dashboardColumns" class="org.springframework.beans.factory.config.ListFactoryBean">
+		<property name="sourceList">
+			<list>
+				<value>dashboard.columns.name</value>
+				<value>dashboard.columns.build-number</value>
+				<value>dashboard.columns.timestamp</value>
+				<value>dashboard.columns.age</value>
+				<value>dashboard.columns.revision</value>
+				<value>dashboard.columns.repository-tag-name</value>
+				<value>dashboard.columns.status</value>
+				<value>dashboard.columns.message</value>
+				<value>dashboard.columns.failure-age</value>
+				<value>dashboard.columns.broken-by</value>
+				<value>dashboard.columns.claim-date</value>
+			</list>
+		</property>
+		<property name="singleton" value="false"/>
+	</bean>
+	
+	<bean id="buildHistoryColumns" class="org.springframework.beans.factory.config.ListFactoryBean">
+		<property name="sourceList">
+			<list>
+				<value>dashboard.columns.name</value>
+				<value>dashboard.columns.build-number</value>
+				<value>dashboard.columns.timestamp</value>
+				<value>dashboard.columns.elapsed-time</value>
+				<value>dashboard.columns.revision</value>
+				<value>dashboard.columns.repository-tag-name</value>
+				<value>dashboard.columns.status</value>
+				<value>dashboard.columns.message</value>
+				<value>dashboard.columns.update-type</value>
+				<value>dashboard.columns.build-requested-by</value>
+				<value>dashboard.columns.work-directory</value>
+				<value>dashboard.columns.broken-by</value>
+				<value>dashboard.columns.claim-date</value>
+			</list>
+		</property>
+		<property name="singleton" value="false"/>
+	</bean>
+	
 	<bean name="preferencesStore" class="net.sourceforge.vulcan.web.DefaultPreferencesStore">
 		<property name="defaultPreferences">
 			<bean class="net.sourceforge.vulcan.dto.PreferencesDto">
@@ -35,6 +75,19 @@
 						<value>dashboard.columns.revision</value>
 						<value>dashboard.columns.repository-tag-name</value>
 						<value>dashboard.columns.status</value>
+					</list>
+				</property>
+				<property name="buildHistoryColumns">
+					<list>
+						<value>dashboard.columns.name</value>
+						<value>dashboard.columns.build-number</value>
+						<value>dashboard.columns.timestamp</value>
+						<value>dashboard.columns.elapsed-time</value>
+						<value>dashboard.columns.revision</value>
+						<value>dashboard.columns.repository-tag-name</value>
+						<value>dashboard.columns.status</value>
+						<value>dashboard.columns.message</value>
+						<value>dashboard.columns.update-type</value>
 					</list>
 				</property>
 			</bean>

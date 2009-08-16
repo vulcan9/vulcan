@@ -25,6 +25,7 @@ import java.util.Map;
 
 import javax.xml.transform.Result;
 
+import net.sourceforge.vulcan.dto.PreferencesDto;
 import net.sourceforge.vulcan.metadata.SvnRevision;
 import net.sourceforge.vulcan.web.Keys;
 
@@ -34,12 +35,14 @@ import org.jdom.Element;
 @SvnRevision(id="$Id$", url="$HeadURL$")
 public class GetCachedBuildHistoryActionTest extends MockApplicationContextStrutsTestCase {
 	Document doc = new Document();
+	PreferencesDto prefs = new PreferencesDto();
 	
 	@Override
 	public void setUp() throws Exception {
 		super.setUp();
 		
 		request.setRequestURL("http://localhost/getBuildHistory.do");
+		request.setAttribute(Keys.PREFERENCES, prefs);
 		
 		request.setContextPath("");
 		setRequestPathInfo("/getBuildHistory.do");
@@ -82,6 +85,7 @@ public class GetCachedBuildHistoryActionTest extends MockApplicationContextStrut
 		final Map<String, ? super Object> params = new HashMap<String, Object>();
 		
 		params.put("viewProjectStatusURL", new URL("http://localhost/projects/"));
+		params.put("preferences", prefs);
 		params.put("locale", request.getLocale().toString());
 		params.put("contextRoot", "");
 		
@@ -110,6 +114,7 @@ public class GetCachedBuildHistoryActionTest extends MockApplicationContextStrut
 		
 		params.put("metricLabel1", "Tests executed");
 		params.put("metricLabel2", "Code coverage by line");
+		params.put("preferences", prefs);
 		params.put("viewProjectStatusURL", new URL("http://localhost/projects/"));
 		params.put("locale", request.getLocale().toString());
 		params.put("contextRoot", "");

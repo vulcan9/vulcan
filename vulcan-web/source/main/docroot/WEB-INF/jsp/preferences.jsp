@@ -127,6 +127,9 @@
 								</li>
 							</c:forEach>
 						</ol>
+						<c:forEach items="${preferences.buildHistoryColumns}" var="column">
+							<html:hidden property="config.buildHistoryColumns" value="${column}"/>
+						</c:forEach>
 					</td>
 				</tr>
 				<tr>

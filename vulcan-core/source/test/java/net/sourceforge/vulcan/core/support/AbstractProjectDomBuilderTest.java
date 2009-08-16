@@ -302,8 +302,8 @@ public class AbstractProjectDomBuilderTest extends EasyMockTestCase {
 
 		final Element elem = doc.getRootElement();
 		
-		assertContainsChildWithText(elem, "broken-by-user", "lazy");
-		Element claimNode = assertContainsChildWithText(elem, "date-claimed", "10:09");
+		assertContainsChildWithText(elem, "broken-by", "lazy");
+		Element claimNode = assertContainsChildWithText(elem, "claim-date", "10:09");
 		assertEquals(ticks.toString(), claimNode.getAttributeValue("millis"));
 		assertEquals(DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.SHORT).format(date), claimNode.getAttributeValue("text"));
 	}

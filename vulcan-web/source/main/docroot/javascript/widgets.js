@@ -442,7 +442,7 @@ function refreshDashboard(e, interval, url) {
 }
 
 function toggleMetricColumnVisibility(e) {
-	var id = $(this).attr("id");
+	var id = $(this).attr("id").substring(4);
 	
 	var header = $("#col_" + id);
 	
@@ -452,6 +452,8 @@ function toggleMetricColumnVisibility(e) {
 	
 	header.toggleClass("hidden");
 	table.find("tbody tr td:nth-child(" + index + ")").toggleClass("hidden");
+	
+	jQuery.get(this.form.action, {action: "toggleBuildReportColumn", item: this.value});
 }
 
 function registerHandler(type, value, handler) {
