@@ -260,7 +260,10 @@ table.dashboard {
 }
 
 table.dashboard td {
-	text-align: center;
+	text-align: left;
+}
+table.dashboard td.numeric {
+	text-align: right;
 }
 
 table.projects {
@@ -429,8 +432,7 @@ ul.issue-list li {
 	margin-left: 0.75em;
 }
 
-ul.options,ul.projectBuildOptions,div.projectCheckboxes ul,ul.metaDataOptions,ul.object-array,ul.primitive-array,ul.dateRanges
-	{
+ul.options,ul.buttons,ul.projectBuildOptions,div.projectCheckboxes ul,ul.metaDataOptions,ul.object-array,ul.primitive-array,ul.dateRanges {
 	list-style: none;
 	padding-left: 0;
 	padding-right: 10px;
@@ -439,12 +441,21 @@ ul.options,ul.projectBuildOptions,div.projectCheckboxes ul,ul.metaDataOptions,ul
 	margin-top: 0;
 }
 
+ul.buttons {
+	margin-top: 1em;
+	margin-bottom: 1em;
+}
+
 ul.dateRanges li {
 	padding-left: 2em;
 }
 
-ul.options li {
+ul.options li, ul.buttons li {
 	display: inline;
+}
+
+ul.buttons li {
+	margin-left: 2em;
 }
 
 input[type=radio]+label {

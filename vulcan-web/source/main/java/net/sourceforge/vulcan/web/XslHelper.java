@@ -18,27 +18,72 @@
  */
 package net.sourceforge.vulcan.web;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Locale;
 
-import org.springframework.context.MessageSource;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+
+import net.sourceforge.vulcan.dto.PreferencesDto;
+
+import org.springframework.web.context.WebApplicationContext;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+
 
 public class XslHelper {
-	private static MessageSource messageSource;
+	private static WebApplicationContext webApplicationContext;
 	private final Locale locale;
 
 	public XslHelper(String locale) {
 		this.locale = new Locale(locale);
 	}
-	
-	public static void setMessageSource(MessageSource messageSource) {
-		XslHelper.messageSource = messageSource;
+
+	public static void setWebApplicationContext(WebApplicationContext webApplicationContext) {
+		XslHelper.webApplicationContext = webApplicationContext;
 	}
 	
 	public String getMessage(String code) {
-		return messageSource.getMessage(code, null, locale);
+		return webApplicationContext.getMessage(code, null, locale);
 	}
 	
 	public String getMessage(String code, String arg1) {
-		return messageSource.getMessage(code, new String[] {arg1}, locale);
+		return webApplicationContext.getMessage(code, new String[] {arg1}, locale);
+	}
+	
+	public static String mangle(String s) {
+		return JstlFunctions.mangle(s);
+	}
+	
+	public static Node getBuildHistoryVisibleColumns(Object prefsObj) throws ParserConfigurationException {
+		PreferencesDto prefs = (PreferencesDto) prefsObj;
+		
+		return makeColumnList(Arrays.asList(prefs.getBuildHistoryColumns()));
+	}
+
+	public static Node getBuildHistoryAvailableColumns() throws ParserConfigurationException {
+		final List<String> columns = JstlFunctions.getAllDashboardColumns(Keys.BUILD_HISTORY_COLUMNS);
+		columns.addAll(JstlFunctions.getAvailableMetrics());
+		return makeColumnList(columns);
+	}
+	
+	private static Node makeColumnList(Iterable<String> columns) throws ParserConfigurationException {
+		final Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
+		
+		final Element node = doc.createElement("visible-columns");
+		
+		for (String s : columns) {
+			addNodeWithText(doc, node, "label", s);
+		}
+		
+		return node;
+	}
+
+	private static Node addNodeWithText(final Document doc, final Element parent, String name, String text) {
+		final Element child = doc.createElement(name);
+		child.setTextContent(text);
+		return parent.appendChild(child);
 	}
 }

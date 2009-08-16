@@ -47,7 +47,7 @@ public final class VulcanContextListener implements ServletContextListener {
 		context.setAttribute("buildOutcomeConverter", wac.getBean("buildOutcomeConverter"));
 		
 		JstlFunctions.setWebApplicationContext(wac);
-		XslHelper.setMessageSource(wac);
+		XslHelper.setWebApplicationContext(wac);
 	}
 
 	public void contextDestroyed(ServletContextEvent event) {

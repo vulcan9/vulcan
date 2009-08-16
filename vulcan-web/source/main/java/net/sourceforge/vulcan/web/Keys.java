@@ -28,6 +28,8 @@ public interface Keys {
 	String EVENT_POOL = "eventPool";
 	String BUILD_OUTCOME_STORE = "buildOutcomeStore";
 	String EVENT_HANDLER = "eventHandler";
+	String DASHBOARD_COLUMNS = "dashboardColumns";
+	String BUILD_HISTORY_COLUMNS = "buildHistoryColumns";
 	
 	String FILE_LIST = "fileList";
 	String DIR_PATH = "fileListPath";

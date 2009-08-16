@@ -140,7 +140,7 @@
 												<jsp:attribute name="key">${metric.messageKey}</jsp:attribute>
 												<jsp:attribute name="label"><spring:message code="${metric.messageKey}"/></jsp:attribute>
 												<jsp:attribute name="value"><c:out value="${metric.value}"/></jsp:attribute>
-												<jsp:attribute name="type"><c:out value="${metric.type}"/></jsp:attribute>
+												<jsp:attribute name="type"><c:out value="${fn:toLowerCase(metric.type)}"/></jsp:attribute>
 											</jsp:element>
 										</c:forEach>
 									</metrics>

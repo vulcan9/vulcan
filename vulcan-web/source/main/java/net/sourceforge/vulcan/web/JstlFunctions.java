@@ -57,7 +57,7 @@ public abstract class JstlFunctions {
 	private static WebApplicationContext webApplicationContext;
 	
 	public static String mangle(String s) {
-		return s.replaceAll("[ +\\[\\]<>&]", "_");
+		return s.replaceAll("[ \\.+\\[\\]<>&]", "_");
 	}
 	
 	public static String encode(String s) {
@@ -176,16 +176,9 @@ public abstract class JstlFunctions {
 	}
 
 	public static List<String> getAvailableDashboardColumns(PageContext pageContext) {
-		final List<String> availableColumns = new ArrayList<String>();
+		final List<String> availableColumns = getAllDashboardColumns(Keys.DASHBOARD_COLUMNS);
 		
-		availableColumns.addAll(Arrays.asList(new String[] {
-				"dashboard.columns.name", "dashboard.columns.age", "dashboard.columns.failure.age",
-				"dashboard.columns.timestamp", "dashboard.columns.build-number",
-				"dashboard.columns.revision", "dashboard.columns.repository-tag-name",
-				"dashboard.columns.status", "dashboard.columns.broken-by",
-				"dashboard.columns.claim-date"}));
-		
-		availableColumns.addAll(getAvailableMetrics(pageContext));
+		availableColumns.addAll(getAvailableMetrics());
 
 		final PreferencesDto prefs = (PreferencesDto) pageContext.findAttribute(Keys.PREFERENCES);
 		
@@ -207,8 +200,13 @@ public abstract class JstlFunctions {
 		
 		return availableColumns;
 	}
+
+	@SuppressWarnings("unchecked")
+	public static List<String> getAllDashboardColumns(String listName) {
+		return (List<String>) webApplicationContext.getBean(listName, List.class);
+	}
 	
-	public static List<String> getAvailableMetrics(PageContext pageContext) {
+	public static List<String> getAvailableMetrics() {
 		final StateManager mgr = (StateManager) webApplicationContext.getBean(Keys.STATE_MANAGER, StateManager.class);
 		final BuildManager buildMgr = (BuildManager) webApplicationContext.getBean("buildManager", BuildManager.class);
 		final Set<String> metrics = new HashSet<String>();

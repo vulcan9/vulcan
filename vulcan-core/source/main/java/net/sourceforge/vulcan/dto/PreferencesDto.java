@@ -33,6 +33,7 @@ public class PreferencesDto extends BaseDto {
 	private boolean showSchedulers;
 	private String[] labels;
 	private String[] dashboardColumns;
+	private String[] buildHistoryColumns = {};
 	
 	public String getSortColumn() {
 		return sortColumn;
@@ -99,5 +100,11 @@ public class PreferencesDto extends BaseDto {
 	}
 	public void setDashboardColumns(String[] dashboardColumns) {
 		this.dashboardColumns = dashboardColumns;
+	}
+	public String[] getBuildHistoryColumns() {
+		return buildHistoryColumns;
+	}
+	public void setBuildHistoryColumns(String[] buildHistoryColumns) {
+		this.buildHistoryColumns = buildHistoryColumns;
 	}
 }

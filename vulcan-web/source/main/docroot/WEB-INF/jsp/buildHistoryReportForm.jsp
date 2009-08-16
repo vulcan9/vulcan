@@ -191,9 +191,9 @@
 			<td><spring:message code="label.transform"/></td>
 			<td colspan="3">
 				<html:select property="transform" styleClass="transform">
-					<html:option value="OpenFlashChart">Open Flash Chart</html:option>
 					<html:option value="DataTable">HTML Data Table</html:option>
-					<html:option value="">XML</html:option>
+					<html:option value="OpenFlashChart">Open Flash Chart</html:option>
+					<html:option value="">Raw XML</html:option>
 				</html:select>
 				<ul class="metaDataOptions">
 					<li>

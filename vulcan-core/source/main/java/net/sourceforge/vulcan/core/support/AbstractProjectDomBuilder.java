@@ -242,6 +242,7 @@ public abstract class AbstractProjectDomBuilder implements ProjectDomBuilder {
 				mEl.setAttribute("label", formatMessage(m.getMessageKey(), null, locale));
 				mEl.setAttribute("value", m.getValue());
 				mEl.setAttribute("type", m.getType().name().toLowerCase());
+				mEl.setAttribute("key", m.getMessageKey());
 				mRoot.addContent(mEl);
 			}
 			root.addContent(mRoot);
@@ -499,8 +500,8 @@ public abstract class AbstractProjectDomBuilder implements ProjectDomBuilder {
 		}
 		
 		if (isNotBlank(status.getBrokenBy())) {
-			addChildNodeWithText(root, "broken-by-user", status.getBrokenBy());
-			addTimestampNode(root, "date-claimed", status.getClaimDate(), format, locale);
+			addChildNodeWithText(root, "broken-by", status.getBrokenBy());
+			addTimestampNode(root, "claim-date", status.getClaimDate(), format, locale);
 		}
 		if (status.getBuildLogId() != null) {
 			addChildNodeWithText(root, "build-log-available", null);

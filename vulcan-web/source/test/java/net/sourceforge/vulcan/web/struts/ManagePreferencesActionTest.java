@@ -101,8 +101,8 @@ public class ManagePreferencesActionTest extends MockApplicationContextStrutsTes
 		
 		request.getSession().setAttribute(Keys.PREFERENCES, old);
 		
-		addRequestParameter("action", "save");
-		addRequestParameter("toggleLabel", "x");
+		addRequestParameter("action", "toggleLabel");
+		addRequestParameter("item", "x");
 		
 		replay();
 		
@@ -129,8 +129,8 @@ public class ManagePreferencesActionTest extends MockApplicationContextStrutsTes
 		
 		request.getSession().setAttribute(Keys.PREFERENCES, old);
 		
-		addRequestParameter("action", "save");
-		addRequestParameter("toggleLabel", "x");
+		addRequestParameter("action", "toggleLabel");
+		addRequestParameter("item", "x");
 		
 		replay();
 		
@@ -156,8 +156,8 @@ public class ManagePreferencesActionTest extends MockApplicationContextStrutsTes
 		
 		request.getSession().setAttribute(Keys.PREFERENCES, old);
 		
-		addRequestParameter("action", "save");
-		addRequestParameter("toggleLabel", "x");
+		addRequestParameter("action", "toggleLabel");
+		addRequestParameter("item", "x");
 		
 		replay();
 		

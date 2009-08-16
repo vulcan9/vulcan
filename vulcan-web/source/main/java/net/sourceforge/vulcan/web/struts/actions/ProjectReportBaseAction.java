@@ -18,6 +18,10 @@
  */
 package net.sourceforge.vulcan.web.struts.actions;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.regex.Pattern;
+
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringReader;
@@ -25,12 +29,10 @@ import java.io.StringWriter;
 import java.io.Writer;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.regex.Pattern;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.stream.StreamResult;
 
@@ -38,9 +40,11 @@ import net.sourceforge.vulcan.ProjectManager;
 import net.sourceforge.vulcan.core.BuildManager;
 import net.sourceforge.vulcan.core.ConfigurationStore;
 import net.sourceforge.vulcan.core.ProjectDomBuilder;
+import net.sourceforge.vulcan.dto.PreferencesDto;
 import net.sourceforge.vulcan.dto.ProjectConfigDto;
 import net.sourceforge.vulcan.exception.NoSuchTransformFormatException;
 import net.sourceforge.vulcan.metadata.SvnRevision;
+import net.sourceforge.vulcan.web.Keys;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
@@ -123,6 +127,7 @@ public abstract class ProjectReportBaseAction extends Action {
 				}
 				
 				params.put("locale", request.getLocale().toString());
+				params.put("preferences", findPreferences(request));
 				params.put("viewProjectStatusURL", getSelfURL(mapping, request, transform));
 				params.put("contextRoot", request.getContextPath());
 				
@@ -158,5 +163,18 @@ public abstract class ProjectReportBaseAction extends Action {
 		}
 		
 		return null;
+	}
+	
+	static PreferencesDto findPreferences(HttpServletRequest request) {
+		final HttpSession session = request.getSession(false);
+		
+		if (session != null) {
+			final PreferencesDto prefs = (PreferencesDto) session.getAttribute(Keys.PREFERENCES);
+			if (prefs != null) {
+				return prefs;
+			}
+		}
+		
+		return (PreferencesDto) request.getAttribute(Keys.PREFERENCES);
 	}
 }

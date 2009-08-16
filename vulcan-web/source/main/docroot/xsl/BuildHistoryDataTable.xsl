@@ -6,27 +6,54 @@
 	
 	<xsl:output method="xml" media-type="text/html" version="1.0"
 		encoding="UTF-8" omit-xml-declaration="no"/>
-		
+	
 	<xsl:include href="common.xsl"/>
 	
+	<xsl:param name="preferences"/>
 	<xsl:param name="contextRoot"/>
 	<xsl:param name="viewProjectStatusURL"/>
 	
 	<xsl:key name="metrics-labels" match="/build-history/project/metrics/metric" use="@label"/>
 	
+	<xsl:variable name="allColumns" select="vulcan:getBuildHistoryAvailableColumns()/label"/>
+	<xsl:variable name="visibleColumns" select="vulcan:getBuildHistoryVisibleColumns($preferences)/label"/>
+	
 	<xsl:template match="/build-history">
+		<xsl:variable name="foo" select="vulcan:getBuildHistoryVisibleColumns($preferences)"/>
 		<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-US">
 			<head>
 				<title>Build History Report</title>
 			</head>
 			<body>
 				<xsl:call-template name="buildHistoryReportSummary"/>
-			
+
 				<xsl:call-template name="columnVisibilitySelectors"/>
 				
 				<xsl:call-template name="buildHistoryTable"/>
+
+				<xsl:call-template name="javascript"/>
 			</body>
 		</html>
+	</xsl:template>
+	
+	<xsl:template name="javascript">
+		<script xmlns="http://www.w3.org/1999/xhtml" language="javascript">
+		function selectAll(checked) {
+			$("#metrics-checkboxes input").each(function (item) {
+				var wasChecked = $(this).is(':checked') ? true : false;
+				
+				if (wasChecked != checked) {
+					$(this).attr("checked", checked);
+					$(this).trigger("toggle");
+				}
+			});
+		}
+		
+		$(document).ready(function() {
+			$("#selectAll").click(function() { selectAll(true) });
+			$("#selectNone").click(function() { selectAll(false) });
+		});
+		</script>
 	</xsl:template>
 	
 	<xsl:template name="buildHistoryReportSummary">
@@ -53,73 +80,55 @@
 			</tbody>
 		</table>
 	</xsl:template>
-	
+
 	<xsl:template name="columnVisibilitySelectors">
-		<form xmlns="http://www.w3.org/1999/xhtml" id="column-selectors" method="get" action="#">
+		<form xmlns="http://www.w3.org/1999/xhtml" id="column-selectors" method="get" action="">
+			<xsl:attribute name="action">
+				<xsl:value-of select="$contextRoot"/>
+				<xsl:text>/managePreferences.do</xsl:text>
+			</xsl:attribute>
 			<div>
 				<h3 class="caption">Columns</h3>
 				<div class="options">
 					<ul id="metrics-checkboxes" class="metaDataOptions">
-						<li>
-							<input type="checkbox" checked="checked" id="build_number"/>
-							<label for="build_number"><xsl:value-of select="vulcan:getMessage($messageSource, 'th.build.number')"/></label>
-						</li>
-						<li>
-							<input type="checkbox" checked="checked" id="revision"/>
-							<label for="revision"><xsl:value-of select="vulcan:getMessage($messageSource, 'th.revision')"/></label>
-						</li>
-						<li>
-							<input type="checkbox" checked="checked" id="tag"/>
-							<label for="tag"><xsl:value-of select="vulcan:getMessage($messageSource, 'th.repository.tag.name')"/></label>
-						</li>
-						<li>
-							<input type="checkbox" checked="checked" id="tstamp"/>
-							<label for="tstamp"><xsl:value-of select="vulcan:getMessage($messageSource, 'th.timestamp')"/></label>
-						</li>
-						<li>
-							<input type="checkbox" checked="checked" id="elapsed_time"/>
-							<label for="elapsed_time"><xsl:value-of select="'Elapsed Time'"/></label>
-						</li>
-						<li>
-							<input type="checkbox" checked="checked" id="status"/>
-							<label for="status"><xsl:value-of select="vulcan:getMessage($messageSource, 'th.project.status')"/></label>
-						</li>
-						<li>
-							<input type="checkbox" checked="checked" id="message"/>
-							<label for="message"><xsl:value-of select="vulcan:getMessage($messageSource, 'th.message')"/></label>
-						</li>
-						<li>
-							<input type="checkbox" checked="checked" id="update_type"/>
-							<label for="update_type"><xsl:value-of select="'Build Type'"/></label>
-						</li>
-						<li>
-							<input type="checkbox" checked="checked" id="requested_by"/>
-							<label for="requested_by"><xsl:value-of select="'Build Scheduler / User'"/></label>
-						</li>
-						<li>
-							<input type="checkbox" checked="checked" id="work_dir"/>
-							<label for="work_dir"><xsl:value-of select="'Build Directory'"/></label>
-						</li>
-						
-						<xsl:for-each select="/build-history/project/metrics/metric[generate-id() = generate-id(key('metrics-labels', @label)[1])]">
+						<xsl:for-each select="$allColumns">
+							<xsl:variable name="col" select="text()"/>
 							<li>
-								<input type="checkbox" checked="checked">
+								<input type="checkbox">
 									<xsl:attribute name="id">
-										<xsl:text>metric</xsl:text>
-										<xsl:value-of select="position()"/>
+										<xsl:text>chk_</xsl:text>
+										<xsl:value-of select="vulcan:mangle(.)"/>
 									</xsl:attribute>
+									<xsl:attribute name="value">
+										<xsl:value-of select="."/>
+									</xsl:attribute>
+									<xsl:if test="$visibleColumns[text() = $col]">
+										<xsl:attribute name="checked">checked</xsl:attribute>
+									</xsl:if>
 								</input>
 								<label>
 									<xsl:attribute name="for">
-										<xsl:text>metric</xsl:text>
-										<xsl:value-of select="position()"/>
+										<xsl:text>chk_</xsl:text>
+										<xsl:value-of select="vulcan:mangle(.)"/>
 									</xsl:attribute>
-									<xsl:value-of select="@label"/>
+									<xsl:value-of select="vulcan:getMessage($messageSource, text())"/>
 								</label>
 							</li>
 						</xsl:for-each>
 					</ul>
 				</div>
+				<ul class="buttons">
+					<li>
+						<a id="selectAll" href="#">
+							<xsl:value-of select="vulcan:getMessage($messageSource, 'button.select.all')"/>
+						</a>
+					</li>
+					<li>
+						<a id="selectNone" href="#">
+							<xsl:value-of select="vulcan:getMessage($messageSource, 'button.select.none')"/>
+						</a>
+					</li>
+				</ul>
 			</div>
 		</form>
 	</xsl:template>
@@ -127,93 +136,25 @@
 	<xsl:template name="buildHistoryTable">
 		<table xmlns="http://www.w3.org/1999/xhtml" class="builds sortable">
 			<caption>Outcomes</caption>
-			<thead>
-				<tr id="build-data-headers">
-					<th><xsl:value-of select="vulcan:getMessage($messageSource, 'th.project')"/></th>
-					<th id="col_build_number"><xsl:value-of select="vulcan:getMessage($messageSource, 'th.build.number')"/></th>
-					<th id="col_revision"><xsl:value-of select="vulcan:getMessage($messageSource, 'th.revision')"/></th>
-					<th id="col_tag"><xsl:value-of select="vulcan:getMessage($messageSource, 'th.repository.tag.name')"/></th>
-					<th id="col_tstamp" class="timestamp sorted-ascending"><xsl:value-of select="vulcan:getMessage($messageSource, 'th.timestamp')"/></th>
-					<th id="col_elapsed_time"><xsl:value-of select="vulcan:getMessage($messageSource, 'th.build.elapsed.time')"/></th>
-					<th id="col_status"><xsl:value-of select="vulcan:getMessage($messageSource, 'th.status')"/></th>
-					<th id="col_message"><xsl:value-of select="vulcan:getMessage($messageSource, 'th.message')"/></th>
-					<th id="col_update_type">Build Type</th>
-					<th id="col_requested_by">Scheduler / User</th>
-					<th id="col_work_dir">Build Directory</th>
-					<xsl:for-each select="/build-history/project/metrics/metric[generate-id() = generate-id(key('metrics-labels', @label)[1])]">
-						<th>
-							<xsl:attribute name="id">
-								<xsl:text>col_metric</xsl:text>
-								<xsl:value-of select="position()"/>
-							</xsl:attribute>
-							<xsl:value-of select="@label"/>
-						</th>
-					</xsl:for-each>
-				</tr>
-			</thead>
+			<xsl:call-template name="project-column-headers">
+				<xsl:with-param name="columns" select="$allColumns"/>
+				<xsl:with-param name="visible-columns" select="$visibleColumns"/>
+				<xsl:with-param name="sortSelect" select="'dashboard.columns.timestamp'"/>
+				<xsl:with-param name="sortOrder" select="'ascending'"/>
+				<xsl:with-param name="sortUrl" select="''"/>
+			</xsl:call-template>
 			<tbody>
 				<xsl:apply-templates select="/build-history/project">
+					<xsl:with-param name="columns" select="$allColumns"/>
+					<xsl:with-param name="visible-columns" select="$visibleColumns"/>
+					<xsl:with-param name="detailLink">
+						<xsl:value-of select="$contextRoot"/>
+						<xsl:text>/projects/</xsl:text>
+					</xsl:with-param>
+					<xsl:with-param name="detailLinkUseLatestKeyword" select="false()"/>
 					<xsl:sort select="timestamp/@millis" order="ascending" data-type="number"/>
 				</xsl:apply-templates>
 			</tbody>
 		</table>
 	</xsl:template>
-	
-	<xsl:template match="/build-history/project">
-		<xsl:variable name="project" select="."/>
-		<tr xmlns="http://www.w3.org/1999/xhtml">
-			<td><xsl:apply-templates select="name"/></td>
-			<td class="numeric">
-				<a>
-					<xsl:attribute name="href">
-						<xsl:value-of select="$viewProjectStatusURL"/>
-						<xsl:value-of select="name"/>
-						<xsl:text>/</xsl:text>
-						<xsl:value-of select="build-number"/>
-						<xsl:text>/</xsl:text>
-					</xsl:attribute>
-					<xsl:apply-templates select="build-number"/>
-				</a>
-			</td>
-			<td><xsl:apply-templates select="revision"/></td>
-			<td><xsl:apply-templates select="repository-tag-name"/></td>
-			<td class="timestamp"><xsl:apply-templates select="timestamp"/></td>
-			<td class="numeric"><xsl:apply-templates select="elapsed-time"/></td>
-			<xsl:element name="td">
-				<xsl:attribute name="class"><xsl:value-of select="status"/> status</xsl:attribute>
-				<xsl:value-of select="status"/>
-			</xsl:element>
-			<td class="buildMessage"><xsl:apply-templates select="message"/></td>
-			<td><xsl:apply-templates select="update-type"/></td>
-			<td>
-				<xsl:apply-templates select="build-scheduled-by"/>
-				<xsl:apply-templates select="build-requested-by"/>
-			</td>
-			<td><xsl:apply-templates select="work-directory"/></td>
-			
-			<xsl:for-each select="/build-history/project/metrics/metric[generate-id() = generate-id(key('metrics-labels', @label)[1])]">
-				<xsl:variable name="label" select="@label"/>
-				<xsl:variable name="metric-type" select="$project/metrics/metric[@label=$label]/@type"/>
-				<td>
-					<xsl:choose>
-						<xsl:when test="$metric-type = 'percent'">
-							<xsl:attribute name="class">numeric</xsl:attribute>
-							<xsl:value-of select="format-number($project/metrics/metric[@label=$label]/@value, '#.##%')"/>
-						</xsl:when>
-						<xsl:when test="$metric-type = 'number'">
-							<xsl:attribute name="class">numeric</xsl:attribute>
-							<xsl:attribute name="title">
-								<xsl:value-of select="$project/metrics/metric[@label=$label]/@value"/>
-							</xsl:attribute>
-							<xsl:value-of select="format-number($project/metrics/metric[@label=$label]/@value, '###,###.##')"/>
-						</xsl:when>
-						<xsl:otherwise>
-							<xsl:value-of select="$project/metrics/metric[@label=$label]/@value"/>
-						</xsl:otherwise>
-					</xsl:choose>
-				</td>
-			</xsl:for-each>
-		</tr>
-	</xsl:template>
-	
 </xsl:stylesheet>
