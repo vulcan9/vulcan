@@ -120,7 +120,7 @@
 					</h3>
 		
 					<xsl:choose>
-						<xsl:when test="/project/status/text() = 'FAIL' and not(/project/broken-by-user)">
+						<xsl:when test="/project/status/text() = 'FAIL' and not(/project/broken-by)">
 							<p id="broken-build-claim">
 								<a id="claimBuild">
 									<xsl:attribute name="href">
@@ -134,12 +134,12 @@
 								</a>
 							</p>
 						</xsl:when>
-						<xsl:when test="/project/status/text() = 'FAIL' and /project/broken-by-user">
+						<xsl:when test="/project/status/text() = 'FAIL' and /project/broken-by">
 							<p id="broken-build-claim">
 								<xsl:text>Responsibility for this failure was claimed by </xsl:text>
-								<xsl:value-of select="/project/broken-by-user"/>
+								<xsl:value-of select="/project/broken-by"/>
 								<xsl:text> on </xsl:text>
-								<xsl:value-of select="/project/date-claimed/@text"/>
+								<xsl:value-of select="/project/claim-date/@text"/>
 								<xsl:text>.</xsl:text>
 							</p>
 						</xsl:when>
