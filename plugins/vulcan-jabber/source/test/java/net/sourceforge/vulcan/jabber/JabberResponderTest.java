@@ -141,6 +141,23 @@ public class JabberResponderTest extends EasyMockTestCase {
 		verify();
 	}
 	
+	public void testClaimBrokenBuildCaseInsensitive() throws Exception {
+		String projectName = "example";
+		int buildNumber = 1134;
+		
+		expect(buildManager.claimBrokenBuild(projectName, buildNumber, "committer_sam")).andReturn(true);
+		
+		client.sendMessage("iamsam82", "Ok thanks!");
+		
+		replay();
+		
+		responder.linkUsersToBrokenBuild(projectName, buildNumber, Collections.singletonMap("committer_sam", "IAmSam82"));
+		
+		responder.messageReceived("iamSAM82", "mine");
+		
+		verify();
+	}
+	
 	public void testClaimBrokenBuildDropsExtraInfoFromScreenName() throws Exception {
 		String projectName = "example";
 		int buildNumber = 1134;

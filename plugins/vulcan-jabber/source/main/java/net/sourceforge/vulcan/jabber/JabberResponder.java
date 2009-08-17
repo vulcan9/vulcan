@@ -84,7 +84,7 @@ public class JabberResponder implements JabberChatListener {
 			ticket.projectName = projectName;
 			ticket.buildNumber = buildNumber;
 			ticket.userName = kvp.getKey();
-			ticket.screenName = kvp.getValue();
+			ticket.screenName = kvp.getValue().toLowerCase();
 			
 			tickets.put(ticket.screenName, ticket);
 		}
@@ -117,7 +117,7 @@ public class JabberResponder implements JabberChatListener {
 	private boolean claimBuildIfApplicable(String from) {
 		// talk.google.com uses names like user@gmail.com/Talk.v104AB7 to distinguish sessions.
 		// Drop anything after a slash when looking up a user.
-		final BuildClaimTicket ticket = tickets.remove(from.split("/")[0]);
+		final BuildClaimTicket ticket = tickets.remove(from.split("/")[0].toLowerCase());
 		
 		if (ticket == null) {
 			return false;
