@@ -120,8 +120,11 @@
 			</sources>
 
 			<references>
+				<lib>
+					<include name="${nunit.bin.dir}"/>
+				</lib>
 				<include name="${nant::get-base-directory()}/NAnt.Core.dll"/>
-				<include name="${nunit.bin.dir}/nunit.framework.dll"/>
+				<include name="nunit.framework.dll"/>
 				<include name="Microsoft.Build.Framework.dll"/>
 			</references>
 		</csc>
