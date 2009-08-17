@@ -25,7 +25,6 @@
 
 	<xsl:variable name="visibleColumns" select="/projects/visible-columns/label"/>
 	
-	
 	<xsl:template match="/">
 		<table class="projects dashboard">
 			<caption>
@@ -55,6 +54,7 @@
 							<xsl:with-param name="columns" select="$visibleColumns"/>
 							<xsl:with-param name="visible-columns" select="$visibleColumns"/>
 							<xsl:with-param name="detailLink" select="$detailLink"/>
+							<xsl:with-param name="contextRoot" select="$contextRoot"/>
 							<xsl:sort select="first-failure/elapsed-time/@millis" order="{$sortOrder1}" data-type="number"/>
 						</xsl:apply-templates>
 					</xsl:when>
@@ -63,6 +63,7 @@
 							<xsl:with-param name="columns" select="$visibleColumns"/>
 							<xsl:with-param name="visible-columns" select="$visibleColumns"/>
 							<xsl:with-param name="detailLink" select="$detailLink"/>
+							<xsl:with-param name="contextRoot" select="$contextRoot"/>
 							<xsl:sort select="revision/@numeric" order="{$sortOrder1}" data-type="number"/>
 						</xsl:apply-templates>
 					</xsl:when>
@@ -71,6 +72,7 @@
 							<xsl:with-param name="columns" select="$visibleColumns"/>
 							<xsl:with-param name="visible-columns" select="$visibleColumns"/>
 							<xsl:with-param name="detailLink" select="$detailLink"/>
+							<xsl:with-param name="contextRoot" select="$contextRoot"/>
 							<xsl:sort select="build-number" order="{$sortOrder1}" data-type="number"/>
 						</xsl:apply-templates>
 					</xsl:when>
@@ -82,6 +84,7 @@
 									<xsl:with-param name="columns" select="$visibleColumns"/>
 									<xsl:with-param name="visible-columns" select="$visibleColumns"/>
 									<xsl:with-param name="detailLink" select="$detailLink"/>
+									<xsl:with-param name="contextRoot" select="$contextRoot"/>
 									<xsl:sort select="*[name()=substring-after($sortSelect, 'dashboard.columns.')] | metrics/metric[@key=$sortSelect]/@value" order="{$sortOrder1}" data-type="number"/>
 								</xsl:apply-templates>
 							</xsl:when>
@@ -90,6 +93,7 @@
 									<xsl:with-param name="columns" select="$visibleColumns"/>
 									<xsl:with-param name="visible-columns" select="$visibleColumns"/>
 									<xsl:with-param name="detailLink" select="$detailLink"/>
+									<xsl:with-param name="contextRoot" select="$contextRoot"/>
 									<xsl:sort select="*[name()=substring-after($sortSelect, 'dashboard.columns.')] | metrics/metric[@key=$sortSelect]/@value" order="{$sortOrder1}" data-type="text"/>
 								</xsl:apply-templates>
 							</xsl:otherwise>

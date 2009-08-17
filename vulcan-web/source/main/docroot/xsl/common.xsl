@@ -10,9 +10,10 @@
 	<xsl:template match="project">
 		<xsl:param name="columns"/>
 		<xsl:param name="visible-columns"/>
-		<xsl:param name="detailLink"/>
 		<xsl:param name="detailLinkUseLatestKeyword" select="true()"/>
-				
+		<xsl:param name="contextRoot"/>
+		<xsl:param name="detailLink"/>
+		
 		<xsl:variable name="project" select="."/>
 		
 		<tr>
