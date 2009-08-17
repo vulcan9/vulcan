@@ -81,7 +81,6 @@
 					}
 					
 					$(document).ready(function() {
-						
 						$("#claimBuild").click(claimBuild);
 					});
 				</script>
@@ -134,7 +133,7 @@
 								</a>
 							</p>
 						</xsl:when>
-						<xsl:when test="/project/status/text() = 'FAIL' and /project/broken-by">
+						<xsl:when test="/project/broken-by">
 							<p id="broken-build-claim">
 								<xsl:text>Responsibility for this failure was claimed by </xsl:text>
 								<xsl:value-of select="/project/broken-by"/>

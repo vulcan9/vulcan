@@ -18,6 +18,8 @@
  */
 package net.sourceforge.vulcan.jabber;
 
+import static org.apache.commons.lang.StringUtils.isBlank;
+
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
@@ -99,7 +101,12 @@ public class XmppClient implements JabberClient, MessageListener {
 	}
 	
 	public void processMessage(Chat chat, Message msg) {
+		if (isBlank(msg.getBody())) {
+			return;
+		}
+		
 		LOG.debug(MessageFormat.format("Message ({2}) from {0}: {1}", chat.getParticipant(), msg.getBody(), msg.getType()));
+		
 		synchronized(lock) {
 			for (JabberChatListener l : listeners) {
 				l.messageReceived(chat.getParticipant(), msg.getBody());
