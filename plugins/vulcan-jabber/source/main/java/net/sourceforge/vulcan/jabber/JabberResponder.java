@@ -21,9 +21,12 @@ package net.sourceforge.vulcan.jabber;
 import static org.apache.commons.lang.StringUtils.isBlank;
 import static org.apache.commons.lang.StringUtils.isNotBlank;
 
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 
 import net.sourceforge.vulcan.core.BuildManager;
 
@@ -49,6 +52,7 @@ public class JabberResponder implements JabberChatListener {
 	private BuildManager buildManager;
 	private JabberPluginConfig config;
 	private String[] retorts;
+	private Set<String> claimKeywords;
 	
 	public void setClient(JabberClient client) {
 		this.client = client;
@@ -66,6 +70,7 @@ public class JabberResponder implements JabberChatListener {
 		this.config = config;
 		if (config != null) {
 			retorts = config.getTemplateConfig().getPithyRetortTemplate().split("\r?\n");
+			claimKeywords = new HashSet<String>(Arrays.asList(config.getTemplateConfig().getClaimKeywords().toLowerCase().split("\r?\n")));
 		}
 	}
 	
@@ -107,14 +112,21 @@ public class JabberResponder implements JabberChatListener {
 			return;
 		}
 		
-		if (claimBuildIfApplicable(from)) {
+		if (claimBuildIfApplicable(from, message)) {
 			return;
 		}
 		
 		sendPithyRetort(from);
 	}
 
-	private boolean claimBuildIfApplicable(String from) {
+	private boolean claimBuildIfApplicable(String from, String message) {
+		// Remove punctuation and lowercase.
+		final String scrubbed = message.toLowerCase().replaceAll("[^\\s\\w]", "");
+		
+		if (!claimKeywords.contains(scrubbed)) {
+			return false;
+		}
+		
 		// talk.google.com uses names like user@gmail.com/Talk.v104AB7 to distinguish sessions.
 		// Drop anything after a slash when looking up a user.
 		final BuildClaimTicket ticket = tickets.remove(from.split("/")[0].toLowerCase());

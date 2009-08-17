@@ -37,6 +37,7 @@ public class JabberTemplatesConfig extends PluginConfigDto {
 	private String pithyRetortTemplate = "";
 	private String brokenBuildAcknowledgementTemplate = "";
 	private String brokenBuildClaimedByTemplate = "";
+	private String claimKeywords = "mine";
 	
 	@Override
 	public String getPluginId() {
@@ -55,6 +56,8 @@ public class JabberTemplatesConfig extends PluginConfigDto {
 		addProperty(pds, "notifyCommitterTemplate", "JabberTemplatesConfig.notifyCommitterTemplate.name", "JabberTemplatesConfig.notifyCommitterTemplate.description", locale,
 				Collections.singletonMap(ATTR_WIDGET_TYPE, Widget.TEXTAREA));
 		addProperty(pds, "notifyBuildMasterTemplate", "JabberTemplatesConfig.notifyBuildMasterTemplate.name", "JabberTemplatesConfig.notifyBuildMasterTemplate.description", locale,
+				Collections.singletonMap(ATTR_WIDGET_TYPE, Widget.TEXTAREA));
+		addProperty(pds, "claimKeywords", "JabberTemplatesConfig.claimKeywords.name", "JabberTemplatesConfig.claimKeywords.description", locale,
 				Collections.singletonMap(ATTR_WIDGET_TYPE, Widget.TEXTAREA));
 		addProperty(pds, "brokenBuildAcknowledgementTemplate", "JabberTemplatesConfig.brokenBuildAcknowledgementTemplate.name", "JabberTemplatesConfig.brokenBuildAcknowledgementTemplate.description", locale,
 				Collections.singletonMap(ATTR_WIDGET_TYPE, Widget.TEXTAREA));
@@ -148,5 +151,13 @@ public class JabberTemplatesConfig extends PluginConfigDto {
 	
 	public void setBrokenBuildClaimedByTemplate(String brokenBuildClaimedByTemplate) {
 		this.brokenBuildClaimedByTemplate = brokenBuildClaimedByTemplate;
+	}
+
+	public String getClaimKeywords() {
+		return claimKeywords;
+	}
+	
+	public void setClaimKeywords(String claimKeywords) {
+		this.claimKeywords = claimKeywords;
 	}
 }

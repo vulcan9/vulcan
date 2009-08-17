@@ -48,6 +48,7 @@ public class JabberResponderTest extends EasyMockTestCase {
 		config.getTemplateConfig().setPithyRetortTemplate("Hi there.");
 		config.getTemplateConfig().setBrokenBuildAcknowledgementTemplate("Ok thanks!");
 		config.getTemplateConfig().setBrokenBuildClaimedByTemplate("Somebody claimed it, so don't worry.");
+		config.getTemplateConfig().setClaimKeywords("mine\nmy bad");
 		
 		responder.setClient(client);
 		responder.setBuildManager(buildManager);
@@ -141,6 +142,40 @@ public class JabberResponderTest extends EasyMockTestCase {
 		verify();
 	}
 	
+	public void testClaimBrokenBuildFiltersOnKeywords() throws Exception {
+		String projectName = "example";
+		int buildNumber = 1134;
+		
+		client.sendMessage("iamsam82", "Hi there.");
+		
+		replay();
+		
+		responder.linkUsersToBrokenBuild(projectName, buildNumber, Collections.singletonMap("committer_sam", "iamsam82"));
+		
+		responder.messageReceived("iamsam82", "I'm not here right now");
+		
+		verify();
+	}
+	
+	public void testClaimBrokenBuildFiltersOnKeywordsDoesNotRemoveTicket() throws Exception {
+		String projectName = "example";
+		int buildNumber = 1134;
+		
+		client.sendMessage("iamsam82", "Hi there.");
+		expect(buildManager.claimBrokenBuild(projectName, buildNumber, "committer_sam")).andReturn(true);
+		
+		client.sendMessage("iamsam82", "Ok thanks!");
+		
+		replay();
+		
+		responder.linkUsersToBrokenBuild(projectName, buildNumber, Collections.singletonMap("committer_sam", "iamsam82"));
+		
+		responder.messageReceived("iamsam82", "I'm not here right now");
+		responder.messageReceived("iamsam82", "mine");
+		
+		verify();
+	}
+	
 	public void testClaimBrokenBuildCaseInsensitive() throws Exception {
 		String projectName = "example";
 		int buildNumber = 1134;
@@ -153,7 +188,7 @@ public class JabberResponderTest extends EasyMockTestCase {
 		
 		responder.linkUsersToBrokenBuild(projectName, buildNumber, Collections.singletonMap("committer_sam", "IAmSam82"));
 		
-		responder.messageReceived("iamSAM82", "mine");
+		responder.messageReceived("iamSAM82", "Mine.");
 		
 		verify();
 	}
