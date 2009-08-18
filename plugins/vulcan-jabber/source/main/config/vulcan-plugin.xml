@@ -11,6 +11,7 @@
 	<bean name="plugin" class="net.sourceforge.vulcan.jabber.JabberPlugin">
 		<property name="client" ref="xmppClient"/>
 		<property name="responder" ref="responder"/>
+		<property name="messageSource" ref="messageSource"/>
 	</bean>
 	
 	<bean name="responder" class="net.sourceforge.vulcan.jabber.JabberResponder" init-method="init">

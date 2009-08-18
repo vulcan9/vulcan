@@ -27,6 +27,7 @@ import java.util.Map;
 import net.sourceforge.vulcan.core.BuildManager;
 import net.sourceforge.vulcan.core.ProjectBuilder;
 import net.sourceforge.vulcan.core.ProjectNameChangeListener;
+import net.sourceforge.vulcan.dto.BuildMessageDto;
 import net.sourceforge.vulcan.dto.PluginConfigDto;
 import net.sourceforge.vulcan.dto.ProjectStatusDto;
 import net.sourceforge.vulcan.dto.ProjectStatusDto.Status;
@@ -40,6 +41,7 @@ import net.sourceforge.vulcan.jabber.JabberPluginConfig.ProjectsToMonitor;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.context.MessageSource;
 
 public class JabberPlugin implements BuildManagerObserverPlugin, ConfigurablePlugin, ProjectNameChangeListener {
 	final static Log LOG = LogFactory.getLog(JabberPlugin.class);
@@ -51,6 +53,7 @@ public class JabberPlugin implements BuildManagerObserverPlugin, ConfigurablePlu
 	
 	JabberPluginConfig config = new JabberPluginConfig();
 	
+	private MessageSource messageSource;
 	private JabberClient client;
 	private JabberResponder responder;
 	
@@ -64,6 +67,10 @@ public class JabberPlugin implements BuildManagerObserverPlugin, ConfigurablePlu
 	
 	public JabberPluginConfig getConfiguration() {
 		return config;
+	}
+	
+	public void setMessageSource(MessageSource messageSource) {
+		this.messageSource = messageSource;
 	}
 	
 	public void setConfiguration(PluginConfigDto bean) {
@@ -112,7 +119,8 @@ public class JabberPlugin implements BuildManagerObserverPlugin, ConfigurablePlu
 	}
 
 	public void onBuildCompleted(BuildCompletedEvent event) {
-		final String projectName = event.getStatus().getName();
+		final ProjectStatusDto outcome = event.getStatus();
+		final String projectName = outcome.getName();
 		
 		final JabberBuildStatusListener listener;
 
@@ -125,10 +133,13 @@ public class JabberPlugin implements BuildManagerObserverPlugin, ConfigurablePlu
 		}
 
 		if (listener.isAttached()) {
-			final Status result = event.getStatus().getStatus();
+			final Status result = outcome.getStatus();
 			
 			if (result == Status.ERROR || result == Status.FAIL) {
-				listener.onBuildMessageLogged(EventsToMonitor.Errors, null, null, "");
+				final BuildMessageDto message = new BuildMessageDto();
+				message.setMessage(messageSource.getMessage(outcome.getMessageKey(), outcome.getMessageArgs(), null));
+				
+				listener.onBuildMessageLogged(EventsToMonitor.Errors, null, message, "");
 			}
 			
 			listener.detach();	

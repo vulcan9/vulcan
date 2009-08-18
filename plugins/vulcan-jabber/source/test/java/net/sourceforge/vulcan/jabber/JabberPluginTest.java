@@ -35,6 +35,8 @@ import net.sourceforge.vulcan.event.BuildStartingEvent;
 import net.sourceforge.vulcan.jabber.JabberPluginConfig.EventsToMonitor;
 import net.sourceforge.vulcan.jabber.JabberPluginConfig.ProjectsToMonitor;
 
+import org.springframework.context.MessageSource;
+
 public class JabberPluginTest extends EasyMockTestCase {
 	JabberPlugin plugin = new JabberPlugin();
 	JabberPluginConfig config = new JabberPluginConfig();
@@ -42,11 +44,14 @@ public class JabberPluginTest extends EasyMockTestCase {
 	JabberClient client = createStrictMock(JabberClient.class);
 	BuildManager buildManager = createStrictMock(BuildManager.class);
 	ProjectBuilder projectBuilder = createStrictMock(ProjectBuilder.class);
+	MessageSource messageSource = createStrictMock(MessageSource.class);
 	
 	BuildDaemonInfoDto buildDaemonInfo = new BuildDaemonInfoDto();
 	ProjectConfigDto target = new ProjectConfigDto();
 	ProjectStatusDto status = new ProjectStatusDto();
 	ProjectStatusDto prevStatus = new ProjectStatusDto();
+	
+	BuildMessageDto loggedMessage;
 	
 	@Override
 	public void setUp() {
@@ -57,6 +62,8 @@ public class JabberPluginTest extends EasyMockTestCase {
 		config.setProjectsToMonitor(ProjectsToMonitor.All);
 		plugin.setClient(client);
 		plugin.setResponder(new JabberResponder());
+		plugin.setMessageSource(messageSource);
+		
 		plugin.config = config;
 		
 		target.setName("a");
@@ -230,6 +237,7 @@ public class JabberPluginTest extends EasyMockTestCase {
 			@Override
 			protected void onBuildMessageLogged(EventsToMonitor type,
 					Pattern regex, BuildMessageDto message, String view) {
+				loggedMessage = message;
 				callFlags[0] = true;
 			}
 			@Override
@@ -242,6 +250,14 @@ public class JabberPluginTest extends EasyMockTestCase {
 			}
 		});
 		
+		if (expectMessage) {
+			status.setMessageKey("sample.message");
+			status.setMessageArgs(new String[] {"the details"});
+			
+			messageSource.getMessage("sample.message", status.getMessageArgs(), null);
+			expectLastCall().andReturn("something formatted");
+		}
+		
 		replay();
 		status.setStatus(result);
 		plugin.onBuildCompleted(new BuildCompletedEvent(buildManager, buildDaemonInfo, target, status));
@@ -253,6 +269,10 @@ public class JabberPluginTest extends EasyMockTestCase {
 		
 		assertTrue(prefix1 + "expected onBuildMessageLogged()", callFlags[0] == expectMessage);
 		assertTrue(prefix2 + "expected detach()", callFlags[1] == expectDetach);
+		
+		if (expectMessage) {
+			assertEquals("something formatted", loggedMessage.getMessage());
+		}
 	}
 	
 	public void testDoesNotRemoveMissingBuildListener() throws Exception {
