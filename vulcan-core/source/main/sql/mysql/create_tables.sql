@@ -28,8 +28,8 @@ create table builds (
 	build_reason_arg_2 varchar(256),
 	build_reason_arg_3 varchar(256),
 	
-	start_date timestamp not null,
-	completion_date timestamp not null,
+	start_date timestamp not null default 0,
+	completion_date timestamp not null default 0,
 	
 	revision bigint,
 	revision_label varchar(32),
