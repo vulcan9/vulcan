@@ -93,7 +93,6 @@
 				</h1>
 
 				<p class="meta">
-
 					<xsl:if test="$num-changes &gt; 0">
 						[<a xmlns="http://www.w3.org/1999/xhtml" href="#commit-log">Recent Commits</a>]
 					</xsl:if>
@@ -112,9 +111,9 @@
 					<xsl:text>]</xsl:text>
 				</p>
 
-				<xsl:if test="/project/broken-by-user">
+				<xsl:if test="/project/broken-by">
 					<xsl:call-template name="bubble">
-						<xsl:with-param name="target" select="'broken-by-user'"/>
+						<xsl:with-param name="target" select="'broken-by'"/>
 					</xsl:call-template>
 				</xsl:if>
 				
@@ -142,8 +141,8 @@
 		<xsl:param name="target"/>
 		<hr xmlns="http://www.w3.org/1999/xhtml" />
 		<xsl:choose>
-			<xsl:when test="$target='broken-by-user'">
-				<xsl:apply-templates select="/project/broken-by-user"/>
+			<xsl:when test="$target='broken-by'">
+				<xsl:apply-templates select="/project/broken-by"/>
 			</xsl:when>
 			<xsl:when test="$target='changes'">
 				<xsl:apply-templates select="/project/change-sets"/>
@@ -157,10 +156,9 @@
 		</xsl:choose>
 	</xsl:template>
 
-	<xsl:template match="broken-by-user">
+	<xsl:template match="broken-by">
 		<p class="broken-by">
-			<xsl:text>Responsibility for this build failure has been claimed by </xsl:text>
-			<xsl:value-of select="."/>
+			<xsl:value-of select="vulcan:getMessage($messageSource, 'messages.broken.by', .)"/>
 		</p>
 	</xsl:template>
 	
