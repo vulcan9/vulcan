@@ -4,7 +4,7 @@
 		xmlns:fmt="http://java.sun.com/jsp/jstl/fmt"
 		xmlns:spring="http://www.springframework.org/tags">
 
-	<jsp:directive.page contentType="application/rss+xml" session="false"/>
+	<jsp:directive.page contentType="application/rss+xml;charset=UTF-8" session="false"/>
 	<jsp:output omit-xml-declaration="false"/>
 	
 	<spring:message code="rss.date.format" var="datePattern"/>

@@ -44,11 +44,11 @@
 		<filter-class>net.sourceforge.vulcan.web.ContentTypeFilter</filter-class>
 		<init-param>
 			<param-name>defaultContentType</param-name>
-			<param-value>application/xhtml+xml</param-value>
+			<param-value>application/xhtml+xml;charset=UTF-8</param-value>
 		</init-param>
 		<init-param>
 			<param-name>legacyContentType</param-name>
-			<param-value>text/html</param-value>
+			<param-value>text/html;charset=UTF-8</param-value>
 		</init-param>
 		<init-param>
 			<param-name>suppressContentTypes</param-name>

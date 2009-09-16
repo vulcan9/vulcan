@@ -10,7 +10,7 @@
 
 	<jsp:output omit-xml-declaration="true"/>
 	
-	<jsp:directive.page session="false" contentType="text/html"/>
+	<jsp:directive.page session="false" contentType="text/html;charset=UTF-8"/>
 
 	<v:bubble styleClass="error">
 		<span class="error"><spring:message code="errors.forbidden"/></span>

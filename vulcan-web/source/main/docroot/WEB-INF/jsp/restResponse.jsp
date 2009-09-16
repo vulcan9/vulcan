@@ -6,7 +6,7 @@
 	xmlns:html="http://struts.apache.org/tags-html"
 	xmlns:v="http://vulcan.sourceforge.net/j2ee/jsp/tags">
 
-	<jsp:directive.page contentType="application/xml"/>
+	<jsp:directive.page contentType="application/xml;charset=UTF-8"/>
 	<c:set var="keys" value="${v:getActionErrorPropertyList(pageContext.request)}"/>
 	
 	<c:if test="${not empty keys}">
