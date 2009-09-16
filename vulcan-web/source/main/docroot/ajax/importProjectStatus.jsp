@@ -10,7 +10,7 @@
 
 	<html:xhtml/>
 	<jsp:output omit-xml-declaration="true"/>
-	<jsp:directive.page contentType="application/xml"/>
+	<jsp:directive.page contentType="application/xml;charset=UTF-8"/>
 
 	<c:if test="${projectImportStatus ne null}">
 		<html:img page="/images/progressbar.gif" alt="Processing..."/>
