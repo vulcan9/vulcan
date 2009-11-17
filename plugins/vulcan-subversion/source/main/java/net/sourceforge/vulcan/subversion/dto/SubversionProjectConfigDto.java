@@ -33,7 +33,8 @@ public class SubversionProjectConfigDto extends RepositoryAdaptorConfigDto {
 	private String repositoryProfile;
 	private String path;
 	private CheckoutDepth checkoutDepth	= CheckoutDepth.Infinity;
-	private boolean obtainBugtraqProperties = true;
+	private boolean useCommitTimes = true;
+	private boolean obtainBugtraqProperties = false;
 	private SparseCheckoutDto[] folders = new SparseCheckoutDto[0];
 	
 	@Override
@@ -57,6 +58,8 @@ public class SubversionProjectConfigDto extends RepositoryAdaptorConfigDto {
 		
 		addProperty(pds, "path", "SubversionProjectConfigDto.path.name", "SubversionProjectConfigDto.path.description", locale);
 
+		addProperty(pds, "useCommitTimes", "SubversionProjectConfigDto.useCommitTimes.name", "SubversionProjectConfigDto.useCommitTimes.description", locale);
+		
 		addProperty(pds, "obtainBugtraqProperties", "SubversionProjectConfigDto.obtainBugtraqProperties.name", "SubversionProjectConfigDto.obtainBugtraqProperties.description", locale);
 
 		addProperty(pds, "checkoutDepth", "SparseCheckoutDto.checkoutDepth.name", "SparseCheckoutDto.checkoutDepth.description", locale);
@@ -111,6 +114,12 @@ public class SubversionProjectConfigDto extends RepositoryAdaptorConfigDto {
 	}
 	public void setObtainBugtraqProperties(boolean obtainBugtraqProperties) {
 		this.obtainBugtraqProperties = obtainBugtraqProperties;
+	}
+	public boolean isUseCommitTimes() {
+		return useCommitTimes;
+	}
+	public void setUseCommitTimes(boolean useCommitTimes) {
+		this.useCommitTimes = useCommitTimes;
 	}
 	public SparseCheckoutDto[] getFolders() {
 		return folders;

@@ -86,6 +86,7 @@ public abstract class SubversionSupport extends PluginSupport {
 		
 		this.options = new DefaultSVNOptions();
 		this.options.setAuthStorageEnabled(false);
+		this.options.setUseCommitTimes(config.isUseCommitTimes());
 	}
 
 	boolean isFatal(SVNException e) {
