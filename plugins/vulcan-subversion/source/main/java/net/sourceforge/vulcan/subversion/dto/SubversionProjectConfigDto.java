@@ -33,8 +33,8 @@ public class SubversionProjectConfigDto extends RepositoryAdaptorConfigDto {
 	private String repositoryProfile;
 	private String path;
 	private CheckoutDepth checkoutDepth	= CheckoutDepth.Infinity;
-	private boolean useCommitTimes = true;
-	private boolean obtainBugtraqProperties = false;
+	private boolean useCommitTimes = false;
+	private boolean obtainBugtraqProperties = true;
 	private SparseCheckoutDto[] folders = new SparseCheckoutDto[0];
 	
 	@Override
