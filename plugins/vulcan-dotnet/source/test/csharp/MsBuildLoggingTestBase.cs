@@ -24,21 +24,21 @@ namespace SourceForge.Vulcan.DotNet
 		protected BuildErrorEventArgs MakeBuildErrorEventArgs(string file)
 		{
 			BuildErrorEventArgs args = new BuildErrorEventArgs("x", "y", file, 22, 0, 0, 0, "error", "", "csc");
-			args.BuildEventContext = new BuildEventContext(0, 0, 0, 0);
+			args.BuildEventContext = new BuildEventContext(0, 1, 2, 3);
 			return args;
 		}
 
 		protected TargetStartedEventArgs MakeTargetStartedEventArgs(string projectFile)
 		{
 			TargetStartedEventArgs args = new TargetStartedEventArgs("foo", "help", "DoStuff", projectFile, "/library/useful-stuff.targets");
-			args.BuildEventContext = new BuildEventContext(0, 0, 0, 0);
+			args.BuildEventContext = new BuildEventContext(0, 1, 2, 3);
 			return args;
 		}
 
 		protected TaskStartedEventArgs MakeTaskStartedEventArgs()
 		{
 			TaskStartedEventArgs args = new TaskStartedEventArgs("foo", "help", "DoStuff", "/home/samantha/work/module1/module1.csproj", "/library/useful-stuff.targets");
-			args.BuildEventContext = new BuildEventContext(0, 0, 0, 0);
+			args.BuildEventContext = new BuildEventContext(0, 1, 2, 3);
 			return args;
 		}
 	}
