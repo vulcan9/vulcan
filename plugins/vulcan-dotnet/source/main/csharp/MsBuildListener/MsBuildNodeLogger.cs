@@ -23,71 +23,68 @@ using Microsoft.Build.Framework;
 namespace SourceForge.Vulcan.DotNet {
 	public class MsBuildNodeLogger : MsBuildListener, INodeLogger
 	{
-		private readonly Dictionary<int, Stack<FileInfo>> projectsByNodeId = new Dictionary<int, Stack<FileInfo>>();
+		private readonly Dictionary<BuildEventContext, string> projectStartedEvents = new Dictionary<BuildEventContext, string>();
 
 		public void Initialize(IEventSource eventSource, int nodeCount)
 		{
 			Initialize(eventSource);
-		}
-
-		public override void TargetStarted(object sender, TargetStartedEventArgs e)
-		{
-			base.TargetStarted(sender, e);
-			PushProjectFile(e.BuildEventContext.NodeId, e.ProjectFile);
-		}
-
-		public override void TargetFinished(object sender, TargetFinishedEventArgs e)
-		{
-			base.TargetFinished(sender, e);
-			PopProjectFile(e.BuildEventContext.NodeId);
-		}
-
-		public override void TaskStarted(object sender, TaskStartedEventArgs e)
-		{
-			base.TaskStarted(sender, e);
-			PushProjectFile(e.BuildEventContext.NodeId, e.ProjectFile);
-		}
-
-		public override void TaskFinished(object sender, TaskFinishedEventArgs e)
-		{
-			base.TaskFinished(sender, e);
-			PopProjectFile(e.BuildEventContext.NodeId);
+			eventSource.ProjectStarted += ProjectStarted;
 		}
 
 		protected override FileInfo GetCurrentProjectFile(BuildEventArgs e)
 		{
-			Stack<FileInfo> stack;
-
-			lock (projectsByNodeId)
+			var fileName = GetProjectFile(e.BuildEventContext);
+			if (fileName == null || string.IsNullOrEmpty(fileName))
 			{
-				if (!projectsByNodeId.TryGetValue(e.BuildEventContext.NodeId, out stack) || stack.Count == 0)
-				{
-					return null;
-				}
-				return stack.Peek();	
+				return null;
 			}
 
+			return new FileInfo(fileName);
 		}
 
-		private void PushProjectFile(int nodeId, string projectFile)
+		public void ProjectStarted(object sender, ProjectStartedEventArgs e)
 		{
-			lock(projectsByNodeId)
+			AddProjectStartedEvent(e.ProjectFile, e.BuildEventContext);
+		}
+
+		public override void TargetStarted(object sender, TargetStartedEventArgs e)
+		{
+			AddProjectStartedEvent(e.ProjectFile, e.BuildEventContext);
+		}
+
+		public override void TaskStarted(object sender, TaskStartedEventArgs e)
+		{
+			AddProjectStartedEvent(e.ProjectFile, e.BuildEventContext);
+		}
+
+		public override void TargetFinished(object sender, TargetFinishedEventArgs e)
+		{
+		}
+
+		public override void TaskFinished(object sender, TaskFinishedEventArgs e)
+		{
+		}
+
+		internal string GetProjectFile(BuildEventContext e)
+		{
+			string file;
+
+			lock (projectStartedEvents)
 			{
-				Stack<FileInfo> stack;
-				if (!projectsByNodeId.TryGetValue(nodeId, out stack))
-				{
-					stack = new Stack<FileInfo>();
-					projectsByNodeId[nodeId] = stack;
-				}
-				stack.Push(new FileInfo(projectFile));
+				projectStartedEvents.TryGetValue(e, out file);
 			}
+
+			return file;
 		}
 
-		private void PopProjectFile(int nodeId)
+		internal void AddProjectStartedEvent(string projectFile, BuildEventContext context)
 		{
-			lock (projectsByNodeId)
+			lock (this.projectStartedEvents)
 			{
-				projectsByNodeId[nodeId].Pop();
+				if (!this.projectStartedEvents.ContainsKey(context))
+				{
+					this.projectStartedEvents.Add(context, projectFile);
+				}
 			}
 		}
 	}
