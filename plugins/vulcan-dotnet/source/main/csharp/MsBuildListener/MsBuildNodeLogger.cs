@@ -49,20 +49,14 @@ namespace SourceForge.Vulcan.DotNet {
 
 		public override void TargetStarted(object sender, TargetStartedEventArgs e)
 		{
+			base.TargetStarted(sender, e);
 			AddProjectStartedEvent(e.ProjectFile, e.BuildEventContext);
 		}
 
 		public override void TaskStarted(object sender, TaskStartedEventArgs e)
 		{
+			base.TaskStarted(sender, e);
 			AddProjectStartedEvent(e.ProjectFile, e.BuildEventContext);
-		}
-
-		public override void TargetFinished(object sender, TargetFinishedEventArgs e)
-		{
-		}
-
-		public override void TaskFinished(object sender, TaskFinishedEventArgs e)
-		{
 		}
 
 		internal string GetProjectFile(BuildEventContext e)

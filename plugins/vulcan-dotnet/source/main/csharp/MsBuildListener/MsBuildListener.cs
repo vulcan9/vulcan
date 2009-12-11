@@ -23,36 +23,13 @@ using Microsoft.Build.Framework;
 
 namespace SourceForge.Vulcan.DotNet {
 	public class MsBuildListener : ILogger	{
-		private string parameters;
-
-		private LoggerVerbosity verbosity;
 		private IBuildMessageReporter reporter;
 
 		private readonly Stack<FileInfo> projectFiles = new Stack<FileInfo>();
 
-		public string Parameters
-		{
-			get
-			{
-				return parameters;
-			}
-			set
-			{
-				parameters = value;
-			}
-		}
+		public string Parameters { get; set; }
 
-		public LoggerVerbosity Verbosity
-		{
-			get
-			{
-				return verbosity;
-			}
-			set
-			{
-				verbosity = value;
-			}
-		}
+		public LoggerVerbosity Verbosity { get; set; }
 
 		public IBuildMessageReporter Reporter
 		{
@@ -61,19 +38,19 @@ namespace SourceForge.Vulcan.DotNet {
 
 		public void Initialize(IEventSource eventSource)
 		{
-			if (parameters == null)
+			if (Parameters == null)
 			{
 				throw new LoggerException("must specify hostname and port");
 			}
 
-			String[] keyValues = parameters.Split(',');
+			String[] keyValues = Parameters.Split(',');
 
 			if (keyValues.Length != 2)
 			{
 				throw new LoggerException("must specify hostname and port");
 			}
 
-			SortedDictionary<string, string> map = new SortedDictionary<string, string>();
+			var map = new SortedDictionary<string, string>();
 
 			foreach(String keyValue in keyValues) {
 				String[] pair = keyValue.Split('=');
