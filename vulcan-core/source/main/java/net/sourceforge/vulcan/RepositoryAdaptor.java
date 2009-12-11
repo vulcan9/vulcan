@@ -36,7 +36,7 @@ public interface RepositoryAdaptor {
 	 * Obtain a token representing the HEAD revision for the overall project tree.
 	 * For a transaction based repository this may simply be the "revision of last change" on
 	 * the project path.  However, for file based repositories, a more complex operation must
-	 * be carried out to dertermine if any one member has been updated, or if new members have
+	 * be carried out to determine if any child paths have been updated, or if new paths have
 	 * been added.
 	 * @param previousRevision If this project has been checked out before, the instance of
 	 * RevisionTokenDto previously returned.  This is provided to allow implementations to
@@ -47,6 +47,13 @@ public interface RepositoryAdaptor {
 	/**
 	 * Populate the changeLog with ChangeSetDtos occurring between previousRevision, exclusive
 	 * and currentRevision, inclusive.  Write a "diff -u" to the output stream and close when finished.
+	 * This method will only be called when:
+	 * 
+	 * <ul>
+	 * <li>previousRevision is not null</li>
+	 * <li>previousRevision.equals(currentRevision) is false</li>
+	 * <li>previousRevision is from the same tag/branch as current configuration</li>
+	 * </ul>
 	 */
 	ChangeLogDto getChangeLog(RevisionTokenDto previousRevision, RevisionTokenDto currentRevision, OutputStream diffOutputStream) throws RepositoryException, InterruptedException;
 	

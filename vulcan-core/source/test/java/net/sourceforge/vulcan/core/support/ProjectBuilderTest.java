@@ -67,6 +67,8 @@ public class ProjectBuilderTest extends EasyMockTestCase {
 	ProjectConfigDto project;
 
 	ProjectStatusDto buildToolStatus = new ProjectStatusDto();
+	ProjectStatusDto previousStatusByTagName;
+	ProjectStatusDto previousStatusByWorkDir;
 	
 	Exception re;
 	BuildFailedException be;
@@ -152,14 +154,6 @@ public class ProjectBuilderTest extends EasyMockTestCase {
 			}
 			return projectStatusDto;
 		}
-		@Override
-		protected void determineUpdateType(ProjectConfigDto currentTarget) {
-			if (ProjectBuilderTest.this.updateType != null) {
-				this.updateType = ProjectBuilderTest.this.updateType; 
-			} else {
-				super.determineUpdateType(currentTarget);
-			}
-		}
 	};
 	
 	BuildManager mgr = createStrictMock(BuildManager.class);
@@ -184,6 +178,20 @@ public class ProjectBuilderTest extends EasyMockTestCase {
 		public Long loadAverageBuildTimeMillis(String name, UpdateType updateType) {
 			return estimatedBuildTimeMillis;
 		}
+		@Override
+		public ProjectStatusDto loadMostRecentBuildOutcomeByTagName(
+				String projectName, String tagName) {
+			assertEquals(project.getName(), projectName);
+			assertEquals(project.getRepositoryTagName(), tagName);
+			return previousStatusByTagName;
+		}
+		@Override
+		public ProjectStatusDto loadMostRecentBuildOutcomeByWorkDir(
+				String projectName, String workDir) {
+			assertEquals(project.getName(), projectName);
+			assertEquals(project.getWorkDir(), workDir);
+			return previousStatusByWorkDir;
+		}
 	};
 	
 	BuildDaemonInfoDto info = new BuildDaemonInfoDto();
@@ -194,12 +202,23 @@ public class ProjectBuilderTest extends EasyMockTestCase {
 
 	Throwable error;
 	
+	WorkingCopyUpdateExpert updateExpert = new WorkingCopyUpdateExpert() {
+		UpdateType determineUpdateStrategy(ProjectConfigDto currentTarget, ProjectStatusDto previousStatus) {
+			if (previousStatusByWorkDir != null) {
+				assertSame(previousStatusByWorkDir, previousStatus);
+			}
+
+			return updateType != null ? updateType : UpdateType.Full;
+		}
+	};
+	
 	@Override
 	public void setUp() throws Exception {
 		checkOrder(false);
 		
 		UUIDUtils.setForcedUUID(id);
 		
+		builder.setWorkingCopyUpdateExpert(updateExpert);
 		builder.setConfigurationStore(store);
 		builder.setBuildOutcomeStore(store);
 		builder.setBuildManager(mgr);
@@ -220,6 +239,7 @@ public class ProjectBuilderTest extends EasyMockTestCase {
 		previousStatus.setStatus(Status.PASS);
 		previousStatus.setRevision(rev0);
 		previousStatus.setBuildNumber(42);
+		previousStatus.setTagName("trunk");
 		
 		buildToolStatus.setName("a name");
 		buildToolStatus.setRevision(rev0);
@@ -234,6 +254,7 @@ public class ProjectBuilderTest extends EasyMockTestCase {
 		buildToolStatus.setMetrics(new ArrayList<MetricDto>());
 		buildToolStatus.setBuildNumber(0);
 		buildToolStatus.setWorkDir("dir");
+		buildToolStatus.setWorkDirSupportsIncrementalUpdate(true);
 		
 		logFile.deleteOnExit();
 		diffFile.deleteOnExit();
@@ -264,7 +285,7 @@ public class ProjectBuilderTest extends EasyMockTestCase {
 		
 		ra.createWorkingCopy(new File(project.getWorkDir()).getAbsoluteFile(), buildDetailCallback);
 		
-		mgr.targetCompleted(info, project, createFakeBuildOutcome(project.getName(), 0, rev1, "trunk", Status.ERROR, "messages.build.killed", new String[] {"a user"}, null, "http://localhost", true, null, "messages.build.reason.repository.changes", null, ProjectStatusDto.UpdateType.Full, project.getWorkDir(), estimatedBuildTimeMillis));
+		mgr.targetCompleted(info, project, createFakeBuildOutcome(project.getName(), 0, rev1, "trunk", Status.ERROR, "messages.build.killed", new String[] {"a user"}, null, "http://localhost", true, null, "messages.build.reason.repository.changes", null, ProjectStatusDto.UpdateType.Full, project.getWorkDir(), true, estimatedBuildTimeMillis));
 
 		replay();
 
@@ -324,7 +345,7 @@ public class ProjectBuilderTest extends EasyMockTestCase {
 		
 		expect(mgr.getLatestStatus("foo")).andReturn(previousStatus);
 		
-		mgr.targetCompleted(info, project, createFakeBuildOutcome(project.getName(), 43, rev0, "trunk", Status.UP_TO_DATE, null, null, null, "http://localhost", false, null, null, null, ProjectStatusDto.UpdateType.Full, project.getWorkDir(), estimatedBuildTimeMillis));
+		mgr.targetCompleted(info, project, createFakeBuildOutcome(project.getName(), 43, rev0, "trunk", Status.UP_TO_DATE, null, null, null, "http://localhost", false, null, null, null, ProjectStatusDto.UpdateType.Full, project.getWorkDir(), true, estimatedBuildTimeMillis));
 
 		checkBuild();
 	}
@@ -354,7 +375,7 @@ public class ProjectBuilderTest extends EasyMockTestCase {
 				eq(logFile),
 				(BuildDetailCallback)notNull());
 		
-		mgr.targetCompleted(info, project, createFakeBuildOutcome(project.getName(), 0, rev0, "trunk", Status.PASS, null, null, null, "http://localhost", true, null, "messages.build.reason.repository.changes", null, ProjectStatusDto.UpdateType.Full, project.getWorkDir(), estimatedBuildTimeMillis));
+		mgr.targetCompleted(info, project, createFakeBuildOutcome(project.getName(), 0, rev0, "trunk", Status.PASS, null, null, null, "http://localhost", true, null, "messages.build.reason.repository.changes", null, ProjectStatusDto.UpdateType.Full, project.getWorkDir(), true, estimatedBuildTimeMillis));
 		
 		checkBuild();
 		
@@ -387,7 +408,7 @@ public class ProjectBuilderTest extends EasyMockTestCase {
 				eq(logFile),
 				(BuildDetailCallback)notNull());
 		
-		mgr.targetCompleted(info, project, createFakeBuildOutcome(project.getName(), 0, rev0, "trunk", Status.PASS, null, null, null, "http://localhost", true, "Deborah", "messages.build.reason.repository.changes", null, ProjectStatusDto.UpdateType.Full, project.getWorkDir(), estimatedBuildTimeMillis));
+		mgr.targetCompleted(info, project, createFakeBuildOutcome(project.getName(), 0, rev0, "trunk", Status.PASS, null, null, null, "http://localhost", true, "Deborah", "messages.build.reason.repository.changes", null, ProjectStatusDto.UpdateType.Full, project.getWorkDir(), true, estimatedBuildTimeMillis));
 		
 		checkBuild();
 	}
@@ -441,7 +462,7 @@ public class ProjectBuilderTest extends EasyMockTestCase {
 				(BuildDetailCallback)notNull());
 		
 
-		final ProjectStatusDto outcome = createFakeBuildOutcome(project.getName(), 0, rev0, "trunk", Status.PASS, null, null, null, "http://localhost", true, "Deborah", "messages.build.reason.repository.changes", null, ProjectStatusDto.UpdateType.Full, project.getWorkDir(), estimatedBuildTimeMillis);
+		final ProjectStatusDto outcome = createFakeBuildOutcome(project.getName(), 0, rev0, "trunk", Status.PASS, null, null, null, "http://localhost", true, "Deborah", "messages.build.reason.repository.changes", null, ProjectStatusDto.UpdateType.Full, project.getWorkDir(), true, estimatedBuildTimeMillis);
 		
 		outcome.getErrors().add(new BuildMessageDto(errorMessage, null, null, null));
 		outcome.getWarnings().add(new BuildMessageDto(warningMessage, null, null, null));
@@ -488,7 +509,7 @@ public class ProjectBuilderTest extends EasyMockTestCase {
 				(BuildDetailCallback)notNull());
 		
 
-		final ProjectStatusDto outcome = createFakeBuildOutcome(project.getName(), 0, rev0, "trunk", Status.PASS, null, null, null, "http://localhost", true, "Deborah", "messages.build.reason.repository.changes", null, ProjectStatusDto.UpdateType.Full, project.getWorkDir(), estimatedBuildTimeMillis);
+		final ProjectStatusDto outcome = createFakeBuildOutcome(project.getName(), 0, rev0, "trunk", Status.PASS, null, null, null, "http://localhost", true, "Deborah", "messages.build.reason.repository.changes", null, ProjectStatusDto.UpdateType.Full, project.getWorkDir(), true, estimatedBuildTimeMillis);
 		
 		outcome.getMetrics().add(metric);
 		
@@ -530,7 +551,7 @@ public class ProjectBuilderTest extends EasyMockTestCase {
 				(BuildDetailCallback)notNull());
 		
 
-		final ProjectStatusDto outcome = createFakeBuildOutcome(project.getName(), 0, rev0, "trunk", Status.PASS, null, null, null, "http://localhost", true, "Deborah", "messages.build.reason.repository.changes", null, ProjectStatusDto.UpdateType.Full, project.getWorkDir(), estimatedBuildTimeMillis);
+		final ProjectStatusDto outcome = createFakeBuildOutcome(project.getName(), 0, rev0, "trunk", Status.PASS, null, null, null, "http://localhost", true, "Deborah", "messages.build.reason.repository.changes", null, ProjectStatusDto.UpdateType.Full, project.getWorkDir(), true, estimatedBuildTimeMillis);
 		
 		outcome.getWarnings().add(new BuildMessageDto(warningMessage, null, null, null));
 		
@@ -574,7 +595,51 @@ public class ProjectBuilderTest extends EasyMockTestCase {
 				eq(logFile),
 				(BuildDetailCallback)notNull());
 		
-		mgr.targetCompleted(info, project, createFakeBuildOutcome(project.getName(), 0, rev1, "trunk", Status.PASS, null, null, new ChangeLogDto(), "http://localhost", true, null, "messages.build.reason.repository.changes", null, ProjectStatusDto.UpdateType.Full, project.getWorkDir(), estimatedBuildTimeMillis));
+		mgr.targetCompleted(info, project, createFakeBuildOutcome(project.getName(), 0, rev1, "trunk", Status.PASS, null, null, new ChangeLogDto(), "http://localhost", true, null, "messages.build.reason.repository.changes", null, ProjectStatusDto.UpdateType.Full, project.getWorkDir(), true, estimatedBuildTimeMillis));
+		
+		checkBuild();
+	}
+	public void testGetsChangeLogWithRevisionFromLastBuildWithSameTag() throws Exception {
+		project = new ProjectConfigDto();
+		project.setName("a name");
+		project.setWorkDir("a");
+		
+		expect(projectMgr.getRepositoryAdaptor(project)).andReturn(ra);
+
+		expect(ra.getTagName()).andReturn("trunk");
+		expect(ra.getLatestRevision(rev0)).andReturn(rev1);
+		
+		previousStatus.setRevision(rev0);
+		previousStatus.setTagName("tags/not-trunk");
+		previousStatus.setStatus(Status.ERROR);
+		
+		expect(mgr.getLatestStatus(project.getName())).andReturn(previousStatus);
+
+		previousStatusByTagName = new ProjectStatusDto();
+		previousStatusByTagName.setTagName("trunk");
+		previousStatusByTagName.setRevision(rev0);
+		
+		ra.createWorkingCopy(new File("a").getAbsoluteFile(), buildDetailCallback);
+		
+		ra.getChangeLog(eq(rev0), eq(rev1), (OutputStream) notNull());
+		expectLastCall().andReturn(new ChangeLogDto());
+
+		expect(projectMgr.getBuildTool(project)).andReturn(tool);
+		
+		buildToolStatus.setBuildReasonKey("messages.build.reason.repository.changes");
+		buildToolStatus.setTagName("trunk");
+		buildToolStatus.setRevision(rev1);
+		buildToolStatus.setChangeLog(new ChangeLogDto());
+		buildToolStatus.setWorkDir("a");
+		buildToolStatus.setBuildNumber(previousStatus.getBuildNumber() + 1);
+		
+		tool.buildProject(
+				eq(project),
+				eq(buildToolStatus),
+				eq(logFile),
+				(BuildDetailCallback)notNull());
+		
+		mgr.targetCompleted(info, project, createFakeBuildOutcome(project.getName(), 43, rev1, "trunk", Status.PASS, null, null, new ChangeLogDto(), "http://localhost", true, null, "messages.build.reason.repository.changes", null, ProjectStatusDto.UpdateType.Full, project.getWorkDir(), true, estimatedBuildTimeMillis));
 		
 		checkBuild();
 	}
@@ -620,7 +685,57 @@ public class ProjectBuilderTest extends EasyMockTestCase {
 				eq(logFile),
 				(BuildDetailCallback)notNull());
 		
-		mgr.targetCompleted(info, project, createFakeBuildOutcome(project.getName(), 0, rev1, "trunk", Status.PASS, null, null, new ChangeLogDto(), "http://localhost", true, null, "messages.build.reason.repository.changes", null, ProjectStatusDto.UpdateType.Incremental, project.getWorkDir(), estimatedBuildTimeMillis));
+		mgr.targetCompleted(info, project, createFakeBuildOutcome(project.getName(), 0, rev1, "trunk", Status.PASS, null, null, new ChangeLogDto(), "http://localhost", true, null, "messages.build.reason.repository.changes", null, ProjectStatusDto.UpdateType.Incremental, project.getWorkDir(), true, estimatedBuildTimeMillis));
+		
+		checkBuild();
+	}
+	public void testIncrementalGetsPreviousBuildByWorkDir() throws Exception {
+		updateType = UpdateType.Incremental;
+		estimatedBuildTimeMillis = 11242341234l;
+		
+		project = new ProjectConfigDto();
+		project.setName("a name");
+		project.setWorkDir("a");
+		project.setUpdateStrategy(ProjectConfigDto.UpdateStrategy.IncrementalAlways);
+		
+		expect(projectMgr.getRepositoryAdaptor(project)).andReturn(ra);
+
+		expect(ra.getTagName()).andReturn("trunk");
+		expect(ra.getLatestRevision(rev0)).andReturn(rev1);
+		
+		final ProjectStatusDto prevStatus = new ProjectStatusDto();
+		prevStatus.setRevision(rev0);
+		prevStatus.setTagName("trunk");
+		prevStatus.setStatus(Status.ERROR);
+		
+		expect(mgr.getLatestStatus(project.getName())).andReturn(prevStatus);
+
+		previousStatusByWorkDir = new ProjectStatusDto();
+		previousStatusByWorkDir.setStatus(Status.PASS);
+		previousStatusByWorkDir.setWorkDir("a");
+		
+		ra.updateWorkingCopy(new File("a").getAbsoluteFile(), buildDetailCallback);
+		
+		ra.getChangeLog(eq(rev0), eq(rev1), (OutputStream)notNull());
+		expectLastCall().andReturn(new ChangeLogDto());
+
+		expect(projectMgr.getBuildTool(project)).andReturn(tool);
+		
+		buildToolStatus.setBuildReasonKey("messages.build.reason.repository.changes");
+		buildToolStatus.setTagName("trunk");
+		buildToolStatus.setRevision(rev1);
+		buildToolStatus.setUpdateType(ProjectStatusDto.UpdateType.Incremental);
+		buildToolStatus.setChangeLog(new ChangeLogDto());
+		buildToolStatus.setWorkDir("a");
+		buildToolStatus.setEstimatedBuildTimeMillis(estimatedBuildTimeMillis);
+		
+		tool.buildProject(
+				eq(project),
+				eq(buildToolStatus),
+				eq(logFile),
+				(BuildDetailCallback)notNull());
+		
+		mgr.targetCompleted(info, project, createFakeBuildOutcome(project.getName(), 0, rev1, "trunk", Status.PASS, null, null, new ChangeLogDto(), "http://localhost", true, null, "messages.build.reason.repository.changes", null, ProjectStatusDto.UpdateType.Incremental, project.getWorkDir(), true, estimatedBuildTimeMillis));
 		
 		checkBuild();
 	}
@@ -663,7 +778,7 @@ public class ProjectBuilderTest extends EasyMockTestCase {
 				(BuildDetailCallback)notNull());
 
 		
-		mgr.targetCompleted(info, project, createFakeBuildOutcome(project.getName(), 0, rev1, "trunk", Status.PASS, null, null, new ChangeLogDto(), "http://localhost", true, null, "messages.build.reason.repository.changes", null, ProjectStatusDto.UpdateType.Full, project.getWorkDir(), estimatedBuildTimeMillis));
+		mgr.targetCompleted(info, project, createFakeBuildOutcome(project.getName(), 0, rev1, "trunk", Status.PASS, null, null, new ChangeLogDto(), "http://localhost", true, null, "messages.build.reason.repository.changes", null, ProjectStatusDto.UpdateType.Full, project.getWorkDir(), true, estimatedBuildTimeMillis));
 		
 		checkBuild();
 	}
@@ -677,7 +792,7 @@ public class ProjectBuilderTest extends EasyMockTestCase {
 		.getRepositoryAdaptor(project)).andReturn(ra);
 
 		ra.setTagName("rc1");
-		expect(ra.getLatestRevision(rev0)).andReturn(rev1);
+		expect(ra.getLatestRevision(null)).andReturn(rev1);
 		
 		final ProjectStatusDto prevStatus = new ProjectStatusDto();
 		prevStatus.setRevision(rev0);
@@ -700,7 +815,7 @@ public class ProjectBuilderTest extends EasyMockTestCase {
 				eq(logFile),
 				(BuildDetailCallback)notNull());
 		
-		mgr.targetCompleted(info, project, createFakeBuildOutcome(project.getName(), 0, rev1, "rc1", Status.PASS, null, null, null, "http://localhost", false, null, "messages.build.reason.repository.changes", null, ProjectStatusDto.UpdateType.Full, project.getWorkDir(), estimatedBuildTimeMillis));
+		mgr.targetCompleted(info, project, createFakeBuildOutcome(project.getName(), 0, rev1, "rc1", Status.PASS, null, null, null, "http://localhost", true, null, "messages.build.reason.repository.changes", null, ProjectStatusDto.UpdateType.Full, project.getWorkDir(), true, estimatedBuildTimeMillis));
 		
 		checkBuild();
 	}
@@ -725,7 +840,7 @@ public class ProjectBuilderTest extends EasyMockTestCase {
 		
 		expect(projectMgr.getBuildTool(project)).andReturn(tool);
 		
-		mgr.targetCompleted(info, project, createFakeBuildOutcome(project.getName(), 0, rev0, "trunk", Status.FAIL, "messages.build.failure", new String[] {"none"}, null, "http://localhost", true, null, "messages.build.reason.repository.changes", null, ProjectStatusDto.UpdateType.Full, project.getWorkDir(), estimatedBuildTimeMillis));
+		mgr.targetCompleted(info, project, createFakeBuildOutcome(project.getName(), 0, rev0, "trunk", Status.FAIL, "messages.build.failure", new String[] {"none"}, null, "http://localhost", true, null, "messages.build.reason.repository.changes", null, ProjectStatusDto.UpdateType.Full, project.getWorkDir(), true, estimatedBuildTimeMillis));
 		
 		sleepTime = 0;
 		
@@ -737,7 +852,7 @@ public class ProjectBuilderTest extends EasyMockTestCase {
 
 		expect(mgr.getLatestStatus(project.getName())).andReturn(((ProjectStatusDto) null));
 		mgr.targetCompleted(info, project, createFakeBuildOutcome(project.getName(), 0, null,
-				null, Status.ERROR, "messages.build.null.work.dir", null, null, null, true, null, null, null, ProjectStatusDto.UpdateType.Full, project.getWorkDir(), estimatedBuildTimeMillis));
+				null, Status.ERROR, "messages.build.null.work.dir", null, null, null, true, null, null, null, ProjectStatusDto.UpdateType.Full, project.getWorkDir(), false, estimatedBuildTimeMillis));
 		
 
 		checkBuild();
@@ -757,7 +872,7 @@ public class ProjectBuilderTest extends EasyMockTestCase {
 		expect(mgr.getLatestStatus(project.getName())).andReturn(((ProjectStatusDto) null));
 
 		mgr.targetCompleted(info, project, createFakeBuildOutcome(project.getName(), 0, rev0,
-				"trunk", Status.ERROR, "errors.cannot.create.dir", new Object[] {new File("hello").getCanonicalPath()}, null, "http://localhost", true, null, "messages.build.reason.repository.changes", null, ProjectStatusDto.UpdateType.Full, project.getWorkDir(), estimatedBuildTimeMillis));
+				"trunk", Status.ERROR, "errors.cannot.create.dir", new Object[] {new File("hello").getCanonicalPath()}, null, "http://localhost", true, null, "messages.build.reason.repository.changes", null, ProjectStatusDto.UpdateType.Full, project.getWorkDir(), false, estimatedBuildTimeMillis));
 		
 		checkBuild();
 	}
@@ -780,7 +895,7 @@ public class ProjectBuilderTest extends EasyMockTestCase {
 		expect(ra.isWorkingCopy(invalid)).andReturn(true);
 		
 		mgr.targetCompleted(info, project, createFakeBuildOutcome(project.getName(), 0, rev0,
-				"trunk", Status.ERROR, "errors.cannot.create.dir", new Object[] {invalid.getCanonicalPath()}, null, "http://localhost", true, null, "messages.build.reason.repository.changes", null, ProjectStatusDto.UpdateType.Full, project.getWorkDir(), estimatedBuildTimeMillis));
+				"trunk", Status.ERROR, "errors.cannot.create.dir", new Object[] {invalid.getCanonicalPath()}, null, "http://localhost", true, null, "messages.build.reason.repository.changes", null, ProjectStatusDto.UpdateType.Full, project.getWorkDir(), false, estimatedBuildTimeMillis));
 		
 		checkBuild();
 	}
@@ -803,7 +918,7 @@ public class ProjectBuilderTest extends EasyMockTestCase {
 		expect(ra.isWorkingCopy(invalid)).andReturn(false);
 		
 		mgr.targetCompleted(info, project, createFakeBuildOutcome(project.getName(), 0, rev0,
-				"trunk", Status.ERROR, "errors.wont.delete.non.working.copy", new Object[] {invalid.getCanonicalPath()}, null, "http://localhost", true, null, "messages.build.reason.repository.changes", null, ProjectStatusDto.UpdateType.Full, project.getWorkDir(), estimatedBuildTimeMillis));
+				"trunk", Status.ERROR, "errors.wont.delete.non.working.copy", new Object[] {invalid.getCanonicalPath()}, null, "http://localhost", true, null, "messages.build.reason.repository.changes", null, ProjectStatusDto.UpdateType.Full, project.getWorkDir(), false, estimatedBuildTimeMillis));
 		
 		checkBuild();
 	}
@@ -838,7 +953,7 @@ public class ProjectBuilderTest extends EasyMockTestCase {
 				(BuildDetailCallback)notNull());
 
 		mgr.targetCompleted(info, project, createFakeBuildOutcome(project.getName(), 43, rev0,
-				"trunk", Status.PASS, null, null, null, "http://localhost", false, null, "messages.build.reason.forced", null, ProjectStatusDto.UpdateType.Full, project.getWorkDir(), estimatedBuildTimeMillis));
+				"trunk", Status.PASS, null, null, null, "http://localhost", false, null, "messages.build.reason.forced", null, ProjectStatusDto.UpdateType.Full, project.getWorkDir(), true, estimatedBuildTimeMillis));
 
 		checkBuild();
 	}
@@ -883,7 +998,7 @@ public class ProjectBuilderTest extends EasyMockTestCase {
 
 		final ProjectStatusDto buildOutcome = createFakeBuildOutcome(project.getName(), 43, rev0,
 				"trunk", Status.PASS, null, null, null, "http://localhost", false, null,
-				"messages.build.reason.dependency", "dep", ProjectStatusDto.UpdateType.Full, project.getWorkDir(), estimatedBuildTimeMillis);
+				"messages.build.reason.dependency", "dep", ProjectStatusDto.UpdateType.Full, project.getWorkDir(), true, estimatedBuildTimeMillis);
 		mgr.targetCompleted(eq(info), eq(project), eq(buildOutcome));
 
 		checkBuild();
@@ -912,7 +1027,7 @@ public class ProjectBuilderTest extends EasyMockTestCase {
 		expect(mgr.getLatestStatus("dep")).andReturn(currentDepStatus);
 
 		mgr.targetCompleted(info, project, createFakeBuildOutcome(project.getName(), 43, rev0,
-				"trunk", Status.UP_TO_DATE, null, null, null, "http://localhost", false, null, null, null, ProjectStatusDto.UpdateType.Full, project.getWorkDir(), estimatedBuildTimeMillis));
+				"trunk", Status.UP_TO_DATE, null, null, null, "http://localhost", false, null, null, null, ProjectStatusDto.UpdateType.Full, project.getWorkDir(), true, estimatedBuildTimeMillis));
 		
 		checkBuild();
 	}
@@ -945,7 +1060,7 @@ public class ProjectBuilderTest extends EasyMockTestCase {
 				(BuildDetailCallback)notNull());
 
 		mgr.targetCompleted(info, project, createFakeBuildOutcome(project.getName(), 43, rev0,
-				"trunk", Status.PASS, null, null, null, "http://localhost", false, null, "messages.build.reason.project.config", null, ProjectStatusDto.UpdateType.Full, project.getWorkDir(), estimatedBuildTimeMillis));
+				"trunk", Status.PASS, null, null, null, "http://localhost", false, null, "messages.build.reason.project.config", null, ProjectStatusDto.UpdateType.Full, project.getWorkDir(), true, estimatedBuildTimeMillis));
 		
 		checkBuild();
 	}
@@ -991,7 +1106,7 @@ public class ProjectBuilderTest extends EasyMockTestCase {
 				(BuildDetailCallback)notNull());
 
 		mgr.targetCompleted(info, project, createFakeBuildOutcome(project.getName(), 43, rev0,
-				"trunk", Status.PASS, null, null, null, "http://localhost", false, null, "messages.build.reason.plugin.config", "a fake plugin", ProjectStatusDto.UpdateType.Full, project.getWorkDir(), estimatedBuildTimeMillis));
+				"trunk", Status.PASS, null, null, null, "http://localhost", false, null, "messages.build.reason.plugin.config", "a fake plugin", ProjectStatusDto.UpdateType.Full, project.getWorkDir(), true, estimatedBuildTimeMillis));
 		
 		checkBuild();
 	}
@@ -1007,7 +1122,7 @@ public class ProjectBuilderTest extends EasyMockTestCase {
 		mgr.targetCompleted(info, project, createFakeBuildOutcome(project.getName(), 43, null,
 				null, Status.ERROR, "messages.repository.error",
 				new Object[]{"table or view does not exist"}, null, null, true, null, null, null,
-				ProjectStatusDto.UpdateType.Full, project.getWorkDir(), estimatedBuildTimeMillis));
+				ProjectStatusDto.UpdateType.Full, project.getWorkDir(), false, estimatedBuildTimeMillis));
 
 		checkBuild();
 	}
@@ -1023,7 +1138,7 @@ public class ProjectBuilderTest extends EasyMockTestCase {
 		final ProjectStatusDto completedOutcome = createFakeBuildOutcome(project.getName(), 43, null,
 				null, Status.ERROR, "messages.build.uncaught.exception",
 				new String[]{project.getName(), re.getMessage(), BuildPhase.Build.name()},
-				null, null, true, null, null, null, ProjectStatusDto.UpdateType.Full, project.getWorkDir(), estimatedBuildTimeMillis);
+				null, null, true, null, null, null, ProjectStatusDto.UpdateType.Full, project.getWorkDir(), false, estimatedBuildTimeMillis);
 		
 		mgr.targetCompleted((BuildDaemonInfoDto)anyObject(), eq(project), eq(completedOutcome));
 
@@ -1042,7 +1157,7 @@ public class ProjectBuilderTest extends EasyMockTestCase {
 		verify();
 	}
 
-	private ProjectStatusDto createFakeBuildOutcome(String name, int buildNumber, RevisionTokenDto rev, String tagName, Status status, String key, Object[] objects, ChangeLogDto changeLog, String repoUrl, boolean statusChanged, String requestedBy, String reasonKey, String reasonArg, UpdateType updateType, String workDir, Long estimatedBuildTimeMillis) {
+	private ProjectStatusDto createFakeBuildOutcome(String name, int buildNumber, RevisionTokenDto rev, String tagName, Status status, String key, Object[] objects, ChangeLogDto changeLog, String repoUrl, boolean statusChanged, String requestedBy, String reasonKey, String reasonArg, UpdateType updateType, String workDir, boolean workDirSupportsIncrementalUpdate, Long estimatedBuildTimeMillis) {
 		final ProjectStatusDto dto = new ProjectStatusDto();
 		dto.setBuildNumber(buildNumber);
 		dto.setId(id);
@@ -1064,6 +1179,7 @@ public class ProjectBuilderTest extends EasyMockTestCase {
 		dto.setBuildReasonKey(reasonKey);
 		dto.setUpdateType(updateType);
 		dto.setWorkDir(workDir);
+		dto.setWorkDirSupportsIncrementalUpdate(workDirSupportsIncrementalUpdate);
 		dto.setEstimatedBuildTimeMillis(estimatedBuildTimeMillis);
 		
 		if (reasonArg != null) {

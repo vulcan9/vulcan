@@ -39,7 +39,8 @@ class HistoryQueryBuilder {
 		"start_date, completion_date, build_number, update_type," +
 		"work_dir, revision, revision_label, last_good_build_number," +
 		"tag_name, repository_url, status_changed, scheduled_build," +
-		"requested_by, revision_unavailable, users.username as broken_by_user_name, claimed_date " +
+		"requested_by, revision_unavailable, users.username as broken_by_user_name, claimed_date, " +
+		"work_dir_vcs_clean " +
 		"from builds inner join project_names on builds.project_id = project_names.id " +
 		"left join users on builds.broken_by_user_id = users.id ";
 	

@@ -114,6 +114,19 @@ public class WorkingCopyUpdateExpertTest extends TestCase {
 		assertEquals(UpdateType.Full, expert.determineUpdateStrategy(config, previousStatus));
 	}
 
+	public void testAllowedOnPreviousBuildErrorWithVcsFlag() throws Exception {
+		assertTrue("Cannot create test directory", workDir.mkdirs());
+		FileUtils.touch(new File(workDir, "foo"));
+		
+		config.setUpdateStrategy(UpdateStrategy.IncrementalAlways);
+		config.setRepositoryTagName("trunk");
+		previousStatus.setStatus(ERROR);
+		previousStatus.setWorkDirSupportsIncrementalUpdate(true);
+		previousStatus.setTagName("trunk");
+		
+		assertEquals(UpdateType.Incremental, expert.determineUpdateStrategy(config, previousStatus));
+	}
+
 	public void testRequestedButPreviousBuildDifferentTag() throws Exception {
 		assertTrue("Cannot create test directory", workDir.mkdirs());
 		FileUtils.touch(new File(workDir, "foo"));

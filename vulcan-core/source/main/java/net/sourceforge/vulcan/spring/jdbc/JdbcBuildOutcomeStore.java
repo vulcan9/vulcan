@@ -41,7 +41,9 @@ import net.sourceforge.vulcan.exception.StoreException;
 import net.sourceforge.vulcan.metadata.SvnRevision;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.dao.DataAccessException;
+import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 @SvnRevision(id="$Id$", url="$HeadURL$")
@@ -125,6 +127,54 @@ public class JdbcBuildOutcomeStore implements BuildOutcomeStore, ProjectNameChan
 		return dto;
 	}
 
+	public ProjectStatusDto loadMostRecentBuildOutcomeByWorkDir(String projectName, String workDir) throws StoreException {
+		final ProjectStatusDto dto = findAndLoadBuildOutcome(projectName, "work_dir", workDir, false);
+		
+		if (!dto.getName().equals(projectName)) {
+			LogFactory.getLog(getClass()).warn("Project " + projectName + " and " + dto.getName() + " seem to share the same work directory.");
+			return null;
+		}
+		
+		return dto;
+	}
+	
+	public ProjectStatusDto loadMostRecentBuildOutcomeByTagName(String projectName, String tagName) throws StoreException {
+		return findAndLoadBuildOutcome(projectName, "tag_name", tagName, true);
+	}
+	
+	/**
+	 * Finds the most recent build outcome with the specified column value.
+	 * This is a helper method for loadMostRecentBuildOutcomeByWorkDir
+	 * and loadMostRecentBuildOutcomeByTagName
+	 * @param projectName Name of project
+	 * @param queryColumn SQL column to compare
+	 * @param value Value to locate
+	 * @param scopeToProject If true, limit result to project name.  If false, return most recent
+	 * build from any project that matches criteria.
+	 */
+	private ProjectStatusDto findAndLoadBuildOutcome(String projectName, String queryColumn, String value, boolean scopeToProject) throws StoreException {
+		String sql = "select uuid from builds where build_number=(select ifnull(max(build_number), -1) from builds where " + queryColumn + "=?";
+		Object[] params;
+		
+		if (scopeToProject) {
+			sql += " and project_id=(select id from project_names where name=?))";
+			params = new Object[] {value, projectName};
+		} else {
+			sql += ")";
+			params = new Object[] {value};
+		}
+			
+		final String result;
+		
+		try {
+			result = (String) jdbcTemplate.queryForObject(sql, params, String.class);	
+		} catch (IncorrectResultSizeDataAccessException e) {
+			return null;
+		}
+		
+		return loadBuildOutcome(UUID.fromString(result));
+	}
+	
 	public List<ProjectStatusDto> loadBuildSummaries(BuildOutcomeQueryDto query) {
 		final BuildHistoryQuery historyQuery = new BuildHistoryQuery(dataSource, query);
 		

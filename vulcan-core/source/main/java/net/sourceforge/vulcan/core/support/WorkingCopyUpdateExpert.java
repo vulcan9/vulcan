@@ -77,9 +77,9 @@ class WorkingCopyUpdateExpert {
 			return Full;
 		}
 	
-		if (ERROR == previousStatus.getStatus()) {
+		if (ERROR == previousStatus.getStatus() && !previousStatus.isWorkDirSupportsIncrementalUpdate()) {
 			log.info("Performing full build of " + currentTarget.getName() + " even though incremental " +
-					"build was requested because previous build resulted in ERROR.");
+					"build was requested because previous build resulted in ERROR before or during checkout or update.");
 
 			return Full;
 		}
