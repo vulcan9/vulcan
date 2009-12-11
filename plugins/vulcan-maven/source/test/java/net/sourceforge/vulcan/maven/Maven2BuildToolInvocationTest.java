@@ -23,8 +23,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.apache.commons.lang.StringUtils;
-
 import net.sourceforge.vulcan.ant.buildlistener.AntEventSummary;
 import net.sourceforge.vulcan.ant.receiver.EventListener;
 import net.sourceforge.vulcan.core.BuildDetailCallback;
@@ -125,16 +123,11 @@ public class Maven2BuildToolInvocationTest extends MavenBuildToolTestBase {
 	public void testCompileFails() throws Exception {
 		config.setTargets("compile");
 		
-		File log = File.createTempFile("vulcan-junit", ".txt");
-		
 		try {
-			tool.buildProject(projectConfig, status, log, detailCallback);
+			tool.buildProject(projectConfig, status, null, detailCallback);
 			fail("expected build to fail");
 		} catch (BuildFailedException dontCare) {
 		}
-		
-		System.out.println("Output is in " + log.getAbsolutePath());
-		System.out.println("Errors from mvn: " + StringUtils.join(errors.iterator(), "\n"));
 		
 		assertEquals(2, errors.size());
 		assertEquals("source/main/java/Invalid.java", fileNames.get(0).replaceAll("\\\\", "/"));
@@ -149,16 +142,11 @@ public class Maven2BuildToolInvocationTest extends MavenBuildToolTestBase {
 		config.setBuildScript("pom-missing-dependency.xml");
 		config.setTargets("compile");
 		
-		File log = File.createTempFile("vulcan-junit", ".txt");
-		
 		try {
-			tool.buildProject(projectConfig, status, log, detailCallback);
+			tool.buildProject(projectConfig, status, null, detailCallback);
 			fail("expected build to fail");
 		} catch (BuildFailedException dontCare) {
 		}
-		
-		System.out.println("Output is in " + log.getAbsolutePath());
-		System.out.println("Errors from mvn: " + StringUtils.join(errors.iterator(), "\n"));
 		
 		assertEquals(2, errors.size());
 		Collections.sort(errors);
