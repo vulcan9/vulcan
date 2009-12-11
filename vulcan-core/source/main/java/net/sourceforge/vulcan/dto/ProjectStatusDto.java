@@ -38,6 +38,7 @@ public class ProjectStatusDto extends NameDto {
 	public enum UpdateType { Full, Incremental };
 	
 	private String workDir;
+	private boolean workDirSupportsIncrementalUpdate;
 	private Status status;
 	private String brokenBy;
 	private Date claimDate;
@@ -301,5 +302,12 @@ public class ProjectStatusDto extends NameDto {
 	}
 	public void setEstimatedBuildTimeMillis(Long estimatedBuildTimeMillis) {
 		this.estimatedBuildTimeMillis = estimatedBuildTimeMillis;
+	}
+	public boolean isWorkDirSupportsIncrementalUpdate() {
+		return workDirSupportsIncrementalUpdate;
+	}
+	public void setWorkDirSupportsIncrementalUpdate(
+			boolean workDirSupportsIncrementalUpdate) {
+		this.workDirSupportsIncrementalUpdate = workDirSupportsIncrementalUpdate;
 	}
 }

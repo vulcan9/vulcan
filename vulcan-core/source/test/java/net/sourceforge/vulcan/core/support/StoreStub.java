@@ -92,6 +92,14 @@ public class StoreStub implements ConfigurationStore, BuildOutcomeStore {
 	public ProjectStatusDto loadBuildOutcome(UUID id) {
 		return null;
 	}
+	public ProjectStatusDto loadMostRecentBuildOutcomeByTagName(
+			String projectName, String tagName) {
+		return null;
+	}
+	public ProjectStatusDto loadMostRecentBuildOutcomeByWorkDir(
+			String projectName, String workDir) {
+		return null;
+	}
 	public List<ProjectStatusDto> loadBuildSummaries(BuildOutcomeQueryDto query) {
 		return null;
 	}

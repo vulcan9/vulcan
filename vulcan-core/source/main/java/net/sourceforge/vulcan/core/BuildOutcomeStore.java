@@ -41,6 +41,8 @@ public interface BuildOutcomeStore {
 	void claimBrokenBuild(UUID id, String userName, Date claimDate);
 	
 	ProjectStatusDto loadBuildOutcome(UUID id) throws StoreException;
+	ProjectStatusDto loadMostRecentBuildOutcomeByTagName(String projectName, String tagName) throws StoreException;
+	ProjectStatusDto loadMostRecentBuildOutcomeByWorkDir(String projectName, String workDir) throws StoreException;
 	
 	List<ProjectStatusDto> loadBuildSummaries(BuildOutcomeQueryDto query);
 

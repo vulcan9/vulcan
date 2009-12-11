@@ -63,8 +63,9 @@ import org.apache.commons.logging.LogFactory;
 @SvnRevision(id="$Id$", url="$HeadURL$")
 public class ProjectBuilderImpl implements ProjectBuilder {
 	private final Log log = LogFactory.getLog(ProjectBuilder.class);
-	private final WorkingCopyUpdateExpert workingCopyUpdateExpert = new WorkingCopyUpdateExpert();
-	private final ProjectRebuildExpert projectRebuildExpert = new ProjectRebuildExpert(workingCopyUpdateExpert);
+	
+	private WorkingCopyUpdateExpert workingCopyUpdateExpert = new WorkingCopyUpdateExpert();
+	private ProjectRebuildExpert projectRebuildExpert = new ProjectRebuildExpert(workingCopyUpdateExpert);
 	
 	private ConfigurationStore configurationStore;
 	private BuildOutcomeStore buildOutcomeStore;
@@ -86,7 +87,6 @@ public class ProjectBuilderImpl implements ProjectBuilder {
 	protected boolean timeout;
 	
 	protected RevisionTokenDto previousRevision;
-	protected boolean alternateTag;
 	protected ProjectStatusDto buildStatus;
 	protected ProjectStatusDto previousStatus;
 	protected ProjectStatusDto.Status previousOutcome;
@@ -153,6 +153,7 @@ public class ProjectBuilderImpl implements ProjectBuilder {
 				buildStatus.setMessageArgs(new String[] {e.getMessage()});
 			}
 		} catch (ProjectUpToDateException e) {
+			buildStatus.setWorkDirSupportsIncrementalUpdate(true);
 			buildStatus.setStatus(Status.UP_TO_DATE);
 		} catch (Throwable e) {
 			log.error("unexpected error", e);
@@ -223,6 +224,9 @@ public class ProjectBuilderImpl implements ProjectBuilder {
 	}
 	public void setConfigurationStore(ConfigurationStore store) {
 		this.configurationStore = store;
+	}
+	public void setWorkingCopyUpdateExpert(WorkingCopyUpdateExpert workingCopyUpdateExpert) {
+		this.workingCopyUpdateExpert = workingCopyUpdateExpert;
 	}
 	public BuildOutcomeStore getBuildOutcomeStore() {
 		return buildOutcomeStore;
@@ -317,7 +321,6 @@ public class ProjectBuilderImpl implements ProjectBuilder {
 		doPhase(BuildPhase.GetChangeLog, new PhaseCallback() {
 			public void execute() throws Exception {
 				if (previousRevision != null &&
-						!alternateTag && 
 						!previousRevision.equals(buildStatus.getRevision())) {
 					final OutputStream diffOutputStream =
 						new FileOutputStream(configurationStore.getChangeLog(currentTarget.getName(), buildStatus.getDiffId()));
@@ -329,6 +332,11 @@ public class ProjectBuilderImpl implements ProjectBuilder {
 			}
 		});
 
+		// We made it this far, so the next build can be incremental
+		// even if this build results in ERROR because the working
+		// copy should be in a known state to the RepositoryAdaptor.
+		buildStatus.setWorkDirSupportsIncrementalUpdate(true);
+		
 		doPhase(BuildPhase.Build, new PhaseCallback() {
 			public void execute() throws Exception {
 				invokeBuilder(currentTarget);
@@ -394,23 +402,29 @@ public class ProjectBuilderImpl implements ProjectBuilder {
 		
 		return true;
 	}
-	protected RevisionTokenDto checkBuildNeccessary(final RepositoryAdaptor ra, final ProjectConfigDto currentTarget) throws ProjectUpToDateException, RepositoryException, InterruptedException {
+	protected RevisionTokenDto checkBuildNeccessary(final RepositoryAdaptor ra, final ProjectConfigDto currentTarget) throws ProjectUpToDateException, RepositoryException, InterruptedException, StoreException {
 		String tagName = currentTarget.getRepositoryTagName();
 		
 		if (!StringUtils.isBlank(tagName)) {
 			ra.setTagName(tagName);
-			alternateTag = true;
 		} else {
 			tagName = ra.getTagName();
 			currentTarget.setRepositoryTagName(tagName);
 		}
 		
-		if (previousStatus != null) {
-			previousRevision = previousStatus.getRevision();
+		ProjectStatusDto prevStatusByTag = previousStatus;
+		
+		if (previousStatus != null && !tagName.equals(previousStatus.getTagName())) {
+			// Look up the most recent build with the same tag name.
+			prevStatusByTag = buildOutcomeStore.loadMostRecentBuildOutcomeByTagName(currentTarget.getName(), tagName);
+		}
+		
+		if (prevStatusByTag != null) {
+			previousRevision = prevStatusByTag.getRevision();
 			if (previousRevision == null) {
-				previousRevision = previousStatus.getLastKnownRevision();
+				previousRevision = prevStatusByTag.getLastKnownRevision();
 			}
-			previousOutcome = previousStatus.getStatus();
+			previousOutcome = prevStatusByTag.getStatus();
 		} else {
 			previousRevision = null;
 			previousOutcome = null;
@@ -428,8 +442,15 @@ public class ProjectBuilderImpl implements ProjectBuilder {
 		
 		return currentRev;
 	}
-	protected void determineUpdateType(ProjectConfigDto currentTarget) {
-		updateType = workingCopyUpdateExpert.determineUpdateStrategy(currentTarget, previousStatus);
+	protected void determineUpdateType(ProjectConfigDto currentTarget) throws StoreException {
+		ProjectStatusDto previousStatusForWorkDir = previousStatus;
+		
+		if (previousStatus != null && !currentTarget.getWorkDir().equals(previousStatus.getWorkDir())) {
+			// Look up the most recent build in the same work dir.
+			previousStatusForWorkDir = buildOutcomeStore.loadMostRecentBuildOutcomeByWorkDir(currentTarget.getName(), currentTarget.getWorkDir());
+		}
+		
+		updateType = workingCopyUpdateExpert.determineUpdateStrategy(currentTarget, previousStatusForWorkDir);
 	}
 	protected void createWorkingCopy(RepositoryAdaptor ra, String workDir) throws RepositoryException, IOException, ConfigException, InterruptedException {
 		buildStatus.setUpdateType(Full);

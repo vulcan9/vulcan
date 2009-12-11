@@ -39,10 +39,10 @@ class BuildInserter extends SqlUpdate {
 				"start_date, completion_date, build_number, update_type," +
 				"work_dir, revision, revision_label, last_good_build_number," +
 				"tag_name, repository_url, status_changed, scheduled_build," +
-				"requested_by, revision_unavailable, broken_by_user_id, claimed_date) " +
+				"requested_by, revision_unavailable, broken_by_user_id, claimed_date, work_dir_vcs_clean) " +
 				"values ((select id from project_names where name=?)," +
 				" ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?," +
-				" (select id from users where username=?), ?)");
+				" (select id from users where username=?), ?, ?)");
 		
 		declareParameter(new SqlParameter(Types.VARCHAR));
 		declareParameter(new SqlParameter(Types.VARCHAR));
@@ -73,6 +73,7 @@ class BuildInserter extends SqlUpdate {
 		declareParameter(new SqlParameter(Types.BOOLEAN));
 		declareParameter(new SqlParameter(Types.VARCHAR));
 		declareParameter(new SqlParameter(Types.TIMESTAMP));
+		declareParameter(new SqlParameter(Types.BOOLEAN));
 		
 		compile();
 	}
@@ -128,7 +129,8 @@ class BuildInserter extends SqlUpdate {
 			dto.getRequestedBy(),
 			revisionUnavailable,
 			dto.getBrokenBy(),
-			dto.getClaimDate()
+			dto.getClaimDate(),
+			dto.isWorkDirSupportsIncrementalUpdate()
 		};
 		
 		return update(params);

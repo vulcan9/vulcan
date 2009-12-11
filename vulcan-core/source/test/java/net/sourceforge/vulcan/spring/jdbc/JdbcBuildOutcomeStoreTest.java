@@ -142,6 +142,12 @@ public class JdbcBuildOutcomeStoreTest extends TestCase {
 		
 		assertPersistence();
 	}
+	
+	public void testSaveWithWorkDirFlag() throws Exception {
+		outcome.setWorkDirSupportsIncrementalUpdate(true);
+		
+		assertPersistence();
+	}
 
 	public void testClaimBrokenBuild() throws Exception {
 		final JdbcBuildOutcomeDto before = storeOutcome();
@@ -209,6 +215,38 @@ public class JdbcBuildOutcomeStoreTest extends TestCase {
 		outcome.setId(UUID.randomUUID());
 		
 		assertPersistence();
+	}
+
+	public void testLoadByWorkDir() throws Exception {
+		outcome.setWorkDir("dir");
+		
+		JdbcBuildOutcomeDto a = storeOutcome();
+		
+		outcome.setBuildNumber(6);
+		outcome.setId(UUID.randomUUID());
+		outcome.setWorkDir("other");
+	
+		storeOutcome();
+		
+		ProjectStatusDto actual = store.loadMostRecentBuildOutcomeByWorkDir(a.getName(), a.getWorkDir());
+		
+		assertEquals(a, actual);
+	}
+
+	public void testLoadByTag() throws Exception {
+		outcome.setTagName("trunk");
+		
+		JdbcBuildOutcomeDto a = storeOutcome();
+		
+		outcome.setBuildNumber(6);
+		outcome.setId(UUID.randomUUID());
+		outcome.setTagName("tags/other");
+	
+		storeOutcome();
+		
+		ProjectStatusDto actual = store.loadMostRecentBuildOutcomeByTagName(a.getName(), a.getTagName());
+		
+		assertEquals(a, actual);
 	}
 
 	public void testRenameProject() throws Exception {

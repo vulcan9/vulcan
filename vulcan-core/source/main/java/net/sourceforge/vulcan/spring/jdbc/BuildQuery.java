@@ -73,6 +73,8 @@ class BuildQuery extends MappingSqlQuery {
 		dto.setCompletionDate(new Date(rs.getTimestamp("completion_date").getTime()));
 		dto.setBuildNumber(rs.getInt("build_number"));
 		dto.setWorkDir(rs.getString("work_dir"));
+		dto.setWorkDirSupportsIncrementalUpdate(rs.getBoolean("work_dir_vcs_clean"));
+		
 		dto.setTagName(rs.getString("tag_name"));
 		dto.setRepositoryUrl(rs.getString("repository_url"));
 		dto.setScheduledBuild(rs.getBoolean("scheduled_build"));
