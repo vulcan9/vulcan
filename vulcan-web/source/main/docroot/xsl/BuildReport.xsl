@@ -135,11 +135,7 @@
 						</xsl:when>
 						<xsl:when test="/project/broken-by">
 							<p id="broken-build-claim">
-								<xsl:text>Responsibility for this failure was claimed by </xsl:text>
-								<xsl:value-of select="/project/broken-by"/>
-								<xsl:text> on </xsl:text>
-								<xsl:value-of select="/project/claim-date/@text"/>
-								<xsl:text>.</xsl:text>
+								<xsl:value-of select="vulcan:getMessage($messageSource, 'messages.broken.by', concat(/project/broken-by, ' on ', /project/claim-date/@text))"/>
 							</p>
 						</xsl:when>
 					</xsl:choose>
@@ -735,6 +731,11 @@
 	
 	<xsl:template match="/project/test-failures">
 		<div class="tab-panel" id="tests-panel" xmlns="http://www.w3.org/1999/xhtml">
+			<xsl:if test="count(/project/metrics[@key='vulcan.metrics.tests.executed']) = 0">
+				<span class="warning">
+					<xsl:value-of select="vulcan:getMessage($messageSource, 'messages.tests.carried.over')"/>
+				</span>
+			</xsl:if>			
 			<table>
 				<caption class="panel-caption"><xsl:value-of select="vulcan:getMessage($messageSource, 'label.test.failures')"/></caption>
 				<thead>
