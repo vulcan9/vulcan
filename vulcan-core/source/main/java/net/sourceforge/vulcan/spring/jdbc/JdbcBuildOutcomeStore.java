@@ -153,22 +153,29 @@ public class JdbcBuildOutcomeStore implements BuildOutcomeStore, ProjectNameChan
 	 * build from any project that matches criteria.
 	 */
 	private ProjectStatusDto findAndLoadBuildOutcome(String projectName, String queryColumn, String value, boolean scopeToProject) throws StoreException {
-		String sql = "select uuid from builds where build_number=(select ifnull(max(build_number), -1) from builds where " + queryColumn + "=?";
+		String sql = "select uuid from builds o inner join " +
+				"(select max(id) as max_id from builds where " + queryColumn + "=?";
 		Object[] params;
 		
 		if (scopeToProject) {
-			sql += " and project_id=(select id from project_names where name=?))";
+			sql += " and project_id=(select id from project_names where name=?)";
 			params = new Object[] {value, projectName};
 		} else {
-			sql += ")";
 			params = new Object[] {value};
 		}
-			
+		
+		sql += ") i on o.id = i.max_id";
+		
 		final String result;
 		
 		try {
 			result = (String) jdbcTemplate.queryForObject(sql, params, String.class);	
 		} catch (IncorrectResultSizeDataAccessException e) {
+			if (e.getActualSize() != 0) {
+				// This is a bug.
+				throw e;
+			}
+			// This just means "no results found."
 			return null;
 		}
 		

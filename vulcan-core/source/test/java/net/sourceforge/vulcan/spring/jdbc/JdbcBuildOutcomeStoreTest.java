@@ -244,6 +244,10 @@ public class JdbcBuildOutcomeStoreTest extends TestCase {
 	
 		storeOutcome();
 		
+		outcome.setId(UUID.randomUUID());
+		outcome.setName("otherproject");
+		storeOutcome();
+
 		ProjectStatusDto actual = store.loadMostRecentBuildOutcomeByTagName(a.getName(), a.getTagName());
 		
 		assertEquals(a, actual);
