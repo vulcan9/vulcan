@@ -233,6 +233,22 @@ public class JdbcBuildOutcomeStoreTest extends TestCase {
 		assertEquals(a, actual);
 	}
 
+	public void testLoadByWorkDirNotFound() throws Exception {
+		outcome.setWorkDir("dir");
+		
+		JdbcBuildOutcomeDto a = storeOutcome();
+		
+		outcome.setBuildNumber(6);
+		outcome.setId(UUID.randomUUID());
+		outcome.setWorkDir("other");
+	
+		storeOutcome();
+		
+		ProjectStatusDto actual = store.loadMostRecentBuildOutcomeByWorkDir(a.getName(), a.getWorkDir() + "2");
+		
+		assertEquals(null, actual);
+	}
+
 	public void testLoadByTag() throws Exception {
 		outcome.setTagName("trunk");
 		

@@ -129,8 +129,8 @@ public class JdbcBuildOutcomeStore implements BuildOutcomeStore, ProjectNameChan
 
 	public ProjectStatusDto loadMostRecentBuildOutcomeByWorkDir(String projectName, String workDir) throws StoreException {
 		final ProjectStatusDto dto = findAndLoadBuildOutcome(projectName, "work_dir", workDir, false);
-		
-		if (!dto.getName().equals(projectName)) {
+
+		if (dto != null && !dto.getName().equals(projectName)) {
 			LogFactory.getLog(getClass()).warn("Project " + projectName + " and " + dto.getName() + " seem to share the same work directory.");
 			return null;
 		}
