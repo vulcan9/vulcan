@@ -55,19 +55,9 @@
 			<plugin>
 				<artifactId>maven-surefire-plugin</artifactId>
 				<configuration>
-					<systemProperties>
-						<!--  This property is defined in the top-level pom but
-							gets lost because we define other properties in this pom. -->
-						<property>
-							<name>net.sourceforge.cobertura.datafile</name>
-							<value>target/cobertura/cobertura.ser</value>
-						</property>
-					
-						<property>
-							<name>ant.home</name>
-							<value>${ant.home}</value>
-						</property>
-					</systemProperties>
+					<systemPropertyVariables>
+						<ant.home>${ant.home}</ant.home>
+					</systemPropertyVariables>
 				</configuration>
 			</plugin>
 		</plugins>

@@ -28,6 +28,7 @@ public class ForeheadConfigTest extends MavenBuildToolTestBase {
 	String expectedMaven1_1beta2Config;
 	String expectedMaven2Config;
 	String expectedMaven2_0_6_Config;
+	String expectedMaven2_2_1_Config;
 	
 	OutputStream os = new ByteArrayOutputStream();
 	
@@ -39,6 +40,7 @@ public class ForeheadConfigTest extends MavenBuildToolTestBase {
 		expectedMaven1_1beta2Config = IOUtils.toString(getClass().getResourceAsStream("resources/forehead-1.1beta2-configured.conf"));
 		expectedMaven2Config = IOUtils.toString(getClass().getResourceAsStream("resources/m2-configured.conf"));
 		expectedMaven2_0_6_Config = IOUtils.toString(getClass().getResourceAsStream("resources/m2.0.6-configured.conf"));
+		expectedMaven2_2_1_Config = IOUtils.toString(getClass().getResourceAsStream("resources/m2.2.1-configured.conf"));
 	}
 	
 	public void testConfigureMaven102() throws Exception {
@@ -63,6 +65,12 @@ public class ForeheadConfigTest extends MavenBuildToolTestBase {
 		tool.configureLaunchFile(getClass().getResourceAsStream("resources/m2.0.6-vanilla.conf"), os);
 		
 		assertEquals(clean(expectedMaven2_0_6_Config), clean(os.toString()));
+	}
+
+	public void testConfigureMaven2_2_1() throws Exception {
+		tool.configureLaunchFile(getClass().getResourceAsStream("resources/m2.2.1-vanilla.conf"), os);
+		
+		assertEquals(clean(expectedMaven2_2_1_Config), clean(os.toString()));
 	}
 
 	private String clean(String string) {

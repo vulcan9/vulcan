@@ -19,6 +19,9 @@
 package net.sourceforge.vulcan.maven;
 
 import java.io.File;
+
+import org.apache.commons.lang.StringUtils;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -78,6 +81,7 @@ public class Maven2BuildToolInvocationTest extends MavenBuildToolTestBase {
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
+		config.setOffline(false);
 		config.setBuildScript("");
 		tool = new MavenBuildTool(config, mavenConfig, null, mavenConfig.getMavenHomes()[1]);
 		logFile = File.createTempFile("vulcan-maven-junit-build", ".log");
@@ -90,7 +94,8 @@ public class Maven2BuildToolInvocationTest extends MavenBuildToolTestBase {
 	
 	public void testGetsEvents() throws Exception {
 		config.setTargets("clean");
-
+		config.setOffline(false);
+		
 		tool.getEventSource().addEventListener(listener);
 		
 		assertEquals(0, events.size());
@@ -100,7 +105,8 @@ public class Maven2BuildToolInvocationTest extends MavenBuildToolTestBase {
 		assertTrue(events.size() > 0);
 		
 		assertTrue("Did not receive enough events", details.size() > 1);
-		assertEquals("clean:clean", details.get(details.size() - 2));
+		final String detail1 = details.get(details.size() - 2);
+		assertTrue("Expected starts with clean:clean but was " + detail1, detail1.startsWith("clean:clean"));
 		assertEquals(null, details.get(details.size() - 1));
 	}
 	
@@ -116,7 +122,8 @@ public class Maven2BuildToolInvocationTest extends MavenBuildToolTestBase {
 		assertTrue(events.size() > 0);
 		
 		assertTrue("Did not receive enough events", details.size() > 1);
-		assertEquals("clean:clean", details.get(details.size() - 2));
+		final String detail1 = details.get(details.size() - 2);
+		assertTrue("Expected starts with clean:clean but was " + detail1, detail1.startsWith("clean:clean"));
 		assertEquals(null, details.get(details.size() - 1));
 	}
 	
@@ -148,7 +155,7 @@ public class Maven2BuildToolInvocationTest extends MavenBuildToolTestBase {
 		} catch (BuildFailedException dontCare) {
 		}
 		
-		assertEquals(2, errors.size());
+		assertEquals("Actual errors: " + StringUtils.join(errors.iterator(), "\n"), 2, errors.size());
 		Collections.sort(errors);
 		assertEquals("Missing artifact no.such.group:no-such-artifact:jar:1.0", errors.get(0));
 		assertEquals("Missing artifact no.such.group:other-no-such-artifact:jar:1.0", errors.get(1));

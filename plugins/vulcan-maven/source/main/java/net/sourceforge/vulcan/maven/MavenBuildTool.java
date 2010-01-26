@@ -390,7 +390,7 @@ public class MavenBuildTool extends AntBuildTool {
 	
 		maven1_1 = true;
 		
-		boolean maven_2_0_6 = false;
+		boolean maven_post_2_0_6 = false;
 		
 		try {
 			String line;
@@ -400,7 +400,9 @@ public class MavenBuildTool extends AntBuildTool {
 				writer.write("\n");
 				
 				if ("main is org.apache.maven.cli.MavenCli from plexus.core".equals(line)) {
-					maven_2_0_6 = true;
+					maven_post_2_0_6 = true;
+				} else if ("main is org.apache.maven.cli.compat.CompatibleMain from plexus.core".equals(line)) {
+					maven_post_2_0_6 = true;
 				}
 				
 				if ("+tools.jar".equals(line)) {
@@ -408,7 +410,7 @@ public class MavenBuildTool extends AntBuildTool {
 					writer.write("+vulcan-maven.jar\n");
 				} else if ("[plexus.core]".equals(line)) {
 					writer.write("load ${vulcan-ant.jar}\n");
-					if (maven_2_0_6) {
+					if (maven_post_2_0_6) {
 						writer.write("load ${vulcan-maven.jar}\n");
 					}
 				} else if ("[plexus.core.maven]".equals(line)) {
@@ -417,7 +419,6 @@ public class MavenBuildTool extends AntBuildTool {
 					writer.write("    ${vulcan-ant.jar}\n");
 				} else if ("[root.maven]".equals(line)) {
 					writer.write("    ${vulcan-maven.jar}\n");
-				} else if (line.contains("endorsed")) {
 					maven1_1 = false;
 				}
 			}
