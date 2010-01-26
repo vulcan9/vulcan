@@ -56,23 +56,13 @@
 			<plugin>
 				<artifactId>maven-surefire-plugin</artifactId>
 				<configuration>
-					<systemProperties>
-						<!--  This property is defined in the top-level pom but
-							gets lost because we define other properties in this pom. -->
-						<property>
-							<name>net.sourceforge.cobertura.datafile</name>
-							<value>target/cobertura/cobertura.ser</value>
-						</property>
-					
-						<property>
-							<name>maven1.home</name>
-							<value>${maven1.home}</value>
-						</property>
-						<property>
-							<name>maven2.home</name>
-							<value>${maven2.home}</value>
-						</property>
-					</systemProperties>
+					<forkMode>once</forkMode>
+					<useManifestOnlyJar>false</useManifestOnlyJar>
+					<useSystemClassLoader>true</useSystemClassLoader>
+					<systemPropertyVariables>
+						<maven1.home>${maven1.home}</maven1.home>
+						<maven2.home>${maven2.home}</maven2.home>
+					</systemPropertyVariables>
 				</configuration>
 			</plugin>
 			<plugin>
@@ -102,26 +92,20 @@
 		</dependency>
 		<dependency>
 			<groupId>org.apache.maven</groupId>
-			<artifactId>maven-monitor</artifactId>
-			<version>2.0.9</version>
-			<scope>provided</scope>
-		</dependency>
- 		<dependency>
-			<groupId>org.apache.maven.plugins</groupId>
-			<artifactId>maven-release-plugin</artifactId>
-			<version>2.0-beta-7</version>
+			<artifactId>maven-core</artifactId>
+			<version>2.2.1</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.maven</groupId>
 			<artifactId>maven-artifact</artifactId>
-			<version>2.0.9</version>
+			<version>2.2.1</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.maven</groupId>
-			<artifactId>maven-core</artifactId>
-			<version>2.0.9</version>
+			<artifactId>maven-monitor</artifactId>
+			<version>2.2.1</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
