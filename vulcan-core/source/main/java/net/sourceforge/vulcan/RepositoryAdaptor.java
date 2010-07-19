@@ -54,6 +54,9 @@ public interface RepositoryAdaptor {
 	 * <li>previousRevision.equals(currentRevision) is false</li>
 	 * <li>previousRevision is from the same tag/branch as current configuration</li>
 	 * </ul>
+	 * 
+	 * @param diffOutputStream OutputStream to write differences to.  This parameter may be null if
+	 * diffs have been disabled by configuration.
 	 */
 	ChangeLogDto getChangeLog(RevisionTokenDto previousRevision, RevisionTokenDto currentRevision, OutputStream diffOutputStream) throws RepositoryException, InterruptedException;
 	

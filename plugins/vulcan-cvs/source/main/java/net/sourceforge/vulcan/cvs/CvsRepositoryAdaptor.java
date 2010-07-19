@@ -87,11 +87,13 @@ public class CvsRepositoryAdaptor extends CvsSupport implements RepositoryAdapto
 	}
 
 	public ChangeLogDto getChangeLog(RevisionTokenDto first, RevisionTokenDto last, OutputStream diffOutputStream) throws RepositoryException {
-		try {
-			// "cvs rdiff -u" does not seem to be supported by netbeans-cvslib at this time.
-			diffOutputStream.close();
-		} catch (IOException e) {
-			throw new RepositoryException(e);
+		if (diffOutputStream != null) {
+			try {
+				// "cvs rdiff -u" does not seem to be supported by netbeans-cvslib at this time.
+				diffOutputStream.close();
+			} catch (IOException e) {
+				throw new RepositoryException(e);
+			}
 		}
 		
 		final ChangeLogDto changeLog = doChangeLogs(first, last);
