@@ -66,13 +66,17 @@ public class ProjectBuilderImpl implements ProjectBuilder {
 	
 	private WorkingCopyUpdateExpert workingCopyUpdateExpert = new WorkingCopyUpdateExpert();
 	private ProjectRebuildExpert projectRebuildExpert = new ProjectRebuildExpert(workingCopyUpdateExpert);
-	
+
+	/* Injected configuration fields */
 	private ConfigurationStore configurationStore;
 	private BuildOutcomeStore buildOutcomeStore;
 	private ProjectManager projectManager;
 	private BuildManager buildManager;
 	private int deleteDirectoryAttempts = 1;
 	private long deleteFailureSleepTime;
+	private boolean diffsEnabled;
+	
+	/* State */
 	private BuildPhase currentPhase;
 	protected UpdateType updateType;
 	
@@ -252,6 +256,12 @@ public class ProjectBuilderImpl implements ProjectBuilder {
 	public void setDeleteFailureSleepTime(long deleteFailureSleepTime) {
 		this.deleteFailureSleepTime = deleteFailureSleepTime;
 	}
+	public boolean isDiffsEnabled() {
+		return diffsEnabled;
+	}
+	public void setDiffsEnabled(boolean diffsEnabled) {
+		this.diffsEnabled = diffsEnabled;
+	}
 	protected ProjectStatusDto createBuildStatus(ProjectConfigDto currentTarget) {
 		final ProjectStatusDto status = createBuildOutcome(currentTarget.getName());
 		
@@ -320,14 +330,20 @@ public class ProjectBuilderImpl implements ProjectBuilder {
 		
 		doPhase(BuildPhase.GetChangeLog, new PhaseCallback() {
 			public void execute() throws Exception {
+				OutputStream diffOutputStream = null;
+				
 				if (previousRevision != null &&
 						!previousRevision.equals(buildStatus.getRevision())) {
-					final OutputStream diffOutputStream =
-						new FileOutputStream(configurationStore.getChangeLog(currentTarget.getName(), buildStatus.getDiffId()));
+					diffOutputStream = diffsEnabled ? 
+						new FileOutputStream(configurationStore.getChangeLog(currentTarget.getName(), buildStatus.getDiffId())) : null;
 					
 					// RepositoryAdaptor instance will close the OutputStream so it
 					// is not closed here in a finally block.
 					buildStatus.setChangeLog(ra.getChangeLog(previousRevision, buildStatus.getRevision(), diffOutputStream));
+				}
+				
+				if (diffOutputStream == null) {
+					buildStatus.setDiffId(null);
 				}
 			}
 		});

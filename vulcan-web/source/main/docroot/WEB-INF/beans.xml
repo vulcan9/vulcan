@@ -217,6 +217,7 @@
 		<property name="projectManager" ref="stateManager"/>
 		<property name="deleteDirectoryAttempts" value="2"/>
 		<property name="deleteFailureSleepTime" value="5000"/>
+		<property name="diffsEnabled" value="${diffs.enabled}"/>
 	</bean>
 	
 	<bean id="projectDomBuilder"
