@@ -149,6 +149,10 @@
 					<label for="buildOnDepFail"><spring:message code="label.build.options.build.on.dependency.failure"/></label>
 				</li>
 				<li>
+					<html:checkbox property="config.buildOnNoUpdates" styleId="noUpdates"/>
+					<label for="noUpdates"><spring:message code="label.build.when.no.updates"/></label>
+				</li>
+				<li>
 					<html:checkbox property="config.suppressErrors" styleId="suppressErrors"/>
 					<label for="suppressErrors"><spring:message code="label.build.options.errors.suppress"/></label>
 				</li>
