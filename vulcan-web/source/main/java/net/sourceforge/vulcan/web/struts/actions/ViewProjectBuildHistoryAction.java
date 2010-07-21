@@ -58,8 +58,8 @@ public final class ViewProjectBuildHistoryAction extends ProjectReportBaseAction
 	@Override
 	public ActionForward execute(ActionMapping mapping, ActionForm form, HttpServletRequest request, HttpServletResponse response) throws Exception {
 		final ReportForm reportForm = (ReportForm) form;
-		final Object fromLabel;
-		final Object toLabel;
+		Object fromLabel = null;
+		Object toLabel = null;
 		
 		final String[] projectNames = reportForm.getProjectNames();
 		final BuildOutcomeQueryDto query = new BuildOutcomeQueryDto();
@@ -75,10 +75,7 @@ public final class ViewProjectBuildHistoryAction extends ProjectReportBaseAction
 			
 			fromLabel = from;
 			toLabel = to;
-		} else if (reportForm.isIncludeAll()) {
-			fromLabel = "0";
-			toLabel="*";
-		} else {
+		} else if (reportForm.isRangeMode()) {
 			final int minBuildNumber = reportForm.getMinBuildNumberAsInt();
 			final int maxBuildNumber = reportForm.getMaxBuildNumberAsInt();
 			
@@ -87,6 +84,10 @@ public final class ViewProjectBuildHistoryAction extends ProjectReportBaseAction
 			
 			fromLabel = Integer.toString(minBuildNumber);
 			toLabel = Integer.toString(maxBuildNumber);
+		} else {
+			fromLabel = "0";
+			toLabel = "*";
+				
 		}
 		
 		final String[] statusTypes = reportForm.getStatusTypes();
@@ -99,6 +100,11 @@ public final class ViewProjectBuildHistoryAction extends ProjectReportBaseAction
 		}
 		
 		query.setRequestedBy(reportForm.getRequestedBy());
+		
+		final int maxResults = reportForm.getMaxResultsAsInt();
+		if (maxResults > 0) {
+			query.setMaxResults(maxResults);
+		}
 		
 		final List<ProjectStatusDto> outcomes = buildOutcomeStore.loadBuildSummaries(query);
 		

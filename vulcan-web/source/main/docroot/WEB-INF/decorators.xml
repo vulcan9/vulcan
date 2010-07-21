@@ -4,7 +4,7 @@
 	<excludes>
 		<pattern>/projects.jsp</pattern>
 		<pattern>/projects/*/email</pattern>
-		<pattern>/rss.jsp</pattern>
+		<pattern>/projects/*/rss/*</pattern>
 		<pattern>/site/*</pattern>
 		<pattern>/*/site/*</pattern>
 	</excludes>

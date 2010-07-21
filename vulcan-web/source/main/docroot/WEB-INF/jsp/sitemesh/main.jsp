@@ -111,7 +111,7 @@
 	</div>
 	
 	<div id="site-info" class="container">
-		<p><a href="http://code.google.com/p/vulcan/" class="help">Vulcan</a> ${stateManager.version} Copyright (c) 2005-2009</p>
+		<p><a href="http://code.google.com/p/vulcan/" class="help">Vulcan</a> ${stateManager.version} Copyright (c) 2005-2010</p>
 		<p><a href="http://www.gnu.org/licenses/old-licenses/gpl-2.0.html" class="help">GNU General Public License v2</a></p>
 	</div>
 </body>
