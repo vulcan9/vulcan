@@ -10,6 +10,12 @@
 	</rule>
 	
 	<rule>
+		<name>RSS feed for project</name>
+		<from>^/projects/([^/]+)/rss/(\?(.*))?$</from>
+		<to last="true">/viewProjectBuildHistory.do?projectNames=$1&amp;transform=rss&amp;rangeType=all&amp;statusTypes=PASS&amp;statusTypes=FAIL&amp;statusTypes=SKIP&amp;statusTypes=ERROR&amp;maxResults=20&amp;$3</to>
+	</rule>
+	
+	<rule>
 		<name>xhtml build report</name>
 		<from>^/projects/([^/]+)/(\d+)/$</from>
 		<to>/viewProjectStatus.do?transform=xhtml&amp;projectName=$1&amp;buildNumber=$2</to>

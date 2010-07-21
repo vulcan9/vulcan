@@ -63,6 +63,7 @@
 		</form>
 		<form name="reportForm">
 			<field property="projectNames" depends="required"/>
+			<field property="maxResults" depends="integer"/>
 			<field property="minBuildNumber" depends="integer,validwhen">
 				<msg key="errors.required" name="validwhen"/>
 				<var>

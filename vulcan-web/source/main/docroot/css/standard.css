@@ -462,6 +462,10 @@ input[type=radio]+label {
 	margin-right: 1em;
 }
 
+label+input[type=text] {
+	margin-left: -0.5em;
+}
+
 input[type=text],input[type=password] {
 	width: 35em;
 }
@@ -605,6 +609,10 @@ select.reloadInterval {
 input.buildNumber {
 	width: 8em;
 	margin-left: 1em;
+}
+
+input.inline {
+	width: 5ex;
 }
 
 input[type=submit] {

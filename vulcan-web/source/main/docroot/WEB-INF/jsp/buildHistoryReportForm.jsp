@@ -27,7 +27,7 @@
 	<caption><spring:message code="captions.report.build.history"/></caption>
 	<tbody>
 		<tr>
-			<td rowspan="3"><spring:message code="label.range"/></td>
+			<td rowspan="4"><spring:message code="label.range"/></td>
 			<td>
 				<html:radio property="rangeType" value="date" styleId="rangeByDate"/>
 				<label for="rangeByDate"><spring:message code="label.range.by.date"/></label>
@@ -70,6 +70,17 @@
 			</td>
 		</tr>
 		<tr>
+			<td colspan="3">
+				<html:radio property="rangeType" value="recent" styleId="rangeRecent"/>
+				<label for="rangeRecent"><spring:message code="label.range.by.recent"/></label>
+				<html:text property="maxResults" styleClass="inline"/>
+				builds
+				<html:messages property="maxResults" id="msg">
+					<span class="error">${msg}</span>
+				</html:messages>
+			</td>
+		</tr>
+		<tr>
 			<td>
 				<html:radio property="rangeType" value="index" styleId="rangeByIndex"/>
 				<label for="rangeByIndex"><spring:message code="label.range.by.index"/></label>
@@ -103,12 +114,12 @@
 						<c:forEach items="${stateManager.projectConfigNames}" var="projectName">
 							<li>
 								<c:choose>
-									<c:when test="${reportForm.dateMode}">
-										<html:multibox property="projectNames" value="${projectName}"
+									<c:when test="${reportForm.rangeMode}">
+										<html:radio property="projectNames" value="${projectName}"
 											styleId="target_${v:mangle(projectName)}"/>
 									</c:when>
 									<c:otherwise>
-										<html:radio property="projectNames" value="${projectName}"
+										<html:multibox property="projectNames" value="${projectName}"
 											styleId="target_${v:mangle(projectName)}"/>
 									</c:otherwise>
 								</c:choose>
@@ -193,6 +204,7 @@
 				<html:select property="transform" styleClass="transform">
 					<html:option value="DataTable">HTML Data Table</html:option>
 					<html:option value="OpenFlashChart">Open Flash Chart</html:option>
+					<html:option value="rss">RSS Feed</html:option>
 					<html:option value="">Raw XML</html:option>
 				</html:select>
 				<ul class="metaDataOptions">

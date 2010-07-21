@@ -1,6 +1,6 @@
 /*
  * Vulcan Build Manager
- * Copyright (C) 2005-2006 Chris Eldredge
+ * Copyright (C) 2005-2010 Chris Eldredge
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -38,6 +38,8 @@ public class BuildOutcomeQueryDto extends BaseDto {
 	private UpdateType updateType;
 
 	private String requestedBy;
+	
+	private Integer maxResults;
 	
 	public Set<String> getProjectNames() {
 		return projectNames;
@@ -101,5 +103,13 @@ public class BuildOutcomeQueryDto extends BaseDto {
 	
 	public void setRequestedBy(String requestedBy) {
 		this.requestedBy = requestedBy;
+	}
+	
+	public Integer getMaxResults() {
+		return maxResults;
+	}
+	
+	public void setMaxResults(Integer maxResults) {
+		this.maxResults = maxResults;
 	}
 }

@@ -13,12 +13,6 @@
 <html:xhtml/>
 
 <head>
-	<jsp:element name="link">
-		<jsp:attribute name="title">RSS</jsp:attribute>
-		<jsp:attribute name="rel">alternate</jsp:attribute>
-		<jsp:attribute name="type">application/rss+xml</jsp:attribute>
-		<jsp:attribute name="href"><c:url value="/rss.jsp"/></jsp:attribute>
-	</jsp:element>
 	<c:if test="${preferences.reloadInterval > 0}">
 		<script type="text/javascript">refreshDashboard(null, ${preferences.reloadInterval * 1000}, "<c:url value="/"/>");</script>
 	</c:if>

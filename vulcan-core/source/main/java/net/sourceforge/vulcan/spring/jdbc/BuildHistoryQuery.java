@@ -1,6 +1,6 @@
 /*
  * Vulcan Build Manager
- * Copyright (C) 2005-2007 Chris Eldredge
+ * Copyright (C) 2005-2010 Chris Eldredge
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,6 +18,7 @@
  */
 package net.sourceforge.vulcan.spring.jdbc;
 
+import java.util.Collections;
 import java.util.List;
 
 import javax.sql.DataSource;
@@ -26,9 +27,15 @@ import net.sourceforge.vulcan.dto.BuildOutcomeQueryDto;
 
 class BuildHistoryQuery extends BuildQuery implements BuilderQuery {
 	protected Object[] parameterValues;
+	private final Integer maxResults;
 	
 	public BuildHistoryQuery(DataSource dataSource, BuildOutcomeQueryDto queryDto) {
 		super(dataSource, true);
+		
+		maxResults = queryDto.getMaxResults();
+		if (isMaxResultsSpecified()) {
+			setMaxRows(maxResults);
+		}
 		
 		HistoryQueryBuilder.buildQuery(queryDto, this);
 	}
@@ -39,11 +46,35 @@ class BuildHistoryQuery extends BuildQuery implements BuilderQuery {
 	
 	@Override
 	public void setSql(String sql) {
-		super.setSql(sql + " order by completion_date");
+		String orderBy = " order by completion_date";
+		
+		/*
+		 * If maxResults is specified we want the most
+		 * recent N records, so invert sort order.
+		 */
+		if (isMaxResultsSpecified()) {
+			orderBy += " desc";
+		}
+		
+		super.setSql(sql + orderBy);
 	}
 	
 	@SuppressWarnings("unchecked")
 	public List<JdbcBuildOutcomeDto> queryForHistory() {
-		return execute(parameterValues);
+		final List results = execute(parameterValues);
+
+		/*
+		 * Reverse to invert descending order specified
+		 * in setSql.
+		 */
+		if (isMaxResultsSpecified()) {
+			Collections.reverse(results);
+		}
+		
+		return results;
+	}
+
+	private boolean isMaxResultsSpecified() {
+		return maxResults != null && maxResults > 0;
 	}
 }

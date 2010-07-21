@@ -28,6 +28,7 @@ import java.util.Date;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.struts.action.ActionErrors;
 import org.apache.struts.action.ActionMapping;
 import org.apache.struts.action.ActionMessage;
@@ -49,6 +50,7 @@ public class ReportForm extends ValidatorForm {
 	private String updateType;
 	private String requestedBy;
 	private String tagName;
+	private String maxResults;
 	
 	/*
 	 * This property is only supplied so it is remembered.
@@ -90,10 +92,10 @@ public class ReportForm extends ValidatorForm {
 		return "date".equals(rangeType);
 	}
 	public boolean isIncludeAll() {
-		return "all".equals(rangeType);
+		return "all".equals(rangeType) || "recent".equals(rangeType);
 	}
 	public boolean isRangeMode() {
-		return !(isDateMode() || isIncludeAll());
+		return "index".equals(rangeType);
 	}
 	public String getRangeType() {
 		return rangeType;
@@ -184,6 +186,15 @@ public class ReportForm extends ValidatorForm {
 	}
 	public void setTagName(String tagName) {
 		this.tagName = tagName;
+	}
+	public String getMaxResults() {
+		return maxResults;
+	}
+	public int getMaxResultsAsInt() {
+		return StringUtils.isBlank(maxResults) ? -1 : Integer.parseInt(maxResults);
+	}
+	public void setMaxResults(String maxResults) {
+		this.maxResults = maxResults;
 	}
 
 	private Date parseDate(final String string) {

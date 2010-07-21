@@ -93,6 +93,7 @@
 			</bean>
 		</property>
 	</bean>
+	
 	<bean class="net.sourceforge.vulcan.spring.mbean.VulcanManager">
 		<property name="stateManager" ref="stateManager"/>
 	</bean>
@@ -233,6 +234,7 @@
 				<entry key="xhtml" value="xsl/BuildReport.xsl"/>
 				<entry key="email" value="xsl/BuildReportEmail.xsl"/>
 				<entry key="DataTable" value="xsl/BuildHistoryDataTable.xsl"/>
+				<entry key="rss" value="xsl/BuildHistoryRss.xsl"/>
 				<entry key="OpenFlashChart-BuildOutcomePieChart" value="xsl/OpenFlashChart-BuildOutcomePieChart.xsl"/>
 				<entry key="OpenFlashChart-BuildDuration" value="xsl/OpenFlashChart-BuildDuration.xsl"/>
 				<entry key="OpenFlashChart-Metrics" value="xsl/OpenFlashChart-Metrics.xsl"/>

@@ -1,6 +1,6 @@
 /*
  * Vulcan Build Manager
- * Copyright (C) 2005-2006 Chris Eldredge
+ * Copyright (C) 2005-2010 Chris Eldredge
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -63,6 +63,7 @@ public final class SpringEventPool implements EventPool, ApplicationListener {
 		
 		return list;
 	}
+	
 	public synchronized List<Event> getEvents(EventType... types) {
 		List<Event> list = new ArrayList<Event>();
 		
@@ -76,6 +77,7 @@ public final class SpringEventPool implements EventPool, ApplicationListener {
 		
 		return list;
 	}
+	
 	public synchronized void onApplicationEvent(ApplicationEvent event) {
 		if (event instanceof EventBridge) {
 			if (events.size() == maxSize) {
@@ -84,10 +86,12 @@ public final class SpringEventPool implements EventPool, ApplicationListener {
 			events.add(0, ((EventBridge)event).getEvent());
 		}
 	}
+	
 	@ManagedAttribute
 	public int getMaxSize() {
 		return maxSize;
 	}
+	
 	@ManagedAttribute(persistPolicy="onUpdate")
 	public synchronized void setMaxSize(int maxSize) {
 		this.maxSize = maxSize;
@@ -97,6 +101,7 @@ public final class SpringEventPool implements EventPool, ApplicationListener {
 			events = new ArrayList<Event>(events.subList(0, maxSize));
 		}
 	}
+	
 	@ManagedOperation
 	public synchronized void clear() {
 		events.clear();

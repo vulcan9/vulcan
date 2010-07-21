@@ -58,6 +58,15 @@
 				<title>
 					<xsl:value-of select="vulcan:getMessage($messageSource, 'label.build.summary')"/>
 				</title>
+				
+				<link title="RSS" rel="alternate" type="application/rss+xml">
+					<xsl:attribute name="href">
+						<xsl:value-of select="$viewProjectStatusURL"/>
+						<xsl:value-of select="name"/>
+						<xsl:text>/rss/</xsl:text>
+					</xsl:attribute>
+				</link>
+				
 				<style type="text/css">
 					<xsl:text>div#</xsl:text>
 					<xsl:value-of select="$visible-div-id"/>
