@@ -21,8 +21,8 @@
 	<xsl:template match="/build-history">
 		<rss version="2.0">
 			<channel>
-				<title>RSS</title>
-				<description>Build results for projects named X</description>
+				<title><xsl:value-of select="vulcan:getMessage($messageSource, 'rss.title')"/></title>
+				<description><xsl:value-of select="vulcan:getMessage($messageSource, 'rss.description')"/></description>
 				<link><xsl:value-of select="$viewProjectStatusURL"/></link>
 	
 				<xsl:apply-templates select="project">
@@ -33,15 +33,20 @@
 	</xsl:template>
 	
 	<xsl:template match="project">
+		<xsl:variable name="timestamp">
+			<xsl:call-template name="replace-string">
+				<xsl:with-param name="text" select="timestamp/text()"/>
+				<xsl:with-param name="from" select="' '"/>
+				<xsl:with-param name="to" select="'T'"/>
+			</xsl:call-template>
+		</xsl:variable>
 		<item>
 			<title>
-				<xsl:value-of select="name"/>
-				<xsl:text> - </xsl:text>
-				<xsl:value-of select="status"/>
-				<xsl:text> - Build </xsl:text>
-				<xsl:value-of select="build-number"/>
+				<xsl:value-of select="vulcan:getMessage($messageSource, 'rss.item.title', name, build-number, status)"/>
 			</title>
-			<pubDate><xsl:value-of select="datetime:formatDate(timestamp, $rss-date-format)"/></pubDate>
+			<pubDate>
+				<xsl:value-of select="datetime:formatDate($timestamp, $rss-date-format)"/>
+			</pubDate>
 			<link>
 				<xsl:value-of select="$viewProjectStatusURL"/>
 				<xsl:value-of select="name"/>
@@ -56,6 +61,7 @@
 				<xsl:text>&lt;p&gt;</xsl:text>
 				<xsl:value-of select="build-reason"/>
 				<xsl:text>&lt;/p&gt;</xsl:text>
+				
 			</description>
 		</item>
 	</xsl:template>

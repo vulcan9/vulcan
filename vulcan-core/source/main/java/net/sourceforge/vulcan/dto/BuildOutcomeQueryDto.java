@@ -112,4 +112,16 @@ public class BuildOutcomeQueryDto extends BaseDto {
 	public void setMaxResults(Integer maxResults) {
 		this.maxResults = maxResults;
 	}
+
+	/**
+	 * @return true when maxResults is specified and
+	 * neither minDate nor minBuildNumber are specified; false
+	 * otherwise.
+	 */
+	public boolean isUnbounded() {
+		return getMaxResults() != null
+			&& getMaxResults() > 0
+			&& getMinDate() == null
+			&& getMinBuildNumber() == null;
+	}
 }
