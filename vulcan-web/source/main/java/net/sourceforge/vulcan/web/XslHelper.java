@@ -53,6 +53,18 @@ public class XslHelper {
 		return webApplicationContext.getMessage(code, new String[] {arg1}, locale);
 	}
 	
+	public String getMessage(String code, String arg1, String arg2) {
+		return webApplicationContext.getMessage(code, new String[] {arg1, arg2}, locale);
+	}
+	
+	public String getMessage(String code, String arg1, String arg2, String arg3) {
+		return webApplicationContext.getMessage(code, new String[] {arg1, arg2, arg3}, locale);
+	}
+	
+	public String getMessage(String code, String arg1, String arg2, String arg3, String arg4) {
+		return webApplicationContext.getMessage(code, new String[] {arg1, arg2, arg3, arg4}, locale);
+	}
+	
 	public static String mangle(String s) {
 		return JstlFunctions.mangle(s);
 	}

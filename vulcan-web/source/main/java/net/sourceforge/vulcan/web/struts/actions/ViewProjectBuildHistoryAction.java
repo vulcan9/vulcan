@@ -124,6 +124,11 @@ public final class ViewProjectBuildHistoryAction extends ProjectReportBaseAction
 		if (StringUtils.isNotBlank(transformType)) {
 			final ActionForward forward = mapping.findForward(transformType);
 			if (forward != null) {
+				if (query.isUnbounded()) {
+					// Refine query to avoid loading irrelevant data.
+					query.setMinDate(outcomes.get(0).getCompletionDate());
+				}
+
 				prepareMetrics(request, outcomes, doc, fromLabel, toLabel);
 				prepareStatistics(request, query);
 				return forward;

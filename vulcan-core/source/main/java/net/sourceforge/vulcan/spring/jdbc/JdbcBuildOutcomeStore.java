@@ -41,7 +41,6 @@ import net.sourceforge.vulcan.exception.StoreException;
 import net.sourceforge.vulcan.metadata.SvnRevision;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.time.DateUtils;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
@@ -197,16 +196,11 @@ public class JdbcBuildOutcomeStore implements BuildOutcomeStore, ProjectNameChan
 		 * we need to avoid loading all metrics when we only need the ones related
 		 * to the results we have.
 		 */
-		if (query.getMaxResults() != null && query.getMaxResults() > 0
-				&& query.getMinDate() == null && query.getMinBuildNumber() == null) {
-			
+		if (query.isUnbounded()) {
 			// Make a copy to avoid modifying passed in object.
 			query = (BuildOutcomeQueryDto) query.copy();
 			
 			query.setMinDate(results.get(0).getCompletionDate());
-			
-			// maxDate is exclusive.  Add a minute to it so last record is within range.
-			query.setMaxDate(DateUtils.addMinutes(results.get(results.size()-1).getCompletionDate(), 1));
 		}
 		
 		final BuildHistoryMetricsQuery metricsQuery = new BuildHistoryMetricsQuery(dataSource, query);
