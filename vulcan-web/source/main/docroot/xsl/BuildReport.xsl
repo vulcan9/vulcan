@@ -740,7 +740,7 @@
 	
 	<xsl:template match="/project/test-failures">
 		<div class="tab-panel" id="tests-panel" xmlns="http://www.w3.org/1999/xhtml">
-			<xsl:if test="count(/project/metrics[@key='vulcan.metrics.tests.executed']) = 0">
+			<xsl:if test="count(/project/metrics/metric[@key='vulcan.metrics.tests.executed']) = 0">
 				<span class="warning">
 					<xsl:value-of select="vulcan:getMessage($messageSource, 'messages.tests.carried.over')"/>
 				</span>
