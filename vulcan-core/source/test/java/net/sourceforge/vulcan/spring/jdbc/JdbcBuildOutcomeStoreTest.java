@@ -1,6 +1,6 @@
 /*
  * Vulcan Build Manager
- * Copyright (C) 2005-2007 Chris Eldredge
+ * Copyright (C) 2005-2010 Chris Eldredge
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -161,6 +161,31 @@ public class JdbcBuildOutcomeStoreTest extends TestCase {
 		assertEquals(date, after.getClaimDate());
 	}
 
+	public void testClaimBrokenBuildCaseInsensitiveUsername() throws Exception {
+		final JdbcBuildOutcomeDto first = storeOutcome();
+		
+		final Date date = new Date(12345l);
+		store.claimBrokenBuild(first.getId(), "Lazy User", date);
+		
+		final JdbcBuildOutcomeDto firstResult = store.loadBuildOutcome(first.getId());
+		
+		assertEquals("Lazy User", firstResult.getBrokenBy());
+		assertEquals(date, firstResult.getClaimDate());
+		
+		outcome.setBuildNumber(outcome.getBuildNumber() + 1);
+		outcome.setId(null);
+		outcome.setBrokenBy(null);
+		outcome.setClaimDate(null);
+
+		final JdbcBuildOutcomeDto second = storeOutcome();
+		
+		store.claimBrokenBuild(second.getId(), "LAZY USER", date);
+		
+		final JdbcBuildOutcomeDto secondResult = store.loadBuildOutcome(second.getId());
+		
+		assertEquals("Lazy User", secondResult.getBrokenBy());
+	}
+
 	public void testClaimBrokenBuildLeavesOthers() throws Exception {
 		final JdbcBuildOutcomeDto other = storeOutcome();
 		final Date date = new Date(12345l);
@@ -181,7 +206,6 @@ public class JdbcBuildOutcomeStoreTest extends TestCase {
 		
 		assertNull(otherAfter.getBrokenBy());
 		assertNull(otherAfter.getClaimDate());
-		
 	}
 	
 	public void testSaveEmptyBrokenByUsesrDoesNotSetClaimedDate() throws Exception {
