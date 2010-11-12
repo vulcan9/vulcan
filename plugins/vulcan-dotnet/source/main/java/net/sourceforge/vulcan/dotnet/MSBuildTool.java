@@ -84,6 +84,9 @@ public class MSBuildTool extends DotNetBuildToolBase  {
 		
 		if (StringUtils.isNotBlank(buildEnv.getMaxJobs())) {
 			args.add("/maxcpucount:" + buildEnv.getMaxJobs());
+			if (!buildEnv.isNodeReuseEnabled()) {
+				args.add("/nodeReuse:false");
+			}
 		}
 		
 		final MSBuildConsoleLoggerParametersDto clp = dotNetProjectConfig.getConsoleLoggerParameters();
