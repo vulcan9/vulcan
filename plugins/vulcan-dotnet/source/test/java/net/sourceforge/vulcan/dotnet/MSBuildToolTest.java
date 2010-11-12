@@ -32,7 +32,6 @@ public class MSBuildToolTest extends MSBuildToolTestBase {
 		assertArgsContains("/toolsversion:3.5");
 	}
 
-	
 	public void testSetsToolsVersionWhenBlank() throws Exception {
 		buildEnv.setToolsVersion("");
 		assertArgsNotContains("/toolsversion:");
@@ -41,6 +40,23 @@ public class MSBuildToolTest extends MSBuildToolTestBase {
 	public void testSetsToolsVersionWhenUnspecified() throws Exception {
 		buildEnv.setToolsVersion("Unspecified");
 		assertArgsNotContains("/toolsversion:");
+	}
+	
+	public void testOmitsNodeReuseWhenEnabled() throws Exception {
+		buildEnv.setNodeReuseEnabled(true);
+		assertArgsNotContains("/nodeReuse:");
+	}
+	
+	public void testOmitsNodeReuseWhenMaxJobsUnspecified() throws Exception {
+		buildEnv.setMaxJobs("");
+		buildEnv.setNodeReuseEnabled(false);
+		assertArgsNotContains("/nodeReuse:");
+	}
+	
+	public void testSetsNodeReuseWhenDisabled() throws Exception {
+		buildEnv.setMaxJobs("2");
+		buildEnv.setNodeReuseEnabled(false);
+		assertArgsContains("/nodeReuse:false");
 	}
 
 	public void testSetsMaxCpuCountWhenSpecified() throws Exception {

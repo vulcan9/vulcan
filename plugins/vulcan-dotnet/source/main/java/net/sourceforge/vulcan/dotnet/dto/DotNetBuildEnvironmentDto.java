@@ -43,6 +43,7 @@ public class DotNetBuildEnvironmentDto extends PluginProfileDto {
 	private DotNetEnvironmentType type;
 	private String toolsVersion = "Unspecified";
 	private String maxJobs;
+	private boolean nodeReuseEnabled = true;
 	
 	@Override
 	public String getPluginId() {
@@ -59,6 +60,12 @@ public class DotNetBuildEnvironmentDto extends PluginProfileDto {
 	@Override
 	public String getHelpTopic() {
 		return "DotNetBuildEnvironmentConfiguration";
+	}
+	public boolean isNodeReuseEnabled() {
+		return nodeReuseEnabled;
+	}
+	public void setNodeReuseEnabled(boolean nodeReuseEnabled) {
+		this.nodeReuseEnabled = nodeReuseEnabled;
 	}
 
 	@Override
@@ -83,6 +90,9 @@ public class DotNetBuildEnvironmentDto extends PluginProfileDto {
 		
 		addProperty(pds, "maxJobs", "DotNetBuildEnvironmentDto.maxJobs.name",
 				"DotNetBuildEnvironmentDto.maxJobs.text", locale);
+		
+		addProperty(pds, "nodeReuseEnabled", "DotNetBuildEnvironmentDto.nodeReuseEnabled.name",
+				"DotNetBuildEnvironmentDto.nodeReuseEnabled.text", locale);
 		
 		return pds;
 	}
