@@ -1,6 +1,6 @@
 /*
  * Vulcan Build Manager
- * Copyright (C) 2005-2007 Chris Eldredge
+ * Copyright (C) 2005-2010 Chris Eldredge
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -40,6 +40,6 @@ class LookupTableQuery extends MappingSqlQuery {
 	}
 	@Override
 	protected Object mapRow(ResultSet rs, int rowNumber) throws SQLException {
-		return rs.getString(1);
+		return rs.getString(1).toLowerCase();
 	}
 }

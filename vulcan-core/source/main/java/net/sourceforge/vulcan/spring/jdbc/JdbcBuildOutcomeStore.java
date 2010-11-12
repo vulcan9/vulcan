@@ -1,6 +1,6 @@
 /*
  * Vulcan Build Manager
- * Copyright (C) 2005-2009 Chris Eldredge
+ * Copyright (C) 2005-2010 Chris Eldredge
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -258,7 +258,7 @@ public class JdbcBuildOutcomeStore implements BuildOutcomeStore, ProjectNameChan
 	public synchronized void claimBrokenBuild(UUID id, String userName, Date claimDate) {
 		boolean brokenByNameAdded = false;
 		
-		if (!brokenBuildUsers.contains(userName)) {
+		if (!brokenBuildUsers.contains(userName.toLowerCase())) {
 			jdbcTemplate.update("insert into users (username) values (?)", new Object[] {userName});
 			brokenByNameAdded = true;
 		}
@@ -268,7 +268,7 @@ public class JdbcBuildOutcomeStore implements BuildOutcomeStore, ProjectNameChan
 				userName, claimDate, id.toString()});
 		
 		if (brokenByNameAdded) {
-			brokenBuildUsers.add(userName);
+			brokenBuildUsers.add(userName.toLowerCase());
 		}
 	}
 	
@@ -353,7 +353,7 @@ public class JdbcBuildOutcomeStore implements BuildOutcomeStore, ProjectNameChan
 		}
 		
 		final String brokenBy = outcome.getBrokenBy();
-		if (StringUtils.isNotBlank(brokenBy) && !brokenBuildUsers.contains(brokenBy)) {
+		if (StringUtils.isNotBlank(brokenBy) && !brokenBuildUsers.contains(brokenBy.toLowerCase())) {
 			jdbcTemplate.update("insert into users (username) values (?)", new Object[] {brokenBy});
 			brokenByNameAdded = true;
 		}
@@ -397,7 +397,7 @@ public class JdbcBuildOutcomeStore implements BuildOutcomeStore, ProjectNameChan
 		}
 		
 		if (brokenByNameAdded) {
-			brokenBuildUsers.add(brokenBy);
+			brokenBuildUsers.add(brokenBy.toLowerCase());
 		}
 		return outcome.getId();
 	}
