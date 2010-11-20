@@ -55,6 +55,7 @@ class DependencyGroupBuilder {
 		this.buildOnDependencyFailureOverride = buildOnDependencyFailureOverride;
 		this.buildOnNoUpdatesOverride = buildOnNoUpdatesOverride;
 	}
+	
 	static DependencyGroup buildDependencyGroup(ProjectConfigDto[] projects,
 			ProjectManager projectManager, DependencyBuildPolicy policy,
 			WorkingCopyUpdateStrategy updateStrategyOverride, boolean buildOnDependencyFailureOverride, boolean buildOnNoUpdatesOverride)
@@ -63,6 +64,7 @@ class DependencyGroupBuilder {
 				updateStrategyOverride,
 				buildOnDependencyFailureOverride, buildOnNoUpdatesOverride).buildDependencyGroup(projects);
 	}
+	
 	private DependencyGroup buildDependencyGroup(ProjectConfigDto[] projects) throws ProjectsLockedException {
 		for (ProjectConfigDto project : projects) {
 			addOnce(project, false);
@@ -73,9 +75,8 @@ class DependencyGroupBuilder {
 			
 		return dg;
 	}
+	
 	private void addOnce(ProjectConfigDto projectConfig, boolean isDependency) {
-		final String name = projectConfig.getName();
-		
 		if (projectConfig.isLocked()) {
 			if (isDependency && DependencyBuildPolicy.AS_NEEDED.equals(policy)) {
 				// exclude locked projects that have been included "as needed"
@@ -87,27 +88,12 @@ class DependencyGroupBuilder {
 			return;
 		}
 		
-		if (!added.contains(name)) {
-			added.add(name);
-			
-			ProjectConfigDto copy = (ProjectConfigDto) projectConfig.copy();
-			if (buildOnDependencyFailureOverride) {
-				copy.setBuildOnDependencyFailure(true);
-			}
-			if (buildOnNoUpdatesOverride) {
-				copy.setBuildOnNoUpdates(true);
-			}
-			if (Full == updateStrategyOverride) {
-				copy.setUpdateStrategy(UpdateStrategy.CleanAlways);
-			} else if (Incremental == updateStrategyOverride) {
-				copy.setUpdateStrategy(UpdateStrategy.IncrementalAlways);
-			}
-			
-			dg.addTarget(copy);
+		if (!added.contains(projectConfig.getName())) {
+			add(projectConfig);
 			
 			if (projectConfig.isAutoIncludeDependencies() && !DependencyBuildPolicy.NONE.equals(policy)) {
 				for (String depName : projectConfig.getDependencies()) {
-					copy = (ProjectConfigDto)projectManager.getProjectConfig(depName).copy();
+					ProjectConfigDto copy = (ProjectConfigDto)projectManager.getProjectConfig(depName).copy();
 					if (DependencyBuildPolicy.FORCE.equals(policy)) {
 						copy.setBuildOnDependencyFailure(true);
 						copy.setBuildOnNoUpdates(true);
@@ -117,5 +103,33 @@ class DependencyGroupBuilder {
 				}
 			}
 		}
+	}
+	
+	private void add(ProjectConfigDto projectConfig) {
+		added.add(projectConfig.getName());
+		
+		ProjectConfigDto copy = (ProjectConfigDto) projectConfig.copy();
+		
+		if (buildOnDependencyFailureOverride) {
+			copy.setBuildOnDependencyFailure(true);
+		}
+		
+		if (buildOnNoUpdatesOverride) {
+			copy.setBuildOnNoUpdates(true);
+		}
+		
+		if (Full == updateStrategyOverride) {
+			copy.setUpdateStrategy(UpdateStrategy.CleanAlways);
+		} else if (Incremental == updateStrategyOverride) {
+			copy.setUpdateStrategy(UpdateStrategy.IncrementalAlways);
+		}
+		
+		if (shouldBuild(copy)) {
+			dg.addTarget(copy);
+		}
+	}
+
+	private boolean shouldBuild(ProjectConfigDto project) {
+		return true;
 	}
 }

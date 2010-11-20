@@ -43,7 +43,8 @@ public final class ProjectSchedulerImpl extends AbstractScheduler implements Pro
 						projects,
 						DependencyBuildPolicy.AS_NEEDED,
 						null,
-						false, false);
+						false,
+						false);
 		
 		dg.setName(getName());
 		

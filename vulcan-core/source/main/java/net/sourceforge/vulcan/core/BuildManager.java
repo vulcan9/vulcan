@@ -81,4 +81,6 @@ public interface BuildManager {
 	Map<String, ProjectStatusDto> getProjectStatus();
 
 	Integer getMostRecentBuildNumberByWorkDir(String workDir);
+
+	ProjectStatusDto getMostRecentBuildByWorkDir(String projectName, String workDir);
 }

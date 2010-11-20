@@ -65,8 +65,7 @@ public class ProjectBuilderImpl implements ProjectBuilder {
 	private final Log log = LogFactory.getLog(ProjectBuilder.class);
 	
 	private WorkingCopyUpdateExpert workingCopyUpdateExpert = new WorkingCopyUpdateExpert();
-	private ProjectRebuildExpert projectRebuildExpert = new ProjectRebuildExpert(workingCopyUpdateExpert);
-
+	
 	/* Injected configuration fields */
 	private ConfigurationStore configurationStore;
 	private BuildOutcomeStore buildOutcomeStore;
@@ -101,8 +100,6 @@ public class ProjectBuilderImpl implements ProjectBuilder {
 	private Thread buildThread;
 	
 	public void init() {
-		projectRebuildExpert.setBuildManager(buildManager);
-		projectRebuildExpert.setProjectManager(projectManager);
 	}
 	
 	public final void build(BuildDaemonInfoDto info, ProjectConfigDto currentTarget, BuildDetailCallback buildDetailCallback) {
@@ -418,7 +415,8 @@ public class ProjectBuilderImpl implements ProjectBuilder {
 		
 		return true;
 	}
-	protected RevisionTokenDto checkBuildNeccessary(final RepositoryAdaptor ra, final ProjectConfigDto currentTarget) throws ProjectUpToDateException, RepositoryException, InterruptedException, StoreException {
+	
+	protected RevisionTokenDto checkBuildNeccessary(final RepositoryAdaptor ra, final ProjectConfigDto currentTarget) throws ProjectUpToDateException, InterruptedException, StoreException, ConfigException {
 		String tagName = currentTarget.getRepositoryTagName();
 		
 		if (!StringUtils.isBlank(tagName)) {
@@ -452,12 +450,25 @@ public class ProjectBuilderImpl implements ProjectBuilder {
 		buildStatus.setTagName(tagName);
 		buildStatus.setRepositoryUrl(ra.getRepositoryUrl());
 		
-		if (!projectRebuildExpert.shouldBuild(currentTarget, currentRev, buildStatus, previousRevision, previousStatus)) {
-			throw new ProjectUpToDateException();
-		}
+		determineBuildReason(currentTarget);
 		
 		return currentRev;
 	}
+
+	protected void determineBuildReason(final ProjectConfigDto currentTarget) throws ConfigException,	ProjectUpToDateException {
+		ProjectRebuildExpert expert = new ProjectRebuildExpert();
+		expert.setBuildManager(buildManager);
+		expert.setProjectManager(projectManager);
+		expert.setWorkingCopyUpdateExpert(workingCopyUpdateExpert);
+
+		if (!expert.shouldBuild(currentTarget, previousStatus)) {
+			throw new ProjectUpToDateException();
+		}
+		
+		buildStatus.setBuildReasonKey(expert.getMessageKey());
+		buildStatus.setBuildReasonArgs(expert.getMessageArgs());
+	}
+
 	protected void determineUpdateType(ProjectConfigDto currentTarget) throws StoreException {
 		ProjectStatusDto previousStatusForWorkDir = previousStatus;
 		

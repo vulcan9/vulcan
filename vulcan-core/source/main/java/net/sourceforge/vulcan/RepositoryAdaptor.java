@@ -24,6 +24,8 @@ import java.util.List;
 
 import net.sourceforge.vulcan.core.BuildDetailCallback;
 import net.sourceforge.vulcan.dto.ChangeLogDto;
+import net.sourceforge.vulcan.dto.ProjectConfigDto;
+import net.sourceforge.vulcan.dto.ProjectStatusDto;
 import net.sourceforge.vulcan.dto.RepositoryTagDto;
 import net.sourceforge.vulcan.dto.RevisionTokenDto;
 import net.sourceforge.vulcan.exception.RepositoryException;
@@ -31,6 +33,16 @@ import net.sourceforge.vulcan.metadata.SvnRevision;
 
 @SvnRevision(id="$Id$", url="$HeadURL$")
 public interface RepositoryAdaptor {
+	
+	/**
+	 * Determine if changes are available in the repository since the previous build.
+	 * This method is only called when a working copy is known to already exist and
+	 * the previous build result is available.
+	 * 
+	 * @param project The project settings to check.
+	 * @param previousStatus The result of the previous build.
+	 */
+	boolean hasIncomingChanges(ProjectConfigDto project, ProjectStatusDto previousStatus) throws RepositoryException;
 	
 	/**
 	 * Obtain a token representing the HEAD revision for the overall project tree.
@@ -117,4 +129,6 @@ public interface RepositoryAdaptor {
 	 * navigate from a build outcome summary to the source code easily.
 	 */
 	String getRepositoryUrl();
+
+	
 }

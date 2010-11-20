@@ -38,6 +38,7 @@ import net.sourceforge.vulcan.core.BuildDetailCallback;
 import net.sourceforge.vulcan.dto.ChangeLogDto;
 import net.sourceforge.vulcan.dto.ChangeSetDto;
 import net.sourceforge.vulcan.dto.ProjectConfigDto;
+import net.sourceforge.vulcan.dto.ProjectStatusDto;
 import net.sourceforge.vulcan.dto.RepositoryTagDto;
 import net.sourceforge.vulcan.dto.RevisionTokenDto;
 import net.sourceforge.vulcan.exception.ConfigException;
@@ -174,6 +175,20 @@ public class SubversionRepositoryAdaptor extends SubversionSupport implements Re
 		}
 	}
 
+	public boolean hasIncomingChanges(ProjectConfigDto project,	ProjectStatusDto previousStatus) throws RepositoryException {
+		RevisionTokenDto rev = previousStatus.getRevision();
+		
+		if (rev == null) {
+			rev = previousStatus.getLastKnownRevision();
+		}
+		
+		if (rev == null) {
+			return true;
+		}
+		
+		return getLatestRevision(rev).getRevision() > rev.getRevision();
+	}
+	
 	public RevisionTokenDto getLatestRevision(RevisionTokenDto previousRevision) throws RepositoryException {
 		final String path = lineOfDevelopment.getComputedRelativePath();
 		SVNDirEntry info;

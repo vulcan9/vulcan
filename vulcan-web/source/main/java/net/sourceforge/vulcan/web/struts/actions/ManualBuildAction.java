@@ -101,7 +101,6 @@ public final class ManualBuildAction extends Action {
 		
 		try {
 			dg = projectManager.buildDependencyGroup(
-		
 					projects.toArray(new ProjectConfigDto[projects.size()]),
 					policy,
 					buildForm.getWorkingCopyUpdateStrategy(),

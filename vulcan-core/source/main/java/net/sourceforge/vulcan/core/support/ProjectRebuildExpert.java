@@ -18,6 +18,8 @@
  */
 package net.sourceforge.vulcan.core.support;
 
+import java.io.File;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -25,12 +27,14 @@ import java.util.Map;
 import java.util.UUID;
 
 import net.sourceforge.vulcan.ProjectManager;
+import net.sourceforge.vulcan.RepositoryAdaptor;
 import net.sourceforge.vulcan.core.BuildManager;
 import net.sourceforge.vulcan.dto.ProjectConfigDto;
 import net.sourceforge.vulcan.dto.ProjectStatusDto;
 import net.sourceforge.vulcan.dto.RevisionTokenDto;
 import net.sourceforge.vulcan.dto.ProjectConfigDto.UpdateStrategy;
 import net.sourceforge.vulcan.dto.ProjectStatusDto.UpdateType;
+import net.sourceforge.vulcan.exception.ConfigException;
 import net.sourceforge.vulcan.metadata.SvnRevision;
 
 import org.apache.commons.logging.Log;
@@ -39,77 +43,158 @@ import org.apache.commons.logging.LogFactory;
 @SvnRevision(id = "$Id: ProjectBuilderTest.java 148 2006-12-03 21:50:35Z chris.eldredge $", url = "$HeadURL: https://vulcan.googlecode.com/svn/main/trunk/source/test/java/net/sourceforge/vulcan/core/support/ProjectBuilderTest.java $")
 class ProjectRebuildExpert {
 	private final Log log = LogFactory.getLog(getClass());
-	private final WorkingCopyUpdateExpert workingCopyUpdateExpert;
-	private final List<ChangeDetectionStrategy> strategies = new ArrayList<ChangeDetectionStrategy>();
+	
+	private final List<RebuildRule> rules = new ArrayList<RebuildRule>();
 	
 	private BuildManager buildManager;
 	private ProjectManager projectManager;
+	private WorkingCopyUpdateExpert workingCopyUpdateExpert;
 	
-	ProjectRebuildExpert(WorkingCopyUpdateExpert workingCopyUpdateExpert) {
-		this.workingCopyUpdateExpert = workingCopyUpdateExpert;
-		
-		strategies.add(new RevisionChangeDetectionStrategy());
-		strategies.add(new DependencyTimestampChangeDetectionStrategy());
-		strategies.add(new FullBuildAfterIncrementalBuildStrategy());
-		strategies.add(new ProjectConfigurationChangeDetectionStrategy());
-		strategies.add(new PluginConfigurationChangeDetectionStrategy());
-		strategies.add(new BuildForcedDetectionStrategy());
+	private String messageKey;
+	private String[] messageArgs;
+
+	ProjectRebuildExpert() {
+		// Rules are in order of fastest to slowest.
+		rules.add(new BuildForcedRule());
+		rules.add(new FirstBuildRule());
+		rules.add(new DependencyTimestampChangeRule());
+		rules.add(new ProjectConfigurationChangeRule());
+		rules.add(new PluginConfigurationChangeRule());
+		rules.add(new FullBuildAfterIncrementalBuildRule());
+		rules.add(new WorkingCopyNotPresentRule());
+		rules.add(new WorkingCopyNotUsingSameTagRule());
+		rules.add(new IncomingChangesRule());
 	}
 	
-	boolean shouldBuild(ProjectConfigDto currentTarget, RevisionTokenDto currentRevision, ProjectStatusDto buildStatus, RevisionTokenDto previousRevision, ProjectStatusDto previousStatus) {
-		for (ChangeDetectionStrategy strategy : strategies) {
-			if (strategy.shouldBuild(currentTarget, currentRevision, buildStatus, previousRevision, previousStatus)) {
+	public boolean shouldBuild(ProjectConfigDto project, ProjectStatusDto previousStatus) throws ConfigException {
+		for (RebuildRule rule : rules) {
+			if (rule.isSatisfiedBy(project, previousStatus)) {
 				return true;
 			}
 		}
 		
 		if (log.isInfoEnabled()) {
 			log.info("Not building project '" + 
-				currentTarget.getName() + "' because no updates are available.  " +
-				"The project is at revision " + currentRevision + ".");
+				project.getName() + "' because no updates are available.  " +
+				"The project is at revision " + previousStatus.getRevision() + ".");
 		}
 		
 		return false;
 	}
 	
-	void setBuildManager(BuildManager buildManager) {
+	public String getMessageKey() {
+		return messageKey;
+	}
+	
+	public String[] getMessageArgs() {
+		return messageArgs;
+	}
+
+	public void setBuildManager(BuildManager buildManager) {
 		this.buildManager = buildManager;
 	}
 	
-	void setProjectManager(ProjectManager projectManager) {
+	public void setProjectManager(ProjectManager projectManager) {
 		this.projectManager = projectManager;
 	}
 	
-	interface ChangeDetectionStrategy {
-		boolean shouldBuild(ProjectConfigDto currentTarget, RevisionTokenDto currentRevision,
-				ProjectStatusDto buildStatus, RevisionTokenDto previousRevision,
-				ProjectStatusDto previousStatus);
+	public void setWorkingCopyUpdateExpert(WorkingCopyUpdateExpert workingCopyUpdateExpert) {
+		this.workingCopyUpdateExpert = workingCopyUpdateExpert;
 	}
 	
-	class RevisionChangeDetectionStrategy implements ChangeDetectionStrategy {
-		public boolean shouldBuild(ProjectConfigDto currentTarget, RevisionTokenDto currentRevision, ProjectStatusDto buildStatus, RevisionTokenDto previousRevision, ProjectStatusDto previousStatus) {
-			if (previousRevision != null && previousRevision.equals(currentRevision)) {
+	abstract class RebuildRule {
+		public abstract boolean isSatisfiedBy(ProjectConfigDto project, ProjectStatusDto previousStatus) throws ConfigException;
+		
+		protected void setBuildReason(String messageKey, String... args) {
+			ProjectRebuildExpert.this.messageKey = messageKey;
+			ProjectRebuildExpert.this.messageArgs = args;
+		}
+	}
+	
+	class WorkingCopyNotUsingSameTagRule extends RebuildRule {
+		@Override
+		public boolean isSatisfiedBy(ProjectConfigDto project, ProjectStatusDto previousStatus) throws ConfigException {
+			ProjectStatusDto mostRecentBuildByWorkDir = previousStatus;
+			
+			if (!previousStatus.getWorkDir().equals(project.getWorkDir())) {
+				mostRecentBuildByWorkDir = buildManager.getMostRecentBuildByWorkDir(project.getName(), project.getWorkDir());
+			}
+			
+			String tagName = project.getRepositoryTagName();
+			
+			if (tagName == null) {
+				final RepositoryAdaptor ra = projectManager.getRepositoryAdaptor(project);
+				tagName = ra.getTagName();
+			}
+			
+			if (mostRecentBuildByWorkDir == null || mostRecentBuildByWorkDir.getTagName().equals(tagName)) {
+				return false;
+			}
+			
+			if (log.isInfoEnabled()) {
+				String msg = MessageFormat.format("Building project {0} because last build in directory {1} used tag {2} and this build uses tag {3}.",
+						project.getName(), project.getWorkDir(), tagName, previousStatus.getTagName());
+				
+				log.info(msg);
+			}
+			
+			setBuildReason("messages.build.reason.different.tag", project.getWorkDir(), tagName, mostRecentBuildByWorkDir.getTagName());
+			
+			return true;
+		}
+	}
+	/**
+	 * Causes the project to rebuild when the working copy is out of date with the repository
+	 */
+	class IncomingChangesRule extends RebuildRule {
+		public boolean isSatisfiedBy(ProjectConfigDto project, ProjectStatusDto previousStatus) throws ConfigException {
+			ProjectStatusDto mostRecentBuildByWorkDir = previousStatus;
+			
+			if (!previousStatus.getWorkDir().equals(project.getWorkDir())) {
+				mostRecentBuildByWorkDir = buildManager.getMostRecentBuildByWorkDir(project.getName(), project.getWorkDir());
+			}
+			
+			RevisionTokenDto previousRevision = mostRecentBuildByWorkDir == null ? null : mostRecentBuildByWorkDir.getRevision();
+			
+			final RepositoryAdaptor ra = projectManager.getRepositoryAdaptor(project);
+			
+			if (!ra.hasIncomingChanges(project, mostRecentBuildByWorkDir)) {
 				return false;
 			}
 
 			if (log.isInfoEnabled()) {
 				log.info("Building project '" + 
-					currentTarget.getName() + "' because revision " + currentRevision +
-					" is newer than revision " + previousRevision + ".");
+					project.getName() + "' because changes were detected since " + previousRevision + ".");
 			}
-				
-			buildStatus.setBuildReasonKey("messages.build.reason.repository.changes");
-			buildStatus.setBuildReasonArgs(null);
+			
+			setBuildReason("messages.build.reason.repository.changes");
 
 			return true;
 		}
 	}
 	
-	class DependencyTimestampChangeDetectionStrategy implements ChangeDetectionStrategy {
-		public boolean shouldBuild(ProjectConfigDto currentTarget, RevisionTokenDto currentRevision, ProjectStatusDto buildStatus, RevisionTokenDto previousRevision, ProjectStatusDto previousStatus) {
+	class WorkingCopyNotPresentRule extends RebuildRule {
+		public boolean isSatisfiedBy(ProjectConfigDto project, ProjectStatusDto previousStatus) throws ConfigException {
+			if (!new File(project.getWorkDir()).exists()) {
+				if (log.isInfoEnabled()) {
+					log.info("Building project '" + 
+						project.getName() + "' because working copy " + project.getWorkDir() + " does not exist.");
+				}
+				
+				setBuildReason("messages.build.reason.missing.working.copy");
+			}
+			return false;
+		}
+	}
+
+	/**
+	 * Causes the project to rebuild when a dependency is newer than the last build of this project. 
+	 */
+	class DependencyTimestampChangeRule extends RebuildRule {
+		public boolean isSatisfiedBy(ProjectConfigDto project, ProjectStatusDto previousStatus) {
 			final Map<String, UUID> dependencyIds = previousStatus.getDependencyIds();
 			
-			for (String depName : currentTarget.getDependencies()) {
+			for (String depName : project.getDependencies()) {
 				final ProjectStatusDto currentStatus = buildManager.getLatestStatus(depName);
 				
 				final UUID statusId = dependencyIds.get(depName);
@@ -122,12 +207,11 @@ class ProjectRebuildExpert {
 				if (!currentStatus.getId().equals(statusId)) {
 					if (log.isInfoEnabled()) {
 						log.info("Building project '" + 
-								currentTarget.getName() + "' because dependency '" +
+								project.getName() + "' because dependency '" +
 								depName + "' has been built more recently.");
 					}
 
-					buildStatus.setBuildReasonKey("messages.build.reason.dependency");
-					buildStatus.setBuildReasonArgs(new String[] {depName});
+					setBuildReason("messages.build.reason.dependency", depName);
 
 					return true;
 				}
@@ -137,9 +221,12 @@ class ProjectRebuildExpert {
 		}
 	}
 	
-	class ProjectConfigurationChangeDetectionStrategy implements ChangeDetectionStrategy {
-		public boolean shouldBuild(ProjectConfigDto currentTarget, RevisionTokenDto currentRevision, ProjectStatusDto buildStatus, RevisionTokenDto previousRevision, ProjectStatusDto previousStatus) {
-			final Date configDate = currentTarget.getLastModificationDate();
+	/**
+	 * Causes the project to rebuild when project configuration changed
+	 */
+	class ProjectConfigurationChangeRule extends RebuildRule {
+		public boolean isSatisfiedBy(ProjectConfigDto project, ProjectStatusDto previousStatus) {
+			final Date configDate = project.getLastModificationDate();
 			
 			if (configDate == null) {
 				return false;
@@ -150,11 +237,10 @@ class ProjectRebuildExpert {
 			if (configDate.after(lastBuild)) {
 				if (log.isInfoEnabled()) {
 					log.info("Buiding project '" + 
-							currentTarget.getName() + "' because project configuration changed.");
+							project.getName() + "' because project configuration changed.");
 				}
 
-				buildStatus.setBuildReasonKey("messages.build.reason.project.config");
-				buildStatus.setBuildReasonArgs(null);
+				setBuildReason("messages.build.reason.project.config");
 
 				return true;
 			}
@@ -163,18 +249,21 @@ class ProjectRebuildExpert {
 		}
 	}
 	
-	class PluginConfigurationChangeDetectionStrategy implements ChangeDetectionStrategy {
-		public boolean shouldBuild(ProjectConfigDto currentTarget, RevisionTokenDto currentRevision, ProjectStatusDto buildStatus, RevisionTokenDto previousRevision, ProjectStatusDto previousStatus) {
-			final java.util.Date plugin1 = projectManager.getPluginModificationDate(currentTarget.getRepositoryAdaptorPluginId());
-			final java.util.Date plugin2 = projectManager.getPluginModificationDate(currentTarget.getBuildToolPluginId());
+	/**
+	 * Causes the project to rebuild when plugin configuration changed.
+	 */
+	class PluginConfigurationChangeRule extends RebuildRule {
+		public boolean isSatisfiedBy(ProjectConfigDto project, ProjectStatusDto previousStatus) {
+			final java.util.Date plugin1 = projectManager.getPluginModificationDate(project.getRepositoryAdaptorPluginId());
+			final java.util.Date plugin2 = projectManager.getPluginModificationDate(project.getBuildToolPluginId());
 			final Date lastBuild = previousStatus.getCompletionDate();
 			
 			final String name;
 			
 			if (plugin1 != null && plugin1.after(lastBuild)) {
-				name = currentTarget.getRepositoryAdaptorConfig().getPluginName();
+				name = project.getRepositoryAdaptorConfig().getPluginName();
 			} else if (plugin2 != null && plugin2.after(lastBuild)) {
-				name = currentTarget.getBuildToolConfig().getPluginName();
+				name = project.getBuildToolConfig().getPluginName();
 			} else {
 				name = null;
 			}
@@ -182,12 +271,11 @@ class ProjectRebuildExpert {
 			if (name != null) {
 				if (log.isInfoEnabled()) {
 					log.info("Buiding project '" + 
-							currentTarget.getName() + "' because " +
+							project.getName() + "' because " +
 							name + " plugin configuration changed.");
 				}
 
-				buildStatus.setBuildReasonKey("messages.build.reason.plugin.config");
-				buildStatus.setBuildReasonArgs(new String[] {name});
+				setBuildReason("messages.build.reason.plugin.config", name);
 
 				return true;
 
@@ -195,16 +283,16 @@ class ProjectRebuildExpert {
 			return false;
 		}
 	}
-	class BuildForcedDetectionStrategy implements ChangeDetectionStrategy {
-		public boolean shouldBuild(ProjectConfigDto currentTarget, RevisionTokenDto currentRevision, ProjectStatusDto buildStatus, RevisionTokenDto previousRevision, ProjectStatusDto previousStatus) {
-			if (currentTarget.isBuildOnNoUpdates()) {
+	
+	class BuildForcedRule extends RebuildRule {
+		public boolean isSatisfiedBy(ProjectConfigDto project, ProjectStatusDto previousStatus) {
+			if (project.isBuildOnNoUpdates()) {
 				if (log.isInfoEnabled()) {
 					log.info("Buiding project '" + 
-							currentTarget.getName() + "' even though no updates are available because it was forced by a user.");
+							project.getName() + "' because 'force build' flag is set.");
 				}
 
-				buildStatus.setBuildReasonKey("messages.build.reason.forced");
-				buildStatus.setBuildReasonArgs(null);
+				setBuildReason("messages.build.reason.forced");
 
 				return true;
 			}
@@ -212,6 +300,22 @@ class ProjectRebuildExpert {
 			return false;
 		}
 	}
+	
+	class FirstBuildRule extends RebuildRule {
+		public boolean isSatisfiedBy(ProjectConfigDto project, ProjectStatusDto previousStatus) {
+			if (previousStatus == null) {
+				if (log.isInfoEnabled()) {
+					log.info("Buiding project '" + 
+							project.getName() + "' because no previous build exists.");
+				}
+
+				return true;
+			}
+			
+			return false;
+		}
+	}
+	
 	/**
 	 * Strategy that will build when all of these criteria are met:
 	 * <ul>
@@ -219,25 +323,23 @@ class ProjectRebuildExpert {
 	 *  <li>Full build was requested, or this build would be the first daily build</li>
 	 * </ul>  
 	 */
-	class FullBuildAfterIncrementalBuildStrategy implements ChangeDetectionStrategy {
-		public boolean shouldBuild(ProjectConfigDto currentTarget, RevisionTokenDto currentRevision, ProjectStatusDto buildStatus, RevisionTokenDto previousRevision, ProjectStatusDto previousStatus) {
+	class FullBuildAfterIncrementalBuildRule extends RebuildRule {
+		public boolean isSatisfiedBy(ProjectConfigDto project, ProjectStatusDto previousStatus) {
 			final UpdateType previousUpdateType = previousStatus.getUpdateType();
-			if (UpdateStrategy.CleanAlways == currentTarget.getUpdateStrategy() && UpdateType.Incremental == previousUpdateType) {
+			if (UpdateStrategy.CleanAlways == project.getUpdateStrategy() && UpdateType.Incremental == previousUpdateType) {
 				log.info("Buiding project '" + 
-						currentTarget.getName() + "' even though no updates are available because a full build was requested and the previous build was incremental.");
+						project.getName() + "' even though no updates are available because a full build was requested and the previous build was incremental.");
 				
-				buildStatus.setBuildReasonKey("messages.build.reason.full.after.incremental");
-				buildStatus.setBuildReasonArgs(null);
+				setBuildReason("messages.build.reason.full.after.incremental");
 
 				return true;
 			} else if (previousUpdateType != UpdateType.Full &&
-					workingCopyUpdateExpert.isDailyFullBuildRequired(currentTarget, previousStatus)) {
+					workingCopyUpdateExpert.isDailyFullBuildRequired(project, previousStatus)) {
 				
 				log.info("Buiding project '" + 
-						currentTarget.getName() + "' even though no updates are available because this is the first full build of the day.");
+						project.getName() + "' even though no updates are available because this is the first full build of the day.");
 				
-				buildStatus.setBuildReasonKey("messages.build.reason.full.after.incremental");
-				buildStatus.setBuildReasonArgs(null);
+				setBuildReason("messages.build.reason.full.after.incremental");
 
 				return true;
 			}
