@@ -296,9 +296,15 @@ public class BuildManagerImpl implements BuildManager {
 	public Map<String, ProjectStatusDto> getProjectStatus() {
 		return cache.getLatestOutcomes();
 	}
+
 	public Integer getMostRecentBuildNumberByWorkDir(String workDir) {
 		return cache.getMostRecentBuildNumberByWorkDir(workDir);
 	}
+
+	public ProjectStatusDto getMostRecentBuildByWorkDir(String projectName, String workDir) {
+		return cache.getOutcomeByBuildNumber(projectName, getMostRecentBuildNumberByWorkDir(workDir));
+	}
+
 	public Map<String, ProjectStatusDto> getProjectsBeingBuilt() {
 		try {
 			readLock.lock();

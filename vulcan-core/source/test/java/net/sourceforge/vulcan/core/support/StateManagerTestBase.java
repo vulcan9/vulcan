@@ -94,6 +94,9 @@ public abstract class StateManagerTestBase extends EasyMockTestCase
 			public Integer getMostRecentBuildNumberByWorkDir(String workDir) {
 				return null;
 			}
+			public ProjectStatusDto getMostRecentBuildByWorkDir(String projectName, String workDir) {
+				return null;
+			}
 			public void clear() {
 				buildMgrClearCallCount++;
 			}
