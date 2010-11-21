@@ -1,6 +1,6 @@
 /*
  * Vulcan Build Manager
- * Copyright (C) 2005-2006 Chris Eldredge
+ * Copyright (C) 2005-2010 Chris Eldredge
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,9 +23,11 @@ import net.sourceforge.vulcan.core.BuildManager;
 import net.sourceforge.vulcan.core.DependencyBuildPolicy;
 import net.sourceforge.vulcan.core.DependencyGroup;
 import net.sourceforge.vulcan.dto.ProjectConfigDto;
+import net.sourceforge.vulcan.event.ErrorEvent;
 import net.sourceforge.vulcan.event.EventHandler;
 import net.sourceforge.vulcan.event.InfoEvent;
 import net.sourceforge.vulcan.exception.AlreadyScheduledException;
+import net.sourceforge.vulcan.exception.ConfigException;
 import net.sourceforge.vulcan.exception.ProjectsLockedException;
 import net.sourceforge.vulcan.metadata.SvnRevision;
 
@@ -78,12 +80,16 @@ public class ScheduleProjectsJob extends QuartzJobBean implements Job {
 		
 		try {
 			final DependencyGroup dg = projectManager
-			.buildDependencyGroup(
+				.buildDependencyGroup(
 					projects,
 					DependencyBuildPolicy.AS_NEEDED,
 					null,
 					false, false);
 		
+			if (dg.isEmpty()) {
+				return;
+			}
+			
 			dg.setName(name);
 			buildManager.add(dg);
 		} catch (ProjectsLockedException ignore) {
@@ -93,6 +99,12 @@ public class ScheduleProjectsJob extends QuartzJobBean implements Job {
 					this,
 					"Scheduler.interval.too.short",
 					new Object[] {name}));
+		} catch (ConfigException e) {
+			eventHandler.reportEvent(new ErrorEvent(
+					this,
+					e.getKey(),
+					new Object[] {e.getArgs()},
+					e));
 		}
 	}
 }

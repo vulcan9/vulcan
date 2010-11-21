@@ -1,6 +1,6 @@
 /*
  * Vulcan Build Manager
- * Copyright (C) 2005-2009 Chris Eldredge
+ * Copyright (C) 2005-2010 Chris Eldredge
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,6 +29,7 @@ import java.util.UUID;
 
 import junit.framework.AssertionFailedError;
 import junit.framework.TestCase;
+import net.sourceforge.vulcan.core.BuildTarget;
 import net.sourceforge.vulcan.core.DependencyGroup;
 import net.sourceforge.vulcan.dto.BuildDaemonInfoDto;
 import net.sourceforge.vulcan.dto.BuildManagerConfigDto;
@@ -112,20 +113,20 @@ public class BuildManagerImplTest extends TestCase {
 		
 		assertEquals(null, a.getRequestedBy());
 		
-		assertSame(a, mgr.getTarget(info1));
+		assertSame(a, mgr.getTarget(info1).getProjectConfig());
 		
 		assertEquals(null, a.getRequestedBy());
 		
 		assertEquals(1, mgr.activeDaemons.size());
 		
 		try {
-			mgr.getTarget(info1);
+			mgr.getTarget(info1).getProjectConfig();
 			fail("expected exception");
 		} catch (IllegalStateException e) {
 		}
 		assertEquals(1, mgr.activeDaemons.size());
 
-		assertSame(b, mgr.getTarget(info2));
+		assertSame(b, mgr.getTarget(info2).getProjectConfig());
 	}
 	public void testTargetCompletedThrowsIfNotFound() {
 		try {
@@ -136,17 +137,17 @@ public class BuildManagerImplTest extends TestCase {
 		}
 	}
 	public void testGetTarget() {
-		ProjectConfigDto proj = mgr.getTarget(info1);
+		BuildTarget proj = mgr.getTarget(info1);
 		
 		assertEquals(null, proj);
 		
 		mgr.add(a);
 		mgr.add(b);
 		
-		assertSame(a, mgr.getTarget(info1));
+		assertSame(a, mgr.getTarget(info1).getProjectConfig());
 		assertEquals(1, mgr.activeDaemons.size());
 		
-		assertSame(b, mgr.getTarget(info2));
+		assertSame(b, mgr.getTarget(info2).getProjectConfig());
 		assertEquals(2, mgr.activeDaemons.size());
 		
 		BuildDaemonInfoDto info3 = (BuildDaemonInfoDto) info2.copy();
@@ -157,7 +158,7 @@ public class BuildManagerImplTest extends TestCase {
 	public void testGetProjectsBeingBuilt() {
 		assertEquals(Collections.emptyMap(), mgr.getProjectsBeingBuilt());
 		
-		ProjectConfigDto proj = mgr.getTarget(info1);
+		BuildTarget proj = mgr.getTarget(info1);
 		
 		assertEquals(null, proj);
 		assertEquals(Collections.emptyMap(), mgr.getProjectsBeingBuilt());
@@ -165,11 +166,11 @@ public class BuildManagerImplTest extends TestCase {
 		mgr.add(a);
 		mgr.add(b);
 		
-		assertSame(a, mgr.getTarget(info1));
+		assertSame(a, mgr.getTarget(info1).getProjectConfig());
 		assertEquals(1, mgr.activeDaemons.size());
 		assertEquals(Collections.singleton(a.getName()), mgr.getProjectsBeingBuilt().keySet());
 		
-		assertSame(b, mgr.getTarget(info2));
+		assertSame(b, mgr.getTarget(info2).getProjectConfig());
 		assertEquals(2, mgr.activeDaemons.size());
 		assertEquals(new HashSet<String>(Arrays.asList(new String[] {a.getName(), b.getName()})), mgr.getProjectsBeingBuilt().keySet());
 		
@@ -180,7 +181,7 @@ public class BuildManagerImplTest extends TestCase {
 	}
 	public void testRegisterStatus() throws Exception {
 		mgr.add(a);
-		assertSame(a, mgr.getTarget(info1));
+		assertSame(a, mgr.getTarget(info1).getProjectConfig());
 		
 		assertNotNull(mgr.getProjectsBeingBuilt().get(a.getName()));
 		
@@ -192,7 +193,7 @@ public class BuildManagerImplTest extends TestCase {
 	}
 	public void testRegisterStatusRegistersBuilder() throws Exception {
 		mgr.add(a);
-		ProjectConfigDto target = mgr.getTarget(info1);
+		ProjectConfigDto target = mgr.getTarget(info1).getProjectConfig();
 		
 		final ProjectStatusDto status = new ProjectStatusDto();
 		
@@ -203,7 +204,7 @@ public class BuildManagerImplTest extends TestCase {
 	}
 	public void testRegisterStatusFiresEvent() throws Exception {
 		mgr.add(a);
-		ProjectConfigDto target = mgr.getTarget(info1);
+		ProjectConfigDto target = mgr.getTarget(info1).getProjectConfig();
 		
 		final ProjectStatusDto status = new ProjectStatusDto();
 		
@@ -225,7 +226,7 @@ public class BuildManagerImplTest extends TestCase {
 		
 		mgr.add(dg);
 		
-		assertSame(a, mgr.getTarget(info1));
+		assertSame(a, mgr.getTarget(info1).getProjectConfig());
 		
 		assertEquals(1, mgr.activeBuilds.size());
 		assertEquals(1, mgr.activeDaemons.size());
@@ -250,7 +251,7 @@ public class BuildManagerImplTest extends TestCase {
 		mgr.add(a);
 		mgr.add(b);
 		
-		ProjectConfigDto config = mgr.getTarget(info1);
+		ProjectConfigDto config = mgr.getTarget(info1).getProjectConfig();
 		
 		assertEquals(0, fireCount);
 		assertFalse(mgr.getProjectStatus().containsKey(config.getName()));
@@ -270,7 +271,7 @@ public class BuildManagerImplTest extends TestCase {
 		assertSame(buildCompletedEvent.getStatus().getBuildNumber(), buildCompletedEvent.getStatus().getLastGoodBuildNumber());
 		assertSame(buildCompletedEvent.getStatus().getLastKnownRevision(), buildCompletedEvent.getStatus().getRevision());
 
-		config = mgr.getTarget(info2);
+		config = mgr.getTarget(info2).getProjectConfig();
 		final ProjectStatusDto st = createFakeStatus(config, rev1, Status.FAIL, "mock",
 				new Object[] {"foo"}, null);
 		
@@ -303,7 +304,7 @@ public class BuildManagerImplTest extends TestCase {
 		
 		mgr.add(a);
 		
-		ProjectConfigDto config = mgr.getTarget(info1);
+		ProjectConfigDto config = mgr.getTarget(info1).getProjectConfig();
 		mgr.targetCompleted(info1, config, createFakeStatus(config, rev0, Status.PASS, null, null, null));
 
 		assertEquals("mgr.isBuildingOrInQueue('" + a.getName() + "')", true, flag[0]);
@@ -321,7 +322,7 @@ public class BuildManagerImplTest extends TestCase {
 		
 		mgr.add(a);
 		
-		ProjectConfigDto config = mgr.getTarget(info1);
+		ProjectConfigDto config = mgr.getTarget(info1).getProjectConfig();
 		
 		try {
 			mgr.targetCompleted(info1, config, createFakeStatus(config, rev0, Status.PASS, null, null, null));
@@ -367,7 +368,7 @@ public class BuildManagerImplTest extends TestCase {
 		
 		mgr.add(dg);
 		
-		assertSame(b, mgr.getTarget(info1));
+		assertSame(b, mgr.getTarget(info1).getProjectConfig());
 
 		mgr.targetCompleted(info1, b, createFakeStatus(b, rev0, Status.FAIL, null, null, null));
 		
@@ -385,7 +386,7 @@ public class BuildManagerImplTest extends TestCase {
 		mgr.add(dg);
 		
 		assertEquals(null, a.getRequestedBy());
-		assertSame(a, mgr.getTarget(info1));
+		assertSame(a, mgr.getTarget(info1).getProjectConfig());
 		assertEquals("Catherine", a.getRequestedBy());
 		
 		assertEquals(null, mgr.getTarget(info2));
@@ -401,14 +402,14 @@ public class BuildManagerImplTest extends TestCase {
 		
 		assertNull(cache.getLatestOutcome("b"));
 		
-		ProjectConfigDto target = mgr.getTarget(info1);
+		ProjectConfigDto target = mgr.getTarget(info1).getProjectConfig();
 		mgr.targetCompleted(info1, target,
 				createFakeStatus(target, rev1, Status.PASS, null, null, null));
 		
 		assertNotNull(cache.getLatestOutcome("b"));
 		assertNotNull(cache.getLatestOutcomeId("b"));
 		
-		target = mgr.getTarget(info1);
+		target = mgr.getTarget(info1).getProjectConfig();
 		mgr.targetCompleted(info1, target, 
 				createFakeStatus(target, rev1, Status.PASS, null, null, null));
 		
@@ -424,14 +425,14 @@ public class BuildManagerImplTest extends TestCase {
 		
 		mgr.add(dg);
 		
-		assertSame(b, mgr.getTarget(info1));
+		assertSame(b, mgr.getTarget(info1).getProjectConfig());
 		
 		assertEquals(null, mgr.getTarget(info2));
 		
 		mgr.targetCompleted(info1, b, 
 				createFakeStatus(b, rev0, Status.PASS, null, null, null));
 		
-		assertSame(a, mgr.getTarget(info1));
+		assertSame(a, mgr.getTarget(info1).getProjectConfig());
 	}
 
 	public void testGetsNextOnPendingDep() throws Exception {
@@ -443,9 +444,9 @@ public class BuildManagerImplTest extends TestCase {
 		mgr.add(dg);
 		mgr.add(c);
 		
-		assertSame(b, mgr.getTarget(info1));
+		assertSame(b, mgr.getTarget(info1).getProjectConfig());
 		
-		assertSame(c, mgr.getTarget(info2));
+		assertSame(c, mgr.getTarget(info2).getProjectConfig());
 		
 		BuildDaemonInfoDto info3 = (BuildDaemonInfoDto) info2.copy();
 		info3.setName("other");
@@ -455,7 +456,7 @@ public class BuildManagerImplTest extends TestCase {
 		mgr.targetCompleted(info1, b,
 				createFakeStatus(b, rev0, Status.PASS, null, null, null));
 		
-		assertSame(a, mgr.getTarget(info3));
+		assertSame(a, mgr.getTarget(info3).getProjectConfig());
 		
 		assertSame(null, mgr.getTarget(info1));
 	}
@@ -469,7 +470,7 @@ public class BuildManagerImplTest extends TestCase {
 		mgr.add(dg);
 		mgr.add(c);
 		
-		assertSame(b, mgr.getTarget(info1));
+		assertSame(b, mgr.getTarget(info1).getProjectConfig());
 		
 		mgr.clear();
 		
@@ -537,7 +538,7 @@ public class BuildManagerImplTest extends TestCase {
 
 		assertEquals(0, fireCount);
 		
-		assertSame(a, mgr.getTarget(info1));
+		assertSame(a, mgr.getTarget(info1).getProjectConfig());
 		
 		assertEquals(0, fireCount);
 
@@ -562,7 +563,7 @@ public class BuildManagerImplTest extends TestCase {
 
 		assertEquals(0, fireCount);
 		
-		assertSame(c, mgr.getTarget(info1));
+		assertSame(c, mgr.getTarget(info1).getProjectConfig());
 		
 		assertEquals(0, fireCount);
 
@@ -571,7 +572,7 @@ public class BuildManagerImplTest extends TestCase {
 		
 		assertEquals(1, fireCount);
 		
-		assertSame(b, mgr.getTarget(info1));
+		assertSame(b, mgr.getTarget(info1).getProjectConfig());
 
 		assertEquals(1, fireCount);
 		
@@ -594,7 +595,7 @@ public class BuildManagerImplTest extends TestCase {
 		assertFalse(mgr.isBuildingOrInQueue(b.getName()));
 		assertTrue(mgr.isBuildingOrInQueue(c.getName()));
 		
-		mgr.getTarget(info1);
+		mgr.getTarget(info1).getProjectConfig();
 		
 		assertTrue(mgr.isBuildingOrInQueue(a.getName()));
 	}
@@ -612,7 +613,7 @@ public class BuildManagerImplTest extends TestCase {
 		assertTrue(pending[1].isInQueue());
 		assertTrue(pending[2].isInQueue());
 		
-		ProjectConfigDto project = mgr.getTarget(info1);
+		ProjectConfigDto project = mgr.getTarget(info1).getProjectConfig();
 		
 		pending = mgr.getPendingTargets();
 		assertEquals(3, pending.length);
@@ -625,7 +626,7 @@ public class BuildManagerImplTest extends TestCase {
 		mgr.targetCompleted(info1, project, 
 				createFakeStatus(project, rev0, Status.PASS, null, null, null));
 		
-		project = mgr.getTarget(info1);
+		project = mgr.getTarget(info1).getProjectConfig();
 		
 		pending = mgr.getPendingTargets();
 		assertEquals(2, pending.length);
@@ -637,7 +638,7 @@ public class BuildManagerImplTest extends TestCase {
 		mgr.targetCompleted(info1, project,
 				createFakeStatus(project, rev0, Status.PASS, null, null, null));
 
-		project = mgr.getTarget(info1);
+		project = mgr.getTarget(info1).getProjectConfig();
 		
 		pending = mgr.getPendingTargets();
 		assertEquals(1, pending.length);
@@ -664,7 +665,7 @@ public class BuildManagerImplTest extends TestCase {
 		} catch (AlreadyScheduledException e) {
 		}
 		
-		ProjectConfigDto project = mgr.getTarget(info1);
+		ProjectConfigDto project = mgr.getTarget(info1).getProjectConfig();
 		mgr.targetCompleted(info1, project,
 				createFakeStatus(project, rev0, Status.PASS, null, null, null));
 
@@ -674,7 +675,7 @@ public class BuildManagerImplTest extends TestCase {
 		} catch (AlreadyScheduledException e) {
 		}
 
-		project = mgr.getTarget(info1);
+		project = mgr.getTarget(info1).getProjectConfig();
 		mgr.targetCompleted(info1, project,
 				createFakeStatus(project, rev0, Status.PASS, null, null, null));
 
@@ -720,7 +721,7 @@ public class BuildManagerImplTest extends TestCase {
 		
 		mgr.add(dg);
 
-		final ProjectConfigDto a = mgr.getTarget(info1);
+		final ProjectConfigDto a = mgr.getTarget(info1).getProjectConfig();
 		assertEquals(this.a, a);
 		
 		assertEquals(0, fireCount);
@@ -730,7 +731,7 @@ public class BuildManagerImplTest extends TestCase {
 		
 		assertEquals(0, fireCount);
 		
-		assertEquals(b, mgr.getTarget(info1));
+		assertEquals(b, mgr.getTarget(info1).getProjectConfig());
 		
 		mgr.targetCompleted(info1, b, 
 				createFakeStatus(b, rev0, Status.PASS, null, null, null));
@@ -763,7 +764,7 @@ public class BuildManagerImplTest extends TestCase {
 		
 		mgr.add(dg);
 
-		final ProjectConfigDto a = mgr.getTarget(info1);
+		final ProjectConfigDto a = mgr.getTarget(info1).getProjectConfig();
 		assertEquals(this.a, a);
 		
 		assertEquals(0, fireCount);
@@ -793,7 +794,7 @@ public class BuildManagerImplTest extends TestCase {
 		
 		mgr.add(dg);
 
-		mgr.getTarget(info1);
+		mgr.getTarget(info1).getProjectConfig();
 		
 		mgr.targetCompleted(info1, a,
 				createFakeStatus(a, null, Status.FAIL, null, null, null));
@@ -820,7 +821,7 @@ public class BuildManagerImplTest extends TestCase {
 		
 		mgr.add(dg);
 
-		final ProjectConfigDto a = mgr.getTarget(info1);
+		final ProjectConfigDto a = mgr.getTarget(info1).getProjectConfig();
 		assertEquals(this.a, a);
 		
 		assertEquals(0, fireCount);
@@ -870,7 +871,7 @@ public class BuildManagerImplTest extends TestCase {
 		mgr.add(dg);
 		mgr.add(dg2);
 		
-		assertSame(a, mgr.getTarget(info1));
+		assertSame(a, mgr.getTarget(info1).getProjectConfig());
 
 		assertNull(event);
 		
@@ -897,9 +898,9 @@ public class BuildManagerImplTest extends TestCase {
 		mgr.add(dg2);
 		mgr.add(dg3);
 		
-		assertSame(a, mgr.getTarget(info1));
+		assertSame(a, mgr.getTarget(info1).getProjectConfig());
 
-		assertSame(c, mgr.getTarget(info2));
+		assertSame(c, mgr.getTarget(info2).getProjectConfig());
 		
 		assertNotNull(event);
 		
@@ -921,9 +922,9 @@ public class BuildManagerImplTest extends TestCase {
 		mgr.add(dg2);
 		mgr.add(dg3);
 		
-		assertSame(a, mgr.getTarget(info1));
+		assertSame(a, mgr.getTarget(info1).getProjectConfig());
 
-		assertSame(c, mgr.getTarget(info2));
+		assertSame(c, mgr.getTarget(info2).getProjectConfig());
 		
 		assertNotNull(event);
 		
@@ -995,7 +996,7 @@ public class BuildManagerImplTest extends TestCase {
 
 		mgr.add(dg);
 
-		assertSame(a, mgr.getTarget(info1));
+		assertSame(a, mgr.getTarget(info1).getProjectConfig());
 		mgr.registerBuildStatus(info1, null, a, status);
 		
 		assertSame(status, mgr.getStatusByBuildNumber(a.getName(), buildNumber));
@@ -1012,7 +1013,7 @@ public class BuildManagerImplTest extends TestCase {
 
 		mgr.add(dg);
 
-		assertSame(a, mgr.getTarget(info1));
+		assertSame(a, mgr.getTarget(info1).getProjectConfig());
 		mgr.registerBuildStatus(info1, null, a, status);
 		
 		assertEquals(null, mgr.getStatusByBuildNumber(a.getName(), buildNumber + 1));
@@ -1035,7 +1036,7 @@ public class BuildManagerImplTest extends TestCase {
 		
 		mgr.add(dg);
 		
-		assertSame(b, mgr.getTarget(info1));
+		assertSame(b, mgr.getTarget(info1).getProjectConfig());
 
 		dg = new DependencyGroupImpl();
 		
@@ -1064,7 +1065,7 @@ public class BuildManagerImplTest extends TestCase {
 		mgr.targetCompleted(info1, b, status);
 		
 		// a should unblock
-		assertSame(a, mgr.getTarget(info1));
+		assertSame(a, mgr.getTarget(info1).getProjectConfig());
 
 		mgr.targetCompleted(info1, a, status);
 

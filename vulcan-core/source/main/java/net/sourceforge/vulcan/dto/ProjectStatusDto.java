@@ -1,6 +1,6 @@
 /*
  * Vulcan Build Manager
- * Copyright (C) 2005-2006 Chris Eldredge
+ * Copyright (C) 2005-2010 Chris Eldredge
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,7 +33,8 @@ public class ProjectStatusDto extends NameDto {
 	 * First line of constants are possible build outcomes.  Following constants are for internal use only.
 	 */
 	public enum Status { PASS, FAIL, SKIP, ERROR,
-						IN_QUEUE, BUILDING, UP_TO_DATE };
+						IN_QUEUE, BUILDING, 
+						 /*TODO: Obsolete: */UP_TO_DATE};
 	
 	public enum UpdateType { Full, Incremental };
 	

@@ -1,6 +1,6 @@
 /*
  * Vulcan Build Manager
- * Copyright (C) 2005-2009 Chris Eldredge
+ * Copyright (C) 2005-2010 Chris Eldredge
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -39,6 +39,7 @@ import net.sourceforge.vulcan.core.BuildManager;
 import net.sourceforge.vulcan.core.BuildOutcomeStore;
 import net.sourceforge.vulcan.core.BuildPhase;
 import net.sourceforge.vulcan.core.BuildStatusListener;
+import net.sourceforge.vulcan.core.BuildTarget;
 import net.sourceforge.vulcan.core.ConfigurationStore;
 import net.sourceforge.vulcan.core.ProjectBuilder;
 import net.sourceforge.vulcan.dto.BuildDaemonInfoDto;
@@ -102,7 +103,7 @@ public class ProjectBuilderImpl implements ProjectBuilder {
 	public void init() {
 	}
 	
-	public final void build(BuildDaemonInfoDto info, ProjectConfigDto currentTarget, BuildDetailCallback buildDetailCallback) {
+	public final void build(BuildDaemonInfoDto info, BuildTarget currentTarget, BuildDetailCallback buildDetailCallback) {
 		
 		synchronized(this) {
 			buildThread = Thread.currentThread();
@@ -115,21 +116,23 @@ public class ProjectBuilderImpl implements ProjectBuilder {
 		}
 
 		this.buildDetailCallback = new DelegatingBuildDetailCallback(
-				buildDetailCallback, currentTarget.isSuppressErrors(),
-				currentTarget.isSuppressWarnings());
+				buildDetailCallback, currentTarget.getProjectConfig().isSuppressErrors(),
+				currentTarget.getProjectConfig().isSuppressWarnings());
 		
-		previousStatus = buildManager.getLatestStatus(currentTarget.getName());
+		previousStatus = buildManager.getLatestStatus(currentTarget.getProjectName());
 		
 		if (log.isDebugEnabled() && previousStatus != null) {
-			log.debug("Project " + currentTarget.getName() + " previous build " + previousStatus.getBuildNumber() + " completed " + previousStatus.getCompletionDate());
+			log.debug("Project " + currentTarget.getProjectName() + " previous build " + previousStatus.getBuildNumber() + " completed " + previousStatus.getCompletionDate());
 		}
 		
 		try {
-			buildStatus = createBuildStatus(currentTarget);
+			buildStatus = currentTarget.getStatus();
+			initializeBuildStatus(currentTarget);
 			
-			buildManager.registerBuildStatus(info, this, currentTarget, buildStatus);
+			//TODO: should take target, not config + status
+			buildManager.registerBuildStatus(info, this, currentTarget.getProjectConfig(), buildStatus);
 			
-			buildProject(currentTarget);
+			buildProject(currentTarget.getProjectConfig());
 			buildStatus.setStatus(Status.PASS);
 		} catch (ConfigException e) {
 			buildStatus.setStatus(Status.ERROR);
@@ -153,9 +156,6 @@ public class ProjectBuilderImpl implements ProjectBuilder {
 				buildStatus.setMessageKey("messages.build.failure");
 				buildStatus.setMessageArgs(new String[] {e.getMessage()});
 			}
-		} catch (ProjectUpToDateException e) {
-			buildStatus.setWorkDirSupportsIncrementalUpdate(true);
-			buildStatus.setStatus(Status.UP_TO_DATE);
 		} catch (Throwable e) {
 			log.error("unexpected error", e);
 			
@@ -168,7 +168,7 @@ public class ProjectBuilderImpl implements ProjectBuilder {
 				phaseName = currentPhase.name();
 			}
 			
-			buildStatus.setMessageArgs(new String[] {currentTarget.getName(), e.getMessage(), phaseName});
+			buildStatus.setMessageArgs(new String[] {currentTarget.getProjectName(), e.getMessage(), phaseName});
 		} finally {
 			if (previousOutcome == null) {
 				buildStatus.setStatusChanged(true);
@@ -177,7 +177,8 @@ public class ProjectBuilderImpl implements ProjectBuilder {
 			}
 			
 			buildDetailCallback.setPhaseMessageKey(BuildPhase.Publish.getMessageKey());
-			buildManager.targetCompleted(info, currentTarget, buildStatus);
+			// TODO: targetCompleted should take currentTarget, not config + status
+			buildManager.targetCompleted(info, currentTarget.getProjectConfig(), buildStatus);
 
 			previousRevision = null;
 			
@@ -259,37 +260,37 @@ public class ProjectBuilderImpl implements ProjectBuilder {
 	public void setDiffsEnabled(boolean diffsEnabled) {
 		this.diffsEnabled = diffsEnabled;
 	}
-	protected ProjectStatusDto createBuildStatus(ProjectConfigDto currentTarget) {
-		final ProjectStatusDto status = createBuildOutcome(currentTarget.getName());
+	protected void initializeBuildStatus(BuildTarget currentTarget) {
+		ProjectStatusDto buildStatus = currentTarget.getStatus();
+		
+		generateUniqueBuildId(buildStatus);
 		
 		if (previousStatus == null || previousStatus.getBuildNumber() == null) {
-			status.setBuildNumber(0);
+			buildStatus.setBuildNumber(0);
 		} else {
-			status.setBuildNumber(previousStatus.getBuildNumber() + 1);
+			buildStatus.setBuildNumber(previousStatus.getBuildNumber() + 1);
 		}
 		
-		status.setStartDate(new Date());
-		status.setRequestedBy(currentTarget.getRequestedBy());
-		status.setScheduledBuild(currentTarget.isScheduledBuild());
-		status.setWorkDir(currentTarget.getWorkDir());
-		status.setStatus(Status.BUILDING);
-		status.setErrors(errors);
-		status.setWarnings(warnings);
-		status.setMetrics(metrics);
+		buildStatus.setStartDate(new Date());
 		
-		return status;
+		//TODO: law of Demeter
+		buildStatus.setRequestedBy(currentTarget.getProjectConfig().getRequestedBy());
+		buildStatus.setScheduledBuild(currentTarget.getProjectConfig().isScheduledBuild());
+		buildStatus.setWorkDir(currentTarget.getProjectConfig().getWorkDir());
+		buildStatus.setStatus(Status.BUILDING);
+		buildStatus.setErrors(errors);
+		buildStatus.setWarnings(warnings);
+		buildStatus.setMetrics(metrics);
 	}
-	protected ProjectStatusDto createBuildOutcome(String projectName) {
-		final ProjectStatusDto dto = new ProjectStatusDto();
+	
+	protected void generateUniqueBuildId(ProjectStatusDto status) {
 		final UUID id = UUIDUtils.generateTimeBasedUUID();
 		
-		dto.setName(projectName);
-		dto.setId(id);
-		dto.setBuildLogId(id);
-		dto.setDiffId(id);
-		
-		return dto;
+		status.setId(id);
+		status.setBuildLogId(id);
+		status.setDiffId(id);
 	}
+	
 	protected void buildProject(final ProjectConfigDto currentTarget) throws Exception {
 		if (StringUtils.isBlank(currentTarget.getWorkDir())) {
 			throw new ConfigException("messages.build.null.work.dir", null);
@@ -416,7 +417,7 @@ public class ProjectBuilderImpl implements ProjectBuilder {
 		return true;
 	}
 	
-	protected RevisionTokenDto checkBuildNeccessary(final RepositoryAdaptor ra, final ProjectConfigDto currentTarget) throws ProjectUpToDateException, InterruptedException, StoreException, ConfigException {
+	protected RevisionTokenDto checkBuildNeccessary(final RepositoryAdaptor ra, final ProjectConfigDto currentTarget) throws InterruptedException, StoreException, ConfigException {
 		String tagName = currentTarget.getRepositoryTagName();
 		
 		if (!StringUtils.isBlank(tagName)) {
@@ -450,23 +451,7 @@ public class ProjectBuilderImpl implements ProjectBuilder {
 		buildStatus.setTagName(tagName);
 		buildStatus.setRepositoryUrl(ra.getRepositoryUrl());
 		
-		determineBuildReason(currentTarget);
-		
 		return currentRev;
-	}
-
-	protected void determineBuildReason(final ProjectConfigDto currentTarget) throws ConfigException,	ProjectUpToDateException {
-		ProjectRebuildExpert expert = new ProjectRebuildExpert();
-		expert.setBuildManager(buildManager);
-		expert.setProjectManager(projectManager);
-		expert.setWorkingCopyUpdateExpert(workingCopyUpdateExpert);
-
-		if (!expert.shouldBuild(currentTarget, previousStatus)) {
-			throw new ProjectUpToDateException();
-		}
-		
-		buildStatus.setBuildReasonKey(expert.getMessageKey());
-		buildStatus.setBuildReasonArgs(expert.getMessageArgs());
 	}
 
 	protected void determineUpdateType(ProjectConfigDto currentTarget) throws StoreException {
@@ -529,7 +514,6 @@ public class ProjectBuilderImpl implements ProjectBuilder {
 		void execute() throws Exception;
 	}
 	protected static final class KilledException extends Exception {}
-	protected static final class ProjectUpToDateException extends Exception {}
 	
 	private class DelegatingBuildDetailCallback implements BuildDetailCallback {
 		private final BuildDetailCallback delegate;

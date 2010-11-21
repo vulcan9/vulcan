@@ -1,6 +1,6 @@
 /*
  * Vulcan Build Manager
- * Copyright (C) 2005-2006 Chris Eldredge
+ * Copyright (C) 2005-2010 Chris Eldredge
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -36,30 +36,33 @@ import org.easymock.EasyMock;
 public class ScheduleProjectsJobTest extends EasyMockTestCase {
 	ScheduleProjectsJob job = new ScheduleProjectsJob();
 	
-	ProjectManager pm = createStrictMock(ProjectManager.class);
-	BuildManager bm = createStrictMock(BuildManager.class);
-	EventHandler eh = createStrictMock(EventHandler.class);
+	ProjectManager projectManager = createStrictMock(ProjectManager.class);
+	BuildManager buildManager = createStrictMock(BuildManager.class);
+	EventHandler eventHandler = createStrictMock(EventHandler.class);
 	
 	ProjectConfigDto[] projects = { new ProjectConfigDto() };
-	DependencyGroup dg = new DependencyGroupImpl();
+	DependencyGroup depGroup = new DependencyGroupImpl();
 	
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 		
-		job.setProjectManager(pm);
-		job.setBuildManager(bm);
-		job.setEventHandler(eh);
+		job.setProjectManager(projectManager);
+		job.setBuildManager(buildManager);
+		job.setEventHandler(eventHandler);
+		
+		// Add a target so isEmpty will be false.
+		depGroup.addTarget(new ProjectConfigDto());
 	}
 	
 	public void testSimple() throws Exception {
-		pm.getProjectsForScheduler("job");
+		projectManager.getProjectsForScheduler("job");
 		EasyMock.expectLastCall().andReturn(projects);
 		
-		pm.buildDependencyGroup(projects, DependencyBuildPolicy.AS_NEEDED, null, false, false);
-		EasyMock.expectLastCall().andReturn(dg);
+		projectManager.buildDependencyGroup(projects, DependencyBuildPolicy.AS_NEEDED, null, false, false);
+		EasyMock.expectLastCall().andReturn(depGroup);
 		
-		bm.add(dg);
+		buildManager.add(depGroup);
 		
 		replay();
 		
@@ -67,20 +70,35 @@ public class ScheduleProjectsJobTest extends EasyMockTestCase {
 		
 		verify();
 	}
-
-	public void testAlreadyScheduled() throws Exception {
-		pm.getProjectsForScheduler("job");
+	
+	public void testDoesNotScheduleEmptyGroup() throws Exception {
+		projectManager.getProjectsForScheduler("job");
 		EasyMock.expectLastCall().andReturn(projects);
 		
-		pm.buildDependencyGroup(projects, DependencyBuildPolicy.AS_NEEDED, null, false, false);
-		EasyMock.expectLastCall().andReturn(dg);
+		projectManager.buildDependencyGroup(projects, DependencyBuildPolicy.AS_NEEDED, null, false, false);
+		depGroup = new DependencyGroupImpl();
+		EasyMock.expectLastCall().andReturn(depGroup);
+		
+		replay();
+		
+		job.executeInternal("job");
+		
+		verify();
+	}
+	
+	public void testAlreadyScheduled() throws Exception {
+		projectManager.getProjectsForScheduler("job");
+		EasyMock.expectLastCall().andReturn(projects);
+		
+		projectManager.buildDependencyGroup(projects, DependencyBuildPolicy.AS_NEEDED, null, false, false);
+		EasyMock.expectLastCall().andReturn(depGroup);
 		
 		final AlreadyScheduledException e = new AlreadyScheduledException("job");
 
-		bm.add(dg);
+		buildManager.add(depGroup);
 		EasyMock.expectLastCall().andThrow(e);
 		
-		eh.reportEvent(new InfoEvent(job, "Scheduler.interval.too.short", new Object[] {"job"}) {
+		eventHandler.reportEvent(new InfoEvent(job, "Scheduler.interval.too.short", new Object[] {"job"}) {
 			@Override
 			public boolean equals(Object obj) {
 				final InfoEvent o = (InfoEvent) obj;
@@ -100,7 +118,7 @@ public class ScheduleProjectsJobTest extends EasyMockTestCase {
 	}
 
 	public void testShortCircuitOnNoProjects() throws Exception {
-		pm.getProjectsForScheduler("job");
+		projectManager.getProjectsForScheduler("job");
 		EasyMock.expectLastCall().andReturn((new ProjectConfigDto[0]));
 		
 		replay();

@@ -1,6 +1,6 @@
 /*
  * Vulcan Build Manager
- * Copyright (C) 2005-2009 Chris Eldredge
+ * Copyright (C) 2005-2010 Chris Eldredge
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,6 +25,7 @@ import java.util.UUID;
 import net.sourceforge.vulcan.EasyMockTestCase;
 import net.sourceforge.vulcan.PluginManager;
 import net.sourceforge.vulcan.core.BuildManager;
+import net.sourceforge.vulcan.core.BuildTarget;
 import net.sourceforge.vulcan.core.DependencyGroup;
 import net.sourceforge.vulcan.core.ProjectBuilder;
 import net.sourceforge.vulcan.dto.BuildDaemonInfoDto;
@@ -69,7 +70,7 @@ public abstract class StateManagerTestBase extends EasyMockTestCase
 		stateMgr.setBuildManager(new BuildManager() {
 			public void add(DependencyGroup dg) {
 			}
-			public ProjectConfigDto getTarget(BuildDaemonInfoDto buildDaemonInfo) {
+			public BuildTarget getTarget(BuildDaemonInfoDto buildDaemonInfo) {
 				return null;
 			}
 			public void registerBuildStatus(BuildDaemonInfoDto info, ProjectBuilder builder, ProjectConfigDto currentTarget, ProjectStatusDto buildStatus) {

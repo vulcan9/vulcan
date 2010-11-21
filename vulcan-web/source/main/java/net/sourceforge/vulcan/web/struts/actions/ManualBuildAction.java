@@ -73,6 +73,7 @@ public final class ManualBuildAction extends Action {
 			final DependencyGroup dg = buildForm.getDependencyGroup();
 			dg.setName(requestedBy);
 			buildManager.add(dg);
+			//TODO: wake up build daemon(s) here too
 			return mapping.findForward("dashboard");
 		}
 		
@@ -107,6 +108,11 @@ public final class ManualBuildAction extends Action {
 					buildForm.isBuildOnDependencyFailure(), buildOnNoUpdates);
 		} catch (ProjectsLockedException e) {
 			BaseDispatchAction.saveError(request, ActionMessages.GLOBAL_MESSAGE, new ActionMessage("errors.projects.locked", StringUtils.join(e.getLockedProjectNames(), ", ")));
+			return mapping.getInputForward();
+		}
+		
+		if (dg.isEmpty()) {
+			BaseDispatchAction.saveError(request, ActionMessages.GLOBAL_MESSAGE, new ActionMessage("errors.projects.up.to.date"));
 			return mapping.getInputForward();
 		}
 		

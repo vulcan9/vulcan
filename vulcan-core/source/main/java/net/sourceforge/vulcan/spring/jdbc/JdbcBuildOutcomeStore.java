@@ -284,6 +284,10 @@ public class JdbcBuildOutcomeStore implements BuildOutcomeStore, ProjectNameChan
 	}
 	
 	public synchronized void projectNameChanged(String oldName, String newName) {
+		String origNewName = newName;
+		oldName = oldName.toLowerCase();
+		newName = newName.toLowerCase();
+		
 		if (projectNames.contains(newName)) {
 			int i=2;
 			while (projectNames.contains(newName + "_" + i)) {
@@ -291,13 +295,14 @@ public class JdbcBuildOutcomeStore implements BuildOutcomeStore, ProjectNameChan
 			}
 			
 			jdbcTemplate.update("update project_names set name=? where name=?",
-				new Object[] {newName + "_" + i, newName});
+				new Object[] {origNewName + "_" + i, newName});
 			
 			projectNames.add(newName + "_" + i);
 		}
 		
 		jdbcTemplate.update("update project_names set name=? where name=?",
-			new Object[] {newName, oldName});
+			new Object[] {origNewName, oldName});
+		
 		projectNames.add(newName);
 		projectNames.remove(oldName);
 	}
@@ -347,7 +352,7 @@ public class JdbcBuildOutcomeStore implements BuildOutcomeStore, ProjectNameChan
 		boolean brokenByNameAdded = false;
 		final String projectName = outcome.getName();
 		
-		if (!projectNames.contains(projectName)) {
+		if (!projectNames.contains(projectName.toLowerCase())) {
 			jdbcTemplate.update("insert into project_names (name) values (?)", new Object[] {projectName});
 			projectNameAdded = true;
 		}
@@ -393,7 +398,7 @@ public class JdbcBuildOutcomeStore implements BuildOutcomeStore, ProjectNameChan
 		}
 		
 		if (projectNameAdded) {
-			projectNames.add(projectName);
+			projectNames.add(projectName.toLowerCase());
 		}
 		
 		if (brokenByNameAdded) {

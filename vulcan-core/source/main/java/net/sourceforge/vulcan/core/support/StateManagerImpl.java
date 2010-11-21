@@ -1,6 +1,6 @@
 /*
  * Vulcan Build Manager
- * Copyright (C) 2005-2006 Chris Eldredge
+ * Copyright (C) 2005-2010 Chris Eldredge
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -767,8 +767,8 @@ public abstract class StateManagerImpl implements StateManager, ProjectManager {
 		
 		throw new ConfigException("messages.build.tool.not.configured", null);
 	}
-	public DependencyGroup buildDependencyGroup(ProjectConfigDto[] projects, DependencyBuildPolicy policy, WorkingCopyUpdateStrategy updateStrategyOverride, boolean buildOnDependencyFailure, boolean buildOnNoUpdates) throws ProjectsLockedException {
-		return DependencyGroupBuilder.buildDependencyGroup(projects, this, policy, updateStrategyOverride, buildOnDependencyFailure, buildOnNoUpdates);
+	public DependencyGroup buildDependencyGroup(ProjectConfigDto[] projects, DependencyBuildPolicy policy, WorkingCopyUpdateStrategy updateStrategyOverride, boolean buildOnDependencyFailure, boolean buildOnNoUpdates) throws ProjectsLockedException, ConfigException {
+		return DependencyGroupBuilder.buildDependencyGroup(projects, this, buildManager, policy, updateStrategyOverride, buildOnDependencyFailure, buildOnNoUpdates);
 	}
 	public StateManagerConfigDto getConfig() {
 		return config;

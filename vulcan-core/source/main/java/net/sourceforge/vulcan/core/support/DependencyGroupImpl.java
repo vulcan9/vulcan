@@ -1,6 +1,6 @@
 /*
  * Vulcan Build Manager
- * Copyright (C) 2005-2006 Chris Eldredge
+ * Copyright (C) 2005-2010 Chris Eldredge
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,12 +19,13 @@
 package net.sourceforge.vulcan.core.support;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import net.sourceforge.vulcan.core.BuildTarget;
 import net.sourceforge.vulcan.core.DependencyException;
 import net.sourceforge.vulcan.core.DependencyGroup;
 import net.sourceforge.vulcan.dto.ProjectConfigDto;
@@ -40,57 +41,13 @@ import org.apache.commons.lang.builder.ToStringBuilder;
 public final class DependencyGroupImpl implements DependencyGroup {
 	private enum DependencyStatus { PASS, FAIL, CYCLE, PENDING };
 	
-	final List<Target> targets = new ArrayList<Target>();
+	final List<BuildTarget> targets = new ArrayList<BuildTarget>();
 	final Map<String, Integer> dependencyCounts = new HashMap<String, Integer>();
 	
 	final Map<String, DependencyStatus> results = new HashMap<String, DependencyStatus>();
 	
 	String name;
 	boolean manualBuild;
-	
-	class Target implements Comparable<Target> {
-		private final ProjectConfigDto config;
-		private final List<String> pendingDependencies;
-		
-		private Target(ProjectConfigDto config) {
-			this.config = config;
-			this.pendingDependencies = new ArrayList<String>(Arrays.asList(config.getDependencies()));
-		}
-		public int compareTo(Target o) {
-			final Integer numDependentProjects = dependencyCounts.get(config.getName());
-			final Integer otherNumDependentProjects = dependencyCounts.get(o.config.getName());
-			
-			int signum = otherNumDependentProjects.compareTo(numDependentProjects);
-			
-			if (signum != 0) {
-				return signum;
-			}
-			
-			if (pendingDependencies.contains(o.config.getName())) {
-				return 1;
-			}
-			
-			if (o.pendingDependencies.contains(config.getName())) {
-				return -1;
-			}
-			
-			signum = Integer.valueOf(pendingDependencies.size()).compareTo(Integer.valueOf(o.pendingDependencies.size()));
-			
-			return signum;
-		}
-		@Override
-		public boolean equals(Object obj) {
-			return EqualsBuilder.reflectionEquals(this, obj);
-		}
-		@Override
-		public int hashCode() {
-			return HashCodeBuilder.reflectionHashCode(this);
-		}
-		@Override
-		public String toString() {
-			return ToStringBuilder.reflectionToString(this);
-		}
-	}
 	
 	public void initializeBuildResults(Map<String, ProjectStatusDto> statusMap) {
 		for (ProjectStatusDto projectStatus : statusMap.values()) {
@@ -107,7 +64,11 @@ public final class DependencyGroupImpl implements DependencyGroup {
 	}
 
 	public void addTarget(ProjectConfigDto config) {
-		final Target target = new Target(config);
+		addTarget(config, new ProjectStatusDto());
+	}
+	
+	public void addTarget(ProjectConfigDto config, ProjectStatusDto buildStatus) {
+		final BuildTarget target = new BuildTargetImpl(config, buildStatus);
 		targets.add(target);
 		
 		final String targetName = config.getName();
@@ -128,7 +89,7 @@ public final class DependencyGroupImpl implements DependencyGroup {
 			dependencyCounts.put(dependency, count);
 		}
 		
-		Collections.sort(targets);
+		sort();
 	}
 
 	public boolean isEmpty() {
@@ -140,10 +101,12 @@ public final class DependencyGroupImpl implements DependencyGroup {
 			throw new IllegalStateException();
 		}
 		
+		// TODO: this method should not have side effects
+		
 		boolean pending = false;
 		
-		final Target target = targets.get(0);
-		for (String name : target.pendingDependencies) {
+		final BuildTarget target = targets.get(0);
+		for (String name : target.getPendingDependencies()) {
 			final DependencyStatus status = results.get(name);
 			if (status == null) {
 				checkMissing(target, name);
@@ -151,18 +114,17 @@ public final class DependencyGroupImpl implements DependencyGroup {
 			}
 			switch (status) {
 				case FAIL:
-					if (target.config.isBuildOnDependencyFailure()) {
+					if (target.isBuildOnDependencyFailure()) {
 						continue;
 					}
 					targets.remove(0);
-					results.put(target.config.getName(), DependencyStatus.FAIL);
-					throw new DependencyFailureException(target.config, name);
+					results.put(target.getProjectName(), DependencyStatus.FAIL);
+					throw new DependencyFailureException(target.getProjectConfig(), name);
 				case CYCLE:
 					targets.remove(0);
-					final String[] dependencies = target.config.getDependencies();
-					for (int i = 0; i < dependencies.length; i++) {
-						if (DependencyStatus.CYCLE.equals(results.get(dependencies[i]))) {
-							throw new DependencyCycleException(target.config, dependencies[i]);		
+					for (String dependency : target.getAllDependencies()) {
+						if (DependencyStatus.CYCLE.equals(results.get(dependency))) {
+							throw new DependencyCycleException(target.getProjectConfig(), dependency);		
 						}
 					}
 					throw new IllegalStateException();
@@ -175,25 +137,25 @@ public final class DependencyGroupImpl implements DependencyGroup {
 		return pending;
 	}
 
-	public ProjectConfigDto getNextTarget() throws DependencyException {
+	public BuildTarget getNextTarget() throws DependencyException {
 		if (isEmpty()) {
 			throw new IllegalStateException();
 		} else if (isBlocked()) {
 			throw new PendingDependencyException();
 		}
 		
-		final Target target = targets.remove(0);
+		final BuildTarget target = targets.remove(0);
 		
-		results.put(target.config.getName(), DependencyStatus.PENDING);
+		results.put(target.getProjectName(), DependencyStatus.PENDING);
 		
-		return target.config; 
+		return target; 
 	}
 
 	public List<ProjectConfigDto> getPendingProjects() {
 		List<ProjectConfigDto> projects = new ArrayList<ProjectConfigDto>();
 		
-		for (Target target : targets) {
-			projects.add(target.config);
+		for (BuildTarget target : targets) {
+			projects.add(target.getProjectConfig());
 		}
 		
 		return Collections.unmodifiableList(projects);
@@ -205,26 +167,24 @@ public final class DependencyGroupImpl implements DependencyGroup {
 		if (success) {
 			results.put(name, DependencyStatus.PASS);
 			
-			for (final Target target : targets) {
-				target.pendingDependencies.remove(name);
+			for (final BuildTarget target : targets) {
+				target.removePendingDependency(name);
 			}
 		} else {
 			results.put(name, DependencyStatus.FAIL);
 		}
 
-		Collections.sort(targets);
+		sort();
 	}
 
-	public ProjectStatusDto[] getPendingTargets() {
-		final ProjectStatusDto[] ps = new ProjectStatusDto[targets.size()];
+	public List<ProjectStatusDto> getPendingTargets() {
+		final List<ProjectStatusDto> list = new ArrayList<ProjectStatusDto>(targets.size());
 		
-		for (int i=0; i<targets.size(); i++) {
-			final Target target = targets.get(i);
-			ps[i] = new ProjectStatusDto();
-			ps[i].setName(target.config.getName());
-			ps[i].setStatus(ProjectStatusDto.Status.IN_QUEUE);
+		for (BuildTarget target : targets) {
+			list.add(target.getStatus());
 		}
-		return ps;
+		
+		return list;
 	}
 
 	public String getName() {
@@ -234,32 +194,6 @@ public final class DependencyGroupImpl implements DependencyGroup {
 	public void setName(String name) {
 		this.name = name;
 	}
-	@Override
-	public boolean equals(Object obj) {
-		return EqualsBuilder.reflectionEquals(this, obj);
-	}
-	@Override
-	public int hashCode() {
-		return HashCodeBuilder.reflectionHashCode(this);
-	}
-	@Override
-	public String toString() {
-		return ToStringBuilder.reflectionToString(this);
-	}
-	private void checkMissing(final Target target, String name) throws DependencyException {
-		for (final Target tgt : targets) {
-			if (name.equals(tgt.config.getName())) {
-				targets.remove(0);
-				results.put(target.config.getName(), DependencyStatus.CYCLE);
-				results.put(name, DependencyStatus.CYCLE);
-				throw new DependencyCycleException(target.config, name);
-			}
-		}
-		if (!target.config.isBuildOnDependencyFailure()) {
-			targets.remove(0);
-			throw new DependencyMissingException(target.config, name);
-		}
-	}
 
 	public boolean isManualBuild() {
 		return manualBuild;
@@ -267,5 +201,66 @@ public final class DependencyGroupImpl implements DependencyGroup {
 	
 	public void setManualBuild(boolean manualBuild) {
 		this.manualBuild = manualBuild;
+	}
+	
+	@Override
+	public boolean equals(Object obj) {
+		return EqualsBuilder.reflectionEquals(this, obj);
+	}
+	
+	@Override
+	public int hashCode() {
+		return HashCodeBuilder.reflectionHashCode(this);
+	}
+	
+	@Override
+	public String toString() {
+		return ToStringBuilder.reflectionToString(this);
+	}
+	
+	private void checkMissing(final BuildTarget target, String name) throws DependencyException {
+		for (final BuildTarget tgt : targets) {
+			if (name.equals(tgt.getProjectName())) {
+				targets.remove(0);
+				results.put(target.getProjectName(), DependencyStatus.CYCLE);
+				results.put(name, DependencyStatus.CYCLE);
+				throw new DependencyCycleException(target.getProjectConfig(), name);
+			}
+		}
+		if (!target.isBuildOnDependencyFailure()) {
+			targets.remove(0);
+			throw new DependencyMissingException(target.getProjectConfig(), name);
+		}
+	}
+
+	private void sort() {
+		Collections.sort(targets, new Comparator<BuildTarget>() {
+			public int compare(BuildTarget o1, BuildTarget o2) {
+				return compareTargets(o1, o2);
+			}
+		});
+	}
+
+	private int compareTargets(BuildTarget lhs, BuildTarget rhs) {
+		final Integer numProjectsDependingOnLhs = dependencyCounts.get(lhs.getProjectName());
+		final Integer numProjectsDependingOnRhs = dependencyCounts.get(rhs.getProjectName());
+		
+		int signum = numProjectsDependingOnRhs.compareTo(numProjectsDependingOnLhs);
+		
+		if (signum != 0) {
+			return signum;
+		}
+		
+		if (lhs.dependsOn(rhs)) {
+			return 1;
+		}
+		
+		if (rhs.dependsOn(lhs)) {
+			return -1;
+		}
+		
+		signum = ((Integer)lhs.getNumberOfPendingDependencies()).compareTo(rhs.getNumberOfPendingDependencies());
+		
+		return signum;
 	}
 }
