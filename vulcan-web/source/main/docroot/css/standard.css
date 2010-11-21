@@ -190,6 +190,39 @@ img.health {
 	margin-left: 1ex;
 }
 
+div#errors {
+	background: url("../images/stop.gif") no-repeat scroll 5px 0.8em transparent;
+	border: 2px solid #AA0C00;
+	color: #AA0C00;
+	padding: 12px 6px 12px 45px;
+	margin: 12px;
+	min-height: 32px;
+}
+
+div#errors ul {
+	margin-top: 1em;
+	color: black;
+}
+
+span.error {
+	color: #AA0C00;
+	font-style: italic;
+}
+
+span.warning {
+	background: transparent no-repeat top left;
+	background-image: url("../images/warning.gif");
+}
+
+span.message {
+	background: transparent no-repeat top left;
+	background-image: url("../images/success.gif");
+}
+
+span.warning,span.message {
+	padding-left: 20px;
+}
+
 /***** Setup Layout *********************************************************************************/
 div#setup-menu {
 	float: left;
@@ -320,25 +353,6 @@ a.issue {
 	font-weight: bold;
 	background: transparent repeat top left;
 	background-image: url("../images/construction.gif");
-}
-
-span.error {
-	background: transparent no-repeat top left;
-	background-image: url("../images/error.gif");
-}
-
-span.warning {
-	background: transparent no-repeat top left;
-	background-image: url("../images/warning.gif");
-}
-
-span.message {
-	background: transparent no-repeat top left;
-	background-image: url("../images/success.gif");
-}
-
-span.error,span.warning,span.message {
-	padding-left: 20px;
 }
 
 div.build-nav {
