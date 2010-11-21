@@ -335,9 +335,13 @@ public class ProjectBuilderImpl implements ProjectBuilder {
 					diffOutputStream = diffsEnabled ? 
 						new FileOutputStream(configurationStore.getChangeLog(currentTarget.getName(), buildStatus.getDiffId())) : null;
 					
-					// RepositoryAdaptor instance will close the OutputStream so it
-					// is not closed here in a finally block.
-					buildStatus.setChangeLog(ra.getChangeLog(previousRevision, buildStatus.getRevision(), diffOutputStream));
+					try {
+						buildStatus.setChangeLog(ra.getChangeLog(previousRevision, buildStatus.getRevision(), diffOutputStream));
+					} finally {
+						if (diffOutputStream != null) {
+							diffOutputStream.close();
+						}
+					}
 				}
 				
 				if (diffOutputStream == null) {
