@@ -1,6 +1,6 @@
 /*
  * Vulcan Build Manager
- * Copyright (C) 2005-2006 Chris Eldredge
+ * Copyright (C) 2005-2010 Chris Eldredge
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -61,7 +61,7 @@ public interface ProjectManager {
 	
 	public DependencyGroup buildDependencyGroup(ProjectConfigDto[] projects,
 			DependencyBuildPolicy policy, WorkingCopyUpdateStrategy updateStrategyOverride,
-			boolean buildOnDependencyFailureOverride, boolean buildOnNoUpdatesOverride) throws ProjectsLockedException;
+			boolean buildOnDependencyFailureOverride, boolean buildOnNoUpdatesOverride) throws ProjectsLockedException, ConfigException;
 
 	public Date getPluginModificationDate(String pluginId);
 }

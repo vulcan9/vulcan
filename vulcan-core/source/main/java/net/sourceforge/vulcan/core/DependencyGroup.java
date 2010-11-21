@@ -1,6 +1,6 @@
 /*
  * Vulcan Build Manager
- * Copyright (C) 2005-2006 Chris Eldredge
+ * Copyright (C) 2005-2010 Chris Eldredge
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,20 +27,20 @@ import net.sourceforge.vulcan.metadata.SvnRevision;
 
 @SvnRevision(id="$Id$", url="$HeadURL$")
 public interface DependencyGroup {
-	ProjectStatusDto[] getPendingTargets();
+	List<ProjectStatusDto> getPendingTargets();
 
 	List<ProjectConfigDto> getPendingProjects();
 	
-	void initializeBuildResults(
-			Map<String, ProjectStatusDto> statusMap);
+	void initializeBuildResults(Map<String, ProjectStatusDto> statusMap);
 
 	void addTarget(ProjectConfigDto config);
+	void addTarget(ProjectConfigDto config, ProjectStatusDto buildStatus);
 
 	boolean isEmpty();
 
 	boolean isBlocked() throws DependencyException;
 
-	ProjectConfigDto getNextTarget() throws DependencyException;
+	BuildTarget getNextTarget() throws DependencyException;
 
 	void targetCompleted(ProjectConfigDto config,
 			boolean success);

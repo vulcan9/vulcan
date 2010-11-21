@@ -1,6 +1,6 @@
 /*
  * Vulcan Build Manager
- * Copyright (C) 2005-2006 Chris Eldredge
+ * Copyright (C) 2005-2010 Chris Eldredge
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,11 +27,14 @@ import java.util.List;
 import java.util.Set;
 
 import net.sourceforge.vulcan.ProjectManager;
+import net.sourceforge.vulcan.core.BuildManager;
 import net.sourceforge.vulcan.core.DependencyBuildPolicy;
 import net.sourceforge.vulcan.core.DependencyGroup;
 import net.sourceforge.vulcan.core.WorkingCopyUpdateStrategy;
 import net.sourceforge.vulcan.dto.ProjectConfigDto;
+import net.sourceforge.vulcan.dto.ProjectStatusDto;
 import net.sourceforge.vulcan.dto.ProjectConfigDto.UpdateStrategy;
+import net.sourceforge.vulcan.exception.ConfigException;
 import net.sourceforge.vulcan.exception.ProjectsLockedException;
 import net.sourceforge.vulcan.metadata.SvnRevision;
 
@@ -39,6 +42,7 @@ import net.sourceforge.vulcan.metadata.SvnRevision;
 @SvnRevision(id="$Id$", url="$HeadURL$")
 class DependencyGroupBuilder {
 	final ProjectManager projectManager;
+	final BuildManager buildManager;
 	final DependencyBuildPolicy policy;
 	final boolean buildOnDependencyFailureOverride;
 	final boolean buildOnNoUpdatesOverride;
@@ -48,8 +52,9 @@ class DependencyGroupBuilder {
 	final WorkingCopyUpdateStrategy updateStrategyOverride;
 	final List<String> locked = new ArrayList<String>();
 	
-	private DependencyGroupBuilder(ProjectManager projectManager, DependencyBuildPolicy policy, WorkingCopyUpdateStrategy updateStrategyOverride, boolean buildOnDependencyFailureOverride, boolean buildOnNoUpdatesOverride) {
+	private DependencyGroupBuilder(ProjectManager projectManager, BuildManager buildManager, DependencyBuildPolicy policy, WorkingCopyUpdateStrategy updateStrategyOverride, boolean buildOnDependencyFailureOverride, boolean buildOnNoUpdatesOverride) {
 		this.projectManager = projectManager;
+		this.buildManager = buildManager;
 		this.policy = policy;
 		this.updateStrategyOverride = updateStrategyOverride;
 		this.buildOnDependencyFailureOverride = buildOnDependencyFailureOverride;
@@ -57,18 +62,19 @@ class DependencyGroupBuilder {
 	}
 	
 	static DependencyGroup buildDependencyGroup(ProjectConfigDto[] projects,
-			ProjectManager projectManager, DependencyBuildPolicy policy,
-			WorkingCopyUpdateStrategy updateStrategyOverride, boolean buildOnDependencyFailureOverride, boolean buildOnNoUpdatesOverride)
-		throws ProjectsLockedException {
-		return new DependencyGroupBuilder(projectManager, policy,
-				updateStrategyOverride,
-				buildOnDependencyFailureOverride, buildOnNoUpdatesOverride).buildDependencyGroup(projects);
+			ProjectManager projectManager, BuildManager buildManager,
+			DependencyBuildPolicy policy, WorkingCopyUpdateStrategy updateStrategyOverride, boolean buildOnDependencyFailureOverride, boolean buildOnNoUpdatesOverride)
+		throws ProjectsLockedException, ConfigException {
+		return new DependencyGroupBuilder(projectManager, buildManager,
+				policy,
+				updateStrategyOverride, buildOnDependencyFailureOverride, buildOnNoUpdatesOverride).buildDependencyGroup(projects);
 	}
 	
-	private DependencyGroup buildDependencyGroup(ProjectConfigDto[] projects) throws ProjectsLockedException {
+	private DependencyGroup buildDependencyGroup(ProjectConfigDto[] projects) throws ProjectsLockedException, ConfigException {
 		for (ProjectConfigDto project : projects) {
 			addOnce(project, false);
 		}
+		
 		if (locked.size() > 0) {
 			throw new ProjectsLockedException(locked);
 		}
@@ -76,7 +82,7 @@ class DependencyGroupBuilder {
 		return dg;
 	}
 	
-	private void addOnce(ProjectConfigDto projectConfig, boolean isDependency) {
+	private void addOnce(ProjectConfigDto projectConfig, boolean isDependency) throws ConfigException {
 		if (projectConfig.isLocked()) {
 			if (isDependency && DependencyBuildPolicy.AS_NEEDED.equals(policy)) {
 				// exclude locked projects that have been included "as needed"
@@ -89,7 +95,9 @@ class DependencyGroupBuilder {
 		}
 		
 		if (!added.contains(projectConfig.getName())) {
-			add(projectConfig);
+			applyOverridesAndAdd(projectConfig);
+			
+			added.add(projectConfig.getName());
 			
 			if (projectConfig.isAutoIncludeDependencies() && !DependencyBuildPolicy.NONE.equals(policy)) {
 				for (String depName : projectConfig.getDependencies()) {
@@ -105,9 +113,7 @@ class DependencyGroupBuilder {
 		}
 	}
 	
-	private void add(ProjectConfigDto projectConfig) {
-		added.add(projectConfig.getName());
-		
+	private void applyOverridesAndAdd(ProjectConfigDto projectConfig) throws ConfigException {
 		ProjectConfigDto copy = (ProjectConfigDto) projectConfig.copy();
 		
 		if (buildOnDependencyFailureOverride) {
@@ -124,12 +130,21 @@ class DependencyGroupBuilder {
 			copy.setUpdateStrategy(UpdateStrategy.IncrementalAlways);
 		}
 		
-		if (shouldBuild(copy)) {
-			dg.addTarget(copy);
-		}
+		addIfNeedToRebuild(copy);
 	}
 
-	private boolean shouldBuild(ProjectConfigDto project) {
-		return true;
+	private void addIfNeedToRebuild(ProjectConfigDto project) throws ConfigException {
+		ProjectRebuildExpert expert = new ProjectRebuildExpert();
+		expert.setProjectManager(projectManager);
+		expert.setBuildManager(buildManager);
+		expert.setWorkingCopyUpdateExpert(new WorkingCopyUpdateExpert());
+		
+		if (expert.shouldBuild(project, buildManager.getLatestStatus(project.getName()))) {
+			final ProjectStatusDto buildStatus = new ProjectStatusDto();
+			buildStatus.setBuildReasonKey(expert.getMessageKey());
+			buildStatus.setBuildReasonArgs(expert.getMessageArgs());
+			
+			dg.addTarget(project, buildStatus);
+		}
 	}
 }

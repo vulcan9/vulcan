@@ -18,22 +18,28 @@
  */
 package net.sourceforge.vulcan.core;
 
-import net.sourceforge.vulcan.dto.BuildDaemonInfoDto;
-import net.sourceforge.vulcan.metadata.SvnRevision;
+import net.sourceforge.vulcan.dto.ProjectConfigDto;
+import net.sourceforge.vulcan.dto.ProjectStatusDto;
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
-public interface ProjectBuilder {
-	public void build(BuildDaemonInfoDto info, BuildTarget currentTarget, BuildDetailCallback buildDetailCallback);
+/**
+ * Represents a project to be built. 
+ */
+public interface BuildTarget {
+	String getProjectName();
 
-	public boolean isBuilding();
-	public boolean isKilling();
+	public ProjectConfigDto getProjectConfig();
+
+	public ProjectStatusDto getStatus();
 	
-	/**
-	 * @param timeout if set, a watchdog is killing the build; otherwise a
-	 * user requested it.
-	 */
-	public void abortCurrentBuild(boolean timeout, String requestUsername);
+	public Iterable<String> getAllDependencies();
 	
-	public void addBuildStatusListener(BuildStatusListener listener);
-	public boolean removeBuildStatusListener(BuildStatusListener listener);
+	public Iterable<String> getPendingDependencies();
+	
+	public void removePendingDependency(String name);
+
+	public int getNumberOfPendingDependencies();
+
+	public boolean dependsOn(BuildTarget other);
+	
+	public boolean isBuildOnDependencyFailure();
 }

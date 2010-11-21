@@ -1,6 +1,6 @@
 /*
  * Vulcan Build Manager
- * Copyright (C) 2005-2009 Chris Eldredge
+ * Copyright (C) 2005-2010 Chris Eldredge
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -37,6 +37,7 @@ import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import net.sourceforge.vulcan.core.BuildManager;
+import net.sourceforge.vulcan.core.BuildTarget;
 import net.sourceforge.vulcan.core.DependencyException;
 import net.sourceforge.vulcan.core.DependencyGroup;
 import net.sourceforge.vulcan.core.ProjectBuilder;
@@ -113,7 +114,7 @@ public class BuildManagerImpl implements BuildManager {
 
 	@ManagedOperation
 	@ManagedOperationParameters({@ManagedOperationParameter(name="buildDaemonInfo", description="")})
-	public ProjectConfigDto getTarget(BuildDaemonInfoDto buildDaemonInfo) {
+	public BuildTarget getTarget(BuildDaemonInfoDto buildDaemonInfo) {
 		try {
 			writeLock.lock();
 			
@@ -431,7 +432,7 @@ public class BuildManagerImpl implements BuildManager {
 	}
 
 	// must obtain write lock before calling this method
-	private ProjectConfigDto getTarget(BuildDaemonInfoDto buildDaemonInfo, Set<String> dependenciesNeededByActiveBuilds, int i) {
+	private BuildTarget getTarget(BuildDaemonInfoDto buildDaemonInfo, Set<String> dependenciesNeededByActiveBuilds, int i) {
 		if (activeDaemons.containsKey(buildDaemonInfo)) {
 			throw new IllegalStateException();
 		}
@@ -441,7 +442,7 @@ public class BuildManagerImpl implements BuildManager {
 		}
 		final Target tgt = queue.get(i);
 		
-		final ProjectConfigDto config;
+		final BuildTarget buildTarget;
 
 		try {
 			boolean removed = false;
@@ -454,11 +455,11 @@ public class BuildManagerImpl implements BuildManager {
 				return null;
 			}
 			
-			config = tgt.next();
+			buildTarget = tgt.next();
 			
-			if (config != null && dependenciesNeededByActiveBuilds.contains(config.getName())) {
+			if (buildTarget != null && dependenciesNeededByActiveBuilds.contains(buildTarget.getProjectName())) {
 				// put it back for later.
-				tgt.push(config);
+				tgt.push(buildTarget);
 				throw new PendingDependencyException();
 			}
 			
@@ -466,10 +467,10 @@ public class BuildManagerImpl implements BuildManager {
 				removed = true;
 				queue.remove(i);
 			}
-			if (config != null) {
-				final String targetName = config.getName();
+			if (buildTarget != null) {
+				final String targetName = buildTarget.getProjectName();
 				if (projectsBeingBuilt.containsKey(targetName)) {
-					warnDuplicateBuild(config, tgt);
+					warnDuplicateBuild(buildTarget.getProjectConfig(), tgt);
 					if (!removed) {
 						queue.remove(i);
 					}
@@ -479,11 +480,11 @@ public class BuildManagerImpl implements BuildManager {
 				if (LOG.isInfoEnabled()) {
 					LOG.info("Assigned project " + targetName + " to builder "+ buildDaemonInfo.getName() + ".");
 				}
-				activeBuilds.add(config);
+				activeBuilds.add(buildTarget.getProjectConfig());
 				activeDaemons.put(buildDaemonInfo, tgt);
 				projectsBeingBuilt.put(targetName, new ProjectStatusDto());
 			}
-			return config;
+			return buildTarget;
 		} catch (PendingDependencyException e) {
 			return getTarget(buildDaemonInfo, dependenciesNeededByActiveBuilds, i+1);
 		}
@@ -580,15 +581,15 @@ public class BuildManagerImpl implements BuildManager {
 	private interface Target {
 		boolean hasNext();
 		boolean containsAny(Collection<String> projectNames);
-		ProjectConfigDto next() throws PendingDependencyException;
-		void push(ProjectConfigDto config);
+		BuildTarget next() throws PendingDependencyException;
+		void push(BuildTarget target);
 		void targetCompleted(ProjectConfigDto config, boolean success);
 		void appendPendingTargets(List<ProjectStatusDto> list);
 		String getName();
 	}
 	private class DependencyTarget implements Target {
 		final DependencyGroup group;
-		ProjectConfigDto pushed;
+		BuildTarget pushed;
 		
 		DependencyTarget(DependencyGroup group) {
 			this.group = group;
@@ -596,8 +597,8 @@ public class BuildManagerImpl implements BuildManager {
 		public boolean hasNext() {
 			return pushed != null || !group.isEmpty();
 		}
-		public ProjectConfigDto next() throws PendingDependencyException {
-			ProjectConfigDto current = null;
+		public BuildTarget next() throws PendingDependencyException {
+			BuildTarget current = null;
 			
 			if (pushed != null) {
 				current = pushed;
@@ -616,16 +617,17 @@ public class BuildManagerImpl implements BuildManager {
 			}
 
 			if (current != null) {
-				current.setRequestedBy(getName());
+				// TODO: scheduler should set these properties
+				current.getProjectConfig().setRequestedBy(getName());
 				if (!group.isManualBuild()) {
-					current.setScheduledBuild(true);
+					current.getProjectConfig().setScheduledBuild(true);
 				}
 			}
 			
 			return current;
 		}
-		public void push(ProjectConfigDto config) {
-			pushed = config;
+		public void push(BuildTarget target) {
+			pushed = target;
 		}
 		public void targetCompleted(ProjectConfigDto config, boolean success) {
 			group.targetCompleted(config, success);
@@ -633,11 +635,11 @@ public class BuildManagerImpl implements BuildManager {
 		public void appendPendingTargets(List<ProjectStatusDto> list) {
 			if (pushed != null) {
 				final ProjectStatusDto pushedStatus = new ProjectStatusDto();
-				pushedStatus.setName(pushed.getName());
+				pushedStatus.setName(pushed.getProjectName());
 				pushedStatus.setStatus(Status.IN_QUEUE);
 				list.add(pushedStatus);
 			}
-			list.addAll(Arrays.asList(group.getPendingTargets()));
+			list.addAll(group.getPendingTargets());
 		}
 		public boolean containsAny(Collection<String> projectNames) {
 			for (ProjectConfigDto target : group.getPendingProjects()) {

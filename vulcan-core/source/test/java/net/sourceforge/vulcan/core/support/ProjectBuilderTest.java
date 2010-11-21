@@ -1,6 +1,6 @@
 /*
  * Vulcan Build Manager
- * Copyright (C) 2005-2009 Chris Eldredge
+ * Copyright (C) 2005-2010 Chris Eldredge
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -36,6 +36,7 @@ import net.sourceforge.vulcan.core.BuildDetailCallback;
 import net.sourceforge.vulcan.core.BuildManager;
 import net.sourceforge.vulcan.core.BuildPhase;
 import net.sourceforge.vulcan.core.BuildStatusListener;
+import net.sourceforge.vulcan.core.BuildTarget;
 import net.sourceforge.vulcan.core.ProjectBuilder;
 import net.sourceforge.vulcan.dto.BuildDaemonInfoDto;
 import net.sourceforge.vulcan.dto.BuildMessageDto;
@@ -70,7 +71,6 @@ public class ProjectBuilderTest extends EasyMockTestCase {
 	boolean gotInterrupt;
 	boolean invokedBuild;
 	boolean suppressStartDate = true;
-	boolean projectIsUpToDate;
 	
 	File logFile = new File("fakeBuildLog.log");
 	File diffFile = new File("fakeDiff.log");
@@ -142,17 +142,11 @@ public class ProjectBuilderTest extends EasyMockTestCase {
 			}
 		}
 		@Override
-		protected ProjectStatusDto createBuildStatus(ProjectConfigDto currentTarget) {
-			final ProjectStatusDto projectStatusDto = super.createBuildStatus(currentTarget);
+		protected void initializeBuildStatus(BuildTarget buildTarget) {
+			super.initializeBuildStatus(buildTarget);
+			
 			if (suppressStartDate) {
-				projectStatusDto.setStartDate(null);
-			}
-			return projectStatusDto;
-		}
-		@Override
-		protected void determineBuildReason(ProjectConfigDto currentTarget) throws ConfigException, ProjectUpToDateException {
-			if (projectIsUpToDate) {
-				throw new ProjectUpToDateException();
+				buildStatus.setStartDate(null);
 			}
 		}
 	};
@@ -268,8 +262,11 @@ public class ProjectBuilderTest extends EasyMockTestCase {
 		project = new ProjectConfigDto();
 		project.setName("foo");
 
-		ProjectStatusDto status = builder.createBuildStatus(project);
-		assertNotNull(status.getStartDate());
+		BuildTarget target = new BuildTargetImpl(project, new ProjectStatusDto());
+		
+		builder.initializeBuildStatus(target);
+		
+		assertNotNull(target.getStatus().getStartDate());
 	}
 	
 	public void testKillProjectDuringBuild() throws Throwable {
@@ -297,7 +294,7 @@ public class ProjectBuilderTest extends EasyMockTestCase {
 			@Override
 			public void run() {
 				try {
-					builder.build(info, project, buildDetailCallback);
+					builder.build(info, new BuildTargetImpl(project, new ProjectStatusDto()), buildDetailCallback);
 				} catch (Throwable e) {
 					error = e;
 				}
@@ -333,25 +330,6 @@ public class ProjectBuilderTest extends EasyMockTestCase {
 		assertTrue("did not interrupt", gotInterrupt);
 		
 		assertFalse(builder.isBuilding());
-	}
-
-	public void testInformsBuildManagerWhenProjectUpToDate() throws Exception {
-		projectIsUpToDate = true;
-		
-		project = new ProjectConfigDto();
-		project.setWorkDir("a");
-		project.setName("foo");
-
-		expect(projectMgr.getRepositoryAdaptor(project)).andReturn(ra);
-
-		expect(ra.getTagName()).andReturn("trunk");
-		expect(ra.getLatestRevision(rev0)).andReturn(rev0);
-		
-		expect(mgr.getLatestStatus("foo")).andReturn(previousStatus);
-		
-		mgr.targetCompleted(info, project, createFakeBuildOutcome(project.getName(), 43, rev0, "trunk", Status.UP_TO_DATE, null, null, null, "http://localhost", false, null, null, null, ProjectStatusDto.UpdateType.Full, project.getWorkDir(), true, estimatedBuildTimeMillis, true));
-
-		checkBuild();
 	}
 
 	public void testBuildProjectPreviousNull() throws Exception {
@@ -1007,7 +985,7 @@ public class ProjectBuilderTest extends EasyMockTestCase {
 		replay();
 
 		try {
-			builder.build(info, project, buildDetailCallback);
+			builder.build(info, new BuildTargetImpl(project, new ProjectStatusDto()), buildDetailCallback);
 		} catch (Exception e) {
 			verify();
 			throw e;

@@ -346,6 +346,8 @@ public class ManualBuildActionTest extends MockApplicationContextStrutsTestCase 
 		
 		final DependencyGroup dg = new DependencyGroupImpl();
 
+		dg.addTarget(new ProjectConfigDto());
+		
 		manager.buildDependencyGroup(
 				aryEq(new ProjectConfigDto[] {projects[0]}),
 				eq(DependencyBuildPolicy.FORCE),
@@ -357,6 +359,7 @@ public class ManualBuildActionTest extends MockApplicationContextStrutsTestCase 
 		
 		expectedDg.setManualBuild(true);
 		expectedDg.setName(username);
+		expectedDg.addTarget(new ProjectConfigDto());
 		
 		buildManager.add(expectedDg);
 		
@@ -391,6 +394,8 @@ public class ManualBuildActionTest extends MockApplicationContextStrutsTestCase 
 		expectLastCall().andReturn(dg);
 
 		buildManager.add(dg);
+		
+		dg.addTarget(new ProjectConfigDto());
 		
 		expect(manager.getBuildDaemons()).andReturn(Collections.<BuildDaemon>emptyList());
 		

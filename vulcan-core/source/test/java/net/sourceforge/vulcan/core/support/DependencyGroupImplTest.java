@@ -1,6 +1,6 @@
 /*
  * Vulcan Build Manager
- * Copyright (C) 2005-2006 Chris Eldredge
+ * Copyright (C) 2005-2010 Chris Eldredge
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,6 +20,7 @@ package net.sourceforge.vulcan.core.support;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 
 import junit.framework.TestCase;
 import net.sourceforge.vulcan.core.DependencyGroup;
@@ -41,7 +42,7 @@ public class DependencyGroupImplTest extends TestCase {
 		
 		assertFalse(dg.isEmpty());
 		
-		assertSame(config, dg.getNextTarget());
+		assertSame(config, dg.getNextTarget().getProjectConfig());
 		
 		assertTrue(dg.isEmpty());
 		
@@ -61,7 +62,7 @@ public class DependencyGroupImplTest extends TestCase {
 		
 		assertFalse(dg.isBlocked());
 		
-		assertSame(a, dg.getNextTarget());
+		assertSame(a, dg.getNextTarget().getProjectConfig());
 		
 		assertTrue(dg.isBlocked());
 		
@@ -75,7 +76,7 @@ public class DependencyGroupImplTest extends TestCase {
 		
 		assertFalse(dg.isBlocked());
 		
-		assertSame(b, dg.getNextTarget());
+		assertSame(b, dg.getNextTarget().getProjectConfig());
 		
 		assertTrue(dg.isEmpty());
 	}
@@ -89,7 +90,7 @@ public class DependencyGroupImplTest extends TestCase {
 		
 		assertFalse(dg.isBlocked());
 		
-		assertSame(a, dg.getNextTarget());
+		assertSame(a, dg.getNextTarget().getProjectConfig());
 		
 		assertTrue(dg.isBlocked());
 		
@@ -116,13 +117,13 @@ public class DependencyGroupImplTest extends TestCase {
 		
 		assertFalse(dg.isBlocked());
 		
-		assertSame(a, dg.getNextTarget());
+		assertSame(a, dg.getNextTarget().getProjectConfig());
 		
 		assertTrue(dg.isBlocked());
 		
 		dg.targetCompleted(a, false);
 		
-		assertSame(b, dg.getNextTarget());
+		assertSame(b, dg.getNextTarget().getProjectConfig());
 		
 		assertTrue(dg.isEmpty());
 	}
@@ -135,7 +136,7 @@ public class DependencyGroupImplTest extends TestCase {
 		
 		assertFalse(dg.isBlocked());
 		
-		assertSame(a, dg.getNextTarget());
+		assertSame(a, dg.getNextTarget().getProjectConfig());
 		
 		dg.targetCompleted(a, true);
 		
@@ -168,7 +169,7 @@ public class DependencyGroupImplTest extends TestCase {
 		
 		dg.addTarget(b);
 		
-		assertSame(b, dg.getNextTarget());
+		assertSame(b, dg.getNextTarget().getProjectConfig());
 
 		dg.targetCompleted(b, true);
 		
@@ -222,7 +223,7 @@ public class DependencyGroupImplTest extends TestCase {
 		dg.addTarget(c);
 		dg.addTarget(b);
 		
-		ProjectConfigDto t = dg.getNextTarget();
+		ProjectConfigDto t = dg.getNextTarget().getProjectConfig();
 		assertSame(a, t);
 		
 		try {
@@ -232,7 +233,7 @@ public class DependencyGroupImplTest extends TestCase {
 		}
 		dg.targetCompleted(t, true);
 		
-		t = dg.getNextTarget();
+		t = dg.getNextTarget().getProjectConfig();
 		assertSame(b, t);
 		
 		try {
@@ -242,7 +243,7 @@ public class DependencyGroupImplTest extends TestCase {
 		}
 		dg.targetCompleted(t, true);
 
-		t = dg.getNextTarget();
+		t = dg.getNextTarget().getProjectConfig();
 		assertSame(c, t);
 		
 		assertTrue(dg.isEmpty());
@@ -256,34 +257,34 @@ public class DependencyGroupImplTest extends TestCase {
 		dg.addTarget(c);
 		dg.addTarget(b);
 		
-		final ProjectStatusDto[] pending = dg.getPendingTargets();
+		final List<ProjectStatusDto> pending = dg.getPendingTargets();
 		
 		assertNotNull(pending);
-		assertEquals(3, pending.length);
+		assertEquals(3, pending.size());
 		
-		assertTrue(pending[0].isInQueue());
-		assertTrue(pending[1].isInQueue());
-		assertTrue(pending[2].isInQueue());
+		assertTrue(pending.get(0).isInQueue());
+		assertTrue(pending.get(1).isInQueue());
+		assertTrue(pending.get(2).isInQueue());
 		
-		ProjectConfigDto cfg = dg.getNextTarget();
+		ProjectConfigDto cfg = dg.getNextTarget().getProjectConfig();
 		
-		assertEquals(2, dg.getPendingTargets().length);
-		
-		dg.targetCompleted(cfg, true);
-		
-		assertEquals(2, dg.getPendingTargets().length);
-		
-		cfg = dg.getNextTarget();
-		
-		assertEquals(1, dg.getPendingTargets().length);
+		assertEquals(2, dg.getPendingTargets().size());
 		
 		dg.targetCompleted(cfg, true);
 		
-		assertEquals(1, dg.getPendingTargets().length);
+		assertEquals(2, dg.getPendingTargets().size());
 		
-		cfg = dg.getNextTarget();
+		cfg = dg.getNextTarget().getProjectConfig();
 		
-		assertEquals(0, dg.getPendingTargets().length);
+		assertEquals(1, dg.getPendingTargets().size());
+		
+		dg.targetCompleted(cfg, true);
+		
+		assertEquals(1, dg.getPendingTargets().size());
+		
+		cfg = dg.getNextTarget().getProjectConfig();
+		
+		assertEquals(0, dg.getPendingTargets().size());
 	}
 	public void testSortStable() throws Exception {
 		final ProjectConfigDto a = createConfigDto("a");
@@ -386,16 +387,16 @@ public class DependencyGroupImplTest extends TestCase {
 		
 		assertEquals(Arrays.asList(a, b, c, d), dg.getPendingProjects());
 		
-		assertSame(a, dg.getNextTarget());
+		assertSame(a, dg.getNextTarget().getProjectConfig());
 		dg.targetCompleted(a, true);
 
-		assertSame(b, dg.getNextTarget());
+		assertSame(b, dg.getNextTarget().getProjectConfig());
 		
-		assertSame(d, dg.getNextTarget());
+		assertSame(d, dg.getNextTarget().getProjectConfig());
 		
 		dg.targetCompleted(b, true);
 		
-		assertSame(c, dg.getNextTarget());
+		assertSame(c, dg.getNextTarget().getProjectConfig());
 	}
 
 	private ProjectConfigDto createConfigDto(String name) {

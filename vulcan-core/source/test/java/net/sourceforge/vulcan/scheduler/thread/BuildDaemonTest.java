@@ -1,6 +1,6 @@
 /*
  * Vulcan Build Manager
- * Copyright (C) 2005-2009 Chris Eldredge
+ * Copyright (C) 2005-2010 Chris Eldredge
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,6 +23,7 @@ import java.net.InetAddress;
 import net.sourceforge.vulcan.EasyMockTestCase;
 import net.sourceforge.vulcan.core.BuildManager;
 import net.sourceforge.vulcan.core.ProjectBuilder;
+import net.sourceforge.vulcan.core.support.BuildTargetImpl;
 import net.sourceforge.vulcan.core.support.ProjectBuilderImpl;
 import net.sourceforge.vulcan.core.support.StoreStub;
 import net.sourceforge.vulcan.dto.BuildDaemonInfoDto;
@@ -109,14 +110,12 @@ public class BuildDaemonTest extends EasyMockTestCase {
 		builder = builderStub;
 		
 		final ProjectConfigDto project = new ProjectConfigDto();
-
-
-		expect(mgr.getTarget(info)).andReturn(project);
+		
+		expect(mgr.getTarget(info)).andReturn(new BuildTargetImpl(project, new ProjectStatusDto()));
 		expect(mgr.getLatestStatus(null)).andReturn(null).anyTimes();
 
 		mgr.registerBuildStatus((BuildDaemonInfoDto)notNull(),
 				(ProjectBuilder)notNull(), (ProjectConfigDto)notNull(), (ProjectStatusDto)notNull());
-		
 
 		mgr.targetCompleted(
 				(BuildDaemonInfoDto) anyObject(),
@@ -169,7 +168,7 @@ public class BuildDaemonTest extends EasyMockTestCase {
 
 		final ProjectConfigDto project = new ProjectConfigDto();
 
-		expect(mgr.getTarget(info)).andReturn(project);
+		expect(mgr.getTarget(info)).andReturn(new BuildTargetImpl(project, new ProjectStatusDto()));
 
 		expect(mgr.getLatestStatus(null)).andReturn(null).anyTimes();
 
@@ -195,7 +194,7 @@ public class BuildDaemonTest extends EasyMockTestCase {
 
 		final ProjectConfigDto project = new ProjectConfigDto();
 
-		expect(mgr.getTarget(info)).andReturn(project);
+		expect(mgr.getTarget(info)).andReturn(new BuildTargetImpl(project, new ProjectStatusDto()));
 
 		expect(mgr.getLatestStatus(null)).andReturn(null).anyTimes();
 		
@@ -230,7 +229,7 @@ public class BuildDaemonTest extends EasyMockTestCase {
 
 		final ProjectConfigDto project = new ProjectConfigDto();
 
-		expect(mgr.getTarget(info)).andReturn(project);
+		expect(mgr.getTarget(info)).andReturn(new BuildTargetImpl(project, new ProjectStatusDto()));
 		expect(mgr.getLatestStatus(null)).andReturn(null).anyTimes();
 
 		mgr.registerBuildStatus((BuildDaemonInfoDto)notNull(),

@@ -1,6 +1,6 @@
 /*
  * Vulcan Build Manager
- * Copyright (C) 2005-2009 Chris Eldredge
+ * Copyright (C) 2005-2010 Chris Eldredge
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -34,7 +34,7 @@ import net.sourceforge.vulcan.metadata.SvnRevision;
 public interface BuildManager {
 	void init(BuildManagerConfigDto buildManagerConfig);
 	
-	ProjectConfigDto getTarget(BuildDaemonInfoDto buildDaemonInfo);
+	BuildTarget getTarget(BuildDaemonInfoDto buildDaemonInfo);
 
 	/**
 	 * Register an instance of ProjectStatusDto which can be updated as the build proceeds.

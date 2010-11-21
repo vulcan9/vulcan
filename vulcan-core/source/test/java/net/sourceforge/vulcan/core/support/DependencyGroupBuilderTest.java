@@ -1,6 +1,6 @@
 /*
  * Vulcan Build Manager
- * Copyright (C) 2005-2006 Chris Eldredge
+ * Copyright (C) 2005-2010 Chris Eldredge
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,11 +20,13 @@ package net.sourceforge.vulcan.core.support;
 
 import net.sourceforge.vulcan.EasyMockTestCase;
 import net.sourceforge.vulcan.ProjectManager;
+import net.sourceforge.vulcan.core.BuildManager;
 import net.sourceforge.vulcan.core.DependencyBuildPolicy;
 import net.sourceforge.vulcan.core.DependencyGroup;
 import net.sourceforge.vulcan.core.WorkingCopyUpdateStrategy;
 import net.sourceforge.vulcan.dto.LockDto;
 import net.sourceforge.vulcan.dto.ProjectConfigDto;
+import net.sourceforge.vulcan.dto.ProjectStatusDto;
 import net.sourceforge.vulcan.dto.ProjectConfigDto.UpdateStrategy;
 import net.sourceforge.vulcan.exception.ProjectsLockedException;
 import net.sourceforge.vulcan.metadata.SvnRevision;
@@ -34,16 +36,21 @@ import org.easymock.EasyMock;
 @SvnRevision(id="$Id$", url="$HeadURL$")
 public class DependencyGroupBuilderTest extends EasyMockTestCase {
 	ProjectManager projectMgr = createStrictMock(ProjectManager.class);
+	BuildManager buildManager = createStrictMock(BuildManager.class);
 	
 	ProjectConfigDto[] projects = {new ProjectConfigDto(), new ProjectConfigDto()};
 	
 	@Override
 	public void setUp() throws Exception {
+		checkOrder(false);
+		expect(buildManager.getLatestStatus((String)notNull())).andReturn(null).anyTimes();
+		
 		projects[0].setName("a");
 		projects[0].setAutoIncludeDependencies(true);
 		projects[0].setUpdateStrategy(UpdateStrategy.CleanDaily);
 		projects[1].setName("b");
 	}
+	
 	public void testAddsProjects() throws Exception {
 		final DependencyGroup dg = new DependencyGroupImpl();
 		dg.addTarget(projects[0]);
@@ -51,6 +58,7 @@ public class DependencyGroupBuilderTest extends EasyMockTestCase {
 		
 		check(dg, DependencyBuildPolicy.AS_NEEDED, true, false, WorkingCopyUpdateStrategy.Default);
 	}
+	
 	public void testThrowsOnLockedProject() throws Exception {
 		projects[0].addLock(new LockDto());
 		try {
@@ -61,6 +69,7 @@ public class DependencyGroupBuilderTest extends EasyMockTestCase {
 			assertEquals(projects[0].getName(), e.getLockedProjectNames().get(0));
 		}
 	}
+	
 	public void testThrowsOnLockedProjectIncludesAllLocked() throws Exception {
 		projects[0].addLock(new LockDto());
 		projects[1].addLock(new LockDto());
@@ -73,6 +82,7 @@ public class DependencyGroupBuilderTest extends EasyMockTestCase {
 			assertEquals(projects[1].getName(), e.getLockedProjectNames().get(1));
 		}
 	}
+	
 	public void testThrowsOnLockedProjectDependency() throws Exception {
 		EasyMock.expect(projectMgr.getProjectConfig("b")).andReturn(projects[1]);
 		
@@ -87,6 +97,7 @@ public class DependencyGroupBuilderTest extends EasyMockTestCase {
 			assertEquals(projects[1].getName(), e.getLockedProjectNames().get(0));
 		}
 	}
+	
 	public void testSkipsOnLockedProjectDependencyAsNeeded() throws Exception {
 		EasyMock.expect(projectMgr.getProjectConfig("b")).andReturn(projects[1]);
 		
@@ -98,16 +109,21 @@ public class DependencyGroupBuilderTest extends EasyMockTestCase {
 		
 		check(dg, DependencyBuildPolicy.AS_NEEDED, false, false, WorkingCopyUpdateStrategy.Default);
 	}
+	
 	public void testOverrideOptions() throws Exception {
 		final DependencyGroup dg = new DependencyGroupImpl();
 		
 		ProjectConfigDto copy = (ProjectConfigDto) projects[0].copy();
 		copy.setBuildOnDependencyFailure(true);
 		copy.setBuildOnNoUpdates(true);
-		dg.addTarget(copy);
+		final ProjectStatusDto buildStatus = new ProjectStatusDto();
+		buildStatus.setBuildReasonArgs(new String[0]);
+		buildStatus.setBuildReasonKey("messages.build.reason.forced");
+		dg.addTarget(copy, buildStatus);
 		
 		check(dg, DependencyBuildPolicy.AS_NEEDED, false, true, WorkingCopyUpdateStrategy.Default);
 	}
+	
 	public void testOverrideUpdateStrategyIncremental() throws Exception {
 		final DependencyGroup dg = new DependencyGroupImpl();
 		
@@ -118,6 +134,7 @@ public class DependencyGroupBuilderTest extends EasyMockTestCase {
 		
 		check(dg, DependencyBuildPolicy.AS_NEEDED, false, false, WorkingCopyUpdateStrategy.Incremental);
 	}
+	
 	public void testOverrideUpdateStrategyClean() throws Exception {
 		final DependencyGroup dg = new DependencyGroupImpl();
 		
@@ -128,6 +145,7 @@ public class DependencyGroupBuilderTest extends EasyMockTestCase {
 		
 		check(dg, DependencyBuildPolicy.AS_NEEDED, false, false, WorkingCopyUpdateStrategy.Full);
 	}
+	
 	public void testSkipsDependenciesWhenAutoIncludeFalse() throws Exception {
 		projects[0].setDependencies(new String[] {"b"});
 		projects[0].setAutoIncludeDependencies(false);
@@ -164,7 +182,12 @@ public class DependencyGroupBuilderTest extends EasyMockTestCase {
 		ProjectConfigDto copy = (ProjectConfigDto) projects[1].copy();
 		copy.setBuildOnDependencyFailure(true);
 		copy.setBuildOnNoUpdates(true);
-		dg.addTarget(copy);
+		
+		final ProjectStatusDto buildStatus = new ProjectStatusDto();
+		buildStatus.setBuildReasonArgs(new String[0]);
+		buildStatus.setBuildReasonKey("messages.build.reason.forced");
+		dg.addTarget(copy, buildStatus);
+
 		
 		check(dg, DependencyBuildPolicy.FORCE, false, false, WorkingCopyUpdateStrategy.Default);
 	}
@@ -218,6 +241,7 @@ public class DependencyGroupBuilderTest extends EasyMockTestCase {
 		
 		check(dg, DependencyBuildPolicy.AS_NEEDED, false, false, WorkingCopyUpdateStrategy.Default);
 	}
+	
 	public void testNoDuplicates() throws Exception {
 		EasyMock.expect(projectMgr.getProjectConfig("b")).andReturn(projects[1]);
 		
@@ -229,6 +253,7 @@ public class DependencyGroupBuilderTest extends EasyMockTestCase {
 		
 		check(dg, DependencyBuildPolicy.AS_NEEDED, true, false, WorkingCopyUpdateStrategy.Default);
 	}
+	
 	private void check(DependencyGroup expected, DependencyBuildPolicy policy, boolean useAll, boolean override, WorkingCopyUpdateStrategy updateStrategyOverride) throws Exception {
 		replay();
 		
@@ -239,8 +264,8 @@ public class DependencyGroupBuilderTest extends EasyMockTestCase {
 		} else {
 			projects = new ProjectConfigDto[] {this.projects[0]};
 		}
-		
-		assertEquals(expected, DependencyGroupBuilder.buildDependencyGroup(projects, projectMgr, policy, updateStrategyOverride, override, override));
+
+		assertEquals(expected, DependencyGroupBuilder.buildDependencyGroup(projects, projectMgr, buildManager, policy, updateStrategyOverride, override, override));
 		
 		verify();
 	}

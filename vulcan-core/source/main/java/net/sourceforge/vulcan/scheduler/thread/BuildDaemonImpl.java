@@ -1,6 +1,6 @@
 /*
  * Vulcan Build Manager
- * Copyright (C) 2005-2006 Chris Eldredge
+ * Copyright (C) 2005-2010 Chris Eldredge
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,6 +22,7 @@ import java.net.InetAddress;
 
 import net.sourceforge.vulcan.core.BuildDetailCallback;
 import net.sourceforge.vulcan.core.BuildManager;
+import net.sourceforge.vulcan.core.BuildTarget;
 import net.sourceforge.vulcan.core.ProjectBuilder;
 import net.sourceforge.vulcan.dto.BuildDaemonInfoDto;
 import net.sourceforge.vulcan.dto.MetricDto;
@@ -33,7 +34,7 @@ import net.sourceforge.vulcan.scheduler.BuildDaemon;
 public abstract class BuildDaemonImpl extends AbstractScheduler implements BuildDaemon {
 	private BuildManager buildManager;
 	
-	protected ProjectConfigDto currentTarget;
+	protected BuildTarget currentTarget;
 	private ProjectBuilder builder;
 	private String phaseMessageKey;
 	private String detail;
@@ -144,7 +145,7 @@ public abstract class BuildDaemonImpl extends AbstractScheduler implements Build
 		return false;
 	}
 	public synchronized ProjectConfigDto getCurrentTarget() {
-		return currentTarget;
+		return currentTarget == null ? null : currentTarget.getProjectConfig();
 	}
 	public BuildManager getBuildManager() {
 		return buildManager;
