@@ -31,10 +31,10 @@ import net.sourceforge.vulcan.metadata.SvnRevision;
 public class ProjectStatusDto extends NameDto {
 	/**
 	 * First line of constants are possible build outcomes.  Following constants are for internal use only.
+	 * TODO: build result is different than current state.
 	 */
 	public enum Status { PASS, FAIL, SKIP, ERROR,
-						IN_QUEUE, BUILDING, 
-						 /*TODO: Obsolete: */UP_TO_DATE};
+						IN_QUEUE, BUILDING };
 	
 	public enum UpdateType { Full, Incremental };
 	

@@ -172,7 +172,7 @@ public class ProjectBuilderImpl implements ProjectBuilder {
 		} finally {
 			if (previousOutcome == null) {
 				buildStatus.setStatusChanged(true);
-			} else if (!buildStatus.getStatus().equals(Status.UP_TO_DATE)) {
+			} else {
 				buildStatus.setStatusChanged(!previousOutcome.equals(buildStatus.getStatus()));
 			}
 			

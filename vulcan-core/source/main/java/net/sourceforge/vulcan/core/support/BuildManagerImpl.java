@@ -369,20 +369,8 @@ public class BuildManagerImpl implements BuildManager {
 		boolean passed = false;
 		
 		try {
-			switch (outcome.getStatus()) {
-				case PASS:
-					passed = true;
-					break;
-				case UP_TO_DATE:
-					passed = getLatestStatus(projectName).getStatus().equals(Status.PASS);
-					break;
-				default:
-					passed = false;
-			}
-			
-			if (!outcome.getStatus().equals(Status.UP_TO_DATE)) {
-				fireBuildCompleted(info, config, outcome);
-			}
+			passed = outcome.getStatus() == Status.PASS;
+			fireBuildCompleted(info, config, outcome);
 		} finally {		
 			try {
 				writeLock.lock();

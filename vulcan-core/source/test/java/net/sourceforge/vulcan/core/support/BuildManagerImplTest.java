@@ -703,48 +703,7 @@ public class BuildManagerImplTest extends TestCase {
 		mgr.add(dg);
 		mgr.add(dg2);
 	}
-	public void testTargetNotBuiltLeavesPreviousStatus() throws Exception {
-		ProjectStatusDto prev = new ProjectStatusDto();
-		prev.setStatus(Status.PASS);
-		prev.setBuildNumber(17);
-		
-		final Map<String, ProjectStatusDto> map = new HashMap<String, ProjectStatusDto>(); 
-		map.put(a.getName(), prev);
-		map.put(b.getName(), prev);
-		
-		cache.mergeOutcomes(map);
-		mgr.init(mgrConfig);
-		
-		b.setDependencies(new String[] {a.getName()});
-		dg.addTarget(a);
-		dg.addTarget(b);
-		
-		mgr.add(dg);
 
-		final ProjectConfigDto a = mgr.getTarget(info1).getProjectConfig();
-		assertEquals(this.a, a);
-		
-		assertEquals(0, fireCount);
-		
-		mgr.targetCompleted(info1, a,
-				createFakeStatus(a, null, Status.UP_TO_DATE, null, null, null));
-		
-		assertEquals(0, fireCount);
-		
-		assertEquals(b, mgr.getTarget(info1).getProjectConfig());
-		
-		mgr.targetCompleted(info1, b, 
-				createFakeStatus(b, rev0, Status.PASS, null, null, null));
-		
-		assertEquals(1, fireCount);
-		assertEquals(null, mgr.getTarget(info1));
-		
-		final ProjectStatusDto newestA = cache.getLatestOutcome(a.getName());
-		final ProjectStatusDto newestB = cache.getLatestOutcome(b.getName());
-		
-		assertSame(prev, newestA);
-		assertNotSame(prev, newestB);
-	}
 	public void testTargetNotPassPreservesLastGoodBuildNumber() throws Exception {
 		ProjectStatusDto prev = new ProjectStatusDto();
 		prev.setStatus(Status.PASS);
@@ -802,45 +761,6 @@ public class BuildManagerImplTest extends TestCase {
 		final ProjectStatusDto cur = cache.getLatestOutcome(a.getName());
 		
 		assertEquals(null, cur.getLastGoodBuildNumber());
-	}
-	public void testTargetNotBuiltMakesDependentsSkip() throws Exception {
-		ProjectStatusDto prev = new ProjectStatusDto();
-		prev.setStatus(Status.FAIL);
-		prev.setBuildNumber(64);
-		
-		final Map<String, ProjectStatusDto> map = new HashMap<String, ProjectStatusDto>(); 
-		map.put(a.getName(), prev);
-		map.put(b.getName(), prev);
-
-		cache.mergeOutcomes(map);
-		mgr.init(mgrConfig);
-
-		b.setDependencies(new String[] {"a"});
-		dg.addTarget(a);
-		dg.addTarget(b);
-		
-		mgr.add(dg);
-
-		final ProjectConfigDto a = mgr.getTarget(info1).getProjectConfig();
-		assertEquals(this.a, a);
-		
-		assertEquals(0, fireCount);
-		
-		mgr.targetCompleted(info1, a,
-				createFakeStatus(a, null, Status.UP_TO_DATE, null, null, null));
-		
-		assertEquals(0, fireCount);
-		
-		assertEquals(null, mgr.getTarget(info1));
-		
-		assertEquals(1, fireCount);
-		
-		final ProjectStatusDto newestA = cache.getLatestOutcome(a.getName());
-		final ProjectStatusDto newestB = cache.getLatestOutcome(b.getName());
-		
-		assertSame(prev, newestA);
-		assertNotSame(prev, newestB);
-		assertEquals((Integer)65, newestB.getBuildNumber());
 	}
 	
 	public void testThrowsOnEmptyGroup() throws Exception {
