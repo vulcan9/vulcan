@@ -175,7 +175,7 @@ public class SubversionRepositoryAdaptor extends SubversionSupport implements Re
 		}
 	}
 
-	public boolean hasIncomingChanges(ProjectConfigDto project,	ProjectStatusDto previousStatus) throws RepositoryException {
+	public boolean hasIncomingChanges(ProjectStatusDto previousStatus) throws RepositoryException {
 		RevisionTokenDto rev = previousStatus.getRevision();
 		
 		if (rev == null) {

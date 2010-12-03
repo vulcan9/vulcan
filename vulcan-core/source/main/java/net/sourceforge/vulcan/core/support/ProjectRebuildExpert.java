@@ -158,7 +158,7 @@ class ProjectRebuildExpert {
 			
 			final RepositoryAdaptor ra = projectManager.getRepositoryAdaptor(project);
 			
-			if (!ra.hasIncomingChanges(project, mostRecentBuildByWorkDir)) {
+			if (!ra.hasIncomingChanges(mostRecentBuildByWorkDir)) {
 				return false;
 			}
 

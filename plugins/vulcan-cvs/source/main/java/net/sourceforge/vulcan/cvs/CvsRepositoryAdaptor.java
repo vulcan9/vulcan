@@ -45,7 +45,6 @@ import net.sourceforge.vulcan.cvs.support.CheckoutListener;
 import net.sourceforge.vulcan.cvs.support.NewestRevisionsLogListener;
 import net.sourceforge.vulcan.dto.ChangeLogDto;
 import net.sourceforge.vulcan.dto.ChangeSetDto;
-import net.sourceforge.vulcan.dto.ProjectConfigDto;
 import net.sourceforge.vulcan.dto.ProjectStatusDto;
 import net.sourceforge.vulcan.dto.RepositoryTagDto;
 import net.sourceforge.vulcan.dto.RevisionTokenDto;
@@ -75,7 +74,7 @@ public class CvsRepositoryAdaptor extends CvsSupport implements RepositoryAdapto
 		}
 	}
 	
-	public boolean hasIncomingChanges(ProjectConfigDto project,	ProjectStatusDto previousStatus) throws RepositoryException {
+	public boolean hasIncomingChanges(ProjectStatusDto previousStatus) throws RepositoryException {
 		RevisionTokenDto rev = previousStatus.getRevision();
 		
 		if (rev == null) {

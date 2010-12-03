@@ -508,7 +508,7 @@ public class ProjectBuilderImpl implements ProjectBuilder {
 		}
 	}
 	
-	private List<BuildStatusListener> getCurrentBuildListeners() {
+	private Iterable<BuildStatusListener> getCurrentBuildListeners() {
 		synchronized(buildListeners) {
 			return new ArrayList<BuildStatusListener>(buildListeners);
 		}

@@ -24,7 +24,6 @@ import java.util.List;
 
 import net.sourceforge.vulcan.core.BuildDetailCallback;
 import net.sourceforge.vulcan.dto.ChangeLogDto;
-import net.sourceforge.vulcan.dto.ProjectConfigDto;
 import net.sourceforge.vulcan.dto.ProjectStatusDto;
 import net.sourceforge.vulcan.dto.RepositoryTagDto;
 import net.sourceforge.vulcan.dto.RevisionTokenDto;
@@ -38,11 +37,9 @@ public interface RepositoryAdaptor {
 	 * Determine if changes are available in the repository since the previous build.
 	 * This method is only called when a working copy is known to already exist and
 	 * the previous build result is available.
-	 * 
-	 * @param project The project settings to check.
-	 * @param previousStatus The result of the previous build.
+	 * @param mostRecentBuildInSameWorkDir The result of the previous build in the same directory.
 	 */
-	boolean hasIncomingChanges(ProjectConfigDto project, ProjectStatusDto previousStatus) throws RepositoryException;
+	boolean hasIncomingChanges(ProjectStatusDto mostRecentBuildInSameWorkDir) throws RepositoryException;
 	
 	/**
 	 * Obtain a token representing the HEAD revision for the overall project tree.
