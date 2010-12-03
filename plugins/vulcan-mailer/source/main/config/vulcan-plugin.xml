@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" 
+	"http://www.springframework.org/dtd/spring-beans.dtd">
+<beans>
+	<bean name="plugin" class="net.sourceforge.vulcan.mailer.EmailPlugin"
+			init-method="init" destroy-method="destroy">
+		<property name="eventHandler">
+			<ref parent="eventHandler"/>
+		</property>
+		<property name="messageAssembler">
+			<bean class="net.sourceforge.vulcan.mailer.MessageAssembler"/>
+		</property>
+		<property name="projectDomBuilder">
+			<ref parent="projectDomBuilder"/>
+		</property>
+		<property name="stylesheet" value="email"/>
+	</bean>
+	
+	<bean id="messageSource" class="org.springframework.context.support.ReloadableResourceBundleMessageSource">
+		<property name="basenames">
+			<list>
+				<value>i18n/mailer-messages</value>
+			</list>
+		</property>
+		<property name="cacheSeconds" value="${i18n.cache.seconds}"/>
+	</bean>
+</beans>

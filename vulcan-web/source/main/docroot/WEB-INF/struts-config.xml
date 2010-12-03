@@ -1,0 +1,240 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE struts-config PUBLIC
+		"-//Apache Software Foundation//DTD Struts Configuration 1.2//EN"
+		"http://jakarta.apache.org/struts/dtds/struts-config_1_2.dtd">
+<!-- 
+	$Id$
+	$HeadURL$
+-->
+<struts-config>
+	<form-beans>
+		<form-bean name="projectConfigForm" type="net.sourceforge.vulcan.web.struts.forms.ProjectConfigForm"/>
+		<form-bean name="schedulerConfigForm" type="net.sourceforge.vulcan.web.struts.forms.SchedulerConfigForm"/>
+		<form-bean name="pluginConfigForm" type="net.sourceforge.vulcan.web.struts.forms.PluginConfigForm"/>
+		<form-bean name="importConfigFileForm" type="net.sourceforge.vulcan.web.struts.forms.ImportConfigFileForm"/>
+		<form-bean name="manualBuildForm" type="net.sourceforge.vulcan.web.struts.forms.ManualBuildForm"/>
+		<form-bean name="reportForm" type="net.sourceforge.vulcan.web.struts.forms.ReportForm"/>
+		<form-bean name="projectImportForm" type="net.sourceforge.vulcan.web.struts.forms.ProjectImportForm"/>
+		<form-bean name="projectStatusForm" type="net.sourceforge.vulcan.web.struts.forms.ProjectStatusForm"/>
+		<form-bean name="multipleProjectConfigForm" type="net.sourceforge.vulcan.web.struts.forms.MultipleProjectConfigForm"/>
+		<form-bean name="labelForm" type="net.sourceforge.vulcan.web.struts.forms.LabelForm"/>
+		<form-bean name="preferencesForm" type="net.sourceforge.vulcan.web.struts.forms.PreferencesForm"/>
+	</form-beans>
+	
+	<global-forwards>
+		<forward name="dashboard" path="/" redirect="true"/>
+		<forward name="about" path="/about.jsp"/>
+		<forward name="report" path="/buildHistoryReport.do"/>
+		
+		<forward name="site" path="/site/"/>
+		
+		<!-- internal forwards -->
+		<forward name="projectDetails" path="/WEB-INF/jsp/projectConfiguration.jsp"/>
+		<forward name="error" path="/WEB-INF/jsp/error.jsp"/>
+		<forward name="failure" path="/WEB-INF/jsp/error.jsp"/>
+		<forward name="restResponse" path="/WEB-INF/jsp/restResponse.jsp"/>
+		
+		<forward name="preferences" path="/editPreferences.do"/>
+		<forward name="help" path="http://code.google.com/p/vulcan/wiki/" redirect="true"/>
+		
+		<forward name="viewProjectStatus" path="/projects/"/>
+		
+		<!-- admin forwards -->
+		<forward name="setup" path="/admin/setup/"/>
+		<forward name="importPlugin" path="/admin/setup/importPlugin.jsp"/>
+		<forward name="clearMessages" path="/admin/clearMessages.do"/>
+		<forward name="configureProject" path="/admin/setup/manageProjectConfig.do?action=Edit"/>
+		<forward name="deleteProjects" path="/admin/setup/deleteProjectsForm.do"/>
+		<forward name="configureScheduler" path="/admin/setup/manageSchedulerConfig.do?action=Edit"/>
+		<forward name="configureBuildDaemon" path="/admin/setup/manageBuildDaemonConfig.do?action=Edit&amp;amp;daemon=true"/>
+		<forward name="configurePlugin" path="/admin/setup/managePlugin.do?action=Configure"/>
+		<forward name="importProjectConfig" path="/admin/setup/importProjectForm.do"/>
+		<forward name="createProjectConfig" path="/admin/setup/manageProjectConfig.do?action=edit&amp;amp;createNew=true"/>
+		<forward name="createProjectLabel" path="/admin/setup/manageLabels.do?action=edit"/>
+		<forward name="createSchedulerConfig" path="/admin/setup/manageSchedulerConfig.do?action=edit&amp;amp;createNew=true"/>
+		<forward name="createBuildDaemonConfig" path="/admin/setup/manageBuildDaemonConfig.do?action=edit&amp;amp;createNew=true&amp;amp;daemon=true"/>
+		<forward name="viewConfig" path="/admin/viewConfig.do?download"/>
+		<forward name="importConfig" path="/admin/setup/importConfig.jsp"/>
+		<forward name="editBuildReports" path="/admin/setup/reports.jsp"/>
+		
+		<!-- build manager forwards -->
+		<forward name="manualBuildForm" path="/buildmanagement/manualBuildForm.do"/>
+		<forward name="flushQueue" path="/buildmanagement/flushBuildQueue.do"/>
+		<forward name="toggleScheduler" path="/buildmanagement/toggleScheduler.do"/>
+		<forward name="killBuild" path="/buildmanagement/kill.do"/>
+	</global-forwards>
+
+	<action-mappings>
+		<action path="/viewProjectStatus"
+				type="org.springframework.web.struts.DelegatingActionProxy"
+				name="projectStatusForm"
+				validate="true"
+				input="/WEB-INF/jsp/error.jsp"/>
+				
+		<action path="/buildHistoryReport"
+				type="org.apache.struts.actions.ForwardAction"
+				name="reportForm"
+				validate="false"
+				scope="session"
+				parameter="/WEB-INF/jsp/buildHistoryReportForm.jsp"/>
+		
+		<action path="/viewProjectBuildHistory"
+				type="org.springframework.web.struts.DelegatingActionProxy"
+				name="reportForm"
+				input="/WEB-INF/jsp/buildHistoryReportForm.jsp">
+			<forward name="OpenFlashChart" path="/WEB-INF/jsp/openFlashChart.jsp"/>
+		</action>
+		
+		<action path="/getBuildHistory"
+				type="org.springframework.web.struts.DelegatingActionProxy"/>
+		
+		<action path="/editPreferences"
+				type="org.apache.struts.actions.ForwardAction"
+				name="preferencesForm"
+				scope="request"
+				parameter="/WEB-INF/jsp/preferences.jsp"/>
+		
+		<action path="/managePreferences"
+				type="org.springframework.web.struts.DelegatingActionProxy"
+				name="preferencesForm"
+				scope="request"
+				parameter="action"
+				input="/WEB-INF/jsp/preferences.jsp">
+		</action>
+		
+		<action path="/admin/clearMessages"
+				type="org.springframework.web.struts.DelegatingActionProxy"/>
+
+		<action path="/admin/setup/importProjectForm"
+				type="org.apache.struts.actions.ForwardAction"
+				parameter="/WEB-INF/jsp/importProjectForm.jsp"
+				name="projectImportForm"
+				validate="false"/>
+		
+		<action path="/admin/setup/createProjectFromUrl"
+				type="org.springframework.web.struts.DelegatingActionProxy"
+				input="/WEB-INF/jsp/importProjectForm.jsp"
+				name="projectImportForm">
+			<forward name="success" path="/admin/setup/"/>
+		</action>
+		
+		<action path="/admin/setup/manageProjectConfig"
+				type="org.springframework.web.struts.DelegatingActionProxy"
+				name="projectConfigForm"
+				parameter="action"
+				input="/WEB-INF/jsp/projectConfiguration.jsp">
+			<forward name="projectList" path="/admin/setup/"/>
+			<forward name="configure" path="/WEB-INF/jsp/metadataConfiguration.jsp"/>
+		</action>
+
+		<action path="/admin/setup/deleteProjectsForm"
+				type="org.apache.struts.actions.ForwardAction"
+				parameter="/WEB-INF/jsp/deleteProjectsForm.jsp"/>
+				
+		<action path="/admin/setup/deleteProjects"
+				type="org.springframework.web.struts.DelegatingActionProxy"
+				name="multipleProjectConfigForm"
+				validate="false"
+				input="/WEB-INF/jsp/deleteProjectsForm.jsp">
+			<forward name="projectList" path="/admin/setup/"/>
+		</action>
+		
+		<action path="/admin/setup/manageLabels"
+				type="org.springframework.web.struts.DelegatingActionProxy"
+				name="labelForm"
+				parameter="action"
+				input="/WEB-INF/jsp/projectLabels.jsp"
+				scope="request">
+			<forward name="labelForm" path="/WEB-INF/jsp/projectLabels.jsp"/>
+		</action>
+		
+		<action path="/admin/setup/manageSchedulerConfig"
+				type="org.springframework.web.struts.DelegatingActionProxy"
+				name="schedulerConfigForm"
+				parameter="action"
+				input="/WEB-INF/jsp/schedulerConfiguration.jsp">
+			<forward name="schedulerList"  path="/admin/setup/"/>
+			<forward name="schedulerDetails" path="/WEB-INF/jsp/schedulerConfiguration.jsp"/>
+		</action>
+
+		<action path="/admin/setup/manageBuildDaemonConfig"
+				type="org.springframework.web.struts.DelegatingActionProxy"
+				name="schedulerConfigForm"
+				parameter="action"
+				input="/WEB-INF/jsp/schedulerConfiguration.jsp">
+			<forward name="schedulerList" path="/admin/setup/"/>
+			<forward name="schedulerDetails" path="/WEB-INF/jsp/schedulerConfiguration.jsp"/>
+		</action>
+		
+		<action path="/admin/setup/managePlugin"
+				type="org.springframework.web.struts.DelegatingActionProxy"
+				name="pluginConfigForm"
+				parameter="action"
+				input="/admin/setup/">
+			<forward name="pluginList" path="/admin/setup/"/>
+			<forward name="pluginLocked" path="/WEB-INF/jsp/pluginLocked.jsp"/>
+			<forward name="configure" path="/WEB-INF/jsp/metadataConfiguration.jsp"/>
+		</action>
+
+		<action path="/admin/setup/saveArtifactLocations"
+				type="org.springframework.web.struts.DelegatingActionProxy"/>
+		
+		<action path="/admin/viewConfig"
+				type="org.springframework.web.struts.DelegatingActionProxy"/>
+
+		<action path="/admin/importConfiguration"
+				type="org.springframework.web.struts.DelegatingActionProxy"
+				name="importConfigFileForm"
+				input="/admin/setup/"/>
+				
+		<action path="/buildmanagement/manualBuildForm"
+				type="org.apache.struts.actions.ForwardAction"
+				name="manualBuildForm"
+				validate="false"
+				scope="session"
+				parameter="/WEB-INF/jsp/manualBuildForm.jsp"/>
+		
+		<action path="/buildmanagement/manualBuild"
+				type="org.springframework.web.struts.DelegatingActionProxy"
+				name="manualBuildForm"
+				scope="session"
+				input="/WEB-INF/jsp/manualBuildForm.jsp">
+			<forward name="chooseTags" path="/WEB-INF/jsp/chooseTags.jsp"/>
+		</action>
+		
+		<action path="/buildmanagement/toggleScheduler"
+				type="org.springframework.web.struts.DelegatingActionProxy"/>
+				
+		<action path="/buildmanagement/flushBuildQueue"
+				type="org.springframework.web.struts.DelegatingActionProxy"/>
+		
+		<action path="/buildmanagement/kill"
+				type="org.springframework.web.struts.DelegatingActionProxy"/>
+				
+		<action path="/buildmanagement/manageLocks"
+				type="org.springframework.web.struts.DelegatingActionProxy"
+				name="multipleProjectConfigForm"
+				input="/buildmanagement/manageLocks.jsp"
+				parameter="action"
+				validate="false"
+				scope="request">
+			<forward name="failure" path="/buildmanagement/manageLocks.jsp"/>
+			<forward name="success" path="/buildmanagement/manageLocks.jsp"/>
+		</action>
+		
+		<action path="/wall/claimBrokenBuild"
+				type="org.springframework.web.struts.DelegatingActionProxy"
+				parameter="action"/>
+	</action-mappings>
+	
+	<controller contentType="" processorClass="net.sourceforge.vulcan.web.struts.RestRequestProcessor"/>
+	
+	<plug-in className="org.apache.struts.validator.ValidatorPlugIn">
+		<set-property property="pathnames" value="/WEB-INF/validator-rules.xml,/WEB-INF/validation.xml" />
+		<set-property property="stopOnFirstError" value="true"/>
+	</plug-in>
+	
+	<plug-in className="net.sourceforge.vulcan.web.struts.plugin.SpringMessageResourcesPlugIn">
+		<set-property property="contextConfigLocation" value="/WEB-INF/action-servlet.xml"/>
+	</plug-in>
+</struts-config>

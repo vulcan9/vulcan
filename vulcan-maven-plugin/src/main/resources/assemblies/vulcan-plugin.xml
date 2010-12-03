@@ -1,0 +1,35 @@
+<assembly>
+	<id>vulcan-plugin</id>
+	<formats>
+		<format>zip</format>
+	</formats>
+	<includeBaseDirectory>false</includeBaseDirectory>
+	<dependencySets>
+		<dependencySet>
+			<outputDirectory>${vulcan.plugin.id}</outputDirectory>
+			<unpack>false</unpack>
+			<scope>runtime</scope>
+		</dependencySet>
+	</dependencySets>
+	<fileSets>
+		<fileSet>
+			<directory>target</directory>
+			<outputDirectory>${vulcan.plugin.id}</outputDirectory>
+			<includes>
+				<include>plugin-version.xml</include>
+				<include>*.jar</include>
+			</includes>
+		</fileSet>
+		<fileSet>
+			<directory>target/vulcan-plugin-includes</directory>
+			<outputDirectory>${vulcan.plugin.id}</outputDirectory>
+		</fileSet>
+		<fileSet>
+			<directory>source/main/config</directory>
+			<outputDirectory>${vulcan.plugin.id}</outputDirectory>
+			<includes>
+				<include>**/*</include>
+			</includes>
+		</fileSet>
+	</fileSets>
+</assembly>

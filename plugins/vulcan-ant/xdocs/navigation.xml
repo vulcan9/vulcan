@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<project name="vulcan-ant">
+	<title>Ant Plugin for Vulcan Build Manager</title>
+
+	<body>
+		<menu name="Project Documentation">
+			<item name="Overview" href="/index.html"/>
+			<item name="Configuration" href="#">
+				<item name="Global Config" href="globalConfig.html"/>
+				<item name="Project Config" href="projectConfig.html"/>
+			</item>
+		</menu>
+		<footer>
+			<div>
+				Project hosting by:<br />
+				<a href="http://sourceforge.net/projects/htmlunit">
+					<img src="http://sourceforge.net/sflogo.php?group_id=47038&amp;type=2" alt="Sourceforge Logo" border="0"/>
+				</a>
+			</div>
+		</footer> 
+	</body>
+</project>

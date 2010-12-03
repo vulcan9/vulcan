@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<project>
+	<body>
+		<menu name="Introduction">
+			<item name="Overview" href="http://code.google.com/p/vulcan/"/>
+			<item name="Download" href="http://code.google.com/p/vulcan/downloads/list"/>
+		</menu>
+		${modules}
+		${reports}
+	</body>
+</project>

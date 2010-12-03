@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" 
+	"http://www.springframework.org/dtd/spring-beans.dtd">
+<beans>
+	<bean name="plugin" class="net.sourceforge.vulcan.filesystem.FileSystemPlugin">
+		<property name="eventHandler">
+			<ref parent="eventHandler"/>
+		</property>
+	</bean>
+	
+	<bean id="messageSource" class="org.springframework.context.support.ReloadableResourceBundleMessageSource">
+		<property name="basenames">
+			<list>
+				<value>i18n/filesystem-messages</value>
+			</list>
+		</property>
+		<property name="cacheSeconds" value="${i18n.cache.seconds}"/>
+	</bean>
+</beans>

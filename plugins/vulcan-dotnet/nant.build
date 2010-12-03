@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="utf-8"?>
+<project name="vulcan-dotnet" default="all" xmlns="http://nant.sf.net/schemas/nant.xsd">
+	<property name="assembly.target.dir" value="${project::get-base-directory()}/target/assemblies"/>
+	<property name="assembly.dist.dir" value="${project::get-base-directory()}/target/vulcan-plugin-includes"/>
+	<property name="assembly.info.file" value="${project::get-base-directory()}/target/AssemblyInfo.cs"/>
+	<property name="test.report.dir" value="${project::get-base-directory()}/target/nunit-reports"/>
+
+	<property name="build.debug" value="false"/>
+
+	<target name="all">
+		<call target="build"/>
+		<call target="unit-test"/>
+		<call target="copy-dist"/>
+	</target>
+
+	<target name="build">
+		<mkdir dir="${assembly.target.dir}"/>
+
+		<copy todir="${assembly.target.dir}">
+			<fileset basedir="${nunit.bin.dir}">
+				<include name="nunit.core.dll"/>
+				<include name="nunit.framework.dll"/>
+			</fileset>
+		</copy>
+
+		<call target="generate-assembly-info"/>
+		<call target="build-msbuild-assembly"/>
+		<call target="build-nant-assembly"/>
+		<call target="build-test-assembly"/>
+	</target>
+
+	<target name="generate-assembly-info">
+		<asminfo output="${assembly.info.file}" language="CSharp">
+			<imports>
+				<import namespace="System" />
+				<import namespace="System.Reflection" />
+			</imports>
+			<attributes>
+				<attribute type="AssemblyVersionAttribute" value="${version}" />
+				<attribute type="AssemblyTitleAttribute" value="Vulcan .NET Remote Build Listener"/>
+				<attribute type="AssemblyDescriptionAttribute" value="Sends build events and log messages over UDP." />
+				<attribute type="AssemblyCopyrightAttribute" value="Copyright (c) 2006-2007, Chris Eldredge" />
+			</attributes>
+		</asminfo>	
+	</target>
+
+	<target name="build-msbuild-assembly">
+		<csc
+			target="library"
+			debug="${build.debug}"
+			output="${assembly.target.dir}/MsBuildListener.dll">
+
+			<nowarn>
+				<warning number="0618"/>
+			</nowarn>
+
+			<sources failonempty="true">
+				<include name="${assembly.info.file}"/>
+				<include name="source/main/csharp/ListenerBase/*.cs"/>
+				<include name="source/main/csharp/MsBuildListener/*.cs"/>
+				<exclude name="source/main/csharp/MsBuildListener/MsBuildNodeLogger.cs"/>
+			</sources>
+			<references>
+				<include name="Microsoft.Build.Framework.dll"/>
+			</references>
+		</csc>
+		
+		<csc
+			target="library"
+			debug="${build.debug}"
+			output="${assembly.target.dir}/MsBuild35Listener.dll">
+
+			<nowarn>
+				<warning number="0618"/>
+			</nowarn>
+
+			<sources failonempty="true">
+				<include name="${assembly.info.file}"/>
+				<include name="source/main/csharp/ListenerBase/*.cs"/>
+				<include name="source/main/csharp/MsBuildListener/*.cs"/>
+			</sources>
+			<references>
+				<include name="Microsoft.Build.Framework.dll"/>
+			</references>
+		</csc>
+	</target>
+
+	<target name="build-nant-assembly">
+		<csc
+			target="library"
+			debug="${build.debug}"
+			output="${assembly.target.dir}/NantBuildListener.dll">
+
+			<nowarn>
+				<warning number="0618"/>
+			</nowarn>
+
+			<sources failonempty="true">
+				<include name="${assembly.info.file}"/>
+				<include name="source/main/csharp/ListenerBase/*.cs"/>
+				<include name="source/main/csharp/NantBuildListener/*.cs"/>
+			</sources>
+
+			<references>
+				<include name="${nant::get-base-directory()}/NAnt.Core.dll"/>
+			</references>
+		</csc>
+	</target>
+
+	<target name="build-test-assembly">
+		<csc
+			target="library"
+			debug="${build.debug}"
+			output="${assembly.target.dir}/UnitTests.dll">
+
+			<sources failonempty="true">
+				<include name="${assembly.info.file}"/>
+				<include name="source/test/csharp/**/*.cs"/>
+				<include name="source/main/csharp/**/*.cs"/>
+			</sources>
+
+			<references>
+				<lib>
+					<include name="${nunit.bin.dir}"/>
+				</lib>
+				<include name="${nant::get-base-directory()}/NAnt.Core.dll"/>
+				<include name="nunit.framework.dll"/>
+				<include name="Microsoft.Build.Framework.dll"/>
+			</references>
+		</csc>
+	</target>
+
+	<target name="unit-test">
+		<mkdir dir="${test.report.dir}"/>
+		<nunit2>
+			<formatter type="Xml" usefile="true" extension=".xml"
+				outputdir="${test.report.dir}"/>
+			<test assemblyname="${assembly.target.dir}/UnitTests.dll"/>
+		</nunit2>
+	</target>
+	
+	<target name="copy-dist">
+		<copy todir="${assembly.dist.dir}">
+			<fileset basedir="${assembly.target.dir}">
+				<include name="*.dll"/>
+				<exclude name="*test*"/>
+				<exclude name="nunit*"/>
+			</fileset>
+		</copy>
+	</target>
+</project>
+

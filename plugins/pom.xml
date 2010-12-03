@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	
+	<parent>
+		<groupId>net.sourceforge.vulcan</groupId>
+		<artifactId>vulcan</artifactId>
+		<version>0.9-SNAPSHOT</version>
+	</parent>
+	
+	<groupId>net.sourceforge.vulcan.plugins</groupId>
+	<artifactId>plugins</artifactId>
+	<name>plugins</name>
+	<packaging>pom</packaging>
+	
+	<properties>
+		<vulcan-maven-plugin.version>1.0-SNAPSHOT</vulcan-maven-plugin.version>
+		<vulcan.zips.target>${basedir}/../target/plugin-zips</vulcan.zips.target>
+	</properties>
+	
+	<modules>
+		<!-- Bundled Vulcan plugins: -->
+		<module>vulcan-ant</module>
+		<module>vulcan-cvs</module>
+		<module>vulcan-dotnet</module>
+		<module>vulcan-filesystem</module>
+		<module>vulcan-jabber</module>
+		<module>vulcan-mailer</module>
+		<module>vulcan-maven</module>
+		<module>vulcan-metrics</module>
+		<module>vulcan-shell</module>
+		<module>vulcan-subversion</module>
+	</modules>
+	
+	<build>
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<artifactId>maven-clean-plugin</artifactId>
+					<configuration>
+						<filesets>
+							<fileset>
+								<directory>${vulcan.zips.target}</directory>
+								<includes>
+									<include>${vulcan.plugin.id}*</include>
+								</includes>
+							</fileset>
+						</filesets>
+					</configuration>
+				</plugin>
+				
+				<plugin>
+					<groupId>net.sourceforge.vulcan</groupId>
+					<artifactId>vulcan-maven-plugin</artifactId>
+					<configuration>
+						<versionLabel>${project.version}.${project.build.number}.${project.revision.numeric}</versionLabel>
+						<vulcanPluginId>${vulcan.plugin.id}</vulcanPluginId>
+					</configuration>
+					<executions>
+						<execution>
+							<goals>
+								<goal>get-subversion-revision</goal>
+								<goal>generate-plugin-version</goal>
+							</goals>
+						</execution>
+					</executions>
+				</plugin>
+
+				<plugin>
+					<artifactId>maven-assembly-plugin</artifactId>
+					<configuration>
+						<finalName>${vulcan.plugin.id}</finalName>
+						<outputDirectory>${vulcan.zips.target}</outputDirectory>
+						<appendAssemblyId>false</appendAssemblyId>
+						<attach>false</attach>
+						<descriptorRefs>
+							<param>vulcan-plugin</param>
+						</descriptorRefs>
+					</configuration>
+					<executions>
+						<execution>
+							<id>build-vulcan-plugin-zip</id>
+							<phase>package</phase>
+							<goals>
+								<goal>attached</goal>
+							</goals>
+						</execution>
+					</executions>
+					<dependencies>
+						<dependency>
+							<groupId>net.sourceforge.vulcan</groupId>
+							<artifactId>vulcan-maven-plugin</artifactId>
+							<version>${vulcan-maven-plugin.version}</version>
+						</dependency>
+					</dependencies> 
+				</plugin>
+			</plugins>		
+		</pluginManagement>
+	</build>
+
+	<dependencies>
+		<dependency>
+			<groupId>net.sourceforge.vulcan</groupId>
+			<artifactId>vulcan-core</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>net.sourceforge.vulcan</groupId>
+			<artifactId>vulcan-test-utils</artifactId>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
+</project>

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" 
+	"http://www.springframework.org/dtd/spring-beans.dtd">
+<!-- 
+	$Id$
+	$HeadURL$
+-->
+<beans>
+	<!-- 
+	<import resource="mbeanContext.xml"/>
+	 -->
+	<import resource="dataAccessContext.xml"/>
+	<import resource="beans.xml"/>
+	
+	<bean name="restRequestDetector" class="net.sourceforge.vulcan.web.struts.UserAgentRestRequestDetector">
+		<property name="restRepsonseForwardName" value="restResponse"/>
+	</bean>
+</beans>

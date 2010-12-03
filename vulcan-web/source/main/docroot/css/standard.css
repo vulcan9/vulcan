@@ -1,0 +1,700 @@
+@import url("parts/color.css");
+
+body {
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 10pt;
+}
+
+h1,h2,h3,h4,h5,h6,ul,ol,p,form,body {
+	margin: 0;
+	padding: 0;
+	font-weight: normal;
+}
+
+h3 {
+	font-size: 200%;
+	font-weight: bold;
+}
+
+h6 {
+	font-size: 100%;
+}
+
+th {
+	font-weight: normal;
+}
+
+tbody th {
+	text-align: left;
+}
+
+ul {
+	margin-left: 2.5em;
+}
+
+li ul {
+	margin-left: 4ex;
+}
+
+.hidden {
+	display: none;
+}
+
+a img {
+	border: none;
+}
+
+a.external {
+	background: transparent no-repeat center right
+		url("../images/external.png");
+	padding-right: 14px;
+}
+
+caption, .caption {
+	padding-bottom: 2ex;
+	font-weight: bold;
+	text-align: left;
+	font-size: 100%;
+}
+
+#loading-message {
+	position: absolute;
+	top: 0;
+	right: 0;
+	color: white;
+	background-color: red;
+	display: none;
+}
+
+/***** Layout ************************************************************************************/
+#top-nav {
+	position: relative;
+	padding: 5ex 0 3ex 5ex;
+}
+
+#brand {
+	height: 58px;
+	width: 225px;
+	overflow: hidden;
+	z-index: 10;
+}
+
+ul#primary-nav,ul#utility-nav {
+	list-style-type: none;
+	text-align: right;
+}
+
+
+ul#primary-nav {
+	position: absolute;
+	bottom: -3px;
+	right: 0;
+}
+
+ul#utility-nav {
+	position: absolute;
+	top: 1ex;
+	right: 0;
+	left: 10ex;
+	border-top: 3px solid #e7e7e7;
+}
+
+ul#primary-nav li {
+	float: left;
+	margin-right: 4ex;
+}
+
+ul#primary-nav li.active {
+	background-color: #9dac39;
+}
+
+ul#primary-nav li.active a {
+	color: white;
+}
+
+ul#primary-nav li a {
+	color: #666;
+	font-weight: bold;
+	display: block;
+	padding: 5px 15px 5px 15px;
+}
+
+ul#utility-nav li {
+	display: inline;
+}
+
+ul#utility-nav li:last-child {
+	margin-right: 5ex;
+}
+
+ul#utility-nav li {
+	color: #868686;
+	background-color: #e7e7e7;
+	padding-bottom: 3px;
+}
+
+ul#utility-nav li a {
+	color: #868686;
+	padding-left: 2ex;
+	padding-right: 2ex;
+	font-size: 85%;
+}
+
+ul#utility-nav li.username {
+	padding-left: 2ex;
+}
+
+ul#utility-nav li:before {
+	content: "|";
+}
+
+ul#utility-nav li:first-child:before {
+	content: "";
+}
+
+ul#utility-nav li.username+li:before {
+	content: "";
+}
+
+div.container {
+	margin: 0 5ex;
+	min-width: 860px;
+}
+
+#content {
+	padding-top: 2ex;
+	padding-bottom: 5ex;
+	position: relative;
+}
+
+#site-info {
+	clear: both;
+	text-align: right;
+	margin: 0 5ex;
+	padding-bottom: 2ex;
+}
+
+#site-info p {
+	font-size: smaller;
+	color: darkgray;
+}
+
+#site-info a {
+	text-decoration: none;
+	color: inherit;
+}
+
+img.health {
+	position: relative;
+	top: 4px;
+	margin-left: 1ex;
+}
+
+div#errors {
+	background: url("../images/stop.gif") no-repeat scroll 5px 0.8em transparent;
+	border: 2px solid #AA0C00;
+	color: #AA0C00;
+	padding: 12px 6px 12px 45px;
+	margin: 12px;
+	min-height: 32px;
+}
+
+div#errors ul {
+	margin-top: 1em;
+	color: black;
+}
+
+span.error {
+	color: #AA0C00;
+	font-style: italic;
+}
+
+span.warning {
+	background: transparent no-repeat top left;
+	background-image: url("../images/warning.gif");
+}
+
+span.message {
+	background: transparent no-repeat top left;
+	background-image: url("../images/success.gif");
+}
+
+span.warning,span.message {
+	padding-left: 20px;
+}
+
+/***** Setup Layout *********************************************************************************/
+div#setup-menu {
+	float: left;
+	min-width: 30ex;
+	width: 20%;
+	background-color: white;
+}
+
+div#setup-content {
+	margin-bottom: 10ex;
+}
+
+ul.detail-menu {
+	list-style: none;
+	padding-left: 4px;
+	padding-right: 4px;
+	margin-left: 0;
+}
+
+ul.detail-menu>li {
+	margin-bottom: 2ex;
+	padding-left: 0;
+	margin-left: 0;
+}
+
+/***** Import Projects ******************************************************************************/
+div#status {
+	margin-top: 4ex;
+}
+
+div#status img {
+	position: relative;
+	left: -6px;
+}
+
+.processing, .status-detail {
+	color: #7E97A6;
+}
+
+/***** Build Reports ********************************************************************************/
+table#reports-list {
+	margin-bottom: 2ex;
+}
+
+table#reports-list td {
+	width: 33%;
+}
+
+tr.dragging td.desc, tr.dragging td.buttons {
+	display: none;
+}
+
+ol li.dragging {
+	list-style: none;
+}
+
+table#buildReportEditFields {
+	margin-top: 4ex;
+}
+
+table#revisions {
+	margin-bottom: 2ex;
+}
+
+/***** Dashboard ************************************************************************************/
+table.dashboard {
+	margin-bottom: 4ex;
+}
+
+table.dashboard td {
+	text-align: left;
+}
+table.dashboard td.numeric {
+	text-align: right;
+}
+
+table.projects {
+	float: left;
+}
+
+div#current-activity {
+	float: right;
+	width: 30%;
+}
+
+div#current-activity table {
+	width: 100%;
+}
+
+div#current-activity ul {
+	list-style: none;
+	margin-left: 0;
+	padding-bottom: 5ex;
+}
+
+div#current-activity ul li {
+	margin-bottom: 1ex;
+}
+
+div.progress-bar, p.phase {
+	margin-left: 2ex;
+}
+	
+.progress-bar-success, .progress-bar-failure {
+	height: 5px;
+	overflow: hidden;
+}
+
+p.time-remaining, a.cancel-build {
+	font-size: 85%;
+	text-align: right;
+}
+
+a.cancel-build {
+	float: right;
+}
+
+.build-outcome-message {
+	margin-bottom: 1ex;
+}
+
+a.issue {
+	background: none !important;
+	padding-right: 0 !important;
+}
+
+.BUILDING,.building {
+	font-weight: bold;
+	background: transparent repeat top left;
+	background-image: url("../images/construction.gif");
+}
+
+div.build-nav {
+	float: right;
+}
+
+div.build-nav a {
+	margin-left: 5px;
+	margin-right: 5px;
+}
+
+div.file-upload {
+	padding: 10px;
+}
+
+.issue,.issue-unlinked {
+	font-weight: bold;
+}
+
+/* monospace */
+.diff,.log,.issue,.issue-unlinked,table.build-messages tbody td,.test-failure-message,.test-failure-details {
+	font-family: "Monaco", "Lucida Console", "Bitstream Vera Sans Mono",
+		"DejaVu Sans Mono", monospace;
+}
+
+.issue-unlinked {
+	border-bottom: 1px dotted orange;
+}
+
+.test-name {
+	font-size: larger;
+}
+
+.test-namespace {
+	font-size: larger;
+}
+
+.test-failure-message {
+	margin-top: 2ex;
+}
+
+.test-failure-details {
+	font-size: 75%;
+}
+
+div.link {
+	margin-bottom: 1em;
+}
+
+div.projectCheckboxes, div.options {
+	-moz-column-width: 12em;
+	-moz-column-gap: 1em;
+}
+
+div.projectCheckboxes li {
+	white-space: nowrap;
+}
+
+div.chart-legend {
+	float: left;
+	border: 1px solid black;
+}
+
+.legend-header {
+	font-weight: bold;
+	position: relative;
+	margin-left: 8px;
+	top: -8px;
+	background-color: white;
+}
+
+.legend-color-box {
+	width: 1em;
+	height: 1em;
+	border: 1px solid black;
+	margin-left: 5px;
+	margin-right: 5px;
+	padding: 0;
+	float: left;
+}
+
+ul.issue-list {
+	list-style: none;
+	display: inline;
+	padding: 0;
+	margin-left: 0;
+}
+
+ul.issue-list li {
+	display: inline;
+	margin-left: 0.75em;
+}
+
+ul.options,ul.buttons,ul.projectBuildOptions,div.projectCheckboxes ul,ul.metaDataOptions,ul.object-array,ul.primitive-array,ul.dateRanges {
+	list-style: none;
+	padding-left: 0;
+	padding-right: 10px;
+	margin-left: 0;
+	margin-right: 10px;
+	margin-top: 0;
+}
+
+ul.buttons {
+	margin-top: 1em;
+	margin-bottom: 1em;
+}
+
+ul.dateRanges li {
+	padding-left: 2em;
+}
+
+ul.options li, ul.buttons li {
+	display: inline;
+}
+
+ul.buttons li {
+	margin-left: 2em;
+}
+
+input[type=radio]+label {
+	margin-right: 1em;
+}
+
+label+input[type=text] {
+	margin-left: -0.5em;
+}
+
+input[type=text],input[type=password] {
+	width: 35em;
+}
+
+input[type=button],button {
+	margin-right: 1em;
+}
+
+a {
+	text-decoration: none;
+}
+
+table.sortable thead th, th.sortable a:link, th.sortable a {
+	cursor: pointer;
+	background: transparent no-repeat center right url("../images/sortable.gif");
+	padding-right: 21px;
+	white-space: nowrap;
+	
+}
+
+.sorted-ascending,.sorted-descending {
+	background: transparent no-repeat center right;
+	padding-right: 21px;
+}
+
+.sorted-ascending, th.age .sorted-descending {
+	background-image: url("../images/asc.gif") !important;
+}
+
+.sorted-descending, th.age .sorted-ascending {
+	background-image: url("../images/desc.gif") !important;
+}
+
+table.error,table.warning,table.message,table.buildHistoryReportForm,table.manualBuild {
+	margin-left: auto;
+	margin-right: auto;
+}
+
+table.blended td {
+	white-space: pre;
+}
+
+table.build-summary {
+	float: left;
+	margin-right: 2em;
+}
+
+table.change-sets,.build-errors,.build-warning,.test-failures {
+	clear: left;
+}
+
+table.about th {
+	width: 8em;
+}
+
+td.component-version {
+	text-align: center;
+}
+
+table.build-messages tbody td {
+	font-size: smaller;
+}
+
+table .error {
+	display: block;
+}
+
+table.primitiveArray,table.objectArray {
+	margin-left: 0;
+	border-spacing: 0 0;
+	border: 0;
+}
+
+table.primitiveArray th,table.primitiveArray td,table.objectArray th,table.objectArray td
+	{
+	vertical-align: middle;
+}
+
+tbody>th {
+	text-align: right;
+	width: 10em;
+}
+
+td,th {
+	padding: 3px;
+	vertical-align: top;
+}
+
+th:last-child,th.last-child {
+	border-right: 0;
+}
+
+th.timestamp,td.timestamp,td.label {
+	white-space: nowrap;
+}
+
+td.status {
+	font-weight: bold;
+	text-align: center;
+}
+
+th.long,th.file {
+	text-align: left;
+}
+
+td.build-number {
+	text-align: center;
+}
+
+td.numeric {
+	text-align: right;
+}
+
+td.dateInputs {
+	vertical-align: bottom;
+}
+
+div.tables th,div.tables td {
+	text-align: center;
+}
+
+input[type="checkbox"]+label+div {
+	margin-top: 1ex;
+	margin-left: 2ex;
+}
+
+.description {
+	font-style: italic;
+}
+
+select.transform {
+	margin-left: 4px;
+	margin-bottom: 8px;
+}
+
+select.reloadInterval {
+	margin-left: 1ex;
+	margin-right: 1ex;
+}
+
+input.buildNumber {
+	width: 8em;
+	margin-left: 1em;
+}
+
+input.inline {
+	width: 5ex;
+}
+
+input[type=submit] {
+	margin-left: 1em;
+}
+
+
+#build-report-header {
+	position: relative;
+	padding-bottom: 8ex;
+}
+
+ul.tabs {
+	margin: 0;
+	margin-top: 20px;
+	padding: 0;
+	list-style-type: none;
+	position: absolute;
+	bottom: -1px;
+}
+
+ul.tabs li {
+	float: left;
+	background-color: #ccc;
+	margin-left: 10px;
+	border: 1px solid black;
+}
+
+ul.tabs li a {
+	display: block;
+	padding: 10px;
+}
+
+ul.tabs li.active {
+	background-color: white;
+	padding-bottom: 1px;
+	border-bottom: none;
+}
+
+div.tab-panel {
+	display: none;
+	border: 1px solid black;
+	padding: 10px;
+}
+
+caption.panel-caption {
+	display: none;
+}
+
+span.count {
+	font-size: smaller;
+	color: black;
+}
+
+div.build-stats {
+	float: left;
+	margin-right: 20px;
+}
+
+iframe {
+	border: none;
+	width: 100%;
+	/* height set by javascript */
+}
+
+#dashboard-columns {
+	list-style-position: inside;
+	min-width: 40em;
+	-moz-column-width: 12em;
+	-moz-column-gap: 1em;
+}

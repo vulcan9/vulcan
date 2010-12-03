@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" 
+	"http://www.springframework.org/dtd/spring-beans.dtd">
+<!-- 
+	$Id$
+	$HeadURL$
+-->
+<beans>
+	<import resource="sql/default.xml"/>
+	
+	<!-- hsqldb configuration -->
+	<bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
+		<property name="driverClassName" value="org.hsqldb.jdbcDriver"/>
+		<property name="url" value="jdbc:hsqldb:file:${vulcan.home}/hsqldb/builds;shutdown=true"/>
+		<property name="username" value="sa"/>
+		<property name="defaultAutoCommit" value="false"/>
+	</bean>
+	
+	<bean id="txManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource" ref="dataSource"/>
+	</bean>
+	
+	<!-- jndi configuration -->
+	<!--
+	<bean id="dataSource" class="org.springframework.jndi.JndiObjectFactoryBean">
+		<property name="jndiName" value="jdbc/vulcan"/>
+		<property name="resourceRef" value="true"/>
+	</bean>
+	-->
+	
+	<!-- buildOutcomeStore definition and transaction configuration -->
+	<bean id="buildOutcomeStoreTarget" class="net.sourceforge.vulcan.spring.jdbc.JdbcBuildOutcomeStore"
+			init-method="init" depends-on="schemaMigrator">
+		<property name="dataSource" ref="dataSource"/>
+		<property name="configurationStore" ref="configurationStore"/>
+		<!--  sqlQueries is defined by one of the sql dialect contexts imported above. -->
+		<property name="sqlQueries" ref="sqlQueries"/>
+	</bean>
+
+	<bean id="buildOutcomeStore" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
+		<property name="transactionManager" ref="txManager"/>
+		<property name="target" ref="buildOutcomeStoreTarget"/>
+		<property name="transactionAttributes">
+			<props>
+				<prop key="store*">PROPAGATION_REQUIRED,-net.sourceforge.vulcan.exception.StoreException</prop>
+				<prop key="projectNameChanged">PROPAGATION_REQUIRED</prop>
+				<prop key="claimBrokenBuild">PROPAGATION_REQUIRED</prop>
+				<prop key="*">PROPAGATION_SUPPORTS,readOnly</prop>
+			</props>
+		</property>
+	</bean>
+</beans>
