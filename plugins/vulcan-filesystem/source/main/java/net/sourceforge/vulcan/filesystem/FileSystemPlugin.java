@@ -36,7 +36,7 @@ public class FileSystemPlugin
 	EventHandler eventHandler;
 	
 	public RepositoryAdaptor createInstance(ProjectConfigDto projectConfig) throws RepositoryException {
-		return new FileSystemRepositoryAdaptor((FileSystemProjectConfigDto)projectConfig.getRepositoryAdaptorConfig());
+		return new FileSystemRepositoryAdaptor(projectConfig, (FileSystemProjectConfigDto)projectConfig.getRepositoryAdaptorConfig());
 	}
 
 	public ProjectRepositoryConfigurator createProjectConfigurator(String url, String username, String password) throws ConfigException {

@@ -56,7 +56,6 @@ import net.sourceforge.vulcan.exception.RepositoryException;
 import net.sourceforge.vulcan.exception.StoreException;
 import net.sourceforge.vulcan.metadata.SvnRevision;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -72,8 +71,6 @@ public class ProjectBuilderImpl implements ProjectBuilder {
 	private BuildOutcomeStore buildOutcomeStore;
 	private ProjectManager projectManager;
 	private BuildManager buildManager;
-	private int deleteDirectoryAttempts = 1;
-	private long deleteFailureSleepTime;
 	private boolean diffsEnabled;
 	
 	/* State */
@@ -194,6 +191,7 @@ public class ProjectBuilderImpl implements ProjectBuilder {
 			}
 		}
 	}
+	
 	public synchronized void abortCurrentBuild(boolean timeout, String requestUsername) {
 		killedBy = requestUsername;
 		
@@ -205,61 +203,71 @@ public class ProjectBuilderImpl implements ProjectBuilder {
 			buildThread.interrupt();
 		}
 	}
+	
 	public synchronized boolean isBuilding() {
 		return building;
 	}
+	
 	public synchronized boolean isKilling() {
 		return killing;
 	}
+	
 	public void addBuildStatusListener(BuildStatusListener listener) {
 		synchronized(buildListeners) {
 			buildListeners.add(listener);
 		}
 	}
+	
 	public boolean removeBuildStatusListener(BuildStatusListener listener) {
 		synchronized(buildListeners) {
 			return buildListeners.remove(listener);
 		}
 	}
+	
 	public ConfigurationStore getConfigurationStore() {
 		return configurationStore;
 	}
+	
 	public void setConfigurationStore(ConfigurationStore store) {
 		this.configurationStore = store;
 	}
+	
 	public void setWorkingCopyUpdateExpert(WorkingCopyUpdateExpert workingCopyUpdateExpert) {
 		this.workingCopyUpdateExpert = workingCopyUpdateExpert;
 	}
+	
 	public BuildOutcomeStore getBuildOutcomeStore() {
 		return buildOutcomeStore;
 	}
+	
 	public void setBuildOutcomeStore(BuildOutcomeStore buildOutcomeStore) {
 		this.buildOutcomeStore = buildOutcomeStore;
 	}
+	
 	public BuildManager getBuildManager() {
 		return buildManager;
 	}
+	
 	public void setBuildManager(BuildManager buildManager) {
 		this.buildManager = buildManager;
 	}
+	
 	public ProjectManager getProjectManager() {
 		return projectManager;
 	}
+	
 	public void setProjectManager(ProjectManager projectManager) {
 		this.projectManager = projectManager;
 	}
-	public void setDeleteDirectoryAttempts(int deleteDirectoryAttempts) {
-		this.deleteDirectoryAttempts = deleteDirectoryAttempts;
-	}
-	public void setDeleteFailureSleepTime(long deleteFailureSleepTime) {
-		this.deleteFailureSleepTime = deleteFailureSleepTime;
-	}
+
 	public boolean isDiffsEnabled() {
 		return diffsEnabled;
 	}
+	
 	public void setDiffsEnabled(boolean diffsEnabled) {
 		this.diffsEnabled = diffsEnabled;
 	}
+	
 	protected void initializeBuildStatus(BuildTarget currentTarget) {
 		ProjectStatusDto buildStatus = currentTarget.getStatus();
 		
@@ -300,19 +308,13 @@ public class ProjectBuilderImpl implements ProjectBuilder {
 
 		doPhase(BuildPhase.CheckForUpdates, new PhaseCallback() {
 			public void execute() throws Exception {
-				checkBuildNeccessary(ra, currentTarget);
+				prepareRepository(ra, currentTarget);
 				determineUpdateType(currentTarget);
 				buildStatus.setEstimatedBuildTimeMillis(buildOutcomeStore.loadAverageBuildTimeMillis(currentTarget.getName(), updateType));
 			}
 		});
 		
 		if (updateType == Full) {
-			doPhase(BuildPhase.CleanWorkingCopy, new PhaseCallback() {
-				public void execute() throws Exception {
-					cleanWorkingDirectory(currentTarget.getWorkDir(), ra);
-				};
-			});
-			
 			doPhase(BuildPhase.CheckoutWorkingCopy, new PhaseCallback() {
 				public void execute() throws Exception {
 					createWorkingCopy(ra, currentTarget.getWorkDir());
@@ -361,67 +363,8 @@ public class ProjectBuilderImpl implements ProjectBuilder {
 			}
 		});
 	}
-	protected File cleanWorkingDirectory(String workDir, RepositoryAdaptor ra) throws ConfigException, IOException {
-		final File path = new File(workDir).getCanonicalFile();
-		
-		if (path.exists() && !ra.isWorkingCopy(path)) {
-			throw new ConfigException(
-					"errors.wont.delete.non.working.copy",
-					new Object[] {path.toString()});
-		}
-		
-		if (!createWorkingDirectories(path)) {
-			throw new ConfigException(
-					"errors.cannot.create.dir",
-					new Object[] {path.toString()});
-		}
-		
-		return path;
-	}
-	/**
-	 * Create working directory and parent directories if they don't exist.
-	 * @return success flag (false if directories were not created).
-	 */
-	protected boolean createWorkingDirectories(File path) throws ConfigException {
-		if (!deleteWorkingDirectory(path)) {
-			return false;
-		}
-		
-		return path.mkdirs();
-	}
-
-	private boolean deleteWorkingDirectory(File path) throws ConfigException {
-		int tries = 0;
-		
-		try {
-			while (path.exists()) {
-				tries++;
-				try {
-					FileUtils.deleteDirectory(path);
-					break;
-				} catch (IOException e) {
-					if (tries >= deleteDirectoryAttempts) {
-						throw e;
-					}
-					try {
-						Thread.sleep(deleteFailureSleepTime);
-					} catch (InterruptedException e1) {
-						return false;
-					}
-				}
-			}
-		} catch (IOException e) {
-				throw new ConfigException(
-						"messages.build.cannot.delete.work.dir",
-						new Object[] {
-							path.getPath(),
-							e.getMessage()});
-		}
-		
-		return true;
-	}
 	
-	protected RevisionTokenDto checkBuildNeccessary(final RepositoryAdaptor ra, final ProjectConfigDto currentTarget) throws InterruptedException, StoreException, ConfigException {
+	protected RevisionTokenDto prepareRepository(final RepositoryAdaptor ra, final ProjectConfigDto currentTarget) throws InterruptedException, StoreException, ConfigException {
 		String tagName = currentTarget.getRepositoryTagName();
 		
 		if (!StringUtils.isBlank(tagName)) {
@@ -430,6 +373,8 @@ public class ProjectBuilderImpl implements ProjectBuilder {
 			tagName = ra.getTagName();
 			currentTarget.setRepositoryTagName(tagName);
 		}
+		
+		ra.prepareRepository(buildDetailCallback);
 		
 		ProjectStatusDto prevStatusByTag = previousStatus;
 		
@@ -470,11 +415,11 @@ public class ProjectBuilderImpl implements ProjectBuilder {
 	}
 	protected void createWorkingCopy(RepositoryAdaptor ra, String workDir) throws RepositoryException, IOException, ConfigException, InterruptedException {
 		buildStatus.setUpdateType(Full);
-		ra.createWorkingCopy(new File(workDir).getCanonicalFile(), buildDetailCallback);
+		ra.createPristineWorkingCopy(UpdateType.Full, buildDetailCallback);
 	}
 	protected void updateWorkingCopy(RepositoryAdaptor ra, String workDir) throws RepositoryException, IOException, ConfigException, InterruptedException {
 		buildStatus.setUpdateType(Incremental);
-		ra.updateWorkingCopy(new File(workDir).getCanonicalFile(), buildDetailCallback);
+		ra.updateWorkingCopy(buildDetailCallback);
 	}
 	protected void invokeBuilder(final ProjectConfigDto target) throws TimeoutException, KilledException, BuildFailedException, ConfigException, IOException, StoreException {
 		final File logFile = configurationStore.getBuildLog(target.getName(), buildStatus.getBuildLogId());
@@ -494,7 +439,7 @@ public class ProjectBuilderImpl implements ProjectBuilder {
 		} catch (InterruptedException e) {
 		} finally {
 			this.buildDetailCallback.setPhaseMessageKey(null);
-			this.buildDetailCallback.setDetail(null);
+			this.buildDetailCallback.setDetailMessage(null, null);
 		}
 
 		//clear interrupt flag if present

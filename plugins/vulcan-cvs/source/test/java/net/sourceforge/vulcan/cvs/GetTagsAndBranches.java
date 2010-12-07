@@ -23,6 +23,7 @@ import java.util.List;
 import net.sourceforge.vulcan.cvs.dto.CvsConfigDto;
 import net.sourceforge.vulcan.cvs.dto.CvsProjectConfigDto;
 import net.sourceforge.vulcan.cvs.dto.CvsRepositoryProfileDto;
+import net.sourceforge.vulcan.dto.ProjectConfigDto;
 import net.sourceforge.vulcan.dto.RepositoryTagDto;
 import net.sourceforge.vulcan.exception.RepositoryException;
 
@@ -40,7 +41,7 @@ public class GetTagsAndBranches {
 		profile.setPassword("");
 		projectConfig.setModule("gtkpod");
 		
-		final CvsRepositoryAdaptor repo = new CvsRepositoryAdaptor(new CvsConfigDto(), profile, projectConfig, null);
+		final CvsRepositoryAdaptor repo = new CvsRepositoryAdaptor(new ProjectConfigDto(), new CvsConfigDto(), profile, projectConfig);
 		
 		final List<RepositoryTagDto> tags = repo.getAvailableTags();
 		

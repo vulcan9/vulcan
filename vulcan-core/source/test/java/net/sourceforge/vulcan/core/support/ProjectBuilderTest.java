@@ -96,6 +96,12 @@ public class ProjectBuilderTest extends EasyMockTestCase {
 		}
 	};
 	
+	FileSystem fileSystem = new FileSystem() {
+		public boolean createWorkingDirectories(File path) throws ConfigException {
+			return createWorkingDirectoriesSuccess;
+		}
+	};
+	
 	ProjectBuilderImpl builder = new ProjectBuilderImpl() {
 		@Override
 		protected void buildProject(ProjectConfigDto currentTarget) throws Exception {
@@ -107,10 +113,6 @@ public class ProjectBuilderTest extends EasyMockTestCase {
 				});
 			}
 			super.buildProject(currentTarget);
-		}
-		@Override
-		protected boolean createWorkingDirectories(File path) throws ConfigException {
-			return createWorkingDirectoriesSuccess;
 		}
 		@Override
 		protected void invokeBuilder(ProjectConfigDto currentTarget) throws TimeoutException, KilledException, BuildFailedException, ConfigException, IOException, StoreException {
@@ -150,6 +152,7 @@ public class ProjectBuilderTest extends EasyMockTestCase {
 			}
 		}
 	};
+	
 	
 	BuildManager mgr = createStrictMock(BuildManager.class);
 	ProjectManager projectMgr = createStrictMock(ProjectManager.class);
@@ -282,7 +285,7 @@ public class ProjectBuilderTest extends EasyMockTestCase {
 		expect(mgr.getLatestStatus("foo")).andReturn(null);
 		expect(ra.getLatestRevision(null)).andReturn(rev1);
 		
-		ra.createWorkingCopy(new File(project.getWorkDir()).getAbsoluteFile(), buildDetailCallback);
+		ra.createPristineWorkingCopy(UpdateType.Full, buildDetailCallback);
 		
 		mgr.targetCompleted(info, project, createFakeBuildOutcome(project.getName(), 0, rev1, "trunk", Status.ERROR, "messages.build.killed", new String[] {"a user"}, null, "http://localhost", true, null, null, null, ProjectStatusDto.UpdateType.Full, project.getWorkDir(), true, estimatedBuildTimeMillis, false));
 
@@ -344,7 +347,7 @@ public class ProjectBuilderTest extends EasyMockTestCase {
 		expect(ra.getTagName()).andReturn("trunk");
 		expect(ra.getLatestRevision(null)).andReturn(rev0);
 
-		ra.createWorkingCopy(new File("a").getAbsoluteFile(), buildDetailCallback);
+		ra.createPristineWorkingCopy(UpdateType.Full, buildDetailCallback);
 
 		expect(projectMgr.getBuildTool(project)).andReturn(tool);
 		
@@ -378,7 +381,7 @@ public class ProjectBuilderTest extends EasyMockTestCase {
 		
 		expect(mgr.getLatestStatus(project.getName())).andReturn(((ProjectStatusDto) null));
 
-		ra.createWorkingCopy(new File("a").getAbsoluteFile(), buildDetailCallback);
+		ra.createPristineWorkingCopy(UpdateType.Full, buildDetailCallback);
 
 		expect(projectMgr.getBuildTool(project)).andReturn(tool);
 		
@@ -426,7 +429,7 @@ public class ProjectBuilderTest extends EasyMockTestCase {
 		
 		expect(mgr.getLatestStatus(project.getName())).andReturn(((ProjectStatusDto) null));
 
-		ra.createWorkingCopy(new File("a").getAbsoluteFile(), buildDetailCallback);
+		ra.createPristineWorkingCopy(UpdateType.Full, buildDetailCallback);
 
 		expect(projectMgr.getBuildTool(project)).andReturn(tool);
 
@@ -472,7 +475,7 @@ public class ProjectBuilderTest extends EasyMockTestCase {
 		
 		expect(mgr.getLatestStatus(project.getName())).andReturn(((ProjectStatusDto) null));
 
-		ra.createWorkingCopy(new File("a").getAbsoluteFile(), buildDetailCallback);
+		ra.createPristineWorkingCopy(UpdateType.Full, buildDetailCallback);
 
 		expect(projectMgr.getBuildTool(project)).andReturn(tool);
 
@@ -516,7 +519,7 @@ public class ProjectBuilderTest extends EasyMockTestCase {
 		
 		expect(mgr.getLatestStatus(project.getName())).andReturn(((ProjectStatusDto) null));
 
-		ra.createWorkingCopy(new File("a").getAbsoluteFile(), buildDetailCallback);
+		ra.createPristineWorkingCopy(UpdateType.Full, buildDetailCallback);
 
 		expect(projectMgr.getBuildTool(project)).andReturn(tool);
 
@@ -560,7 +563,7 @@ public class ProjectBuilderTest extends EasyMockTestCase {
 		
 		expect(mgr.getLatestStatus(project.getName())).andReturn(prevStatus);
 
-		ra.createWorkingCopy(new File("a").getAbsoluteFile(), buildDetailCallback);
+		ra.createPristineWorkingCopy(UpdateType.Full, buildDetailCallback);
 		
 		ra.getChangeLog(eq(rev0), eq(rev1), (OutputStream) notNull());
 		expectLastCall().andReturn(new ChangeLogDto());
@@ -601,7 +604,7 @@ public class ProjectBuilderTest extends EasyMockTestCase {
 		
 		expect(mgr.getLatestStatus(project.getName())).andReturn(prevStatus);
 
-		ra.createWorkingCopy(new File("a").getAbsoluteFile(), buildDetailCallback);
+		ra.createPristineWorkingCopy(UpdateType.Full, buildDetailCallback);
 		
 		ra.getChangeLog(eq(rev0), eq(rev1), (OutputStream) eq(null));
 		expectLastCall().andReturn(new ChangeLogDto());
@@ -646,7 +649,7 @@ public class ProjectBuilderTest extends EasyMockTestCase {
 		previousStatusByTagName.setTagName("trunk");
 		previousStatusByTagName.setRevision(rev0);
 		
-		ra.createWorkingCopy(new File("a").getAbsoluteFile(), buildDetailCallback);
+		ra.createPristineWorkingCopy(UpdateType.Full, buildDetailCallback);
 		
 		ra.getChangeLog(eq(rev0), eq(rev1), (OutputStream) notNull());
 		expectLastCall().andReturn(new ChangeLogDto());
@@ -690,7 +693,7 @@ public class ProjectBuilderTest extends EasyMockTestCase {
 		
 		expect(mgr.getLatestStatus(project.getName())).andReturn(prevStatus);
 
-		ra.updateWorkingCopy(new File("a").getAbsoluteFile(), buildDetailCallback);
+		ra.updateWorkingCopy(buildDetailCallback);
 		
 		ra.getChangeLog(eq(rev0), eq(rev1), (OutputStream)notNull());
 		expectLastCall().andReturn(new ChangeLogDto());
@@ -739,7 +742,7 @@ public class ProjectBuilderTest extends EasyMockTestCase {
 		previousStatusByWorkDir.setStatus(Status.PASS);
 		previousStatusByWorkDir.setWorkDir("a");
 		
-		ra.updateWorkingCopy(new File("a").getAbsoluteFile(), buildDetailCallback);
+		ra.updateWorkingCopy(buildDetailCallback);
 		
 		ra.getChangeLog(eq(rev0), eq(rev1), (OutputStream)notNull());
 		expectLastCall().andReturn(new ChangeLogDto());
@@ -782,7 +785,7 @@ public class ProjectBuilderTest extends EasyMockTestCase {
 		
 		expect(mgr.getLatestStatus(project.getName())).andReturn(prevStatus);
 
-		ra.createWorkingCopy(new File("a").getAbsoluteFile(), buildDetailCallback);
+		ra.createPristineWorkingCopy(UpdateType.Full, buildDetailCallback);
 		
 		ra.getChangeLog(eq(rev0), eq(rev1), (OutputStream)notNull());
 		expectLastCall().andReturn(new ChangeLogDto());
@@ -823,7 +826,7 @@ public class ProjectBuilderTest extends EasyMockTestCase {
 		
 		expect(mgr.getLatestStatus(project.getName())).andReturn(prevStatus);
 
-		ra.createWorkingCopy(new File("a").getAbsoluteFile(), buildDetailCallback);
+		ra.createPristineWorkingCopy(UpdateType.Full, buildDetailCallback);
 		
 		expect(projectMgr.getBuildTool(project)).andReturn(tool);
 		
@@ -853,7 +856,7 @@ public class ProjectBuilderTest extends EasyMockTestCase {
 		
 		expect(mgr.getLatestStatus(project.getName())).andReturn(((ProjectStatusDto) null));
 
-		ra.createWorkingCopy(new File("a").getAbsoluteFile(), buildDetailCallback);
+		ra.createPristineWorkingCopy(UpdateType.Full, buildDetailCallback);
 
 		tool = new BuildTool() {
 			public void buildProject(ProjectConfigDto projectConfig, ProjectStatusDto buildStatus, File logFile, BuildDetailCallback buildDetailCallback) throws BuildFailedException, ConfigException {
@@ -915,7 +918,7 @@ public class ProjectBuilderTest extends EasyMockTestCase {
 		
 		expect(mgr.getLatestStatus(project.getName())).andReturn(((ProjectStatusDto) null));
 
-		expect(ra.isWorkingCopy(invalid)).andReturn(true);
+		expect(ra.isWorkingCopy()).andReturn(true);
 		
 		mgr.targetCompleted(info, project, createFakeBuildOutcome(project.getName(), 0, rev0,
 				"trunk", Status.ERROR, "errors.cannot.create.dir", new Object[] {invalid.getCanonicalPath()}, null, "http://localhost", true, null, null, null, ProjectStatusDto.UpdateType.Full, project.getWorkDir(), false, estimatedBuildTimeMillis, true));
@@ -938,7 +941,7 @@ public class ProjectBuilderTest extends EasyMockTestCase {
 		
 		expect(mgr.getLatestStatus(project.getName())).andReturn(((ProjectStatusDto) null));
 
-		expect(ra.isWorkingCopy(invalid)).andReturn(false);
+		expect(ra.isWorkingCopy()).andReturn(false);
 		
 		mgr.targetCompleted(info, project, createFakeBuildOutcome(project.getName(), 0, rev0,
 				"trunk", Status.ERROR, "errors.wont.delete.non.working.copy", new Object[] {invalid.getCanonicalPath()}, null, "http://localhost", true, null, null, null, ProjectStatusDto.UpdateType.Full, project.getWorkDir(), false, estimatedBuildTimeMillis, true));

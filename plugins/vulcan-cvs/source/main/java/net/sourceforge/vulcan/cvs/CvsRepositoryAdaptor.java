@@ -45,9 +45,11 @@ import net.sourceforge.vulcan.cvs.support.CheckoutListener;
 import net.sourceforge.vulcan.cvs.support.NewestRevisionsLogListener;
 import net.sourceforge.vulcan.dto.ChangeLogDto;
 import net.sourceforge.vulcan.dto.ChangeSetDto;
+import net.sourceforge.vulcan.dto.ProjectConfigDto;
 import net.sourceforge.vulcan.dto.ProjectStatusDto;
 import net.sourceforge.vulcan.dto.RepositoryTagDto;
 import net.sourceforge.vulcan.dto.RevisionTokenDto;
+import net.sourceforge.vulcan.dto.ProjectStatusDto.UpdateType;
 import net.sourceforge.vulcan.exception.RepositoryException;
 
 import org.netbeans.lib.cvsclient.Client;
@@ -57,17 +59,17 @@ import org.netbeans.lib.cvsclient.command.log.RlogCommand;
 import org.netbeans.lib.cvsclient.command.update.UpdateCommand;
 
 public class CvsRepositoryAdaptor extends CvsSupport implements RepositoryAdaptor {
-	private final String projectName;
+	private ProjectConfigDto projectConfig;
 	
 	private Set<String> symbolicNames;
 	
-	public CvsRepositoryAdaptor(CvsConfigDto globalConfig, CvsRepositoryProfileDto profile, CvsProjectConfigDto config, String projectName) throws RepositoryException {
-		this(globalConfig, profile, config, projectName, true);
+	public CvsRepositoryAdaptor(ProjectConfigDto projectConfig, CvsConfigDto globalConfig, CvsRepositoryProfileDto profile, CvsProjectConfigDto config) throws RepositoryException {
+		this(projectConfig, globalConfig, profile, config, true);
 	}
 
-	protected CvsRepositoryAdaptor(CvsConfigDto globalConfig, CvsRepositoryProfileDto profile, CvsProjectConfigDto config, String projectName, boolean connect) throws RepositoryException {
+	protected CvsRepositoryAdaptor(ProjectConfigDto projectConfig, CvsConfigDto globalConfig, CvsRepositoryProfileDto profile, CvsProjectConfigDto config, boolean connect) throws RepositoryException {
 		super(globalConfig, profile, config);
-		this.projectName = projectName;
+		this.projectConfig = projectConfig;
 
 		if (connect) {
 			openConnection();
@@ -88,6 +90,9 @@ public class CvsRepositoryAdaptor extends CvsSupport implements RepositoryAdapto
 		return getLatestRevision(rev).getRevision() > rev.getRevision();
 	}
 	
+	public void prepareRepository(BuildDetailCallback buildDetailCallback) throws RepositoryException, InterruptedException {
+	}
+	
 	public RevisionTokenDto getLatestRevision(RevisionTokenDto previousRevision) throws RepositoryException {
 		// first, check to see if there are any changes since the previous revision
 		if (previousRevision != null) {
@@ -102,15 +107,6 @@ public class CvsRepositoryAdaptor extends CvsSupport implements RepositoryAdapto
 	}
 
 	public ChangeLogDto getChangeLog(RevisionTokenDto first, RevisionTokenDto last, OutputStream diffOutputStream) throws RepositoryException {
-		if (diffOutputStream != null) {
-			try {
-				// "cvs rdiff -u" does not seem to be supported by netbeans-cvslib at this time.
-				diffOutputStream.close();
-			} catch (IOException e) {
-				throw new RepositoryException(e);
-			}
-		}
-		
 		final ChangeLogDto changeLog = doChangeLogs(first, last);
 		
 		return changeLog;
@@ -155,13 +151,14 @@ public class CvsRepositoryAdaptor extends CvsSupport implements RepositoryAdapto
 		return names;
 	}
 	
-	public void createWorkingCopy(File absolutePath, BuildDetailCallback buildDetailCallback) throws RepositoryException {
+	public void createPristineWorkingCopy(UpdateType updateType, BuildDetailCallback buildDetailCallback) throws RepositoryException {
+		final File absolutePath = new File(projectConfig.getWorkDir()).getAbsoluteFile();
 		final Map<String, Long> counters = globalConfig.getWorkingCopyByteCounts();
 		long previousBytesCounted = -1;
 		
 		synchronized (counters) {
-			if (counters.containsKey(projectName)) {
-				previousBytesCounted = counters.get(projectName).longValue();
+			if (counters.containsKey(projectConfig.getName())) {
+				previousBytesCounted = counters.get(projectConfig.getName()).longValue();
 			}
 		}
 		
@@ -181,11 +178,12 @@ public class CvsRepositoryAdaptor extends CvsSupport implements RepositoryAdapto
 		executeCvsCommand(client, cmd);
 		
 		synchronized (counters) {
-			counters.put(projectName, listener.getBytesCounted());
+			counters.put(projectConfig.getName(), listener.getBytesCounted());
 		}
 	}
 
-	public void updateWorkingCopy(File absolutePath, BuildDetailCallback buildDetailCallback) throws RepositoryException {
+	public void updateWorkingCopy(BuildDetailCallback buildDetailCallback) throws RepositoryException {
+		final File absolutePath = new File(projectConfig.getWorkDir()).getAbsoluteFile();
 		final Client client = new Client(connection, new StandardAdminHandler());
 		final UpdateCommand cmd = new UpdateCommand();
 
@@ -195,7 +193,8 @@ public class CvsRepositoryAdaptor extends CvsSupport implements RepositoryAdapto
 		executeCvsCommand(client, cmd);
 	}
 	
-	public boolean isWorkingCopy(File absolutePath) {
+	public boolean isWorkingCopy() {
+		final File absolutePath = new File(projectConfig.getWorkDir()).getAbsoluteFile();
 		final Client client = new Client(connection, new StandardAdminHandler());
 		try {
 			if (client.getRepositoryForDirectory(absolutePath) != null) {

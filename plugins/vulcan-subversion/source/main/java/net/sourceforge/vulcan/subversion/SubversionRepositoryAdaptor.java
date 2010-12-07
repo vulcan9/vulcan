@@ -41,6 +41,7 @@ import net.sourceforge.vulcan.dto.ProjectConfigDto;
 import net.sourceforge.vulcan.dto.ProjectStatusDto;
 import net.sourceforge.vulcan.dto.RepositoryTagDto;
 import net.sourceforge.vulcan.dto.RevisionTokenDto;
+import net.sourceforge.vulcan.dto.ProjectStatusDto.UpdateType;
 import net.sourceforge.vulcan.exception.ConfigException;
 import net.sourceforge.vulcan.exception.RepositoryException;
 import net.sourceforge.vulcan.integration.support.PluginSupport;
@@ -81,6 +82,7 @@ import org.tmatesoft.svn.core.wc.SVNWCClient;
 
 public class SubversionRepositoryAdaptor extends SubversionSupport implements RepositoryAdaptor {
 	private final EventHandler eventHandler = new EventHandler();
+	private final ProjectConfigDto projectConfig;
 	private final String projectName;
 	private final Map<String, Long> byteCounters;
 	
@@ -127,6 +129,7 @@ public class SubversionRepositoryAdaptor extends SubversionSupport implements Re
 		super(config, profile, svnRepository);
 		
 		this.stateManager = stateManager;
+		this.projectConfig = projectConfig;
 		this.projectName = projectConfig.getName();
 		
 		if (globalConfig != null) {
@@ -187,6 +190,9 @@ public class SubversionRepositoryAdaptor extends SubversionSupport implements Re
 		}
 		
 		return getLatestRevision(rev).getRevision() > rev.getRevision();
+	}
+	
+	public void prepareRepository(BuildDetailCallback buildDetailCallback) throws RepositoryException, InterruptedException {
 	}
 	
 	public RevisionTokenDto getLatestRevision(RevisionTokenDto previousRevision) throws RepositoryException {
@@ -255,7 +261,9 @@ public class SubversionRepositoryAdaptor extends SubversionSupport implements Re
 		return new RevisionTokenDto(revision, "r" + revision);
 	}
 
-	public void createWorkingCopy(File absolutePath, BuildDetailCallback buildDetailCallback) throws RepositoryException {
+	public void createPristineWorkingCopy(UpdateType updateType, BuildDetailCallback buildDetailCallback) throws RepositoryException {
+		final File absolutePath = new File(projectConfig.getWorkDir()).getAbsoluteFile();
+		
 		synchronized (byteCounters) {
 			if (byteCounters.containsKey(projectName)) {
 				eventHandler.setPreviousFileCount(byteCounters.get(projectName).longValue());
@@ -328,7 +336,9 @@ public class SubversionRepositoryAdaptor extends SubversionSupport implements Re
 		}
 	}
 	
-	public void updateWorkingCopy(File absolutePath, BuildDetailCallback buildDetailCallback) throws RepositoryException {
+	public void updateWorkingCopy(BuildDetailCallback buildDetailCallback) throws RepositoryException {
+		final File absolutePath = new File(projectConfig.getWorkDir()).getAbsoluteFile();
+		
 		try {
 			final Revision svnRev = Revision.getInstance(revision);
 			final boolean depthIsSticky = false;
@@ -344,9 +354,9 @@ public class SubversionRepositoryAdaptor extends SubversionSupport implements Re
 		}
 	}
 	
-	public boolean isWorkingCopy(File path) {
+	public boolean isWorkingCopy() {
 		try {
-			if (client.info(path.getAbsolutePath()) != null) {
+			if (client.info(new File(projectConfig.getWorkDir()).getAbsolutePath()) != null) {
 				return true;
 			}
 		} catch (ClientException ignore) {

@@ -53,7 +53,7 @@ public class CvsPlugin extends PluginSupport
 		final CvsRepositoryProfileDto env = getSelectedEnvironment(globalConfig.getProfiles(), cvsProjectConfig.getRepositoryProfile(),
 				"cvs.errors.profile.not.found");
 		
-		final CvsRepositoryAdaptor cvsRepositoryAdaptor = new CvsRepositoryAdaptor(globalConfig, env, cvsProjectConfig, projectConfig.getName());
+		final CvsRepositoryAdaptor cvsRepositoryAdaptor = new CvsRepositoryAdaptor(new ProjectConfigDto(), globalConfig, env, cvsProjectConfig);
 		
 		return cvsRepositoryAdaptor;
 	}
