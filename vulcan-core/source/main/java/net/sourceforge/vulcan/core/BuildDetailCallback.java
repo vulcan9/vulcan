@@ -21,7 +21,7 @@ package net.sourceforge.vulcan.core;
 import net.sourceforge.vulcan.dto.MetricDto;
 import net.sourceforge.vulcan.metadata.SvnRevision;
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
+@SvnRevision(id="$Id: BuildDetailCallback.java 636 2009-01-10 19:32:47Z chris.eldredge $", url="$HeadURL: https://vulcan.googlecode.com/svn/trunk/vulcan-core/source/main/java/net/sourceforge/vulcan/core/BuildDetailCallback.java $")
 public interface BuildDetailCallback {
 	void setPhaseMessageKey(String messageKey);
 	void setDetail(String detail);

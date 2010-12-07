@@ -18,7 +18,6 @@
  */
 package net.sourceforge.vulcan;
 
-import java.io.File;
 import java.io.OutputStream;
 import java.util.List;
 
@@ -27,6 +26,7 @@ import net.sourceforge.vulcan.dto.ChangeLogDto;
 import net.sourceforge.vulcan.dto.ProjectStatusDto;
 import net.sourceforge.vulcan.dto.RepositoryTagDto;
 import net.sourceforge.vulcan.dto.RevisionTokenDto;
+import net.sourceforge.vulcan.dto.ProjectStatusDto.UpdateType;
 import net.sourceforge.vulcan.exception.RepositoryException;
 import net.sourceforge.vulcan.metadata.SvnRevision;
 
@@ -42,11 +42,16 @@ public interface RepositoryAdaptor {
 	boolean hasIncomingChanges(ProjectStatusDto mostRecentBuildInSameWorkDir) throws RepositoryException;
 	
 	/**
-	 * Obtain a token representing the HEAD revision for the overall project tree.
-	 * For a transaction based repository this may simply be the "revision of last change" on
-	 * the project path.  However, for file based repositories, a more complex operation must
-	 * be carried out to determine if any child paths have been updated, or if new paths have
-	 * been added.
+	 * Prepare for subsequent operations.  This method will be called before calling other methods like
+	 * getLatestRevision, getChangeLog, etc.
+	 */
+	void prepareRepository(BuildDetailCallback buildDetailCallback) throws RepositoryException, InterruptedException;
+	
+	/**
+	 * Obtain a token representing the most recent revision.
+	 * For a transaction based repository this may simply be the "revision of last change".
+	 * However, for file based repositories, a more complex operation must be carried out
+	 * to determine if any child paths have been updated, or if new paths have been added.
 	 * @param previousRevision If this project has been checked out before, the instance of
 	 * RevisionTokenDto previously returned.  This is provided to allow implementations to
 	 * optimize the range in which changes are searched.
@@ -68,25 +73,26 @@ public interface RepositoryAdaptor {
 	 * diffs have been disabled by configuration.
 	 */
 	ChangeLogDto getChangeLog(RevisionTokenDto previousRevision, RevisionTokenDto currentRevision, OutputStream diffOutputStream) throws RepositoryException, InterruptedException;
-	
+
 	/**
 	 * Perform a "checkout" operation, creating a local "working copy" or "sandbox"
 	 * containing the source files for the given project.
+	 * @param updateType TODO
 	 */
-	void createWorkingCopy(File absolutePath, BuildDetailCallback buildDetailCallback) throws RepositoryException, InterruptedException;
+	void createPristineWorkingCopy(UpdateType updateType, BuildDetailCallback buildDetailCallback) throws RepositoryException, InterruptedException;
 
 	/**
 	 * Perform an "update" operation on an existing "working copy" or "sandbox"
 	 * given the path to the existing location.
 	 */
-	void updateWorkingCopy(File absolutePath, BuildDetailCallback buildDetailCallback) throws RepositoryException;
+	void updateWorkingCopy(BuildDetailCallback buildDetailCallback) throws RepositoryException;
 	
 	/**
 	 * Verify that a given path is a valid working copy.
 	 * @param path Location to verify
 	 * @return true if the path contains a working copy, false if not
 	 */
-	boolean isWorkingCopy(File absolutePath);
+	boolean isWorkingCopy() throws RepositoryException;
 	
 	/**
 	 * Return a logical name which identifies the tag/branch or other line of development
@@ -126,6 +132,4 @@ public interface RepositoryAdaptor {
 	 * navigate from a build outcome summary to the source code easily.
 	 */
 	String getRepositoryUrl();
-
-	
 }

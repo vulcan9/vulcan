@@ -21,6 +21,7 @@ package net.sourceforge.vulcan.filesystem;
 import java.io.File;
 
 import junit.framework.TestCase;
+import net.sourceforge.vulcan.dto.ProjectConfigDto;
 import net.sourceforge.vulcan.filesystem.dto.FileSystemProjectConfigDto;
 
 import org.apache.commons.io.FileUtils;
@@ -35,7 +36,7 @@ public class FileSystemRepositoryAdaptorTest extends TestCase {
 		super.setUp();
 		
 		dir = new File(System.getProperty("java.io.tmpdir"), "vulcan-filesystem-junit");
-		ra = new FileSystemRepositoryAdaptor(config);
+		ra = new FileSystemRepositoryAdaptor(new ProjectConfigDto(), config);
 	}
 	
 	@Override
@@ -49,7 +50,7 @@ public class FileSystemRepositoryAdaptorTest extends TestCase {
 	public void testNotWorkingCopy() throws Exception {
 		assertTrue(dir.mkdir());
 		
-		assertEquals(false, ra.isWorkingCopy(dir));
+		assertEquals(false, ra.isWorkingCopy());
 	}
 	
 	public void testIsWorkingCopyWhenMarkerPresent() throws Exception {
@@ -57,6 +58,6 @@ public class FileSystemRepositoryAdaptorTest extends TestCase {
 		
 		FileUtils.touch(new File(dir, FileSystemRepositoryAdaptor.WORKING_COPY_MARKER));
 		
-		assertEquals(true, ra.isWorkingCopy(dir));
+		assertEquals(true, ra.isWorkingCopy());
 	}
 }

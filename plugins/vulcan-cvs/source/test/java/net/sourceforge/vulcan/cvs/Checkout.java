@@ -21,13 +21,13 @@ package net.sourceforge.vulcan.cvs;
 import java.util.HashMap;
 import java.util.Map;
 
-import java.io.File;
-
 import net.sourceforge.vulcan.core.BuildDetailCallback;
 import net.sourceforge.vulcan.cvs.dto.CvsConfigDto;
 import net.sourceforge.vulcan.cvs.dto.CvsProjectConfigDto;
 import net.sourceforge.vulcan.cvs.dto.CvsRepositoryProfileDto;
 import net.sourceforge.vulcan.dto.MetricDto;
+import net.sourceforge.vulcan.dto.ProjectConfigDto;
+import net.sourceforge.vulcan.dto.ProjectStatusDto.UpdateType;
 import net.sourceforge.vulcan.exception.RepositoryException;
 
 public class Checkout {
@@ -48,11 +48,11 @@ public class Checkout {
 		map.put("gtkpod", 3000000l);
 		cvsConfigDto.setWorkingCopyByteCounts(map);
 		
-		final CvsRepositoryAdaptor repo = new CvsRepositoryAdaptor(cvsConfigDto, profile, projectConfig, "gtkpod");
+		final ProjectConfigDto project = new ProjectConfigDto();
+		project.setWorkDir("/home/chris/workspace/cvs-test");
+		final CvsRepositoryAdaptor repo = new CvsRepositoryAdaptor(project, cvsConfigDto, profile, projectConfig);
 
-		final File file = new File("/home/chris/workspace/cvs-test");
-		
-		repo.createWorkingCopy(file, new BuildDetailCallback() {
+		repo.createPristineWorkingCopy(UpdateType.Full, new BuildDetailCallback() {
 			public void setDetail(String msg) {
 			}
 			public void setDetailMessage(String messageKey, Object[] args) {

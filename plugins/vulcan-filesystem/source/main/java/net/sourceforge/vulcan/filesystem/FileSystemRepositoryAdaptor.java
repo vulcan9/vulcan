@@ -28,9 +28,11 @@ import net.sourceforge.vulcan.RepositoryAdaptor;
 import net.sourceforge.vulcan.core.BuildDetailCallback;
 import net.sourceforge.vulcan.dto.ChangeLogDto;
 import net.sourceforge.vulcan.dto.ChangeSetDto;
+import net.sourceforge.vulcan.dto.ProjectConfigDto;
 import net.sourceforge.vulcan.dto.ProjectStatusDto;
 import net.sourceforge.vulcan.dto.RepositoryTagDto;
 import net.sourceforge.vulcan.dto.RevisionTokenDto;
+import net.sourceforge.vulcan.dto.ProjectStatusDto.UpdateType;
 import net.sourceforge.vulcan.exception.RepositoryException;
 import net.sourceforge.vulcan.filesystem.dto.FileSystemProjectConfigDto;
 
@@ -39,13 +41,19 @@ import org.apache.commons.io.FileUtils;
 public class FileSystemRepositoryAdaptor implements RepositoryAdaptor {
 	public static final String WORKING_COPY_MARKER = ".vulcan-filesystem";
 	private final FileSystemProjectConfigDto config;
+	private final ProjectConfigDto projectConfig;
 	
-	public FileSystemRepositoryAdaptor(FileSystemProjectConfigDto config) throws RepositoryException {
+	public FileSystemRepositoryAdaptor(ProjectConfigDto projectConfig, FileSystemProjectConfigDto config) throws RepositoryException {
+		this.projectConfig = projectConfig;
 		this.config = config;
 	}
 
-	public void createWorkingCopy(File targetDir, BuildDetailCallback buildDetailCallback) throws RepositoryException {
+	public void prepareRepository(BuildDetailCallback buildDetailCallback) throws RepositoryException, InterruptedException {
+	}
+	
+	public void createPristineWorkingCopy(UpdateType updateType, BuildDetailCallback buildDetailCallback) throws RepositoryException {
 		final File sourceDir = new File(config.getSourceDirectory());
+		final File targetDir = new File(projectConfig.getWorkDir());
 		
 		try {
 			FileUtils.copyDirectory(sourceDir, targetDir);
@@ -55,14 +63,14 @@ public class FileSystemRepositoryAdaptor implements RepositoryAdaptor {
 		}
 	}
 	
-	public void updateWorkingCopy(File targetDir, BuildDetailCallback buildDetailCallback) throws RepositoryException {
+	public void updateWorkingCopy(BuildDetailCallback buildDetailCallback) throws RepositoryException {
 		// This will actually overwrite all files from source to target (even if they are the same)
 		// so it's not as incremental as it should be.
-		createWorkingCopy(targetDir, buildDetailCallback);
+		createPristineWorkingCopy(UpdateType.Full, buildDetailCallback);
 	}
 	
-	public boolean isWorkingCopy(File absolutePath) {
-		if (new File(absolutePath, WORKING_COPY_MARKER).exists()) {
+	public boolean isWorkingCopy() {
+		if (new File(projectConfig.getWorkDir(), WORKING_COPY_MARKER).exists()) {
 			return true;
 		}
 		

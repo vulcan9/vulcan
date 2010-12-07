@@ -127,7 +127,7 @@ class ProjectRebuildExpert {
 				tagName = ra.getTagName();
 			}
 			
-			if (mostRecentBuildByWorkDir == null || mostRecentBuildByWorkDir.getTagName().equals(tagName)) {
+			if (mostRecentBuildByWorkDir == null || tagName.equals(mostRecentBuildByWorkDir.getTagName())) {
 				return false;
 			}
 			
@@ -182,6 +182,7 @@ class ProjectRebuildExpert {
 				}
 				
 				setBuildReason("messages.build.reason.missing.working.copy");
+				return true;
 			}
 			return false;
 		}
