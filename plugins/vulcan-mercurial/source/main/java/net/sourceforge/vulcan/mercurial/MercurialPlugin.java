@@ -20,17 +20,21 @@ package net.sourceforge.vulcan.mercurial;
 
 import net.sourceforge.vulcan.ProjectRepositoryConfigurator;
 import net.sourceforge.vulcan.RepositoryAdaptor;
+import net.sourceforge.vulcan.dto.PluginConfigDto;
 import net.sourceforge.vulcan.dto.ProjectConfigDto;
 import net.sourceforge.vulcan.dto.RepositoryAdaptorConfigDto;
 import net.sourceforge.vulcan.exception.ConfigException;
+import net.sourceforge.vulcan.integration.ConfigurablePlugin;
 import net.sourceforge.vulcan.integration.RepositoryAdaptorPlugin;
 
-public class MercurialPlugin implements RepositoryAdaptorPlugin {
+public class MercurialPlugin implements RepositoryAdaptorPlugin, ConfigurablePlugin {
 	public static String PLUGIN_ID = "net.sourceforge.vulcan.mercurial";
 	public static String PLUGIN_NAME = "Mercurial";
 	
+	private MercurialConfig config = new MercurialConfig();
+	
 	public RepositoryAdaptor createInstance(ProjectConfigDto projectConfig)	throws ConfigException {
-		return new MercurialRepository(projectConfig);
+		return new MercurialRepository(projectConfig, config);
 	}
 
 	public ProjectRepositoryConfigurator createProjectConfigurator(String url, String username, String password) throws ConfigException {
@@ -41,6 +45,14 @@ public class MercurialPlugin implements RepositoryAdaptorPlugin {
 		return new MercurialProjectConfig();
 	}
 
+	public PluginConfigDto getConfiguration() {
+		return config;
+	}
+	
+	public void setConfiguration(PluginConfigDto bean) {
+		config = (MercurialConfig) bean;
+	}
+	
 	public String getId() {
 		return PLUGIN_ID;
 	}

@@ -35,13 +35,15 @@ import java.util.Set;
 import net.sourceforge.vulcan.RepositoryAdaptor;
 import net.sourceforge.vulcan.StateManager;
 import net.sourceforge.vulcan.core.BuildDetailCallback;
+import net.sourceforge.vulcan.core.support.FileSystem;
+import net.sourceforge.vulcan.core.support.FileSystemImpl;
+import net.sourceforge.vulcan.core.support.RepositoryUtils;
 import net.sourceforge.vulcan.dto.ChangeLogDto;
 import net.sourceforge.vulcan.dto.ChangeSetDto;
 import net.sourceforge.vulcan.dto.ProjectConfigDto;
 import net.sourceforge.vulcan.dto.ProjectStatusDto;
 import net.sourceforge.vulcan.dto.RepositoryTagDto;
 import net.sourceforge.vulcan.dto.RevisionTokenDto;
-import net.sourceforge.vulcan.dto.ProjectStatusDto.UpdateType;
 import net.sourceforge.vulcan.exception.ConfigException;
 import net.sourceforge.vulcan.exception.RepositoryException;
 import net.sourceforge.vulcan.integration.support.PluginSupport;
@@ -93,6 +95,7 @@ public class SubversionRepositoryAdaptor extends SubversionSupport implements Re
 	private long diffStartRevision = -1;
 	
 	private final StateManager stateManager;
+	private FileSystem fileSystem = new FileSystemImpl();
 	
 	private List<ChangeSetDto> changeSets;
 	
@@ -261,8 +264,10 @@ public class SubversionRepositoryAdaptor extends SubversionSupport implements Re
 		return new RevisionTokenDto(revision, "r" + revision);
 	}
 
-	public void createPristineWorkingCopy(UpdateType updateType, BuildDetailCallback buildDetailCallback) throws RepositoryException {
+	public void createPristineWorkingCopy(BuildDetailCallback buildDetailCallback) throws RepositoryException {
 		final File absolutePath = new File(projectConfig.getWorkDir()).getAbsoluteFile();
+		
+		new RepositoryUtils(fileSystem).createOrCleanWorkingCopy(absolutePath, buildDetailCallback);
 		
 		synchronized (byteCounters) {
 			if (byteCounters.containsKey(projectName)) {
@@ -389,7 +394,7 @@ public class SubversionRepositoryAdaptor extends SubversionSupport implements Re
 	}
 
 	@SuppressWarnings("unchecked")
-	public List<RepositoryTagDto> getAvailableTags() throws RepositoryException {
+	public List<RepositoryTagDto> getAvailableTagsAndBranches() throws RepositoryException {
 		final String projectRoot = lineOfDevelopment.getComputedTagRoot();
 		
 		final List<RepositoryTagDto> tags = new ArrayList<RepositoryTagDto>();
@@ -429,11 +434,11 @@ public class SubversionRepositoryAdaptor extends SubversionSupport implements Re
 		}
 	}
 	
-	public String getTagName() {
+	public String getTagOrBranch() {
 		return lineOfDevelopment.getComputedTagName();
 	}
 
-	public void setTagName(String tagName) {
+	public void setTagOrBranch(String tagName) {
 		lineOfDevelopment.setAlternateTagName(tagName);
 	}
 

@@ -43,7 +43,7 @@ public class GetTagsAndBranches {
 		
 		final CvsRepositoryAdaptor repo = new CvsRepositoryAdaptor(new ProjectConfigDto(), new CvsConfigDto(), profile, projectConfig);
 		
-		final List<RepositoryTagDto> tags = repo.getAvailableTags();
+		final List<RepositoryTagDto> tags = repo.getAvailableTagsAndBranches();
 		
 		for (RepositoryTagDto tag : tags) {
 			System.out.println(tag.getName());

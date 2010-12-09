@@ -27,7 +27,6 @@ import net.sourceforge.vulcan.cvs.dto.CvsProjectConfigDto;
 import net.sourceforge.vulcan.cvs.dto.CvsRepositoryProfileDto;
 import net.sourceforge.vulcan.dto.MetricDto;
 import net.sourceforge.vulcan.dto.ProjectConfigDto;
-import net.sourceforge.vulcan.dto.ProjectStatusDto.UpdateType;
 import net.sourceforge.vulcan.exception.RepositoryException;
 
 public class Checkout {
@@ -52,7 +51,7 @@ public class Checkout {
 		project.setWorkDir("/home/chris/workspace/cvs-test");
 		final CvsRepositoryAdaptor repo = new CvsRepositoryAdaptor(project, cvsConfigDto, profile, projectConfig);
 
-		repo.createPristineWorkingCopy(UpdateType.Full, new BuildDetailCallback() {
+		repo.createPristineWorkingCopy(new BuildDetailCallback() {
 			public void setDetail(String msg) {
 			}
 			public void setDetailMessage(String messageKey, Object[] args) {

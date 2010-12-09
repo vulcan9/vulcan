@@ -24,6 +24,7 @@ import java.io.IOException;
 
 import org.apache.commons.exec.CommandLine;
 import org.apache.commons.exec.DefaultExecutor;
+import org.apache.commons.exec.ExecuteException;
 import org.apache.commons.exec.Executor;
 import org.apache.commons.exec.PumpStreamHandler;
 import org.apache.commons.logging.Log;
@@ -32,13 +33,14 @@ import org.apache.commons.logging.LogFactory;
 public class ProcessInvoker implements Invoker {
 	private static final Log LOG = LogFactory.getLog(ProcessInvoker.class);
 	
-	ByteArrayOutputStream err;
-	int exitCode;
-	
+	private String executable;
 	private Executor executor = new DefaultExecutor();
-
+	
+	private ByteArrayOutputStream err;
+	private int exitCode;
+	
 	public InvocationResult invoke(String command, File workDir, String... args) throws IOException {
-		CommandLine cmdLine = new CommandLine("hg");
+		CommandLine cmdLine = new CommandLine(executable);
 		
 		cmdLine.addArgument(command);
 		cmdLine.addArgument("--noninteractive");
@@ -53,12 +55,22 @@ public class ProcessInvoker implements Invoker {
 	
 		LOG.debug("Executing " + cmdLine);
 		
-		exitCode = executor.execute(cmdLine);
-		return new InvocationResult(out.toString(), err.toString(), exitCode == 0);
+		try {
+			exitCode = executor.execute(cmdLine);
+			return new InvocationResult(out.toString(), err.toString(), exitCode == 0);
+		} catch (ExecuteException e) {
+			exitCode = e.getExitValue();
+			throw e;
+		}
+		
+	}
+
+	public String getExecutable() {
+		return executable;
 	}
 	
-	public Executor getExecutor() {
-		return executor;
+	public void setExecutable(String executable) {
+		this.executable = executable;
 	}
 	
 	public void setExecutor(Executor executor) {

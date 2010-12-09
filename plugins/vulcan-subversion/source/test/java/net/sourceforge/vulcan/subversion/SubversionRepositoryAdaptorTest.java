@@ -111,7 +111,7 @@ public class SubversionRepositoryAdaptorTest extends TestCase {
 		
 		r.lineOfDevelopment.setPath(path);
 		
-		final List<RepositoryTagDto> tags = r.getAvailableTags();
+		final List<RepositoryTagDto> tags = r.getAvailableTagsAndBranches();
 		
 		final List<String> names = new ArrayList<String>();
 		

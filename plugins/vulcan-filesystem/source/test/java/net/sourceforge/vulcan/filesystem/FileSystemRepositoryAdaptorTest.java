@@ -36,7 +36,9 @@ public class FileSystemRepositoryAdaptorTest extends TestCase {
 		super.setUp();
 		
 		dir = new File(System.getProperty("java.io.tmpdir"), "vulcan-filesystem-junit");
-		ra = new FileSystemRepositoryAdaptor(new ProjectConfigDto(), config);
+		final ProjectConfigDto project = new ProjectConfigDto();
+		project.setWorkDir(dir.getAbsolutePath());
+		ra = new FileSystemRepositoryAdaptor(project, config);
 	}
 	
 	@Override

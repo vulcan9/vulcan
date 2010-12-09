@@ -276,7 +276,7 @@ public class ProjectRebuildExpertTest extends EasyMockTestCase {
 		final WorkingCopyNotUsingSameTagRule rule = expert.createWorkingCopyNotUsingSameTagRule();
 		
 		expect(projectManager.getRepositoryAdaptor(project)).andReturn(repositoryAdaptor);
-		expect(repositoryAdaptor.getTagName()).andReturn("default");
+		expect(repositoryAdaptor.getTagOrBranch()).andReturn("default");
 		
 		replay();
 		

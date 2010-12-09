@@ -40,7 +40,7 @@ import org.apache.commons.logging.LogFactory;
 class WorkingCopyUpdateExpert {
 	Log log = LogFactory.getLog(getClass());
 	
-	UpdateType determineUpdateStrategy(ProjectConfigDto currentTarget, ProjectStatusDto previousStatus) {
+	UpdateType determineUpdateStrategy(ProjectConfigDto currentTarget, ProjectStatusDto previousBuildInSameWorkDirectory) {
 		if (UpdateStrategy.CleanAlways == currentTarget.getUpdateStrategy()) {
 			return Full;
 		}
@@ -70,28 +70,28 @@ class WorkingCopyUpdateExpert {
 			return Full;
 		}
 		
-		if (previousStatus == null) {
+		if (previousBuildInSameWorkDirectory == null) {
 			log.info("Performing full build of " + currentTarget.getName() + " even though incremental " +
 					"build was requested because previous build is not available.");
 	
 			return Full;
 		}
 	
-		if (ERROR == previousStatus.getStatus() && !previousStatus.isWorkDirSupportsIncrementalUpdate()) {
+		if (ERROR == previousBuildInSameWorkDirectory.getStatus() && !previousBuildInSameWorkDirectory.isWorkDirSupportsIncrementalUpdate()) {
 			log.info("Performing full build of " + currentTarget.getName() + " even though incremental " +
 					"build was requested because previous build resulted in ERROR before or during checkout or update.");
 
 			return Full;
 		}
 		
-		if (!currentTarget.getRepositoryTagName().equals(previousStatus.getTagName())) {
+		if (!currentTarget.getRepositoryTagName().equals(previousBuildInSameWorkDirectory.getTagName())) {
 			log.info("Performing full build of " + currentTarget.getName() + " even though incremental " +
 					"build was requested because previous build was performed from a different tag/branch.");
 
 			return Full;
 		}
 		
-		if (isDailyFullBuildRequired(currentTarget, previousStatus)) {
+		if (isDailyFullBuildRequired(currentTarget, previousBuildInSameWorkDirectory)) {
 			log.info("Performing first daily full build of " + currentTarget.getName() + ".");
 
 			return Full;
@@ -100,12 +100,12 @@ class WorkingCopyUpdateExpert {
 		return Incremental;
 	}
 
-	boolean isDailyFullBuildRequired(ProjectConfigDto currentTarget, ProjectStatusDto previousStatus) {
+	boolean isDailyFullBuildRequired(ProjectConfigDto currentTarget, ProjectStatusDto previousStatusInSameWorkDirectory) {
 		if (currentTarget.getUpdateStrategy() != UpdateStrategy.CleanDaily) {
 			return false;
 		}
 		
-		final Date previousBuildDate = previousStatus.getCompletionDate();
+		final Date previousBuildDate = previousStatusInSameWorkDirectory.getCompletionDate();
 		
 		final Calendar cal = new GregorianCalendar();
 		cal.setTime(previousBuildDate);

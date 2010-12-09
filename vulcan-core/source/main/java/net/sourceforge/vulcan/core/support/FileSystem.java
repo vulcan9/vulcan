@@ -1,86 +1,43 @@
-/**
+/*
+ * Vulcan Build Manager
+ * Copyright (C) 2005-2010 Chris Eldredge
  * 
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 package net.sourceforge.vulcan.core.support;
 
 import java.io.File;
 import java.io.IOException;
 
-import net.sourceforge.vulcan.RepositoryAdaptor;
-import net.sourceforge.vulcan.exception.ConfigException;
+import org.apache.commons.io.filefilter.IOFileFilter;
 
-import org.apache.commons.io.FileUtils;
-
-public class FileSystem {
-	private int deleteDirectoryAttempts = 1;
-	private long deleteFailureSleepTime;
-	
-	public File cleanWorkingDirectory(String workDir, RepositoryAdaptor ra) throws ConfigException, IOException {
-		final File path = new File(workDir).getCanonicalFile();
-		
-		if (path.exists() && !ra.isWorkingCopy()) {
-			throw new ConfigException(
-					"errors.wont.delete.non.working.copy",
-					new Object[] {path.toString()});
-		}
-		
-		if (!createWorkingDirectories(path)) {
-			throw new ConfigException(
-					"errors.cannot.create.dir",
-					new Object[] {path.toString()});
-		}
-		
-		return path;
-	}
-	
+/**
+ * Abstraction of file system operations to facilitate unit testing.
+ */
+public interface FileSystem {
 	/**
-	 * Create working directory and parent directories if they don't exist.
-	 * @return success flag (false if directories were not created).
+	 * Remove any files and directories in the specified directory except if
+	 * they match excludeFilter.
 	 */
-	public boolean createWorkingDirectories(File path) throws ConfigException {
-		if (!deleteWorkingDirectory(path)) {
-			return false;
-		}
-		
-		return path.mkdirs();
-	}
+	void cleanDirectory(File directory, IOFileFilter excludeFilter) throws IOException;
 
-	public boolean deleteWorkingDirectory(File path) throws ConfigException {
-		int tries = 0;
-		
-		try {
-			while (path.exists()) {
-				tries++;
-				try {
-					FileUtils.deleteDirectory(path);
-					break;
-				} catch (IOException e) {
-					if (tries >= deleteDirectoryAttempts) {
-						throw e;
-					}
-					try {
-						Thread.sleep(deleteFailureSleepTime);
-					} catch (InterruptedException e1) {
-						return false;
-					}
-				}
-			}
-		} catch (IOException e) {
-				throw new ConfigException(
-						"messages.build.cannot.delete.work.dir",
-						new Object[] {
-							path.getPath(),
-							e.getMessage()});
-		}
-		
-		return true;
-	}
-	
-	public void setDeleteDirectoryAttempts(int deleteDirectoryAttempts) {
-		this.deleteDirectoryAttempts = deleteDirectoryAttempts;
-	}
-	
-	public void setDeleteFailureSleepTime(long deleteFailureSleepTime) {
-		this.deleteFailureSleepTime = deleteFailureSleepTime;
-	}
+	/**
+	 * Create directory and any parent directories that are not already present.
+	 * @throws IOException if directory or parents could not be created.
+	 */
+	void createDirectory(File directory) throws IOException;
+
+	boolean directoryExists(File directory);
 }

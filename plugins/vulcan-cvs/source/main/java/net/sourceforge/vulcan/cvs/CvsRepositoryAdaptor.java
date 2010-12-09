@@ -37,6 +37,7 @@ import java.util.Set;
 
 import net.sourceforge.vulcan.RepositoryAdaptor;
 import net.sourceforge.vulcan.core.BuildDetailCallback;
+import net.sourceforge.vulcan.core.support.RepositoryUtils;
 import net.sourceforge.vulcan.cvs.dto.CvsConfigDto;
 import net.sourceforge.vulcan.cvs.dto.CvsProjectConfigDto;
 import net.sourceforge.vulcan.cvs.dto.CvsRepositoryProfileDto;
@@ -49,7 +50,6 @@ import net.sourceforge.vulcan.dto.ProjectConfigDto;
 import net.sourceforge.vulcan.dto.ProjectStatusDto;
 import net.sourceforge.vulcan.dto.RepositoryTagDto;
 import net.sourceforge.vulcan.dto.RevisionTokenDto;
-import net.sourceforge.vulcan.dto.ProjectStatusDto.UpdateType;
 import net.sourceforge.vulcan.exception.RepositoryException;
 
 import org.netbeans.lib.cvsclient.Client;
@@ -122,7 +122,7 @@ public class CvsRepositoryAdaptor extends CvsSupport implements RepositoryAdapto
 	 *   	<li>Capture the symbolic names for the rlog</li>
 	 *   </ol>
 	 */
-	public List<RepositoryTagDto> getAvailableTags() throws RepositoryException {
+	public List<RepositoryTagDto> getAvailableTagsAndBranches() throws RepositoryException {
 		final List<RepositoryTagDto> names = new ArrayList<RepositoryTagDto>();
 		
 		if (symbolicNames == null) {
@@ -151,10 +151,12 @@ public class CvsRepositoryAdaptor extends CvsSupport implements RepositoryAdapto
 		return names;
 	}
 	
-	public void createPristineWorkingCopy(UpdateType updateType, BuildDetailCallback buildDetailCallback) throws RepositoryException {
+	public void createPristineWorkingCopy(BuildDetailCallback buildDetailCallback) throws RepositoryException {
 		final File absolutePath = new File(projectConfig.getWorkDir()).getAbsoluteFile();
 		final Map<String, Long> counters = globalConfig.getWorkingCopyByteCounts();
 		long previousBytesCounted = -1;
+		
+		new RepositoryUtils().createOrCleanWorkingCopy(absolutePath, buildDetailCallback);
 		
 		synchronized (counters) {
 			if (counters.containsKey(projectConfig.getName())) {
@@ -209,11 +211,11 @@ public class CvsRepositoryAdaptor extends CvsSupport implements RepositoryAdapto
 		return null;
 	}
 	
-	public String getTagName() {
+	public String getTagOrBranch() {
 		return tag;
 	}
 
-	public void setTagName(String tagName) {
+	public void setTagOrBranch(String tagName) {
 		this.tag = tagName;
 	}
 
