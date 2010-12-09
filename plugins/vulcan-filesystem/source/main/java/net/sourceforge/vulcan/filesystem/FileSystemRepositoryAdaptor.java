@@ -26,13 +26,13 @@ import java.util.List;
 
 import net.sourceforge.vulcan.RepositoryAdaptor;
 import net.sourceforge.vulcan.core.BuildDetailCallback;
+import net.sourceforge.vulcan.core.support.RepositoryUtils;
 import net.sourceforge.vulcan.dto.ChangeLogDto;
 import net.sourceforge.vulcan.dto.ChangeSetDto;
 import net.sourceforge.vulcan.dto.ProjectConfigDto;
 import net.sourceforge.vulcan.dto.ProjectStatusDto;
 import net.sourceforge.vulcan.dto.RepositoryTagDto;
 import net.sourceforge.vulcan.dto.RevisionTokenDto;
-import net.sourceforge.vulcan.dto.ProjectStatusDto.UpdateType;
 import net.sourceforge.vulcan.exception.RepositoryException;
 import net.sourceforge.vulcan.filesystem.dto.FileSystemProjectConfigDto;
 
@@ -51,9 +51,11 @@ public class FileSystemRepositoryAdaptor implements RepositoryAdaptor {
 	public void prepareRepository(BuildDetailCallback buildDetailCallback) throws RepositoryException, InterruptedException {
 	}
 	
-	public void createPristineWorkingCopy(UpdateType updateType, BuildDetailCallback buildDetailCallback) throws RepositoryException {
+	public void createPristineWorkingCopy(BuildDetailCallback buildDetailCallback) throws RepositoryException {
 		final File sourceDir = new File(config.getSourceDirectory());
 		final File targetDir = new File(projectConfig.getWorkDir());
+		
+		new RepositoryUtils().createOrCleanWorkingCopy(targetDir, buildDetailCallback);
 		
 		try {
 			FileUtils.copyDirectory(sourceDir, targetDir);
@@ -66,7 +68,7 @@ public class FileSystemRepositoryAdaptor implements RepositoryAdaptor {
 	public void updateWorkingCopy(BuildDetailCallback buildDetailCallback) throws RepositoryException {
 		// This will actually overwrite all files from source to target (even if they are the same)
 		// so it's not as incremental as it should be.
-		createPristineWorkingCopy(UpdateType.Full, buildDetailCallback);
+		createPristineWorkingCopy(buildDetailCallback);
 	}
 	
 	public boolean isWorkingCopy() {
@@ -96,7 +98,7 @@ public class FileSystemRepositoryAdaptor implements RepositoryAdaptor {
 		
 		return empty;
 	}
-	public List<RepositoryTagDto> getAvailableTags() throws RepositoryException {
+	public List<RepositoryTagDto> getAvailableTagsAndBranches() throws RepositoryException {
 		final RepositoryTagDto tag = new RepositoryTagDto();
 		
 		tag.setDescription("Not Available");
@@ -105,10 +107,10 @@ public class FileSystemRepositoryAdaptor implements RepositoryAdaptor {
 		return Collections.singletonList(tag);
 	}
 	
-	public String getTagName() {
+	public String getTagOrBranch() {
 		return "N/A";
 	}
 	
-	public void setTagName(String tagName) {
+	public void setTagOrBranch(String tagName) {
 	}
 }

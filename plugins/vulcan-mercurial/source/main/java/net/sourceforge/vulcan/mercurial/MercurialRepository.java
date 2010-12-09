@@ -18,39 +18,78 @@
  */
 package net.sourceforge.vulcan.mercurial;
 
+import static org.apache.commons.lang.StringUtils.isNotBlank;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import net.sourceforge.vulcan.RepositoryAdaptor;
 import net.sourceforge.vulcan.core.BuildDetailCallback;
+import net.sourceforge.vulcan.core.support.FileSystem;
+import net.sourceforge.vulcan.core.support.FileSystemImpl;
 import net.sourceforge.vulcan.dto.ChangeLogDto;
+import net.sourceforge.vulcan.dto.ChangeSetDto;
 import net.sourceforge.vulcan.dto.ProjectConfigDto;
 import net.sourceforge.vulcan.dto.ProjectStatusDto;
 import net.sourceforge.vulcan.dto.RepositoryTagDto;
 import net.sourceforge.vulcan.dto.RevisionTokenDto;
-import net.sourceforge.vulcan.dto.ProjectStatusDto.UpdateType;
 import net.sourceforge.vulcan.exception.RepositoryException;
 
+import org.apache.commons.io.filefilter.NameFileFilter;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 public class MercurialRepository implements RepositoryAdaptor {
+	protected static enum Command {
+		clone(true),
+		pull(true),
+		incoming(true),
+		log(false),
+		update(false),
+		purge(false),
+		branches(false),
+		tags(false),
+		heads(false);
+		
+		private final boolean remote;
+ 
+		Command(boolean remote) {
+			this.remote = remote;
+		}
+		
+		public boolean isRemote() {
+			return remote;
+		}
+	}
+	
 	private static final Log LOG = LogFactory.getLog(MercurialRepository.class);
+	
+	private final static Pattern tagPattern = Pattern.compile("^(.*)\\s+(\\d+:\\w+)$", Pattern.MULTILINE);
 	
 	private final ProjectConfigDto projectConfig;
 	private final MercurialProjectConfig settings;
+	private final MercurialConfig globals;
 	
-	public MercurialRepository(ProjectConfigDto projectConfig) {
+	private FileSystem fileSystem = new FileSystemImpl();
+	
+	public MercurialRepository(ProjectConfigDto projectConfig, MercurialConfig globals) {
 		this.projectConfig = projectConfig;
 		this.settings = (MercurialProjectConfig)projectConfig.getRepositoryAdaptorConfig().copy();
+		this.globals = globals;
 	}
 
 	public boolean hasIncomingChanges(ProjectStatusDto mostRecentBuildInSameWorkDir) throws RepositoryException {
 		try {
-			if (!getLatestRevision(mostRecentBuildInSameWorkDir.getRevision()).equals(mostRecentBuildInSameWorkDir.getRevision())) {
+			final RevisionTokenDto latestRevision = getLatestRevision(mostRecentBuildInSameWorkDir.getRevision());
+			
+			if (!latestRevision.equals(mostRecentBuildInSameWorkDir.getRevision())) {
 				return true;
 			}
 			
@@ -64,39 +103,60 @@ public class MercurialRepository implements RepositoryAdaptor {
 		final File workDir = getLocalRepositoryPath();
 		
 		if (!isWorkingCopy()) {
-			if (!isDirectoryPresent(workDir)) {
-				if (!workDir.mkdirs()) {
-					throw new RepositoryException("hg.errors.mkdir", new Object[] {workDir}, null);
-				}
-			}
-			buildDetailCallback.setDetailMessage("hg.activity.clone", null);
-			//TODO: add flags for --pull, --uncompressed
-			tryInvoke("clone", "--noupdate", settings.getRemoteRepositoryUrl(), ".");
+			clone(workDir, buildDetailCallback);
 		} else {
-			buildDetailCallback.setDetailMessage("hg.activity.pull", null);
-			tryInvoke("pull", settings.getRemoteRepositoryUrl());
+			pull(buildDetailCallback);
 		}
+	}
+
+	public void clone(File workDir, BuildDetailCallback buildDetailCallback) throws RepositoryException {
+		if (!isRemoteRepositoryConfigured()) {
+			throw new RepositoryException("hg.errors.no.repo.and.no.remote", new Object[] {workDir}, null);
+		}
+
+		buildDetailCallback.setDetailMessage("hg.activity.clone", null);
+		
+		List<String> args = new ArrayList<String>();
+		if (settings.isCloneWithPullProtocol()) {
+			args.add("--pull");
+		}
+		if (settings.isUncompressed()) {
+			args.add("--uncompressed");
+		}
+		args.add("--noupdate");
+		args.add(settings.getRemoteRepositoryUrl());
+		args.add(".");
+
+		tryInvoke(Command.clone, args.toArray(new String[args.size()]));
+	}
+	
+	public void pull(BuildDetailCallback buildDetailCallback) throws RepositoryException {
+		if (!isRemoteRepositoryConfigured()) {
+			return;
+		}
+
+		buildDetailCallback.setDetailMessage("hg.activity.pull", null);
+		
+		tryInvoke(Command.pull, settings.getRemoteRepositoryUrl());
 	}
 	
 	public boolean isWorkingCopy() throws RepositoryException {
-		if (!isDirectoryPresent(getLocalRepositoryPath())) {
+		if (!fileSystem.directoryExists(getLocalRepositoryPath())) {
 			return false;
 		}
 		
 		try {
-			InvocationResult result = invoke("summary", "--quiet");
+			String[] args = { "--quiet" };
+			final Invoker invoker = createInvoker();
+			InvocationResult result = invoker.invoke("summary", getLocalRepositoryPath(), args);
 			return result.isSuccess();
 		} catch (IOException ignore) {
 			return false;
 		}
 	}
 
-	protected boolean isDirectoryPresent(File absolutePath) {
-		return absolutePath.isDirectory();
-	}
-
 	public RevisionTokenDto getLatestRevision(RevisionTokenDto previousRevision) throws RepositoryException, InterruptedException {
-		InvocationResult result = tryInvoke("log", "--rev", getSelectedBranch(), "--limit", "1", "--quiet");
+		InvocationResult result = tryInvoke(Command.log, "--rev", getSelectedBranch(), "--limit", "1", "--quiet");
 		
 		final String output = result.getOutput().trim();
 		String[] parts = output.split(":", 2);
@@ -109,11 +169,15 @@ public class MercurialRepository implements RepositoryAdaptor {
 	}
 	
 	boolean hasIncomingChangesFromRemote() throws RepositoryException, InterruptedException {
-		if (StringUtils.isBlank(settings.getRemoteRepositoryUrl())) {
+		if (!isRemoteRepositoryConfigured()) {
 			return false;
 		}
 		
-		return tryInvoke("incoming", "--rev", getSelectedBranch(), "--limit", "1", "--quiet", settings.getRemoteRepositoryUrl()).isSuccess();
+		return tryInvoke(Command.incoming, "--rev", getSelectedBranch(), "--limit", "1", "--quiet", settings.getRemoteRepositoryUrl()).isSuccess();
+	}
+
+	boolean isRemoteRepositoryConfigured() {
+		return !StringUtils.isBlank(settings.getRemoteRepositoryUrl());
 	}
 
 	String getSelectedBranch() {
@@ -127,50 +191,153 @@ public class MercurialRepository implements RepositoryAdaptor {
 	File getLocalRepositoryPath() {
 		return new File(projectConfig.getWorkDir());
 	}
-
-	private InvocationResult tryInvoke(String command, String... args) throws RepositoryException {
-		final Invoker invoker = createInvoker();
-
-		try {
-			return invoker.invoke(command, getLocalRepositoryPath(), args);
-		} catch (IOException e) {
-			LOG.error("Unexpected exception invoking hg: " + invoker.getErrorText(), e);
-			throw new RepositoryException("hg.errors.invocation", new Object[] {invoker.getErrorText(), invoker.getExitCode()}, e);
+	
+	public void createPristineWorkingCopy(BuildDetailCallback buildDetailCallback) throws RepositoryException, InterruptedException {
+		if (globals.isPurgeEnabled()) {
+			buildDetailCallback.setDetailMessage("hg.activity.update", null);
+			tryInvoke(Command.update, "--clean", getSelectedBranch());
+			
+			buildDetailCallback.setDetailMessage("hg.activity.purge", null);
+			tryInvoke(Command.purge, "--all", "--config", "extensions.purge=");
+		} else {
+			buildDetailCallback.setDetailMessage("hg.activity.remove.working.copy", null);
+			tryInvoke(Command.update, "--clean", "null");
+			
+			buildDetailCallback.setDetailMessage("hg.activity.purge", null);
+			
+			try {
+				fileSystem.cleanDirectory(getLocalRepositoryPath(), new NameFileFilter(".hg"));
+			} catch (IOException e) {
+				throw new RepositoryException("hg.errors.delete.files", null, e);
+			}
+			
+			buildDetailCallback.setDetailMessage("hg.activity.update", null);
+			tryInvoke(Command.update, getSelectedBranch());
 		}
 	}
 
-	private InvocationResult invoke(String command, String... args) throws IOException {
-		final Invoker invoker = createInvoker();
-		return invoker.invoke(command, getLocalRepositoryPath(), args);
-	}
-
-	protected Invoker createInvoker() {
-		return new ProcessInvoker();
-	}
-	
-	public void createPristineWorkingCopy(UpdateType updateType, BuildDetailCallback buildDetailCallback) throws RepositoryException, InterruptedException {
-	}
-
 	public void updateWorkingCopy(BuildDetailCallback buildDetailCallback) throws RepositoryException {
+		tryInvoke(Command.update, getSelectedBranch());
 	}
 
 	public ChangeLogDto getChangeLog(RevisionTokenDto previousRevision,	RevisionTokenDto currentRevision, OutputStream diffOutputStream) throws RepositoryException, InterruptedException {
-		return null;
+		final ArrayList<ChangeSetDto> changes = new ArrayList<ChangeSetDto>();
+		
+		// TODO: implement me.
+		
+		final ChangeLogDto log = new ChangeLogDto();
+		log.setChangeSets(changes);
+		return log;
 	}
 	
-	public List<RepositoryTagDto> getAvailableTags() throws RepositoryException {
-		return null;
+	public List<RepositoryTagDto> getAvailableTagsAndBranches() throws RepositoryException {
+		final List<RepositoryTagDto> results = new ArrayList<RepositoryTagDto>();
+		final List<String> namedRevisions = new ArrayList<String>();
+		
+		addAvailableTags(Command.branches, results, namedRevisions);
+		addAvailableTags(Command.tags, results, namedRevisions);
+		
+		addAnonymousHeads(results, namedRevisions);
+		
+		return results;
+	}
+
+	private void addAvailableTags(Command command, List<RepositoryTagDto> results, List<String> namedRevisions) throws RepositoryException {
+		final InvocationResult result = tryInvoke(command);
+		
+		final Matcher matcher = tagPattern.matcher(result.getOutput());
+		
+		while (matcher.find()) {
+			final String name = matcher.group(1).trim();
+			final String revision = matcher.group(2);
+			
+			results.add(new RepositoryTagDto(name, name));
+			namedRevisions.add(revision);
+		}
+	}
+
+	private void addAnonymousHeads(List<RepositoryTagDto> results, List<String> namedRevisions) throws RepositoryException {
+		final InvocationResult result = tryInvoke(Command.heads, "--quiet", "--topo");
+		
+		for (String s : result.getOutput().split("\n")) {
+			s = s.trim();
+			if (s.equals("") || namedRevisions.contains(s)) {
+				continue;
+			}
+			
+			results.add(new RepositoryTagDto(s, s));
+		}
+	}
+	
+	protected InvocationResult tryInvoke(Command command, String... args) throws RepositoryException {
+		final File workDir = getLocalRepositoryPath();
+		
+		if (!fileSystem.directoryExists(workDir)) {
+			try {
+				fileSystem.createDirectory(workDir);
+			} catch (IOException e) {
+				throw new RepositoryException("hg.errors.mkdir", new Object[] {workDir}, e);
+			}
+		}
+
+		final Invoker invoker = createInvoker();
+		
+		if (command.isRemote()) {
+			args = addRemoteFlags(args);
+		}
+		
+		try {
+			return invoker.invoke(command.name(), workDir, args);
+		} catch (IOException e) {
+			final String errorText = invoker.getErrorText();
+			LOG.error("Unexpected exception invoking hg: " + errorText, e);
+			throw new RepositoryException("hg.errors.invocation", new Object[] {errorText, invoker.getExitCode()}, e);
+		}
+	}
+
+	private String[] addRemoteFlags(String[] args) {
+		List<String> list = new ArrayList<String>();
+		
+		addIfSpecified(list, "--ssh", settings.getSshCommand());
+		addIfSpecified(list, "--remotecmd", settings.getRemoteCommand());
+		
+		list.addAll(Arrays.asList(args));
+		
+		return list.toArray(new String[list.size()]);
+	}
+
+	private void addIfSpecified(List<String> args, String flag, String value) {
+		if (isNotBlank(value)) {
+			args.add(flag);
+			args.add(value);
+		}
+	}
+
+	protected Invoker createInvoker() {
+		final ProcessInvoker invoker = new ProcessInvoker();
+		
+		invoker.setExecutable(globals.getExecutable());
+		
+		return invoker;
 	}
 
 	public String getRepositoryUrl() {
-		return null;
+		return settings.getRemoteRepositoryUrl();
 	}
 
-	public String getTagName() {
+	public String getTagOrBranch() {
 		return getSelectedBranch();
 	}
 
-	public void setTagName(String tagName) {
+	public void setTagOrBranch(String tagName) {
 		settings.setBranch(tagName);
+	}
+	
+	protected MercurialProjectConfig getSettings() {
+		return settings;
+	}
+	
+	public void setFileSystem(FileSystem fileSystem) {
+		this.fileSystem = fileSystem;
 	}
 }

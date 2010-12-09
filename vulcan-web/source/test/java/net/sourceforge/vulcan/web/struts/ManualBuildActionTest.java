@@ -433,11 +433,11 @@ public class ManualBuildActionTest extends MockApplicationContextStrutsTestCase 
 
 		expect(manager.getRepositoryAdaptor(project)).andReturn(ra1);
 		
-		expect(ra1.getAvailableTags()).andReturn(tags1);
+		expect(ra1.getAvailableTagsAndBranches()).andReturn(tags1);
 		
 		expect(manager.getRepositoryAdaptor(projects[1])).andReturn(ra2);
 		
-		expect(ra2.getAvailableTags()).andReturn(tags2);
+		expect(ra2.getAvailableTagsAndBranches()).andReturn(tags2);
 		
 		ProjectStatusDto a = new ProjectStatusDto();
 		a.setTagName("rc2");
@@ -504,7 +504,7 @@ public class ManualBuildActionTest extends MockApplicationContextStrutsTestCase 
 
 		expect(manager.getRepositoryAdaptor(project)).andReturn(ra1);
 		
-		expect(ra1.getAvailableTags()).andThrow(new RepositoryException("key.message", null, null));
+		expect(ra1.getAvailableTagsAndBranches()).andThrow(new RepositoryException("key.message", null, null));
 		
 		expect(buildManager.getLatestStatus("a")).andReturn(new ProjectStatusDto());
 

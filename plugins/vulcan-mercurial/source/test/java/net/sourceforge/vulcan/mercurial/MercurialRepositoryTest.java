@@ -20,59 +20,80 @@ package net.sourceforge.vulcan.mercurial;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import net.sourceforge.vulcan.EasyMockTestCase;
 import net.sourceforge.vulcan.core.BuildDetailCallback;
+import net.sourceforge.vulcan.core.support.FileSystem;
 import net.sourceforge.vulcan.dto.ProjectConfigDto;
 import net.sourceforge.vulcan.dto.ProjectStatusDto;
+import net.sourceforge.vulcan.dto.RepositoryTagDto;
 import net.sourceforge.vulcan.dto.RevisionTokenDto;
+import net.sourceforge.vulcan.exception.RepositoryException;
+
+import org.apache.commons.exec.ExecuteException;
+import org.apache.commons.io.filefilter.IOFileFilter;
 
 public class MercurialRepositoryTest extends EasyMockTestCase {
-
-	MercurialProjectConfig settings;
+	MercurialConfig globals;
 	ProjectConfigDto project;
 	MercurialRepository repo;
+	FileSystem fileSystem;
 	
 	Invoker invoker;
 	BuildDetailCallback buildDetail;
 	
-	boolean directoryPresent = true;
+	File workDir;
 	
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 		
-		settings = new MercurialProjectConfig();
+		globals = new MercurialConfig();
+		
+		MercurialProjectConfig settings = new MercurialProjectConfig();
 		settings.setRemoteRepositoryUrl("http://localhost/hg/repo1");
 		
 		project = new ProjectConfigDto();
 		project.setWorkDir("work_dir");
 		
+		workDir = new File(project.getWorkDir());
+		
 		project.setRepositoryAdaptorConfig(settings);
 		invoker = createMock(Invoker.class);
 		buildDetail = createMock(BuildDetailCallback.class);
 		
-		repo = new MercurialRepository(project) {
+		repo = new MercurialRepository(project, globals) {
 			@Override
 			protected Invoker createInvoker() {
 				return invoker;
 			}
-			
-			@Override
-			protected boolean isDirectoryPresent(File absolutePath) {
-				return directoryPresent;
-			}
 		};
+		
+		fileSystem = createMock(FileSystem.class);
+		repo.setFileSystem(fileSystem);
+		
+		expect(fileSystem.directoryExists(workDir)).andReturn(true).anyTimes();
+	}
+	
+	public void testCreateInvokerSetsExecutable() throws Exception {
+		globals.setExecutable("custom-hg.exe");
+		
+		ProcessInvoker invoker = (ProcessInvoker) new MercurialRepository(project, globals).createInvoker();
+		
+		assertEquals("custom-hg.exe", invoker.getExecutable());
 	}
 	
 	public void testGetSelectedBranchDefaultWhenBlank() throws Exception {
-		settings.setBranch("");
+		repo.setTagOrBranch("");
 		
 		assertEquals("default", repo.getSelectedBranch());
 	}
 	
 	public void testGetSelectedBranchOther() throws Exception {
-		settings.setBranch("other");
+		repo.setTagOrBranch("other");
 		
 		assertEquals("other", repo.getSelectedBranch());
 	}
@@ -90,7 +111,7 @@ public class MercurialRepositoryTest extends EasyMockTestCase {
 	}
 
 	public void testHasIncomingChangesFromRemoteUsesTagNoChanges() throws Exception {
-		settings.setBranch("v2");
+		repo.getSettings().setBranch("v2");
 		
 		expectIncomingCommand();
 		
@@ -104,10 +125,11 @@ public class MercurialRepositoryTest extends EasyMockTestCase {
 	}
 
 	public void testHasIncomingChangesFromRemoteFalseOnNoRemoteRepo() throws Exception {
-		settings.setRemoteRepositoryUrl("");
-				
+		repo.getSettings().setRemoteRepositoryUrl("");
+		
 		replay();
 		
+		assertEquals("", repo.getSettings().getRemoteRepositoryUrl());
 		assertEquals("hasIncomingChangesFromRemote", false, repo.hasIncomingChangesFromRemote());
 		
 		verify();
@@ -163,8 +185,8 @@ public class MercurialRepositoryTest extends EasyMockTestCase {
 		verify();
 	}
 	
-	public void testHasIncomingChangesFalse() throws Exception {
-		settings.setRemoteRepositoryUrl("");
+	public void testHasIncomingChangesFalseOnNoRemoteRepository() throws Exception {
+		repo.getSettings().setRemoteRepositoryUrl("");
 		
 		expectLogCommand();
 		
@@ -192,7 +214,19 @@ public class MercurialRepositoryTest extends EasyMockTestCase {
 		verify();
 	}
 
-	public void testIsWorkingCopyFalse() throws Exception {
+	public void testIsWorkingCopyFalseOnMissingDir() throws Exception {
+		reset();
+		
+		expect(fileSystem.directoryExists(workDir)).andReturn(false);
+		
+		replay();
+		
+		assertEquals("isWorkingCopy", false, repo.isWorkingCopy());
+		
+		verify();
+	}
+
+	public void testIsWorkingCopyFalseOnCommandFailure() throws Exception {
 		expectSummaryCommand();
 		
 		expectLastCall().andThrow(new IOException("not a working copy"));
@@ -220,6 +254,46 @@ public class MercurialRepositoryTest extends EasyMockTestCase {
 		verify();
 	}
 	
+	public void testPrepareMakesCloneWithFlags() throws Exception {
+		repo.getSettings().setUncompressed(true);
+		repo.getSettings().setCloneWithPullProtocol(true);
+		
+		testPrepareMakesClone();
+	}
+	
+	public void testPrepareThrowsOnMissingLocalRepoAndNoRemoteRepo() throws Exception {
+		repo.getSettings().setRemoteRepositoryUrl("");
+		
+		expectSummaryCommand();
+		
+		returnFailure();
+	
+		replay();
+		
+		try {
+			repo.prepareRepository(buildDetail);
+			fail("expected RepositoryException");
+		} catch (RepositoryException e) {
+			
+		}
+		
+		verify();
+	}
+	
+	public void testPrepareDoesNotPullOnNoRemoteRepo() throws Exception {
+		repo.getSettings().setRemoteRepositoryUrl("");
+		
+		expectSummaryCommand();
+		
+		returnSuccess();
+	
+		replay();
+		
+		repo.prepareRepository(buildDetail);
+		
+		verify();
+	}
+
 	public void testPreparePullsWhenRepositoryPresent() throws Exception {
 		expectSummaryCommand();
 		
@@ -236,26 +310,240 @@ public class MercurialRepositoryTest extends EasyMockTestCase {
 		verify();
 	}
 	
+	public void testUpdateWorkingCopy() throws Exception {
+		expectUpdateCommand();
+		
+		returnSuccess();
+		
+		replay();
+		
+		repo.updateWorkingCopy(buildDetail);
+		
+		verify();
+	}
+	
+	public void testCreatePristineWorkingCopyUsingPurge() throws Exception {
+		globals.setPurgeEnabled(true);
+		
+		expectUpdateCommandWithBuildDetail("--clean");
+		
+		returnSuccess();
+		
+		expectPurgeAllCommand();
+		
+		returnSuccess();
+		
+		replay();
+		
+		repo.createPristineWorkingCopy(buildDetail);
+		
+		verify();
+	}
+	
+	public void testCreatePristineWorkingCopy() throws Exception {
+		globals.setPurgeEnabled(false);
+		
+		buildDetail.setDetailMessage("hg.activity.remove.working.copy", null);
+		
+		invoker.invoke("update", workDir, "--clean", "null");
+		returnSuccess();
+		
+		buildDetail.setDetailMessage("hg.activity.purge", null);
+		fileSystem.cleanDirectory(eq(workDir), (IOFileFilter) notNull());
+		
+		expectUpdateCommandWithBuildDetail();
+		
+		returnSuccess();
+
+		replay();
+		
+		repo.createPristineWorkingCopy(buildDetail);
+		
+		verify();
+	}
+	
+	public void testGetTagsAndBranchesOneBranch() throws Exception {
+		invoker.invoke("branches", workDir);
+		returnSuccessWithOutput("first draft                 1234:9bd7475fd513\n");
+		invoker.invoke("tags", workDir);
+		returnSuccessWithOutput("");
+		invoker.invoke("heads", workDir, "--quiet", "--topo");
+		returnSuccessWithOutput("");
+		
+		replay();
+		
+		final List<RepositoryTagDto> actual = repo.getAvailableTagsAndBranches();
+		
+		verify();
+		
+		final List<RepositoryTagDto> expected = Arrays.asList(
+				new RepositoryTagDto("first draft", "first draft"));
+		
+		assertEquals(expected, actual);
+	}
+	
+	public void testGetTagsAndBranchesShowsAnonymousHeads() throws Exception {
+		invoker.invoke("branches", workDir);
+		returnSuccessWithOutput("");
+		invoker.invoke("tags", workDir);
+		returnSuccessWithOutput("");
+		invoker.invoke("heads", workDir, "--quiet", "--topo");
+		returnSuccessWithOutput("5679:315df5747db");
+		
+		replay();
+		
+		final List<RepositoryTagDto> actual = repo.getAvailableTagsAndBranches();
+		
+		verify();
+		
+		final List<RepositoryTagDto> expected = Arrays.asList(
+				new RepositoryTagDto("5679:315df5747db", "5679:315df5747db"));
+		
+		assertEquals(expected, actual);
+	}
+	
+	public void testGetTagsAndBranchesExcludesNamedHeads() throws Exception {
+		invoker.invoke("branches", workDir);
+		returnSuccessWithOutput("b1             1234:9bd7475fd513");
+		invoker.invoke("tags", workDir);
+		returnSuccessWithOutput("t1             5679:315df5747db\nt2             8765:2a56f5747db");
+		invoker.invoke("heads", workDir, "--quiet", "--topo");
+		returnSuccessWithOutput("1234:9bd7475fd513\n5679:315df5747db");
+		
+		replay();
+		
+		final List<RepositoryTagDto> actual = repo.getAvailableTagsAndBranches();
+		
+		verify();
+		
+		final List<RepositoryTagDto> expected = Arrays.asList(
+				new RepositoryTagDto("b1", "b1"),
+				new RepositoryTagDto("t1", "t1"),
+				new RepositoryTagDto("t2", "t2")
+				);
+		
+		assertEquals(expected, actual);
+	}
+	
+	public void testInvokeIncludesRemoteOptions() throws Exception {
+		repo.getSettings().setSshCommand("/opt/bin/ssh2");
+		repo.getSettings().setRemoteCommand("/opt/hg/bin/hg");
+		
+		invoker.invoke("incoming", workDir, "--ssh", "/opt/bin/ssh2", "--remotecmd", "/opt/hg/bin/hg", "some", "extra", "args");
+		returnSuccess();
+		
+		replay();
+		
+		repo.tryInvoke(MercurialRepository.Command.incoming, "some", "extra", "args");
+		
+		verify();
+	}
+	
+	public void testInvokeCreatesWorkDirWhenMissing() throws Exception {
+		reset();
+		
+		expect(fileSystem.directoryExists(workDir)).andReturn(false);
+		fileSystem.createDirectory(workDir);
+		
+		invoker.invoke("incoming", workDir);
+		returnSuccess();
+		
+		replay();
+		
+		repo.tryInvoke(MercurialRepository.Command.incoming);
+		
+		verify();
+	}
+	
+	public void testInvokeCreatesWorkDirWhenMissingWrapsIOException() throws Exception {
+		final IOException ioe = new IOException();
+		
+		reset();
+		
+		expect(fileSystem.directoryExists(workDir)).andReturn(false);
+		fileSystem.createDirectory(workDir);
+		expectLastCall().andThrow(ioe);
+		
+		replay();
+		
+		try {
+			repo.tryInvoke(MercurialRepository.Command.incoming);
+			fail("expected RepositoryException");
+		} catch (RepositoryException e) {
+			assertSame("e.getCause()", ioe, e.getCause());
+		}
+		
+		verify();
+	}
+	
+	public void testInvokeWrapsExecuteException() throws Exception {	
+		final ExecuteException ee = new ExecuteException("oops", 2);
+		expect(invoker.invoke("incoming", workDir)).andThrow(ee);
+		expect(invoker.getErrorText()).andReturn("unrecognized option");
+		expect(invoker.getExitCode()).andReturn(2);
+		
+		replay();
+		
+		try {
+			repo.tryInvoke(MercurialRepository.Command.incoming);
+			fail("expected RepositoryException");
+		} catch (RepositoryException e) {
+			assertSame("e.getCause()", ee, e.getCause());
+		}
+		
+		verify();
+	}
+	
+	private void expectPurgeAllCommand() throws IOException {
+		buildDetail.setDetailMessage("hg.activity.purge", null);
+		invoker.invoke("purge", workDir, "--all", "--config", "extensions.purge=");
+	}
+
+	private void expectUpdateCommandWithBuildDetail(String... extraArgs) throws IOException {
+		buildDetail.setDetailMessage("hg.activity.update", null);
+		expectUpdateCommand(extraArgs);
+	}
+	
+	private void expectUpdateCommand(String... extraArgs) throws IOException {
+		List<String> args = new ArrayList<String>();
+		args.addAll(Arrays.asList(extraArgs));
+		args.add(repo.getSelectedBranch());
+		
+		invoker.invoke("update", workDir, args.toArray(new String[args.size()]));
+	}
+
 	private void expectCloneCommand() throws IOException {
 		buildDetail.setDetailMessage("hg.activity.clone", null);
-		invoker.invoke("clone", new File(project.getWorkDir()), "--noupdate", settings.getRemoteRepositoryUrl(), ".");
+		
+		List<String> args = new ArrayList<String>();
+		if (repo.getSettings().isCloneWithPullProtocol()) {
+			args.add("--pull");
+		}
+		if (repo.getSettings().isUncompressed()) {
+			args.add("--uncompressed");
+		}
+		args.add("--noupdate");
+		args.add(repo.getSettings().getRemoteRepositoryUrl());
+		args.add(".");
+		
+		invoker.invoke("clone", workDir, args.toArray(new String[args.size()]));
 	}
 	
 	private void expectPullCommand() throws IOException {
 		buildDetail.setDetailMessage("hg.activity.pull", null);
-		invoker.invoke("pull", new File(project.getWorkDir()), settings.getRemoteRepositoryUrl());
+		invoker.invoke("pull", workDir, repo.getSettings().getRemoteRepositoryUrl());
 	}
 
 	private void expectSummaryCommand() throws IOException {
-		invoker.invoke("summary", new File(project.getWorkDir()), "--quiet");
+		invoker.invoke("summary", workDir, "--quiet");
 	}
 
 	private void expectLogCommand() throws IOException {
-		invoker.invoke("log", new File(project.getWorkDir()), new String[] {"--rev", repo.getSelectedBranch(), "--limit", "1", "--quiet"});
+		invoker.invoke("log", workDir, new String[] {"--rev", repo.getSelectedBranch(), "--limit", "1", "--quiet"});
 	}
 
 	private void expectIncomingCommand() throws IOException {
-		invoker.invoke("incoming", new File(project.getWorkDir()), new String[] {"--rev", repo.getSelectedBranch(), "--limit", "1", "--quiet", settings.getRemoteRepositoryUrl()});
+		invoker.invoke("incoming", workDir, new String[] {"--rev", repo.getSelectedBranch(), "--limit", "1", "--quiet", repo.getSettings().getRemoteRepositoryUrl()});
 	}
 
 	private void returnSuccess() {

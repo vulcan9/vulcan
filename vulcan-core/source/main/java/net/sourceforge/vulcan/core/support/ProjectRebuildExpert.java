@@ -124,7 +124,7 @@ class ProjectRebuildExpert {
 			
 			if (tagName == null) {
 				final RepositoryAdaptor ra = projectManager.getRepositoryAdaptor(project);
-				tagName = ra.getTagName();
+				tagName = ra.getTagOrBranch();
 			}
 			
 			if (mostRecentBuildByWorkDir == null || tagName.equals(mostRecentBuildByWorkDir.getTagName())) {
@@ -156,9 +156,9 @@ class ProjectRebuildExpert {
 			
 			RevisionTokenDto previousRevision = mostRecentBuildByWorkDir == null ? null : mostRecentBuildByWorkDir.getRevision();
 			
-			final RepositoryAdaptor ra = projectManager.getRepositoryAdaptor(project);
+			final RepositoryAdaptor repository = projectManager.getRepositoryAdaptor(project);
 			
-			if (!ra.hasIncomingChanges(mostRecentBuildByWorkDir)) {
+			if (!repository.hasIncomingChanges(mostRecentBuildByWorkDir)) {
 				return false;
 			}
 

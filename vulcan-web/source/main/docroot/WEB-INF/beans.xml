@@ -216,8 +216,6 @@
 		<property name="buildOutcomeStore" ref="buildOutcomeStore"/>
 		<property name="buildManager" ref="buildManager"/>
 		<property name="projectManager" ref="stateManager"/>
-		<property name="deleteDirectoryAttempts" value="2"/>
-		<property name="deleteFailureSleepTime" value="5000"/>
 		<property name="diffsEnabled" value="${diffs.enabled}"/>
 	</bean>
 	

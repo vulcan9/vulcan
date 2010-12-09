@@ -29,9 +29,11 @@ import javax.servlet.http.HttpServletResponse;
 import net.sourceforge.vulcan.ProjectManager;
 import net.sourceforge.vulcan.RepositoryAdaptor;
 import net.sourceforge.vulcan.StateManager;
+import net.sourceforge.vulcan.core.BuildDetailCallback;
 import net.sourceforge.vulcan.core.BuildManager;
 import net.sourceforge.vulcan.core.DependencyBuildPolicy;
 import net.sourceforge.vulcan.core.DependencyGroup;
+import net.sourceforge.vulcan.dto.MetricDto;
 import net.sourceforge.vulcan.dto.ProjectConfigDto;
 import net.sourceforge.vulcan.dto.ProjectStatusDto;
 import net.sourceforge.vulcan.dto.RepositoryTagDto;
@@ -206,8 +208,15 @@ public final class ManualBuildAction extends Action {
 			List<RepositoryTagDto> projectTags = null;
 			
 			try {
-				final RepositoryAdaptor ra = projectManager.getRepositoryAdaptor(target);
-				projectTags = ra.getAvailableTags();
+				final RepositoryAdaptor repository = projectManager.getRepositoryAdaptor(target);
+				
+				try {
+					repository.prepareRepository(new NoOpBuildDetailCallback());
+				} catch (InterruptedException e) {
+					throw new ConfigException("errors.interrupted", null, e);
+				}
+				
+				projectTags = repository.getAvailableTagsAndBranches();
 			} catch (ConfigException e) {
 				BaseDispatchAction.saveError(request, target.getName(),
 						new ActionMessage(e.getKey(), e.getArgs()));
@@ -246,5 +255,22 @@ public final class ManualBuildAction extends Action {
 		}
 		
 		selectedTags.add(tagName);
+	}
+	
+	class NoOpBuildDetailCallback implements BuildDetailCallback {
+		public void addMetric(MetricDto metric) {
+		}
+		public void reportError(String message, String file,
+				Integer lineNumber, String code) {
+		}
+		public void reportWarning(String message, String file,
+				Integer lineNumber, String code) {
+		}
+		public void setDetail(String detail) {
+		}
+		public void setDetailMessage(String messageKey, Object[] args) {
+		}
+		public void setPhaseMessageKey(String messageKey) {
+		}
 	}
 }

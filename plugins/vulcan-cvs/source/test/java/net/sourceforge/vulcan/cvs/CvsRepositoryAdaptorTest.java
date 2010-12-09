@@ -41,7 +41,7 @@ public class CvsRepositoryAdaptorTest extends TestCase {
 	public void testUseHeadIfNoBranchSpecified() throws Exception {
 		final CvsRepositoryAdaptor ra = new CvsRepositoryAdaptor(new ProjectConfigDto(), globalConfig, profile, config, false);
 		
-		assertEquals("HEAD", ra.getTagName());
+		assertEquals("HEAD", ra.getTagOrBranch());
 	}
 	
 	public void testUseBranchIfSpecified() throws Exception {
@@ -49,6 +49,6 @@ public class CvsRepositoryAdaptorTest extends TestCase {
 		
 		final CvsRepositoryAdaptor ra = new CvsRepositoryAdaptor(new ProjectConfigDto(), globalConfig, profile, config, false);
 		
-		assertEquals("branchy", ra.getTagName());
+		assertEquals("branchy", ra.getTagOrBranch());
 	}
 }
