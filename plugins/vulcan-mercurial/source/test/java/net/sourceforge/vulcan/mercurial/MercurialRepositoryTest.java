@@ -27,6 +27,7 @@ import java.util.List;
 import net.sourceforge.vulcan.EasyMockTestCase;
 import net.sourceforge.vulcan.core.BuildDetailCallback;
 import net.sourceforge.vulcan.core.support.FileSystem;
+import net.sourceforge.vulcan.dto.ChangeLogDto;
 import net.sourceforge.vulcan.dto.ProjectConfigDto;
 import net.sourceforge.vulcan.dto.ProjectStatusDto;
 import net.sourceforge.vulcan.dto.RepositoryTagDto;
@@ -360,6 +361,20 @@ public class MercurialRepositoryTest extends EasyMockTestCase {
 		repo.createPristineWorkingCopy(buildDetail);
 		
 		verify();
+	}
+	
+	public void testGetChangeLogEmpty() throws Exception {
+		invoker.invoke("log", workDir, "--style", "xml", "-r", "124:456");
+		returnSuccessWithOutput("<xml/>");
+		
+		replay();
+		
+		final ChangeLogDto changeLog = repo.getChangeLog(new RevisionTokenDto(123L, "123:9bd7475fd513"), new RevisionTokenDto(456L, "456:9bd7475fd513"), null);
+		
+		verify();
+		
+		assertNotNull("return value", changeLog);
+		assertNotNull("change sets", changeLog.getChangeSets());
 	}
 	
 	public void testGetTagsAndBranchesOneBranch() throws Exception {

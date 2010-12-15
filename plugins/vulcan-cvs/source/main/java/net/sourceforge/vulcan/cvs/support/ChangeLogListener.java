@@ -21,6 +21,7 @@ package net.sourceforge.vulcan.cvs.support;
 import static net.sourceforge.vulcan.cvs.support.CvsDateFormat.parseDate;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -97,7 +98,7 @@ public class ChangeLogListener extends LogListener {
 		final String repositoryFilename = logInfo.getRepositoryFilename();
 		
 		for (ChangeSetDto e : currentEntries) {
-			e.setModifiedPaths(new String[] {repositoryFilename});
+			e.setModifiedPaths(Collections.singletonList(repositoryFilename));
 		}
 		
 		allEntries.addAll(currentEntries);

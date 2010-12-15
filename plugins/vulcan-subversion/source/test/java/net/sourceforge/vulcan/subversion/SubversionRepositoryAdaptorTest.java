@@ -165,12 +165,13 @@ public class SubversionRepositoryAdaptorTest extends TestCase {
 		repoConfig.setCheckoutDepth(CheckoutDepth.Empty);
 		
 		ChangeSetDto change = new ChangeSetDto();
-		change.setModifiedPaths(new String[] {"/some/included/path"});
+		
+		change.setModifiedPaths(Collections.singletonList("/some/included/path"));
 		change.setRevisionLabel("r125");
 		fakeChangeSets.add(change);
 		
 		change = new ChangeSetDto();
-		change.setModifiedPaths(new String[] {"/some/excluded/path"});
+		change.setModifiedPaths(Collections.singletonList("/some/excluded/path"));
 		change.setRevisionLabel("r150");
 		fakeChangeSets.add(change);		
 		
@@ -192,7 +193,7 @@ public class SubversionRepositoryAdaptorTest extends TestCase {
 		repoConfig.setCheckoutDepth(CheckoutDepth.Empty);
 		
 		ChangeSetDto change = new ChangeSetDto();
-		change.setModifiedPaths(new String[] {"/some/excluded/path"});
+		change.setModifiedPaths(Collections.singletonList("/some/excluded/path"));
 		change.setRevisionLabel("r125");
 		fakeChangeSets.add(change);
 		
@@ -213,7 +214,7 @@ public class SubversionRepositoryAdaptorTest extends TestCase {
 		repoConfig.setCheckoutDepth(CheckoutDepth.Empty);
 		
 		ChangeSetDto change = new ChangeSetDto();
-		change.setModifiedPaths(new String[] {"/some/excluded/path"});
+		change.setModifiedPaths(Collections.singletonList("/some/excluded/path"));
 		change.setRevisionLabel("r125");
 		fakeChangeSets.add(change);
 		
@@ -280,7 +281,7 @@ public class SubversionRepositoryAdaptorTest extends TestCase {
 	
 	public void testFiltersSparseChangeSets() throws Exception {
 		final ChangeSetDto change = new ChangeSetDto();
-		change.setModifiedPaths(new String[] {"some/excluded/path"});
+		change.setModifiedPaths(Collections.singletonList("some/excluded/path"));
 		repoConfig.setCheckoutDepth(CheckoutDepth.Empty);
 		
 		fakeChangeSets.add(change);
@@ -292,7 +293,7 @@ public class SubversionRepositoryAdaptorTest extends TestCase {
 	
 	public void testGetChangeLogCachesResult() throws Exception {
 		final ChangeSetDto change = new ChangeSetDto();
-		change.setModifiedPaths(new String[] {"some/excluded/path"});
+		change.setModifiedPaths(Collections.singletonList("some/excluded/path"));
 		repoConfig.setCheckoutDepth(CheckoutDepth.Empty);
 		
 		fakeChangeSets.add(change);

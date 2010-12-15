@@ -38,7 +38,7 @@ public class SparseChangeLogFilterTest extends TestCase {
 	protected void setUp() throws Exception {
 		super.setUp();
 		change1 = new ChangeSetDto();
-		change1.setModifiedPaths(new String[] {"/trunk/Scripts/Build"});
+		change1.setModifiedPaths(Arrays.asList("/trunk/Scripts/Build"));
 		config.setCheckoutDepth(CheckoutDepth.Infinity);
 		config.setPath("/trunk");
 		
@@ -193,7 +193,7 @@ public class SparseChangeLogFilterTest extends TestCase {
 	private ChangeSetDto makeChangeSet(String... paths) {
 		final ChangeSetDto dto = new ChangeSetDto();
 		
-		dto.setModifiedPaths(paths);
+		dto.setModifiedPaths(Arrays.asList(paths));
 		
 		return dto;
 	}
