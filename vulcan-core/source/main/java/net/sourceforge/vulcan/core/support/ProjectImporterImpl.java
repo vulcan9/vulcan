@@ -322,7 +322,7 @@ public class ProjectImporterImpl implements ProjectImporter {
 			}
 		}
 		
-		throw new ConfigException("errors.url.unsupported", null);
+		throw new ConfigException("errors.url.unsupported");
 	}
 	
 	private ProjectBuildConfigurator createBuildToolConfigurator(List<BuildToolPlugin> buildToolPlugins, ProjectConfigDto projectConfig, String url, File buildSpecFile, Document xmlDocument) throws ConfigException {
@@ -336,7 +336,7 @@ public class ProjectImporterImpl implements ProjectImporter {
 			}
 		}
 		
-		throw new ConfigException("errors.build.file.unsupported", null);
+		throw new ConfigException("errors.build.file.unsupported");
 	}
 	
 	private File downloadBuildSpecFile(ProjectRepositoryConfigurator ra) throws RepositoryException, ConfigException {
@@ -348,7 +348,7 @@ public class ProjectImporterImpl implements ProjectImporter {
 			return tmpFile;
 		} catch (IOException e) {
 			deleteIfPresent(tmpFile);
-			throw new ConfigException("errors.import.download", new Object[] {e.getMessage()}, e);
+			throw new ConfigException("errors.import.download", e, e.getMessage());
 		}
 	}
 

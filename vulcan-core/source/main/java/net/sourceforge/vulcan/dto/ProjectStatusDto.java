@@ -134,6 +134,10 @@ public class ProjectStatusDto extends NameDto {
 		this.lastGoodBuildNumber = lastGoodBuildNumber;
 	}
 	public RevisionTokenDto getLastKnownRevision() {
+		if (revision != null) {
+			return revision;
+		}
+		
 		return lastKnownRevision;
 	}
 	public void setLastKnownRevision(RevisionTokenDto lastKnownRevision) {

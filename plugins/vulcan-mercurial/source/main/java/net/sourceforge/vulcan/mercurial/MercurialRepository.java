@@ -111,7 +111,7 @@ public class MercurialRepository implements RepositoryAdaptor {
 
 	public void clone(File workDir, BuildDetailCallback buildDetailCallback) throws RepositoryException {
 		if (!isRemoteRepositoryConfigured()) {
-			throw new RepositoryException("hg.errors.no.repo.and.no.remote", new Object[] {workDir}, null);
+			throw new RepositoryException("hg.errors.no.repo.and.no.remote", null, workDir);
 		}
 
 		buildDetailCallback.setDetailMessage("hg.activity.clone", null);
@@ -208,7 +208,7 @@ public class MercurialRepository implements RepositoryAdaptor {
 			try {
 				fileSystem.cleanDirectory(getLocalRepositoryPath(), new NameFileFilter(".hg"));
 			} catch (IOException e) {
-				throw new RepositoryException("hg.errors.delete.files", null, e);
+				throw new RepositoryException("hg.errors.delete.files", e);
 			}
 			
 			buildDetailCallback.setDetailMessage("hg.activity.update", null);
@@ -276,7 +276,7 @@ public class MercurialRepository implements RepositoryAdaptor {
 			try {
 				fileSystem.createDirectory(workDir);
 			} catch (IOException e) {
-				throw new RepositoryException("hg.errors.mkdir", new Object[] {workDir}, e);
+				throw new RepositoryException("hg.errors.mkdir", e, workDir);
 			}
 		}
 
@@ -291,7 +291,7 @@ public class MercurialRepository implements RepositoryAdaptor {
 		} catch (IOException e) {
 			final String errorText = invoker.getErrorText();
 			LOG.error("Unexpected exception invoking hg: " + errorText, e);
-			throw new RepositoryException("hg.errors.invocation", new Object[] {errorText, invoker.getExitCode()}, e);
+			throw new RepositoryException("hg.errors.invocation", e, errorText, invoker.getExitCode());
 		}
 	}
 

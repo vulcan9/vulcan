@@ -92,7 +92,7 @@ public class SubversionProjectConfigurator extends SubversionSupport
 				throw new AuthenticationRequiredRepositoryException();
 			}
 			
-			throw new ConfigException("svn.error", new Object[] {e.getErrorMessage().getFullMessage()});
+			throw new ConfigException("svn.error", e, e.getErrorMessage().getFullMessage());
 		}
 		
 		raProjectConfig.setApplicationContext(appCtx);
@@ -108,7 +108,7 @@ public class SubversionProjectConfigurator extends SubversionSupport
 		try {
 			svnRepository.getFile(buildSpecPath, SVNRevision.HEAD.getNumber(), null, os);
 		} catch (SVNException e) {
-			throw new RepositoryException("svn.error", new Object[] {e.getErrorMessage().getFullMessage()}, e);
+			throw new RepositoryException("svn.error", e, e.getErrorMessage().getFullMessage());
 		} finally {
 			os.close();
 		}

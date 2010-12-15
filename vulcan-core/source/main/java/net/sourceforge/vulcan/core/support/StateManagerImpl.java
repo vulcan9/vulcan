@@ -753,7 +753,7 @@ public abstract class StateManagerImpl implements StateManager, ProjectManager {
 			}
 		}
 		
-		throw new ConfigException("messages.repository.not.configured", null);
+		throw new ConfigException("messages.repository.not.configured");
 	}
 	public BuildTool getBuildTool(ProjectConfigDto projectConfig) throws ConfigException {
 		final String pluginId = projectConfig.getBuildToolPluginId();
@@ -765,7 +765,7 @@ public abstract class StateManagerImpl implements StateManager, ProjectManager {
 			}
 		}
 		
-		throw new ConfigException("messages.build.tool.not.configured", null);
+		throw new ConfigException("messages.build.tool.not.configured");
 	}
 	public DependencyGroup buildDependencyGroup(ProjectConfigDto[] projects, DependencyBuildPolicy policy, WorkingCopyUpdateStrategy updateStrategyOverride, boolean buildOnDependencyFailure, boolean buildOnNoUpdates) throws ProjectsLockedException, ConfigException {
 		return DependencyGroupBuilder.buildDependencyGroup(projects, this, buildManager, policy, updateStrategyOverride, buildOnDependencyFailure, buildOnNoUpdates);

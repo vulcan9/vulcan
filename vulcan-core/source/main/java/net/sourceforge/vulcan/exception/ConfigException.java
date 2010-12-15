@@ -22,10 +22,10 @@ import net.sourceforge.vulcan.metadata.SvnRevision;
 
 @SvnRevision(id="$Id$", url="$HeadURL$")
 public class ConfigException extends MessageFormatException {
-	public ConfigException(String key, Object[] args) {
+	public ConfigException(String key, Object... args) {
 		super(key, args);
 	}
-	public ConfigException(String key, Object[] args, Throwable cause) {
+	public ConfigException(String key, Throwable cause, Object... args) {
 		super(key, args, cause);
 	}
 }
