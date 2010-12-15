@@ -1,6 +1,6 @@
 /*
  * Vulcan Build Manager
- * Copyright (C) 2005-2006 Chris Eldredge
+ * Copyright (C) 2005-2010 Chris Eldredge
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,6 +25,7 @@ import java.util.List;
 
 import net.sourceforge.vulcan.RepositoryAdaptor;
 import net.sourceforge.vulcan.SimplePrincipal;
+import net.sourceforge.vulcan.core.BuildDetailCallback;
 import net.sourceforge.vulcan.core.DependencyBuildPolicy;
 import net.sourceforge.vulcan.core.DependencyGroup;
 import net.sourceforge.vulcan.core.WorkingCopyUpdateStrategy;
@@ -433,9 +434,13 @@ public class ManualBuildActionTest extends MockApplicationContextStrutsTestCase 
 
 		expect(manager.getRepositoryAdaptor(project)).andReturn(ra1);
 		
+		ra1.prepareRepository((BuildDetailCallback) notNull());
+		
 		expect(ra1.getAvailableTagsAndBranches()).andReturn(tags1);
 		
 		expect(manager.getRepositoryAdaptor(projects[1])).andReturn(ra2);
+		
+		ra2.prepareRepository((BuildDetailCallback) notNull());
 		
 		expect(ra2.getAvailableTagsAndBranches()).andReturn(tags2);
 		
@@ -503,6 +508,8 @@ public class ManualBuildActionTest extends MockApplicationContextStrutsTestCase 
 		expectLastCall().andReturn(dg);
 
 		expect(manager.getRepositoryAdaptor(project)).andReturn(ra1);
+		
+		ra1.prepareRepository((BuildDetailCallback) notNull());
 		
 		expect(ra1.getAvailableTagsAndBranches()).andThrow(new RepositoryException("key.message", null));
 		
