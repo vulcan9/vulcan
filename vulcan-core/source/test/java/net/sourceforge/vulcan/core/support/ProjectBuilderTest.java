@@ -33,7 +33,6 @@ import net.sourceforge.vulcan.core.BuildDetailCallback;
 import net.sourceforge.vulcan.core.BuildManager;
 import net.sourceforge.vulcan.core.BuildPhase;
 import net.sourceforge.vulcan.core.BuildTarget;
-import net.sourceforge.vulcan.core.ProjectBuilder;
 import net.sourceforge.vulcan.core.support.ProjectBuilderImpl.RunnablePhase;
 import net.sourceforge.vulcan.core.support.ProjectBuilderImpl.RunnablePhaseImpl;
 import net.sourceforge.vulcan.dto.BuildDaemonInfoDto;
@@ -62,7 +61,7 @@ public class ProjectBuilderTest extends EasyMockTestCase {
 	
 	ProjectStatusDto lastBuild = new ProjectStatusDto();
 	ProjectStatusDto lastBuildFromSameTag = new ProjectStatusDto();
-	ProjectStatusDto lastBuildByWorkDir = new ProjectStatusDto();
+	ProjectStatusDto lastBuildInSameWorkDir = new ProjectStatusDto();
 
 	BuildDaemonInfoDto info = new BuildDaemonInfoDto();
 
@@ -104,6 +103,7 @@ public class ProjectBuilderTest extends EasyMockTestCase {
 	
 	BuildManager mgr = createStrictMock(BuildManager.class);
 	ProjectManager projectMgr = createStrictMock(ProjectManager.class);
+	FileSystem fileSystem = createStrictMock(FileSystem.class);
 	RepositoryAdaptor repository = createStrictMock(RepositoryAdaptor.class);
 	BuildTool buildTool = createStrictMock(BuildTool.class);
 
@@ -136,14 +136,14 @@ public class ProjectBuilderTest extends EasyMockTestCase {
 				String projectName, String workDir) {
 			assertEquals(project.getName(), projectName);
 			assertEquals(project.getWorkDir(), workDir);
-			return lastBuildByWorkDir;
+			return lastBuildInSameWorkDir;
 		}
 	};
 	
 	WorkingCopyUpdateExpert updateExpert = new WorkingCopyUpdateExpert() {
 		UpdateType determineUpdateStrategy(ProjectConfigDto currentTarget, ProjectStatusDto previousStatus) {
-			if (lastBuildByWorkDir != null) {
-				assertSame(lastBuildByWorkDir, previousStatus);
+			if (lastBuildInSameWorkDir != null) {
+				assertSame(lastBuildInSameWorkDir, previousStatus);
 			}
 
 			return UpdateType.Full;
@@ -162,6 +162,7 @@ public class ProjectBuilderTest extends EasyMockTestCase {
 		builder.setBuildOutcomeStore(store);
 		builder.setBuildManager(mgr);
 		builder.setProjectManager(projectMgr);
+		builder.setFileSystem(fileSystem);
 		builder.setDiffsEnabled(true);
 		
 		builder.init();
@@ -205,15 +206,58 @@ public class ProjectBuilderTest extends EasyMockTestCase {
 		verify();
 	}
 
-	public void testExecuteBuildPhasesNullOrBlankWorkDir() throws Exception {
+	public void testValidateNullOrBlankWorkDir() throws Exception {
 		project.setWorkDir("");
 		
 		try {
-			builder.executeBuildPhases(new BuildContext(buildTarget));
+			builder.validateWorkDir(buildContext);
 			fail("expected exception");
 		} catch (ConfigException e) {
 			assertEquals("messages.build.null.work.dir", e.getKey());
 		}
+	}
+
+	public void testValidateWorkDirDoesNotExist() throws Exception {
+		fileSystem.directoryExists(new File(project.getWorkDir()));
+		expectLastCall().andReturn(false);
+		
+		replay();
+		
+		builder.validateWorkDir(buildContext);
+		
+		verify();
+	}
+
+	public void testValidateWorkDirNotPreviouslyUsed() throws Exception {
+		buildContext.setLastBuildInSameWorkDir(null);
+		
+		fileSystem.directoryExists(new File(project.getWorkDir()));
+		expectLastCall().andReturn(true);
+		
+		replay();
+		
+		try {
+			builder.validateWorkDir(buildContext);
+			fail("expected exception");
+		} catch (ConfigException e) {
+			assertEquals("errors.wont.delete.non.working.copy", e.getKey());
+			assertEquals(Arrays.asList(buildContext.getConfig().getWorkDir(), buildContext.getProjectName()), Arrays.asList(e.getArgs()));
+		}
+		
+		verify();
+	}
+
+	public void testValidateWorkDirPreviouslyUsed() throws Exception {
+		buildContext.setLastBuildInSameWorkDir(lastBuildInSameWorkDir);
+		
+		fileSystem.directoryExists(new File(project.getWorkDir()));
+		expectLastCall().andReturn(true);
+		
+		replay();
+		
+		builder.validateWorkDir(buildContext);
+		
+		verify();
 	}
 	
 	public void testInitializeBuildStatus() throws Exception {
@@ -324,7 +368,7 @@ public class ProjectBuilderTest extends EasyMockTestCase {
 		
 		assertSame(lastBuild, ctx.getLastBuild());
 		assertSame(lastBuild, ctx.getLastBuildFromSameTag());
-		assertSame("lastBuildInSameWorkDir", lastBuildByWorkDir, ctx.getLastBuildInSameWorkDir());
+		assertSame("lastBuildInSameWorkDir", lastBuildInSameWorkDir, ctx.getLastBuildInSameWorkDir());
 	}
 
 	public void testInitializeBuildStatusGetsLastBuildFromSameTag() throws Exception {
@@ -392,7 +436,7 @@ public class ProjectBuilderTest extends EasyMockTestCase {
 	private void doPrepareRepositoryTest() throws RepositoryException, InterruptedException, Exception {
 		builder.initializeBuildDetailCallback(buildTarget, buildDetailCallback);
 		
-		buildContext.setLastBuildInSameWorkDir(lastBuildByWorkDir);
+		buildContext.setLastBuildInSameWorkDir(lastBuildInSameWorkDir);
 		buildContext.setRepositoryAdatpor(repository);
 		
 		repository.prepareRepository(builder.buildDetailCallback);
@@ -756,8 +800,11 @@ public class ProjectBuilderTest extends EasyMockTestCase {
 		};
 		
 		builder.setBuildManager(mgr);
+		builder.setFileSystem(fileSystem);
 		
 		builder.log = createNiceMock(Log.class);
+		
+		expect(fileSystem.directoryExists((File) notNull())).andReturn(false);
 		
 		mgr.registerBuildStatus(eq(info), eq(builder), eq(project), eq(buildStatus));
 

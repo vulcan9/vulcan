@@ -157,6 +157,7 @@ public class ProjectBuilderImpl implements ProjectBuilder {
 	private BuildOutcomeStore buildOutcomeStore;
 	private ProjectManager projectManager;
 	private BuildManager buildManager;
+	private FileSystem fileSystem;
 	private boolean diffsEnabled;
 	
 	/* State */
@@ -196,6 +197,8 @@ public class ProjectBuilderImpl implements ProjectBuilder {
 		
 		try {
 			buildContext = initializeBuildStatus(currentTarget);
+			
+			validateWorkDir(buildContext);
 			
 			if (log.isDebugEnabled() && buildContext.getLastBuild() != null) {
 				log.debug("Project " + currentTarget.getProjectName() + " previous build " + buildContext.getLastBuild().getBuildNumber() + " completed " + buildContext.getLastBuild().getCompletionDate());
@@ -304,6 +307,10 @@ public class ProjectBuilderImpl implements ProjectBuilder {
 		this.projectManager = projectManager;
 	}
 
+	public void setFileSystem(FileSystem fileSystem) {
+		this.fileSystem = fileSystem;
+	}
+	
 	public void setDiffsEnabled(boolean diffsEnabled) {
 		this.diffsEnabled = diffsEnabled;
 	}
@@ -359,6 +366,24 @@ public class ProjectBuilderImpl implements ProjectBuilder {
 		buildStatus.setTagName(tagName);
 		
 		return context;
+	}
+	
+	protected void validateWorkDir(BuildContext buildContext) throws ConfigException {
+		final ProjectConfigDto project = buildContext.getConfig();
+		
+		if (StringUtils.isBlank(project.getWorkDir())) {
+			throw new ConfigException("messages.build.null.work.dir");
+		}
+		
+		if (!fileSystem.directoryExists(new File(project.getWorkDir()))) {
+			return;
+		}
+		
+		if (buildContext.getLastBuildInSameWorkDir() != null) {
+			return;
+		}
+		
+		throw new ConfigException("errors.wont.delete.non.working.copy", project.getWorkDir(), project.getName());
 	}
 	
 	protected void generateUniqueBuildId(ProjectStatusDto status) {
@@ -465,18 +490,12 @@ public class ProjectBuilderImpl implements ProjectBuilder {
 	protected List<? extends RunnablePhase> phases = Arrays.asList(prepareRepository, createWorkingCopy, getChangeLog, invokeBuildTool);
 	
 	protected void executeBuildPhases(BuildContext buildContext) throws Exception {
-		final ProjectConfigDto project = buildContext.getConfig();
-		
-		if (StringUtils.isBlank(project.getWorkDir())) {
-			throw new ConfigException("messages.build.null.work.dir");
-		}
-		
 		for (RunnablePhase phase : phases) {
 			phase.execute(buildContext);
 		}
 	}
 	
-	protected interface RunnablePhase {
+	protected static interface RunnablePhase {
 		void execute(BuildContext buildContext) throws Exception;
 	}
 	

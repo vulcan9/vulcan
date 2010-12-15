@@ -22,19 +22,13 @@ import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
 
-import net.sourceforge.vulcan.exception.ConfigException;
-
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.FileFilterUtils;
 import org.apache.commons.io.filefilter.IOFileFilter;
 
 public class FileSystemImpl implements FileSystem {
-	private int deleteDirectoryAttempts = 2;
-	private long deleteFailureSleepTime = 5000;
 
 	public void cleanDirectory(File directory, IOFileFilter excludeFilter) throws IOException {
-		// TODO: move validation (isWorkingCopy) somewhere else and improve logic.
-		
 		if (!directory.exists() || !directory.isDirectory()) {
 			throw new IOException("Not a directory");
 		}
@@ -59,44 +53,5 @@ public class FileSystemImpl implements FileSystem {
 	
 	public void createDirectory(File path) throws IOException {
 		FileUtils.forceMkdir(path);
-	}
-
-	public boolean deleteWorkingDirectory(File path) throws ConfigException {
-		int tries = 0;
-		
-		try {
-			while (path.exists()) {
-				tries++;
-				try {
-					FileUtils.deleteDirectory(path);
-					break;
-				} catch (IOException e) {
-					if (tries >= deleteDirectoryAttempts) {
-						throw e;
-					}
-					try {
-						Thread.sleep(deleteFailureSleepTime);
-					} catch (InterruptedException e1) {
-						return false;
-					}
-				}
-			}
-		} catch (IOException e) {
-				throw new ConfigException(
-						"messages.build.cannot.delete.work.dir",
-						new Object[] {
-							path.getPath(),
-							e.getMessage()});
-		}
-		
-		return true;
-	}
-	
-	public void setDeleteDirectoryAttempts(int deleteDirectoryAttempts) {
-		this.deleteDirectoryAttempts = deleteDirectoryAttempts;
-	}
-	
-	public void setDeleteFailureSleepTime(long deleteFailureSleepTime) {
-		this.deleteFailureSleepTime = deleteFailureSleepTime;
 	}
 }
