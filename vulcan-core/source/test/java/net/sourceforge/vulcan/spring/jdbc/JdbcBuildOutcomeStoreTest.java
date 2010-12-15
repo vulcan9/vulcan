@@ -680,7 +680,7 @@ public class JdbcBuildOutcomeStoreTest extends TestCase {
 		final ChangeSetDto a = new ChangeSetDto();
 		a.setMessage("did some stuff");
 		a.setRevisionLabel("1.42");
-		a.setModifiedPaths(new String[] {"a/b/c", "x/y/z"});
+		a.setModifiedPaths(Arrays.asList("a/b/c", "x/y/z"));
 		
 		log.setChangeSets(Arrays.asList(a));
 		

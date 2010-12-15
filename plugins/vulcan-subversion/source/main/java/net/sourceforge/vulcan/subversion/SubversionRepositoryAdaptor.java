@@ -501,7 +501,7 @@ public class SubversionRepositoryAdaptor extends SubversionSupport implements Re
 				
 				final Set<String> paths = logEntry.getChangedPaths().keySet();
 				
-				changeSet.setModifiedPaths(paths.toArray(new String[paths.size()]));
+				changeSet.setModifiedPaths(new ArrayList<String>(paths));
 				
 				changeSets.add(changeSet);
 			}

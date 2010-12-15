@@ -23,6 +23,7 @@ import static org.apache.commons.lang.StringUtils.isNotBlank;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -34,7 +35,6 @@ import net.sourceforge.vulcan.core.BuildDetailCallback;
 import net.sourceforge.vulcan.core.support.FileSystem;
 import net.sourceforge.vulcan.core.support.FileSystemImpl;
 import net.sourceforge.vulcan.dto.ChangeLogDto;
-import net.sourceforge.vulcan.dto.ChangeSetDto;
 import net.sourceforge.vulcan.dto.ProjectConfigDto;
 import net.sourceforge.vulcan.dto.ProjectStatusDto;
 import net.sourceforge.vulcan.dto.RepositoryTagDto;
@@ -71,7 +71,7 @@ public class MercurialRepository implements RepositoryAdaptor {
 	
 	private static final Log LOG = LogFactory.getLog(MercurialRepository.class);
 	
-	private final static Pattern tagPattern = Pattern.compile("^(.*)\\s+(\\d+:\\w+)$", Pattern.MULTILINE);
+	private final static Pattern tagWithRevisionPattern = Pattern.compile("^(.*)\\s+(\\d+:\\w+)$", Pattern.MULTILINE);
 	
 	private final ProjectConfigDto projectConfig;
 	private final MercurialProjectConfig settings;
@@ -221,13 +221,17 @@ public class MercurialRepository implements RepositoryAdaptor {
 	}
 
 	public ChangeLogDto getChangeLog(RevisionTokenDto previousRevision,	RevisionTokenDto currentRevision, OutputStream diffOutputStream) throws RepositoryException, InterruptedException {
-		final ArrayList<ChangeSetDto> changes = new ArrayList<ChangeSetDto>();
+		final String revisionRange = MessageFormat.format("{0}:{1}", previousRevision.getRevision()+1, currentRevision.getRevision());
 		
-		// TODO: implement me.
+		final InvocationResult result = tryInvoke(Command.log, "--style", "xml", "-r", revisionRange);
 		
-		final ChangeLogDto log = new ChangeLogDto();
-		log.setChangeSets(changes);
-		return log;
+		final CommitLogParser parser = new CommitLogParser();
+		
+		try {
+			return parser.parse(result.getOutput());
+		} catch (Exception e) {
+			throw new RepositoryException("hg.errors.parse.xml", e, e.getMessage());
+		}
 	}
 	
 	public List<RepositoryTagDto> getAvailableTagsAndBranches() throws RepositoryException {
@@ -245,7 +249,7 @@ public class MercurialRepository implements RepositoryAdaptor {
 	private void addAvailableTags(Command command, List<RepositoryTagDto> results, List<String> namedRevisions) throws RepositoryException {
 		final InvocationResult result = tryInvoke(command);
 		
-		final Matcher matcher = tagPattern.matcher(result.getOutput());
+		final Matcher matcher = tagWithRevisionPattern.matcher(result.getOutput());
 		
 		while (matcher.find()) {
 			final String name = matcher.group(1).trim();

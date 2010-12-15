@@ -476,7 +476,7 @@ public class AbstractProjectDomBuilderTest extends EasyMockTestCase {
 		changeSet.setRevisionLabel(projectStatus.getRevision().getLabel());
 		changeSet.setTimestamp(new Date(date.getTime() + 1000000));
 		changeSet.setMessage("fixed every bug ever in the entire project");
-		changeSet.setModifiedPaths(new String[] {"/a/file", "/other/stuff"});
+		changeSet.setModifiedPaths(Arrays.asList("/a/file", "/other/stuff"));
 		
 		changeLog.setChangeSets(Collections.singletonList(changeSet));
 		
@@ -618,7 +618,7 @@ public class AbstractProjectDomBuilderTest extends EasyMockTestCase {
 		changeSet.setRevisionLabel(projectStatus.getRevision().getLabel());
 		changeSet.setTimestamp(new Date(date.getTime() + 1000000));
 		changeSet.setMessage("fixed every bug including bug 4352, issue 12, bug #54, bug: 51 and bug:#5443.  And stuff.");
-		changeSet.setModifiedPaths(new String[] {"/a/file", "/other/stuff"});
+		changeSet.setModifiedPaths(Arrays.asList("/a/file", "/other/stuff"));
 		
 		changeLog.setChangeSets(Collections.singletonList(changeSet));
 		
@@ -656,7 +656,7 @@ public class AbstractProjectDomBuilderTest extends EasyMockTestCase {
 		changeSet.setRevisionLabel(projectStatus.getRevision().getLabel());
 		changeSet.setTimestamp(new Date(date.getTime() + 1000000));
 		changeSet.setMessage("fixed every bug including bug 4352, issue 12, bug #54, bug: 51 and bug:#5443.  And stuff.");
-		changeSet.setModifiedPaths(new String[] {"/a/file", "/other/stuff"});
+		changeSet.setModifiedPaths(Arrays.asList("/a/file", "/other/stuff"));
 		
 		changeLog.setChangeSets(Collections.singletonList(changeSet));
 		
@@ -707,7 +707,7 @@ public class AbstractProjectDomBuilderTest extends EasyMockTestCase {
 		changeSet.setRevisionLabel(projectStatus.getRevision().getLabel());
 		changeSet.setTimestamp(new Date(date.getTime() + 1000000));
 		changeSet.setMessage("Used new feature found at http://www.example.com Bug# 27172\nWorks great.");
-		changeSet.setModifiedPaths(new String[] {"/a/file", "/other/stuff"});
+		changeSet.setModifiedPaths(Arrays.asList("/a/file", "/other/stuff"));
 		
 		changeLog.setChangeSets(Collections.singletonList(changeSet));
 		
@@ -753,7 +753,7 @@ public class AbstractProjectDomBuilderTest extends EasyMockTestCase {
 		changeSet.setRevisionLabel(projectStatus.getRevision().getLabel());
 		changeSet.setTimestamp(new Date(date.getTime() + 1000000));
 		changeSet.setMessage("Used new feature found at http://www.example.com.");
-		changeSet.setModifiedPaths(new String[] {"/a/file", "/other/stuff"});
+		changeSet.setModifiedPaths(Arrays.asList("/a/file", "/other/stuff"));
 		
 		changeLog.setChangeSets(Collections.singletonList(changeSet));
 		
@@ -802,7 +802,7 @@ public class AbstractProjectDomBuilderTest extends EasyMockTestCase {
 		changeSet.setTimestamp(new Date(date.getTime() + 1000000));
 		changeSet.setMessage("Used new feature (see http://www.example.com)." +
 				"  Also https://www.example.com...");
-		changeSet.setModifiedPaths(new String[] {"/a/file", "/other/stuff"});
+		changeSet.setModifiedPaths(Arrays.asList("/a/file", "/other/stuff"));
 		
 		changeLog.setChangeSets(Collections.singletonList(changeSet));
 		

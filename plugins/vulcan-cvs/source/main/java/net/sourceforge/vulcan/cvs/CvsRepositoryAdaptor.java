@@ -25,7 +25,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -296,10 +295,10 @@ public class CvsRepositoryAdaptor extends CvsSupport implements RepositoryAdapto
 				final ChangeSetDto m = map.get(key);
 				m.setRevisionLabel(revisionLabel);
 				
-				final Set<String> paths = new HashSet<String>(Arrays.asList(m.getModifiedPaths()));
-				paths.addAll(Arrays.asList(e.getModifiedPaths()));
+				final Set<String> paths = new HashSet<String>(m.getModifiedPaths());
+				paths.addAll(e.getModifiedPaths());
 				
-				m.setModifiedPaths(paths.toArray(new String[paths.size()]));
+				m.setModifiedPaths(new ArrayList<String>(paths));
 				
 				if (e.getTimestamp().after(m.getTimestamp())) {
 					m.setTimestamp(e.getTimestamp());
