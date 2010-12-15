@@ -41,7 +41,7 @@ public class RepositoryUtils {
 			try {
 				fileSystem.createDirectory(workDir);
 			} catch (IOException e) {
-				throw new RepositoryException("errors.cannot.create.dir", new Object[] {workDir, e.getMessage()}, e);
+				throw new RepositoryException("errors.cannot.create.dir", e, new Object[] {workDir, e.getMessage()});
 			}
 			return;
 		}
@@ -50,7 +50,7 @@ public class RepositoryUtils {
 			cb.setDetail("build.messages.clean");
 			fileSystem.cleanDirectory(workDir, null);
 		} catch (IOException e) {
-			throw new RepositoryException("messages.build.cannot.clean.work.dir", new Object[] {workDir, e.getMessage()}, e);
+			throw new RepositoryException("messages.build.cannot.clean.work.dir", e, new Object[] {workDir, e.getMessage()});
 		}
 
 	}

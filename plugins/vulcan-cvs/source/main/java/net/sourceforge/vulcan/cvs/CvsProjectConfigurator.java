@@ -135,7 +135,7 @@ public class CvsProjectConfigurator extends CvsSupport implements ProjectReposit
 			
 			final Collection<File> files = FileUtils.listFiles(exportDir, null, false);
 			if (files.size() != 1) {
-				throw new RepositoryException("cvs.erorrs.export.failed", new Object[] {files.size()}, null);
+				throw new RepositoryException("cvs.erorrs.export.failed", null, files.size());
 			}
 			
 			final File source = files.iterator().next();

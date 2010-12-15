@@ -197,7 +197,7 @@ public abstract class CvsSupport extends PluginSupport {
 		
 		if (!tmpDir.mkdir()) {
 			throw new RepositoryException("cvs.errors.cannot.create.tmp.dir",
-					new Object[] {tmpDir.getPath()}, null);
+					null, tmpDir.getPath());
 		}
 		
 		return tmpDir;

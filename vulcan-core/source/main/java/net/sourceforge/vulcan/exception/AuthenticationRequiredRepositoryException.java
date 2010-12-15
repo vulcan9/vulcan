@@ -29,7 +29,7 @@ public class AuthenticationRequiredRepositoryException extends RepositoryExcepti
 	}
 	
 	public AuthenticationRequiredRepositoryException(String suggestedUsername) {
-		super("messages.repository.authentication.required", null, null);
+		super("messages.repository.authentication.required", null);
 		this.suggestedUsername = suggestedUsername;
 	}
 	

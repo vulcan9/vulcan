@@ -209,8 +209,7 @@ public class SubversionRepositoryAdaptor extends SubversionSupport implements Re
 		}
 		
 		if (info == null) {
-			throw new RepositoryException("svn.path.not.exist",
-					new String[] {path}, null);
+			throw new RepositoryException("svn.path.not.exist",	null, path);
 		}
 		
 		final long lastChangedRevision = info.getRevision();
@@ -336,7 +335,7 @@ public class SubversionRepositoryAdaptor extends SubversionSupport implements Re
 			client.update(path, svnRev, folder.getCheckoutDepth().getId(), depthIsSticky, ignoreExternals, allowUnverObstructions);
 		} catch (ClientException e) {
 			if (!canceling) {
-				throw new RepositoryException("svn.sparse.checkout.error", new Object[] {folder.getDirectoryName()}, e);
+				throw new RepositoryException("svn.sparse.checkout.error", e, folder.getDirectoryName());
 			}
 		}
 	}

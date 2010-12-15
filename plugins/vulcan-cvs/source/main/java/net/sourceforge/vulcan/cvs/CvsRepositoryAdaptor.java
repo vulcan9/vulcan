@@ -249,7 +249,7 @@ public class CvsRepositoryAdaptor extends CvsSupport implements RepositoryAdapto
 			if (previousRevision != null) {
 				return previousRevision;
 			}
-			throw new RepositoryException("cvs.errors.rlog.failed", null, null);
+			throw new RepositoryException("cvs.errors.rlog.failed", null);
 		}
 		
 		return new RevisionTokenDto(

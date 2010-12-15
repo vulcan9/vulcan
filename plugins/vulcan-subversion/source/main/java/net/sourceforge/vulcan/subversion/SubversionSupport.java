@@ -157,7 +157,7 @@ public abstract class SubversionSupport extends PluginSupport {
 		}
 		
 		if (profile == null) {
-			throw new ConfigException("svn.profile.not.selected", null);
+			throw new ConfigException("svn.profile.not.selected");
 		}
 		try {
 			return SVNRepositoryFactory.create(SVNURL.parseURIEncoded(profile.getRootUrl()));

@@ -504,7 +504,7 @@ public class ManualBuildActionTest extends MockApplicationContextStrutsTestCase 
 
 		expect(manager.getRepositoryAdaptor(project)).andReturn(ra1);
 		
-		expect(ra1.getAvailableTagsAndBranches()).andThrow(new RepositoryException("key.message", null, null));
+		expect(ra1.getAvailableTagsAndBranches()).andThrow(new RepositoryException("key.message", null));
 		
 		expect(buildManager.getLatestStatus("a")).andReturn(new ProjectStatusDto());
 

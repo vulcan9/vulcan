@@ -1,6 +1,6 @@
 /*
  * Vulcan Build Manager
- * Copyright (C) 2005-2006 Chris Eldredge
+ * Copyright (C) 2005-2010 Chris Eldredge
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,9 +19,7 @@
 package net.sourceforge.vulcan.core;
 
 import net.sourceforge.vulcan.dto.MetricDto;
-import net.sourceforge.vulcan.metadata.SvnRevision;
 
-@SvnRevision(id="$Id: BuildDetailCallback.java 636 2009-01-10 19:32:47Z chris.eldredge $", url="$HeadURL: https://vulcan.googlecode.com/svn/trunk/vulcan-core/source/main/java/net/sourceforge/vulcan/core/BuildDetailCallback.java $")
 public interface BuildDetailCallback {
 	void setPhaseMessageKey(String messageKey);
 	void setDetail(String detail);
