@@ -645,12 +645,14 @@ public class JdbcBuildOutcomeStoreTest extends TestCase {
 		final ChangeSetDto a = new ChangeSetDto();
 		a.setMessage("did some stuff");
 		a.setRevisionLabel("1.42");
-
+		a.setModifiedPaths(Arrays.asList("file1", "file2"));
+		
 		final ChangeSetDto b = new ChangeSetDto();
 		b.setMessage("made some changes");
 		b.setRevisionLabel("<multiple>");
 		b.setAuthor("Barbara");
 		b.setTimestamp(new Date());
+		b.setModifiedPaths(Arrays.asList("file3", "file4"));
 		
 		log.setChangeSets(Arrays.asList(a, b));
 		
