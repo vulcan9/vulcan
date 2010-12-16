@@ -279,8 +279,11 @@ public class XmlMetricsPlugin implements BuildManagerObserverPlugin, Configurabl
 	
 	@SuppressWarnings("unchecked")
 	private void digestMetrics(Element root, ProjectStatusDto status) {
-		final List<MetricDto> metricList = new ArrayList<MetricDto>();
 		final List<Element> metrics = root.getChildren("metric");
+		
+		if (status.getMetrics() == null) {
+			status.setMetrics(new ArrayList<MetricDto>());
+		}
 		
 		for (Element c : metrics) {
 			final MetricDto m = new MetricDto();
@@ -292,13 +295,7 @@ public class XmlMetricsPlugin implements BuildManagerObserverPlugin, Configurabl
 				throw new IllegalStateException("Metric with key='" + key + "' must declare a type.");
 			}
 			m.setType(MetricType.valueOf(typeString.toUpperCase()));
-			metricList.add(m);
-		}
-		
-		if (status.getMetrics() != null) {
-			status.getMetrics().addAll(metricList);
-		} else {
-			status.setMetrics(metricList);
+			status.addMetric(m);
 		}
 	}
 	
