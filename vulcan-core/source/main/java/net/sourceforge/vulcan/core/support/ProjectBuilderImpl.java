@@ -18,14 +18,15 @@
  */
 package net.sourceforge.vulcan.core.support;
 
+import static net.sourceforge.vulcan.dto.ProjectStatusDto.Status.ERROR;
+import static net.sourceforge.vulcan.dto.ProjectStatusDto.Status.FAIL;
+import static net.sourceforge.vulcan.dto.ProjectStatusDto.Status.PASS;
 import static net.sourceforge.vulcan.dto.ProjectStatusDto.UpdateType.Full;
-import static net.sourceforge.vulcan.dto.ProjectStatusDto.UpdateType.Incremental;
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.OutputStream;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -43,8 +44,6 @@ import net.sourceforge.vulcan.core.BuildTarget;
 import net.sourceforge.vulcan.core.ConfigurationStore;
 import net.sourceforge.vulcan.core.ProjectBuilder;
 import net.sourceforge.vulcan.dto.BuildDaemonInfoDto;
-import net.sourceforge.vulcan.dto.BuildMessageDto;
-import net.sourceforge.vulcan.dto.MetricDto;
 import net.sourceforge.vulcan.dto.ProjectConfigDto;
 import net.sourceforge.vulcan.dto.ProjectStatusDto;
 import net.sourceforge.vulcan.dto.RevisionTokenDto;
@@ -52,18 +51,104 @@ import net.sourceforge.vulcan.dto.ProjectStatusDto.Status;
 import net.sourceforge.vulcan.dto.ProjectStatusDto.UpdateType;
 import net.sourceforge.vulcan.exception.BuildFailedException;
 import net.sourceforge.vulcan.exception.ConfigException;
-import net.sourceforge.vulcan.exception.RepositoryException;
 import net.sourceforge.vulcan.exception.StoreException;
 import net.sourceforge.vulcan.metadata.SvnRevision;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+class BuildContext {
+	private final BuildTarget target;
+	
+	private ProjectStatusDto lastBuild;
+	private ProjectStatusDto lastBuildFromSameTag;
+	private ProjectStatusDto lastBuildInSameWorkDir;
+
+	private RepositoryAdaptor repositoryAdaptor;
+
+	public BuildContext(BuildTarget target) {
+		this.target = target;
+	}
+	
+	public ProjectConfigDto getConfig() { 
+		return target.getProjectConfig();
+	}
+	
+	public ProjectStatusDto getCurrentStatus() {
+		return target.getStatus();
+	}
+	
+	public ProjectStatusDto getLastBuild() {
+		return lastBuild;
+	}
+	
+	public void setLastBuild(ProjectStatusDto lastBuild) {
+		this.lastBuild = lastBuild;
+	}
+	
+	public ProjectStatusDto getLastBuildFromSameTag() {
+		return lastBuildFromSameTag;
+	}
+	
+	public void setLastBuildFromSameTag(ProjectStatusDto lastBuildFromSameTag) {
+		this.lastBuildFromSameTag = lastBuildFromSameTag;
+	}
+	
+	public ProjectStatusDto getLastBuildInSameWorkDir() {
+		return lastBuildInSameWorkDir;
+	}
+	
+	public void setLastBuildInSameWorkDir(ProjectStatusDto lastBuildInSameWorkDir) {
+		this.lastBuildInSameWorkDir = lastBuildInSameWorkDir;
+	}
+
+	public RepositoryAdaptor getRepositoryAdaptor() {
+		return repositoryAdaptor;
+	}
+	
+	public void setRepositoryAdatpor(RepositoryAdaptor repositoryAdaptor) {
+		this.repositoryAdaptor = repositoryAdaptor;
+	}
+
+	public UpdateType getUpdateType() {
+		return target.getStatus().getUpdateType();
+	}
+	
+	public void setUpdateType(UpdateType updateType) {
+		target.getStatus().setUpdateType(updateType);
+	}
+
+	public String getProjectName() {
+		return target.getProjectName();
+	}
+
+	public RevisionTokenDto getRevision() {
+		return target.getStatus().getRevision();
+	}
+
+	public void setResult(Status result) {
+		setResult(result, null);
+	}
+
+	public void setResult(Status result, String messageKey, Object... args) {
+		final ProjectStatusDto status = target.getStatus();
+		
+		status.setStatus(result);
+		status.setMessageKey(messageKey);
+		status.setMessageArgs(args);
+		
+		if (getLastBuild() == null) {
+			status.setStatusChanged(true);
+		} else {
+			status.setStatusChanged(!getLastBuild().getStatus().equals(result));
+		}
+	}
+}
+
 @SvnRevision(id="$Id$", url="$HeadURL$")
 public class ProjectBuilderImpl implements ProjectBuilder {
-	private final Log log = LogFactory.getLog(ProjectBuilder.class);
+	protected Log log = LogFactory.getLog(ProjectBuilder.class);
 	
 	private WorkingCopyUpdateExpert workingCopyUpdateExpert = new WorkingCopyUpdateExpert();
 	
@@ -72,31 +157,17 @@ public class ProjectBuilderImpl implements ProjectBuilder {
 	private BuildOutcomeStore buildOutcomeStore;
 	private ProjectManager projectManager;
 	private BuildManager buildManager;
-	private int deleteDirectoryAttempts = 1;
-	private long deleteFailureSleepTime;
+	private FileSystem fileSystem;
 	private boolean diffsEnabled;
 	
 	/* State */
-	private BuildPhase currentPhase;
-	protected UpdateType updateType;
-	
-	private List<BuildStatusListener> buildListeners = new ArrayList<BuildStatusListener>();
-	
-	private List<BuildMessageDto> errors = new ArrayList<BuildMessageDto>();
-	private List<BuildMessageDto> warnings = new ArrayList<BuildMessageDto>();
-	private List<MetricDto> metrics = new ArrayList<MetricDto>();
-	
 	protected boolean building;
 	protected boolean killing;
 	protected boolean timeout;
 	
-	protected RevisionTokenDto previousRevision;
-	protected ProjectStatusDto buildStatus;
-	protected ProjectStatusDto previousStatus;
-	protected ProjectStatusDto.Status previousOutcome;
 	protected String killedBy;
 	
-	BuildDetailCallback buildDetailCallback;
+	DelegatingBuildDetailCallback buildDetailCallback;
 	
 	private Thread buildThread;
 	
@@ -104,96 +175,90 @@ public class ProjectBuilderImpl implements ProjectBuilder {
 	}
 	
 	public final void build(BuildDaemonInfoDto info, BuildTarget currentTarget, BuildDetailCallback buildDetailCallback) {
-		
-		synchronized(this) {
-			buildThread = Thread.currentThread();
-			
-			building = true;
-			killing = false;
-			timeout = false;
-			
-			notifyAll();
-		}
+		initializeThreadState();
 
-		this.buildDetailCallback = new DelegatingBuildDetailCallback(
-				buildDetailCallback, currentTarget.getProjectConfig().isSuppressErrors(),
-				currentTarget.getProjectConfig().isSuppressWarnings());
-		
-		previousStatus = buildManager.getLatestStatus(currentTarget.getProjectName());
-		
-		if (log.isDebugEnabled() && previousStatus != null) {
-			log.debug("Project " + currentTarget.getProjectName() + " previous build " + previousStatus.getBuildNumber() + " completed " + previousStatus.getCompletionDate());
-		}
-		
 		try {
-			buildStatus = currentTarget.getStatus();
-			initializeBuildStatus(currentTarget);
-			
-			//TODO: should take target, not config + status
-			buildManager.registerBuildStatus(info, this, currentTarget.getProjectConfig(), buildStatus);
-			
-			buildProject(currentTarget.getProjectConfig());
-			buildStatus.setStatus(Status.PASS);
-		} catch (ConfigException e) {
-			buildStatus.setStatus(Status.ERROR);
-			buildStatus.setMessageKey(e.getKey());
-			buildStatus.setMessageArgs(e.getArgs());
-		} catch (TimeoutException e) {
-			buildStatus.setStatus(Status.ERROR);
-			buildStatus.setMessageKey("messages.build.timeout");
-		} catch (KilledException e) {
-			buildStatus.setStatus(Status.ERROR);
-			buildStatus.setMessageKey("messages.build.killed");
-			buildStatus.setMessageArgs(new String[] {killedBy});
-		} catch (BuildFailedException e) {
-			final String target = e.getTarget();
-			buildStatus.setStatus(Status.FAIL);
-			
-			if (target != null) {
-				buildStatus.setMessageKey("messages.build.failure.during.target");
-				buildStatus.setMessageArgs(new String[] {e.getMessage(), target});
-			} else {
-				buildStatus.setMessageKey("messages.build.failure");
-				buildStatus.setMessageArgs(new String[] {e.getMessage()});
-			}
-		} catch (Throwable e) {
-			log.error("unexpected error", e);
-			
-			buildStatus.setStatus(Status.ERROR);
-			buildStatus.setMessageKey("messages.build.uncaught.exception");
-			
-			String phaseName = "(none)";
-			
-			if (currentPhase != null) {
-				phaseName = currentPhase.name();
-			}
-			
-			buildStatus.setMessageArgs(new String[] {currentTarget.getProjectName(), e.getMessage(), phaseName});
+			buildInternal(info, currentTarget, buildDetailCallback);
 		} finally {
-			if (previousOutcome == null) {
-				buildStatus.setStatusChanged(true);
-			} else {
-				buildStatus.setStatusChanged(!previousOutcome.equals(buildStatus.getStatus()));
-			}
-			
-			buildDetailCallback.setPhaseMessageKey(BuildPhase.Publish.getMessageKey());
-			// TODO: targetCompleted should take currentTarget, not config + status
-			buildManager.targetCompleted(info, currentTarget.getProjectConfig(), buildStatus);
-
-			previousRevision = null;
-			
-			this.buildDetailCallback.setPhaseMessageKey(null);
-
 			synchronized(this) {
-					buildThread = null;
-					building = false;
-					killing = false;
-					timeout = false;
-				
+				buildThread = null;
+				building = false;
+				killing = false;
+				timeout = false;
+			
 				notifyAll();
 			}
 		}
 	}
+
+	protected void buildInternal(BuildDaemonInfoDto info, BuildTarget currentTarget, BuildDetailCallback buildDetailCallback) {
+		initializeBuildDetailCallback(currentTarget, buildDetailCallback);
+		BuildContext buildContext = null;
+		
+		try {
+			buildContext = initializeBuildStatus(currentTarget);
+			
+			validateWorkDir(buildContext);
+			
+			if (log.isDebugEnabled() && buildContext.getLastBuild() != null) {
+				log.debug("Project " + currentTarget.getProjectName() + " previous build " + buildContext.getLastBuild().getBuildNumber() + " completed " + buildContext.getLastBuild().getCompletionDate());
+			}
+			
+			//TODO: should take target, not config + status. consider moving to BuildDaemonImpl.
+			buildManager.registerBuildStatus(info, this, currentTarget.getProjectConfig(), currentTarget.getStatus());
+			
+			executeBuildPhases(buildContext);
+			
+			buildContext.setResult(PASS);
+		} catch (ConfigException e) {
+			buildContext.setResult(ERROR, e.getKey(), e.getArgs());
+		} catch (TimeoutException e) {
+			if (timeout) {
+				buildContext.setResult(ERROR, "messages.build.timeout");
+			} else {
+				buildContext.setResult(ERROR, "messages.build.killed", killedBy);
+			}
+		} catch (BuildFailedException e) {
+			if (e.getTarget() != null) {
+				buildContext.setResult(FAIL, "messages.build.failure.during.target", e.getMessage(), e.getTarget());
+			} else {
+				buildContext.setResult(FAIL, "messages.build.failure", e.getMessage());
+			}
+		} catch (Throwable e) {
+			log.error("unexpected error", e);
+			
+			BuildPhase currentPhase = this.buildDetailCallback.getCurrentPhase();
+			String phaseName = currentPhase != null ? currentPhase.name() : "(none)";
+			
+			buildContext.setResult(ERROR, "messages.build.uncaught.exception", buildContext.getProjectName(), e.getMessage(), phaseName);
+		} finally {
+			this.buildDetailCallback.setPhase(BuildPhase.Publish);
+			// TODO: targetCompleted should take currentTarget, not config + status
+			buildManager.targetCompleted(info, currentTarget.getProjectConfig(), currentTarget.getStatus());
+
+			this.buildDetailCallback.clearPhase();
+		}
+	}
+
+	protected synchronized void initializeThreadState() {
+		buildThread = Thread.currentThread();
+		
+		building = true;
+		killing = false;
+		timeout = false;
+		
+		notifyAll();
+	}
+
+	void initializeBuildDetailCallback(BuildTarget target, BuildDetailCallback buildDetailCallback) {
+		this.buildDetailCallback = new DelegatingBuildDetailCallback(
+				target.getStatus(),
+				buildDetailCallback,
+				this,
+				target.getProjectConfig().isSuppressErrors(),
+				target.getProjectConfig().isSuppressWarnings());
+	}
+	
 	public synchronized void abortCurrentBuild(boolean timeout, String requestUsername) {
 		killedBy = requestUsername;
 		
@@ -205,70 +270,90 @@ public class ProjectBuilderImpl implements ProjectBuilder {
 			buildThread.interrupt();
 		}
 	}
+	
 	public synchronized boolean isBuilding() {
 		return building;
 	}
+	
 	public synchronized boolean isKilling() {
 		return killing;
 	}
+	
 	public void addBuildStatusListener(BuildStatusListener listener) {
-		synchronized(buildListeners) {
-			buildListeners.add(listener);
-		}
+		buildDetailCallback.addListener(listener);
 	}
+	
 	public boolean removeBuildStatusListener(BuildStatusListener listener) {
-		synchronized(buildListeners) {
-			return buildListeners.remove(listener);
-		}
+		return buildDetailCallback.removeListener(listener);
 	}
-	public ConfigurationStore getConfigurationStore() {
-		return configurationStore;
-	}
+	
 	public void setConfigurationStore(ConfigurationStore store) {
 		this.configurationStore = store;
 	}
+	
 	public void setWorkingCopyUpdateExpert(WorkingCopyUpdateExpert workingCopyUpdateExpert) {
 		this.workingCopyUpdateExpert = workingCopyUpdateExpert;
 	}
-	public BuildOutcomeStore getBuildOutcomeStore() {
-		return buildOutcomeStore;
-	}
+	
 	public void setBuildOutcomeStore(BuildOutcomeStore buildOutcomeStore) {
 		this.buildOutcomeStore = buildOutcomeStore;
 	}
-	public BuildManager getBuildManager() {
-		return buildManager;
-	}
+	
 	public void setBuildManager(BuildManager buildManager) {
 		this.buildManager = buildManager;
 	}
-	public ProjectManager getProjectManager() {
-		return projectManager;
-	}
+	
 	public void setProjectManager(ProjectManager projectManager) {
 		this.projectManager = projectManager;
 	}
-	public void setDeleteDirectoryAttempts(int deleteDirectoryAttempts) {
-		this.deleteDirectoryAttempts = deleteDirectoryAttempts;
+
+	public void setFileSystem(FileSystem fileSystem) {
+		this.fileSystem = fileSystem;
 	}
-	public void setDeleteFailureSleepTime(long deleteFailureSleepTime) {
-		this.deleteFailureSleepTime = deleteFailureSleepTime;
-	}
-	public boolean isDiffsEnabled() {
-		return diffsEnabled;
-	}
+	
 	public void setDiffsEnabled(boolean diffsEnabled) {
 		this.diffsEnabled = diffsEnabled;
 	}
-	protected void initializeBuildStatus(BuildTarget currentTarget) {
+	
+	protected BuildContext initializeBuildStatus(BuildTarget currentTarget) throws StoreException, ConfigException {
+		BuildContext context = new BuildContext(currentTarget);
+		
+		context.setRepositoryAdatpor(projectManager.getRepositoryAdaptor(currentTarget.getProjectConfig()));
+		
+		ProjectStatusDto lastBuild = buildManager.getLatestStatus(currentTarget.getProjectName());
+		context.setLastBuild(lastBuild);
+		
+		ProjectStatusDto lastBuildInSameWorkDir = lastBuild;
+		if (lastBuild != null && !lastBuild.getWorkDir().equals(context.getConfig().getWorkDir())) {
+			lastBuildInSameWorkDir = buildOutcomeStore.loadMostRecentBuildOutcomeByWorkDir(context.getConfig().getName(), context.getConfig().getWorkDir());
+		}
+		
+		context.setLastBuildInSameWorkDir(lastBuildInSameWorkDir);
+		
+		if (StringUtils.isNotBlank(currentTarget.getProjectConfig().getRepositoryTagName())) {
+			context.getRepositoryAdaptor().setTagOrBranch(currentTarget.getProjectConfig().getRepositoryTagName());
+		}
+		
+		final String tagName = context.getRepositoryAdaptor().getTagOrBranch();
+		
+		// TODO: experts use this to compare with previous build. they should get it from current status instead. 
+		context.getConfig().setRepositoryTagName(tagName);
+		
+		ProjectStatusDto lastBuildFromSameTag = lastBuild;
+		if (lastBuild != null && !lastBuild.getTagName().equals(tagName)) {
+			lastBuildFromSameTag = buildOutcomeStore.loadMostRecentBuildOutcomeByTagName(currentTarget.getProjectName(), tagName);
+		}
+		
+		context.setLastBuildFromSameTag(lastBuildFromSameTag);			
+		
 		ProjectStatusDto buildStatus = currentTarget.getStatus();
 		
 		generateUniqueBuildId(buildStatus);
 		
-		if (previousStatus == null || previousStatus.getBuildNumber() == null) {
+		if (context.getLastBuild() == null || context.getLastBuild().getBuildNumber() == null) {
 			buildStatus.setBuildNumber(0);
 		} else {
-			buildStatus.setBuildNumber(previousStatus.getBuildNumber() + 1);
+			buildStatus.setBuildNumber(context.getLastBuild().getBuildNumber() + 1);
 		}
 		
 		buildStatus.setStartDate(new Date());
@@ -278,9 +363,27 @@ public class ProjectBuilderImpl implements ProjectBuilder {
 		buildStatus.setScheduledBuild(currentTarget.getProjectConfig().isScheduledBuild());
 		buildStatus.setWorkDir(currentTarget.getProjectConfig().getWorkDir());
 		buildStatus.setStatus(Status.BUILDING);
-		buildStatus.setErrors(errors);
-		buildStatus.setWarnings(warnings);
-		buildStatus.setMetrics(metrics);
+		buildStatus.setTagName(tagName);
+		
+		return context;
+	}
+	
+	protected void validateWorkDir(BuildContext buildContext) throws ConfigException {
+		final ProjectConfigDto project = buildContext.getConfig();
+		
+		if (StringUtils.isBlank(project.getWorkDir())) {
+			throw new ConfigException("messages.build.null.work.dir");
+		}
+		
+		if (!fileSystem.directoryExists(new File(project.getWorkDir()))) {
+			return;
+		}
+		
+		if (buildContext.getLastBuildInSameWorkDir() != null) {
+			return;
+		}
+		
+		throw new ConfigException("errors.wont.delete.non.working.copy", project.getWorkDir(), project.getName());
 	}
 	
 	protected void generateUniqueBuildId(ProjectStatusDto status) {
@@ -291,283 +394,138 @@ public class ProjectBuilderImpl implements ProjectBuilder {
 		status.setDiffId(id);
 	}
 	
-	protected void buildProject(final ProjectConfigDto currentTarget) throws Exception {
-		if (StringUtils.isBlank(currentTarget.getWorkDir())) {
-			throw new ConfigException("messages.build.null.work.dir", null);
+	protected RunnablePhaseImpl prepareRepository = new RunnablePhaseImpl(BuildPhase.PrepareRepository) {
+		protected void executePhase(BuildContext buildContext) throws Exception {
+			prepareRepository(buildContext);
+			determineUpdateType(buildContext);
+			setEstimatedBuildDuration(buildContext);
 		}
 		
-		final RepositoryAdaptor ra = projectManager.getRepositoryAdaptor(currentTarget);
-
-		doPhase(BuildPhase.CheckForUpdates, new PhaseCallback() {
-			public void execute() throws Exception {
-				checkBuildNeccessary(ra, currentTarget);
-				determineUpdateType(currentTarget);
-				buildStatus.setEstimatedBuildTimeMillis(buildOutcomeStore.loadAverageBuildTimeMillis(currentTarget.getName(), updateType));
-			}
-		});
-		
-		if (updateType == Full) {
-			doPhase(BuildPhase.CleanWorkingCopy, new PhaseCallback() {
-				public void execute() throws Exception {
-					cleanWorkingDirectory(currentTarget.getWorkDir(), ra);
-				};
-			});
+		private RevisionTokenDto prepareRepository(BuildContext buildContext) throws InterruptedException, StoreException, ConfigException {
+			final RepositoryAdaptor repository = buildContext.getRepositoryAdaptor();
 			
-			doPhase(BuildPhase.CheckoutWorkingCopy, new PhaseCallback() {
-				public void execute() throws Exception {
-					createWorkingCopy(ra, currentTarget.getWorkDir());
-				};
-			});
-		} else {
-			doPhase(BuildPhase.UpdateWorkingCopy, new PhaseCallback() {
-				public void execute() throws Exception {
-					updateWorkingCopy(ra, currentTarget.getWorkDir());
-				};
-			});
+			repository.prepareRepository(buildDetailCallback);
+			
+			final RevisionTokenDto currentRev = repository.getLatestRevision(null);
+			
+			// TODO law of demeter
+			ProjectStatusDto buildStatus = buildContext.getCurrentStatus();
+			buildStatus.setRevision(currentRev);
+			buildStatus.setRepositoryUrl(repository.getRepositoryUrl());
+			
+			return currentRev;
 		}
-		
-		doPhase(BuildPhase.GetChangeLog, new PhaseCallback() {
-			public void execute() throws Exception {
-				OutputStream diffOutputStream = null;
-				
-				if (previousRevision != null &&
-						!previousRevision.equals(buildStatus.getRevision())) {
-					diffOutputStream = diffsEnabled ? 
-						new FileOutputStream(configurationStore.getChangeLog(currentTarget.getName(), buildStatus.getDiffId())) : null;
-					
-					try {
-						buildStatus.setChangeLog(ra.getChangeLog(previousRevision, buildStatus.getRevision(), diffOutputStream));
-					} finally {
-						if (diffOutputStream != null) {
-							diffOutputStream.close();
-						}
-					}
-				}
-				
-				if (diffOutputStream == null) {
-					buildStatus.setDiffId(null);
-				}
-			}
-		});
 
-		// We made it this far, so the next build can be incremental
-		// even if this build results in ERROR because the working
-		// copy should be in a known state to the RepositoryAdaptor.
-		buildStatus.setWorkDirSupportsIncrementalUpdate(true);
-		
-		doPhase(BuildPhase.Build, new PhaseCallback() {
-			public void execute() throws Exception {
-				invokeBuilder(currentTarget);
-			}
-		});
-	}
-	protected File cleanWorkingDirectory(String workDir, RepositoryAdaptor ra) throws ConfigException, IOException {
-		final File path = new File(workDir).getCanonicalFile();
-		
-		if (path.exists() && !ra.isWorkingCopy(path)) {
-			throw new ConfigException(
-					"errors.wont.delete.non.working.copy",
-					new Object[] {path.toString()});
+		private void determineUpdateType(BuildContext buildContext) throws StoreException {
+			ProjectStatusDto previousStatusForWorkDir = buildContext.getLastBuildInSameWorkDir();
+			
+			buildContext.setUpdateType(workingCopyUpdateExpert.determineUpdateStrategy(buildContext.getConfig(), previousStatusForWorkDir));
 		}
-		
-		if (!createWorkingDirectories(path)) {
-			throw new ConfigException(
-					"errors.cannot.create.dir",
-					new Object[] {path.toString()});
-		}
-		
-		return path;
-	}
-	/**
-	 * Create working directory and parent directories if they don't exist.
-	 * @return success flag (false if directories were not created).
-	 */
-	protected boolean createWorkingDirectories(File path) throws ConfigException {
-		if (!deleteWorkingDirectory(path)) {
-			return false;
-		}
-		
-		return path.mkdirs();
-	}
 
-	private boolean deleteWorkingDirectory(File path) throws ConfigException {
-		int tries = 0;
-		
-		try {
-			while (path.exists()) {
-				tries++;
-				try {
-					FileUtils.deleteDirectory(path);
-					break;
-				} catch (IOException e) {
-					if (tries >= deleteDirectoryAttempts) {
-						throw e;
-					}
-					try {
-						Thread.sleep(deleteFailureSleepTime);
-					} catch (InterruptedException e1) {
-						return false;
-					}
-				}
-			}
-		} catch (IOException e) {
-				throw new ConfigException(
-						"messages.build.cannot.delete.work.dir",
-						new Object[] {
-							path.getPath(),
-							e.getMessage()});
+		private void setEstimatedBuildDuration(BuildContext buildContext) {
+			buildContext.getCurrentStatus().setEstimatedBuildTimeMillis(buildOutcomeStore.loadAverageBuildTimeMillis(buildContext.getProjectName(), buildContext.getUpdateType()));
 		}
-		
-		return true;
-	}
+	};
 	
-	protected RevisionTokenDto checkBuildNeccessary(final RepositoryAdaptor ra, final ProjectConfigDto currentTarget) throws InterruptedException, StoreException, ConfigException {
-		String tagName = currentTarget.getRepositoryTagName();
-		
-		if (!StringUtils.isBlank(tagName)) {
-			ra.setTagName(tagName);
-		} else {
-			tagName = ra.getTagName();
-			currentTarget.setRepositoryTagName(tagName);
-		}
-		
-		ProjectStatusDto prevStatusByTag = previousStatus;
-		
-		if (previousStatus != null && !tagName.equals(previousStatus.getTagName())) {
-			// Look up the most recent build with the same tag name.
-			prevStatusByTag = buildOutcomeStore.loadMostRecentBuildOutcomeByTagName(currentTarget.getName(), tagName);
-		}
-		
-		if (prevStatusByTag != null) {
-			previousRevision = prevStatusByTag.getRevision();
-			if (previousRevision == null) {
-				previousRevision = prevStatusByTag.getLastKnownRevision();
+	protected RunnablePhaseImpl createWorkingCopy = new RunnablePhaseImpl(BuildPhase.CheckoutWorkingCopy) {
+		protected void executePhase(BuildContext buildContext) throws Exception {
+			if (buildContext.getUpdateType() == Full) {
+				buildContext.getRepositoryAdaptor().createPristineWorkingCopy(buildDetailCallback);
+			} else {
+				buildContext.getRepositoryAdaptor().updateWorkingCopy(buildDetailCallback);
 			}
-			previousOutcome = prevStatusByTag.getStatus();
-		} else {
-			previousRevision = null;
-			previousOutcome = null;
+			
+			// We made it this far, so the next build can be incremental
+			// even if this build results in ERROR because the working
+			// copy should be in a known state to the RepositoryAdaptor.
+			buildContext.getCurrentStatus().setWorkDirSupportsIncrementalUpdate(true);
 		}
-		
-		final RevisionTokenDto currentRev = ra.getLatestRevision(previousRevision);
-		
-		buildStatus.setRevision(currentRev);
-		buildStatus.setTagName(tagName);
-		buildStatus.setRepositoryUrl(ra.getRepositoryUrl());
-		
-		return currentRev;
-	}
+	};
 
-	protected void determineUpdateType(ProjectConfigDto currentTarget) throws StoreException {
-		ProjectStatusDto previousStatusForWorkDir = previousStatus;
-		
-		if (previousStatus != null && !currentTarget.getWorkDir().equals(previousStatus.getWorkDir())) {
-			// Look up the most recent build in the same work dir.
-			previousStatusForWorkDir = buildOutcomeStore.loadMostRecentBuildOutcomeByWorkDir(currentTarget.getName(), currentTarget.getWorkDir());
+	protected RunnablePhaseImpl getChangeLog = new RunnablePhaseImpl(BuildPhase.GetChangeLog) {
+		@Override
+		protected void executePhase(BuildContext buildContext) throws Exception {
+			if (buildContext.getLastBuildFromSameTag() == null
+				|| buildContext.getLastBuildFromSameTag().getLastKnownRevision() == null) {
+				return;
+			}
+			
+			final RevisionTokenDto previousRevision = buildContext.getLastBuildFromSameTag().getLastKnownRevision();
+			
+			if (previousRevision.equals(buildContext.getRevision())) {
+				return;
+			}
+			
+			OutputStream diffOutputStream = null;
+			
+			if (diffsEnabled) {
+				diffOutputStream = new FileOutputStream(configurationStore.getChangeLog(buildContext.getProjectName(), buildContext.getCurrentStatus().getDiffId()));
+			}
+			
+			try {
+				buildContext.getCurrentStatus().setChangeLog(buildContext.getRepositoryAdaptor().getChangeLog(previousRevision, buildContext.getRevision(), diffOutputStream));
+			} finally {
+				if (diffOutputStream != null) {
+					diffOutputStream.close();
+				}
+			}
+			
+			if (diffOutputStream == null) {
+				buildContext.getCurrentStatus().setDiffId(null);
+			}
 		}
-		
-		updateType = workingCopyUpdateExpert.determineUpdateStrategy(currentTarget, previousStatusForWorkDir);
-	}
-	protected void createWorkingCopy(RepositoryAdaptor ra, String workDir) throws RepositoryException, IOException, ConfigException, InterruptedException {
-		buildStatus.setUpdateType(Full);
-		ra.createWorkingCopy(new File(workDir).getCanonicalFile(), buildDetailCallback);
-	}
-	protected void updateWorkingCopy(RepositoryAdaptor ra, String workDir) throws RepositoryException, IOException, ConfigException, InterruptedException {
-		buildStatus.setUpdateType(Incremental);
-		ra.updateWorkingCopy(new File(workDir).getCanonicalFile(), buildDetailCallback);
-	}
-	protected void invokeBuilder(final ProjectConfigDto target) throws TimeoutException, KilledException, BuildFailedException, ConfigException, IOException, StoreException {
-		final File logFile = configurationStore.getBuildLog(target.getName(), buildStatus.getBuildLogId());
-		
-		final BuildTool tool = projectManager.getBuildTool(target);
-		
-		tool.buildProject(target, (ProjectStatusDto) buildStatus.copy(), logFile, buildDetailCallback);
-	}
-	protected final void doPhase(BuildPhase phase, PhaseCallback callback) throws Exception {
-		currentPhase = phase;
-		buildDetailCallback.setPhaseMessageKey(phase.getMessageKey());
-		for (BuildStatusListener listener : getCurrentBuildListeners()) {
-			listener.onBuildPhaseChanged(this, phase);
+	};
+	
+	protected RunnablePhaseImpl invokeBuildTool = new RunnablePhaseImpl(BuildPhase.Build) {
+		@Override
+		protected void executePhase(BuildContext buildContext) throws Exception {
+			final File logFile = configurationStore.getBuildLog(buildContext.getProjectName(), buildContext.getCurrentStatus().getBuildLogId());
+			
+			final BuildTool tool = projectManager.getBuildTool(buildContext.getConfig());
+			
+			tool.buildProject(buildContext.getConfig(), (ProjectStatusDto) buildContext.getCurrentStatus().copy(), logFile, buildDetailCallback);
 		}
-		try {
-			callback.execute();
-		} catch (InterruptedException e) {
-		} finally {
-			this.buildDetailCallback.setPhaseMessageKey(null);
-			this.buildDetailCallback.setDetail(null);
-		}
-
-		//clear interrupt flag if present
-		Thread.interrupted();
-		
-		if (timeout) {
-			throw new TimeoutException();
-		}
-		if (killing) {
-			throw new KilledException();
+	};
+	
+	protected List<? extends RunnablePhase> phases = Arrays.asList(prepareRepository, createWorkingCopy, getChangeLog, invokeBuildTool);
+	
+	protected void executeBuildPhases(BuildContext buildContext) throws Exception {
+		for (RunnablePhase phase : phases) {
+			phase.execute(buildContext);
 		}
 	}
 	
-	private List<BuildStatusListener> getCurrentBuildListeners() {
-		synchronized(buildListeners) {
-			return new ArrayList<BuildStatusListener>(buildListeners);
+	protected static interface RunnablePhase {
+		void execute(BuildContext buildContext) throws Exception;
+	}
+	
+	protected abstract class RunnablePhaseImpl implements RunnablePhase {
+		private final BuildPhase phase;
+		
+		protected RunnablePhaseImpl(BuildPhase phase) {
+			this.phase = phase;
 		}
-	}
+		
+		public final void execute(BuildContext buildContext) throws Exception {
+			buildDetailCallback.setPhase(phase);
+			
+			try {
+				executePhase(buildContext);
+			} catch (InterruptedException e) {
+			} finally {
+				buildDetailCallback.clearPhase();
+			}
 
-	protected interface PhaseCallback {
-		void execute() throws Exception;
+			//clear interrupt flag if present
+			Thread.interrupted();
+			
+			if (killing || timeout) {
+				throw new TimeoutException();
+			}
+		}
+		
+		protected abstract void executePhase(BuildContext buildContext) throws Exception;
 	}
+	
 	protected static final class KilledException extends Exception {}
-	
-	private class DelegatingBuildDetailCallback implements BuildDetailCallback {
-		private final BuildDetailCallback delegate;
-		private final boolean suppressErrors;
-		private final boolean suppressWarnings;
-		
-		public DelegatingBuildDetailCallback(BuildDetailCallback delegate,
-				boolean suppressErrors, boolean suppressWarnings) {
-			this.delegate = delegate;
-			this.suppressErrors = suppressErrors;
-			this.suppressWarnings = suppressWarnings;
-		}
-
-		public void reportError(String message, String file, Integer lineNumber, String code) {
-			if (!suppressErrors) {
-				delegate.reportError(message, file, lineNumber, code);
-				final BuildMessageDto error = new BuildMessageDto(message, file, lineNumber, code);
-				errors.add(error);
-				for (BuildStatusListener listener : getCurrentBuildListeners()) {
-					listener.onErrorLogged(ProjectBuilderImpl.this, error);
-				}
-			}
-		}
-
-		public void reportWarning(String message, String file, Integer lineNumber, String code) {
-			if (!suppressWarnings) {
-				delegate.reportWarning(message, file, lineNumber, code);
-				final BuildMessageDto warning = new BuildMessageDto(message, file, lineNumber, code);
-				warnings.add(warning);
-				for (BuildStatusListener listener : getCurrentBuildListeners()) {
-					listener.onWarningLogged(ProjectBuilderImpl.this, warning);
-				}
-			}
-		}
-
-		public void addMetric(MetricDto metric) {
-			metrics.add(metric);
-			delegate.addMetric(metric);
-		}
-		
-		public void setDetail(String detail) {
-			delegate.setDetail(detail);
-		}
-
-		public void setDetailMessage(String messageKey, Object[] args) {
-			delegate.setDetailMessage(messageKey, args);
-		}
-		
-		public void setPhaseMessageKey(String key) {
-			delegate.setPhaseMessageKey(key);
-		}
-	}
 }

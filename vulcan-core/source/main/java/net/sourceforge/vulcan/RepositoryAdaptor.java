@@ -18,13 +18,11 @@
  */
 package net.sourceforge.vulcan;
 
-import java.io.File;
 import java.io.OutputStream;
 import java.util.List;
 
 import net.sourceforge.vulcan.core.BuildDetailCallback;
 import net.sourceforge.vulcan.dto.ChangeLogDto;
-import net.sourceforge.vulcan.dto.ProjectConfigDto;
 import net.sourceforge.vulcan.dto.ProjectStatusDto;
 import net.sourceforge.vulcan.dto.RepositoryTagDto;
 import net.sourceforge.vulcan.dto.RevisionTokenDto;
@@ -38,21 +36,25 @@ public interface RepositoryAdaptor {
 	 * Determine if changes are available in the repository since the previous build.
 	 * This method is only called when a working copy is known to already exist and
 	 * the previous build result is available.
-	 * 
-	 * @param project The project settings to check.
-	 * @param previousStatus The result of the previous build.
+	 * @param mostRecentBuildInSameWorkDir The result of the previous build in the same directory.
 	 */
-	boolean hasIncomingChanges(ProjectConfigDto project, ProjectStatusDto previousStatus) throws RepositoryException;
+	boolean hasIncomingChanges(ProjectStatusDto mostRecentBuildInSameWorkDir) throws RepositoryException;
 	
 	/**
-	 * Obtain a token representing the HEAD revision for the overall project tree.
-	 * For a transaction based repository this may simply be the "revision of last change" on
-	 * the project path.  However, for file based repositories, a more complex operation must
-	 * be carried out to determine if any child paths have been updated, or if new paths have
-	 * been added.
+	 * Prepare for subsequent operations.  This method will be called before calling other methods like
+	 * getLatestRevision, getChangeLog, etc.
+	 */
+	void prepareRepository(BuildDetailCallback buildDetailCallback) throws RepositoryException, InterruptedException;
+	
+	/**
+	 * Obtain a token representing the most recent revision.
+	 * For a transaction based repository this may simply be the "revision of last change".
+	 * However, for file based repositories, a more complex operation must be carried out
+	 * to determine if any child paths have been updated, or if new paths have been added.
 	 * @param previousRevision If this project has been checked out before, the instance of
 	 * RevisionTokenDto previously returned.  This is provided to allow implementations to
 	 * optimize the range in which changes are searched.
+	 * TODO: push this into CVS, the only thing that wants it.
 	 */
 	RevisionTokenDto getLatestRevision(RevisionTokenDto previousRevision) throws RepositoryException, InterruptedException;
 
@@ -71,53 +73,52 @@ public interface RepositoryAdaptor {
 	 * diffs have been disabled by configuration.
 	 */
 	ChangeLogDto getChangeLog(RevisionTokenDto previousRevision, RevisionTokenDto currentRevision, OutputStream diffOutputStream) throws RepositoryException, InterruptedException;
-	
-	/**
-	 * Perform a "checkout" operation, creating a local "working copy" or "sandbox"
-	 * containing the source files for the given project.
-	 */
-	void createWorkingCopy(File absolutePath, BuildDetailCallback buildDetailCallback) throws RepositoryException, InterruptedException;
 
 	/**
-	 * Perform an "update" operation on an existing "working copy" or "sandbox"
-	 * given the path to the existing location.
+	 * Either create a working copy from scratch or restore an existing working copy
+	 * to a pristine state where uncommitted changes are reverted, non-versioned files
+	 * and directories are removed and the working copy is updated to the latest revision.
 	 */
-	void updateWorkingCopy(File absolutePath, BuildDetailCallback buildDetailCallback) throws RepositoryException;
+	void createPristineWorkingCopy(BuildDetailCallback buildDetailCallback) throws RepositoryException, InterruptedException;
+
+	/**
+	 * Perform an update operation on an existing working copy.  Unlike createPristineWorkingCopy,
+	 * this method should not remove non-versioned files or revert uncommitted changes.
+	 */
+	void updateWorkingCopy(BuildDetailCallback buildDetailCallback) throws RepositoryException;
 	
 	/**
 	 * Verify that a given path is a valid working copy.
 	 * @param path Location to verify
 	 * @return true if the path contains a working copy, false if not
 	 */
-	boolean isWorkingCopy(File absolutePath);
+	boolean isWorkingCopy() throws RepositoryException;
 	
 	/**
 	 * Return a logical name which identifies the tag/branch or other line of development
-	 * that is being used to create the working copy.  The identifier returned will be
-	 * passed into the BuildTool to identify the line of development.  If no branch or tag
-	 * applies, "HEAD" or "trunk" may be used as a default value.
+	 * that is being used to create the working copy.
 	 */
-	String getTagName();
+	String getTagOrBranch();
 	
 	/**
 	 * Set the name of the tag/branch to use.  When performing a "managed build", 
 	 * this will be called before getLatestRevision, getChangeLog,
-	 * and createWorkingCopy.  When no tag is selected, this method will
-	 * not be called.  In that case, HEAD/trunk should be used.
+	 * and createPristineWorkingCopy.  When no tag is selected, this method will
+	 * not be called.
 	 */
-	void setTagName(String tagName);
+	void setTagOrBranch(String tagOrBranchName);
 	
 	/**
-	 * Return a list of tags that may be used to build the project.  This list
-	 * should always contain at least one tag representing the HEAD/trunk
-	 * development path.  If other tags or branches exist, they should be
-	 * included as well.
+	 * Return a list of tags and branches that may be used to populate
+	 * the working copy.  This list should always contain at least one tag
+	 * representing the default setting (default, trunk, HEAD, etc.).
+	 * If other tags or branches exist, they should be included as well.
 	 * <br><br>
 	 * This list will be presented to a user performing a "managed build" to
 	 * allow the user to select an alternate tag or branch to build from,
-	 * whereas normally vulcan would build the project using HEAD/trunk.
+	 * whereas normally vulcan would build the project using the default.
 	 */
-	List<RepositoryTagDto> getAvailableTags() throws RepositoryException;
+	List<RepositoryTagDto> getAvailableTagsAndBranches() throws RepositoryException;
 	
 	/**
 	 * Return URL where project source code can be accessed.  If applicable,
@@ -129,6 +130,4 @@ public interface RepositoryAdaptor {
 	 * navigate from a build outcome summary to the source code easily.
 	 */
 	String getRepositoryUrl();
-
-	
 }

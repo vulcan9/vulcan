@@ -124,10 +124,10 @@ class ProjectRebuildExpert {
 			
 			if (tagName == null) {
 				final RepositoryAdaptor ra = projectManager.getRepositoryAdaptor(project);
-				tagName = ra.getTagName();
+				tagName = ra.getTagOrBranch();
 			}
 			
-			if (mostRecentBuildByWorkDir == null || mostRecentBuildByWorkDir.getTagName().equals(tagName)) {
+			if (mostRecentBuildByWorkDir == null || tagName.equals(mostRecentBuildByWorkDir.getTagName())) {
 				return false;
 			}
 			
@@ -156,9 +156,9 @@ class ProjectRebuildExpert {
 			
 			RevisionTokenDto previousRevision = mostRecentBuildByWorkDir == null ? null : mostRecentBuildByWorkDir.getRevision();
 			
-			final RepositoryAdaptor ra = projectManager.getRepositoryAdaptor(project);
+			final RepositoryAdaptor repository = projectManager.getRepositoryAdaptor(project);
 			
-			if (!ra.hasIncomingChanges(project, mostRecentBuildByWorkDir)) {
+			if (!repository.hasIncomingChanges(mostRecentBuildByWorkDir)) {
 				return false;
 			}
 
@@ -182,6 +182,7 @@ class ProjectRebuildExpert {
 				}
 				
 				setBuildReason("messages.build.reason.missing.working.copy");
+				return true;
 			}
 			return false;
 		}

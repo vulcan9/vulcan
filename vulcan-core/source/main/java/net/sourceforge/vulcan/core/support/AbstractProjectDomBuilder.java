@@ -429,7 +429,7 @@ public abstract class AbstractProjectDomBuilder implements ProjectDomBuilder {
 		}
 	}
 	
-	private static void addModifiedPaths(Element changeSet, String[] modifiedPaths) {
+	private static void addModifiedPaths(Element changeSet, Iterable<String> modifiedPaths) {
 		final Element mps = new Element("modified-paths");
 
 		for (String path : modifiedPaths) {

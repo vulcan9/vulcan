@@ -21,7 +21,9 @@ package net.sourceforge.vulcan.scheduler.thread;
 import java.net.InetAddress;
 
 import net.sourceforge.vulcan.EasyMockTestCase;
+import net.sourceforge.vulcan.core.BuildDetailCallback;
 import net.sourceforge.vulcan.core.BuildManager;
+import net.sourceforge.vulcan.core.BuildTarget;
 import net.sourceforge.vulcan.core.ProjectBuilder;
 import net.sourceforge.vulcan.core.support.BuildTargetImpl;
 import net.sourceforge.vulcan.core.support.ProjectBuilderImpl;
@@ -38,7 +40,7 @@ public class BuildDaemonTest extends EasyMockTestCase {
 	
 	class ProjectBuilderStub extends ProjectBuilderImpl {
 		@Override
-		protected void buildProject(ProjectConfigDto currentTarget) throws Exception {
+		protected void buildInternal(BuildDaemonInfoDto info, BuildTarget currentTarget, BuildDetailCallback buildDetailCallback) {
 			if (fastMode) {
 				return;
 			}
@@ -46,6 +48,7 @@ public class BuildDaemonTest extends EasyMockTestCase {
 			synchronized(this) {
 				notifyAll();
 			}
+			
 			try {
 				Thread.sleep(250);
 			} catch (InterruptedException e) {
@@ -66,9 +69,9 @@ public class BuildDaemonTest extends EasyMockTestCase {
 	};
 
 	BuildManager mgr = createStrictMock(BuildManager.class);
-	ProjectBuilder builder = createStrictMock(ProjectBuilder.class);
 	
 	ProjectBuilderStub builderStub = new ProjectBuilderStub();
+	ProjectBuilder builder = builderStub;
 	
 	StoreStub store = new StoreStub(null);
 	
@@ -96,6 +99,8 @@ public class BuildDaemonTest extends EasyMockTestCase {
 	}
 
 	public void testGetsProjectSkipsOnNull() throws Exception {
+		builder = createStrictMock(ProjectBuilder.class);
+		
 		mgr.getTarget(info);
 		expectLastCall().andReturn(null);
 
@@ -107,20 +112,9 @@ public class BuildDaemonTest extends EasyMockTestCase {
 	}
 
 	public void testKillProjectBeingBuilt() throws Exception {
-		builder = builderStub;
-		
 		final ProjectConfigDto project = new ProjectConfigDto();
 		
 		expect(mgr.getTarget(info)).andReturn(new BuildTargetImpl(project, new ProjectStatusDto()));
-		expect(mgr.getLatestStatus(null)).andReturn(null).anyTimes();
-
-		mgr.registerBuildStatus((BuildDaemonInfoDto)notNull(),
-				(ProjectBuilder)notNull(), (ProjectConfigDto)notNull(), (ProjectStatusDto)notNull());
-
-		mgr.targetCompleted(
-				(BuildDaemonInfoDto) anyObject(),
-				(ProjectConfigDto) anyObject(),
-				(ProjectStatusDto) anyObject());
 
 		replay();
 
@@ -140,8 +134,8 @@ public class BuildDaemonTest extends EasyMockTestCase {
 
 		thread.start();
 
-		synchronized (builder) {
-			builder.wait(100);
+		synchronized (builderStub) {
+			builderStub.wait(100);
 		}
 
 		assertTrue(bd.isBuilding());
@@ -160,9 +154,8 @@ public class BuildDaemonTest extends EasyMockTestCase {
 		
 		assertTrue("did not interrupt thread", interrupted);
 	}
+	
 	public void testWatchDogKills() throws Exception {
-		builder = builderStub;
-		
 		config.setTimeout(10);
 		bd.thread = Thread.currentThread();
 
@@ -170,25 +163,14 @@ public class BuildDaemonTest extends EasyMockTestCase {
 
 		expect(mgr.getTarget(info)).andReturn(new BuildTargetImpl(project, new ProjectStatusDto()));
 
-		expect(mgr.getLatestStatus(null)).andReturn(null).anyTimes();
-
-		mgr.registerBuildStatus((BuildDaemonInfoDto)notNull(),
-				(ProjectBuilder)notNull(), (ProjectConfigDto)notNull(), (ProjectStatusDto)notNull());
-
-		mgr.targetCompleted(
-				(BuildDaemonInfoDto) anyObject(),
-				(ProjectConfigDto) anyObject(),
-				(ProjectStatusDto) anyObject());
-		
 		replay();
 
 		bd.execute();
 
 		verify();
 	}
+	
 	public void testWatchDogTerminatesOnBuildComplete() throws Exception {
-		builder = builderStub;
-		
 		config.setTimeout(10000);
 		bd.thread = Thread.currentThread();
 
@@ -196,33 +178,23 @@ public class BuildDaemonTest extends EasyMockTestCase {
 
 		expect(mgr.getTarget(info)).andReturn(new BuildTargetImpl(project, new ProjectStatusDto()));
 
-		expect(mgr.getLatestStatus(null)).andReturn(null).anyTimes();
-		
-		mgr.registerBuildStatus((BuildDaemonInfoDto)notNull(),
-				(ProjectBuilder)notNull(), (ProjectConfigDto)notNull(), (ProjectStatusDto)notNull());
-		
-		
-		mgr.targetCompleted(
-				(BuildDaemonInfoDto) anyObject(),
-				(ProjectConfigDto) anyObject(),
-				(ProjectStatusDto) anyObject());
-
 		replay();
 
 		bd.execute();
 
 		verify();
 	}
-	public void testWatchDogTerminatesOnBuildCompleteRaceConditionLots() throws Exception {
-		for (int i=0; i<1000; i++) {
+	
+	// attempt to find thread synchronization problems.  only run manually.
+	public void _testWatchDogTerminatesOnBuildCompleteRaceConditionLots() throws Exception {
+		for (int i=0; i<10000; i++) {
 			doTestWatchDogTerminatesOnBuildCompleteRaceCondition();
 			reset();
 		}
 	}
+	
 	public void doTestWatchDogTerminatesOnBuildCompleteRaceCondition() throws Exception {
 		fastMode = true;
-		
-		builder = builderStub;
 		
 		config.setTimeout(10000);
 		bd.thread = Thread.currentThread();
@@ -230,16 +202,6 @@ public class BuildDaemonTest extends EasyMockTestCase {
 		final ProjectConfigDto project = new ProjectConfigDto();
 
 		expect(mgr.getTarget(info)).andReturn(new BuildTargetImpl(project, new ProjectStatusDto()));
-		expect(mgr.getLatestStatus(null)).andReturn(null).anyTimes();
-
-		mgr.registerBuildStatus((BuildDaemonInfoDto)notNull(),
-				(ProjectBuilder)notNull(), (ProjectConfigDto)notNull(), (ProjectStatusDto)notNull());
-		
-
-		mgr.targetCompleted(
-				(BuildDaemonInfoDto) anyObject(),
-				(ProjectConfigDto) anyObject(),
-				(ProjectStatusDto) anyObject());
 		
 		replay();
 

@@ -26,9 +26,9 @@ public class RepositoryException extends ConfigException {
 		this("messages.repository.error", cause);
 	}
 	public RepositoryException(String key, Throwable cause) {
-		this(key, new Object[] {cause.getMessage()}, cause);
+		super(key, cause);
 	}
-	public RepositoryException(String key, Object[] args, Throwable cause) {
-		super(key, args, cause);
+	public RepositoryException(String key, Throwable cause, Object... args) {
+		super(key, cause, args);
 	}
 }

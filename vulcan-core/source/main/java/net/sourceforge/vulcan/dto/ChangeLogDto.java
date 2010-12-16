@@ -1,6 +1,6 @@
 /*
  * Vulcan Build Manager
- * Copyright (C) 2005-2006 Chris Eldredge
+ * Copyright (C) 2005-2010 Chris Eldredge
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,26 +18,39 @@
  */
 package net.sourceforge.vulcan.dto;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import net.sourceforge.vulcan.metadata.SvnRevision;
 
 @SvnRevision(id="$Id$", url="$HeadURL$")
 public class ChangeLogDto extends BaseDto {
-	private List<ChangeSetDto> changeSets;
+	private List<ChangeSetDto> changeSets = Collections.emptyList();
 
 	private String differences;
 	
 	public List<ChangeSetDto> getChangeSets() {
 		return changeSets;
 	}
+	
 	public void setChangeSets(List<ChangeSetDto> changeSets) {
 		this.changeSets = changeSets;
 	}
+	
+	public void addChangeSet(ChangeSetDto changeSet) {
+		if (changeSets == Collections.<ChangeSetDto>emptyList()) {
+			changeSets = new ArrayList<ChangeSetDto>();
+		}
+		
+		changeSets.add(changeSet);
+	}
+	
 	@Deprecated
 	public String getDifferences() {
 		return differences;
 	}
+	
 	@Deprecated
 	public void setDifferences(String differences) {
 		this.differences = differences;

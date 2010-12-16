@@ -81,7 +81,7 @@ class ChangeSetQuery extends MappingSqlQuery {
 		int buildId = rs.getInt("build_id");
 		int changeSetId = rs.getInt("change_set_id");
 		
-		final String[] paths = modifiedPathQuery.queryModifiedPaths(buildId, changeSetId);
+		final List<String> paths = modifiedPathQuery.queryModifiedPaths(buildId, changeSetId);
 		dto.setModifiedPaths(paths);
 		
 		return dto;

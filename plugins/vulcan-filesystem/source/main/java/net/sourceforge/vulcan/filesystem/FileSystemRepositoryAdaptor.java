@@ -26,6 +26,7 @@ import java.util.List;
 
 import net.sourceforge.vulcan.RepositoryAdaptor;
 import net.sourceforge.vulcan.core.BuildDetailCallback;
+import net.sourceforge.vulcan.core.support.RepositoryUtils;
 import net.sourceforge.vulcan.dto.ChangeLogDto;
 import net.sourceforge.vulcan.dto.ChangeSetDto;
 import net.sourceforge.vulcan.dto.ProjectConfigDto;
@@ -40,13 +41,21 @@ import org.apache.commons.io.FileUtils;
 public class FileSystemRepositoryAdaptor implements RepositoryAdaptor {
 	public static final String WORKING_COPY_MARKER = ".vulcan-filesystem";
 	private final FileSystemProjectConfigDto config;
+	private final ProjectConfigDto projectConfig;
 	
-	public FileSystemRepositoryAdaptor(FileSystemProjectConfigDto config) throws RepositoryException {
+	public FileSystemRepositoryAdaptor(ProjectConfigDto projectConfig, FileSystemProjectConfigDto config) throws RepositoryException {
+		this.projectConfig = projectConfig;
 		this.config = config;
 	}
 
-	public void createWorkingCopy(File targetDir, BuildDetailCallback buildDetailCallback) throws RepositoryException {
+	public void prepareRepository(BuildDetailCallback buildDetailCallback) throws RepositoryException, InterruptedException {
+	}
+	
+	public void createPristineWorkingCopy(BuildDetailCallback buildDetailCallback) throws RepositoryException {
 		final File sourceDir = new File(config.getSourceDirectory());
+		final File targetDir = new File(projectConfig.getWorkDir());
+		
+		new RepositoryUtils().createOrCleanWorkingCopy(targetDir, buildDetailCallback);
 		
 		try {
 			FileUtils.copyDirectory(sourceDir, targetDir);
@@ -56,21 +65,21 @@ public class FileSystemRepositoryAdaptor implements RepositoryAdaptor {
 		}
 	}
 	
-	public void updateWorkingCopy(File targetDir, BuildDetailCallback buildDetailCallback) throws RepositoryException {
+	public void updateWorkingCopy(BuildDetailCallback buildDetailCallback) throws RepositoryException {
 		// This will actually overwrite all files from source to target (even if they are the same)
 		// so it's not as incremental as it should be.
-		createWorkingCopy(targetDir, buildDetailCallback);
+		createPristineWorkingCopy(buildDetailCallback);
 	}
 	
-	public boolean isWorkingCopy(File absolutePath) {
-		if (new File(absolutePath, WORKING_COPY_MARKER).exists()) {
+	public boolean isWorkingCopy() {
+		if (new File(projectConfig.getWorkDir(), WORKING_COPY_MARKER).exists()) {
 			return true;
 		}
 		
 		return false;
 	}
 	
-	public boolean hasIncomingChanges(ProjectConfigDto project,	ProjectStatusDto previousStatus) throws RepositoryException {
+	public boolean hasIncomingChanges(ProjectStatusDto previousStatus) throws RepositoryException {
 		return true;
 	}
 	
@@ -89,7 +98,7 @@ public class FileSystemRepositoryAdaptor implements RepositoryAdaptor {
 		
 		return empty;
 	}
-	public List<RepositoryTagDto> getAvailableTags() throws RepositoryException {
+	public List<RepositoryTagDto> getAvailableTagsAndBranches() throws RepositoryException {
 		final RepositoryTagDto tag = new RepositoryTagDto();
 		
 		tag.setDescription("Not Available");
@@ -98,10 +107,10 @@ public class FileSystemRepositoryAdaptor implements RepositoryAdaptor {
 		return Collections.singletonList(tag);
 	}
 	
-	public String getTagName() {
+	public String getTagOrBranch() {
 		return "N/A";
 	}
 	
-	public void setTagName(String tagName) {
+	public void setTagOrBranch(String tagName) {
 	}
 }

@@ -21,6 +21,7 @@ package net.sourceforge.vulcan.cvs;
 import net.sourceforge.vulcan.cvs.dto.CvsConfigDto;
 import net.sourceforge.vulcan.cvs.dto.CvsProjectConfigDto;
 import net.sourceforge.vulcan.cvs.dto.CvsRepositoryProfileDto;
+import net.sourceforge.vulcan.dto.ProjectConfigDto;
 import net.sourceforge.vulcan.dto.RevisionTokenDto;
 import net.sourceforge.vulcan.exception.RepositoryException;
 
@@ -37,7 +38,7 @@ public class GetLatestRevision {
 		final CvsProjectConfigDto projectConfig = new CvsProjectConfigDto();
 		projectConfig.setModule("gtkpod");
 		
-		final CvsRepositoryAdaptor repo = new CvsRepositoryAdaptor(new CvsConfigDto(), profile, projectConfig, null);
+		final CvsRepositoryAdaptor repo = new CvsRepositoryAdaptor(new ProjectConfigDto(), new CvsConfigDto(), profile, projectConfig);
 		
 		RevisionTokenDto rev = repo.getLatestRevision(
 				//new RevisionTokenDto(20070416215757l, "2007/06/24 04:44:07"));

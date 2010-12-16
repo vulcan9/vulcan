@@ -41,14 +41,14 @@ class ModifiedPathQuery extends MappingSqlQuery {
 		compile();
 	}
 	
-	public String[] queryModifiedPaths(int buildId, int changeSetId) {
+	public List<String> queryModifiedPaths(int buildId, int changeSetId) {
 		final List<String> paths = execute(buildId, changeSetId);
 		
 		if (paths.isEmpty()) {
 			return null;
 		}
 
-		return paths.toArray(new String[paths.size()]);
+		return paths;
 	}
 	
 	@Override

@@ -104,7 +104,7 @@ public abstract class PluginSupport {
 		});
 		
 		if (t == null && missingMessageKey != null) {
-			throw new ConfigException(missingMessageKey, new String[] {name});
+			throw new ConfigException(missingMessageKey, name);
 		}
 		
 		return t;

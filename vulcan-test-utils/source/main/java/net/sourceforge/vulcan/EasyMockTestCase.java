@@ -48,20 +48,42 @@ public abstract class EasyMockTestCase extends TestCase {
 	}
 	
 	private static class ReflectionMatcher implements IArgumentMatcher {
-			private final Object expected;
+		private final Object expected;
+
+		public ReflectionMatcher(final Object expected) {
+			this.expected = expected;
+		}
+		
+		public boolean matches(Object actual) {
+			return EqualsBuilder.reflectionEquals(expected, actual);
+		}
+		public void appendTo(StringBuffer buffer) {
+			buffer.append(expected);
+		}
+	}
 	
-			public ReflectionMatcher(final Object expected) {
-				this.expected = expected;
+	private static class ToStringMatcher implements IArgumentMatcher {
+		private final Object expected;
+
+		public ToStringMatcher(final Object expected) {
+			this.expected = expected;
+		}
+		
+		public boolean matches(Object actual) {
+			if (actual == null && expected == null) {
+				return true;
+			}
+			if (expected == null) {
+				return false;
 			}
 			
-			public boolean matches(Object actual) {
-				return EqualsBuilder.reflectionEquals(expected, actual);
-			}
-			public void appendTo(StringBuffer buffer) {
-				buffer.append(expected);
-			}
+			return expected.toString().equals(actual.toString());
 		}
-
+		public void appendTo(StringBuffer buffer) {
+			buffer.append(expected);
+		}
+	}
+		
 	private final TestRunner internalTestRunner = new TestRunner() {
 		public void run() throws Throwable{
 			EasyMockTestCase.super.runTest();
@@ -168,8 +190,13 @@ public abstract class EasyMockTestCase extends TestCase {
 		return EasyMock.eq(obj);
 	}
 
-	public static Object reflectionEq(Object argument) {
-		EasyMock.reportMatcher(new ReflectionMatcher(argument));
+	public static <T> T reflectionEq(T obj) {
+		EasyMock.reportMatcher(new ReflectionMatcher(obj));
+		return null;
+	}
+
+	public static <T> T stringEq(T obj) {
+		EasyMock.reportMatcher(new ToStringMatcher(obj));
 		return null;
 	}
 	

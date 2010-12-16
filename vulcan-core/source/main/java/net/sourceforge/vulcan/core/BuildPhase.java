@@ -19,10 +19,9 @@
 package net.sourceforge.vulcan.core;
 
 public enum BuildPhase {
-	CheckForUpdates("build.phase.check.updates"),
+	PrepareRepository("build.phase.prepare.repository"),
 	CleanWorkingCopy("build.phase.clean"),
 	CheckoutWorkingCopy("build.phase.checkout"),
-	UpdateWorkingCopy("build.phase.update"),
 	GetChangeLog("build.phase.changelog"),
 	Build("build.phase.build"),
 	Publish("build.phase.publish");

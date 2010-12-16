@@ -25,7 +25,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -37,6 +36,7 @@ import java.util.Set;
 
 import net.sourceforge.vulcan.RepositoryAdaptor;
 import net.sourceforge.vulcan.core.BuildDetailCallback;
+import net.sourceforge.vulcan.core.support.RepositoryUtils;
 import net.sourceforge.vulcan.cvs.dto.CvsConfigDto;
 import net.sourceforge.vulcan.cvs.dto.CvsProjectConfigDto;
 import net.sourceforge.vulcan.cvs.dto.CvsRepositoryProfileDto;
@@ -58,24 +58,24 @@ import org.netbeans.lib.cvsclient.command.log.RlogCommand;
 import org.netbeans.lib.cvsclient.command.update.UpdateCommand;
 
 public class CvsRepositoryAdaptor extends CvsSupport implements RepositoryAdaptor {
-	private final String projectName;
+	private ProjectConfigDto projectConfig;
 	
 	private Set<String> symbolicNames;
 	
-	public CvsRepositoryAdaptor(CvsConfigDto globalConfig, CvsRepositoryProfileDto profile, CvsProjectConfigDto config, String projectName) throws RepositoryException {
-		this(globalConfig, profile, config, projectName, true);
+	public CvsRepositoryAdaptor(ProjectConfigDto projectConfig, CvsConfigDto globalConfig, CvsRepositoryProfileDto profile, CvsProjectConfigDto config) throws RepositoryException {
+		this(projectConfig, globalConfig, profile, config, true);
 	}
 
-	protected CvsRepositoryAdaptor(CvsConfigDto globalConfig, CvsRepositoryProfileDto profile, CvsProjectConfigDto config, String projectName, boolean connect) throws RepositoryException {
+	protected CvsRepositoryAdaptor(ProjectConfigDto projectConfig, CvsConfigDto globalConfig, CvsRepositoryProfileDto profile, CvsProjectConfigDto config, boolean connect) throws RepositoryException {
 		super(globalConfig, profile, config);
-		this.projectName = projectName;
+		this.projectConfig = projectConfig;
 
 		if (connect) {
 			openConnection();
 		}
 	}
 	
-	public boolean hasIncomingChanges(ProjectConfigDto project,	ProjectStatusDto previousStatus) throws RepositoryException {
+	public boolean hasIncomingChanges(ProjectStatusDto previousStatus) throws RepositoryException {
 		RevisionTokenDto rev = previousStatus.getRevision();
 		
 		if (rev == null) {
@@ -87,6 +87,9 @@ public class CvsRepositoryAdaptor extends CvsSupport implements RepositoryAdapto
 		}
 		
 		return getLatestRevision(rev).getRevision() > rev.getRevision();
+	}
+	
+	public void prepareRepository(BuildDetailCallback buildDetailCallback) throws RepositoryException, InterruptedException {
 	}
 	
 	public RevisionTokenDto getLatestRevision(RevisionTokenDto previousRevision) throws RepositoryException {
@@ -103,15 +106,6 @@ public class CvsRepositoryAdaptor extends CvsSupport implements RepositoryAdapto
 	}
 
 	public ChangeLogDto getChangeLog(RevisionTokenDto first, RevisionTokenDto last, OutputStream diffOutputStream) throws RepositoryException {
-		if (diffOutputStream != null) {
-			try {
-				// "cvs rdiff -u" does not seem to be supported by netbeans-cvslib at this time.
-				diffOutputStream.close();
-			} catch (IOException e) {
-				throw new RepositoryException(e);
-			}
-		}
-		
 		final ChangeLogDto changeLog = doChangeLogs(first, last);
 		
 		return changeLog;
@@ -127,7 +121,7 @@ public class CvsRepositoryAdaptor extends CvsSupport implements RepositoryAdapto
 	 *   	<li>Capture the symbolic names for the rlog</li>
 	 *   </ol>
 	 */
-	public List<RepositoryTagDto> getAvailableTags() throws RepositoryException {
+	public List<RepositoryTagDto> getAvailableTagsAndBranches() throws RepositoryException {
 		final List<RepositoryTagDto> names = new ArrayList<RepositoryTagDto>();
 		
 		if (symbolicNames == null) {
@@ -156,13 +150,16 @@ public class CvsRepositoryAdaptor extends CvsSupport implements RepositoryAdapto
 		return names;
 	}
 	
-	public void createWorkingCopy(File absolutePath, BuildDetailCallback buildDetailCallback) throws RepositoryException {
+	public void createPristineWorkingCopy(BuildDetailCallback buildDetailCallback) throws RepositoryException {
+		final File absolutePath = new File(projectConfig.getWorkDir()).getAbsoluteFile();
 		final Map<String, Long> counters = globalConfig.getWorkingCopyByteCounts();
 		long previousBytesCounted = -1;
 		
+		new RepositoryUtils().createOrCleanWorkingCopy(absolutePath, buildDetailCallback);
+		
 		synchronized (counters) {
-			if (counters.containsKey(projectName)) {
-				previousBytesCounted = counters.get(projectName).longValue();
+			if (counters.containsKey(projectConfig.getName())) {
+				previousBytesCounted = counters.get(projectConfig.getName()).longValue();
 			}
 		}
 		
@@ -182,11 +179,12 @@ public class CvsRepositoryAdaptor extends CvsSupport implements RepositoryAdapto
 		executeCvsCommand(client, cmd);
 		
 		synchronized (counters) {
-			counters.put(projectName, listener.getBytesCounted());
+			counters.put(projectConfig.getName(), listener.getBytesCounted());
 		}
 	}
 
-	public void updateWorkingCopy(File absolutePath, BuildDetailCallback buildDetailCallback) throws RepositoryException {
+	public void updateWorkingCopy(BuildDetailCallback buildDetailCallback) throws RepositoryException {
+		final File absolutePath = new File(projectConfig.getWorkDir()).getAbsoluteFile();
 		final Client client = new Client(connection, new StandardAdminHandler());
 		final UpdateCommand cmd = new UpdateCommand();
 
@@ -196,7 +194,8 @@ public class CvsRepositoryAdaptor extends CvsSupport implements RepositoryAdapto
 		executeCvsCommand(client, cmd);
 	}
 	
-	public boolean isWorkingCopy(File absolutePath) {
+	public boolean isWorkingCopy() {
+		final File absolutePath = new File(projectConfig.getWorkDir()).getAbsoluteFile();
 		final Client client = new Client(connection, new StandardAdminHandler());
 		try {
 			if (client.getRepositoryForDirectory(absolutePath) != null) {
@@ -211,11 +210,11 @@ public class CvsRepositoryAdaptor extends CvsSupport implements RepositoryAdapto
 		return null;
 	}
 	
-	public String getTagName() {
+	public String getTagOrBranch() {
 		return tag;
 	}
 
-	public void setTagName(String tagName) {
+	public void setTagOrBranch(String tagName) {
 		this.tag = tagName;
 	}
 
@@ -249,7 +248,7 @@ public class CvsRepositoryAdaptor extends CvsSupport implements RepositoryAdapto
 			if (previousRevision != null) {
 				return previousRevision;
 			}
-			throw new RepositoryException("cvs.errors.rlog.failed", null, null);
+			throw new RepositoryException("cvs.errors.rlog.failed", null);
 		}
 		
 		return new RevisionTokenDto(
@@ -296,10 +295,10 @@ public class CvsRepositoryAdaptor extends CvsSupport implements RepositoryAdapto
 				final ChangeSetDto m = map.get(key);
 				m.setRevisionLabel(revisionLabel);
 				
-				final Set<String> paths = new HashSet<String>(Arrays.asList(m.getModifiedPaths()));
-				paths.addAll(Arrays.asList(e.getModifiedPaths()));
+				final Set<String> paths = new HashSet<String>(m.getModifiedPaths());
+				paths.addAll(e.getModifiedPaths());
 				
-				m.setModifiedPaths(paths.toArray(new String[paths.size()]));
+				m.setModifiedPaths(new ArrayList<String>(paths));
 				
 				if (e.getTimestamp().after(m.getTimestamp())) {
 					m.setTimestamp(e.getTimestamp());

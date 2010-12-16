@@ -1,6 +1,6 @@
 /*
  * Vulcan Build Manager
- * Copyright (C) 2005-2006 Chris Eldredge
+ * Copyright (C) 2005-2010 Chris Eldredge
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,7 +18,10 @@
  */
 package net.sourceforge.vulcan.dto;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 
 import net.sourceforge.vulcan.metadata.SvnRevision;
 
@@ -28,30 +31,56 @@ public class ChangeSetDto extends BaseDto {
 	private String author;
 	private Date timestamp;
 	private String message;
-	private String[] modifiedPaths;
+	private List<String> modifiedPaths = Collections.emptyList();
+
+	public ChangeSetDto() {
+	}
+	
+	public ChangeSetDto(String revisionLabel, String author, Date timestamp, String message, List<String> modifiedPaths) {
+		this.revisionLabel = revisionLabel;
+		this.author = author;
+		this.timestamp = timestamp;
+		this.message = message;
+		this.modifiedPaths = modifiedPaths;
+	}
 	
 	public String getAuthor() {
 		return author;
 	}
+	
 	public void setAuthor(String author) {
 		this.author = author;
 	}
+	
 	public String getMessage() {
 		return message;
 	}
+	
 	public void setMessage(String message) {
 		this.message = message;
 	}
-	public String[] getModifiedPaths() {
+	
+	public List<String> getModifiedPaths() {
 		return modifiedPaths;
 	}
-	public void setModifiedPaths(String[] modifiedPaths) {
+	
+	public void setModifiedPaths(List<String> modifiedPaths) {
 		this.modifiedPaths = modifiedPaths;
 	}
+	
+	public void addModifiedPath(String path) {
+		if (modifiedPaths == Collections.<String>emptyList()) {
+			modifiedPaths = new ArrayList<String>();
+		}
+		
+		modifiedPaths.add(path);
+	}
+	
 	@Deprecated
 	public RevisionTokenDto getRevision() {
 		return new RevisionTokenDto(0l, revisionLabel);
 	}
+	
 	@Deprecated
 	public void setRevision(RevisionTokenDto revision) {
 		if (revision == null) {
@@ -60,16 +89,20 @@ public class ChangeSetDto extends BaseDto {
 			this.revisionLabel = revision.getLabel();
 		}
 	}
+	
 	public String getRevisionLabel() {
 		return revisionLabel;
 	}
+	
 	public void setRevisionLabel(String revisionLabel) {
 		this.revisionLabel = revisionLabel;
 	}
-	public java.util.Date getTimestamp() {
+	
+	public Date getTimestamp() {
 		return timestamp;
 	}
-	public void setTimestamp(java.util.Date timestamp) {
-		this.timestamp = timestamp;
+	
+	public void setTimestamp(Date timestamp) {
+		this.timestamp = (Date) timestamp;
 	}
 }

@@ -18,6 +18,8 @@
  */
 package net.sourceforge.vulcan.dto;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -81,14 +83,38 @@ public class ProjectStatusDto extends NameDto {
 	
 	private UpdateType updateType = UpdateType.Full;
 	
-	private List<BuildMessageDto> errors;
-	private List<BuildMessageDto> warnings;
-	private List<MetricDto> metrics;
+	private List<BuildMessageDto> errors = Collections.emptyList();
+	private List<BuildMessageDto> warnings = Collections.emptyList();
+	private List<MetricDto> metrics = Collections.emptyList();
 	private List<TestFailureDto> testFailures;
 	
 	// Only defined while building
 	private Long estimatedBuildTimeMillis;
 	
+	public void addError(BuildMessageDto error) {
+		if (errors == Collections.<BuildMessageDto>emptyList()) {
+			errors = new ArrayList<BuildMessageDto>();
+		}
+		
+		errors.add(error);
+	}
+	
+	public void addWarning(BuildMessageDto warning) {
+		if (warnings == Collections.<BuildMessageDto>emptyList()) {
+			warnings = new ArrayList<BuildMessageDto>();
+		}
+		
+		warnings.add(warning);
+	}
+	
+	public void addMetric(MetricDto metric) {
+		if (metrics == Collections.<MetricDto>emptyList()) {
+			metrics = new ArrayList<MetricDto>();
+		}
+		
+		metrics.add(metric);
+	}
+
 	public String getWorkDir() {
 		return workDir;
 	}
@@ -108,6 +134,10 @@ public class ProjectStatusDto extends NameDto {
 		this.lastGoodBuildNumber = lastGoodBuildNumber;
 	}
 	public RevisionTokenDto getLastKnownRevision() {
+		if (revision != null) {
+			return revision;
+		}
+		
 		return lastKnownRevision;
 	}
 	public void setLastKnownRevision(RevisionTokenDto lastKnownRevision) {

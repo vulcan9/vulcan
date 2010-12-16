@@ -39,7 +39,7 @@ class ModifiedPathInserter extends SqlUpdate {
 		compile();
 	}
 	
-	public int insert(int buildId, int changeSetId, String[] modifiedPaths) {
+	public int insert(int buildId, int changeSetId, Iterable<String> modifiedPaths) {
 		int count = 0;
 		
 		final Object[] params = new Object[3];

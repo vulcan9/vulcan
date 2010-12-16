@@ -23,6 +23,7 @@ import net.sourceforge.vulcan.cvs.dto.CvsProjectConfigDto;
 import net.sourceforge.vulcan.cvs.dto.CvsRepositoryProfileDto;
 import net.sourceforge.vulcan.dto.ChangeLogDto;
 import net.sourceforge.vulcan.dto.ChangeSetDto;
+import net.sourceforge.vulcan.dto.ProjectConfigDto;
 import net.sourceforge.vulcan.dto.RevisionTokenDto;
 import net.sourceforge.vulcan.exception.RepositoryException;
 
@@ -40,7 +41,7 @@ public class GetChangeLogs {
 		profile.setPassword("");
 		projectConfig.setModule("gtkpod");
 		
-		final CvsRepositoryAdaptor repo = new CvsRepositoryAdaptor(new CvsConfigDto(), profile, projectConfig, null);
+		final CvsRepositoryAdaptor repo = new CvsRepositoryAdaptor(new ProjectConfigDto(), new CvsConfigDto(), profile, projectConfig);
 		
 		RevisionTokenDto first = new RevisionTokenDto(20061022052422l, "2006/10/22 05:24:52");
 		RevisionTokenDto head = new RevisionTokenDto(20061109074924l, "2006/11/09 07:49:24");

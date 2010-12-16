@@ -19,12 +19,9 @@
 package net.sourceforge.vulcan.core.support;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.OutputStream;
 import java.net.InetAddress;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Arrays;
 import java.util.UUID;
 import java.util.concurrent.TimeoutException;
 
@@ -35,17 +32,15 @@ import net.sourceforge.vulcan.RepositoryAdaptor;
 import net.sourceforge.vulcan.core.BuildDetailCallback;
 import net.sourceforge.vulcan.core.BuildManager;
 import net.sourceforge.vulcan.core.BuildPhase;
-import net.sourceforge.vulcan.core.BuildStatusListener;
 import net.sourceforge.vulcan.core.BuildTarget;
-import net.sourceforge.vulcan.core.ProjectBuilder;
+import net.sourceforge.vulcan.core.support.ProjectBuilderImpl.RunnablePhase;
+import net.sourceforge.vulcan.core.support.ProjectBuilderImpl.RunnablePhaseImpl;
 import net.sourceforge.vulcan.dto.BuildDaemonInfoDto;
-import net.sourceforge.vulcan.dto.BuildMessageDto;
 import net.sourceforge.vulcan.dto.ChangeLogDto;
 import net.sourceforge.vulcan.dto.MetricDto;
 import net.sourceforge.vulcan.dto.ProjectConfigDto;
 import net.sourceforge.vulcan.dto.ProjectStatusDto;
 import net.sourceforge.vulcan.dto.RevisionTokenDto;
-import net.sourceforge.vulcan.dto.MetricDto.MetricType;
 import net.sourceforge.vulcan.dto.ProjectStatusDto.Status;
 import net.sourceforge.vulcan.dto.ProjectStatusDto.UpdateType;
 import net.sourceforge.vulcan.exception.BuildFailedException;
@@ -54,32 +49,29 @@ import net.sourceforge.vulcan.exception.RepositoryException;
 import net.sourceforge.vulcan.exception.StoreException;
 import net.sourceforge.vulcan.metadata.SvnRevision;
 
+import org.apache.commons.logging.Log;
+import org.easymock.IAnswer;
+
 @SvnRevision(id = "$Id$", url = "$HeadURL$")
 public class ProjectBuilderTest extends EasyMockTestCase {
-	boolean createWorkingDirectoriesSuccess = true;
-	long sleepTime = -1;
+	ProjectConfigDto project = new ProjectConfigDto();
+	ProjectStatusDto buildStatus = new ProjectStatusDto();
+	BuildTargetImpl buildTarget = new BuildTargetImpl(project, buildStatus);
+	BuildContext buildContext = new BuildContext(buildTarget);
 	
-	ProjectConfigDto project;
+	ProjectStatusDto lastBuild = new ProjectStatusDto();
+	ProjectStatusDto lastBuildFromSameTag = new ProjectStatusDto();
+	ProjectStatusDto lastBuildInSameWorkDir = new ProjectStatusDto();
 
-	ProjectStatusDto buildToolStatus = new ProjectStatusDto();
-	ProjectStatusDto previousStatusByTagName;
-	ProjectStatusDto previousStatusByWorkDir;
+	BuildDaemonInfoDto info = new BuildDaemonInfoDto();
+
+	RevisionTokenDto rev0 = new RevisionTokenDto(0L);
+	RevisionTokenDto rev1 = new RevisionTokenDto(1L);
 	
-	Exception re;
-	BuildFailedException be;
-	
-	boolean gotInterrupt;
-	boolean invokedBuild;
 	boolean suppressStartDate = true;
 	
 	File logFile = new File("fakeBuildLog.log");
 	File diffFile = new File("fakeDiff.log");
-	
-	String errorMessage;
-	String warningMessage;
-	MetricDto metric;
-	
-	UpdateType updateType = null;
 	
 	Long estimatedBuildTimeMillis = null;
 	
@@ -98,63 +90,22 @@ public class ProjectBuilderTest extends EasyMockTestCase {
 	
 	ProjectBuilderImpl builder = new ProjectBuilderImpl() {
 		@Override
-		protected void buildProject(ProjectConfigDto currentTarget) throws Exception {
-			if (re != null) {
-				doPhase(BuildPhase.Build, new PhaseCallback() {
-					public void execute() throws Exception {
-						throw re;						
-					}
-				});
-			}
-			super.buildProject(currentTarget);
-		}
-		@Override
-		protected boolean createWorkingDirectories(File path) throws ConfigException {
-			return createWorkingDirectoriesSuccess;
-		}
-		@Override
-		protected void invokeBuilder(ProjectConfigDto currentTarget) throws TimeoutException, KilledException, BuildFailedException, ConfigException, IOException, StoreException {
-			if (be != null) {
-				throw be;
-			}
-			synchronized(this) {
-				invokedBuild = true;
-				notifyAll();
-			}
-			if (errorMessage != null) {
-				buildDetailCallback.reportError(errorMessage, null, null, null);
-			}
-			if (warningMessage != null) {
-				buildDetailCallback.reportWarning(warningMessage, null, null, null);
-			}
-			if (metric != null) {
-				buildDetailCallback.addMetric(metric);
-			}
-			if (sleepTime > 0) {
-				try {
-					Thread.sleep(sleepTime);
-				} catch (InterruptedException e) {
-					gotInterrupt = true;
-					Thread.currentThread().interrupt();
-				}
-			} else {
-				super.invokeBuilder(currentTarget);
-			}
-		}
-		@Override
-		protected void initializeBuildStatus(BuildTarget buildTarget) {
-			super.initializeBuildStatus(buildTarget);
+		protected BuildContext initializeBuildStatus(BuildTarget buildTarget) throws StoreException, ConfigException {
+			BuildContext ctx = super.initializeBuildStatus(buildTarget);
 			
 			if (suppressStartDate) {
-				buildStatus.setStartDate(null);
+				ctx.getCurrentStatus().setStartDate(null);
 			}
+			
+			return ctx;
 		}
 	};
 	
 	BuildManager mgr = createStrictMock(BuildManager.class);
 	ProjectManager projectMgr = createStrictMock(ProjectManager.class);
-	RepositoryAdaptor ra = createStrictMock(RepositoryAdaptor.class);
-	BuildTool tool = createStrictMock(BuildTool.class);
+	FileSystem fileSystem = createStrictMock(FileSystem.class);
+	RepositoryAdaptor repository = createStrictMock(RepositoryAdaptor.class);
+	BuildTool buildTool = createStrictMock(BuildTool.class);
 
 	UUID id = UUID.randomUUID();
 	
@@ -178,850 +129,698 @@ public class ProjectBuilderTest extends EasyMockTestCase {
 				String projectName, String tagName) {
 			assertEquals(project.getName(), projectName);
 			assertEquals(project.getRepositoryTagName(), tagName);
-			return previousStatusByTagName;
+			return lastBuildFromSameTag;
 		}
 		@Override
 		public ProjectStatusDto loadMostRecentBuildOutcomeByWorkDir(
 				String projectName, String workDir) {
 			assertEquals(project.getName(), projectName);
 			assertEquals(project.getWorkDir(), workDir);
-			return previousStatusByWorkDir;
+			return lastBuildInSameWorkDir;
 		}
 	};
 	
-	BuildDaemonInfoDto info = new BuildDaemonInfoDto();
-	ProjectStatusDto previousStatus = new ProjectStatusDto();
-
-	RevisionTokenDto rev0 = new RevisionTokenDto(0l);
-	RevisionTokenDto rev1 = new RevisionTokenDto(1l);
-
-	Throwable error;
-	
 	WorkingCopyUpdateExpert updateExpert = new WorkingCopyUpdateExpert() {
 		UpdateType determineUpdateStrategy(ProjectConfigDto currentTarget, ProjectStatusDto previousStatus) {
-			if (previousStatusByWorkDir != null) {
-				assertSame(previousStatusByWorkDir, previousStatus);
+			if (lastBuildInSameWorkDir != null) {
+				assertSame(lastBuildInSameWorkDir, previousStatus);
 			}
 
-			return updateType != null ? updateType : UpdateType.Full;
+			return UpdateType.Full;
 		}
 	};
 	
 	@Override
 	public void setUp() throws Exception {
-		checkOrder(false);
-		
 		UUIDUtils.setForcedUUID(id);
+		
+		project.setName("example_project");
+		project.setWorkDir("default_workdir");
 		
 		builder.setWorkingCopyUpdateExpert(updateExpert);
 		builder.setConfigurationStore(store);
 		builder.setBuildOutcomeStore(store);
 		builder.setBuildManager(mgr);
 		builder.setProjectManager(projectMgr);
+		builder.setFileSystem(fileSystem);
 		builder.setDiffsEnabled(true);
 		
 		builder.init();
 		
-		expect(ra.getRepositoryUrl()).andReturn("http://localhost").anyTimes();
-		expect(projectMgr.getPluginModificationDate((String)anyObject())).andReturn(null).anyTimes();
-
-		mgr.registerBuildStatus((BuildDaemonInfoDto)notNull(), (ProjectBuilder) notNull(),
-				(ProjectConfigDto)notNull(), (ProjectStatusDto)notNull());
-		expectLastCall().anyTimes();
-		
 		info.setHostname(InetAddress.getLocalHost());
 		info.setName("mock");
 
-		previousStatus.setStatus(Status.PASS);
-		previousStatus.setRevision(rev0);
-		previousStatus.setBuildNumber(42);
-		previousStatus.setTagName("trunk");
-		
-		buildToolStatus.setName("a name");
-		buildToolStatus.setRevision(rev0);
-		buildToolStatus.setStatus(Status.BUILDING);
-		buildToolStatus.setTagName("trunk");
-		buildToolStatus.setId(id);
-		buildToolStatus.setDiffId(id);
-		buildToolStatus.setBuildLogId(id);
-		buildToolStatus.setRepositoryUrl("http://localhost");
-		buildToolStatus.setErrors(new ArrayList<BuildMessageDto>());
-		buildToolStatus.setWarnings(new ArrayList<BuildMessageDto>());
-		buildToolStatus.setMetrics(new ArrayList<MetricDto>());
-		buildToolStatus.setBuildNumber(0);
-		buildToolStatus.setWorkDir("dir");
-		buildToolStatus.setWorkDirSupportsIncrementalUpdate(true);
+		lastBuild.setStatus(Status.PASS);
+		lastBuild.setRevision(rev0);
+		lastBuild.setBuildNumber(42);
+		lastBuild.setTagName("trunk");
+		lastBuild.setWorkDir(project.getWorkDir());
 		
 		logFile.deleteOnExit();
 		diffFile.deleteOnExit();
 	}
-
-	public void testSetsStartDate() throws Exception {
-		suppressStartDate = false;
-		
-		project = new ProjectConfigDto();
-		project.setName("foo");
-
-		BuildTarget target = new BuildTargetImpl(project, new ProjectStatusDto());
-		
-		builder.initializeBuildStatus(target);
-		
-		assertNotNull(target.getStatus().getStartDate());
+	
+	@Override
+	protected void tearDown() throws Exception {
+		super.tearDown();
+		Thread.interrupted();
 	}
 	
-	public void testKillProjectDuringBuild() throws Throwable {
-		sleepTime = 10000;
-		
-		project = new ProjectConfigDto();
-		project.setName("foo");
-		project.setWorkDir("dir");
-		
-		expect(projectMgr.getRepositoryAdaptor(project)).andReturn(ra);
+	public void testDefaultPhases() throws Exception {
+		assertEquals(Arrays.asList(builder.prepareRepository, builder.createWorkingCopy, builder.getChangeLog, builder.invokeBuildTool), builder.phases);
+	}
 
-		expect(ra.getTagName()).andReturn("trunk");
-		expect(mgr.getLatestStatus("foo")).andReturn(null);
-		expect(ra.getLatestRevision(null)).andReturn(rev1);
+	public void testExecutePhasesRunsPhases() throws Exception {
+		RunnablePhase p1 = createStrictMock(RunnablePhase.class);
+		RunnablePhase p2 = createStrictMock(RunnablePhase.class);
 		
-		ra.createWorkingCopy(new File(project.getWorkDir()).getAbsoluteFile(), buildDetailCallback);
+		p1.execute(buildContext);
+		p2.execute(buildContext);
 		
-		mgr.targetCompleted(info, project, createFakeBuildOutcome(project.getName(), 0, rev1, "trunk", Status.ERROR, "messages.build.killed", new String[] {"a user"}, null, "http://localhost", true, null, null, null, ProjectStatusDto.UpdateType.Full, project.getWorkDir(), true, estimatedBuildTimeMillis, false));
-
 		replay();
+		
+		builder.phases = Arrays.asList(p1, p2);
+		
+		builder.executeBuildPhases(buildContext);
+		
+		verify();
+	}
 
-		assertFalse(builder.isBuilding());
-
-		final Thread thread = new Thread() {
-			@Override
-			public void run() {
-				try {
-					builder.build(info, new BuildTargetImpl(project, new ProjectStatusDto()), buildDetailCallback);
-				} catch (Throwable e) {
-					error = e;
-				}
-			}
-		};
-
-		thread.start();
-
-		synchronized (builder) {
-			if (!invokedBuild) {
-				builder.wait(1000);
-			}
+	public void testValidateNullOrBlankWorkDir() throws Exception {
+		project.setWorkDir("");
+		
+		try {
+			builder.validateWorkDir(buildContext);
+			fail("expected exception");
+		} catch (ConfigException e) {
+			assertEquals("messages.build.null.work.dir", e.getKey());
 		}
-		
-		assertTrue(builder.isBuilding());
-		
-		synchronized (builder) {
-			if (!invokedBuild) {
-				builder.wait(1000);
-			}
-		}
+	}
 
-		builder.abortCurrentBuild(false, "a user");
-
-		thread.join();
+	public void testValidateWorkDirDoesNotExist() throws Exception {
+		fileSystem.directoryExists(new File(project.getWorkDir()));
+		expectLastCall().andReturn(false);
 		
-		if (error != null) {
-			throw error;
+		replay();
+		
+		builder.validateWorkDir(buildContext);
+		
+		verify();
+	}
+
+	public void testValidateWorkDirNotPreviouslyUsed() throws Exception {
+		buildContext.setLastBuildInSameWorkDir(null);
+		
+		fileSystem.directoryExists(new File(project.getWorkDir()));
+		expectLastCall().andReturn(true);
+		
+		replay();
+		
+		try {
+			builder.validateWorkDir(buildContext);
+			fail("expected exception");
+		} catch (ConfigException e) {
+			assertEquals("errors.wont.delete.non.working.copy", e.getKey());
+			assertEquals(Arrays.asList(buildContext.getConfig().getWorkDir(), buildContext.getProjectName()), Arrays.asList(e.getArgs()));
 		}
 		
 		verify();
-		
-		assertTrue("did not interrupt", gotInterrupt);
-		
-		assertFalse(builder.isBuilding());
 	}
 
-	public void testBuildProjectPreviousNull() throws Exception {
-		project = new ProjectConfigDto();
-		project.setName("a name");
-		project.setWorkDir("a");
-
-		expect(mgr.getLatestStatus(project.getName())).andReturn(((ProjectStatusDto) null));
-
-		expect(projectMgr.getRepositoryAdaptor(project)).andReturn(ra);
-
-		expect(ra.getTagName()).andReturn("trunk");
-		expect(ra.getLatestRevision(null)).andReturn(rev0);
-
-		ra.createWorkingCopy(new File("a").getAbsoluteFile(), buildDetailCallback);
-
-		expect(projectMgr.getBuildTool(project)).andReturn(tool);
+	public void testValidateWorkDirPreviouslyUsed() throws Exception {
+		buildContext.setLastBuildInSameWorkDir(lastBuildInSameWorkDir);
 		
-		//buildToolStatus.setBuildReasonKey("messages.build.reason.repository.changes");
-		buildToolStatus.setWorkDir("a");
-		buildToolStatus.setDiffId(null);
+		fileSystem.directoryExists(new File(project.getWorkDir()));
+		expectLastCall().andReturn(true);
 		
-		tool.buildProject(
-				eq(project),
-				eq(buildToolStatus),
-				eq(logFile),
-				(BuildDetailCallback)notNull());
+		replay();
 		
-		mgr.targetCompleted(info, project, createFakeBuildOutcome(project.getName(), 0, rev0, "trunk", Status.PASS, null, null, null, "http://localhost", true, null, null, null, ProjectStatusDto.UpdateType.Full, project.getWorkDir(), true, estimatedBuildTimeMillis, false));
+		builder.validateWorkDir(buildContext);
 		
-		checkBuild();
-		
-		assertTrue(invokedBuild);
+		verify();
 	}
-	public void testBuildProjectRequestedByUser() throws Exception {
-		project = new ProjectConfigDto();
-		project.setName("a name");
-		project.setWorkDir("a");
+	
+	public void testInitializeBuildStatus() throws Exception {
+		suppressStartDate = false;
+		
+		BuildContext ctx = doInitializeBuildStatusTest();
+		
+		assertNotNull(ctx.getCurrentStatus().getStartDate());
+		assertEquals(lastBuild.getBuildNumber()+1, ctx.getCurrentStatus().getBuildNumber().intValue());
+	}
+
+	public void testInitializeBuildStatusSetsTagOnCurrentStatus() throws Exception {
+		suppressStartDate = false;
+		
+		BuildContext ctx = doInitializeBuildStatusTest();
+		
+		assertEquals("trunk", ctx.getCurrentStatus().getTagName());
+	}
+	
+	
+	public void testInitializeBuildStatusSetsLastBuildFromSameTag() throws Exception {
+		suppressStartDate = false;
+		
+		BuildContext ctx = doInitializeBuildStatusTest();
+	
+		assertSame("lastBuildFromSameTag", lastBuild, ctx.getLastBuildFromSameTag());
+	}
+	
+	public void testInitializeBuildStatusPreviousNull() throws Exception {
+		lastBuild = null;
+		
+		BuildContext ctx = doInitializeBuildStatusTest();
+		
+		assertEquals(0, ctx.getCurrentStatus().getBuildNumber().intValue());
+	}
+
+	public void testInitializeBuildStatusRequestedByUser() throws Exception {
 		project.setRequestedBy("Deborah");
-
-		expect(projectMgr
-		.getRepositoryAdaptor(project)).andReturn(ra);
-
-		expect(ra.getTagName()).andReturn("trunk");
-		expect(ra.getLatestRevision(null)).andReturn(rev0);
 		
-		expect(mgr.getLatestStatus(project.getName())).andReturn(((ProjectStatusDto) null));
-
-		ra.createWorkingCopy(new File("a").getAbsoluteFile(), buildDetailCallback);
-
-		expect(projectMgr.getBuildTool(project)).andReturn(tool);
+		BuildContext ctx = doInitializeBuildStatusTest();
 		
-		buildToolStatus.setBuildReasonKey("messages.build.reason.repository.changes");
-		buildToolStatus.setRequestedBy("Deborah");
-		buildToolStatus.setDiffId(null);
-		
-		tool.buildProject(
-				eq(project),
-				(ProjectStatusDto) notNull(),
-				eq(logFile),
-				(BuildDetailCallback)notNull());
-		
-		mgr.targetCompleted(info, project, createFakeBuildOutcome(project.getName(), 0, rev0, "trunk", Status.PASS, null, null, null, "http://localhost", true, "Deborah", null, null, ProjectStatusDto.UpdateType.Full, project.getWorkDir(), true, estimatedBuildTimeMillis, false));
-		
-		checkBuild();
+		assertEquals(project.getRequestedBy(), ctx.getCurrentStatus().getRequestedBy());
 	}
-	public void testCapturesErrorsAndWarnings() throws Exception {
-		project = new ProjectConfigDto();
-		project.setName("a name");
-		project.setWorkDir("a");
-		project.setRequestedBy("Deborah");
 
+	public void testInitializeBuildStatusSetsScheduledFlag() throws Exception {
+		project.setScheduledBuild(true);
 		
-		final List<BuildPhase> listenedPhases = new ArrayList<BuildPhase>();
-		final List<BuildMessageDto> listenedErrors = new ArrayList<BuildMessageDto>();
-		final List<BuildMessageDto> listenedWarnings = new ArrayList<BuildMessageDto>();
+		BuildContext ctx = doInitializeBuildStatusTest();
 		
-		builder.addBuildStatusListener(new BuildStatusListener() {
-			public void onBuildPhaseChanged(Object source, BuildPhase phase) {
-				listenedPhases.add(phase);
-			}
-			public void onErrorLogged(Object source, BuildMessageDto error) {
-				listenedErrors.add(error);
-			}
-			public void onWarningLogged(Object source, BuildMessageDto warning) {
-				listenedWarnings.add(warning);
+		assertEquals(project.isScheduledBuild(), ctx.getCurrentStatus().isScheduledBuild());
+	}
+	
+	public void testInitializeBuildSpecifiedTag() throws Exception {
+		project.setRepositoryTagName("v1.2");
+		
+		BuildContext ctx = doInitializeBuildStatusTest();
+		
+		assertSame("lastBuildFromSameTag", lastBuildFromSameTag, ctx.getLastBuildFromSameTag());
+		assertEquals("v1.2", ctx.getCurrentStatus().getTagName());
+	}
+	
+	public void testInitializeBuildSetsTagOnProject() throws Exception {
+		buildContext.getConfig().setRepositoryTagName(null);
+		
+		BuildContext ctx = doInitializeBuildStatusTest();
+	
+		assertEquals("trunk", ctx.getConfig().getRepositoryTagName());
+	}
+	
+	private BuildContext doInitializeBuildStatusTest() throws Exception {
+		expect(projectMgr.getRepositoryAdaptor(project)).andReturn(repository);
+		expect(mgr.getLatestStatus(project.getName())).andReturn(lastBuild);
+		
+		
+		String tag = "trunk";
+		
+		if (project.getRepositoryTagName() != null) {
+			tag = project.getRepositoryTagName();
+			repository.setTagOrBranch(tag);
+		}
+		
+		expect(repository.getTagOrBranch()).andReturn(tag);
+		
+		replay();
+		
+		BuildContext buildContext = builder.initializeBuildStatus(buildTarget);
+		
+		verify();
+		
+		assertSame("lastBuild", lastBuild, buildContext.getLastBuild());
+		assertSame("lastBuildInSameWorkDir", lastBuild, buildContext.getLastBuildInSameWorkDir());
+		
+		return buildContext;
+	}
+	
+	public void testInitializeBuildStatusGetsLastBuildInSameWorkDir() throws Exception {
+		lastBuild.setWorkDir("other");
+		
+		expect(projectMgr.getRepositoryAdaptor(project)).andReturn(repository);
+		expect(mgr.getLatestStatus(project.getName())).andReturn(lastBuild);
+		expect(repository.getTagOrBranch()).andReturn("trunk");
+		
+		replay();
+		
+		BuildContext ctx = builder.initializeBuildStatus(buildTarget);
+		
+		verify();
+		
+		assertSame(lastBuild, ctx.getLastBuild());
+		assertSame(lastBuild, ctx.getLastBuildFromSameTag());
+		assertSame("lastBuildInSameWorkDir", lastBuildInSameWorkDir, ctx.getLastBuildInSameWorkDir());
+	}
+
+	public void testInitializeBuildStatusGetsLastBuildFromSameTag() throws Exception {
+		lastBuild.setTagName("other");
+		
+		expect(projectMgr.getRepositoryAdaptor(project)).andReturn(repository);
+		expect(mgr.getLatestStatus(project.getName())).andReturn(lastBuild);
+		expect(repository.getTagOrBranch()).andReturn("trunk");
+		
+		replay();
+		
+		BuildContext ctx = builder.initializeBuildStatus(buildTarget);
+		
+		verify();
+		
+		assertSame(lastBuild, ctx.getLastBuild());
+		assertSame(lastBuildFromSameTag, ctx.getLastBuildFromSameTag());
+		assertSame(lastBuild, ctx.getLastBuildInSameWorkDir());
+	}
+
+	public void testInitializeBuildStatusSetsTag() throws Exception {
+		project.setRepositoryTagName("other");
+		
+		expect(projectMgr.getRepositoryAdaptor(project)).andReturn(repository);
+		expect(mgr.getLatestStatus(project.getName())).andReturn(lastBuild);
+		repository.setTagOrBranch(project.getRepositoryTagName());
+		expect(repository.getTagOrBranch()).andReturn(project.getRepositoryTagName());
+		
+		replay();
+		
+		BuildContext ctx = builder.initializeBuildStatus(buildTarget);
+		
+		verify();
+		
+		assertSame(lastBuild, ctx.getLastBuild());
+		assertSame(lastBuildFromSameTag, ctx.getLastBuildFromSameTag());
+		assertSame(lastBuild, ctx.getLastBuildInSameWorkDir());
+	}
+
+
+
+	public void testPrepareRepositorySetsProperties() throws Exception {
+		doPrepareRepositoryTest();
+		
+		assertEquals(rev0, buildContext.getRevision());
+		assertEquals("http://localhost", buildContext.getCurrentStatus().getRepositoryUrl());
+	}
+
+	public void testPrepareRepositorySetsUpdateType() throws Exception {
+		buildContext.setUpdateType(null);
+		
+		doPrepareRepositoryTest();
+		
+		assertEquals(UpdateType.Full, buildContext.getUpdateType());
+	}
+
+	public void testPrepareRepositorySetsEstimatedBuildTime() throws Exception {
+		estimatedBuildTimeMillis = 123L;
+		
+		doPrepareRepositoryTest();
+		
+		assertEquals(estimatedBuildTimeMillis, buildContext.getCurrentStatus().getEstimatedBuildTimeMillis());
+	}
+
+	private void doPrepareRepositoryTest() throws RepositoryException, InterruptedException, Exception {
+		builder.initializeBuildDetailCallback(buildTarget, buildDetailCallback);
+		
+		buildContext.setLastBuildInSameWorkDir(lastBuildInSameWorkDir);
+		buildContext.setRepositoryAdatpor(repository);
+		
+		repository.prepareRepository(builder.buildDetailCallback);
+		
+		expect(repository.getLatestRevision(null)).andReturn(rev0);
+		expect(repository.getRepositoryUrl()).andReturn("http://localhost");
+		
+		replay();
+		
+		builder.prepareRepository.executePhase(buildContext);
+		
+		verify();
+	}
+
+	public void testCreateWorkingCopyFull() throws Exception {
+		buildContext.setUpdateType(UpdateType.Full);
+		buildContext.setRepositoryAdatpor(repository);
+		buildContext.getCurrentStatus().setWorkDirSupportsIncrementalUpdate(false);
+		
+		repository.createPristineWorkingCopy(buildDetailCallback);
+		
+		replay();
+		
+		builder.createWorkingCopy.executePhase(buildContext);
+		
+		verify();
+		
+		assertEquals("WorkDirSupportsIncrementalUpdate", true, buildContext.getCurrentStatus().isWorkDirSupportsIncrementalUpdate());
+	}
+
+	public void testCreateWorkingCopyIncrementall() throws Exception {
+		buildContext.setUpdateType(UpdateType.Incremental);
+		buildContext.setRepositoryAdatpor(repository);
+		buildContext.getCurrentStatus().setWorkDirSupportsIncrementalUpdate(false);
+		
+		repository.updateWorkingCopy(buildDetailCallback);
+		
+		replay();
+		
+		builder.createWorkingCopy.executePhase(buildContext);
+		
+		verify();
+		
+		assertEquals("WorkDirSupportsIncrementalUpdate", true, buildContext.getCurrentStatus().isWorkDirSupportsIncrementalUpdate());
+	}
+	
+	public void testGetsChangeLog() throws Exception {
+		final ChangeLogDto changeLog = new ChangeLogDto();
+		
+		lastBuildFromSameTag.setRevision(rev0);
+		buildContext.setLastBuildFromSameTag(lastBuildFromSameTag);
+		buildContext.getCurrentStatus().setRevision(rev1);
+		buildContext.setRepositoryAdatpor(repository);
+		
+		repository.getChangeLog(eq(rev0), eq(rev1), (OutputStream) notNull());
+		expectLastCall().andReturn(changeLog);
+
+		replay();
+		
+		builder.getChangeLog.executePhase(buildContext);
+		
+		verify();
+		
+		assertSame("changeLog", changeLog, buildContext.getCurrentStatus().getChangeLog());
+	}
+	
+	public void testGetsChangeLogNullDiffOutputStreamWhenFlagIsFalse() throws Exception {
+		builder.setDiffsEnabled(false);
+		
+		lastBuildFromSameTag.setRevision(rev0);
+		buildContext.setLastBuildFromSameTag(lastBuildFromSameTag);
+		buildContext.getCurrentStatus().setRevision(rev1);
+		buildContext.setRepositoryAdatpor(repository);
+		
+		repository.getChangeLog(eq(rev0), eq(rev1), (OutputStream) eq(null));
+		expectLastCall().andReturn(new ChangeLogDto());
+
+		replay();
+		
+		builder.getChangeLog.executePhase(buildContext);
+		
+		verify();
+		
+		assertEquals("diffId", null, buildContext.getCurrentStatus().getDiffId());
+	}
+
+	public void testGetsChangeLogSkipsOnNoPreviousBuildFromSameTag() throws Exception {
+		buildContext.setLastBuildFromSameTag(null);
+		buildContext.getCurrentStatus().setRevision(rev1);
+		buildContext.setRepositoryAdatpor(repository);
+		
+		replay();
+		
+		builder.getChangeLog.executePhase(buildContext);
+		
+		verify();
+		
+		assertSame("changeLog", null, buildContext.getCurrentStatus().getChangeLog());
+	}
+
+	public void testGetsChangeLogSkipsWhenRevisionNotChanged() throws Exception {
+		lastBuildFromSameTag.setRevision(rev0);
+		buildContext.setLastBuildFromSameTag(lastBuildFromSameTag);
+		buildContext.getCurrentStatus().setRevision(rev0);
+		buildContext.setRepositoryAdatpor(repository);
+		
+		replay();
+		
+		builder.getChangeLog.executePhase(buildContext);
+		
+		verify();
+		
+		assertSame("changeLog", null, buildContext.getCurrentStatus().getChangeLog());
+	}
+
+	public void testInvokeBuildTool() throws Exception {
+		expect(projectMgr.getBuildTool(project)).andReturn(buildTool);
+		buildTool.buildProject(eq(project), eq(buildStatus), (File)notNull(), (BuildDetailCallback) notNull());
+		
+		replay();
+		
+		builder.initializeBuildDetailCallback(buildTarget, buildDetailCallback);
+		builder.invokeBuildTool.executePhase(buildContext);
+		
+		verify();
+	}
+	
+	public void testRunnablePhaseSetsAndClearsPhase() throws Exception {
+		doRunnablePhaseTest(null);
+	}
+
+	public void testRunnablePhaseClearsInterrupt() throws Exception {
+		doRunnablePhaseTest(new RunnableCallback() {
+			public void run(BuildContext buildContext) throws Exception {
+				Thread.currentThread().interrupt();
 			}
 		});
 		
-		expect(projectMgr.getRepositoryAdaptor(project)).andReturn(ra);
-
-		expect(ra.getTagName()).andReturn("trunk");
-		expect(ra.getLatestRevision(null)).andReturn(rev0);
-		
-		expect(mgr.getLatestStatus(project.getName())).andReturn(((ProjectStatusDto) null));
-
-		ra.createWorkingCopy(new File("a").getAbsoluteFile(), buildDetailCallback);
-
-		expect(projectMgr.getBuildTool(project)).andReturn(tool);
-
-		errorMessage = "An error occurred!";
-		warningMessage = "This api is deprecated.";
-		
-		buildToolStatus.setRequestedBy("Deborah");
-		buildToolStatus.getErrors().add(new BuildMessageDto(errorMessage, null, null, null));
-		buildToolStatus.getWarnings().add(new BuildMessageDto(warningMessage, null, null, null));
-		buildToolStatus.setWorkDir("a");
-		buildToolStatus.setDiffId(null);
-		
-		tool.buildProject(
-				eq(project),
-				eq(buildToolStatus),
-				eq(logFile),
-				(BuildDetailCallback)notNull());
-		
-
-		final ProjectStatusDto outcome = createFakeBuildOutcome(project.getName(), 0, rev0, "trunk", Status.PASS, null, null, null, "http://localhost", true, "Deborah", null, null, ProjectStatusDto.UpdateType.Full, project.getWorkDir(), true, estimatedBuildTimeMillis, false);
-		
-		outcome.getErrors().add(new BuildMessageDto(errorMessage, null, null, null));
-		outcome.getWarnings().add(new BuildMessageDto(warningMessage, null, null, null));
-		
-		mgr.targetCompleted(info, project, outcome);
-		
-		checkBuild();
-		
-		assertTrue("expected listenedPhases.size() > 0 but was " + listenedPhases.size(), listenedPhases.size() > 0);
-		assertTrue("expected listenedErrors.size() > 0 but was " + listenedErrors.size(), listenedErrors.size() > 0);
-		assertTrue("expected listenedWarnings.size() > 0 but was " + listenedWarnings.size(), listenedWarnings.size() > 0);
+		assertEquals("Thread interrupted", false, Thread.currentThread().isInterrupted());
 	}
-	public void testCapturesMetrics() throws Exception {
-		project = new ProjectConfigDto();
-		project.setName("a name");
-		project.setWorkDir("a");
-		project.setRequestedBy("Deborah");
 
-		expect(projectMgr.getRepositoryAdaptor(project)).andReturn(ra);
-
-		expect(ra.getTagName()).andReturn("trunk");
-		expect(ra.getLatestRevision(null)).andReturn(rev0);
-		
-		expect(mgr.getLatestStatus(project.getName())).andReturn(((ProjectStatusDto) null));
-
-		ra.createWorkingCopy(new File("a").getAbsoluteFile(), buildDetailCallback);
-
-		expect(projectMgr.getBuildTool(project)).andReturn(tool);
-
-		metric = new MetricDto();
-		metric.setMessageKey("m.key");
-		metric.setValue("0.99");
-		metric.setType(MetricType.PERCENT);
-		buildToolStatus.setDiffId(null);
-		
-		buildToolStatus.setRequestedBy("Deborah");
-		buildToolStatus.setWorkDir("a");
-		buildToolStatus.getMetrics().add(metric);
-		
-		tool.buildProject(
-				eq(project),
-				eq(buildToolStatus),
-				eq(logFile),
-				(BuildDetailCallback)notNull());
-		
-
-		final ProjectStatusDto outcome = createFakeBuildOutcome(project.getName(), 0, rev0, "trunk", Status.PASS, null, null, null, "http://localhost", true, "Deborah", null, null, ProjectStatusDto.UpdateType.Full, project.getWorkDir(), true, estimatedBuildTimeMillis, false);
-		
-		outcome.getMetrics().add(metric);
-		
-		mgr.targetCompleted(info, project, outcome);
-		
-		checkBuild();
+	public void testRunnablePhaseHandlesInterruptedException() throws Exception {
+		doRunnablePhaseTest(new RunnableCallback() {
+			public void run(BuildContext buildContext) throws Exception {
+				throw new InterruptedException();
+			}
+		});
 	}
-	public void testSupressErrors() throws Exception {
-		project = new ProjectConfigDto();
-		project.setName("a name");
-		project.setWorkDir("a");
-		project.setRequestedBy("Deborah");
-		project.setSuppressErrors(true);
-		
-		expect(projectMgr
-				.getRepositoryAdaptor(project)).andReturn(ra);
 
-		expect(ra.getTagName()).andReturn("trunk");
-		expect(ra.getLatestRevision(null)).andReturn(rev0);
+	public void testRunnablePhaseSetsAndClearsPhaseOnException() throws Exception {
+		final RuntimeException e = new RuntimeException();
 		
-		expect(mgr.getLatestStatus(project.getName())).andReturn(((ProjectStatusDto) null));
-
-		ra.createWorkingCopy(new File("a").getAbsoluteFile(), buildDetailCallback);
-
-		expect(projectMgr.getBuildTool(project)).andReturn(tool);
-
-		errorMessage = "An error occurred!";
-		warningMessage = "This api is deprecated.";
+		try {
+			doRunnablePhaseTest(new RunnableCallback() {
+				public void run(BuildContext buildContext) {
+					throw e;
+				}
+			});
+			
+			fail("expected exception");
+		} catch (RuntimeException caught) {
+			assertSame(e, caught);
+		}
 		
-		buildToolStatus.setRequestedBy("Deborah");
-		buildToolStatus.getWarnings().add(new BuildMessageDto(warningMessage, null, null, null));
-		buildToolStatus.setWorkDir("a");
-		buildToolStatus.setDiffId(null);
-		
-		tool.buildProject(
-				eq(project),
-				eq(buildToolStatus),
-				eq(logFile),
-				(BuildDetailCallback)notNull());
-		
-
-		final ProjectStatusDto outcome = createFakeBuildOutcome(project.getName(), 0, rev0, "trunk", Status.PASS, null, null, null, "http://localhost", true, "Deborah", null, null, ProjectStatusDto.UpdateType.Full, project.getWorkDir(), true, estimatedBuildTimeMillis, false);
-		
-		outcome.getWarnings().add(new BuildMessageDto(warningMessage, null, null, null));
-		
-		mgr.targetCompleted(info, project, outcome);
-		
-		checkBuild();
+		assertEquals(null, builder.buildDetailCallback.getCurrentPhase());
 	}
-	public void testGetsChangeLog() throws Exception {
-		project = new ProjectConfigDto();
-		project.setName("a name");
-		project.setWorkDir("a");
-		
-		expect(projectMgr.getRepositoryAdaptor(project)).andReturn(ra);
 
-		expect(ra.getTagName()).andReturn("trunk");
-		expect(ra.getLatestRevision(rev0)).andReturn(rev1);
-		
-		final ProjectStatusDto prevStatus = new ProjectStatusDto();
-		prevStatus.setRevision(rev0);
-		prevStatus.setTagName("trunk");
-		prevStatus.setStatus(Status.ERROR);
-		
-		expect(mgr.getLatestStatus(project.getName())).andReturn(prevStatus);
-
-		ra.createWorkingCopy(new File("a").getAbsoluteFile(), buildDetailCallback);
-		
-		ra.getChangeLog(eq(rev0), eq(rev1), (OutputStream) notNull());
-		expectLastCall().andReturn(new ChangeLogDto());
-
-		expect(projectMgr.getBuildTool(project)).andReturn(tool);
-		
-		buildToolStatus.setTagName("trunk");
-		buildToolStatus.setRevision(rev1);
-		buildToolStatus.setChangeLog(new ChangeLogDto());
-		buildToolStatus.setWorkDir("a");
-		
-		tool.buildProject(
-				eq(project),
-				eq(buildToolStatus),
-				eq(logFile),
-				(BuildDetailCallback)notNull());
-		
-		mgr.targetCompleted(info, project, createFakeBuildOutcome(project.getName(), 0, rev1, "trunk", Status.PASS, null, null, new ChangeLogDto(), "http://localhost", true, null, null, null, ProjectStatusDto.UpdateType.Full, project.getWorkDir(), true, estimatedBuildTimeMillis, true));
-		
-		checkBuild();
+	public void testRunnablePhaseThrowsTimeoutException() throws Exception {
+		try {
+			doRunnablePhaseTest(new RunnableCallback() {
+				public void run(BuildContext buildContext) {
+					builder.timeout = true;
+				}
+			});
+			fail("expected exception");
+		} catch (TimeoutException e) {
+		}
 	}
-	public void testGetsChangeLogSkipWhenFlagIsFalse() throws Exception {
-		project = new ProjectConfigDto();
-		project.setName("a name");
-		project.setWorkDir("a");
-		
-		builder.setDiffsEnabled(false);
-		
-		expect(projectMgr.getRepositoryAdaptor(project)).andReturn(ra);
 
-		expect(ra.getTagName()).andReturn("trunk");
-		expect(ra.getLatestRevision(rev0)).andReturn(rev1);
-		
-		final ProjectStatusDto prevStatus = new ProjectStatusDto();
-		prevStatus.setRevision(rev0);
-		prevStatus.setTagName("trunk");
-		prevStatus.setStatus(Status.ERROR);
-		
-		expect(mgr.getLatestStatus(project.getName())).andReturn(prevStatus);
-
-		ra.createWorkingCopy(new File("a").getAbsoluteFile(), buildDetailCallback);
-		
-		ra.getChangeLog(eq(rev0), eq(rev1), (OutputStream) eq(null));
-		expectLastCall().andReturn(new ChangeLogDto());
-
-		expect(projectMgr.getBuildTool(project)).andReturn(tool);
-		
-		buildToolStatus.setTagName("trunk");
-		buildToolStatus.setRevision(rev1);
-		buildToolStatus.setChangeLog(new ChangeLogDto());
-		buildToolStatus.setWorkDir("a");
-		buildToolStatus.setDiffId(null);
-		
-		tool.buildProject(
-				eq(project),
-				eq(buildToolStatus),
-				eq(logFile),
-				(BuildDetailCallback)notNull());
-		
-		final ProjectStatusDto fakeBuildOutcome = createFakeBuildOutcome(project.getName(), 0, rev1, "trunk", Status.PASS, null, null, new ChangeLogDto(), "http://localhost", true, null, null, null, ProjectStatusDto.UpdateType.Full, project.getWorkDir(), true, estimatedBuildTimeMillis, false);
-				
-		mgr.targetCompleted(info, project, fakeBuildOutcome);
-		
-		checkBuild();
+	public void testRunnablePhaseThrowsTimeoutExceptionOnKillingFlag() throws Exception {
+		try {
+			doRunnablePhaseTest(new RunnableCallback() {
+				public void run(BuildContext buildContext) {
+					builder.killing = true;
+				}
+			});
+			fail("expected exception");
+		} catch (TimeoutException e) {
+		}
 	}
-	public void testGetsChangeLogWithRevisionFromLastBuildWithSameTag() throws Exception {
-		project = new ProjectConfigDto();
-		project.setName("a name");
-		project.setWorkDir("a");
-		
-		expect(projectMgr.getRepositoryAdaptor(project)).andReturn(ra);
 
-		expect(ra.getTagName()).andReturn("trunk");
-		expect(ra.getLatestRevision(rev0)).andReturn(rev1);
-		
-		previousStatus.setRevision(rev0);
-		previousStatus.setTagName("tags/not-trunk");
-		previousStatus.setStatus(Status.ERROR);
-		
-		expect(mgr.getLatestStatus(project.getName())).andReturn(previousStatus);
-
-		previousStatusByTagName = new ProjectStatusDto();
-		previousStatusByTagName.setTagName("trunk");
-		previousStatusByTagName.setRevision(rev0);
-		
-		ra.createWorkingCopy(new File("a").getAbsoluteFile(), buildDetailCallback);
-		
-		ra.getChangeLog(eq(rev0), eq(rev1), (OutputStream) notNull());
-		expectLastCall().andReturn(new ChangeLogDto());
-
-		expect(projectMgr.getBuildTool(project)).andReturn(tool);
-		
-		buildToolStatus.setTagName("trunk");
-		buildToolStatus.setRevision(rev1);
-		buildToolStatus.setChangeLog(new ChangeLogDto());
-		buildToolStatus.setWorkDir("a");
-		buildToolStatus.setBuildNumber(previousStatus.getBuildNumber() + 1);
-		
-		tool.buildProject(
-				eq(project),
-				eq(buildToolStatus),
-				eq(logFile),
-				(BuildDetailCallback)notNull());
-		
-		mgr.targetCompleted(info, project, createFakeBuildOutcome(project.getName(), 43, rev1, "trunk", Status.PASS, null, null, new ChangeLogDto(), "http://localhost", true, null, null, null, ProjectStatusDto.UpdateType.Full, project.getWorkDir(), true, estimatedBuildTimeMillis, true));
-		
-		checkBuild();
+	private interface RunnableCallback {
+		void run(BuildContext buildContext) throws Exception;
 	}
-	public void testIncremental() throws Exception {
-		updateType = UpdateType.Incremental;
-		estimatedBuildTimeMillis = 11242341234l;
+	
+	private void doRunnablePhaseTest(final RunnableCallback runInsidePhase) throws Exception {
+		final RunnablePhaseImpl[] phase = new RunnablePhaseImpl[1];
+		final boolean[] called = new boolean[1];
 		
-		project = new ProjectConfigDto();
-		project.setName("a name");
-		project.setWorkDir("a");
-		project.setUpdateStrategy(ProjectConfigDto.UpdateStrategy.IncrementalAlways);
-		
-		expect(projectMgr.getRepositoryAdaptor(project)).andReturn(ra);
-
-		expect(ra.getTagName()).andReturn("trunk");
-		expect(ra.getLatestRevision(rev0)).andReturn(rev1);
-		
-		final ProjectStatusDto prevStatus = new ProjectStatusDto();
-		prevStatus.setRevision(rev0);
-		prevStatus.setTagName("trunk");
-		prevStatus.setStatus(Status.ERROR);
-		
-		expect(mgr.getLatestStatus(project.getName())).andReturn(prevStatus);
-
-		ra.updateWorkingCopy(new File("a").getAbsoluteFile(), buildDetailCallback);
-		
-		ra.getChangeLog(eq(rev0), eq(rev1), (OutputStream)notNull());
-		expectLastCall().andReturn(new ChangeLogDto());
-
-		expect(projectMgr.getBuildTool(project)).andReturn(tool);
-		
-		buildToolStatus.setTagName("trunk");
-		buildToolStatus.setRevision(rev1);
-		buildToolStatus.setUpdateType(ProjectStatusDto.UpdateType.Incremental);
-		buildToolStatus.setChangeLog(new ChangeLogDto());
-		buildToolStatus.setWorkDir("a");
-		buildToolStatus.setEstimatedBuildTimeMillis(estimatedBuildTimeMillis);
-		
-		tool.buildProject(
-				eq(project),
-				eq(buildToolStatus),
-				eq(logFile),
-				(BuildDetailCallback)notNull());
-		
-		mgr.targetCompleted(info, project, createFakeBuildOutcome(project.getName(), 0, rev1, "trunk", Status.PASS, null, null, new ChangeLogDto(), "http://localhost", true, null, null, null, ProjectStatusDto.UpdateType.Incremental, project.getWorkDir(), true, estimatedBuildTimeMillis, true));
-		
-		checkBuild();
-	}
-	public void testIncrementalGetsPreviousBuildByWorkDir() throws Exception {
-		updateType = UpdateType.Incremental;
-		estimatedBuildTimeMillis = 11242341234l;
-		
-		project = new ProjectConfigDto();
-		project.setName("a name");
-		project.setWorkDir("a");
-		project.setUpdateStrategy(ProjectConfigDto.UpdateStrategy.IncrementalAlways);
-		
-		expect(projectMgr.getRepositoryAdaptor(project)).andReturn(ra);
-
-		expect(ra.getTagName()).andReturn("trunk");
-		expect(ra.getLatestRevision(rev0)).andReturn(rev1);
-		
-		final ProjectStatusDto prevStatus = new ProjectStatusDto();
-		prevStatus.setRevision(rev0);
-		prevStatus.setTagName("trunk");
-		prevStatus.setStatus(Status.ERROR);
-		
-		expect(mgr.getLatestStatus(project.getName())).andReturn(prevStatus);
-
-		previousStatusByWorkDir = new ProjectStatusDto();
-		previousStatusByWorkDir.setStatus(Status.PASS);
-		previousStatusByWorkDir.setWorkDir("a");
-		
-		ra.updateWorkingCopy(new File("a").getAbsoluteFile(), buildDetailCallback);
-		
-		ra.getChangeLog(eq(rev0), eq(rev1), (OutputStream)notNull());
-		expectLastCall().andReturn(new ChangeLogDto());
-
-		expect(projectMgr.getBuildTool(project)).andReturn(tool);
-		
-		buildToolStatus.setTagName("trunk");
-		buildToolStatus.setRevision(rev1);
-		buildToolStatus.setUpdateType(ProjectStatusDto.UpdateType.Incremental);
-		buildToolStatus.setChangeLog(new ChangeLogDto());
-		buildToolStatus.setWorkDir("a");
-		buildToolStatus.setEstimatedBuildTimeMillis(estimatedBuildTimeMillis);
-		
-		tool.buildProject(
-				eq(project),
-				eq(buildToolStatus),
-				eq(logFile),
-				(BuildDetailCallback)notNull());
-		
-		mgr.targetCompleted(info, project, createFakeBuildOutcome(project.getName(), 0, rev1, "trunk", Status.PASS, null, null, new ChangeLogDto(), "http://localhost", true, null, null, null, ProjectStatusDto.UpdateType.Incremental, project.getWorkDir(), true, estimatedBuildTimeMillis, true));
-		
-		checkBuild();
-	}
-	public void testChangeLogUsesLastKnownRevisionWhenPrevNull() throws Exception {
-		project = new ProjectConfigDto();
-		project.setName("a name");
-		project.setWorkDir("a");
-		
-		expect(projectMgr
-		.getRepositoryAdaptor(project)).andReturn(ra);
-
-		expect(ra.getTagName()).andReturn("trunk");
-		expect(ra.getLatestRevision(rev0)).andReturn(rev1);
-		
-		final ProjectStatusDto prevStatus = new ProjectStatusDto();
-		prevStatus.setLastKnownRevision(rev0);
-		prevStatus.setRevision(null);
-		prevStatus.setTagName("trunk");
-		prevStatus.setStatus(Status.ERROR);
-		
-		expect(mgr.getLatestStatus(project.getName())).andReturn(prevStatus);
-
-		ra.createWorkingCopy(new File("a").getAbsoluteFile(), buildDetailCallback);
-		
-		ra.getChangeLog(eq(rev0), eq(rev1), (OutputStream)notNull());
-		expectLastCall().andReturn(new ChangeLogDto());
-
-		expect(projectMgr.getBuildTool(project)).andReturn(tool);
-		
-		buildToolStatus.setTagName("trunk");
-		buildToolStatus.setRevision(rev1);
-		buildToolStatus.setChangeLog(new ChangeLogDto());
-		buildToolStatus.setWorkDir("a");
-		
-		tool.buildProject(
-				eq(project),
-				eq(buildToolStatus),
-				eq(logFile),
-				(BuildDetailCallback)notNull());
-
-		
-		mgr.targetCompleted(info, project, createFakeBuildOutcome(project.getName(), 0, rev1, "trunk", Status.PASS, null, null, new ChangeLogDto(), "http://localhost", true, null, null, null, ProjectStatusDto.UpdateType.Full, project.getWorkDir(), true, estimatedBuildTimeMillis, true));
-		
-		checkBuild();
-	}
-	public void testBuildProjectWithTag() throws Exception {
-		project = new ProjectConfigDto();
-		project.setName("a name");
-		project.setWorkDir("a");
-		project.setRepositoryTagName("rc1");
-		
-		expect(projectMgr
-		.getRepositoryAdaptor(project)).andReturn(ra);
-
-		ra.setTagName("rc1");
-		expect(ra.getLatestRevision(null)).andReturn(rev1);
-		
-		final ProjectStatusDto prevStatus = new ProjectStatusDto();
-		prevStatus.setRevision(rev0);
-		prevStatus.setStatus(Status.PASS);
-		
-		expect(mgr.getLatestStatus(project.getName())).andReturn(prevStatus);
-
-		ra.createWorkingCopy(new File("a").getAbsoluteFile(), buildDetailCallback);
-		
-		expect(projectMgr.getBuildTool(project)).andReturn(tool);
-		
-		buildToolStatus.setTagName("rc1");
-		buildToolStatus.setRevision(rev1);
-		buildToolStatus.setWorkDir("a");
-		buildToolStatus.setDiffId(null);
-		
-		tool.buildProject(
-				eq(project),
-				eq(buildToolStatus),
-				eq(logFile),
-				(BuildDetailCallback)notNull());
-		
-		mgr.targetCompleted(info, project, createFakeBuildOutcome(project.getName(), 0, rev1, "rc1", Status.PASS, null, null, null, "http://localhost", true, null, null, null, ProjectStatusDto.UpdateType.Full, project.getWorkDir(), true, estimatedBuildTimeMillis, false));
-		
-		checkBuild();
-	}
-	public void testBuildFailsWithNoBuildTarget() throws Exception {
-		project = new ProjectConfigDto();
-		project.setWorkDir("a");
-
-		expect(projectMgr.getRepositoryAdaptor(project)).andReturn(ra);
-
-		expect(ra.getTagName()).andReturn("trunk");
-		expect(ra.getLatestRevision(null)).andReturn(rev0);
-		
-		expect(mgr.getLatestStatus(project.getName())).andReturn(((ProjectStatusDto) null));
-
-		ra.createWorkingCopy(new File("a").getAbsoluteFile(), buildDetailCallback);
-
-		tool = new BuildTool() {
-			public void buildProject(ProjectConfigDto projectConfig, ProjectStatusDto buildStatus, File logFile, BuildDetailCallback buildDetailCallback) throws BuildFailedException, ConfigException {
-				throw new BuildFailedException("none", null, 0);
+		builder = new ProjectBuilderImpl() {
+			@Override
+			public void init() {
+				phase[0] = new RunnablePhaseImpl(BuildPhase.Publish) {
+					@Override
+					protected void executePhase(BuildContext buildContext) throws Exception {
+						called[0] = true;
+						assertEquals(BuildPhase.Publish, buildDetailCallback.getCurrentPhase());
+						if (runInsidePhase != null) {
+							runInsidePhase.run(buildContext);
+						}
+					}
+				};
 			}
 		};
 		
-		expect(projectMgr.getBuildTool(project)).andReturn(tool);
+		builder.init();
+		builder.initializeBuildDetailCallback(buildTarget, buildDetailCallback);
 		
-		mgr.targetCompleted(info, project, createFakeBuildOutcome(project.getName(), 0, rev0, "trunk", Status.FAIL, "messages.build.failure", new String[] {"none"}, null, "http://localhost", true, null, null, null, ProjectStatusDto.UpdateType.Full, project.getWorkDir(), true, estimatedBuildTimeMillis, false));
+		phase[0].execute(buildContext);
 		
-		sleepTime = 0;
-		
-		checkBuild();
+		assertEquals("called", true, called[0]);
+		assertEquals(null, builder.buildDetailCallback.getCurrentPhase());
 	}
-	public void testBuildProjectNullOrBlankWorkDir() throws Exception {
-		project = new ProjectConfigDto();
-		project.setWorkDir("");
-
-		expect(mgr.getLatestStatus(project.getName())).andReturn(((ProjectStatusDto) null));
-		mgr.targetCompleted(info, project, createFakeBuildOutcome(project.getName(), 0, null,
-				null, Status.ERROR, "messages.build.null.work.dir", null, null, null, true, null, null, null, ProjectStatusDto.UpdateType.Full, project.getWorkDir(), false, estimatedBuildTimeMillis, true));
+	
+	public void testAbort() throws Exception {
+		builder.initializeThreadState();
 		
-
-		checkBuild();
+		builder.abortCurrentBuild(false, "impatient");
+			
+		assertEquals("interrupted", true, Thread.currentThread().isInterrupted());
+		
+		assertEquals("killing", true, builder.isKilling());
 	}
-	public void testBuildProjectCannotCreateWorkDir() throws Exception {
-		createWorkingDirectoriesSuccess = false;
-
-		project = new ProjectConfigDto();
-		project.setWorkDir("hello");
-
-		expect(projectMgr
-		.getRepositoryAdaptor(project)).andReturn(ra);
-
-		expect(ra.getTagName()).andReturn("trunk");
-		expect(ra.getLatestRevision(null)).andReturn(rev0);
+	
+	public void testTopLevelBuild() throws Exception {
+		doTopLevelBuildTest(null);
 		
-		expect(mgr.getLatestStatus(project.getName())).andReturn(((ProjectStatusDto) null));
-
-		mgr.targetCompleted(info, project, createFakeBuildOutcome(project.getName(), 0, rev0,
-				"trunk", Status.ERROR, "errors.cannot.create.dir", new Object[] {new File("hello").getCanonicalPath()}, null, "http://localhost", true, null, null, null, ProjectStatusDto.UpdateType.Full, project.getWorkDir(), false, estimatedBuildTimeMillis, true));
-		
-		checkBuild();
+		assertEquals(Status.PASS, buildStatus.getStatus());
 	}
-	public void testBuildProjectValidatesWorkingCopyBeforeDelete() throws Exception {
-		final File invalid = new File(".").getCanonicalFile();
-
-		createWorkingDirectoriesSuccess = false;
-
-		project = new ProjectConfigDto();
-		project.setWorkDir(invalid.getPath());
-
-		expect(projectMgr
-		.getRepositoryAdaptor(project)).andReturn(ra);
-
-		expect(ra.getTagName()).andReturn("trunk");
-		expect(ra.getLatestRevision(null)).andReturn(rev0);
+	
+	public void testTopLevelBuildClearsPhase() throws Exception {
+		doTopLevelBuildTest(null);
 		
-		expect(mgr.getLatestStatus(project.getName())).andReturn(((ProjectStatusDto) null));
-
-		expect(ra.isWorkingCopy(invalid)).andReturn(true);
-		
-		mgr.targetCompleted(info, project, createFakeBuildOutcome(project.getName(), 0, rev0,
-				"trunk", Status.ERROR, "errors.cannot.create.dir", new Object[] {invalid.getCanonicalPath()}, null, "http://localhost", true, null, null, null, ProjectStatusDto.UpdateType.Full, project.getWorkDir(), false, estimatedBuildTimeMillis, true));
-		
-		checkBuild();
+		assertEquals(null, builder.buildDetailCallback.getCurrentPhase());
 	}
-	public void testBuildProjectRefusesToDeleteNonWorkingCopy() throws Exception {
-		final File invalid = new File(".").getCanonicalFile();
-
-		createWorkingDirectoriesSuccess = false;
-
-		project = new ProjectConfigDto();
-		project.setWorkDir(invalid.getPath());
-
-		expect(projectMgr
-		.getRepositoryAdaptor(project)).andReturn(ra);
-
-		expect(ra.getTagName()).andReturn("trunk");
-		expect(ra.getLatestRevision(null)).andReturn(rev0);
+	
+	public void testTopLevelBuildSetsStatusChanged() throws Exception {
+		doTopLevelBuildTest(null);
 		
-		expect(mgr.getLatestStatus(project.getName())).andReturn(((ProjectStatusDto) null));
-
-		expect(ra.isWorkingCopy(invalid)).andReturn(false);
+		assertEquals("statusChanged", true, buildStatus.isStatusChanged());
+	}
+	
+	public void testTopLevelBuildSetsStatusNotChanged() throws Exception {
+		buildStatus.setStatus(Status.PASS);
+		buildContext.setLastBuild((ProjectStatusDto) buildStatus.copy());
 		
-		mgr.targetCompleted(info, project, createFakeBuildOutcome(project.getName(), 0, rev0,
-				"trunk", Status.ERROR, "errors.wont.delete.non.working.copy", new Object[] {invalid.getCanonicalPath()}, null, "http://localhost", true, null, null, null, ProjectStatusDto.UpdateType.Full, project.getWorkDir(), false, estimatedBuildTimeMillis, true));
+		doTopLevelBuildTest(null);
 		
-		checkBuild();
+		assertEquals("statusChanged", false, buildStatus.isStatusChanged());
+	}
+	
+	public void testTopLevelBuildReportsConfigException() throws Exception {
+		doTopLevelBuildTest(new RunnableCallback() {
+			public void run(BuildContext buildContext) throws Exception {
+				throw new ConfigException("some.key", "arg1", "arg2");
+			}
+		});
+		
+		assertEquals(Status.ERROR, buildStatus.getStatus());
+		assertEquals("some.key", buildStatus.getMessageKey());
+		assertEquals(Arrays.asList("arg1", "arg2"), Arrays.asList(buildStatus.getMessageArgs()));
+	}
+	
+	public void testTopLevelBuildReportsTimeout() throws Exception {
+		doTopLevelBuildTest(new RunnableCallback() {
+			public void run(BuildContext buildContext) throws Exception {
+				builder.abortCurrentBuild(true, "watchdog");
+				throw new TimeoutException();
+			}
+		});
+		
+		assertEquals(Status.ERROR, buildStatus.getStatus());
+		assertEquals("messages.build.timeout", buildStatus.getMessageKey());
+	}
+	
+	public void testTopLevelBuildReportsKilled() throws Exception {
+		doTopLevelBuildTest(new RunnableCallback() {
+			public void run(BuildContext buildContext) throws Exception {
+				builder.abortCurrentBuild(false, "impatient user");
+				throw new TimeoutException();
+			}
+		});
+		
+		assertEquals(Status.ERROR, buildStatus.getStatus());
+		assertEquals("messages.build.killed", buildStatus.getMessageKey());
+		assertEquals(Arrays.asList("impatient user"), Arrays.asList(buildStatus.getMessageArgs()));
+	}
+	
+	public void testTopLevelBuildReportsUnexpectedException() throws Exception {
+		doTopLevelBuildTest(new RunnableCallback() {
+			public void run(BuildContext buildContext) throws Exception {
+				throw new RuntimeException("this is probably a bug.");
+			}
+		});
+		
+		assertEquals(Status.ERROR, buildStatus.getStatus());
+		assertEquals("messages.build.uncaught.exception", buildStatus.getMessageKey());
+		assertEquals(Arrays.asList(project.getName(), "this is probably a bug.", "(none)"), Arrays.asList(buildStatus.getMessageArgs()));
+	}
+	
+	public void testTopLevelBuildReportsUnexpectedExceptionDuringPhase() throws Exception {
+		doTopLevelBuildTest(new RunnableCallback() {
+			public void run(BuildContext buildContext) throws Exception {
+				builder.buildDetailCallback.setPhase(BuildPhase.Build);
+				throw new RuntimeException("this is probably a bug.");
+			}
+		});
+		
+		assertEquals(Status.ERROR, buildStatus.getStatus());
+		assertEquals("messages.build.uncaught.exception", buildStatus.getMessageKey());
+		assertEquals(Arrays.asList(project.getName(), "this is probably a bug.", BuildPhase.Build.name()), Arrays.asList(buildStatus.getMessageArgs()));
+	}
+	
+	public void testTopLevelBuildReportsBuildToolFailure() throws Exception {
+		doTopLevelBuildTest(new RunnableCallback() {
+			public void run(BuildContext buildContext) throws Exception {
+				throw new BuildFailedException("the build failed", null, 0);
+			}
+		});
+		
+		assertEquals(Status.FAIL, buildStatus.getStatus());
+		assertEquals("messages.build.failure", buildStatus.getMessageKey());
+		assertEquals(Arrays.asList("the build failed"), Arrays.asList(buildStatus.getMessageArgs()));
+	}
+	
+	public void testTopLevelBuildReportsBuildToolFailureWithTarget() throws Exception {
+		doTopLevelBuildTest(new RunnableCallback() {
+			public void run(BuildContext buildContext) throws Exception {
+				throw new BuildFailedException("the build failed", "BuggyTarget", 0);
+			}
+		});
+		
+		assertEquals(Status.FAIL, buildStatus.getStatus());
+		assertEquals("messages.build.failure.during.target", buildStatus.getMessageKey());
+		assertEquals(Arrays.asList("the build failed", "BuggyTarget"), Arrays.asList(buildStatus.getMessageArgs()));
 	}
 
-	public void testGetLoc() throws Exception {
-		project = new ProjectConfigDto();
-		project.setName("a");
+	private void doTopLevelBuildTest(final RunnableCallback runInsideExecuteBuildPhases) {
+		builder = new ProjectBuilderImpl() {
+			@Override
+			protected BuildContext initializeBuildStatus(BuildTarget currentTarget) throws StoreException, ConfigException {
+				return buildContext;
+			}
+			
+			@Override
+			protected void executeBuildPhases(BuildContext buildContext) throws Exception {
+				if (runInsideExecuteBuildPhases != null) {
+					runInsideExecuteBuildPhases.run(buildContext);
+				}
+			}
+		};
 		
-		expect(mgr.getLatestStatus(project.getName())).andReturn(previousStatus);
+		builder.setBuildManager(mgr);
+		builder.setFileSystem(fileSystem);
 		
-		re = new RepositoryException(new SQLException(
-				"table or view does not exist"));
-
-		mgr.targetCompleted(info, project, createFakeBuildOutcome(project.getName(), 43, null,
-				null, Status.ERROR, "messages.repository.error",
-				new Object[]{"table or view does not exist"}, null, null, true, null, null, null,
-				ProjectStatusDto.UpdateType.Full, project.getWorkDir(), false, estimatedBuildTimeMillis, true));
-
-		checkBuild();
-	}
-	public void testTreatsGeneralExceptionAsError()
-			throws Exception {
-		project = new ProjectConfigDto();
-		project.setName("a name");
+		builder.log = createNiceMock(Log.class);
 		
-		expect(mgr.getLatestStatus(project.getName())).andReturn(previousStatus);
-
-		re = new RuntimeException("this should not have happened");
-
-		final ProjectStatusDto completedOutcome = createFakeBuildOutcome(project.getName(), 43, null,
-				null, Status.ERROR, "messages.build.uncaught.exception",
-				new String[]{project.getName(), re.getMessage(), BuildPhase.Build.name()},
-				null, null, true, null, null, null, ProjectStatusDto.UpdateType.Full, project.getWorkDir(), false, estimatedBuildTimeMillis, true);
+		expect(fileSystem.directoryExists((File) notNull())).andReturn(false);
 		
-		mgr.targetCompleted((BuildDaemonInfoDto)anyObject(), eq(project), eq(completedOutcome));
+		mgr.registerBuildStatus(eq(info), eq(builder), eq(project), eq(buildStatus));
 
-		checkBuild();
-	}
-
-	private void checkBuild() throws Exception {
+		mgr.targetCompleted(info, buildTarget.getProjectConfig(), buildTarget.getStatus());
+		
+		expectLastCall().andAnswer(new IAnswer<Object>() {
+			public Object answer() throws Throwable {
+				assertEquals(BuildPhase.Publish, builder.buildDetailCallback.getCurrentPhase());
+				return null;
+			}
+		});
+		
 		replay();
-
-		try {
-			builder.build(info, new BuildTargetImpl(project, new ProjectStatusDto()), buildDetailCallback);
-		} catch (Exception e) {
-			verify();
-			throw e;
-		}
+		
+		builder.build(info, buildTarget, buildDetailCallback);
+		
 		verify();
-	}
-
-	private ProjectStatusDto createFakeBuildOutcome(String name, int buildNumber, RevisionTokenDto rev, String tagName, Status status, String key, Object[] objects, ChangeLogDto changeLog, String repoUrl, boolean statusChanged, String requestedBy, String reasonKey, String reasonArg, UpdateType updateType, String workDir, boolean workDirSupportsIncrementalUpdate, Long estimatedBuildTimeMillis, boolean diffAvailable) {
-		final ProjectStatusDto dto = new ProjectStatusDto();
-		dto.setBuildNumber(buildNumber);
-		dto.setId(id);
-		dto.setDiffId(diffAvailable ? id : null);
-		dto.setBuildLogId(id);
-		dto.setName(name);
-		dto.setRevision(rev);
-		dto.setStatus(status);
-		dto.setMessageKey(key);
-		dto.setMessageArgs(objects);
-		dto.setChangeLog(changeLog);
-		dto.setTagName(tagName);
-		dto.setRepositoryUrl(repoUrl);
-		dto.setStatusChanged(statusChanged);
-		dto.setRequestedBy(requestedBy);
-		dto.setErrors(new ArrayList<BuildMessageDto>());
-		dto.setWarnings(new ArrayList<BuildMessageDto>());
-		dto.setMetrics(new ArrayList<MetricDto>());
-		dto.setBuildReasonKey(reasonKey);
-		dto.setUpdateType(updateType);
-		dto.setWorkDir(workDir);
-		dto.setWorkDirSupportsIncrementalUpdate(workDirSupportsIncrementalUpdate);
-		dto.setEstimatedBuildTimeMillis(estimatedBuildTimeMillis);
-		
-		if (reasonArg != null) {
-			dto.setBuildReasonArgs(new String[] {reasonArg});
-		}
-		
-		return dto;
 	}
 }

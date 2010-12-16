@@ -35,6 +35,9 @@ import java.util.Set;
 import net.sourceforge.vulcan.RepositoryAdaptor;
 import net.sourceforge.vulcan.StateManager;
 import net.sourceforge.vulcan.core.BuildDetailCallback;
+import net.sourceforge.vulcan.core.support.FileSystem;
+import net.sourceforge.vulcan.core.support.FileSystemImpl;
+import net.sourceforge.vulcan.core.support.RepositoryUtils;
 import net.sourceforge.vulcan.dto.ChangeLogDto;
 import net.sourceforge.vulcan.dto.ChangeSetDto;
 import net.sourceforge.vulcan.dto.ProjectConfigDto;
@@ -81,6 +84,7 @@ import org.tmatesoft.svn.core.wc.SVNWCClient;
 
 public class SubversionRepositoryAdaptor extends SubversionSupport implements RepositoryAdaptor {
 	private final EventHandler eventHandler = new EventHandler();
+	private final ProjectConfigDto projectConfig;
 	private final String projectName;
 	private final Map<String, Long> byteCounters;
 	
@@ -91,6 +95,7 @@ public class SubversionRepositoryAdaptor extends SubversionSupport implements Re
 	private long diffStartRevision = -1;
 	
 	private final StateManager stateManager;
+	private FileSystem fileSystem = new FileSystemImpl();
 	
 	private List<ChangeSetDto> changeSets;
 	
@@ -127,6 +132,7 @@ public class SubversionRepositoryAdaptor extends SubversionSupport implements Re
 		super(config, profile, svnRepository);
 		
 		this.stateManager = stateManager;
+		this.projectConfig = projectConfig;
 		this.projectName = projectConfig.getName();
 		
 		if (globalConfig != null) {
@@ -175,7 +181,7 @@ public class SubversionRepositoryAdaptor extends SubversionSupport implements Re
 		}
 	}
 
-	public boolean hasIncomingChanges(ProjectConfigDto project,	ProjectStatusDto previousStatus) throws RepositoryException {
+	public boolean hasIncomingChanges(ProjectStatusDto previousStatus) throws RepositoryException {
 		RevisionTokenDto rev = previousStatus.getRevision();
 		
 		if (rev == null) {
@@ -189,6 +195,9 @@ public class SubversionRepositoryAdaptor extends SubversionSupport implements Re
 		return getLatestRevision(rev).getRevision() > rev.getRevision();
 	}
 	
+	public void prepareRepository(BuildDetailCallback buildDetailCallback) throws RepositoryException, InterruptedException {
+	}
+	
 	public RevisionTokenDto getLatestRevision(RevisionTokenDto previousRevision) throws RepositoryException {
 		final String path = lineOfDevelopment.getComputedRelativePath();
 		SVNDirEntry info;
@@ -200,8 +209,7 @@ public class SubversionRepositoryAdaptor extends SubversionSupport implements Re
 		}
 		
 		if (info == null) {
-			throw new RepositoryException("svn.path.not.exist",
-					new String[] {path}, null);
+			throw new RepositoryException("svn.path.not.exist",	null, path);
 		}
 		
 		final long lastChangedRevision = info.getRevision();
@@ -255,7 +263,11 @@ public class SubversionRepositoryAdaptor extends SubversionSupport implements Re
 		return new RevisionTokenDto(revision, "r" + revision);
 	}
 
-	public void createWorkingCopy(File absolutePath, BuildDetailCallback buildDetailCallback) throws RepositoryException {
+	public void createPristineWorkingCopy(BuildDetailCallback buildDetailCallback) throws RepositoryException {
+		final File absolutePath = new File(projectConfig.getWorkDir()).getAbsoluteFile();
+		
+		new RepositoryUtils(fileSystem).createOrCleanWorkingCopy(absolutePath, buildDetailCallback);
+		
 		synchronized (byteCounters) {
 			if (byteCounters.containsKey(projectName)) {
 				eventHandler.setPreviousFileCount(byteCounters.get(projectName).longValue());
@@ -323,12 +335,14 @@ public class SubversionRepositoryAdaptor extends SubversionSupport implements Re
 			client.update(path, svnRev, folder.getCheckoutDepth().getId(), depthIsSticky, ignoreExternals, allowUnverObstructions);
 		} catch (ClientException e) {
 			if (!canceling) {
-				throw new RepositoryException("svn.sparse.checkout.error", new Object[] {folder.getDirectoryName()}, e);
+				throw new RepositoryException("svn.sparse.checkout.error", e, folder.getDirectoryName());
 			}
 		}
 	}
 	
-	public void updateWorkingCopy(File absolutePath, BuildDetailCallback buildDetailCallback) throws RepositoryException {
+	public void updateWorkingCopy(BuildDetailCallback buildDetailCallback) throws RepositoryException {
+		final File absolutePath = new File(projectConfig.getWorkDir()).getAbsoluteFile();
+		
 		try {
 			final Revision svnRev = Revision.getInstance(revision);
 			final boolean depthIsSticky = false;
@@ -344,9 +358,9 @@ public class SubversionRepositoryAdaptor extends SubversionSupport implements Re
 		}
 	}
 	
-	public boolean isWorkingCopy(File path) {
+	public boolean isWorkingCopy() {
 		try {
-			if (client.info(path.getAbsolutePath()) != null) {
+			if (client.info(new File(projectConfig.getWorkDir()).getAbsolutePath()) != null) {
 				return true;
 			}
 		} catch (ClientException ignore) {
@@ -379,7 +393,7 @@ public class SubversionRepositoryAdaptor extends SubversionSupport implements Re
 	}
 
 	@SuppressWarnings("unchecked")
-	public List<RepositoryTagDto> getAvailableTags() throws RepositoryException {
+	public List<RepositoryTagDto> getAvailableTagsAndBranches() throws RepositoryException {
 		final String projectRoot = lineOfDevelopment.getComputedTagRoot();
 		
 		final List<RepositoryTagDto> tags = new ArrayList<RepositoryTagDto>();
@@ -419,11 +433,11 @@ public class SubversionRepositoryAdaptor extends SubversionSupport implements Re
 		}
 	}
 	
-	public String getTagName() {
+	public String getTagOrBranch() {
 		return lineOfDevelopment.getComputedTagName();
 	}
 
-	public void setTagName(String tagName) {
+	public void setTagOrBranch(String tagName) {
 		lineOfDevelopment.setAlternateTagName(tagName);
 	}
 
@@ -487,7 +501,7 @@ public class SubversionRepositoryAdaptor extends SubversionSupport implements Re
 				
 				final Set<String> paths = logEntry.getChangedPaths().keySet();
 				
-				changeSet.setModifiedPaths(paths.toArray(new String[paths.size()]));
+				changeSet.setModifiedPaths(new ArrayList<String>(paths));
 				
 				changeSets.add(changeSet);
 			}
