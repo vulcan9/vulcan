@@ -365,7 +365,7 @@ public class MercurialRepositoryTest extends EasyMockTestCase {
 	}
 	
 	public void testGetChangeLogEmptyNullDiffStream() throws Exception {
-		invoker.invoke("log", workDir, "--style", "xml", "-r", "124:456");
+		invoker.invoke("log", workDir, "--style", "xml", "--verbose", "-r", "124:456");
 		returnSuccessWithOutput("<log/>");
 		
 		replay();
@@ -398,7 +398,7 @@ public class MercurialRepositoryTest extends EasyMockTestCase {
 		invoker.invoke("diff", workDir, "-r", "124:456");
 		returnSuccess();
 		
-		invoker.invoke("log", workDir, "--style", "xml", "-r", "124:456");
+		invoker.invoke("log", workDir, "--style", "xml", "--verbose", "-r", "124:456");
 		returnSuccessWithOutput("<log/>");
 		
 		replay();
