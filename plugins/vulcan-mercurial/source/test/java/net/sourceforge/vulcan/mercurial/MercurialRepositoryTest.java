@@ -18,6 +18,7 @@
  */
 package net.sourceforge.vulcan.mercurial;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -363,9 +364,9 @@ public class MercurialRepositoryTest extends EasyMockTestCase {
 		verify();
 	}
 	
-	public void testGetChangeLogEmpty() throws Exception {
+	public void testGetChangeLogEmptyNullDiffStream() throws Exception {
 		invoker.invoke("log", workDir, "--style", "xml", "-r", "124:456");
-		returnSuccessWithOutput("<xml/>");
+		returnSuccessWithOutput("<log/>");
 		
 		replay();
 		
@@ -375,6 +376,23 @@ public class MercurialRepositoryTest extends EasyMockTestCase {
 		
 		assertNotNull("return value", changeLog);
 		assertNotNull("change sets", changeLog.getChangeSets());
+	}
+	
+	public void testGetChangeLogDiff() throws Exception {
+		final ByteArrayOutputStream diffOut = new ByteArrayOutputStream();
+		
+		invoker.setOutputStream(diffOut);
+		invoker.invoke("diff", workDir, "-r", "124:456");
+		returnSuccess();
+		
+		invoker.invoke("log", workDir, "--style", "xml", "-r", "124:456");
+		returnSuccessWithOutput("<log/>");
+		
+		replay();
+		
+		repo.getChangeLog(new RevisionTokenDto(123L, "123:9bd7475fd513"), new RevisionTokenDto(456L, "456:9bd7475fd513"), diffOut);
+		
+		verify();
 	}
 	
 	public void testGetTagsAndBranchesOneBranch() throws Exception {

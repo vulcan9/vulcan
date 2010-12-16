@@ -21,6 +21,7 @@ package net.sourceforge.vulcan.mercurial;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.OutputStream;
 
 import org.apache.commons.exec.CommandLine;
 import org.apache.commons.exec.DefaultExecutor;
@@ -36,7 +37,8 @@ public class ProcessInvoker implements Invoker {
 	private String executable;
 	private Executor executor = new DefaultExecutor();
 	
-	private ByteArrayOutputStream err;
+	private OutputStream out;
+	private OutputStream err;
 	private int exitCode;
 	
 	public InvocationResult invoke(String command, File workDir, String... args) throws IOException {
@@ -46,23 +48,31 @@ public class ProcessInvoker implements Invoker {
 		cmdLine.addArgument("--noninteractive");
 		cmdLine.addArguments(args);
 		
-		final ByteArrayOutputStream out = new ByteArrayOutputStream();
+		final OutputStream out = isOutputRedirected() ? this.out : new ByteArrayOutputStream();
 		err = new ByteArrayOutputStream();
 		
 		executor.setExitValues(new int[] {0, 1});
 		executor.setWorkingDirectory(workDir);
-		executor.setStreamHandler(new PumpStreamHandler(out, err));
+		executor.setStreamHandler(new MyPumpStreamHandler(out, err));
 	
 		LOG.debug("Executing " + cmdLine);
 		
 		try {
 			exitCode = executor.execute(cmdLine);
-			return new InvocationResult(out.toString(), err.toString(), exitCode == 0);
+			return new InvocationResult(isOutputRedirected() ? null : out.toString(), err.toString(), exitCode == 0);
 		} catch (ExecuteException e) {
 			exitCode = e.getExitValue();
 			throw e;
 		}
 		
+	}
+
+	private boolean isOutputRedirected() {
+		return this.out != null;
+	}
+	
+	public void setOutputStream(OutputStream stream) {
+		out = stream;
 	}
 
 	public String getExecutable() {
@@ -83,5 +93,21 @@ public class ProcessInvoker implements Invoker {
 	
 	public int getExitCode() {
 		return exitCode;
+	}
+}
+
+class MyPumpStreamHandler extends PumpStreamHandler {
+	public MyPumpStreamHandler(OutputStream out, OutputStream err) {
+		super(out, err);
+	}
+
+	@Override
+	public OutputStream getOut() {
+		return super.getOut();
+	}
+	
+	@Override
+	public OutputStream getErr() {
+		return super.getErr();
 	}
 }

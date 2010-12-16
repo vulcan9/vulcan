@@ -18,6 +18,7 @@
  */
 package net.sourceforge.vulcan.mercurial;
 
+
 public class InvocationResult {
 	private final String error;
 	private final String output;
@@ -34,6 +35,9 @@ public class InvocationResult {
 	}
 	
 	public String getOutput() {
+		if (output == null) {
+			throw new IllegalStateException("Output was redirected.");
+		}
 		return output;
 	}
 	
