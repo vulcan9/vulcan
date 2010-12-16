@@ -1,0 +1,264 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" 
+	"http://www.springframework.org/dtd/spring-beans.dtd">
+<!-- 
+	$Id$
+	$HeadURL$
+-->
+<beans>
+	<!-- This will replace values with System Properties where applicable: -->
+	<bean id="placeholderConfig" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+		<property name="ignoreUnresolvablePlaceholders" value="true"/>
+		<property name="locations">
+			<list>
+				<value>WEB-INF/application.properties</value>
+				<value>WEB-INF/version.properties</value>
+			</list>
+		</property>
+	</bean>
+
+	<bean id="dashboardColumns" class="org.springframework.beans.factory.config.ListFactoryBean">
+		<property name="sourceList">
+			<list>
+				<value>dashboard.columns.name</value>
+				<value>dashboard.columns.build-number</value>
+				<value>dashboard.columns.timestamp</value>
+				<value>dashboard.columns.age</value>
+				<value>dashboard.columns.revision</value>
+				<value>dashboard.columns.repository-tag-name</value>
+				<value>dashboard.columns.status</value>
+				<value>dashboard.columns.message</value>
+				<value>dashboard.columns.failure-age</value>
+				<value>dashboard.columns.broken-by</value>
+				<value>dashboard.columns.claim-date</value>
+			</list>
+		</property>
+		<property name="singleton" value="false"/>
+	</bean>
+	
+	<bean id="buildHistoryColumns" class="org.springframework.beans.factory.config.ListFactoryBean">
+		<property name="sourceList">
+			<list>
+				<value>dashboard.columns.name</value>
+				<value>dashboard.columns.build-number</value>
+				<value>dashboard.columns.timestamp</value>
+				<value>dashboard.columns.elapsed-time</value>
+				<value>dashboard.columns.revision</value>
+				<value>dashboard.columns.repository-tag-name</value>
+				<value>dashboard.columns.status</value>
+				<value>dashboard.columns.message</value>
+				<value>dashboard.columns.update-type</value>
+				<value>dashboard.columns.build-requested-by</value>
+				<value>dashboard.columns.work-directory</value>
+				<value>dashboard.columns.broken-by</value>
+				<value>dashboard.columns.claim-date</value>
+			</list>
+		</property>
+		<property name="singleton" value="false"/>
+	</bean>
+	
+	<bean name="preferencesStore" class="net.sourceforge.vulcan.web.DefaultPreferencesStore">
+		<property name="defaultPreferences">
+			<bean class="net.sourceforge.vulcan.dto.PreferencesDto">
+				<property name="showBuildDaemons" value="${preferences.default.showBuildDaemons}"/>
+				<property name="showBuildQueue" value="${preferences.default.showBuildQueue}"/>
+				<property name="showSchedulers" value="${preferences.default.showSchedulers}"/>
+				<property name="groupByLabel" value="${preferences.default.groupByLabel}"/>
+				<property name="popupMode" value="${preferences.default.popupMode}"/>
+				<property name="reloadInterval" value="${preferences.default.reloadInterval}"/>
+				<property name="stylesheet" value="${preferences.default.stylesheet}"/>
+				<property name="dashboardColumns">
+					<list>
+						<value>dashboard.columns.name</value>
+						<value>dashboard.columns.age</value>
+						<value>dashboard.columns.build-number</value>
+						<value>dashboard.columns.revision</value>
+						<value>dashboard.columns.repository-tag-name</value>
+						<value>dashboard.columns.status</value>
+					</list>
+				</property>
+				<property name="buildHistoryColumns">
+					<list>
+						<value>dashboard.columns.name</value>
+						<value>dashboard.columns.build-number</value>
+						<value>dashboard.columns.timestamp</value>
+						<value>dashboard.columns.elapsed-time</value>
+						<value>dashboard.columns.revision</value>
+						<value>dashboard.columns.repository-tag-name</value>
+						<value>dashboard.columns.status</value>
+						<value>dashboard.columns.message</value>
+						<value>dashboard.columns.update-type</value>
+					</list>
+				</property>
+			</bean>
+		</property>
+	</bean>
+	
+	<bean class="net.sourceforge.vulcan.spring.mbean.VulcanManager">
+		<property name="stateManager" ref="stateManager"/>
+	</bean>
+
+	<bean name="stateManager" id="stateManager" class="net.sourceforge.vulcan.core.support.StateManagerImpl">
+		<lookup-method name="createBuildDaemon" bean="buildDaemon"/>
+		<lookup-method name="createProjectScheduler" bean="quartzScheduler"/>
+		
+		<property name="version" value="${version}"/>
+		<property name="buildManager" ref="buildManager"/>
+		<property name="pluginManager" ref="pluginManager"/>
+		<property name="configurationStore" ref="configurationStore"/>
+		<property name="eventHandler" ref="eventHandler"/>
+		<property name="projectNameChangeListeners">
+			<list>
+				<ref bean="configurationStore"/>
+				<ref bean="buildOutcomeStore"/>
+				<ref bean="buildOutcomeCache"/>
+				<ref bean="pluginManager"/>
+			</list>
+		</property>
+	</bean>
+	
+	<alias alias="projectManager" name="stateManager"/>
+	
+	<bean name="projectImporter" class="net.sourceforge.vulcan.core.support.ProjectImporterImpl">
+		<property name="pluginManager" ref="pluginManager"/>
+		<property name="stateManager" ref="stateManager"/>
+		<property name="configurationStore" ref="configurationStore"/>
+	</bean>
+	
+	<bean name="eventPool" class="net.sourceforge.vulcan.spring.SpringEventPool">
+		<property name="maxSize">
+			<value>200</value>
+		</property>
+	</bean>
+	
+	<bean name="buildEventPluginPublisher" class="net.sourceforge.vulcan.spring.BuildEventPluginPublisher"/>
+	
+	<bean id="eventHandler" class="net.sourceforge.vulcan.spring.SpringEventHandler" depends-on="eventPool"/>
+
+	<bean id="factoryExpert" class="net.sourceforge.vulcan.spring.PluginFactoryExpert">
+		<property name="pluginManagerBeanName" value="pluginManager"/>
+	</bean>
+	
+	<bean id="beanEncoder" class="net.sourceforge.vulcan.spring.SpringBeanXmlEncoder">
+		<property name="factoryExpert" ref="factoryExpert"/>
+	</bean>
+
+	<bean id="configurationStore" class="net.sourceforge.vulcan.spring.SpringFileStore"
+			init-method="init">
+		<property name="eventHandler" ref="eventHandler"/>
+		<property name="configRoot">
+			<value>${vulcan.home}</value>
+		</property>
+		<property name="workingCopyLocationPattern">
+			<value>${default.build.directory}</value>
+		</property>
+		<property name="beanEncoder" ref="beanEncoder"/>
+	</bean>
+	
+	<bean id="buildOutcomeCache" class="net.sourceforge.vulcan.core.support.BuildOutcomeCache">
+		<property name="buildOutcomeStore" ref="buildOutcomeStore"/>
+		<property name="eventHandler" ref="eventHandler"/>
+		<property name="cacheSize" value="500"/>
+	</bean>
+	
+	<bean id="buildManager" class="net.sourceforge.vulcan.core.support.BuildManagerImpl">
+		<property name="eventHandler" ref="eventHandler"/>
+		<property name="buildOutcomeCache" ref="buildOutcomeCache"/>
+	</bean>
+	
+	<bean id="pluginManager" name="pluginManager" class="net.sourceforge.vulcan.spring.SpringPluginManager"
+			init-method="init" destroy-method="shutdown">
+		<property name="buildEventPluginPublisher" ref="buildEventPluginPublisher"/>
+		<property name="configurationStore" ref="configurationStore"/>
+		<property name="eventHandler" ref="eventHandler"/>
+		<property name="messageSource" ref="messageSource"/>
+		<property name="factoryExpert" ref="factoryExpert"/>
+		<property name="pluginBeanName"><value>plugin</value></property>
+		<property name="importBundledPlugins"><value>true</value></property>
+		<property name="bundledPluginResourcesPattern"><value>/WEB-INF/plugins/*.zip</value></property>
+	</bean>
+	
+	<bean id="quartzScheduler" class="net.sourceforge.vulcan.scheduler.quartz.QuartzProjectScheduler" singleton="false">
+		<property name="scheduler">
+			<bean name="quartzJobScheduler" class="org.quartz.impl.StdSchedulerFactory"
+				factory-method="getDefaultScheduler" init-method="start" destroy-method="shutdown"/>
+		</property>
+		<property name="jobDetail">
+			<bean class="org.springframework.scheduling.quartz.JobDetailBean">
+				<property name="jobClass" value="net.sourceforge.vulcan.scheduler.quartz.ScheduleProjectsJob"/>
+				<property name="group" value="ProjectSchedulers"/>
+				<property name="jobDataAsMap">
+					<map>
+						<entry key="buildManager" value-ref="buildManager"/>
+						<entry key="projectManager" value-ref="stateManager"/>
+						<entry key="eventHandler" value-ref="eventHandler"/>
+					</map>
+				</property>
+			</bean>
+		</property>
+	</bean>
+	
+	<bean id="threadScheduler" class="net.sourceforge.vulcan.scheduler.thread.ProjectSchedulerImpl" singleton="false">
+		<property name="projectManager" ref="stateManager"/>
+		<property name="buildManager" ref="buildManager"/>
+		<property name="eventHandler" ref="eventHandler"/>
+	</bean>
+
+	<bean id="buildDaemon" class="net.sourceforge.vulcan.scheduler.thread.BuildDaemonImpl" singleton="false">
+		<lookup-method name="createBuilder" bean="projectBuilder"/>
+		<property name="buildManager" ref="buildManager"/>
+		<property name="eventHandler" ref="eventHandler"/>
+	</bean>
+	
+	<bean id="projectBuilder" class="net.sourceforge.vulcan.core.support.ProjectBuilderImpl" singleton="false"
+			init-method="init">
+		<property name="configurationStore" ref="configurationStore"/>
+		<property name="buildOutcomeStore" ref="buildOutcomeStore"/>
+		<property name="buildManager" ref="buildManager"/>
+		<property name="projectManager" ref="stateManager"/>
+		<property name="fileSystem" ref="fileSystem"/>
+		<property name="diffsEnabled" value="${diffs.enabled}"/>
+	</bean>
+	
+	<bean id="fileSystem" class="net.sourceforge.vulcan.core.support.FileSystemImpl"/>
+	
+	<bean id="projectDomBuilder"
+			class="net.sourceforge.vulcan.spring.SpringProjectDomBuilder">
+		<property name="buildManager"><ref bean="buildManager"/></property>
+		<property name="projectManager"><ref bean="stateManager"/></property>
+		<property name="eventHandler" ref="eventHandler"/>
+		<property name="transformerFactory">
+			<bean class="javax.xml.transform.TransformerFactory" factory-method="newInstance"/>
+		</property>
+		<property name="transformResources">
+			<map>
+				<entry key="xhtml" value="xsl/BuildReport.xsl"/>
+				<entry key="email" value="xsl/BuildReportEmail.xsl"/>
+				<entry key="DataTable" value="xsl/BuildHistoryDataTable.xsl"/>
+				<entry key="rss" value="xsl/BuildHistoryRss.xsl"/>
+				<entry key="OpenFlashChart-BuildOutcomePieChart" value="xsl/OpenFlashChart-BuildOutcomePieChart.xsl"/>
+				<entry key="OpenFlashChart-BuildDuration" value="xsl/OpenFlashChart-BuildDuration.xsl"/>
+				<entry key="OpenFlashChart-Metrics" value="xsl/OpenFlashChart-Metrics.xsl"/>
+			</map>
+		</property>
+	</bean>
+
+	<bean id="buildOutcomeConverter" class="net.sourceforge.vulcan.core.conversion.BuildOutcomeConverter"
+			init-method="convertOldBuildOutcomes">
+		<property name="buildOutcomeStore" ref="buildOutcomeStore"/>
+		<property name="buildOutcomeCache" ref="buildOutcomeCache"/>
+		<property name="fileStore" ref="configurationStore"/>
+		<property name="eventHandler" ref="eventHandler"/>
+		<property name="stateManager" ref="stateManager"/>
+	</bean>
+	
+	<bean id="messageSource" class="net.sourceforge.vulcan.spring.DelegatingResourceBundleMessageSource">
+		<property name="basenames">
+			<list>
+				<value>/WEB-INF/i18n/messages</value>
+			</list>
+		</property>
+		<property name="cacheSeconds" value="${i18n.cache.seconds}"/>
+		<property name="useCodeAsDefaultMessage" value="true"/>
+	</bean>
+</beans>

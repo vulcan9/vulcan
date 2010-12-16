@@ -1,0 +1,24 @@
+<document>
+  <properties>
+    <title>Ant Plugin for Vulcan Build Manager</title>
+  </properties>
+  <body>
+    <section name="Overview">
+	<p>
+	This plugin provides support for Apache Ant.
+	</p>
+	<p>
+	The plugin is part of the main Vulcan distribution.
+	</p>
+	<p>
+	To use this plugin, you need to have a complete, working installation of Ant, which can be obtained
+	from <a href="http://ant.apache.org">http://ant.apache.org</a>.
+	</p>
+    </section>
+	<section name="Troubleshooting">
+		<p>To see exactly how Ant is being executed by the plugin, add the following rule to your log4j configuration:</p>
+		<code>log4j.logger.net.sourceforge.vulcan.ant.AntBuildTool=DEBUG</code>
+		<p>See the <a href="../../logging.html">Logging Guide</a> in Vulcan for more information.</p>
+	</section>
+  </body>
+</document>

@@ -1,0 +1,38 @@
+#brand, #primary-nav, #utility-nav, #loading-message, .hidden {
+	display: none !important;
+}
+#site-info {
+	font-size: 75%;
+	color: darkgray;
+}
+#site-info a {
+	text-decoration: none;
+	color: inherit;
+}
+div.content {
+	margin: 0 !important;
+	position: relative !important;
+}
+
+div.setup-content {
+	margin: inherit !important;
+	position: relative !important;
+}
+
+div.detail-menu {
+	display: none !important;
+}
+
+/* Open Flash Chart report page */
+div.pane, div.chart {
+	float: none !important;
+	width: 98% !important;
+	margin: inherit !important;;
+}
+div.chart {
+	height: 360px;
+}
+
+div.plotOptions, #column-selectors {
+	display: none !important;
+}

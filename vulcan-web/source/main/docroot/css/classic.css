@@ -1,0 +1,298 @@
+html, body {
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 10pt;
+	background-color: #DEDEDE;
+}
+
+/* Uppercase classes are build outcomes, lowercase are for more generic use */
+.success, .PASS {
+	background-color: #43F143;
+}
+.failure, .FAIL {
+	background-color: red;
+}
+.SKIP {
+	background-color: yellow;
+}
+.ERROR {
+	background-color: #FFA500;
+}
+.BUILDING, .building {
+	font-weight: bold;
+	background: transparent repeat top left;
+	background-image: url("../images/construction.gif");
+}
+.error {
+	color: red;
+	background: transparent no-repeat top left;
+	background-image: url("../images/error.gif");
+}
+.warning {
+	color: #FFA500;
+	background: transparent no-repeat top left;
+	background-image: url("../images/warning.gif");
+}
+.message {
+	color: green;
+	background: transparent no-repeat top left;
+	background-image: url("../images/success.gif");
+}
+.error, .warning, .message {
+	display: block;
+	padding-left: 20px;
+	margin-top: 10px;
+	margin-bottom: 10px;
+}
+.diff, .log {
+	border: 1px solid black;
+	background-color: white;
+	font-family: "MS Courier New", Courier, monospace
+}
+a.health {
+	float: right;
+	padding: 3px;
+}
+.authInfo {
+	float: right;
+	padding: 3px;
+}
+.requestUser {
+	font-weight: bold;
+	padding-bottom: 1ex;
+}
+table.setup {
+	float: left;
+	margin-right: 2em;
+}
+.wrapper, .bubble {
+	border: 0 !important;
+	padding: 0;
+	margin: 0;
+	background-color: inherit !important;
+}
+.upper-left, .upper-right,
+.lower-left, .lower-right {
+	display: none;
+}
+div.header {
+	position: fixed;
+	top: 0;
+	left: 0;
+	right: 0;
+	background-color: #99CCFF; /* sky blue */
+	padding: 2px;
+	padding-left: 10px;
+	padding-bottom: 2px;
+	z-index: 2;
+}
+div.link {
+	margin-bottom: 1em;
+}
+div.content, div.setup-content {
+	margin-top: 4em;
+	position: static;
+	display: block;
+}
+div.inputGroup {
+	border: 1px solid gray;
+	padding: 5px;
+	margin-bottom: 10px;
+	background-color: #FEFEFE;
+}
+div.inputGroup h1 {
+	margin-top: 4px;
+	font-size: 10pt;
+	font-weight: bold;
+}
+div.inputGroup input {
+	margin-right: 5px;
+}
+div.tables {
+	margin-left: auto;
+	margin-right: auto;
+	width: 50em;
+}
+div.buildHistoryReport table,
+div.buildHistoryReport caption {
+	margin-left: 0;
+}
+div.tables table {
+	width: 100%;
+	clear: none;
+}
+div.tables caption {
+	clear: none;
+}
+div.projectCheckboxes {
+	-moz-column-width: 12em;
+}
+a.xml {
+	float: right;
+	padding-top: 1px;
+	padding-right: 1px;
+}
+a.edit, a.editing {
+	position: absolute;
+	margin-left: 1px;
+}
+a.edit, a.edit:link, a.edit:visited, a.edit:active,
+a.editing, a.editing:link, a.editing:visited, a.editing:active {
+	color: white;
+	background-color: #316AC5;
+	margin-top: 1px;
+	margin-right: 10px;
+	font-weight: bold;
+	font-size: smaller;
+	text-decoration: none;
+}
+a.edit, a.edit:link, a.edit:visited, a.edit:active {
+}
+a.editing, a.editing:link, a.editing:visited, a.editing:active {
+	border-right: 1px solid #FF9A57;
+	border-bottom: 1px solid #FFC8A4;
+	border-left: 1px solid #7D3302;
+	border-top: 1px solid #3F1A01;
+	background-color: #FF6600;
+}
+a img {
+	border: none;
+}
+
+ul.menu {
+	display: inline;
+	padding-left: 0;
+	margin-left: 0;
+}
+ul.menu li:before {
+	content: " | ";
+}
+ul.menu li {
+	list-style: square;
+	display: inline; 
+}
+ul.menu a {
+	text-decoration: none;
+}
+ul.modified-paths {
+	margin: 0;
+	padding-left: 15px;
+}
+ul.options, ul.projectBuildOptions, div.projectCheckboxes ul,
+ul.metaDataOptions, ul.object-array, ul.primitive-array {
+	list-style: none;
+	padding-left: 0;
+	padding-right: 10px;
+	margin-right: 10px;
+	margin-top: 0;
+}
+ul.options li {
+	display: inline;
+}
+input[disabled] + label, label + input[disabled] {
+	color: gray;
+}
+input[type=radio] + label {
+	margin-right: 1em;
+}
+input[type=text], input[type=password] {
+	width: 25em;
+}
+
+a:link, a:visited {
+	color: #4080ff;
+}
+
+a:active {
+	color: red;
+}
+a.sorted-ascending, a.sorted-descending {
+	background: transparent no-repeat top right;
+	padding-right: 16px;
+}
+a.sorted-ascending, th.age a.sorted-descending {
+	background-image: url("../images/arrow_down.png");
+}
+a.sorted-descending, th.age a.sorted-ascending {
+	background-image: url("../images/arrow_up.png");
+	
+}
+
+caption {
+	margin-left: auto;
+	margin-right: auto;
+	background-color: #316AC5;
+	color: white;
+	font-weight: bold;
+}
+
+table {
+	margin-left: auto;
+	margin-right: auto;
+	border-spacing: 2px 2px;
+	border: outset 1px;
+	margin-bottom: 2em;
+	background-color: #316AC5;
+}
+table.change-sets, table.revisions,
+table.change-sets caption, table.revisions caption {
+	margin-left: inherit;
+}
+
+table .error {
+	display: block;
+}
+table.primitiveArray, table.objectArray {
+	margin-left: 0;
+	border-spacing: 0 0;
+	border: 0;
+}
+table.primitiveArray th, table.primitiveArray td,
+table.objectArray th, table.objectArray td {
+	vertical-align: middle;
+}
+tbody th {
+	text-align: right;
+	width: 10em;
+}
+td, th {
+	padding: 3px;
+	vertical-align: top;
+}
+td {
+	background-color: white;
+}
+th {
+	background-color: #99CCFF;
+}
+td.status {
+	font-weight: bold;
+	text-align: center;
+}
+td.buildMessage {
+	width: 20em;
+}
+div.tables th, div.tables td {
+	text-align: center;
+}
+span.banner {
+	font-size: larger;
+	font-weight: bold;
+}
+span.description {
+	font-style: italic;
+}
+a.red {
+	color : red;
+}
+a.outline {
+	border: 1px solid purple;
+}
+.next-index {
+	margin-left: 1ex;
+}
+.prev-index {
+}
+input.buildNumber {
+	width: 4em;
+	margin-left: 1em;
+}

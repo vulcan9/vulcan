@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE urlrewrite PUBLIC "-//tuckey.org//DTD UrlRewrite 2.6//EN"
+    "http://tuckey.org/res/dtds/urlrewrite2.6.dtd">
+
+<urlrewrite>
+	<rule>
+		<name>Redirect with slash</name>
+		<from>^/projects/([^/]+)/([^/]+)$</from>
+		<to last="true" type="redirect">%{context-path}/projects/$1/$2/</to>
+	</rule>
+	
+	<rule>
+		<name>RSS feed for project</name>
+		<from>^/projects/([^/]+)/rss/(\?(.*))?$</from>
+		<to last="true">/viewProjectBuildHistory.do?projectNames=$1&amp;transform=rss&amp;rangeType=all&amp;statusTypes=PASS&amp;statusTypes=FAIL&amp;statusTypes=SKIP&amp;statusTypes=ERROR&amp;maxResults=20&amp;$3</to>
+	</rule>
+	
+	<rule>
+		<name>xhtml build report</name>
+		<from>^/projects/([^/]+)/(\d+)/$</from>
+		<to>/viewProjectStatus.do?transform=xhtml&amp;projectName=$1&amp;buildNumber=$2</to>
+	</rule>
+	
+	<rule>
+		<name>xml build report</name>
+		<from>^/projects/([^/]+)/(\d+)/xml$</from>
+		<to>/viewProjectStatus.do?projectName=$1&amp;buildNumber=$2</to>
+	</rule>
+	
+	<rule>
+		<name>xhtml build report with view</name>
+		<from>^/projects/([^/]+)/(\d+)/(summary|changes|metrics|tests|errors|warnings|browse|log|diff)$</from>
+		<to>/viewProjectStatus.do?projectName=$1&amp;buildNumber=$2&amp;view=$3&amp;transform=xhtml</to>
+	</rule>
+	
+	<rule>
+		<name>working copy redirect with slash</name>
+		<from>^/projects/([^/]+)/(\d+)/site$</from>
+		<to last="true" type="redirect">%{context-path}/projects/$1/$2/site/</to>
+	</rule>
+	
+	<rule>
+		<name>working copy</name>
+		<from>^/projects/([^/]+)/(\d+)/site/(.*)$</from>
+		<to>/site/$1/$2/$3</to>
+	</rule>
+	
+	<rule>
+		<name>working copy without build number</name>
+		<from>^/projects/([^/]+)/(LATEST|NEWEST|RECENT|CURRENT)/site/(.*)$</from>
+		<to>/site/$1/$3</to>
+	</rule>
+	
+	<rule>
+		<from>^/projects/([^/]+)/(LATEST|NEWEST|RECENT|CURRENT)/$</from>
+		<to>/viewProjectStatus.do?transform=xhtml&amp;projectName=$1</to>
+	</rule>
+	<rule>
+		<from>^/projects/([^/]+)/(LATEST|NEWEST|RECENT|CURRENT)/xml$</from>
+		<to>/viewProjectStatus.do?projectName=$1</to>
+	</rule>
+	<rule>
+		<from>^/projects/([^/]+)/(LATEST|NEWEST|RECENT|CURRENT)/(summary|changes|metrics|tests|errors|warnings|browse|log|diff)$</from>
+		<to>/viewProjectStatus.do?projectName=$1&amp;view=$3&amp;transform=xhtml</to>
+	</rule>
+	
+	<rule>
+		<name>xhtml build report with transform</name>
+		<from>^/projects/([^/]+)/(\d+)/(.*)$</from>
+		<to>/viewProjectStatus.do?projectName=$1&amp;buildNumber=$2&amp;transform=$3</to>
+	</rule>
+	<rule>
+		<name>xhtml build report with transform (latest)</name>
+		<from>^/projects/([^/]+)/(LATEST|NEWEST|RECENT|CURRENT)/(.*)$</from>
+		<to>/viewProjectStatus.do?projectName=$1&amp;transform=$3</to>
+	</rule>
+</urlrewrite>
