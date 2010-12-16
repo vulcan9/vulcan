@@ -377,10 +377,23 @@ public class MercurialRepositoryTest extends EasyMockTestCase {
 		assertNotNull("return value", changeLog);
 		assertNotNull("change sets", changeLog.getChangeSets());
 	}
+
+	boolean throwOnClose;
+	boolean closedFlag;
 	
+	final ByteArrayOutputStream diffOut = new ByteArrayOutputStream() {
+		@Override
+		public void close() throws IOException {
+			if (throwOnClose) {
+				throw new IOException("you can't close me!");
+			}
+
+			super.close();
+			closedFlag = true;
+		}
+	};
+
 	public void testGetChangeLogDiff() throws Exception {
-		final ByteArrayOutputStream diffOut = new ByteArrayOutputStream();
-		
 		invoker.setOutputStream(diffOut);
 		invoker.invoke("diff", workDir, "-r", "124:456");
 		returnSuccess();
@@ -393,6 +406,45 @@ public class MercurialRepositoryTest extends EasyMockTestCase {
 		repo.getChangeLog(new RevisionTokenDto(123L, "123:9bd7475fd513"), new RevisionTokenDto(456L, "456:9bd7475fd513"), diffOut);
 		
 		verify();
+		
+		assertEquals("should close stream", true, closedFlag);
+	}
+	
+	public void testGetChangeLogDiffRethrowsExceptionOnClose() throws Exception {
+		invoker.setOutputStream(diffOut);
+		invoker.invoke("diff", workDir, "-r", "124:456");
+		returnSuccess();
+		
+		throwOnClose = true;
+		
+		replay();
+		
+		try {
+			repo.getChangeLog(new RevisionTokenDto(123L, "123:9bd7475fd513"), new RevisionTokenDto(456L, "456:9bd7475fd513"), diffOut);
+			fail("expected exception");
+		} catch (RepositoryException e) {
+		}
+		
+		verify();
+	}
+	
+	public void testGetChangeLogDiffClosesStreamOnDiffError() throws Exception {
+		invoker.setOutputStream(diffOut);
+		invoker.invoke("diff", workDir, "-r", "124:456");
+		expectLastCall().andThrow(new IOException());
+		expect(invoker.getErrorText()).andReturn("invalid command");
+		expect(invoker.getExitCode()).andReturn(-1);
+		
+		replay();
+		
+		try {
+			repo.getChangeLog(new RevisionTokenDto(123L, "123:9bd7475fd513"), new RevisionTokenDto(456L, "456:9bd7475fd513"), diffOut);
+		} catch (Exception ignore) {
+		}
+		
+		verify();
+		
+		assertEquals("should close stream", true, closedFlag);
 	}
 	
 	public void testGetTagsAndBranchesOneBranch() throws Exception {
