@@ -19,10 +19,8 @@
 package net.sourceforge.vulcan.mercurial;
 
 import net.sourceforge.vulcan.ProjectRepositoryConfigurator;
-import net.sourceforge.vulcan.RepositoryAdaptor;
 import net.sourceforge.vulcan.dto.PluginConfigDto;
 import net.sourceforge.vulcan.dto.ProjectConfigDto;
-import net.sourceforge.vulcan.dto.RepositoryAdaptorConfigDto;
 import net.sourceforge.vulcan.exception.ConfigException;
 import net.sourceforge.vulcan.integration.ConfigurablePlugin;
 import net.sourceforge.vulcan.integration.RepositoryAdaptorPlugin;
@@ -33,7 +31,7 @@ public class MercurialPlugin implements RepositoryAdaptorPlugin, ConfigurablePlu
 	
 	private MercurialConfig config = new MercurialConfig();
 	
-	public RepositoryAdaptor createInstance(ProjectConfigDto projectConfig)	throws ConfigException {
+	public MercurialRepository createInstance(ProjectConfigDto projectConfig)	throws ConfigException {
 		return new MercurialRepository(projectConfig, config);
 	}
 
@@ -41,11 +39,11 @@ public class MercurialPlugin implements RepositoryAdaptorPlugin, ConfigurablePlu
 		return null;
 	}
 	
-	public RepositoryAdaptorConfigDto getDefaultConfig() {
+	public MercurialProjectConfig getDefaultConfig() {
 		return new MercurialProjectConfig();
 	}
 
-	public PluginConfigDto getConfiguration() {
+	public MercurialConfig getConfiguration() {
 		return config;
 	}
 	

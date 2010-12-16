@@ -20,8 +20,11 @@ package net.sourceforge.vulcan.mercurial;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.OutputStream;
 
 public interface Invoker {
+	void setOutputStream(OutputStream stream);
+	
 	InvocationResult invoke(String command, File workDir, String... args) throws IOException;
 
 	public String getErrorText();

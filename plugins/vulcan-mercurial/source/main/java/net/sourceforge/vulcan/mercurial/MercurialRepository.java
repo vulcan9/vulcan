@@ -52,6 +52,7 @@ public class MercurialRepository implements RepositoryAdaptor {
 		pull(true),
 		incoming(true),
 		log(false),
+		diff(false),
 		update(false),
 		purge(false),
 		branches(false),
@@ -223,6 +224,20 @@ public class MercurialRepository implements RepositoryAdaptor {
 	public ChangeLogDto getChangeLog(RevisionTokenDto previousRevision,	RevisionTokenDto currentRevision, OutputStream diffOutputStream) throws RepositoryException, InterruptedException {
 		final String revisionRange = MessageFormat.format("{0}:{1}", previousRevision.getRevision()+1, currentRevision.getRevision());
 		
+		getDiff(revisionRange, diffOutputStream);
+		
+		return getChangeSets(revisionRange);
+	}
+
+	private void getDiff(String revisionRange, OutputStream diffOutputStream) throws RepositoryException {
+		if (diffOutputStream == null) {
+			return;
+		}
+		
+		tryInvokeWithStream(Command.diff, diffOutputStream, "-r", revisionRange);
+	}
+
+	private ChangeLogDto getChangeSets(final String revisionRange) throws RepositoryException {
 		final InvocationResult result = tryInvoke(Command.log, "--style", "xml", "-r", revisionRange);
 		
 		final CommitLogParser parser = new CommitLogParser();
@@ -274,6 +289,10 @@ public class MercurialRepository implements RepositoryAdaptor {
 	}
 	
 	protected InvocationResult tryInvoke(Command command, String... args) throws RepositoryException {
+		return tryInvokeWithStream(command, null, args);
+	}
+	
+	protected InvocationResult tryInvokeWithStream(Command command, OutputStream output, String... args) throws RepositoryException {
 		final File workDir = getLocalRepositoryPath();
 		
 		if (!fileSystem.directoryExists(workDir)) {
@@ -285,6 +304,10 @@ public class MercurialRepository implements RepositoryAdaptor {
 		}
 
 		final Invoker invoker = createInvoker();
+		
+		if (output != null) {
+			invoker.setOutputStream(output);
+		}
 		
 		if (command.isRemote()) {
 			args = addRemoteFlags(args);
@@ -337,11 +360,19 @@ public class MercurialRepository implements RepositoryAdaptor {
 		settings.setBranch(tagName);
 	}
 	
+	public void setFileSystem(FileSystem fileSystem) {
+		this.fileSystem = fileSystem;
+	}
+	
+	protected ProjectConfigDto getProjectConfig() {
+		return projectConfig;
+	}
+	
 	protected MercurialProjectConfig getSettings() {
 		return settings;
 	}
 	
-	public void setFileSystem(FileSystem fileSystem) {
-		this.fileSystem = fileSystem;
+	protected MercurialConfig getGlobals() {
+		return globals;
 	}
 }

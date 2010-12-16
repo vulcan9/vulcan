@@ -18,17 +18,28 @@
  */
 package net.sourceforge.vulcan.mercurial;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.IOException;
+import java.io.OutputStream;
 
 import net.sourceforge.vulcan.EasyMockTestCase;
 
 import org.apache.commons.exec.CommandLine;
+import org.apache.commons.exec.ExecuteException;
 import org.apache.commons.exec.ExecuteStreamHandler;
 import org.apache.commons.exec.Executor;
+import org.easymock.EasyMock;
+import org.easymock.IAnswer;
 
 public class ProcessInvokerTest extends EasyMockTestCase {
 	private ProcessInvoker invoker = new ProcessInvoker();
 	private Executor executor;
+	
+	private String executable = "hg";
+	private int exitCode = 0;
+	private OutputStream outputStream;
+	private InvocationResult result;
 	
 	@Override
 	protected void setUp() throws Exception {
@@ -38,29 +49,50 @@ public class ProcessInvokerTest extends EasyMockTestCase {
 	}
 	
 	public void testInvoke() throws Exception {
-		CommandLine commandLine = new CommandLine("hg");
-		commandLine.addArgument("help");
-		commandLine.addArgument("--noninteractive");
-		commandLine.addArgument("arg 1");
-		commandLine.addArgument("arg 2");
+		doInvokeTest();
 		
-		executor.setExitValues(reflectionEq(new int[] {0, 1}));
-		executor.setWorkingDirectory(new File("."));
-		executor.setStreamHandler((ExecuteStreamHandler) notNull());
-		expect(executor.execute(stringEq(commandLine))).andReturn(0);
+		assertEquals("isSuccess", true, result.isSuccess());
+		assertEquals("output", "sample output", result.getOutput());
+		assertEquals("error", "sample error", result.getError());
+	}
+	
+	public void testInvokeWithAlternateCommand() throws Exception {
+		executable = "hg1";
 		
-		replay();
-
-		invoker.setExecutable("hg");
-		final InvocationResult result = invoker.invoke("help", new File("."), "arg 1", "arg 2");
-		
-		assertEquals("result.isSuccess()", true, result.isSuccess());
-		
-		verify();
+		doInvokeTest();
 	}
 	
 	public void testInvokeSetsSuccessFlag() throws Exception {
-		CommandLine commandLine = new CommandLine("hg1");
+		exitCode = 1;
+		
+		doInvokeTest();
+		
+		assertEquals("result.isSuccess()", false, result.isSuccess());
+		assertEquals("result.getExitCode()", 1, invoker.getExitCode());
+	}
+	
+	public void testRedirectOutput() throws Exception {
+		outputStream = new ByteArrayOutputStream();
+		
+		doInvokeTest();
+		
+		assertEquals("sample output", outputStream.toString());
+	}
+	
+	public void testRedirectOutputResultOutputThrows() throws Exception {
+		outputStream = new ByteArrayOutputStream();
+		
+		doInvokeTest();
+		
+		try {
+			result.getOutput();
+			fail("expected exception");
+		} catch (IllegalStateException e) {
+		}
+	}
+	
+	private InvocationResult doInvokeTest() throws ExecuteException, IOException {
+		CommandLine commandLine = new CommandLine(executable);
 		commandLine.addArgument("help");
 		commandLine.addArgument("--noninteractive");
 		commandLine.addArgument("arg 1");
@@ -69,16 +101,38 @@ public class ProcessInvokerTest extends EasyMockTestCase {
 		executor.setExitValues(reflectionEq(new int[] {0, 1}));
 		executor.setWorkingDirectory(new File("."));
 		executor.setStreamHandler((ExecuteStreamHandler) notNull());
-		expect(executor.execute(stringEq(commandLine))).andReturn(1);
+		
+		expectLastCall().andAnswer(captureStreamHandler);
+		expect(executor.execute(stringEq(commandLine))).andAnswer(executeAnswer);
 		
 		replay();
 
-		invoker.setExecutable("hg1");
-		final InvocationResult result = invoker.invoke("help", new File("."), "arg 1", "arg 2");
+		if (outputStream != null) {
+			invoker.setOutputStream(outputStream);
+		}
 		
-		assertEquals("result.isSuccess()", false, result.isSuccess());
-		assertEquals("result.getExitCode()", 1, invoker.getExitCode());
+		invoker.setExecutable(executable);
+		result = invoker.invoke("help", new File("."), "arg 1", "arg 2");
 		
 		verify();
+		
+		return result;
 	}
+	
+	private MyPumpStreamHandler handler;
+	
+	private IAnswer<Object> captureStreamHandler = new IAnswer<Object>() {
+		public Object answer() throws Throwable {
+			handler = (MyPumpStreamHandler) EasyMock.getCurrentArguments()[0];
+			return null;
+		}
+	};
+	
+	private IAnswer<Integer> executeAnswer = new IAnswer<Integer>() {
+		public Integer answer() throws Throwable {
+			handler.getOut().write("sample output".getBytes());
+			handler.getErr().write("sample error".getBytes());
+			return exitCode;
+		}
+	};
 }
