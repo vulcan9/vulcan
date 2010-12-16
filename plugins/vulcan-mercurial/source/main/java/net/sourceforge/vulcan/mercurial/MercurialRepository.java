@@ -234,7 +234,15 @@ public class MercurialRepository implements RepositoryAdaptor {
 			return;
 		}
 		
-		tryInvokeWithStream(Command.diff, diffOutputStream, "-r", revisionRange);
+		try {
+			tryInvokeWithStream(Command.diff, diffOutputStream, "-r", revisionRange);
+		} finally {
+			try {
+				diffOutputStream.close();
+			} catch (IOException e) {
+				throw new RepositoryException(e);
+			}
+		}
 	}
 
 	private ChangeLogDto getChangeSets(final String revisionRange) throws RepositoryException {
