@@ -24,13 +24,11 @@ import java.util.List;
 import net.sourceforge.vulcan.dto.ProjectConfigDto;
 import net.sourceforge.vulcan.dto.SchedulerConfigDto;
 import net.sourceforge.vulcan.exception.DuplicateNameException;
-import net.sourceforge.vulcan.metadata.SvnRevision;
 import net.sourceforge.vulcan.scheduler.BuildDaemon;
 import net.sourceforge.vulcan.scheduler.ProjectScheduler;
 import net.sourceforge.vulcan.scheduler.Scheduler;
 
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public class StateManagerDaemonTest extends StateManagerTestBase {
 	int startCallCount = 0;
 	int stopCallCount = 0;

@@ -23,13 +23,11 @@ import java.util.Locale;
 import net.sourceforge.vulcan.EasyMockTestCase;
 import net.sourceforge.vulcan.event.ErrorEvent;
 import net.sourceforge.vulcan.event.WarningEvent;
-import net.sourceforge.vulcan.metadata.SvnRevision;
 
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationEvent;
 
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public class SpringEventHandlerTest extends EasyMockTestCase {
 	SpringEventHandler handler = new SpringEventHandler();
 	ApplicationContext ctx;

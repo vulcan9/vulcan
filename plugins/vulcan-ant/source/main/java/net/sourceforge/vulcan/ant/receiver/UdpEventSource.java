@@ -34,13 +34,11 @@ import net.sourceforge.vulcan.ant.buildlistener.Constants;
 import net.sourceforge.vulcan.ant.io.ObjectSerializer;
 import net.sourceforge.vulcan.ant.io.Serializer;
 import net.sourceforge.vulcan.exception.ConfigException;
-import net.sourceforge.vulcan.metadata.SvnRevision;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public class UdpEventSource extends SerializedEventSource {
 	private final static Log log = LogFactory.getLog(UdpEventSource.class);
 	private final static String ANT_LISTENER_CLASS_NAME = "net.sourceforge.vulcan.ant.buildlistener.UdpBuildEventPublisher";

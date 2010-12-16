@@ -62,7 +62,6 @@ import net.sourceforge.vulcan.event.Event;
 import net.sourceforge.vulcan.event.EventHandler;
 import net.sourceforge.vulcan.exception.NoSuchProjectException;
 import net.sourceforge.vulcan.exception.NoSuchTransformFormatException;
-import net.sourceforge.vulcan.metadata.SvnRevision;
 
 import org.jdom.Document;
 import org.jdom.Element;
@@ -71,7 +70,6 @@ import org.jdom.output.XMLOutputter;
 import org.jdom.output.Format.TextMode;
 import org.jdom.transform.JDOMSource;
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public class AbstractProjectDomBuilderTest extends EasyMockTestCase {
 	TimeZone defaultTimeZone;
 	

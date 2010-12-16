@@ -22,9 +22,7 @@ import java.io.InputStream;
 
 import net.sourceforge.vulcan.dto.StateManagerConfigDto;
 import net.sourceforge.vulcan.event.Event;
-import net.sourceforge.vulcan.metadata.SvnRevision;
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public class ImportConfigActionTest extends MockApplicationContextStrutsTestCase {
 	StateManagerConfigDto stateManagerConfig = new StateManagerConfigDto();
 	

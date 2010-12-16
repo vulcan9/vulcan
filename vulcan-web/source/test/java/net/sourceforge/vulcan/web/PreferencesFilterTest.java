@@ -25,13 +25,11 @@ import javax.servlet.http.Cookie;
 
 import net.sourceforge.vulcan.MockApplicationContext;
 import net.sourceforge.vulcan.dto.PreferencesDto;
-import net.sourceforge.vulcan.metadata.SvnRevision;
 
 import org.easymock.EasyMock;
 import org.easymock.IMocksControl;
 import org.springframework.web.context.WebApplicationContext;
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public class PreferencesFilterTest extends ServletFilterTestCase {
 	EasyMock mock = new EasyMock();
 	PreferencesFilter filter = new PreferencesFilter();

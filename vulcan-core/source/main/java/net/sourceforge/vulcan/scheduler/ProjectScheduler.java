@@ -18,9 +18,7 @@
  */
 package net.sourceforge.vulcan.scheduler;
 
-import net.sourceforge.vulcan.metadata.SvnRevision;
 
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public interface ProjectScheduler extends Scheduler {
 }

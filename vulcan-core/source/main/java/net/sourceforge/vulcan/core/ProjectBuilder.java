@@ -19,9 +19,7 @@
 package net.sourceforge.vulcan.core;
 
 import net.sourceforge.vulcan.dto.BuildDaemonInfoDto;
-import net.sourceforge.vulcan.metadata.SvnRevision;
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public interface ProjectBuilder {
 	public void build(BuildDaemonInfoDto info, BuildTarget currentTarget, BuildDetailCallback buildDetailCallback);
 

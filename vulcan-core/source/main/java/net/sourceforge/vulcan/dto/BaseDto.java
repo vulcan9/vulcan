@@ -23,14 +23,12 @@ import java.beans.PropertyChangeSupport;
 import java.io.Serializable;
 import java.lang.reflect.Array;
 
-import net.sourceforge.vulcan.metadata.SvnRevision;
 
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.commons.lang.builder.ToStringBuilder;
 
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public abstract class BaseDto implements Serializable, Cloneable, Copyable {
 	protected transient PropertyChangeSupport propertyChangeSupport = new PropertyChangeSupport(this);
 	

@@ -18,10 +18,8 @@
  */
 package net.sourceforge.vulcan.dto;
 
-import net.sourceforge.vulcan.metadata.SvnRevision;
 import junit.framework.TestCase;
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public class PluginProfileDtoTest extends TestCase {
 	public void testNotRenamedByDefault() throws Exception {
 		assertFalse(new PluginProfileDtoStub().isRenamed());

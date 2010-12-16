@@ -23,7 +23,6 @@ import java.text.ParseException;
 import javax.servlet.http.HttpServletRequest;
 
 import net.sourceforge.vulcan.dto.SchedulerConfigDto;
-import net.sourceforge.vulcan.metadata.SvnRevision;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.struts.action.ActionErrors;
@@ -32,7 +31,6 @@ import org.apache.struts.action.ActionMessage;
 import org.quartz.CronTrigger;
 
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public final class SchedulerConfigForm extends ConfigForm {
 	private static long[] multipliers = {86400000, 3600000, 60000, 1000};
 	private boolean daemon;

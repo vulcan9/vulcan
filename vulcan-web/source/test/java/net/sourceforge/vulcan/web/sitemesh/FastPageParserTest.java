@@ -19,11 +19,9 @@
 package net.sourceforge.vulcan.web.sitemesh;
 
 import junit.framework.TestCase;
-import net.sourceforge.vulcan.metadata.SvnRevision;
 
 import com.opensymphony.module.sitemesh.Page;
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public class FastPageParserTest extends TestCase {
 	FastPageParser p = new FastPageParser();
 	

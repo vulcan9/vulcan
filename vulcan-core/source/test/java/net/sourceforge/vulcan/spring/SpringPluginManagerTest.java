@@ -46,7 +46,6 @@ import net.sourceforge.vulcan.integration.BuildManagerObserverPlugin;
 import net.sourceforge.vulcan.integration.ConfigurablePlugin;
 import net.sourceforge.vulcan.integration.Plugin;
 import net.sourceforge.vulcan.integration.PluginStub;
-import net.sourceforge.vulcan.metadata.SvnRevision;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.PropertyPlaceholderConfigurer;
@@ -58,7 +57,6 @@ import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public class SpringPluginManagerTest extends EasyMockTestCase {
 	BuildEventPluginPublisher buildEventPluginPublisher = new BuildEventPluginPublisher();
 	SpringPluginManager mgr = new SpringPluginManager() {

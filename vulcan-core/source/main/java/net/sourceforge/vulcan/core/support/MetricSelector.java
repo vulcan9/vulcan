@@ -21,14 +21,12 @@ package net.sourceforge.vulcan.core.support;
 import java.util.ArrayList;
 import java.util.List;
 
-import net.sourceforge.vulcan.metadata.SvnRevision;
 
 /**
  * This class facilitates selecting default metrics for plotting
  * in the build history report.  It selects two metrics to plot
  * from the list of metrics present in the build history.
  */
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public class MetricSelector {
 	private List<String> preferredMetrics;
 

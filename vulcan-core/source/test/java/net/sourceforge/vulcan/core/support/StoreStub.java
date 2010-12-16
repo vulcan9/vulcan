@@ -38,9 +38,7 @@ import net.sourceforge.vulcan.dto.StateManagerConfigDto;
 import net.sourceforge.vulcan.dto.TestFailureDto;
 import net.sourceforge.vulcan.dto.ProjectStatusDto.UpdateType;
 import net.sourceforge.vulcan.exception.StoreException;
-import net.sourceforge.vulcan.metadata.SvnRevision;
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public class StoreStub implements ConfigurationStore, BuildOutcomeStore {
 	StateManagerConfigDto stateManagerConfig;
 	private int commitCount;

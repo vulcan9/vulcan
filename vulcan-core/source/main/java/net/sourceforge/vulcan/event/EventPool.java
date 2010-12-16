@@ -20,7 +20,6 @@ package net.sourceforge.vulcan.event;
 
 import java.util.List;
 
-import net.sourceforge.vulcan.metadata.SvnRevision;
 
 
 /**
@@ -29,7 +28,6 @@ import net.sourceforge.vulcan.metadata.SvnRevision;
  * "get" and "containsKey" methods need to be implemented.  Other methods derived
  * from Map may throw UnsupportedOperationException.
  */
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public interface EventPool {
 	/**
 	 * @param types comma delimited list of EventType enum values to return.

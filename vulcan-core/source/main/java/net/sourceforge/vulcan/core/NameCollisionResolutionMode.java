@@ -18,9 +18,7 @@
  */
 package net.sourceforge.vulcan.core;
 
-import net.sourceforge.vulcan.metadata.SvnRevision;
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public enum NameCollisionResolutionMode {
 	Abort, UseExisting, Overwrite 
 }

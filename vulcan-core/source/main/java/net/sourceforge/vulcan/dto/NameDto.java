@@ -18,9 +18,7 @@
  */
 package net.sourceforge.vulcan.dto;
 
-import net.sourceforge.vulcan.metadata.SvnRevision;
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public abstract class NameDto extends BaseDto implements Comparable<NameDto>, NamedObject {
 	private String name;
 	

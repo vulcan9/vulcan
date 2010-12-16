@@ -26,9 +26,7 @@ import net.sourceforge.vulcan.BuildTool;
 import net.sourceforge.vulcan.ProjectBuildConfigurator;
 import net.sourceforge.vulcan.dto.BuildToolConfigDto;
 import net.sourceforge.vulcan.exception.ConfigException;
-import net.sourceforge.vulcan.metadata.SvnRevision;
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public interface BuildToolPlugin extends Plugin {
 	BuildTool createInstance(BuildToolConfigDto config) throws ConfigException;
 	BuildToolConfigDto getDefaultConfig();

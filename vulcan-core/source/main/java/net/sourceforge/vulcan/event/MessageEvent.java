@@ -20,10 +20,8 @@ package net.sourceforge.vulcan.event;
 
 import java.util.Date;
 
-import net.sourceforge.vulcan.metadata.SvnRevision;
 
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public abstract class MessageEvent implements Event, Message {
 	final Object source;
 	final String messageKey;

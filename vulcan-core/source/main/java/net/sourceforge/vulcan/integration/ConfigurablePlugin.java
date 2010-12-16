@@ -19,10 +19,8 @@
 package net.sourceforge.vulcan.integration;
 
 import net.sourceforge.vulcan.dto.PluginConfigDto;
-import net.sourceforge.vulcan.metadata.SvnRevision;
 
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public interface ConfigurablePlugin {
 	public PluginConfigDto getConfiguration();
 	public void setConfiguration(PluginConfigDto bean);

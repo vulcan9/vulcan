@@ -58,7 +58,6 @@ import net.sourceforge.vulcan.event.Message;
 import net.sourceforge.vulcan.event.WarningEvent;
 import net.sourceforge.vulcan.exception.AlreadyScheduledException;
 import net.sourceforge.vulcan.exception.StoreException;
-import net.sourceforge.vulcan.metadata.SvnRevision;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
@@ -70,7 +69,6 @@ import org.springframework.jmx.export.annotation.ManagedOperationParameters;
 import org.springframework.jmx.export.annotation.ManagedResource;
 
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 @ManagedResource(objectName="vulcan:name=buildManager")
 public class BuildManagerImpl implements BuildManager {
 	private final static Log LOG = LogFactory.getLog(BuildManager.class);

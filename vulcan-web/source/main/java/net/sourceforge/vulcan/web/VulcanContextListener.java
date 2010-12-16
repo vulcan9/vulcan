@@ -23,12 +23,10 @@ import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 
 import net.sourceforge.vulcan.StateManager;
-import net.sourceforge.vulcan.metadata.SvnRevision;
 
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.WebApplicationContextUtils;
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public final class VulcanContextListener implements ServletContextListener {
 	WebApplicationContext wac;
 	StateManager stateManager;

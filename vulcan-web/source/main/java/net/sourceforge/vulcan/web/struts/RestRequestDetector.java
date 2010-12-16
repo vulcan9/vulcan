@@ -20,9 +20,7 @@ package net.sourceforge.vulcan.web.struts;
 
 import javax.servlet.http.HttpServletRequest;
 
-import net.sourceforge.vulcan.metadata.SvnRevision;
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public interface RestRequestDetector {
 	boolean isRestRequest(HttpServletRequest request);
 	String getRestResponseForwardName();

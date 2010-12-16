@@ -21,9 +21,7 @@ package net.sourceforge.vulcan.web.struts;
 import javax.servlet.http.HttpServletResponse;
 
 import net.sourceforge.vulcan.SimplePrincipal;
-import net.sourceforge.vulcan.metadata.SvnRevision;
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public class ClaimBrokenBuildActionTest extends MockApplicationContextStrutsTestCase {
 	@Override
 	public void setUp() throws Exception {

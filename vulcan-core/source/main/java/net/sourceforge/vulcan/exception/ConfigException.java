@@ -18,9 +18,7 @@
  */
 package net.sourceforge.vulcan.exception;
 
-import net.sourceforge.vulcan.metadata.SvnRevision;
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public class ConfigException extends MessageFormatException {
 	public ConfigException(String key, Object... args) {
 		super(key, args);

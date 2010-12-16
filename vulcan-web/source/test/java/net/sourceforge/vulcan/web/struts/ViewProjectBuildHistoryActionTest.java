@@ -36,14 +36,12 @@ import net.sourceforge.vulcan.dto.TestFailureDto;
 import net.sourceforge.vulcan.dto.MetricDto.MetricType;
 import net.sourceforge.vulcan.dto.ProjectStatusDto.Status;
 import net.sourceforge.vulcan.dto.ProjectStatusDto.UpdateType;
-import net.sourceforge.vulcan.metadata.SvnRevision;
 
 import org.apache.struts.action.ActionMessages;
 import org.easymock.EasyMock;
 import org.jdom.Document;
 import org.jdom.Element;
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public class ViewProjectBuildHistoryActionTest extends MockApplicationContextStrutsTestCase {
 	ProjectStatusDto status = new ProjectStatusDto();
 	List<ProjectStatusDto> results = Collections.nCopies(2, status);

@@ -26,12 +26,10 @@ import java.util.List;
 import jdepend.framework.JDepend;
 import jdepend.framework.JavaPackage;
 import junit.framework.TestCase;
-import net.sourceforge.vulcan.metadata.SvnRevision;
 
 import org.apache.commons.lang.StringUtils;
 
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public class PackageDependencyTest extends TestCase {
 	JDepend jdepend;
 	

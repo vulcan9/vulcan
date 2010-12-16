@@ -29,9 +29,7 @@ import net.sourceforge.vulcan.dto.SchedulerConfigDto;
 import net.sourceforge.vulcan.event.Event;
 import net.sourceforge.vulcan.event.EventHandler;
 import net.sourceforge.vulcan.exception.AlreadyScheduledException;
-import net.sourceforge.vulcan.metadata.SvnRevision;
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public class ProjectSchedulerTest extends EasyMockTestCase {
 	ProjectSchedulerImpl ps = new ProjectSchedulerImpl();
 	

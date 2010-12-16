@@ -20,10 +20,8 @@ package net.sourceforge.vulcan.dto;
 
 import java.io.Serializable;
 
-import net.sourceforge.vulcan.metadata.SvnRevision;
 
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public interface Copyable extends Serializable {
 	public Copyable copy();
 }

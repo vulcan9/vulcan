@@ -18,7 +18,6 @@
  */
 package net.sourceforge.vulcan.dto;
 
-import net.sourceforge.vulcan.metadata.SvnRevision;
 
 /**
  * Represents a test failure which will be displayed in
@@ -26,7 +25,6 @@ import net.sourceforge.vulcan.metadata.SvnRevision;
  * the buildNumber will be set to the first build number in which
  * the test failed.
  */
-@SvnRevision(id="$Id: ProjectStatusDto.java 296 2007-03-15 19:43:16Z chris.eldredge $", url="$HeadURL: https://vulcan.googlecode.com/svn/trunk/vulcan-core/source/main/java/net/sourceforge/vulcan/dto/ProjectStatusDto.java $")
 public class TestFailureDto extends BaseDto {
 	private String name;
 	private String message;

@@ -19,11 +19,9 @@
 package net.sourceforge.vulcan.web.struts;
 
 import net.sourceforge.vulcan.dto.PreferencesDto;
-import net.sourceforge.vulcan.metadata.SvnRevision;
 import net.sourceforge.vulcan.web.struts.forms.PreferencesForm;
 
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public class EditPreferencesTest extends MockApplicationContextStrutsTestCase {
 	@Override
 	public void setUp() throws Exception {

@@ -28,7 +28,6 @@ import javax.servlet.jsp.PageContext;
 
 import net.sourceforge.vulcan.EasyMockTestCase;
 import net.sourceforge.vulcan.StateManager;
-import net.sourceforge.vulcan.metadata.SvnRevision;
 
 import org.apache.commons.lang.time.DateUtils;
 import org.apache.struts.Globals;
@@ -40,7 +39,6 @@ import org.springframework.web.context.WebApplicationContext;
 import servletunit.HttpServletRequestSimulator;
 import servletunit.ServletContextSimulator;
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public class JstlFunctionsTest extends EasyMockTestCase {
 	final HttpServletRequestSimulator request = new HttpServletRequestSimulator(new ServletContextSimulator());
 	final WebApplicationContext wac = createStrictMock(WebApplicationContext.class);

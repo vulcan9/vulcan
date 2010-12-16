@@ -22,9 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import net.sourceforge.vulcan.dto.BuildArtifactLocationDto;
-import net.sourceforge.vulcan.metadata.SvnRevision;
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public class SaveArtifactLocationsActionTest extends MockApplicationContextStrutsTestCase {
 	@Override
 	public void setUp() throws Exception {

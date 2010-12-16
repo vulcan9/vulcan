@@ -20,14 +20,12 @@ package net.sourceforge.vulcan.web.struts.forms;
 
 import javax.servlet.http.HttpServletRequest;
 
-import net.sourceforge.vulcan.metadata.SvnRevision;
 
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.struts.action.ActionMapping;
 import org.apache.struts.validator.ValidatorForm;
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public class MultipleProjectConfigForm extends ValidatorForm implements DispatchForm {
 	private String[] projectNames;
 	private String message;

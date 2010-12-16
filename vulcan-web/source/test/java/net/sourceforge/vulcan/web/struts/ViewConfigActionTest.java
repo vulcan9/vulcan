@@ -20,12 +20,10 @@ package net.sourceforge.vulcan.web.struts;
 
 import java.io.OutputStream;
 
-import net.sourceforge.vulcan.metadata.SvnRevision;
 
 import org.easymock.EasyMock;
 
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public class ViewConfigActionTest extends MockApplicationContextStrutsTestCase {
 	
 	@Override

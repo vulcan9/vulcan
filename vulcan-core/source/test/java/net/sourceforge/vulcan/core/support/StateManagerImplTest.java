@@ -42,10 +42,8 @@ import net.sourceforge.vulcan.exception.DuplicateNameException;
 import net.sourceforge.vulcan.exception.NoSuchProjectException;
 import net.sourceforge.vulcan.exception.ProjectNeedsDependencyException;
 import net.sourceforge.vulcan.exception.StoreException;
-import net.sourceforge.vulcan.metadata.SvnRevision;
 
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public class StateManagerImplTest extends StateManagerTestBase
 {
 	public void testThrowsWhenListIsNull() {

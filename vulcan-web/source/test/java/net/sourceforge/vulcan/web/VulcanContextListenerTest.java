@@ -22,11 +22,9 @@ import javax.servlet.ServletContextEvent;
 
 import net.sourceforge.vulcan.core.conversion.BuildOutcomeConverter;
 import net.sourceforge.vulcan.exception.StoreException;
-import net.sourceforge.vulcan.metadata.SvnRevision;
 
 import org.springframework.web.context.WebApplicationContext;
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public class VulcanContextListenerTest extends ServletTestCase {
 	VulcanContextListener l = new VulcanContextListener();
 	

@@ -20,9 +20,7 @@ package net.sourceforge.vulcan.exception;
 
 import java.util.Iterator;
 
-import net.sourceforge.vulcan.metadata.SvnRevision;
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public class ValidationException extends MessageFormatException implements Iterable<ValidationException> {
 	private final String propertyName;
 	

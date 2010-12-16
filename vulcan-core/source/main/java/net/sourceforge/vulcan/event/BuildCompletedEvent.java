@@ -21,10 +21,8 @@ package net.sourceforge.vulcan.event;
 import net.sourceforge.vulcan.dto.BuildDaemonInfoDto;
 import net.sourceforge.vulcan.dto.ProjectConfigDto;
 import net.sourceforge.vulcan.dto.ProjectStatusDto;
-import net.sourceforge.vulcan.metadata.SvnRevision;
 
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public class BuildCompletedEvent extends BuildEvent {
 	public BuildCompletedEvent(final Object source,
 			final BuildDaemonInfoDto buildDaemonInfo,

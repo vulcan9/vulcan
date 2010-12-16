@@ -24,7 +24,6 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import net.sourceforge.vulcan.metadata.SvnRevision;
 
 import org.apache.struts.action.Action;
 import org.apache.struts.action.ActionErrors;
@@ -35,7 +34,6 @@ import org.apache.struts.action.ActionMessage;
 import org.apache.struts.config.ModuleConfig;
 import org.apache.struts.util.ModuleUtils;
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public class RestRequestProcessorTest extends MockApplicationContextStrutsTestCase {
 	RestRequestDetector rrd = createMock(RestRequestDetector.class);
 	ActionMapping mapping = new ActionMapping() {

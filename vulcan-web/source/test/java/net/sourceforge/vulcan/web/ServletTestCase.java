@@ -29,7 +29,6 @@ import net.sourceforge.vulcan.ProjectManager;
 import net.sourceforge.vulcan.StateManager;
 import net.sourceforge.vulcan.core.BuildManager;
 import net.sourceforge.vulcan.event.EventHandler;
-import net.sourceforge.vulcan.metadata.SvnRevision;
 
 import org.springframework.context.support.AbstractApplicationContext;
 import org.springframework.context.support.AbstractMessageSource;
@@ -42,7 +41,6 @@ import servletunit.ServletConfigSimulator;
 import servletunit.ServletContextSimulator;
 import servletunit.ServletOutputStreamSimulator;
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public abstract class ServletTestCase extends EasyMockTestCase {
 	ServletContextSimulator servletContext = new ServletContextSimulator() {
 		@Override

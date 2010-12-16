@@ -20,14 +20,12 @@ package net.sourceforge.vulcan.spring.mbean;
 
 import javax.naming.NamingException;
 
-import net.sourceforge.vulcan.metadata.SvnRevision;
 
 import org.springframework.jmx.MBeanServerNotFoundException;
 import org.springframework.jmx.support.JmxUtils;
 import org.springframework.jndi.JndiObjectFactoryBean;
 
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public class MbeanServerLocator extends JndiObjectFactoryBean {
 	Object mbeanServer;
 	

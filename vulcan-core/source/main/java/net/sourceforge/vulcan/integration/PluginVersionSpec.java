@@ -18,9 +18,7 @@
  */
 package net.sourceforge.vulcan.integration;
 
-import net.sourceforge.vulcan.metadata.SvnRevision;
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public interface PluginVersionSpec {
 	long getPluginRevision();
 	String getVersion();

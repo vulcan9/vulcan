@@ -40,9 +40,7 @@ import net.sourceforge.vulcan.dto.ProjectStatusDto;
 import net.sourceforge.vulcan.dto.RevisionTokenDto;
 import net.sourceforge.vulcan.dto.ProjectConfigDto.UpdateStrategy;
 import net.sourceforge.vulcan.dto.ProjectStatusDto.UpdateType;
-import net.sourceforge.vulcan.metadata.SvnRevision;
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public class ProjectRebuildExpertTest extends EasyMockTestCase {
 	ProjectConfigDto project = new ProjectConfigDto();
 	RevisionTokenDto currentRevision = new RevisionTokenDto();

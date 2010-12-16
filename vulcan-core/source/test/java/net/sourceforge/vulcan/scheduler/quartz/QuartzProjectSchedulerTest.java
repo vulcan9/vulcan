@@ -22,7 +22,6 @@ import java.util.Date;
 
 import net.sourceforge.vulcan.EasyMockTestCase;
 import net.sourceforge.vulcan.dto.SchedulerConfigDto;
-import net.sourceforge.vulcan.metadata.SvnRevision;
 
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.easymock.EasyMock;
@@ -38,7 +37,6 @@ import org.quartz.Trigger;
 import org.quartz.impl.StdSchedulerFactory;
 import org.springframework.scheduling.quartz.JobDetailBean;
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public class QuartzProjectSchedulerTest extends EasyMockTestCase {
 	SchedulerConfigDto config = new SchedulerConfigDto();
 	QuartzProjectScheduler projectScheduler = new QuartzProjectScheduler();

@@ -18,9 +18,7 @@
  */
 package net.sourceforge.vulcan.event;
 
-import net.sourceforge.vulcan.metadata.SvnRevision;
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public enum EventType {
 	ALL(Event.class),
 	AUDIT(AuditEvent.class),

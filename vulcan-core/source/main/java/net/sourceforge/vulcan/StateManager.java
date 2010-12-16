@@ -34,11 +34,9 @@ import net.sourceforge.vulcan.exception.NoSuchProjectException;
 import net.sourceforge.vulcan.exception.PluginNotFoundException;
 import net.sourceforge.vulcan.exception.ProjectNeedsDependencyException;
 import net.sourceforge.vulcan.exception.StoreException;
-import net.sourceforge.vulcan.metadata.SvnRevision;
 import net.sourceforge.vulcan.scheduler.BuildDaemon;
 import net.sourceforge.vulcan.scheduler.ProjectScheduler;
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public interface StateManager {
 	public void updateArtifactLocations(List<BuildArtifactLocationDto> list) throws StoreException;
 	public List<String> getProjectConfigNames();

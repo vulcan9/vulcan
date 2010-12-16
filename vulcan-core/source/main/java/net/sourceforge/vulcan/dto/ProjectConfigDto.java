@@ -28,11 +28,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import net.sourceforge.vulcan.metadata.SvnRevision;
 
 import org.apache.commons.lang.StringUtils;
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public class ProjectConfigDto extends NameDto {
 	public static enum UpdateStrategy {
 		CleanAlways, CleanDaily, IncrementalAlways
