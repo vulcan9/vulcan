@@ -28,14 +28,12 @@ import javax.servlet.http.HttpServletResponse;
 
 import net.sourceforge.vulcan.StateManager;
 import net.sourceforge.vulcan.dto.BuildArtifactLocationDto;
-import net.sourceforge.vulcan.metadata.SvnRevision;
 
 import org.apache.struts.action.Action;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public final class SaveArtifactLocationsAction extends Action {
 	private StateManager stateManager;
 	

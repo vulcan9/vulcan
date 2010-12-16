@@ -20,10 +20,8 @@ package net.sourceforge.vulcan.exception;
 
 import java.io.File;
 
-import net.sourceforge.vulcan.metadata.SvnRevision;
 
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public class CannotCreateDirectoryException extends StoreException {
 	private final File directory;
 	

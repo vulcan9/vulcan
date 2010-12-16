@@ -46,14 +46,12 @@ import net.sourceforge.vulcan.event.EventHandler;
 import net.sourceforge.vulcan.exception.DuplicatePluginIdException;
 import net.sourceforge.vulcan.exception.InvalidPluginLayoutException;
 import net.sourceforge.vulcan.exception.StoreException;
-import net.sourceforge.vulcan.metadata.SvnRevision;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.filefilter.FalseFileFilter;
 import org.apache.commons.io.filefilter.PrefixFileFilter;
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public class SpringFileStoreTest extends EasyMockTestCase {
 	class SpringFileStoreExt extends SpringFileStore {
 		PluginMetaDataDto createPluginConfigWrapper(File f) throws IOException {

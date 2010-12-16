@@ -20,9 +20,7 @@ package net.sourceforge.vulcan.dto;
 
 import org.apache.commons.lang.builder.EqualsBuilder;
 
-import net.sourceforge.vulcan.metadata.SvnRevision;
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public class RevisionTokenDto extends BaseDto {
 	protected Long revision;
 	protected String label;

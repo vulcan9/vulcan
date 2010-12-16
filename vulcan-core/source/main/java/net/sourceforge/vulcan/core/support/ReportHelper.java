@@ -27,9 +27,7 @@ import java.util.Map;
 
 import net.sourceforge.vulcan.dto.ProjectStatusDto;
 import net.sourceforge.vulcan.dto.ProjectStatusDto.Status;
-import net.sourceforge.vulcan.metadata.SvnRevision;
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public class ReportHelper {
 	private final List<ProjectStatusDto> samples;
 	

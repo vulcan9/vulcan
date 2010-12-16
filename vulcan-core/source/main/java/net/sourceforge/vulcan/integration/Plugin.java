@@ -18,9 +18,7 @@
  */
 package net.sourceforge.vulcan.integration;
 
-import net.sourceforge.vulcan.metadata.SvnRevision;
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public interface Plugin {
 	/**
 	 * Return unique name of plugin.  This name should also be the name of the top level

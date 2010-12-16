@@ -27,9 +27,7 @@ import java.util.UUID;
 import net.sourceforge.vulcan.dto.PluginMetaDataDto;
 import net.sourceforge.vulcan.dto.StateManagerConfigDto;
 import net.sourceforge.vulcan.exception.StoreException;
-import net.sourceforge.vulcan.metadata.SvnRevision;
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public interface ConfigurationStore {
 	StateManagerConfigDto loadConfiguration() throws StoreException;
 	void storeConfiguration(StateManagerConfigDto config) throws StoreException;

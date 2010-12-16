@@ -22,9 +22,7 @@ import java.util.Date;
 import java.util.Set;
 
 import net.sourceforge.vulcan.dto.ProjectStatusDto.UpdateType;
-import net.sourceforge.vulcan.metadata.SvnRevision;
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public class BuildOutcomeQueryDto extends BaseDto {
 	private Set<String> projectNames;
 	

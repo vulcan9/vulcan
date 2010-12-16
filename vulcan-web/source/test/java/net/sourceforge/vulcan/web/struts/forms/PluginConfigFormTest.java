@@ -25,10 +25,8 @@ import java.util.Locale;
 
 import net.sourceforge.vulcan.integration.ConfigChoice;
 import net.sourceforge.vulcan.integration.PluginConfigStub;
-import net.sourceforge.vulcan.metadata.SvnRevision;
 import net.sourceforge.vulcan.web.struts.MockApplicationContextStrutsTestCase;
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public class PluginConfigFormTest extends MockApplicationContextStrutsTestCase {
 	PluginConfigForm form = new PluginConfigForm();
 	

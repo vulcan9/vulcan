@@ -22,10 +22,8 @@ import java.io.IOException;
 
 import net.sourceforge.vulcan.ant.buildlistener.AntEventSummary;
 import net.sourceforge.vulcan.ant.io.Serializer;
-import net.sourceforge.vulcan.metadata.SvnRevision;
 
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public abstract class SerializedEventSource extends AbstractEventSource {
 	private final Serializer serializer;
 	

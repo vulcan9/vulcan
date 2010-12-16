@@ -20,7 +20,6 @@ package net.sourceforge.vulcan.web.sitemesh;
 
 import java.io.IOException;
 
-import net.sourceforge.vulcan.metadata.SvnRevision;
 
 import com.opensymphony.module.sitemesh.Page;
 import com.opensymphony.module.sitemesh.PageParser;
@@ -28,7 +27,6 @@ import com.opensymphony.module.sitemesh.PageParser;
 /**
  * Wrapper of FastPageParser which strips xml header from document. 
  */
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public final class FastPageParser implements PageParser
 {
 	final com.opensymphony.module.sitemesh.parser.FastPageParser delegate

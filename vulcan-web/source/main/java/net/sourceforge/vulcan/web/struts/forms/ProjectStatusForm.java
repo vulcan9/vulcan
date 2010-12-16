@@ -20,12 +20,10 @@ package net.sourceforge.vulcan.web.struts.forms;
 
 import javax.servlet.http.HttpServletRequest;
 
-import net.sourceforge.vulcan.metadata.SvnRevision;
 
 import org.apache.struts.action.ActionMapping;
 import org.apache.struts.validator.ValidatorForm;
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public class ProjectStatusForm extends ValidatorForm {
 	private String projectName;
 	private String buildNumber;

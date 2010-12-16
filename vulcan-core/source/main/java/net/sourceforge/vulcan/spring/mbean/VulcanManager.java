@@ -22,7 +22,6 @@ import net.sourceforge.vulcan.StateManager;
 import net.sourceforge.vulcan.dto.SchedulerConfigDto;
 import net.sourceforge.vulcan.exception.DuplicateNameException;
 import net.sourceforge.vulcan.exception.StoreException;
-import net.sourceforge.vulcan.metadata.SvnRevision;
 
 import org.springframework.jmx.export.annotation.ManagedOperation;
 import org.springframework.jmx.export.annotation.ManagedOperationParameter;
@@ -30,7 +29,6 @@ import org.springframework.jmx.export.annotation.ManagedOperationParameters;
 import org.springframework.jmx.export.annotation.ManagedResource;
 
 
-@SvnRevision(id="$Id$", url="$HeadURL")
 @ManagedResource(objectName="vulcan:name=Manager")
 public final class VulcanManager {
 	private StateManager stateManager;

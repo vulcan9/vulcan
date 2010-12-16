@@ -20,9 +20,7 @@ package net.sourceforge.vulcan.dto;
 
 import java.util.Date;
 
-import net.sourceforge.vulcan.metadata.SvnRevision;
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public class LockDto extends BaseDto {
 	private String message;
 	private long id;

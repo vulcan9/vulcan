@@ -21,10 +21,8 @@ package net.sourceforge.vulcan.dto;
 import java.util.Collection;
 import java.util.Map;
 
-import net.sourceforge.vulcan.metadata.SvnRevision;
 
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public class ConfigUpdatesDto extends BaseDto {
 	private Collection<ProjectConfigDto> newProjectConfigs;
 	private Map<String, ? extends PluginConfigDto> modifiedPluginConfigs;

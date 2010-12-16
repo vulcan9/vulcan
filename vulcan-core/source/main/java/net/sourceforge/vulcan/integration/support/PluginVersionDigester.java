@@ -26,9 +26,7 @@ import org.apache.commons.digester.SetPropertiesRule;
 import org.xml.sax.SAXException;
 
 import net.sourceforge.vulcan.integration.PluginVersionSpec;
-import net.sourceforge.vulcan.metadata.SvnRevision;
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public abstract class PluginVersionDigester {
 	public static PluginVersionSpec digest(Reader reader) throws IOException {
 		if (reader == null) {

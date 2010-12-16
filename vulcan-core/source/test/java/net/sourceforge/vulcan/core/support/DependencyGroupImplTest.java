@@ -26,10 +26,8 @@ import junit.framework.TestCase;
 import net.sourceforge.vulcan.core.DependencyGroup;
 import net.sourceforge.vulcan.dto.ProjectConfigDto;
 import net.sourceforge.vulcan.dto.ProjectStatusDto;
-import net.sourceforge.vulcan.metadata.SvnRevision;
 
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public class DependencyGroupImplTest extends TestCase {
 	DependencyGroup dg = new DependencyGroupImpl();
 	

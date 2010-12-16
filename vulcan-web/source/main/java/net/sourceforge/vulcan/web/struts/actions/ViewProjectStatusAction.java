@@ -37,7 +37,6 @@ import net.sourceforge.vulcan.dto.ProjectConfigDto;
 import net.sourceforge.vulcan.dto.ProjectStatusDto;
 import net.sourceforge.vulcan.exception.NoSuchProjectException;
 import net.sourceforge.vulcan.exception.StoreException;
-import net.sourceforge.vulcan.metadata.SvnRevision;
 import net.sourceforge.vulcan.web.Keys;
 import net.sourceforge.vulcan.web.struts.forms.ProjectStatusForm;
 
@@ -51,7 +50,6 @@ import org.apache.struts.action.ActionMessages;
 import org.jdom.Document;
 import org.jdom.Element;
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public final class ViewProjectStatusAction extends ProjectReportBaseAction {
 	@Override
 	public ActionForward execute(ActionMapping mapping, ActionForm form, HttpServletRequest request, HttpServletResponse response) throws Exception {

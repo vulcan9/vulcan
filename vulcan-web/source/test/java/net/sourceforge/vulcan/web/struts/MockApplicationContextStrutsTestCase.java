@@ -45,7 +45,6 @@ import net.sourceforge.vulcan.core.ProjectImporter;
 import net.sourceforge.vulcan.core.ConfigurationStore;
 import net.sourceforge.vulcan.event.EventHandler;
 import net.sourceforge.vulcan.event.EventPool;
-import net.sourceforge.vulcan.metadata.SvnRevision;
 import net.sourceforge.vulcan.web.Keys;
 import net.sourceforge.vulcan.web.PreferencesStore;
 import net.sourceforge.vulcan.web.ServletTestCase;
@@ -74,7 +73,6 @@ import servletunit.HttpServletResponseSimulator;
 import servletunit.ServletConfigSimulator;
 import servletunit.ServletContextSimulator;
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public abstract class MockApplicationContextStrutsTestCase extends EasyMockStrutsTestCase {
 	protected ActionForward resultForward;
 	protected final static Hashtable<String, Object> multipartElements = new Hashtable<String, Object>();

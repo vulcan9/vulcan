@@ -19,12 +19,10 @@
 package net.sourceforge.vulcan.spring;
 
 import net.sourceforge.vulcan.event.Event;
-import net.sourceforge.vulcan.metadata.SvnRevision;
 
 import org.springframework.context.ApplicationEvent;
 
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 class EventBridge extends ApplicationEvent {
 	final Event event;
 	EventBridge(Event event) {

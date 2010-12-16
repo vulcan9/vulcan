@@ -26,13 +26,11 @@ import java.util.Map;
 import javax.xml.transform.Result;
 
 import net.sourceforge.vulcan.dto.PreferencesDto;
-import net.sourceforge.vulcan.metadata.SvnRevision;
 import net.sourceforge.vulcan.web.Keys;
 
 import org.jdom.Document;
 import org.jdom.Element;
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public class GetCachedBuildHistoryActionTest extends MockApplicationContextStrutsTestCase {
 	Document doc = new Document();
 	PreferencesDto prefs = new PreferencesDto();

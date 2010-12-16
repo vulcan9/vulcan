@@ -21,9 +21,7 @@ package net.sourceforge.vulcan.dto;
 import java.util.HashMap;
 import java.util.Map;
 
-import net.sourceforge.vulcan.metadata.SvnRevision;
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public abstract class RepositoryAdaptorConfigDto extends PluginConfigDto {
 	private Map<String, Long> workingCopyByteCounts = new HashMap<String, Long>();
 	

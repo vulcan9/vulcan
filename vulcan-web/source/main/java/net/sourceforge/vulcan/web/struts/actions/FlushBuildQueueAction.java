@@ -26,7 +26,6 @@ import javax.servlet.http.HttpServletResponse;
 import net.sourceforge.vulcan.StateManager;
 import net.sourceforge.vulcan.event.AuditEvent;
 import net.sourceforge.vulcan.event.EventHandler;
-import net.sourceforge.vulcan.metadata.SvnRevision;
 
 import org.apache.commons.logging.Log;
 import org.apache.struts.action.Action;
@@ -37,7 +36,6 @@ import org.springframework.context.MessageSource;
 import org.springframework.context.MessageSourceAware;
 
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public final class FlushBuildQueueAction extends Action implements MessageSourceAware {
 	private StateManager stateManager;
 	private EventHandler eventHandler;

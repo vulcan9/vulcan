@@ -27,7 +27,6 @@ import net.sourceforge.vulcan.event.BuildCompletedEvent;
 import net.sourceforge.vulcan.event.ErrorEvent;
 import net.sourceforge.vulcan.event.Event;
 import net.sourceforge.vulcan.event.EventType;
-import net.sourceforge.vulcan.metadata.SvnRevision;
 import net.sourceforge.vulcan.spring.EventBridge;
 import net.sourceforge.vulcan.spring.SpringEventPool;
 
@@ -36,7 +35,6 @@ import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.support.GenericApplicationContext;
 
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public class SpringEventPoolTest extends TestCase {
 	SpringEventPool pool = new SpringEventPool();
 	

@@ -38,7 +38,6 @@ import net.sourceforge.vulcan.dto.ProjectStatusDto;
 import net.sourceforge.vulcan.dto.TestFailureDto;
 import net.sourceforge.vulcan.dto.ProjectStatusDto.UpdateType;
 import net.sourceforge.vulcan.exception.StoreException;
-import net.sourceforge.vulcan.metadata.SvnRevision;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.LogFactory;
@@ -46,7 +45,6 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public class JdbcBuildOutcomeStore implements BuildOutcomeStore, ProjectNameChangeListener {
 	public static int MAX_TEST_FAILURE_MESSAGE_LENGTH = 1024;
 	public static int MAX_TEST_FAILURE_DETAILS_LENGTH = 4096;

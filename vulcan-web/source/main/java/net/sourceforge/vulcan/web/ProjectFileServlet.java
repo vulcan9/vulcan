@@ -45,14 +45,12 @@ import net.sourceforge.vulcan.core.BuildManager;
 import net.sourceforge.vulcan.dto.ProjectConfigDto;
 import net.sourceforge.vulcan.dto.ProjectStatusDto;
 import net.sourceforge.vulcan.exception.NoSuchProjectException;
-import net.sourceforge.vulcan.metadata.SvnRevision;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.WebApplicationContextUtils;
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public class ProjectFileServlet extends HttpServlet {
 	static final DateFormat HTTP_DATE_FORMAT = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z");
 	static {

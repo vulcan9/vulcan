@@ -24,12 +24,10 @@ import java.io.IOException;
 import net.sourceforge.vulcan.dto.PluginConfigDto;
 import net.sourceforge.vulcan.dto.ProjectConfigDto;
 import net.sourceforge.vulcan.exception.RepositoryException;
-import net.sourceforge.vulcan.metadata.SvnRevision;
 
 /**
  * Used by ProjectImporter to configure ProjectConfigDto and related plugin configuration.
  */
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public interface ProjectRepositoryConfigurator {
 	/**
 	 * This method should obtain the contents of the resource

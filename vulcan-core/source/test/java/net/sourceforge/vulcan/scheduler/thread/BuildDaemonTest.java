@@ -32,9 +32,7 @@ import net.sourceforge.vulcan.dto.BuildDaemonInfoDto;
 import net.sourceforge.vulcan.dto.ProjectConfigDto;
 import net.sourceforge.vulcan.dto.ProjectStatusDto;
 import net.sourceforge.vulcan.dto.SchedulerConfigDto;
-import net.sourceforge.vulcan.metadata.SvnRevision;
 
-@SvnRevision(id = "$Id$", url = "$HeadURL$")
 public class BuildDaemonTest extends EasyMockTestCase {
 	boolean fastMode;
 	

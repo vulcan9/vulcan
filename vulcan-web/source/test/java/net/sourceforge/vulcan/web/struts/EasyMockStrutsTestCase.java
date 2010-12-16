@@ -20,14 +20,12 @@ package net.sourceforge.vulcan.web.struts;
 
 import junit.framework.TestCase;
 import net.sourceforge.vulcan.EasyMockTestCase;
-import net.sourceforge.vulcan.metadata.SvnRevision;
 
 import org.easymock.EasyMock;
 import org.easymock.IExpectationSetters;
 
 import servletunit.struts.MockStrutsTestCase;
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public abstract class EasyMockStrutsTestCase extends MockStrutsTestCase {
 	private EasyMockTestCase easyMockDelegate = new EasyMockTestCase() {};
 

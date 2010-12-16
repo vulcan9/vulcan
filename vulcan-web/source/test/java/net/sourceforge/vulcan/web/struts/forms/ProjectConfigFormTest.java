@@ -20,10 +20,8 @@ package net.sourceforge.vulcan.web.struts.forms;
 
 import net.sourceforge.vulcan.dto.ProjectConfigDto;
 import net.sourceforge.vulcan.dto.ProjectConfigDto.UpdateStrategy;
-import net.sourceforge.vulcan.metadata.SvnRevision;
 import junit.framework.TestCase;
 
-@SvnRevision(id = "$Id$", url = "$HeadURL$")
 public class ProjectConfigFormTest extends TestCase {
 	ProjectConfigForm form = new ProjectConfigForm();
 	

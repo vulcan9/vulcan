@@ -30,10 +30,8 @@ import java.net.SocketAddress;
 import junit.framework.TestCase;
 import net.sourceforge.vulcan.ant.AntBuildEvent;
 import net.sourceforge.vulcan.ant.buildlistener.AntEventSummary;
-import net.sourceforge.vulcan.metadata.SvnRevision;
 
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public class UdpEventSourceTest extends TestCase {
 
 	UdpEventSource source = new UdpEventSource();

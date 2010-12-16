@@ -26,7 +26,6 @@ import java.text.MessageFormat;
 
 import junit.framework.TestCase;
 import net.sourceforge.vulcan.MockApplicationContext;
-import net.sourceforge.vulcan.metadata.SvnRevision;
 
 import org.springframework.beans.BeansException;
 import org.springframework.context.NoSuchMessageException;
@@ -34,7 +33,6 @@ import org.springframework.context.support.AbstractApplicationContext;
 import org.springframework.context.support.AbstractMessageSource;
 
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public class DelegatingResourceBundleMessageSourceTest extends TestCase {
 	private final class WacStub extends MockApplicationContext {
 		@Override

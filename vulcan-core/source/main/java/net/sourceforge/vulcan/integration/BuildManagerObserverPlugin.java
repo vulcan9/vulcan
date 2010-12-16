@@ -21,10 +21,8 @@ package net.sourceforge.vulcan.integration;
 import net.sourceforge.vulcan.event.BrokenBuildClaimedEvent;
 import net.sourceforge.vulcan.event.BuildCompletedEvent;
 import net.sourceforge.vulcan.event.BuildStartingEvent;
-import net.sourceforge.vulcan.metadata.SvnRevision;
 
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public interface BuildManagerObserverPlugin extends Plugin {
 	public void onBuildStarting(BuildStartingEvent event);
 	public void onBuildCompleted(BuildCompletedEvent event);

@@ -19,12 +19,10 @@
 package net.sourceforge.vulcan.web.struts.forms;
 
 import net.sourceforge.vulcan.dto.SchedulerConfigDto;
-import net.sourceforge.vulcan.metadata.SvnRevision;
 import net.sourceforge.vulcan.web.struts.forms.SchedulerConfigForm;
 import junit.framework.TestCase;
 
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public class SchedulerConfigFormTest extends TestCase {
 	SchedulerConfigForm form = new SchedulerConfigForm();
 	

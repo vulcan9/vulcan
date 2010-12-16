@@ -68,7 +68,6 @@ import net.sourceforge.vulcan.exception.PluginNotFoundException;
 import net.sourceforge.vulcan.exception.ProjectNeedsDependencyException;
 import net.sourceforge.vulcan.exception.ProjectsLockedException;
 import net.sourceforge.vulcan.exception.StoreException;
-import net.sourceforge.vulcan.metadata.SvnRevision;
 import net.sourceforge.vulcan.scheduler.BuildDaemon;
 import net.sourceforge.vulcan.scheduler.ProjectScheduler;
 import net.sourceforge.vulcan.scheduler.Scheduler;
@@ -77,7 +76,6 @@ import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.commons.lang.StringUtils;
 
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public abstract class StateManagerImpl implements StateManager, ProjectManager {
 	/* Dependencies */
 	ConfigurationStore configurationStore;

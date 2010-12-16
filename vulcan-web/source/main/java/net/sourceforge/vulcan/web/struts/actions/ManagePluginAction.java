@@ -37,7 +37,6 @@ import net.sourceforge.vulcan.exception.PluginLoadFailureException;
 import net.sourceforge.vulcan.exception.PluginNotConfigurableException;
 import net.sourceforge.vulcan.exception.StoreException;
 import net.sourceforge.vulcan.exception.ValidationException;
-import net.sourceforge.vulcan.metadata.SvnRevision;
 import net.sourceforge.vulcan.web.struts.forms.PluginConfigForm;
 import net.sourceforge.vulcan.web.struts.forms.ProjectConfigForm;
 
@@ -51,7 +50,6 @@ import org.apache.struts.action.ActionMessages;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public final class ManagePluginAction extends BaseDispatchAction {
 	public ActionForward upload(ActionMapping mapping, ActionForm form,
 			HttpServletRequest request, HttpServletResponse response)

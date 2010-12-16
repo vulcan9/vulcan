@@ -60,7 +60,6 @@ import net.sourceforge.vulcan.event.ErrorEvent;
 import net.sourceforge.vulcan.event.EventHandler;
 import net.sourceforge.vulcan.exception.NoSuchProjectException;
 import net.sourceforge.vulcan.exception.NoSuchTransformFormatException;
-import net.sourceforge.vulcan.metadata.SvnRevision;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
@@ -71,7 +70,6 @@ import org.jdom.transform.JDOMSource;
 import org.xml.sax.SAXException;
 
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public abstract class AbstractProjectDomBuilder implements ProjectDomBuilder {
 	static TimeZone SYSTEM_TIMEZONE = TimeZone.getDefault();
 	static TimeZone GMT_TIMEZONE = TimeZone.getTimeZone("Greenwhich");

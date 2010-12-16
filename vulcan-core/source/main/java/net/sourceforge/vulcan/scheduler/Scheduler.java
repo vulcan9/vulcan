@@ -21,10 +21,8 @@ package net.sourceforge.vulcan.scheduler;
 import java.util.Date;
 
 import net.sourceforge.vulcan.dto.SchedulerConfigDto;
-import net.sourceforge.vulcan.metadata.SvnRevision;
 
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public interface Scheduler {
 	public void init(SchedulerConfigDto config);
 	public void configurationChanged(SchedulerConfigDto config);

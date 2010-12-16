@@ -23,7 +23,6 @@ import java.util.Locale;
 import javax.servlet.ServletContext;
 
 import net.sourceforge.vulcan.EasyMockTestCase;
-import net.sourceforge.vulcan.metadata.SvnRevision;
 
 import org.apache.struts.Globals;
 import org.apache.struts.util.MessageResources;
@@ -31,7 +30,6 @@ import org.springframework.web.context.WebApplicationContext;
 
 import servletunit.ServletContextSimulator;
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public class SpringMessageResourcesPlugInTest extends EasyMockTestCase {
 	WebApplicationContext wac = createMock(WebApplicationContext.class);
 	

@@ -18,9 +18,7 @@
  */
 package net.sourceforge.vulcan.dto;
 
-import net.sourceforge.vulcan.metadata.SvnRevision;
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public class PreferencesDto extends BaseDto {
 	private String sortColumn;
 	private String sortOrder;

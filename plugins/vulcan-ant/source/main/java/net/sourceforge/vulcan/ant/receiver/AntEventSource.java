@@ -20,9 +20,7 @@ package net.sourceforge.vulcan.ant.receiver;
 
 import net.sourceforge.vulcan.ant.JavaCommandBuilder;
 import net.sourceforge.vulcan.exception.ConfigException;
-import net.sourceforge.vulcan.metadata.SvnRevision;
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public interface AntEventSource extends Runnable {
 	void addEventListener(EventListener listener);
 	boolean removeEventListener(EventListener listener);

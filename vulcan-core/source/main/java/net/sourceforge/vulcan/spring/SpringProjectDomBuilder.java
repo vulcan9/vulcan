@@ -30,7 +30,6 @@ import javax.xml.transform.sax.SAXSource;
 
 import net.sourceforge.vulcan.core.support.AbstractProjectDomBuilder;
 import net.sourceforge.vulcan.exception.NoSuchTransformFormatException;
-import net.sourceforge.vulcan.metadata.SvnRevision;
 
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
@@ -39,7 +38,6 @@ import org.springframework.core.io.Resource;
 import org.xml.sax.InputSource;
 import org.xml.sax.helpers.XMLReaderFactory;
 
-@SvnRevision(id="$Id", url="$HeadURL$")
 public class SpringProjectDomBuilder extends AbstractProjectDomBuilder implements ApplicationContextAware {
 	private ApplicationContext applicationContext;
 	private Map<String, String> transformResources = Collections.emptyMap();

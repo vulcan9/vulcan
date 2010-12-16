@@ -18,9 +18,7 @@
  */
 package net.sourceforge.vulcan.dto;
 
-import net.sourceforge.vulcan.metadata.SvnRevision;
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public class BuildMessageDto extends BaseDto {
 	private String message;
 	private String file;

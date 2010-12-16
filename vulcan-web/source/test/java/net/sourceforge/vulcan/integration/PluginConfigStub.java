@@ -28,10 +28,8 @@ import java.util.Locale;
 import net.sourceforge.vulcan.dto.PluginProfileDto;
 import net.sourceforge.vulcan.dto.RepositoryAdaptorConfigDto;
 import net.sourceforge.vulcan.exception.ValidationException;
-import net.sourceforge.vulcan.metadata.SvnRevision;
 
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public class PluginConfigStub extends RepositoryAdaptorConfigDto {
 	public static boolean validateCalled;
 	public static String helpTopic;

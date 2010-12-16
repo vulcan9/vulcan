@@ -19,10 +19,8 @@
 package net.sourceforge.vulcan.ant.receiver;
 
 import net.sourceforge.vulcan.ant.buildlistener.AntEventSummary;
-import net.sourceforge.vulcan.metadata.SvnRevision;
 
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public interface EventListener extends java.util.EventListener {
 	void eventReceived(AntEventSummary event);
 }

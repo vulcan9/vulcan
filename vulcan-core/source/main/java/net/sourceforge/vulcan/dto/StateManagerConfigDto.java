@@ -22,10 +22,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import net.sourceforge.vulcan.metadata.SvnRevision;
 
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public class StateManagerConfigDto extends BaseDto {
 	private BuildManagerConfigDto buildManagerConfig;
 	private ProjectConfigDto[] projects = {};

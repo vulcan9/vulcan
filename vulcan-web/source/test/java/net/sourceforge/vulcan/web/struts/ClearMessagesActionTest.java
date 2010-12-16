@@ -18,10 +18,8 @@
  */
 package net.sourceforge.vulcan.web.struts;
 
-import net.sourceforge.vulcan.metadata.SvnRevision;
 
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public class ClearMessagesActionTest extends MockApplicationContextStrutsTestCase {
 	@Override
 	public void setUp() throws Exception {

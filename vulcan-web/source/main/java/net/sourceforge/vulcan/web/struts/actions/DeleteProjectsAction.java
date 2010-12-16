@@ -28,7 +28,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import net.sourceforge.vulcan.StateManager;
 import net.sourceforge.vulcan.exception.ProjectNeedsDependencyException;
-import net.sourceforge.vulcan.metadata.SvnRevision;
 import net.sourceforge.vulcan.web.struts.forms.MultipleProjectConfigForm;
 
 import org.apache.struts.action.Action;
@@ -36,7 +35,6 @@ import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public final class DeleteProjectsAction extends Action {
 	private StateManager stateManager;
 	

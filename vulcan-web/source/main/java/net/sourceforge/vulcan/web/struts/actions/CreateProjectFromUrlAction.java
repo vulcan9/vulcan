@@ -35,7 +35,6 @@ import net.sourceforge.vulcan.exception.AuthenticationRequiredRepositoryExceptio
 import net.sourceforge.vulcan.exception.ConfigException;
 import net.sourceforge.vulcan.exception.DuplicateNameException;
 import net.sourceforge.vulcan.exception.StoreException;
-import net.sourceforge.vulcan.metadata.SvnRevision;
 import net.sourceforge.vulcan.web.struts.forms.ProjectImportForm;
 
 import org.apache.struts.action.Action;
@@ -46,7 +45,6 @@ import org.apache.struts.action.ActionMessage;
 import org.apache.struts.action.ActionMessages;
 
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public final class CreateProjectFromUrlAction extends Action {
 	private ProjectImporter projectImporter;
 	

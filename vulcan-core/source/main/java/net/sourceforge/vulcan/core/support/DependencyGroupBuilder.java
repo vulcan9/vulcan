@@ -36,10 +36,8 @@ import net.sourceforge.vulcan.dto.ProjectStatusDto;
 import net.sourceforge.vulcan.dto.ProjectConfigDto.UpdateStrategy;
 import net.sourceforge.vulcan.exception.ConfigException;
 import net.sourceforge.vulcan.exception.ProjectsLockedException;
-import net.sourceforge.vulcan.metadata.SvnRevision;
 
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 class DependencyGroupBuilder {
 	final ProjectManager projectManager;
 	final BuildManager buildManager;

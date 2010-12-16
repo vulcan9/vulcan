@@ -54,7 +54,6 @@ import net.sourceforge.vulcan.exception.RepositoryException;
 import net.sourceforge.vulcan.exception.StoreException;
 import net.sourceforge.vulcan.integration.BuildToolPlugin;
 import net.sourceforge.vulcan.integration.RepositoryAdaptorPlugin;
-import net.sourceforge.vulcan.metadata.SvnRevision;
 
 import org.apache.commons.collections.set.ListOrderedSet;
 import org.apache.commons.logging.Log;
@@ -63,7 +62,6 @@ import org.jdom.Document;
 import org.jdom.JDOMException;
 import org.jdom.input.SAXBuilder;
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public class ProjectImporterImpl implements ProjectImporter {
 	private final Log log = LogFactory.getLog(getClass());
 	

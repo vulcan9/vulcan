@@ -23,10 +23,8 @@ import java.util.Date;
 import net.sourceforge.vulcan.dto.BuildDaemonInfoDto;
 import net.sourceforge.vulcan.dto.ProjectConfigDto;
 import net.sourceforge.vulcan.dto.ProjectStatusDto;
-import net.sourceforge.vulcan.metadata.SvnRevision;
 
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public abstract class BuildEvent implements Event {
 	final transient Object source;
 	final BuildDaemonInfoDto buildDaemonInfo;

@@ -24,13 +24,11 @@ import net.sourceforge.vulcan.dto.SchedulerConfigDto;
 import net.sourceforge.vulcan.event.ErrorEvent;
 import net.sourceforge.vulcan.event.Event;
 import net.sourceforge.vulcan.event.EventHandler;
-import net.sourceforge.vulcan.metadata.SvnRevision;
 import net.sourceforge.vulcan.scheduler.thread.AbstractScheduler;
 
 import junit.framework.TestCase;
 
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public class AbstractSchedulerTest extends TestCase {
 	AbstractScheduler rs = new AbstractScheduler() {
 		@Override

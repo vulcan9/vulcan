@@ -30,7 +30,6 @@ import net.sourceforge.vulcan.core.DependencyGroup;
 import net.sourceforge.vulcan.core.WorkingCopyUpdateStrategy;
 import net.sourceforge.vulcan.dto.ProjectConfigDto;
 import net.sourceforge.vulcan.dto.RepositoryTagDto;
-import net.sourceforge.vulcan.metadata.SvnRevision;
 
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
@@ -40,7 +39,6 @@ import org.apache.struts.action.ActionMessage;
 import org.apache.struts.validator.ValidatorForm;
 
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public class ManualBuildForm extends ValidatorForm {
 	private String[] targets;
 	private String dependencies;

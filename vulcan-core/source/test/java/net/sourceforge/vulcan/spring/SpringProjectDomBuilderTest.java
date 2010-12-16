@@ -25,12 +25,10 @@ import javax.xml.transform.TransformerFactory;
 import junit.framework.TestCase;
 import net.sourceforge.vulcan.MockApplicationContext;
 import net.sourceforge.vulcan.exception.NoSuchTransformFormatException;
-import net.sourceforge.vulcan.metadata.SvnRevision;
 
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 
-@SvnRevision(id="$Id", url="$HeadURL$")
 public class SpringProjectDomBuilderTest extends TestCase {
 	MockApplicationContext ctx = new MockApplicationContext() {
 		@Override

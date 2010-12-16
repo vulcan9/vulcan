@@ -36,7 +36,6 @@ import java.io.Writer;
 import java.lang.reflect.Method;
 
 import net.sourceforge.vulcan.core.BeanEncoder;
-import net.sourceforge.vulcan.metadata.SvnRevision;
 import net.sourceforge.vulcan.metadata.Transient;
 
 import org.jdom.DocType;
@@ -50,7 +49,6 @@ import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.beans.factory.config.FieldRetrievingFactoryBean;
 
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public final class SpringBeanXmlEncoder implements BeanEncoder {
 	Element root;
 	FactoryExpert factoryExpert = new NoOpFactoryExpert();

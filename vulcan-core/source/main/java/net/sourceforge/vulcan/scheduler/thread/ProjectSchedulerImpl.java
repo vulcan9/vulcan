@@ -25,11 +25,9 @@ import net.sourceforge.vulcan.core.DependencyGroup;
 import net.sourceforge.vulcan.dto.ProjectConfigDto;
 import net.sourceforge.vulcan.event.WarningEvent;
 import net.sourceforge.vulcan.exception.AlreadyScheduledException;
-import net.sourceforge.vulcan.metadata.SvnRevision;
 import net.sourceforge.vulcan.scheduler.ProjectScheduler;
 
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public final class ProjectSchedulerImpl extends AbstractScheduler implements ProjectScheduler {
 	private ProjectManager projectManager;
 	private BuildManager buildManager;

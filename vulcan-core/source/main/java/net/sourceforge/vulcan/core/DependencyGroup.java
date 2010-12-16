@@ -23,9 +23,7 @@ import java.util.Map;
 
 import net.sourceforge.vulcan.dto.ProjectConfigDto;
 import net.sourceforge.vulcan.dto.ProjectStatusDto;
-import net.sourceforge.vulcan.metadata.SvnRevision;
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public interface DependencyGroup {
 	List<ProjectStatusDto> getPendingTargets();
 
