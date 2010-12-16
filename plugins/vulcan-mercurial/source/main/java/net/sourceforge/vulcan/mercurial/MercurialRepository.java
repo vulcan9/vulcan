@@ -246,7 +246,7 @@ public class MercurialRepository implements RepositoryAdaptor {
 	}
 
 	private ChangeLogDto getChangeSets(final String revisionRange) throws RepositoryException {
-		final InvocationResult result = tryInvoke(Command.log, "--style", "xml", "-r", revisionRange);
+		final InvocationResult result = tryInvoke(Command.log, "--style", "xml", "--verbose", "-r", revisionRange);
 		
 		final CommitLogParser parser = new CommitLogParser();
 		
