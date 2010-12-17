@@ -448,7 +448,7 @@ public class MercurialRepositoryTest extends EasyMockTestCase {
 	}
 	
 	public void testGetTagsAndBranchesOneBranch() throws Exception {
-		invoker.invoke("branches", workDir);
+		invoker.invoke("branches", workDir, "--active");
 		returnSuccessWithOutput("first draft                 1234:9bd7475fd513\n");
 		invoker.invoke("tags", workDir);
 		returnSuccessWithOutput("");
@@ -468,7 +468,7 @@ public class MercurialRepositoryTest extends EasyMockTestCase {
 	}
 	
 	public void testGetTagsAndBranchesShowsAnonymousHeads() throws Exception {
-		invoker.invoke("branches", workDir);
+		invoker.invoke("branches", workDir, "--active");
 		returnSuccessWithOutput("");
 		invoker.invoke("tags", workDir);
 		returnSuccessWithOutput("");
@@ -488,7 +488,7 @@ public class MercurialRepositoryTest extends EasyMockTestCase {
 	}
 	
 	public void testGetTagsAndBranchesExcludesNamedHeads() throws Exception {
-		invoker.invoke("branches", workDir);
+		invoker.invoke("branches", workDir, "--active");
 		returnSuccessWithOutput("b1             1234:9bd7475fd513");
 		invoker.invoke("tags", workDir);
 		returnSuccessWithOutput("t1             5679:315df5747db\nt2             8765:2a56f5747db");
