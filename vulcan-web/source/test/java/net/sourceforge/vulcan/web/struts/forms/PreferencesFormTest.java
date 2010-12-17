@@ -27,13 +27,11 @@ import java.util.Set;
 import javax.servlet.ServletContext;
 
 import junit.framework.TestCase;
-import net.sourceforge.vulcan.metadata.SvnRevision;
 
 import org.apache.struts.action.ActionServlet;
 
 import servletunit.ServletContextSimulator;
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public class PreferencesFormTest extends TestCase {
 	PreferencesForm form = new PreferencesForm();
 	

@@ -25,13 +25,11 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 
 import net.sourceforge.vulcan.dto.PreferencesDto;
-import net.sourceforge.vulcan.metadata.SvnRevision;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public class DefaultPreferencesStore implements PreferencesStore {
 	private static final Log LOG = LogFactory.getLog(DefaultPreferencesStore.class);
 	

@@ -42,7 +42,6 @@ import net.sourceforge.vulcan.exception.PluginLoadFailureException;
 import net.sourceforge.vulcan.exception.PluginNotConfigurableException;
 import net.sourceforge.vulcan.exception.StoreException;
 import net.sourceforge.vulcan.integration.PluginConfigStub;
-import net.sourceforge.vulcan.metadata.SvnRevision;
 import net.sourceforge.vulcan.web.struts.ManageProjectConfigActionTest.MockBuildToolDto;
 import net.sourceforge.vulcan.web.struts.forms.PluginConfigForm;
 import net.sourceforge.vulcan.web.struts.forms.ProjectConfigForm;
@@ -50,7 +49,6 @@ import net.sourceforge.vulcan.web.struts.forms.ProjectConfigForm;
 import org.apache.struts.action.ActionMessages;
 
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public class ManagePluginActionTest extends MockApplicationContextStrutsTestCase {
 	StateManagerConfigDto stateManagerConfig = new StateManagerConfigDto();
 	PluginManager mgr;

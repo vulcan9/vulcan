@@ -35,11 +35,9 @@ import javax.xml.transform.Transformer;
 import junit.framework.TestCase;
 import net.sourceforge.vulcan.core.support.AbstractProjectDomBuilder.AxisLabel;
 import net.sourceforge.vulcan.exception.NoSuchTransformFormatException;
-import net.sourceforge.vulcan.metadata.SvnRevision;
 
 import org.apache.commons.lang.time.DateUtils;
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public class AxisLabelGeneratorTest extends TestCase {
 	private AbstractProjectDomBuilder domBuilder = new AbstractProjectDomBuilder() {
 		@Override

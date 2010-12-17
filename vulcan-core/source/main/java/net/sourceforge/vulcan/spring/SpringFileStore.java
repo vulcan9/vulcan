@@ -42,7 +42,6 @@ import net.sourceforge.vulcan.dto.ProjectStatusDto;
 import net.sourceforge.vulcan.dto.StateManagerConfigDto;
 import net.sourceforge.vulcan.event.WarningEvent;
 import net.sourceforge.vulcan.exception.StoreException;
-import net.sourceforge.vulcan.metadata.SvnRevision;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
@@ -55,7 +54,6 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public class SpringFileStore extends AbstractFileStore implements BeanFactoryAware, ProjectNameChangeListener {
 	private BeanFactory beanFactory;
 	private BeanEncoder beanEncoder;

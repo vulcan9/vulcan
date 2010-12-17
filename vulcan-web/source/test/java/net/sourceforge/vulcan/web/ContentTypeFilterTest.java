@@ -24,11 +24,9 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 
-import net.sourceforge.vulcan.metadata.SvnRevision;
 import servletunit.FilterChainSimulator;
 import servletunit.HttpServletRequestSimulator;
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public class ContentTypeFilterTest extends ServletFilterTestCase {
 	private static final String DEFAULT_TYPE = "application/x-mock-type";
 	private static final String LEGACY_TYPE = "text/plain";

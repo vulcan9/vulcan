@@ -34,14 +34,12 @@ import net.sourceforge.vulcan.dto.NamedObject;
 import net.sourceforge.vulcan.dto.ProjectConfigDto;
 import net.sourceforge.vulcan.dto.RepositoryAdaptorConfigDto;
 import net.sourceforge.vulcan.dto.ProjectConfigDto.UpdateStrategy;
-import net.sourceforge.vulcan.metadata.SvnRevision;
 
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.struts.action.ActionErrors;
 import org.apache.struts.action.ActionMapping;
 import org.apache.struts.action.ActionMessage;
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public final class ProjectConfigForm extends ConfigForm {
 	private transient ConfigurationStore store;
 	

@@ -23,14 +23,12 @@ import java.util.Locale;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 
-import net.sourceforge.vulcan.metadata.SvnRevision;
 
 import org.apache.struts.Globals;
 import org.apache.struts.util.MessageResources;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.struts.ContextLoaderPlugIn;
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public class SpringMessageResourcesPlugIn extends ContextLoaderPlugIn {
 	@Override
 	protected void onInit() throws ServletException {

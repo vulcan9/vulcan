@@ -21,7 +21,6 @@ package net.sourceforge.vulcan.metadata;
 import net.sourceforge.vulcan.metadata.Transient;
 import junit.framework.TestCase;
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public class TransientTest extends TestCase {
 	
 	

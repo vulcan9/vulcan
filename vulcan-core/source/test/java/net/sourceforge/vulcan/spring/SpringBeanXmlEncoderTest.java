@@ -35,7 +35,6 @@ import java.util.Set;
 import java.util.UUID;
 
 import junit.framework.TestCase;
-import net.sourceforge.vulcan.metadata.SvnRevision;
 import net.sourceforge.vulcan.metadata.Transient;
 import net.sourceforge.vulcan.spring.SpringBeanXmlEncoderTest.Bean.Status;
 
@@ -46,7 +45,6 @@ import org.springframework.beans.factory.xml.XmlBeanFactory;
 import org.springframework.core.io.ClassPathResource;
 
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public class SpringBeanXmlEncoderTest extends TestCase {
 	SpringBeanXmlEncoder enc = new SpringBeanXmlEncoder();
 	

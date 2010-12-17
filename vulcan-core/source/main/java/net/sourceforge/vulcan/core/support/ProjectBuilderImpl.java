@@ -52,7 +52,6 @@ import net.sourceforge.vulcan.dto.ProjectStatusDto.UpdateType;
 import net.sourceforge.vulcan.exception.BuildFailedException;
 import net.sourceforge.vulcan.exception.ConfigException;
 import net.sourceforge.vulcan.exception.StoreException;
-import net.sourceforge.vulcan.metadata.SvnRevision;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
@@ -146,7 +145,6 @@ class BuildContext {
 	}
 }
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public class ProjectBuilderImpl implements ProjectBuilder {
 	protected Log log = LogFactory.getLog(ProjectBuilder.class);
 	

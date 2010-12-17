@@ -19,9 +19,7 @@
 package net.sourceforge.vulcan.core;
 
 import net.sourceforge.vulcan.event.Message;
-import net.sourceforge.vulcan.metadata.SvnRevision;
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public abstract class DependencyException extends Exception implements Message {
 	public DependencyException() {
 		super();

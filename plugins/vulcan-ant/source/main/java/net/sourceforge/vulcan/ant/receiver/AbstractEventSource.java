@@ -23,10 +23,8 @@ import java.util.Iterator;
 import java.util.List;
 
 import net.sourceforge.vulcan.ant.buildlistener.AntEventSummary;
-import net.sourceforge.vulcan.metadata.SvnRevision;
 
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public abstract class AbstractEventSource implements AntEventSource {
 	private final List<EventListener> listeners = new ArrayList<EventListener>();
 	

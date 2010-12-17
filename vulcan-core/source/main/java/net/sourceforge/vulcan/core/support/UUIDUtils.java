@@ -20,11 +20,9 @@ package net.sourceforge.vulcan.core.support;
 
 import java.util.UUID;
 
-import net.sourceforge.vulcan.metadata.SvnRevision;
 
 import org.safehaus.uuid.UUIDGenerator;
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public abstract class UUIDUtils {
 	public static UUID forcedUUID;
 	

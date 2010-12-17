@@ -23,9 +23,7 @@ import net.sourceforge.vulcan.RepositoryAdaptor;
 import net.sourceforge.vulcan.dto.ProjectConfigDto;
 import net.sourceforge.vulcan.dto.RepositoryAdaptorConfigDto;
 import net.sourceforge.vulcan.exception.ConfigException;
-import net.sourceforge.vulcan.metadata.SvnRevision;
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public interface RepositoryAdaptorPlugin extends Plugin {
 	/**
 	 * @param projectConfig The top level configuration for the project

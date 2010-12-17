@@ -46,13 +46,11 @@ import net.sourceforge.vulcan.dto.PreferencesDto;
 import net.sourceforge.vulcan.dto.ProjectStatusDto;
 import net.sourceforge.vulcan.event.Event;
 import net.sourceforge.vulcan.event.EventPool;
-import net.sourceforge.vulcan.metadata.SvnRevision;
 
 import org.apache.struts.Globals;
 import org.apache.struts.action.ActionMessages;
 import org.springframework.web.context.WebApplicationContext;
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public abstract class JstlFunctions {
 	private static WebApplicationContext webApplicationContext;
 	

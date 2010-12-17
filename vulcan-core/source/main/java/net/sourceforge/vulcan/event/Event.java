@@ -22,10 +22,8 @@ import java.util.Date;
 
 import java.io.Serializable;
 
-import net.sourceforge.vulcan.metadata.SvnRevision;
 
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public interface Event extends Serializable {
 	public Object getSource();
 	public String getKey();

@@ -18,9 +18,7 @@
  */
 package net.sourceforge.vulcan.exception;
 
-import net.sourceforge.vulcan.metadata.SvnRevision;
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public class BuildFailedException extends Exception {
 	protected final String target;
 	protected final int exitCode;

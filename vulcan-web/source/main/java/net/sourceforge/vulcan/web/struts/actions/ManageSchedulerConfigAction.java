@@ -21,10 +21,8 @@ package net.sourceforge.vulcan.web.struts.actions;
 import net.sourceforge.vulcan.dto.SchedulerConfigDto;
 import net.sourceforge.vulcan.exception.DuplicateNameException;
 import net.sourceforge.vulcan.exception.StoreException;
-import net.sourceforge.vulcan.metadata.SvnRevision;
 
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public final class ManageSchedulerConfigAction extends SchedulerConfigBaseAction {
 	@Override
 	protected SchedulerConfigDto getConfig(String name) {

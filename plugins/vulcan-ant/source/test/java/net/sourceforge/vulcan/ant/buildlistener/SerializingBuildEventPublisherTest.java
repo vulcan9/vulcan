@@ -23,7 +23,6 @@ import java.util.List;
 
 import junit.framework.TestCase;
 import net.sourceforge.vulcan.ant.AntBuildEvent;
-import net.sourceforge.vulcan.metadata.SvnRevision;
 
 import org.apache.tools.ant.BuildEvent;
 import org.apache.tools.ant.BuildException;
@@ -32,7 +31,6 @@ import org.apache.tools.ant.Target;
 import org.apache.tools.ant.Task;
 
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public class SerializingBuildEventPublisherTest extends TestCase {
 	final List<AntEventSummary> events = new ArrayList<AntEventSummary>();
 	

@@ -38,7 +38,6 @@ import net.sourceforge.vulcan.dto.ProjectConfigDto;
 import net.sourceforge.vulcan.dto.ProjectStatusDto;
 import net.sourceforge.vulcan.exception.NoSuchProjectException;
 import net.sourceforge.vulcan.exception.NoSuchTransformFormatException;
-import net.sourceforge.vulcan.metadata.SvnRevision;
 import net.sourceforge.vulcan.web.Keys;
 
 import org.apache.struts.Globals;
@@ -48,7 +47,6 @@ import org.easymock.IAnswer;
 import org.jdom.Document;
 import org.jdom.Element;
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public class ViewProjectStatusActionTest extends MockApplicationContextStrutsTestCase {
 	ProjectStatusDto status = new ProjectStatusDto();
 	Document dom = new Document();

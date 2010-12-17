@@ -23,9 +23,7 @@ import java.util.List;
 import java.io.IOException;
 import java.io.Writer;
 
-import net.sourceforge.vulcan.metadata.SvnRevision;
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public interface BeanEncoder {
 	public static interface FactoryExpert {
 		public boolean needsFactory(Object bean);

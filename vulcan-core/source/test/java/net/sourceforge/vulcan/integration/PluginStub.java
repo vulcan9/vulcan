@@ -23,9 +23,7 @@ import java.util.List;
 import java.util.Locale;
 
 import net.sourceforge.vulcan.dto.PluginConfigDto;
-import net.sourceforge.vulcan.metadata.SvnRevision;
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public class PluginStub extends PluginConfigDto {
 	@Override
 	public String getPluginId() {

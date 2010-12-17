@@ -20,7 +20,6 @@ package net.sourceforge.vulcan.spring;
 
 import junit.framework.TestCase;
 
-import net.sourceforge.vulcan.metadata.SvnRevision;
 
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.RootBeanDefinition;
@@ -30,7 +29,6 @@ import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.support.GenericApplicationContext;
 
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public class AppCtxTest extends TestCase {
 	GenericApplicationContext ac = new GenericApplicationContext();
 	ApplicationEvent evt = new ContextRefreshedEvent(ac);

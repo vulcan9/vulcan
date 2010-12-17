@@ -30,14 +30,12 @@ import net.sourceforge.vulcan.core.DependencyException;
 import net.sourceforge.vulcan.core.DependencyGroup;
 import net.sourceforge.vulcan.dto.ProjectConfigDto;
 import net.sourceforge.vulcan.dto.ProjectStatusDto;
-import net.sourceforge.vulcan.metadata.SvnRevision;
 
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.commons.lang.builder.ToStringBuilder;
 
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public final class DependencyGroupImpl implements DependencyGroup {
 	private enum DependencyStatus { PASS, FAIL, CYCLE, PENDING };
 	

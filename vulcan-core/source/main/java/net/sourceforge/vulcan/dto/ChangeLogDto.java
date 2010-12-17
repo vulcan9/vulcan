@@ -22,9 +22,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import net.sourceforge.vulcan.metadata.SvnRevision;
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public class ChangeLogDto extends BaseDto {
 	private List<ChangeSetDto> changeSets = Collections.emptyList();
 

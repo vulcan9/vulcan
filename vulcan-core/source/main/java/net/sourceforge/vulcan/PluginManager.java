@@ -34,9 +34,7 @@ import net.sourceforge.vulcan.exception.PluginNotConfigurableException;
 import net.sourceforge.vulcan.exception.PluginNotFoundException;
 import net.sourceforge.vulcan.exception.StoreException;
 import net.sourceforge.vulcan.integration.Plugin;
-import net.sourceforge.vulcan.metadata.SvnRevision;
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public interface PluginManager extends ProjectNameChangeListener {
 	public void init();
 	public void importPluginZip(InputStream in) throws StoreException, PluginLoadFailureException;

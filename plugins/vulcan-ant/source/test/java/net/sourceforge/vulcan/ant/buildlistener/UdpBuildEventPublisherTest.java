@@ -23,14 +23,12 @@ import junit.framework.TestCase;
 import net.sourceforge.vulcan.ant.buildlistener.UdpBuildEventPublisher;
 import net.sourceforge.vulcan.ant.receiver.EventListener;
 import net.sourceforge.vulcan.ant.receiver.UdpEventSource;
-import net.sourceforge.vulcan.metadata.SvnRevision;
 
 import org.apache.tools.ant.BuildEvent;
 import org.apache.tools.ant.Project;
 import org.apache.tools.ant.Target;
 
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public class UdpBuildEventPublisherTest extends TestCase {
 
 	@Override

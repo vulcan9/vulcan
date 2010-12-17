@@ -19,13 +19,11 @@
 package net.sourceforge.vulcan.web.struts;
 
 import net.sourceforge.vulcan.dto.SchedulerConfigDto;
-import net.sourceforge.vulcan.metadata.SvnRevision;
 import net.sourceforge.vulcan.web.struts.forms.SchedulerConfigForm;
 
 import org.easymock.EasyMock;
 
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public class ManageSchedulerConfigActionTest extends MockApplicationContextStrutsTestCase {
 	@Override
 	public void setUp() throws Exception {

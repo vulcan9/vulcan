@@ -25,13 +25,11 @@ import java.util.Locale;
 import java.util.Map;
 
 import net.sourceforge.vulcan.exception.ValidationException;
-import net.sourceforge.vulcan.metadata.SvnRevision;
 
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public abstract class PluginConfigDto extends BaseDto implements ApplicationContextAware {
 	public static String ATTR_CHOICE_TYPE = "net.sourceforge.vulcan.integration.CHOICE_TYPE";
 	public static String ATTR_AVAILABLE_CHOICES = "net.sourceforge.vulcan.integration.CHOICES";

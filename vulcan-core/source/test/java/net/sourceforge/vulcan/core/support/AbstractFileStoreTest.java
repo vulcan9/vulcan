@@ -27,9 +27,7 @@ import java.util.UUID;
 import junit.framework.TestCase;
 import net.sourceforge.vulcan.dto.StateManagerConfigDto;
 import net.sourceforge.vulcan.exception.StoreException;
-import net.sourceforge.vulcan.metadata.SvnRevision;
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public class AbstractFileStoreTest extends TestCase {
 	AbstractFileStore store = new AbstractFileStore() {
 		public void exportConfiguration(OutputStream os) throws StoreException, IOException {

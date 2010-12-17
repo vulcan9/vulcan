@@ -26,10 +26,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import net.sourceforge.vulcan.metadata.SvnRevision;
 
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public class ProjectStatusDto extends NameDto {
 	/**
 	 * First line of constants are possible build outcomes.  Following constants are for internal use only.

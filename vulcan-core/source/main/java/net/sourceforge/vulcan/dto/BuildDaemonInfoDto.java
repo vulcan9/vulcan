@@ -20,10 +20,8 @@ package net.sourceforge.vulcan.dto;
 
 import java.net.InetAddress;
 
-import net.sourceforge.vulcan.metadata.SvnRevision;
 
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public class BuildDaemonInfoDto extends NameDto {
 	private InetAddress hostname;
 	

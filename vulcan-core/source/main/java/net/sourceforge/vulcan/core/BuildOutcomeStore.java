@@ -29,12 +29,10 @@ import net.sourceforge.vulcan.dto.ProjectStatusDto;
 import net.sourceforge.vulcan.dto.TestFailureDto;
 import net.sourceforge.vulcan.dto.ProjectStatusDto.UpdateType;
 import net.sourceforge.vulcan.exception.StoreException;
-import net.sourceforge.vulcan.metadata.SvnRevision;
 
 import org.springframework.transaction.annotation.Transactional;
 
 @Transactional(readOnly=true)
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public interface BuildOutcomeStore {
 	UUID storeBuildOutcome(ProjectStatusDto outcome) throws StoreException;
 	

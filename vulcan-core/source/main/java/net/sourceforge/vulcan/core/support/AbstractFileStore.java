@@ -46,7 +46,6 @@ import net.sourceforge.vulcan.exception.InvalidPluginLayoutException;
 import net.sourceforge.vulcan.exception.StoreException;
 import net.sourceforge.vulcan.integration.PluginVersionSpec;
 import net.sourceforge.vulcan.integration.support.PluginVersionDigester;
-import net.sourceforge.vulcan.metadata.SvnRevision;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
@@ -54,7 +53,6 @@ import org.apache.commons.io.filefilter.FileFilterUtils;
 import org.apache.commons.io.filefilter.SuffixFileFilter;
 
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public abstract class AbstractFileStore implements ConfigurationStore {
 	protected String workingCopyLocationPattern;
 	protected File configRoot;

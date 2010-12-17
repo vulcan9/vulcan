@@ -19,10 +19,8 @@
 package net.sourceforge.vulcan.web.struts;
 
 import net.sourceforge.vulcan.dto.SchedulerConfigDto;
-import net.sourceforge.vulcan.metadata.SvnRevision;
 
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public class ManageBuildDaemonConfigActionTest extends MockApplicationContextStrutsTestCase {
 	@Override
 	public void setUp() throws Exception {

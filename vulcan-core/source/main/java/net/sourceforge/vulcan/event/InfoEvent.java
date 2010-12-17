@@ -18,9 +18,7 @@
  */
 package net.sourceforge.vulcan.event;
 
-import net.sourceforge.vulcan.metadata.SvnRevision;
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public class InfoEvent extends MessageEvent {
 	public InfoEvent(final Object source, final String messageKey) {
 		this(source, messageKey, new Object[0]);

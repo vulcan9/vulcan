@@ -54,7 +54,6 @@ import net.sourceforge.vulcan.integration.BuildToolPlugin;
 import net.sourceforge.vulcan.integration.ConfigurablePlugin;
 import net.sourceforge.vulcan.integration.Plugin;
 import net.sourceforge.vulcan.integration.RepositoryAdaptorPlugin;
-import net.sourceforge.vulcan.metadata.SvnRevision;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -72,7 +71,6 @@ import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public class SpringPluginManager 
 		implements PluginManager, ApplicationContextAware, ProjectNameChangeListener {
 	final static Log log = LogFactory.getLog(SpringPluginManager.class);

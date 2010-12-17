@@ -25,7 +25,6 @@ import java.util.List;
 import net.sourceforge.vulcan.event.Event;
 import net.sourceforge.vulcan.event.EventPool;
 import net.sourceforge.vulcan.event.EventType;
-import net.sourceforge.vulcan.metadata.SvnRevision;
 
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationListener;
@@ -35,7 +34,6 @@ import org.springframework.jmx.export.annotation.ManagedOperationParameter;
 import org.springframework.jmx.export.annotation.ManagedOperationParameters;
 import org.springframework.jmx.export.annotation.ManagedResource;
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 @ManagedResource(objectName="vulcan:name=eventPool")
 public final class SpringEventPool implements EventPool, ApplicationListener {
 	List<Event> events = new ArrayList<Event>();

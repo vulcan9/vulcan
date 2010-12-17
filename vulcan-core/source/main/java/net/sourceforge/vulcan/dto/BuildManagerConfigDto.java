@@ -20,10 +20,8 @@ package net.sourceforge.vulcan.dto;
 
 import java.util.Map;
 
-import net.sourceforge.vulcan.metadata.SvnRevision;
 
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public class BuildManagerConfigDto extends BaseDto {
 	private boolean enabled = true;
 	private Map<String, ProjectStatusDto> projectStatus;

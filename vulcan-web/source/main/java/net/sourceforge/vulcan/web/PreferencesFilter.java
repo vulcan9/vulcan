@@ -28,12 +28,10 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import net.sourceforge.vulcan.dto.PreferencesDto;
-import net.sourceforge.vulcan.metadata.SvnRevision;
 
 import org.springframework.web.context.support.WebApplicationContextUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public class PreferencesFilter extends OncePerRequestFilter {
 	private PreferencesStore store;
 	

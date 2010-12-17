@@ -18,9 +18,7 @@
  */
 package net.sourceforge.vulcan.dto;
 
-import net.sourceforge.vulcan.metadata.SvnRevision;
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public abstract class PluginProfileDto extends PluginConfigDto implements NamedObject {
 	private String name;
 	

@@ -22,9 +22,7 @@ import static org.apache.commons.lang.StringUtils.isNotBlank;
 
 import javax.servlet.http.HttpServletRequest;
 
-import net.sourceforge.vulcan.metadata.SvnRevision;
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public class UserAgentRestRequestDetector implements RestRequestDetector {
 	private String restRepsonseForwardName;
 	

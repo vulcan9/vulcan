@@ -20,7 +20,6 @@ package net.sourceforge.vulcan.web.struts.actions;
 
 import net.sourceforge.vulcan.StateManager;
 import net.sourceforge.vulcan.event.EventHandler;
-import net.sourceforge.vulcan.metadata.SvnRevision;
 
 import org.apache.commons.logging.Log;
 import org.apache.struts.action.Action;
@@ -28,7 +27,6 @@ import org.springframework.context.MessageSource;
 import org.springframework.context.MessageSourceAware;
 
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public abstract class BaseAuditAction extends Action implements MessageSourceAware {
 	protected StateManager stateManager;
 	protected Log auditLog;

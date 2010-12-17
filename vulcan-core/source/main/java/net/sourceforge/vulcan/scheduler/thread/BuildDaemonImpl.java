@@ -27,10 +27,8 @@ import net.sourceforge.vulcan.core.ProjectBuilder;
 import net.sourceforge.vulcan.dto.BuildDaemonInfoDto;
 import net.sourceforge.vulcan.dto.MetricDto;
 import net.sourceforge.vulcan.dto.ProjectConfigDto;
-import net.sourceforge.vulcan.metadata.SvnRevision;
 import net.sourceforge.vulcan.scheduler.BuildDaemon;
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public abstract class BuildDaemonImpl extends AbstractScheduler implements BuildDaemon {
 	private BuildManager buildManager;
 	

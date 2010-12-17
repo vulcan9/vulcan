@@ -24,7 +24,6 @@ import javax.servlet.http.HttpServletResponse;
 import net.sourceforge.vulcan.dto.SchedulerConfigDto;
 import net.sourceforge.vulcan.exception.DuplicateNameException;
 import net.sourceforge.vulcan.exception.StoreException;
-import net.sourceforge.vulcan.metadata.SvnRevision;
 import net.sourceforge.vulcan.web.struts.forms.SchedulerConfigForm;
 
 import org.apache.struts.action.ActionForm;
@@ -34,7 +33,6 @@ import org.apache.struts.action.ActionMessage;
 import org.apache.struts.action.ActionMessages;
 
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public abstract class SchedulerConfigBaseAction extends BaseDispatchAction {
 	private boolean allowCronExpressions;
 	

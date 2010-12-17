@@ -27,13 +27,11 @@ import net.sourceforge.vulcan.event.BuildStartingEvent;
 import net.sourceforge.vulcan.event.Event;
 import net.sourceforge.vulcan.integration.BuildManagerObserverPlugin;
 import net.sourceforge.vulcan.integration.MetricsPlugin;
-import net.sourceforge.vulcan.metadata.SvnRevision;
 
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationListener;
 
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public class BuildEventPluginPublisher implements ApplicationListener {
 	List<BuildManagerObserverPlugin> observers = new ArrayList<BuildManagerObserverPlugin>();
 	

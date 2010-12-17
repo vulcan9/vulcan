@@ -23,10 +23,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import net.sourceforge.vulcan.metadata.SvnRevision;
 
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public class PluginFactoryExpert implements SpringBeanXmlEncoder.FactoryExpert {
 	private static final String CREATE_OBJECT = "createObject";
 	private static final String CREATE_ENUM = "createEnum";

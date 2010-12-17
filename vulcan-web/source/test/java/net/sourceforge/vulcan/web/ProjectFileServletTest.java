@@ -30,11 +30,9 @@ import net.sourceforge.vulcan.TestUtils;
 import net.sourceforge.vulcan.dto.ProjectConfigDto;
 import net.sourceforge.vulcan.dto.ProjectStatusDto;
 import net.sourceforge.vulcan.exception.NoSuchProjectException;
-import net.sourceforge.vulcan.metadata.SvnRevision;
 
 import org.springframework.web.context.WebApplicationContext;
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public class ProjectFileServletTest extends ServletTestCase {
 	final static File TEST_DIR = TestUtils.resolveRelativeFile("source/test/servlet");
 

@@ -36,7 +36,6 @@ import java.lang.annotation.Target;
  * to gain access to the corresponding annotations.  Therefore applying the annotation to
  * the getter method is chosen as a compromise.
  */
-@SvnRevision(id="$Id$", url="$HeadURL$")
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
 @Documented

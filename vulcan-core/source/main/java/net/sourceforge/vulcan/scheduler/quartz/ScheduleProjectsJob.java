@@ -29,14 +29,12 @@ import net.sourceforge.vulcan.event.InfoEvent;
 import net.sourceforge.vulcan.exception.AlreadyScheduledException;
 import net.sourceforge.vulcan.exception.ConfigException;
 import net.sourceforge.vulcan.exception.ProjectsLockedException;
-import net.sourceforge.vulcan.metadata.SvnRevision;
 
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.springframework.scheduling.quartz.QuartzJobBean;
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public class ScheduleProjectsJob extends QuartzJobBean implements Job {
 	private BuildManager buildManager;
 	private ProjectManager projectManager;

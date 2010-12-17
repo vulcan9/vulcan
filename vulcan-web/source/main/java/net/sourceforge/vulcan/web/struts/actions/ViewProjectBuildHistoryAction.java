@@ -37,7 +37,6 @@ import net.sourceforge.vulcan.dto.MetricDto;
 import net.sourceforge.vulcan.dto.ProjectStatusDto;
 import net.sourceforge.vulcan.dto.MetricDto.MetricType;
 import net.sourceforge.vulcan.dto.ProjectStatusDto.Status;
-import net.sourceforge.vulcan.metadata.SvnRevision;
 import net.sourceforge.vulcan.web.Keys;
 import net.sourceforge.vulcan.web.struts.forms.ReportForm;
 
@@ -49,7 +48,6 @@ import org.apache.struts.action.ActionMessage;
 import org.apache.struts.action.ActionMessages;
 import org.jdom.Document;
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public final class ViewProjectBuildHistoryAction extends ProjectReportBaseAction {
 	private BuildOutcomeStore buildOutcomeStore;
 	private MetricSelector metricSelector;

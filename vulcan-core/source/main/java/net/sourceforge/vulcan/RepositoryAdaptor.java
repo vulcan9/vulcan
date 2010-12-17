@@ -27,9 +27,7 @@ import net.sourceforge.vulcan.dto.ProjectStatusDto;
 import net.sourceforge.vulcan.dto.RepositoryTagDto;
 import net.sourceforge.vulcan.dto.RevisionTokenDto;
 import net.sourceforge.vulcan.exception.RepositoryException;
-import net.sourceforge.vulcan.metadata.SvnRevision;
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public interface RepositoryAdaptor {
 	
 	/**
