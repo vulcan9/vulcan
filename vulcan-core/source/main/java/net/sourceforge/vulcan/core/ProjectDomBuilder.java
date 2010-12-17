@@ -28,12 +28,10 @@ import javax.xml.transform.TransformerException;
 
 import net.sourceforge.vulcan.dto.ProjectStatusDto;
 import net.sourceforge.vulcan.exception.NoSuchTransformFormatException;
-import net.sourceforge.vulcan.metadata.SvnRevision;
 
 import org.jdom.Document;
 import org.xml.sax.SAXException;
 
-@SvnRevision(id="$Id", url="$HeadURL$")
 public interface ProjectDomBuilder {
 	Document createProjectDocument(ProjectStatusDto status, Locale locale);
 	Document createProjectSummaries(List<ProjectStatusDto> outcomes, Object fromLabel, Object toLabel, Locale locale);

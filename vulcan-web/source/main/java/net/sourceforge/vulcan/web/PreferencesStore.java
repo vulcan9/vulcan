@@ -19,9 +19,7 @@
 package net.sourceforge.vulcan.web;
 
 import net.sourceforge.vulcan.dto.PreferencesDto;
-import net.sourceforge.vulcan.metadata.SvnRevision;
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public interface PreferencesStore {
 	public PreferencesDto getDefaultPreferences();
 	public PreferencesDto convertFromString(String data);

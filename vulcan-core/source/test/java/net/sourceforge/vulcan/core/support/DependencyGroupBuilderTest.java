@@ -29,11 +29,9 @@ import net.sourceforge.vulcan.dto.ProjectConfigDto;
 import net.sourceforge.vulcan.dto.ProjectStatusDto;
 import net.sourceforge.vulcan.dto.ProjectConfigDto.UpdateStrategy;
 import net.sourceforge.vulcan.exception.ProjectsLockedException;
-import net.sourceforge.vulcan.metadata.SvnRevision;
 
 import org.easymock.EasyMock;
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public class DependencyGroupBuilderTest extends EasyMockTestCase {
 	ProjectManager projectMgr = createStrictMock(ProjectManager.class);
 	BuildManager buildManager = createStrictMock(BuildManager.class);

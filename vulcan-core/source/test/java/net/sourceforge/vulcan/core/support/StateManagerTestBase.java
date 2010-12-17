@@ -35,12 +35,10 @@ import net.sourceforge.vulcan.dto.ProjectStatusDto;
 import net.sourceforge.vulcan.dto.StateManagerConfigDto;
 import net.sourceforge.vulcan.event.Event;
 import net.sourceforge.vulcan.event.EventHandler;
-import net.sourceforge.vulcan.metadata.SvnRevision;
 import net.sourceforge.vulcan.scheduler.BuildDaemon;
 import net.sourceforge.vulcan.scheduler.ProjectScheduler;
 
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public abstract class StateManagerTestBase extends EasyMockTestCase
 {
 	StateManagerConfigDto stateManagerConfig = new StateManagerConfigDto();

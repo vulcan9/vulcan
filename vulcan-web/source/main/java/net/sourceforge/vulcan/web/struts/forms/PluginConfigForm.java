@@ -42,7 +42,6 @@ import net.sourceforge.vulcan.dto.PluginConfigDto;
 import net.sourceforge.vulcan.dto.PluginProfileDto;
 import net.sourceforge.vulcan.dto.PluginConfigDto.Widget;
 import net.sourceforge.vulcan.integration.ConfigChoice;
-import net.sourceforge.vulcan.metadata.SvnRevision;
 
 import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.beanutils.ConvertUtils;
@@ -56,7 +55,6 @@ import org.apache.struts.action.ActionMapping;
 import org.apache.struts.upload.FormFile;
 import org.apache.struts.validator.ValidatorForm;
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public final class PluginConfigForm extends ValidatorForm implements DispatchForm {
 	private static final Log log = LogFactory.getLog(PluginConfigForm.class);
 	

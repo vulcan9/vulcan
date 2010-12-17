@@ -19,10 +19,8 @@
 package net.sourceforge.vulcan.event;
 
 import net.sourceforge.vulcan.dto.ProjectStatusDto;
-import net.sourceforge.vulcan.metadata.SvnRevision;
 
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public class BrokenBuildClaimedEvent extends BuildEvent {
 	public BrokenBuildClaimedEvent(final Object source,	final ProjectStatusDto status) {
 		super(source, null, null, status);

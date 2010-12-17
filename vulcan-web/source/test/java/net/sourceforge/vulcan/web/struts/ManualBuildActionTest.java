@@ -36,12 +36,10 @@ import net.sourceforge.vulcan.dto.RepositoryTagDto;
 import net.sourceforge.vulcan.exception.NoSuchProjectException;
 import net.sourceforge.vulcan.exception.ProjectsLockedException;
 import net.sourceforge.vulcan.exception.RepositoryException;
-import net.sourceforge.vulcan.metadata.SvnRevision;
 import net.sourceforge.vulcan.scheduler.BuildDaemon;
 import net.sourceforge.vulcan.web.Keys;
 import net.sourceforge.vulcan.web.struts.forms.ManualBuildForm;
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public class ManualBuildActionTest extends MockApplicationContextStrutsTestCase {
 	ProjectConfigDto[] projects = {new ProjectConfigDto(), new ProjectConfigDto()};
 	

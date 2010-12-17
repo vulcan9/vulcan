@@ -21,7 +21,6 @@ package net.sourceforge.vulcan.spring;
 import net.sourceforge.vulcan.event.ErrorEvent;
 import net.sourceforge.vulcan.event.Event;
 import net.sourceforge.vulcan.event.EventHandler;
-import net.sourceforge.vulcan.metadata.SvnRevision;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -30,7 +29,6 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public class SpringEventHandler
 		implements EventHandler, ApplicationContextAware {
 

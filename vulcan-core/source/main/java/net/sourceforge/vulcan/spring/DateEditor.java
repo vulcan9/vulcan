@@ -21,9 +21,7 @@ package net.sourceforge.vulcan.spring;
 import java.beans.PropertyEditorSupport;
 import java.util.Date;
 
-import net.sourceforge.vulcan.metadata.SvnRevision;
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 class DateEditor extends PropertyEditorSupport {
 	@Override
 	public void setAsText(String text) throws IllegalArgumentException {

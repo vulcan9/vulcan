@@ -31,7 +31,6 @@ import net.sourceforge.vulcan.dto.LockDto;
 import net.sourceforge.vulcan.dto.PluginConfigDto;
 import net.sourceforge.vulcan.dto.ProjectConfigDto;
 import net.sourceforge.vulcan.exception.ProjectNeedsDependencyException;
-import net.sourceforge.vulcan.metadata.SvnRevision;
 import net.sourceforge.vulcan.web.struts.forms.PluginConfigForm;
 import net.sourceforge.vulcan.web.struts.forms.ProjectConfigForm;
 
@@ -42,7 +41,6 @@ import org.apache.struts.action.ActionMapping;
 import org.apache.struts.action.ActionMessage;
 import org.apache.struts.action.ActionMessages;
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public final class ManageProjectConfigAction extends BaseDispatchAction {
 	private ConfigurationStore configurationStore;
 	private BuildManager buildManager;

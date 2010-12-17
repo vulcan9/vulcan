@@ -22,7 +22,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import net.sourceforge.vulcan.event.EventPool;
-import net.sourceforge.vulcan.metadata.SvnRevision;
 
 import org.apache.struts.action.Action;
 import org.apache.struts.action.ActionForm;
@@ -30,7 +29,6 @@ import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public final class ClearMessagesAction extends Action {
 	EventPool eventPool;
 	

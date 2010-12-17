@@ -105,6 +105,12 @@
 				<include name="${nant::get-base-directory()}/NAnt.Core.dll"/>
 			</references>
 		</csc>
+		
+		<copy todir="${assembly.target.dir}">
+			<fileset basedir="${nant::get-base-directory()}">
+				<include name="NAnt.Core.dll"/>
+			</fileset>
+		</copy>
 	</target>
 
 	<target name="build-test-assembly">
@@ -132,11 +138,14 @@
 
 	<target name="unit-test">
 		<mkdir dir="${test.report.dir}"/>
-		<nunit2>
-			<formatter type="Xml" usefile="true" extension=".xml"
-				outputdir="${test.report.dir}"/>
-			<test assemblyname="${assembly.target.dir}/UnitTests.dll"/>
-		</nunit2>
+		
+		<exec program="${nunit.bin.dir}/nunit-console.exe" workingdir="${assembly.target.dir}" verbose="true">
+			<arg value="UnitTests.dll" /> 
+			<arg value="/nologo"/>
+			<arg value="/noshadow"/>
+			<arg value="/xml"/>
+			<arg value="${test.report.dir}/UnitTests.xml"/>
+		</exec>
 	</target>
 	
 	<target name="copy-dist">

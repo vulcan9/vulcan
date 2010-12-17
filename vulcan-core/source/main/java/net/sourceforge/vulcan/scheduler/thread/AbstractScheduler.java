@@ -24,14 +24,12 @@ import java.util.Date;
 import net.sourceforge.vulcan.dto.SchedulerConfigDto;
 import net.sourceforge.vulcan.event.ErrorEvent;
 import net.sourceforge.vulcan.event.EventHandler;
-import net.sourceforge.vulcan.metadata.SvnRevision;
 import net.sourceforge.vulcan.scheduler.Scheduler;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public abstract class AbstractScheduler implements Scheduler, UncaughtExceptionHandler {
 	protected final Log log = LogFactory.getLog(getClass());
 	

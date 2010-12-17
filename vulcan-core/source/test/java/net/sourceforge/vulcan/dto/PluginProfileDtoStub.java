@@ -22,9 +22,7 @@ import java.beans.PropertyDescriptor;
 import java.util.List;
 import java.util.Locale;
 
-import net.sourceforge.vulcan.metadata.SvnRevision;
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public class PluginProfileDtoStub extends PluginProfileDto {
 	private String pluginId;
 	private String pluginName;

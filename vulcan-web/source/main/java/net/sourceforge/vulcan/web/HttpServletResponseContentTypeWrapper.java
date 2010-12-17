@@ -22,9 +22,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpServletResponseWrapper;
 
-import net.sourceforge.vulcan.metadata.SvnRevision;
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public final  class HttpServletResponseContentTypeWrapper extends HttpServletResponseWrapper {
 	private final String[] suppressContentTypes;
 	private final String overrideContentType;

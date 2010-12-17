@@ -27,7 +27,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import net.sourceforge.vulcan.core.BuildManager;
 import net.sourceforge.vulcan.exception.NoSuchProjectException;
-import net.sourceforge.vulcan.metadata.SvnRevision;
 import net.sourceforge.vulcan.web.struts.forms.MultipleProjectConfigForm;
 
 import org.apache.commons.lang.StringUtils;
@@ -37,7 +36,6 @@ import org.apache.struts.action.ActionMapping;
 import org.apache.struts.action.ActionMessage;
 import org.apache.struts.action.ActionMessages;
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public final class ManageLocksAction extends BaseDispatchAction {
 	private BuildManager buildManager;
 	

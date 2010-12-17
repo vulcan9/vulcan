@@ -22,12 +22,10 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
 import net.sourceforge.vulcan.dto.BaseDto;
-import net.sourceforge.vulcan.metadata.SvnRevision;
 
 
 import junit.framework.TestCase;
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public class BaseDtoTest extends TestCase {
 	static class Dto extends BaseDto {
 		String value;

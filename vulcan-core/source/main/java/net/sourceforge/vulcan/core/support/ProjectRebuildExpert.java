@@ -35,12 +35,10 @@ import net.sourceforge.vulcan.dto.RevisionTokenDto;
 import net.sourceforge.vulcan.dto.ProjectConfigDto.UpdateStrategy;
 import net.sourceforge.vulcan.dto.ProjectStatusDto.UpdateType;
 import net.sourceforge.vulcan.exception.ConfigException;
-import net.sourceforge.vulcan.metadata.SvnRevision;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-@SvnRevision(id = "$Id: ProjectBuilderTest.java 148 2006-12-03 21:50:35Z chris.eldredge $", url = "$HeadURL: https://vulcan.googlecode.com/svn/main/trunk/source/test/java/net/sourceforge/vulcan/core/support/ProjectBuilderTest.java $")
 class ProjectRebuildExpert {
 	private final Log log = LogFactory.getLog(getClass());
 	

@@ -21,9 +21,7 @@ package net.sourceforge.vulcan.dto;
 import java.io.File;
 import java.net.URL;
 
-import net.sourceforge.vulcan.metadata.SvnRevision;
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public class PluginMetaDataDto extends BaseDto {
 	private String id;
 	private File directory;

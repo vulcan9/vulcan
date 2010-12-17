@@ -23,10 +23,8 @@ import java.util.List;
 import junit.framework.TestCase;
 import net.sourceforge.vulcan.dto.PluginConfigDto;
 import net.sourceforge.vulcan.integration.PluginStub;
-import net.sourceforge.vulcan.metadata.SvnRevision;
 
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public class PluginFactoryExpertTest extends TestCase {
 	PluginFactoryExpert expert = new PluginFactoryExpert();
 	

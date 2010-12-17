@@ -29,7 +29,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import net.sourceforge.vulcan.dto.PreferencesDto;
-import net.sourceforge.vulcan.metadata.SvnRevision;
 import net.sourceforge.vulcan.web.Keys;
 import net.sourceforge.vulcan.web.PreferencesStore;
 import net.sourceforge.vulcan.web.struts.forms.PreferencesForm;
@@ -38,7 +37,6 @@ import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public final class ManagePreferencesAction extends BaseDispatchAction {
 	private PreferencesStore preferencesStore;
 	

@@ -18,9 +18,7 @@
  */
 package net.sourceforge.vulcan.exception;
 
-import net.sourceforge.vulcan.metadata.SvnRevision;
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public class StoreException extends Exception {
 	public StoreException(Throwable cause) {
 		this(cause.getMessage(), cause);

@@ -31,12 +31,10 @@ import net.sourceforge.vulcan.dto.ProjectConfigDto;
 import net.sourceforge.vulcan.dto.ProjectStatusDto;
 import net.sourceforge.vulcan.dto.ProjectConfigDto.UpdateStrategy;
 import net.sourceforge.vulcan.dto.ProjectStatusDto.UpdateType;
-import net.sourceforge.vulcan.metadata.SvnRevision;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-@SvnRevision(id = "$Id$", url = "$HeadURL$")
 class WorkingCopyUpdateExpert {
 	Log log = LogFactory.getLog(getClass());
 	

@@ -21,11 +21,9 @@ package net.sourceforge.vulcan.web.struts;
 import java.util.Arrays;
 import java.util.List;
 
-import net.sourceforge.vulcan.metadata.SvnRevision;
 import net.sourceforge.vulcan.web.struts.forms.LabelForm;
 
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public class ManageLabelActionTest extends MockApplicationContextStrutsTestCase {
 	@Override
 	public void setUp() throws Exception {

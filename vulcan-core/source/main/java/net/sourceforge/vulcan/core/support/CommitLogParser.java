@@ -24,13 +24,11 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import net.sourceforge.vulcan.metadata.SvnRevision;
 
 import org.jdom.Content;
 import org.jdom.Element;
 import org.jdom.Text;
 
-@SvnRevision(id="$Id: AbstractProjectDomBuilder.java 161 2006-12-05 22:19:21Z chris.eldredge $", url="$HeadURL: https://vulcan.googlecode.com/svn/main/trunk/source/main/java/net/sourceforge/vulcan/core/support/AbstractProjectDomBuilder.java $")
 class CommitLogParser {
 	private static String urlPattern = "\\w+://\\S+";
 

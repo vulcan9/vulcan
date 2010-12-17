@@ -25,7 +25,6 @@ import java.util.Map;
 import javax.servlet.http.Cookie;
 
 import junit.framework.TestCase;
-import net.sourceforge.vulcan.metadata.SvnRevision;
 
 import org.apache.commons.collections.iterators.IteratorEnumeration;
 
@@ -35,7 +34,6 @@ import servletunit.HttpServletRequestSimulator;
 import servletunit.HttpServletResponseSimulator;
 import servletunit.ServletContextSimulator;
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public abstract class ServletFilterTestCase extends TestCase {
 	protected ServletContextSimulator context = new ServletContextSimulator();
 	protected FilterConfigSimulator filterConfig = new FilterConfigSimulator(context) {

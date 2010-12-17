@@ -18,14 +18,12 @@
  */
 package net.sourceforge.vulcan.integration;
 
-import net.sourceforge.vulcan.metadata.SvnRevision;
 
 /**
  * Enumeration of categories that may be used to display available choices to
  * a user when configuring a plugin.  These values instruct the GUI component
  * on which options should be presented to a user as available choices.
  */
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public enum ConfigChoice {
 	/**
 	 * Allow user to select from a list of currently configured projects.

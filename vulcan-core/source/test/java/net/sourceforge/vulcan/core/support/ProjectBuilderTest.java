@@ -47,12 +47,10 @@ import net.sourceforge.vulcan.exception.BuildFailedException;
 import net.sourceforge.vulcan.exception.ConfigException;
 import net.sourceforge.vulcan.exception.RepositoryException;
 import net.sourceforge.vulcan.exception.StoreException;
-import net.sourceforge.vulcan.metadata.SvnRevision;
 
 import org.apache.commons.logging.Log;
 import org.easymock.IAnswer;
 
-@SvnRevision(id = "$Id$", url = "$HeadURL$")
 public class ProjectBuilderTest extends EasyMockTestCase {
 	ProjectConfigDto project = new ProjectConfigDto();
 	ProjectStatusDto buildStatus = new ProjectStatusDto();

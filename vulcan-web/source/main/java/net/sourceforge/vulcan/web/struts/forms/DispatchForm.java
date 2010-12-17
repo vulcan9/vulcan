@@ -18,9 +18,7 @@
  */
 package net.sourceforge.vulcan.web.struts.forms;
 
-import net.sourceforge.vulcan.metadata.SvnRevision;
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public interface DispatchForm {
 	String getAction();
 	

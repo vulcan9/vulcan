@@ -31,7 +31,6 @@ import net.sourceforge.vulcan.event.AuditEvent;
 import net.sourceforge.vulcan.event.EventHandler;
 import net.sourceforge.vulcan.exception.DuplicateNameException;
 import net.sourceforge.vulcan.exception.StoreException;
-import net.sourceforge.vulcan.metadata.SvnRevision;
 import net.sourceforge.vulcan.web.struts.forms.ConfigForm;
 import net.sourceforge.vulcan.web.struts.forms.DispatchForm;
 
@@ -47,7 +46,6 @@ import org.apache.struts.actions.DispatchAction;
 import org.springframework.context.MessageSource;
 import org.springframework.context.MessageSourceAware;
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public abstract class BaseDispatchAction extends DispatchAction implements MessageSourceAware {
 	private Log auditLog;
 	private Set<String> actionsToAudit;

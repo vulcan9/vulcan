@@ -23,11 +23,9 @@ import net.sourceforge.vulcan.SimplePrincipal;
 import net.sourceforge.vulcan.core.ProjectBuilder;
 import net.sourceforge.vulcan.dto.ProjectConfigDto;
 import net.sourceforge.vulcan.event.Event;
-import net.sourceforge.vulcan.metadata.SvnRevision;
 import net.sourceforge.vulcan.scheduler.BuildDaemon;
 import net.sourceforge.vulcan.scheduler.thread.BuildDaemonImpl;
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public class KillBuildActionTest extends MockApplicationContextStrutsTestCase {
 	boolean abortCalled = false;
 	String abortUsername;

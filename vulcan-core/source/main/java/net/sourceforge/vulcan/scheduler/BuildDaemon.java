@@ -19,10 +19,8 @@
 package net.sourceforge.vulcan.scheduler;
 
 import net.sourceforge.vulcan.dto.ProjectConfigDto;
-import net.sourceforge.vulcan.metadata.SvnRevision;
 
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public interface BuildDaemon extends Scheduler {
 	String PHASE_CHECK_UPDATES = "build.phase.check.updates";
 	String PHASE_CHECKOUT = "build.phase.checkout";

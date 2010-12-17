@@ -21,12 +21,10 @@ package net.sourceforge.vulcan;
 import java.util.List;
 
 import net.sourceforge.vulcan.dto.ProjectConfigDto;
-import net.sourceforge.vulcan.metadata.SvnRevision;
 
 /**
  * Used by ProjectImporter to configure ProjectConfigDto and related plugin configuration.
  */
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public interface ProjectBuildConfigurator {
 	/**
 	 * If the build file that is being imported is nested in a subdirectory of the project root,

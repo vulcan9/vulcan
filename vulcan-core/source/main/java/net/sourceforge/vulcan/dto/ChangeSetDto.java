@@ -23,9 +23,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
-import net.sourceforge.vulcan.metadata.SvnRevision;
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public class ChangeSetDto extends BaseDto {
 	private String revisionLabel;
 	private String author;

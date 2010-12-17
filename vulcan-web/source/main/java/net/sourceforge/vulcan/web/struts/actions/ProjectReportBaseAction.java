@@ -43,7 +43,6 @@ import net.sourceforge.vulcan.core.ProjectDomBuilder;
 import net.sourceforge.vulcan.dto.PreferencesDto;
 import net.sourceforge.vulcan.dto.ProjectConfigDto;
 import net.sourceforge.vulcan.exception.NoSuchTransformFormatException;
-import net.sourceforge.vulcan.metadata.SvnRevision;
 import net.sourceforge.vulcan.web.Keys;
 
 import org.apache.commons.io.IOUtils;
@@ -60,7 +59,6 @@ import org.jdom.output.XMLOutputter;
 import org.springframework.context.MessageSource;
 import org.xml.sax.SAXException;
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public abstract class ProjectReportBaseAction extends Action {
 	private static final Pattern bugtraqRegex = Pattern.compile("%bugid%", Pattern.CASE_INSENSITIVE);
 	

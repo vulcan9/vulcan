@@ -18,12 +18,10 @@
  */
 package net.sourceforge.vulcan.web.struts;
 
-import net.sourceforge.vulcan.metadata.SvnRevision;
 import junit.framework.TestCase;
 import servletunit.HttpServletRequestSimulator;
 import servletunit.ServletContextSimulator;
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public class UserAgentRestRequestDetectorTest extends TestCase {
 	UserAgentRestRequestDetector detector = new UserAgentRestRequestDetector();
 	HttpServletRequestSimulator request = new HttpServletRequestSimulator(new ServletContextSimulator());

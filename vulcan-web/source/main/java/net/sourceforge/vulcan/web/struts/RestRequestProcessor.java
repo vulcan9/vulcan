@@ -25,7 +25,6 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import net.sourceforge.vulcan.metadata.SvnRevision;
 
 import org.apache.struts.action.Action;
 import org.apache.struts.action.ActionForm;
@@ -41,7 +40,6 @@ import org.apache.struts.config.ModuleConfig;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.WebApplicationContextUtils;
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public class RestRequestProcessor extends RequestProcessor {
 	private RestRequestDetector restRequestDetector;
 	

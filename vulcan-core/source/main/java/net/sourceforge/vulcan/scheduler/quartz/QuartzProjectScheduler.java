@@ -30,10 +30,8 @@ import org.quartz.SimpleTrigger;
 import org.quartz.Trigger;
 
 import net.sourceforge.vulcan.dto.SchedulerConfigDto;
-import net.sourceforge.vulcan.metadata.SvnRevision;
 import net.sourceforge.vulcan.scheduler.ProjectScheduler;
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public class QuartzProjectScheduler implements ProjectScheduler {
 	private SchedulerConfigDto config;
 	private Trigger trigger;

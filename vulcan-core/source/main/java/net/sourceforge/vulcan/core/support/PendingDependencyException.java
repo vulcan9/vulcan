@@ -19,9 +19,7 @@
 package net.sourceforge.vulcan.core.support;
 
 import net.sourceforge.vulcan.core.DependencyException;
-import net.sourceforge.vulcan.metadata.SvnRevision;
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 class PendingDependencyException extends DependencyException {
 	public String getKey() {
 		return null;

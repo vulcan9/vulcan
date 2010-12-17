@@ -19,9 +19,7 @@
 package net.sourceforge.vulcan.exception;
 
 import static org.apache.commons.lang.StringUtils.join;
-import net.sourceforge.vulcan.metadata.SvnRevision;
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public final class ProjectNeedsDependencyException extends Exception {
 	final String[] projectsToDelete;
 	final String[] dependantProjects;

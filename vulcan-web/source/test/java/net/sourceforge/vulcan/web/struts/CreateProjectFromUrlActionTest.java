@@ -30,13 +30,11 @@ import net.sourceforge.vulcan.exception.AuthenticationRequiredRepositoryExceptio
 import net.sourceforge.vulcan.exception.ConfigException;
 import net.sourceforge.vulcan.exception.DuplicateNameException;
 import net.sourceforge.vulcan.exception.StoreException;
-import net.sourceforge.vulcan.metadata.SvnRevision;
 import net.sourceforge.vulcan.web.struts.forms.ProjectImportForm;
 
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.struts.action.ActionMessages;
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public class CreateProjectFromUrlActionTest extends MockApplicationContextStrutsTestCase {
 	RepositoryAdaptor ra = createMock(RepositoryAdaptor.class);
 	ProjectImportStatusDto status = new ProjectImportStatusDto();

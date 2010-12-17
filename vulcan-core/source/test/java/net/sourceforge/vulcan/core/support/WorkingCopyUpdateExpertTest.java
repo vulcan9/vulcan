@@ -30,11 +30,9 @@ import net.sourceforge.vulcan.dto.ProjectConfigDto;
 import net.sourceforge.vulcan.dto.ProjectStatusDto;
 import net.sourceforge.vulcan.dto.ProjectConfigDto.UpdateStrategy;
 import net.sourceforge.vulcan.dto.ProjectStatusDto.UpdateType;
-import net.sourceforge.vulcan.metadata.SvnRevision;
 
 import org.apache.commons.io.FileUtils;
 
-@SvnRevision(id = "$Id$", url = "$HeadURL$")
 public class WorkingCopyUpdateExpertTest extends TestCase {
 	WorkingCopyUpdateExpert expert = new WorkingCopyUpdateExpert() {
 		@Override

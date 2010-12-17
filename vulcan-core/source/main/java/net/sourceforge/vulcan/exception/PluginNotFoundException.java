@@ -18,9 +18,7 @@
  */
 package net.sourceforge.vulcan.exception;
 
-import net.sourceforge.vulcan.metadata.SvnRevision;
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public class PluginNotFoundException extends Exception {
 	private String pluginId;
 

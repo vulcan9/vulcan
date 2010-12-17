@@ -28,7 +28,6 @@ import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import net.sourceforge.vulcan.metadata.SvnRevision;
 
 import org.apache.commons.lang.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -50,7 +49,6 @@ import org.springframework.web.filter.OncePerRequestFilter;
  * the "supressContentTypes" list, the Content-type will be overridden to use that value.
  * This allows special cases (such as "application/xml+rss") to override this filter.
  */
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public class ContentTypeFilter extends OncePerRequestFilter {
 	public static final String HEADER_USER_AGENT = "User-Agent";
 	

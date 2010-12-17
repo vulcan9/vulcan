@@ -23,9 +23,7 @@ import java.io.StringReader;
 
 import junit.framework.TestCase;
 import net.sourceforge.vulcan.integration.PluginVersionSpec;
-import net.sourceforge.vulcan.metadata.SvnRevision;
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public class PluginVersionDigesterTest extends TestCase {
 	public void testNull() throws Exception {
 		final Reader reader = null;

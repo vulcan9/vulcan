@@ -20,11 +20,9 @@ package net.sourceforge.vulcan.dto;
 
 import net.sourceforge.vulcan.dto.StateManagerConfigDto;
 import net.sourceforge.vulcan.dto.ProjectConfigDto;
-import net.sourceforge.vulcan.metadata.SvnRevision;
 
 import junit.framework.TestCase;
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public class StateManagerConfigDtoTest extends TestCase {
 	public void testCloneIsShallow() {
 		final StateManagerConfigDto config = new StateManagerConfigDto();

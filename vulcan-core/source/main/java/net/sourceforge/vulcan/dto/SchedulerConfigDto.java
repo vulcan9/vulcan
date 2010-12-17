@@ -18,9 +18,7 @@
  */
 package net.sourceforge.vulcan.dto;
 
-import net.sourceforge.vulcan.metadata.SvnRevision;
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public class SchedulerConfigDto extends NameDto {
 	private long interval;
 	private long timeout;

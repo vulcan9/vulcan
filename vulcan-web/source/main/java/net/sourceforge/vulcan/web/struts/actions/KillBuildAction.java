@@ -25,7 +25,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import net.sourceforge.vulcan.dto.ProjectConfigDto;
 import net.sourceforge.vulcan.event.AuditEvent;
-import net.sourceforge.vulcan.metadata.SvnRevision;
 import net.sourceforge.vulcan.scheduler.BuildDaemon;
 
 import org.apache.struts.action.ActionForm;
@@ -35,7 +34,6 @@ import org.apache.struts.action.ActionMessage;
 import org.apache.struts.action.ActionMessages;
 
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public final class KillBuildAction extends BaseAuditAction {
 	
 	@Override

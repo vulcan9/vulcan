@@ -20,10 +20,8 @@ package net.sourceforge.vulcan.core.support;
 
 import net.sourceforge.vulcan.core.DependencyException;
 import net.sourceforge.vulcan.dto.ProjectConfigDto;
-import net.sourceforge.vulcan.metadata.SvnRevision;
 
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 class DependencyFailureException extends DependencyException {
 	final ProjectConfigDto projectConfig;
 	final String dependencyName;

@@ -22,7 +22,6 @@ import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
 
-import net.sourceforge.vulcan.metadata.SvnRevision;
 
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.MessageSource;
@@ -32,7 +31,6 @@ import org.springframework.context.support.AbstractMessageSource;
 import org.springframework.context.support.ReloadableResourceBundleMessageSource;
 
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public class DelegatingResourceBundleMessageSource extends ReloadableResourceBundleMessageSource {
 	private Set<ApplicationContext> delegates = new HashSet<ApplicationContext>();
 	

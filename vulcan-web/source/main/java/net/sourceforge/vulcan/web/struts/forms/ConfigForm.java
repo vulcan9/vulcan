@@ -23,7 +23,6 @@ import javax.servlet.http.HttpServletRequest;
 import net.sourceforge.vulcan.StateManager;
 import net.sourceforge.vulcan.dto.NameDto;
 import net.sourceforge.vulcan.dto.NamedObject;
-import net.sourceforge.vulcan.metadata.SvnRevision;
 import net.sourceforge.vulcan.web.Keys;
 
 import org.apache.commons.lang.StringUtils;
@@ -33,7 +32,6 @@ import org.apache.struts.action.ActionServlet;
 import org.apache.struts.validator.ValidatorForm;
 
 
-@SvnRevision(id="$Id$", url="$HeadURL$")
 public abstract class ConfigForm extends ValidatorForm implements DispatchForm {
 	private final NameDto blank;
 	private NamedObject original;
