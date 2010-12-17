@@ -270,7 +270,12 @@ public class MercurialRepository implements RepositoryAdaptor {
 	}
 
 	private void addAvailableTags(Command command, List<RepositoryTagDto> results, List<String> namedRevisions) throws RepositoryException {
-		final InvocationResult result = tryInvoke(command);
+		String[] args = new String[0];
+		if (command == Command.branches) {
+			args = new String[] {"--active"};
+		}
+		
+		final InvocationResult result = tryInvoke(command, args);
 		
 		final Matcher matcher = tagWithRevisionPattern.matcher(result.getOutput());
 		

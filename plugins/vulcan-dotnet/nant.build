@@ -141,9 +141,9 @@
 		
 		<exec program="${nunit.bin.dir}/nunit-console.exe" workingdir="${assembly.target.dir}" verbose="true">
 			<arg value="UnitTests.dll" /> 
-			<arg value="/nologo"/>
-			<arg value="/noshadow"/>
-			<arg value="/xml"/>
+			<arg value="-nologo"/>
+			<arg value="-noshadow"/>
+			<arg value="-xml"/>
 			<arg value="${test.report.dir}/UnitTests.xml"/>
 		</exec>
 	</target>
