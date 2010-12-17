@@ -91,6 +91,13 @@ public class ProcessInvoker implements Invoker {
 		return err.toString();
 	}
 	
+	public String getOutputText() {
+		if (isOutputRedirected()) {
+			throw new IllegalStateException("output was redirected.");
+		}
+		
+		return out.toString();
+	}
 	public int getExitCode() {
 		return exitCode;
 	}
