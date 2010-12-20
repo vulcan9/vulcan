@@ -89,13 +89,13 @@ public class SparseCheckoutDto extends PluginConfigDto implements Comparable<Spa
 		super.validate();
 		
 		if (StringUtils.isBlank(directoryName)) {
-			throw new ValidationException("directoryName", "errors.required", null);
+			throw new ValidationException("directoryName", "errors.required");
 		}
 		
 		directoryName = directoryName.replace('\\', '/');
 		
 		if (directoryName.startsWith("/")) {
-			throw new ValidationException("directoryName", "svn.errors.directoryName", null);
+			throw new ValidationException("directoryName", "svn.errors.directoryName");
 		}
 	}
 }

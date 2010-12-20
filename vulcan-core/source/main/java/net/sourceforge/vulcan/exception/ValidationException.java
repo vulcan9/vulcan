@@ -26,7 +26,7 @@ public class ValidationException extends MessageFormatException implements Itera
 	
 	private ValidationException next;
 	
-	public ValidationException(String propertyName, String key, Object[] args) {
+	public ValidationException(String propertyName, String key, Object... args) {
 		super(key, args);
 		this.propertyName = propertyName;
 	}
