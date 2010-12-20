@@ -402,6 +402,25 @@ public class ProjectBuilderTest extends EasyMockTestCase {
 		assertSame(lastBuild, buildContext.getLastBuildInSameWorkDir());
 	}
 
+	public void testInitializeBuildStatusGetsLastBuildFromSameTagNullSafe() throws Exception {
+		lastBuild.setStatus(Status.SKIP);
+		lastBuild.setTagName(null);
+		
+		expect(projectMgr.getRepositoryAdaptor(project)).andReturn(repository);
+		expect(mgr.getLatestStatus(project.getName())).andReturn(lastBuild);
+		expect(repository.getTagOrBranch()).andReturn("trunk");
+		
+		replay();
+		
+		builder.initializeBuildStatus(buildContext);
+		
+		verify();
+		
+		assertSame(lastBuild, buildContext.getLastBuild());
+		assertSame(lastBuildFromSameTag, buildContext.getLastBuildFromSameTag());
+		assertSame(lastBuild, buildContext.getLastBuildInSameWorkDir());
+	}
+
 	public void testInitializeBuildStatusSetsTag() throws Exception {
 		project.setRepositoryTagName("other");
 		
