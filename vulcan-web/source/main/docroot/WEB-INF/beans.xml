@@ -12,7 +12,7 @@
 		<property name="locations">
 			<list>
 				<value>WEB-INF/application.properties</value>
-				<value>WEB-INF/version.properties</value>
+				<value>META-INF/maven/net.sourceforge.vulcan/vulcan-web/pom.properties</value>
 			</list>
 		</property>
 	</bean>
