@@ -39,6 +39,7 @@ import net.sourceforge.vulcan.dto.ProjectConfigDto;
 import net.sourceforge.vulcan.dto.ProjectStatusDto;
 import net.sourceforge.vulcan.dto.RevisionTokenDto;
 import net.sourceforge.vulcan.dto.ProjectConfigDto.UpdateStrategy;
+import net.sourceforge.vulcan.dto.ProjectStatusDto.Status;
 import net.sourceforge.vulcan.dto.ProjectStatusDto.UpdateType;
 
 public class ProjectRebuildExpertTest extends EasyMockTestCase {
@@ -267,6 +268,22 @@ public class ProjectRebuildExpertTest extends EasyMockTestCase {
 		verify();
 	}
 	
+	public void testRebuildsOnDifferentTagNullSafe() throws Exception {
+		project.setRepositoryTagName("default");
+		previousStatus.setStatus(Status.SKIP);
+		previousStatus.setTagName(null);
+		
+		final WorkingCopyNotUsingSameTagRule rule = expert.createWorkingCopyNotUsingSameTagRule();
+		
+		replay();
+		
+		assertTrue("rule.isSatisfiedBy", rule.isSatisfiedBy(project, previousStatus));
+		assertEquals("messages.build.reason.different.tag", expert.getMessageKey());
+		assertEquals(Arrays.asList("workdir", "default", null), Arrays.asList(expert.getMessageArgs()));
+		
+		verify();
+	}
+	
 	public void testGetsDefaultTagNameFromRepositoryAdaptor() throws Exception {
 		project.setRepositoryTagName(null);
 		previousStatus.setTagName("default");
@@ -305,6 +322,27 @@ public class ProjectRebuildExpertTest extends EasyMockTestCase {
 		ProjectStatusDto fromSameWorkDir = (ProjectStatusDto) previousStatus.copy();
 		
 		previousStatus.setWorkDir("other");
+		previousStatus.setTagName("default");
+		
+		fromSameWorkDir.setTagName("rc1");
+		
+		final WorkingCopyNotUsingSameTagRule rule = expert.createWorkingCopyNotUsingSameTagRule();
+		
+		expect(buildManager.getMostRecentBuildByWorkDir(project.getName(), project.getWorkDir())).andReturn(fromSameWorkDir);
+				
+		replay();
+		
+		assertTrue("rule.isSatisfiedBy", rule.isSatisfiedBy(project, previousStatus));
+		
+		verify();
+	}
+	
+	public void testGetsLastBuildFromSameWorkDirNullSafe() throws Exception {
+		project.setRepositoryTagName("default");
+		
+		ProjectStatusDto fromSameWorkDir = (ProjectStatusDto) previousStatus.copy();
+		
+		previousStatus.setWorkDir(null);
 		previousStatus.setTagName("default");
 		
 		fromSameWorkDir.setTagName("rc1");

@@ -191,10 +191,11 @@ public class ProjectBuilderImpl implements ProjectBuilder {
 
 	protected void buildInternal(BuildDaemonInfoDto info, BuildTarget currentTarget, BuildDetailCallback buildDetailCallback) {
 		initializeBuildDetailCallback(currentTarget, buildDetailCallback);
-		BuildContext buildContext = null;
+		
+		final BuildContext buildContext = new BuildContext(currentTarget);;
 		
 		try {
-			buildContext = initializeBuildStatus(currentTarget);
+			initializeBuildStatus(buildContext);
 			
 			validateWorkDir(buildContext);
 			
@@ -313,23 +314,21 @@ public class ProjectBuilderImpl implements ProjectBuilder {
 		this.diffsEnabled = diffsEnabled;
 	}
 	
-	protected BuildContext initializeBuildStatus(BuildTarget currentTarget) throws StoreException, ConfigException {
-		BuildContext context = new BuildContext(currentTarget);
+	protected void initializeBuildStatus(BuildContext context) throws StoreException, ConfigException {
+		context.setRepositoryAdatpor(projectManager.getRepositoryAdaptor(context.getConfig()));
 		
-		context.setRepositoryAdatpor(projectManager.getRepositoryAdaptor(currentTarget.getProjectConfig()));
-		
-		ProjectStatusDto lastBuild = buildManager.getLatestStatus(currentTarget.getProjectName());
+		ProjectStatusDto lastBuild = buildManager.getLatestStatus(context.getProjectName());
 		context.setLastBuild(lastBuild);
 		
 		ProjectStatusDto lastBuildInSameWorkDir = lastBuild;
-		if (lastBuild != null && !lastBuild.getWorkDir().equals(context.getConfig().getWorkDir())) {
+		if (lastBuild != null && (lastBuild.getWorkDir() == null || !lastBuild.getWorkDir().equals(context.getConfig().getWorkDir()))) {
 			lastBuildInSameWorkDir = buildOutcomeStore.loadMostRecentBuildOutcomeByWorkDir(context.getConfig().getName(), context.getConfig().getWorkDir());
 		}
 		
 		context.setLastBuildInSameWorkDir(lastBuildInSameWorkDir);
 		
-		if (StringUtils.isNotBlank(currentTarget.getProjectConfig().getRepositoryTagName())) {
-			context.getRepositoryAdaptor().setTagOrBranch(currentTarget.getProjectConfig().getRepositoryTagName());
+		if (StringUtils.isNotBlank(context.getConfig().getRepositoryTagName())) {
+			context.getRepositoryAdaptor().setTagOrBranch(context.getConfig().getRepositoryTagName());
 		}
 		
 		final String tagName = context.getRepositoryAdaptor().getTagOrBranch();
@@ -338,13 +337,13 @@ public class ProjectBuilderImpl implements ProjectBuilder {
 		context.getConfig().setRepositoryTagName(tagName);
 		
 		ProjectStatusDto lastBuildFromSameTag = lastBuild;
-		if (lastBuild != null && !lastBuild.getTagName().equals(tagName)) {
-			lastBuildFromSameTag = buildOutcomeStore.loadMostRecentBuildOutcomeByTagName(currentTarget.getProjectName(), tagName);
+		if (lastBuild != null && !tagName.equals(lastBuild.getTagName())) {
+			lastBuildFromSameTag = buildOutcomeStore.loadMostRecentBuildOutcomeByTagName(context.getProjectName(), tagName);
 		}
 		
 		context.setLastBuildFromSameTag(lastBuildFromSameTag);			
 		
-		ProjectStatusDto buildStatus = currentTarget.getStatus();
+		ProjectStatusDto buildStatus = context.getCurrentStatus();
 		
 		generateUniqueBuildId(buildStatus);
 		
@@ -357,13 +356,11 @@ public class ProjectBuilderImpl implements ProjectBuilder {
 		buildStatus.setStartDate(new Date());
 		
 		//TODO: law of Demeter
-		buildStatus.setRequestedBy(currentTarget.getProjectConfig().getRequestedBy());
-		buildStatus.setScheduledBuild(currentTarget.getProjectConfig().isScheduledBuild());
-		buildStatus.setWorkDir(currentTarget.getProjectConfig().getWorkDir());
+		buildStatus.setRequestedBy(context.getConfig().getRequestedBy());
+		buildStatus.setScheduledBuild(context.getConfig().isScheduledBuild());
+		buildStatus.setWorkDir(context.getConfig().getWorkDir());
 		buildStatus.setStatus(Status.BUILDING);
 		buildStatus.setTagName(tagName);
-		
-		return context;
 	}
 	
 	protected void validateWorkDir(BuildContext buildContext) throws ConfigException {
