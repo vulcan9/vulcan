@@ -59,6 +59,11 @@ public class MercurialProjectConfig extends RepositoryAdaptorConfigDto {
 		return MercurialPlugin.PLUGIN_NAME;
 	}
 
+	@Override
+	public String getHelpTopic() {
+		return "MercurialProjectConfig";
+	}
+	
 	public String getBranch() {
 		return branch;
 	}

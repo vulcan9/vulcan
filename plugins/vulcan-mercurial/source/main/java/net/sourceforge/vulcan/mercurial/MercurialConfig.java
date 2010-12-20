@@ -59,6 +59,11 @@ public class MercurialConfig extends PluginConfigDto {
 		return MercurialPlugin.PLUGIN_NAME;
 	}
 	
+	@Override
+	public String getHelpTopic() {
+		return "MercurialConfig";
+	}
+	
 	public String getExecutable() {
 		return executable;
 	}
