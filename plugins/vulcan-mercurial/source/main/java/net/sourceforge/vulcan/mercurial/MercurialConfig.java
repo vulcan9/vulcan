@@ -45,7 +45,7 @@ public class MercurialConfig extends PluginConfigDto {
 	@Override
 	public void validate() throws ValidationException {
 		if (StringUtils.isBlank(executable)) {
-			throw new ValidationException("executable", "errors.required.with.name", new Object[] {"executable"});
+			throw new ValidationException("executable", "errors.required.with.name", "executable");
 		}
 	}
 	

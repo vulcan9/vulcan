@@ -18,22 +18,24 @@
  */
 package net.sourceforge.vulcan.exception;
 
-
 public abstract class MessageFormatException extends Exception {
 	protected final String key;
 	protected final Object[] args;
 	
-	public MessageFormatException(String key, Object[] args) {
-		this(key, args, null);
+	public MessageFormatException(String key, Object... args) {
+		this(key, null, args);
 	}
-	public MessageFormatException(String key, Object[] args, Throwable cause) {
+	
+	public MessageFormatException(String key, Throwable cause, Object... args) {
 		super(cause);
 		this.key = key;
 		this.args = args;
 	}
+	
 	public final Object[] getArgs() {
 		return args;
 	}
+	
 	public final String getKey() {
 		return key;
 	}

@@ -148,7 +148,7 @@ public class JabberPluginConfig extends PluginConfigDto {
 				Pattern.compile(errorRegex);
 			}
 		} catch (PatternSyntaxException e) {
-			throw new ValidationException("errorRegex", "jabber.validation.regex", null);
+			throw new ValidationException("errorRegex", "jabber.validation.regex");
 		}
 		
 		try {
@@ -156,7 +156,7 @@ public class JabberPluginConfig extends PluginConfigDto {
 				Pattern.compile(warningRegex);
 			}
 		} catch (PatternSyntaxException e) {
-			throw new ValidationException("warningRegex", "jabber.validation.regex", null);
+			throw new ValidationException("warningRegex", "jabber.validation.regex");
 		}
 	}		
 

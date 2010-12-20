@@ -106,9 +106,9 @@ public class JabberTemplatesConfig extends PluginConfigDto {
 		} catch (IllegalArgumentException e) {
 			final String invalidParamName = "can't parse argument number ";
 			if (e.getMessage().startsWith(invalidParamName)) {
-				throw new ValidationException(propertyName, "jabber.validation.template.param.name", new String[] {e.getMessage().substring(invalidParamName.length())});	
+				throw new ValidationException(propertyName, "jabber.validation.template.param.name", e.getMessage().substring(invalidParamName.length()));	
 			}
-			throw new ValidationException(propertyName, "jabber.validation.template.format", new String[] {e.getMessage()});
+			throw new ValidationException(propertyName, "jabber.validation.template.format", e.getMessage());
 			
 		}
 	}

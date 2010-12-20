@@ -136,11 +136,11 @@ public class PluginConfigStub extends RepositoryAdaptorConfigDto {
 	@Override
 	public void validate() throws ValidationException {
 		validateCalled = true;
-		final ValidationException e = new ValidationException("value", "fake.error.key", null);
+		final ValidationException e = new ValidationException("value", "fake.error.key");
 		if ("bad".equals(value)) {
 			throw e;
 		} else if ("worse".equals(value)) {
-			e.append(new ValidationException(null, "other.fake.error.key", null));
+			e.append(new ValidationException(null, "other.fake.error.key"));
 			throw e;
 		}
 	}
