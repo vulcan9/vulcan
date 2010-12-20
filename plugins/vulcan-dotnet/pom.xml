@@ -7,7 +7,7 @@
 	<parent>
 		<groupId>net.sourceforge.vulcan.plugins</groupId>
 		<artifactId>plugins</artifactId>
-		<version>0.9-SNAPSHOT</version>
+		<version>${pom.version}</version>
 	</parent>
 	
 	<groupId>net.sourceforge.vulcan.plugins</groupId>
@@ -18,8 +18,8 @@
 
 	<properties>
 		<vulcan.plugin.id>net.sourceforge.vulcan.dotnet</vulcan.plugin.id>
-		<vulcan.version.numeric>0.9.0.0</vulcan.version.numeric>
 	</properties>
+	
 	<build>
 		<plugins>
 			<plugin>
@@ -47,7 +47,7 @@
 							<arguments>
 								<argument>-t:${nant.target.framework}</argument>
 								<argument>-D:nunit.bin.dir=${nunit.bin.dir}</argument>
-								<argument>-D:version=${vulcan.version.numeric}</argument>
+								<argument>-D:version=${pom.version}</argument>
 							</arguments>
 						</configuration>
 					</execution>

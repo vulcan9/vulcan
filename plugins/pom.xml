@@ -7,7 +7,7 @@
 	<parent>
 		<groupId>net.sourceforge.vulcan</groupId>
 		<artifactId>vulcan</artifactId>
-		<version>0.9-SNAPSHOT</version>
+		<version>${pom.version}</version>
 	</parent>
 	
 	<groupId>net.sourceforge.vulcan.plugins</groupId>
@@ -16,7 +16,6 @@
 	<packaging>pom</packaging>
 	
 	<properties>
-		<vulcan-maven-plugin.version>1.0-SNAPSHOT</vulcan-maven-plugin.version>
 		<vulcan.zips.target>${basedir}/../target/plugin-zips</vulcan.zips.target>
 	</properties>
 	
@@ -93,7 +92,7 @@
 						<dependency>
 							<groupId>net.sourceforge.vulcan</groupId>
 							<artifactId>vulcan-maven-plugin</artifactId>
-							<version>${vulcan-maven-plugin.version}</version>
+							<version>${pom.version}</version>
 						</dependency>
 					</dependencies> 
 				</plugin>
