@@ -565,6 +565,7 @@ public class MercurialRepositoryTest extends EasyMockTestCase {
 		final ExecuteException ee = new ExecuteException("oops", 2);
 		expect(invoker.invoke("incoming", workDir)).andThrow(ee);
 		expect(invoker.getErrorText()).andReturn("unrecognized option");
+		expect(invoker.getOutputText()).andReturn("");
 		expect(invoker.getExitCode()).andReturn(2);
 		
 		replay();

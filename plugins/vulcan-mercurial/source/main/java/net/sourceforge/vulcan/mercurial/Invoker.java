@@ -27,8 +27,8 @@ public interface Invoker {
 	
 	InvocationResult invoke(String command, File workDir, String... args) throws IOException;
 
-	public String getErrorText();
-
+	String getErrorText();
+	String getOutputText();
 	int getExitCode();
 }
 

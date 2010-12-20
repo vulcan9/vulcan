@@ -37,7 +37,8 @@ public class ProcessInvoker implements Invoker {
 	private String executable;
 	private Executor executor = new DefaultExecutor();
 	
-	private OutputStream out;
+	private OutputStream defaultOut = new ByteArrayOutputStream();
+	private OutputStream out = defaultOut;
 	private OutputStream err;
 	private int exitCode;
 	
@@ -46,9 +47,8 @@ public class ProcessInvoker implements Invoker {
 		
 		cmdLine.addArgument(command);
 		cmdLine.addArgument("--noninteractive");
-		cmdLine.addArguments(args);
+		cmdLine.addArguments(args, false);
 		
-		final OutputStream out = isOutputRedirected() ? this.out : new ByteArrayOutputStream();
 		err = new ByteArrayOutputStream();
 		
 		executor.setExitValues(new int[] {0, 1});
@@ -68,7 +68,7 @@ public class ProcessInvoker implements Invoker {
 	}
 
 	private boolean isOutputRedirected() {
-		return this.out != null;
+		return this.out != this.defaultOut;
 	}
 	
 	public void setOutputStream(OutputStream stream) {
@@ -91,6 +91,13 @@ public class ProcessInvoker implements Invoker {
 		return err.toString();
 	}
 	
+	public String getOutputText() {
+		if (isOutputRedirected()) {
+			throw new IllegalStateException("output was redirected.");
+		}
+		
+		return out.toString();
+	}
 	public int getExitCode() {
 		return exitCode;
 	}

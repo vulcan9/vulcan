@@ -330,7 +330,20 @@ public class MercurialRepository implements RepositoryAdaptor {
 			return invoker.invoke(command.name(), workDir, args);
 		} catch (IOException e) {
 			final String errorText = invoker.getErrorText();
-			LOG.error("Unexpected exception invoking hg: " + errorText, e);
+			
+			StringBuilder sb = new StringBuilder();
+			sb.append("Unexpected exception invoking hg: stderr: ");
+			sb.append(errorText);
+			if (output == null) {
+				final String stdout = invoker.getOutputText();
+				if (StringUtils.isNotBlank(stdout)) {
+					sb.append("\nstdout: ");
+					sb.append(stdout);
+				}
+			}
+			
+			LOG.error(sb.toString(), e);
+			
 			throw new RepositoryException("hg.errors.invocation", e, errorText, invoker.getExitCode());
 		}
 	}

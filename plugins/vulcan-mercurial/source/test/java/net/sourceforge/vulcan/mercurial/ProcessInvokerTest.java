@@ -95,8 +95,8 @@ public class ProcessInvokerTest extends EasyMockTestCase {
 		CommandLine commandLine = new CommandLine(executable);
 		commandLine.addArgument("help");
 		commandLine.addArgument("--noninteractive");
-		commandLine.addArgument("arg 1");
-		commandLine.addArgument("arg 2");
+		commandLine.addArgument("arg 1", false);
+		commandLine.addArgument("arg 2", false);
 		
 		executor.setExitValues(reflectionEq(new int[] {0, 1}));
 		executor.setWorkingDirectory(new File("."));
