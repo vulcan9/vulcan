@@ -114,7 +114,7 @@ class ProjectRebuildExpert {
 		public boolean isSatisfiedBy(ProjectConfigDto project, ProjectStatusDto previousStatus) throws ConfigException {
 			ProjectStatusDto mostRecentBuildByWorkDir = previousStatus;
 			
-			if (!previousStatus.getWorkDir().equals(project.getWorkDir())) {
+			if (!project.getWorkDir().equals(previousStatus.getWorkDir())) {
 				mostRecentBuildByWorkDir = buildManager.getMostRecentBuildByWorkDir(project.getName(), project.getWorkDir());
 			}
 			
