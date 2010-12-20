@@ -7,7 +7,7 @@
 	<parent>
 		<groupId>net.sourceforge.vulcan.plugins</groupId>
 		<artifactId>plugins</artifactId>
-		<version>0.9-SNAPSHOT</version>
+		<version>${pom.version}</version>
 	</parent>
 	
 	<groupId>net.sourceforge.vulcan.plugins</groupId>

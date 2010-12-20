@@ -1,13 +1,25 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	
 	<modelVersion>4.0.0</modelVersion>
+	
 	<groupId>net.sourceforge.vulcan</groupId>
 	<artifactId>vulcan-maven-plugin</artifactId>
-	<packaging>maven-plugin</packaging>
-	<version>1.0-SNAPSHOT</version>
 	<name>vulcan-maven-plugin</name>
+	<version>${pom.version}</version>
+	<packaging>maven-plugin</packaging>
 	<url>http://vulcan.sourceforge.net</url>
 	
+	<properties>
+		<project.build.sourceEncoding>utf-8</project.build.sourceEncoding>
+		<version.major>0</version.major>
+		<version.minor>9</version.minor>
+		<project.build.number>0</project.build.number>
+		<project.revision.numeric>0</project.revision.numeric>
+		
+		<pom.version>${version.major}.${version.minor}.${project.build.number}.${project.revision.numeric}</pom.version>
+	</properties>
+
 	<scm>
 		<connection>scm:svn:http://vulcan.googlecode.com/svn/trunk/vulcan-maven-plugin/</connection>
 		<developerConnection>scm:svn:https://vulcan.googlecode.com/svn/trunk/vulcan-maven-plugin/</developerConnection>
