@@ -32,7 +32,6 @@ import net.sourceforge.vulcan.RepositoryAdaptor;
 import net.sourceforge.vulcan.core.BuildDetailCallback;
 import net.sourceforge.vulcan.core.BuildManager;
 import net.sourceforge.vulcan.core.BuildPhase;
-import net.sourceforge.vulcan.core.BuildTarget;
 import net.sourceforge.vulcan.core.support.ProjectBuilderImpl.RunnablePhase;
 import net.sourceforge.vulcan.core.support.ProjectBuilderImpl.RunnablePhaseImpl;
 import net.sourceforge.vulcan.dto.BuildDaemonInfoDto;
@@ -88,14 +87,12 @@ public class ProjectBuilderTest extends EasyMockTestCase {
 	
 	ProjectBuilderImpl builder = new ProjectBuilderImpl() {
 		@Override
-		protected BuildContext initializeBuildStatus(BuildTarget buildTarget) throws StoreException, ConfigException {
-			BuildContext ctx = super.initializeBuildStatus(buildTarget);
+		protected void initializeBuildStatus(BuildContext ctx) throws StoreException, ConfigException {
+			super.initializeBuildStatus(ctx);
 			
 			if (suppressStartDate) {
 				ctx.getCurrentStatus().setStartDate(null);
 			}
-			
-			return ctx;
 		}
 	};
 	
@@ -329,7 +326,6 @@ public class ProjectBuilderTest extends EasyMockTestCase {
 		expect(projectMgr.getRepositoryAdaptor(project)).andReturn(repository);
 		expect(mgr.getLatestStatus(project.getName())).andReturn(lastBuild);
 		
-		
 		String tag = "trunk";
 		
 		if (project.getRepositoryTagName() != null) {
@@ -341,7 +337,7 @@ public class ProjectBuilderTest extends EasyMockTestCase {
 		
 		replay();
 		
-		BuildContext buildContext = builder.initializeBuildStatus(buildTarget);
+		builder.initializeBuildStatus(buildContext);
 		
 		verify();
 		
@@ -360,13 +356,32 @@ public class ProjectBuilderTest extends EasyMockTestCase {
 		
 		replay();
 		
-		BuildContext ctx = builder.initializeBuildStatus(buildTarget);
+		builder.initializeBuildStatus(buildContext);
 		
 		verify();
 		
-		assertSame(lastBuild, ctx.getLastBuild());
-		assertSame(lastBuild, ctx.getLastBuildFromSameTag());
-		assertSame("lastBuildInSameWorkDir", lastBuildInSameWorkDir, ctx.getLastBuildInSameWorkDir());
+		assertSame(lastBuild, buildContext.getLastBuild());
+		assertSame(lastBuild, buildContext.getLastBuildFromSameTag());
+		assertSame("lastBuildInSameWorkDir", lastBuildInSameWorkDir, buildContext.getLastBuildInSameWorkDir());
+	}
+	
+	public void testInitializeBuildStatusGetsLastBuildInSameWorkDirNullSafe() throws Exception {
+		lastBuild.setStatus(Status.SKIP);
+		lastBuild.setWorkDir(null);
+		
+		expect(projectMgr.getRepositoryAdaptor(project)).andReturn(repository);
+		expect(mgr.getLatestStatus(project.getName())).andReturn(lastBuild);
+		expect(repository.getTagOrBranch()).andReturn("trunk");
+		
+		replay();
+		
+		builder.initializeBuildStatus(buildContext);
+		
+		verify();
+		
+		assertSame(lastBuild, buildContext.getLastBuild());
+		assertSame(lastBuild, buildContext.getLastBuildFromSameTag());
+		assertSame("lastBuildInSameWorkDir", lastBuildInSameWorkDir, buildContext.getLastBuildInSameWorkDir());
 	}
 
 	public void testInitializeBuildStatusGetsLastBuildFromSameTag() throws Exception {
@@ -378,13 +393,13 @@ public class ProjectBuilderTest extends EasyMockTestCase {
 		
 		replay();
 		
-		BuildContext ctx = builder.initializeBuildStatus(buildTarget);
+		builder.initializeBuildStatus(buildContext);
 		
 		verify();
 		
-		assertSame(lastBuild, ctx.getLastBuild());
-		assertSame(lastBuildFromSameTag, ctx.getLastBuildFromSameTag());
-		assertSame(lastBuild, ctx.getLastBuildInSameWorkDir());
+		assertSame(lastBuild, buildContext.getLastBuild());
+		assertSame(lastBuildFromSameTag, buildContext.getLastBuildFromSameTag());
+		assertSame(lastBuild, buildContext.getLastBuildInSameWorkDir());
 	}
 
 	public void testInitializeBuildStatusSetsTag() throws Exception {
@@ -397,13 +412,13 @@ public class ProjectBuilderTest extends EasyMockTestCase {
 		
 		replay();
 		
-		BuildContext ctx = builder.initializeBuildStatus(buildTarget);
+		builder.initializeBuildStatus(buildContext);
 		
 		verify();
 		
-		assertSame(lastBuild, ctx.getLastBuild());
-		assertSame(lastBuildFromSameTag, ctx.getLastBuildFromSameTag());
-		assertSame(lastBuild, ctx.getLastBuildInSameWorkDir());
+		assertSame(lastBuild, buildContext.getLastBuild());
+		assertSame(lastBuildFromSameTag, buildContext.getLastBuildFromSameTag());
+		assertSame(lastBuild, buildContext.getLastBuildInSameWorkDir());
 	}
 
 
@@ -688,10 +703,12 @@ public class ProjectBuilderTest extends EasyMockTestCase {
 	}
 	
 	public void testTopLevelBuildSetsStatusNotChanged() throws Exception {
-		buildStatus.setStatus(Status.PASS);
-		buildContext.setLastBuild((ProjectStatusDto) buildStatus.copy());
-		
-		doTopLevelBuildTest(null);
+		doTopLevelBuildTest(new RunnableCallback() {
+			public void run(BuildContext buildContext) throws Exception {
+				buildStatus.setStatus(Status.PASS);
+				buildContext.setLastBuild((ProjectStatusDto) buildStatus.copy());
+			}
+		});
 		
 		assertEquals("statusChanged", false, buildStatus.isStatusChanged());
 	}
@@ -785,8 +802,8 @@ public class ProjectBuilderTest extends EasyMockTestCase {
 	private void doTopLevelBuildTest(final RunnableCallback runInsideExecuteBuildPhases) {
 		builder = new ProjectBuilderImpl() {
 			@Override
-			protected BuildContext initializeBuildStatus(BuildTarget currentTarget) throws StoreException, ConfigException {
-				return buildContext;
+			protected void initializeBuildStatus(BuildContext context) throws StoreException, ConfigException {
+				buildContext = context;
 			}
 			
 			@Override
