@@ -48,6 +48,7 @@
 								<argument>-t:${nant.target.framework}</argument>
 								<argument>-D:nunit.bin.dir=${nunit.bin.dir}</argument>
 								<argument>-D:version=${pom.version}</argument>
+								<argument>-D:skipTests=${maven.test.skip}</argument>
 							</arguments>
 						</configuration>
 					</execution>
