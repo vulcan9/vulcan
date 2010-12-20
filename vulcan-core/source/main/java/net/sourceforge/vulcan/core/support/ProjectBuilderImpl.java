@@ -337,7 +337,7 @@ public class ProjectBuilderImpl implements ProjectBuilder {
 		context.getConfig().setRepositoryTagName(tagName);
 		
 		ProjectStatusDto lastBuildFromSameTag = lastBuild;
-		if (lastBuild != null && !lastBuild.getTagName().equals(tagName)) {
+		if (lastBuild != null && !tagName.equals(lastBuild.getTagName())) {
 			lastBuildFromSameTag = buildOutcomeStore.loadMostRecentBuildOutcomeByTagName(context.getProjectName(), tagName);
 		}
 		
