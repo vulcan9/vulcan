@@ -54,4 +54,14 @@ public class FileSystemImpl implements FileSystem {
 	public void createDirectory(File path) throws IOException {
 		FileUtils.forceMkdir(path);
 	}
+	
+	public File[] listFiles(File directory) throws IOException {
+		final File[] files = directory.listFiles();
+		
+		if (files == null) {
+			throw new IOException("Failed to list files.");
+		}
+
+		return files;
+	}
 }

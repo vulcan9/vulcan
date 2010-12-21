@@ -1,6 +1,6 @@
 /*
  * Vulcan Build Manager
- * Copyright (C) 2005-2006 Chris Eldredge
+ * Copyright (C) 2005-2010 Chris Eldredge
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -42,6 +42,8 @@ import javax.servlet.http.HttpServletResponse;
 
 import net.sourceforge.vulcan.ProjectManager;
 import net.sourceforge.vulcan.core.BuildManager;
+import net.sourceforge.vulcan.core.support.FileSystem;
+import net.sourceforge.vulcan.core.support.FileSystemImpl;
 import net.sourceforge.vulcan.dto.ProjectConfigDto;
 import net.sourceforge.vulcan.dto.ProjectStatusDto;
 import net.sourceforge.vulcan.exception.NoSuchProjectException;
@@ -61,6 +63,8 @@ public class ProjectFileServlet extends HttpServlet {
 		String projectName;
 		int buildNumber;
 	}
+	
+	FileSystem fileSystem = new FileSystemImpl();
 	
 	ProjectManager projectManager;
 	BuildManager buildManager;
@@ -256,6 +260,24 @@ public class ProjectFileServlet extends HttpServlet {
 		
 		return new File(workDir, pathInfo);
 	}
+
+	protected File[] getDirectoryListing(final File file) throws IOException {
+		final File[] files = fileSystem.listFiles(file);
+		
+		Arrays.sort(files, new Comparator<File>() {
+			public int compare(File o1, File o2) {
+				if (o1.isDirectory() && !o2.isDirectory()) {
+					return -1;
+				} else if (!o1.isDirectory() && o2.isDirectory()) {
+					return 1;
+				}
+				
+				return o1.getName().compareTo(o2.getName());
+			}
+		});
+		
+		return files;
+	}
 	
 	private void redirectWithBuildNumber(HttpServletResponse response, final PathInfo projPathInfo, final String requestURI) throws IOException {
 		final ProjectStatusDto latestStatus = buildManager.getLatestStatus(projPathInfo.projectName);
@@ -274,28 +296,6 @@ public class ProjectFileServlet extends HttpServlet {
 		}
 		
 		response.sendRedirect(sb.toString());
-	}
-
-	private File[] getDirectoryListing(final File file) throws IOException {
-		final File[] files = file.listFiles();
-		
-		if (files == null) {
-			throw new IOException();
-		}
-		
-		Arrays.sort(files, new Comparator<File>() {
-			public int compare(File o1, File o2) {
-				if (o1.isDirectory() && !o2.isDirectory()) {
-					return -1;
-				} else if (!o1.isDirectory() && o2.isDirectory()) {
-					return 1;
-				}
-				
-				return o1.getName().compareTo(o2.getName());
-			}
-		});
-		
-		return files;
 	}
 
 	private String getFallbackParentPath(HttpServletRequest request, String workDir) {
