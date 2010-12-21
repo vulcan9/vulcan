@@ -377,6 +377,20 @@ public class MercurialRepositoryTest extends EasyMockTestCase {
 		assertNotNull("return value", changeLog);
 		assertNotNull("change sets", changeLog.getChangeSets());
 	}
+	
+	public void testGetChangeLogEmptyFormatsRevision() throws Exception {
+		invoker.invoke("log", workDir, "--style", "xml", "--verbose", "-r", "1123457:1123458");
+		returnSuccessWithOutput("<log/>");
+		
+		replay();
+		
+		final ChangeLogDto changeLog = repo.getChangeLog(new RevisionTokenDto(1123456L, "1123456:9bd7475fd513"), new RevisionTokenDto(1123458L, "1123458:9bd7475fd513"), null);
+		
+		verify();
+		
+		assertNotNull("return value", changeLog);
+		assertNotNull("change sets", changeLog.getChangeSets());
+	}
 
 	boolean throwOnClose;
 	boolean closedFlag;
