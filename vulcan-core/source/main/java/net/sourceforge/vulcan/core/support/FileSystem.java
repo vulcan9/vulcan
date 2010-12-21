@@ -40,4 +40,6 @@ public interface FileSystem {
 	void createDirectory(File directory) throws IOException;
 
 	boolean directoryExists(File directory);
+
+	File[] listFiles(File directory) throws IOException;
 }

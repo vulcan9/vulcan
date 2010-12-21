@@ -7,7 +7,7 @@
 	<groupId>net.sourceforge.vulcan</groupId>
 	<artifactId>vulcan</artifactId>
 	<name>vulcan</name>	
-	<version>0.9-SNAPSHOT</version>
+	<version>${pom.version}</version>
 	<packaging>pom</packaging>
 
 	<prerequisites>
@@ -23,6 +23,12 @@
 
 	<properties>
 		<project.build.sourceEncoding>utf-8</project.build.sourceEncoding>
+		<version.major>0</version.major>
+		<version.minor>9</version.minor>
+		<project.build.number>0</project.build.number>
+		<project.revision.numeric>0</project.revision.numeric>
+		
+		<pom.version>${version.major}.${version.minor}.${project.build.number}.${project.revision.numeric}</pom.version>
 	</properties>
 	
 	<modules>
@@ -31,9 +37,6 @@
 		
 		<!-- Core components -->
 		<module>vulcan-core</module>
-		
-		<!-- The Maven-2 plugin used to build Vulcan plugins -->
-		<module>vulcan-maven-plugin</module>
 		
 		<!-- Bundled Vulcan plugins -->
 		<module>plugins</module>
@@ -229,17 +232,17 @@
 			<dependency>
 				<groupId>net.sourceforge.vulcan</groupId>
 				<artifactId>vulcan-core</artifactId>
-				<version>0.9-SNAPSHOT</version>
+				<version>${pom.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>net.sourceforge.vulcan</groupId>
 				<artifactId>vulcan-test-utils</artifactId>
-				<version>0.9-SNAPSHOT</version>
+				<version>${pom.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>net.sourceforge.vulcan.plugins</groupId>
 				<artifactId>vulcan-ant</artifactId>
-				<version>0.9-SNAPSHOT</version>
+				<version>${pom.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.springframework</groupId>

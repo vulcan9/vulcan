@@ -8,7 +8,7 @@
 	<parent>
 		<groupId>net.sourceforge.vulcan</groupId>
 		<artifactId>vulcan</artifactId>
-		<version>0.9-SNAPSHOT</version>
+		<version>${pom.version}</version>
 	</parent>
 
 	<groupId>net.sourceforge.vulcan</groupId>
@@ -104,9 +104,9 @@
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
-			<groupId>hsqldb</groupId>
+			<groupId>org.hsqldb</groupId>
 			<artifactId>hsqldb</artifactId>
-			<version>1.8.0.7</version>
+			<version>1.8.0.10</version>
 			<scope>compile</scope>
 		</dependency>
 		<dependency>

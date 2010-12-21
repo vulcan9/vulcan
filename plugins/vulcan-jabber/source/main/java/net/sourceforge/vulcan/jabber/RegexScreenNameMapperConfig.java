@@ -60,7 +60,7 @@ public class RegexScreenNameMapperConfig extends PluginConfigDto {
 		try {
 			Pattern.compile(regex);
 		} catch (PatternSyntaxException e) {
-			throw new ValidationException("regex", "jabber.validation.regex", null);
+			throw new ValidationException("regex", "jabber.validation.regex");
 		}
 	}
 	

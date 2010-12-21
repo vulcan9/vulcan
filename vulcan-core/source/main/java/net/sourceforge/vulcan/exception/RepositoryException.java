@@ -21,7 +21,7 @@ package net.sourceforge.vulcan.exception;
 
 public class RepositoryException extends ConfigException {
 	public RepositoryException(Throwable cause) {
-		this("messages.repository.error", cause);
+		this("messages.repository.error", cause, cause != null ? cause.getMessage() : "");
 	}
 	public RepositoryException(String key, Throwable cause) {
 		super(key, cause);
