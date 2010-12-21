@@ -74,31 +74,25 @@
 
 				<plugin>
 					<artifactId>maven-assembly-plugin</artifactId>
+					<version>2.2</version>
 					<configuration>
 						<finalName>${vulcan.plugin.id}</finalName>
 						<outputDirectory>${vulcan.zips.target}</outputDirectory>
 						<appendAssemblyId>false</appendAssemblyId>
 						<attach>false</attach>
-						<descriptorRefs>
-							<param>vulcan-plugin</param>
-						</descriptorRefs>
+						<descriptors>
+							<value>${basedir}/../plugin-assembly-descriptor.xml</value>
+						</descriptors>
 					</configuration>
 					<executions>
 						<execution>
 							<id>build-vulcan-plugin-zip</id>
 							<phase>package</phase>
 							<goals>
-								<goal>attached</goal>
+								<goal>single</goal>
 							</goals>
 						</execution>
 					</executions>
-					<dependencies>
-						<dependency>
-							<groupId>net.sourceforge.vulcan</groupId>
-							<artifactId>vulcan-maven-plugin</artifactId>
-							<version>${pom.version}</version>
-						</dependency>
-					</dependencies> 
 				</plugin>
 			</plugins>		
 		</pluginManagement>
