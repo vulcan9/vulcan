@@ -38,9 +38,6 @@
 		<!-- Core components -->
 		<module>vulcan-core</module>
 		
-		<!-- The Maven-2 plugin used to build Vulcan plugins -->
-		<module>vulcan-maven-plugin</module>
-		
 		<!-- Bundled Vulcan plugins -->
 		<module>plugins</module>
 		
