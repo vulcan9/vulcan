@@ -1,6 +1,6 @@
 /*
  * Vulcan Build Manager
- * Copyright (C) 2005-2006 Chris Eldredge
+ * Copyright (C) 2005-2010 Chris Eldredge
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,6 +27,7 @@ import java.util.Date;
 import javax.servlet.ServletException;
 
 import net.sourceforge.vulcan.TestUtils;
+import net.sourceforge.vulcan.core.support.FileSystem;
 import net.sourceforge.vulcan.dto.ProjectConfigDto;
 import net.sourceforge.vulcan.dto.ProjectStatusDto;
 import net.sourceforge.vulcan.exception.NoSuchProjectException;
@@ -106,6 +107,8 @@ public class ProjectFileServletTest extends ServletTestCase {
 		latestStatus.setBuildNumber(3351);
 		
 		servlet.setCacheEnabled(true);
+		
+		servlet.fileSystem = createStrictMock(FileSystem.class);
 	}
 	
 	public void testInit() throws Exception {
@@ -524,6 +527,8 @@ public class ProjectFileServletTest extends ServletTestCase {
 		expect(mgr.getProjectConfig("myProject")).andReturn(projectConfig);
 		expect(buildManager.getStatusByBuildNumber("myProject", 22)).andReturn(latestStatus);
 		
+		expect(servlet.fileSystem.listFiles(TestUtils.resolveRelativeFile("source/test/servlet/subdir").getAbsoluteFile())).andReturn(new File[] {new File(".svn"), new File("file")});
+		
 		replay();
 		
 		servlet.doGet(request, response);
@@ -535,7 +540,7 @@ public class ProjectFileServletTest extends ServletTestCase {
 		assertNotNull(files);
 
 		assertEquals(2, files.length);
-		assertEquals("svn", files[0].getName().substring(1));
+		assertEquals(".svn", files[0].getName());
 		assertEquals("file", files[1].getName());
 		
 		assertEquals("/WEB-INF/jsp/fileList.jsp", requestedPath);
