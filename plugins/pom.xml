@@ -7,7 +7,7 @@
 	<parent>
 		<groupId>net.sourceforge.vulcan</groupId>
 		<artifactId>vulcan</artifactId>
-		<version>0.9-SNAPSHOT</version>
+		<version>${pom.version}</version>
 	</parent>
 	
 	<groupId>net.sourceforge.vulcan.plugins</groupId>
@@ -16,7 +16,6 @@
 	<packaging>pom</packaging>
 	
 	<properties>
-		<vulcan-maven-plugin.version>1.0-SNAPSHOT</vulcan-maven-plugin.version>
 		<vulcan.zips.target>${basedir}/../target/plugin-zips</vulcan.zips.target>
 	</properties>
 	
@@ -53,49 +52,47 @@
 				</plugin>
 				
 				<plugin>
-					<groupId>net.sourceforge.vulcan</groupId>
-					<artifactId>vulcan-maven-plugin</artifactId>
-					<configuration>
-						<versionLabel>${project.version}.${project.build.number}.${project.revision.numeric}</versionLabel>
-						<vulcanPluginId>${vulcan.plugin.id}</vulcanPluginId>
-					</configuration>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-antrun-plugin</artifactId>
+					<version>1.3</version>
 					<executions>
 						<execution>
 							<goals>
-								<goal>get-subversion-revision</goal>
-								<goal>generate-plugin-version</goal>
+								<goal>run</goal>
 							</goals>
+							<phase>generate-sources</phase>
+							<configuration>
+								<tasks>
+									<mkdir dir="${project.build.directory}"/>
+									<echo file="${project.build.directory}/plugin-version.xml" message="&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf8&quot;?&gt;${line.separator}" />
+									<echo file="${project.build.directory}/plugin-version.xml" append="true" message="&lt;vulcan-version-descriptor pluginRevision=&quot;${project.revision.numeric}&quot; version=&quot;${pom.version}&quot;/&gt;${line.separator}" />
+								</tasks>
+							</configuration>
 						</execution>
 					</executions>
 				</plugin>
 
 				<plugin>
 					<artifactId>maven-assembly-plugin</artifactId>
+					<version>2.2</version>
 					<configuration>
 						<finalName>${vulcan.plugin.id}</finalName>
 						<outputDirectory>${vulcan.zips.target}</outputDirectory>
 						<appendAssemblyId>false</appendAssemblyId>
 						<attach>false</attach>
-						<descriptorRefs>
-							<param>vulcan-plugin</param>
-						</descriptorRefs>
+						<descriptors>
+							<value>${basedir}/../plugin-assembly-descriptor.xml</value>
+						</descriptors>
 					</configuration>
 					<executions>
 						<execution>
 							<id>build-vulcan-plugin-zip</id>
 							<phase>package</phase>
 							<goals>
-								<goal>attached</goal>
+								<goal>single</goal>
 							</goals>
 						</execution>
 					</executions>
-					<dependencies>
-						<dependency>
-							<groupId>net.sourceforge.vulcan</groupId>
-							<artifactId>vulcan-maven-plugin</artifactId>
-							<version>${vulcan-maven-plugin.version}</version>
-						</dependency>
-					</dependencies> 
 				</plugin>
 			</plugins>		
 		</pluginManagement>

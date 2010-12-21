@@ -137,15 +137,21 @@
 	</target>
 
 	<target name="unit-test">
-		<mkdir dir="${test.report.dir}"/>
+		<if test="${skipTests=='true'}">
+			<echo message="Tests are skipped."/>
+		</if>
 		
-		<exec program="${nunit.bin.dir}/nunit-console.exe" workingdir="${assembly.target.dir}" verbose="true">
-			<arg value="UnitTests.dll" /> 
-			<arg value="-nologo"/>
-			<arg value="-noshadow"/>
-			<arg value="-xml"/>
-			<arg value="${test.report.dir}/UnitTests.xml"/>
-		</exec>
+		<if test="${skipTests!='true'}">
+			<mkdir dir="${test.report.dir}"/>
+			
+			<exec program="${nunit.bin.dir}/nunit-console-x86.exe" workingdir="${assembly.target.dir}" verbose="true">
+				<arg value="UnitTests.dll" /> 
+				<arg value="-nologo"/>
+				<arg value="-noshadow"/>
+				<arg value="-xml"/>
+				<arg value="${test.report.dir}/UnitTests.xml"/>
+			</exec>
+		</if>
 	</target>
 	
 	<target name="copy-dist">

@@ -18,13 +18,13 @@
  */
 package net.sourceforge.vulcan.exception;
 
-
 public class ConfigException extends MessageFormatException {
 	public ConfigException(String key, Object... args) {
 		super(key, args);
 	}
+	
 	public ConfigException(String key, Throwable cause, Object... args) {
-		super(key, args, cause);
+		super(key, cause, args);
 	}
 }
 

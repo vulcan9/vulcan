@@ -1,0 +1,11 @@
+[patterns]
+**.java = LF
+**.xml = LF
+**.xsl = LF
+**.sql = LF
+**.properties = LF
+**.css = LF
+**.js = LF
+**.jsp = LF
+**.tld = LF
+**.tag = LF

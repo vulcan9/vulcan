@@ -80,6 +80,16 @@ public class XmppClient implements JabberClient, MessageListener {
 		}			
 	}
 	
+	public void disconnect() {
+		synchronized (lock) {
+			if (connection != null) {
+				connection.disconnect();
+				connection = null;
+				connectionString = null;
+			}
+		}
+	}
+	
 	public void sendMessage(String recipient, String message) {
 		if (StringUtils.isBlank(message)) {
 			return;
