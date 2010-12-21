@@ -2,7 +2,7 @@
 <!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" 
 	"http://www.springframework.org/dtd/spring-beans.dtd">
 <beans>
-	<bean name="xmppClient" class="net.sourceforge.vulcan.jabber.XmppClient">
+	<bean name="xmppClient" class="net.sourceforge.vulcan.jabber.XmppClient" destroy-method="disconnect">
 		<property name="eventHandler">
 			<ref parent="eventHandler"/>
 		</property>
