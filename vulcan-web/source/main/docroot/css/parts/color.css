@@ -1,0 +1,107 @@
+/* Colors: */
+caption, .caption {
+	color: #E56630;
+}
+
+div#top-nav {
+	border-bottom: 4px solid #9DAC39;
+}
+
+#site-info {
+	border-top: 4px solid #9DAC39;
+}
+
+table {
+	border-spacing: 1px;
+	background-color: #E7E7E7;
+}
+
+th, th a:link, th a:visited {
+	background-color: #E7E7E7;
+	color: #666;
+}
+
+tbody > th {
+	background-color: white;
+}
+
+td {
+	background-color: white;
+}
+
+.build-errors th, .build-warnings th, .test-failures th {
+	background-color: #FFF3D3;
+}
+
+div.error, div.warning, div.message,
+div.build-errors, div.build-errors caption,
+div.build-warnings, div.build-warnings caption,
+div.test-failures, div.test-failures caption {
+	border: 4px solid #FFD363 !important;
+	background-color: #FFD363;
+}
+
+html, body {
+	background-color: white;
+}
+
+.build-stats {
+	color: gray;
+}
+
+.success, .PASS {
+	color: #43F143;
+}
+
+div.progress-bar {
+	border: 1px solid #E7E7E7;
+}
+
+div.progress-bar-success {
+	background-color: #43F143;
+}
+
+.failure, .FAIL {
+	color: red;
+}
+
+div.progress-bar-failure {
+	background-color: red;
+}
+
+.SKIP {
+	color: #C0C000;
+}
+
+.ERROR {
+	color: #FFA500;
+}
+
+a:link, a:visited {
+	color: #0000CE;
+}
+
+a:active {
+	color: red;
+}
+
+input[disabled] + label, label + input[disabled] {
+	color: gray;
+}
+
+input[type=text].new-label {
+	width: 12ex;
+	margin-left: 1ex;
+}
+
+.new-test-failure {
+	color: red;
+}
+
+.test-namespace, .test-failure-details {
+	color: gray;
+}
+
+.idle, .time-remaining {
+	color: #666;
+}

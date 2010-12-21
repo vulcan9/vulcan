@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+	<modelVersion>4.0.0</modelVersion>
+	
+	<version>1.0</version>
+	<groupId>net.sourceforge.vulcan.import-test</groupId>
+	<artifactId>parent</artifactId>
+	<name>parent</name>
+	<packaging>pom</packaging>
+	
+	<scm>
+		<connection>scm:cvs:pserver:anonymous@example.com:/cvsroot/import-test/parent</connection>
+	</scm>
+	
+	<modules>
+		<module>../module-1</module>
+	</modules>
+</project>

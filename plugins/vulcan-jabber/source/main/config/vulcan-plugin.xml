@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" 
+	"http://www.springframework.org/dtd/spring-beans.dtd">
+<beans>
+	<bean name="xmppClient" class="net.sourceforge.vulcan.jabber.XmppClient">
+		<property name="eventHandler">
+			<ref parent="eventHandler"/>
+		</property>
+	</bean>
+	
+	<bean name="plugin" class="net.sourceforge.vulcan.jabber.JabberPlugin">
+		<property name="client" ref="xmppClient"/>
+		<property name="responder" ref="responder"/>
+		<property name="messageSource" ref="messageSource"/>
+	</bean>
+	
+	<bean name="responder" class="net.sourceforge.vulcan.jabber.JabberResponder" init-method="init">
+		<property name="client" ref="xmppClient"/>
+		<property name="buildManager" ref="buildManager"/>	<!-- reference from parent context. -->
+		<property name="idleThreshold" value="30000"/>
+	</bean>
+	
+	<bean id="messageSource" class="org.springframework.context.support.ReloadableResourceBundleMessageSource">
+		<property name="basenames">
+			<list>
+				<value>i18n/jabber-messages</value>
+			</list>
+		</property>
+		<property name="cacheSeconds" value="${i18n.cache.seconds}"/>
+	</bean>
+</beans>

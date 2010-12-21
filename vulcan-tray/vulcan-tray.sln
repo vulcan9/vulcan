@@ -1,0 +1,34 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 9.00
+# Visual Studio 2005
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VulcanTray", "source\main\csharp\VulcanTray.csproj", "{BF486568-2AC3-49C8-9390-9EE14C8E4B72}"
+	ProjectSection(WebsiteProperties) = preProject
+		Debug.AspNetCompiler.Debug = "True"
+		Release.AspNetCompiler.Debug = "False"
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnitTest", "source\test\csharp\UnitTest.csproj", "{9189099D-F632-43A4-8303-6AC084E27259}"
+	ProjectSection(WebsiteProperties) = preProject
+		Debug.AspNetCompiler.Debug = "True"
+		Release.AspNetCompiler.Debug = "False"
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{BF486568-2AC3-49C8-9390-9EE14C8E4B72}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BF486568-2AC3-49C8-9390-9EE14C8E4B72}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BF486568-2AC3-49C8-9390-9EE14C8E4B72}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BF486568-2AC3-49C8-9390-9EE14C8E4B72}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9189099D-F632-43A4-8303-6AC084E27259}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9189099D-F632-43A4-8303-6AC084E27259}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9189099D-F632-43A4-8303-6AC084E27259}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9189099D-F632-43A4-8303-6AC084E27259}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

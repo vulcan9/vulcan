@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" 
+	"http://www.springframework.org/dtd/spring-beans.dtd">
+<beans>
+	<bean name="plugin" class="net.sourceforge.vulcan.metrics.XmlMetricsPlugin"
+			init-method="init">
+		<property name="buildOutcomeCache">
+			<ref parent="buildOutcomeCache"/>
+		</property>
+		<property name="eventHandler">
+			<ref parent="eventHandler"/>
+		</property>
+		<property name="fileScanner">
+			<ref bean="fileScanner"/>
+		</property>
+		<property name="transformSourcePath" value="xsl/*.xsl"/>
+		<property name="transformerFactory">
+			<bean class="javax.xml.transform.TransformerFactory" factory-method="newInstance"/>
+		</property>
+	</bean>
+	
+	<bean id="fileScanner" class="net.sourceforge.vulcan.metrics.scanner.plexus.PlexusFileScanner"/>
+	
+	<bean id="messageSource" class="org.springframework.context.support.ReloadableResourceBundleMessageSource">
+		<property name="basenames">
+			<list>
+				<value>i18n/metrics-messages</value>
+			</list>
+		</property>
+		<property name="cacheSeconds" value="${i18n.cache.seconds}"/>
+	</bean>
+</beans>

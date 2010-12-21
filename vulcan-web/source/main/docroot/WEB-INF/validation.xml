@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE form-validation PUBLIC
+          "-//Apache Software Foundation//DTD Commons Validator Rules Configuration 1.1.3//EN"
+          "http://jakarta.apache.org/commons/dtds/validator_1_1_3.dtd">
+<!-- 
+	$Id$
+	$HeadURL$
+-->
+<form-validation>
+    <formset>
+		<form name="projectConfigForm">
+			<field property="config.name" depends="required"/>
+			<field property="config.workDir" depends="validwhen">
+				<var>
+					<var-name>test</var-name>
+					<var-value>((*this* != null) or ((action != "update") and (action != "create")))</var-value>
+				</var>
+			</field>
+		</form>
+		<form name="labelForm">
+			<field property="name" depends="validwhen">
+				<var>
+					<var-name>test</var-name>
+					<var-value>(((action=="save") and (*this* != null)) or (action != "save"))</var-value>
+				</var>
+			</field>
+		</form>
+		<form name="schedulerConfigForm">
+			<field property="config.name" depends="required"/>
+			<field property="intervalScalar" depends="required,integer"/>
+			<field property="intervalMultiplier" depends="required,integer"/>
+			<field property="timeoutScalar" depends="integer"/>
+			<field property="timeoutMultiplier" depends="integer"/>
+		</form>
+		<form name="manualBuildForm">
+			<field property="targets" depends="required"/>
+		</form>
+		<form name="pluginConfigForm">
+			<field property="pluginFile" depends="validwhen">
+				<var>
+					<var-name>test</var-name>
+					<var-value>(((action=="upload") and (*this* != null)) or (action != "upload"))</var-value>
+				</var>
+			</field>
+			<field property="pluginId" depends="validwhen">
+				<var>
+					<var-name>test</var-name>
+					<var-value>((action=="upload") or (*this* != null))</var-value>
+				</var>
+			</field>
+		</form>
+		<form name="importConfigFileForm">
+			<field property="configFile" depends="required"/>
+		</form>
+		<form name="projectImportForm">
+			<field property="url" depends="required"/>
+			<field property="nameCollisionResolutionMode" depends="required"/>
+		</form>
+		<form name="projectStatusForm">
+			<field property="projectName" depends="required"/>
+			<field property="buildNumber" depends="integer"/>
+			<field property="index" depends="integer"/>
+		</form>
+		<form name="reportForm">
+			<field property="projectNames" depends="required"/>
+			<field property="maxResults" depends="integer"/>
+			<field property="minBuildNumber" depends="integer,validwhen">
+				<msg key="errors.required" name="validwhen"/>
+				<var>
+					<var-name>test</var-name>
+					<var-value>
+						((*this* != null) or (rangeMode == "false"))
+					</var-value>
+				</var>
+			</field>
+			<field property="maxBuildNumber" depends="integer,validwhen">
+				<msg key="errors.required" name="validwhen"/>
+				<var>
+					<var-name>test</var-name>
+					<var-value>
+						((*this* != null) or (rangeMode == "false"))
+					</var-value>
+				</var>
+			</field>
+			<field property="startDate" depends="date,validwhen">
+				<msg key="errors.required" name="validwhen"/>
+				<var>
+					<var-name>datePattern</var-name>
+					<var-value>MM/dd/yyyy</var-value>
+				</var>
+				<var>
+					<var-name>test</var-name>
+					<var-value>
+						((*this* != null) or (dateMode == "false"))
+					</var-value>
+				</var>
+			</field>
+			<field property="endDate" depends="date,validwhen">
+				<msg key="errors.required" name="validwhen"/>
+				<var>
+					<var-name>datePattern</var-name>
+					<var-value>MM/dd/yyyy</var-value>
+				</var>
+				<var>
+					<var-name>test</var-name>
+					<var-value>
+						((*this* != null) or (dateMode == "false"))
+					</var-value>
+				</var>
+			</field>
+		</form>
+	</formset>
+</form-validation>
