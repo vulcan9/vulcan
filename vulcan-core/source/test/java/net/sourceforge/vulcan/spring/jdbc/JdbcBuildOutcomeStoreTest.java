@@ -87,7 +87,7 @@ public class JdbcBuildOutcomeStoreTest extends TestCase {
 		store.setDataSource(dataSource);
 
 		final Map<String, String> queries = new HashMap<String, String>();
-		queries.put("select.average.build.time", "select avg(elapsed) from (select top 10 datediff('ms', start_date, completion_date) as elapsed " +
+		queries.put("select.average.build.time", "select avg(elapsed) / 1000000 from (select top 10 datediff('ms', start_date, completion_date) as elapsed " +
 				"from builds inner join project_names on builds.project_id = project_names.id " +
 				"where name=? and update_type=? and status='PASS' order by build_number desc)");
 		
@@ -99,8 +99,8 @@ public class JdbcBuildOutcomeStoreTest extends TestCase {
 		outcome.setBuildNumber(5);
 		outcome.setBuildReasonKey("x.y.z");
 		outcome.setMessageKey("r.x.t");
-		outcome.setStartDate(new Date(10004000l));
-		outcome.setCompletionDate(new Date(20004000l));
+		outcome.setStartDate(new Date(10004000L));
+		outcome.setCompletionDate(new Date(20004000L));
 		
 		final JdbcSchemaMigrator migrator = new JdbcSchemaMigrator();
 		migrator.setCreateTablesScript(JdbcSchemaMigratorTest.resolveSqlScript("create_tables.sql"));
@@ -736,11 +736,30 @@ public class JdbcBuildOutcomeStoreTest extends TestCase {
 	}
 	
 	public void testAverageBuildTime() throws Exception {
+		Long elapsed1 = outcome.getCompletionDate().getTime() - outcome.getStartDate().getTime();
 		storeOutcome();
 		
-		Long expected = outcome.getCompletionDate().getTime() - outcome.getStartDate().getTime();
+		outcome.setId(UUID.randomUUID());
+		outcome.setBuildNumber(outcome.getBuildNumber() + 1);
+		outcome.setStartDate(new Date(outcome.getCompletionDate().getTime() + 10000L));
+		outcome.setCompletionDate(new Date(outcome.getStartDate().getTime() + 500L));
+		Long elapsed2 = outcome.getCompletionDate().getTime() - outcome.getStartDate().getTime();
 		
-		assertEquals(expected, store.loadAverageBuildTimeMillis(outcome.getName(), outcome.getUpdateType()));
+		storeOutcome();
+		
+		Long expected = (elapsed1 + elapsed2) / 2;
+		
+		assertEquals(expected.toString(), store.loadAverageBuildTimeMillis(outcome.getName(), outcome.getUpdateType()).toString());
+	}
+	
+	public void testHsqldbDateDiffUsesNanosecondsNotMilliseconds() throws Exception {
+		// Seems the meaning of 'ms' changed to nanoseconds in hsqldb 2.0
+		
+		final Long expected = 1000000000L;	// one billion nanoseconds, not one thousand milliseconds
+		
+		final Long actual = new JdbcTemplate(dataSource).queryForLong("select datediff('ms', CURRENT_TIMESTAMP, dateadd('ss', 1, CURRENT_TIMESTAMP)) from db_version");
+		
+		assertEquals(expected, actual);
 	}
 	
 	private JdbcBuildOutcomeDto storeOutcome() throws StoreException {

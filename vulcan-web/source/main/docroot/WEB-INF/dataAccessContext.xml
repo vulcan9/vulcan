@@ -6,7 +6,7 @@
 	$HeadURL$
 -->
 <beans>
-	<import resource="sql/default.xml"/>
+	<import resource="sql/hsql.xml"/>
 	
 	<!-- hsqldb configuration -->
 	<bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
