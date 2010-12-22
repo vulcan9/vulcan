@@ -409,15 +409,15 @@ public class MercurialRepositoryTest extends EasyMockTestCase {
 
 	public void testGetChangeLogDiff() throws Exception {
 		invoker.setOutputStream(diffOut);
-		invoker.invoke("diff", workDir, "-r", "124:456");
+		invoker.invoke("diff", workDir, "-r", "1:2");
 		returnSuccess();
 		
-		invoker.invoke("log", workDir, "--style", "xml", "--verbose", "-r", "124:456");
+		invoker.invoke("log", workDir, "--style", "xml", "--verbose", "-r", "2:2");
 		returnSuccessWithOutput("<log/>");
 		
 		replay();
 		
-		repo.getChangeLog(new RevisionTokenDto(123L, "123:9bd7475fd513"), new RevisionTokenDto(456L, "456:9bd7475fd513"), diffOut);
+		repo.getChangeLog(new RevisionTokenDto(1L, "1:9bd7475fd513"), new RevisionTokenDto(2L, "2:9bd7475fd513"), diffOut);
 		
 		verify();
 		
@@ -426,7 +426,7 @@ public class MercurialRepositoryTest extends EasyMockTestCase {
 	
 	public void testGetChangeLogDiffRethrowsExceptionOnClose() throws Exception {
 		invoker.setOutputStream(diffOut);
-		invoker.invoke("diff", workDir, "-r", "124:456");
+		invoker.invoke("diff", workDir, "-r", "123:456");
 		returnSuccess();
 		
 		throwOnClose = true;
@@ -444,7 +444,7 @@ public class MercurialRepositoryTest extends EasyMockTestCase {
 	
 	public void testGetChangeLogDiffClosesStreamOnDiffError() throws Exception {
 		invoker.setOutputStream(diffOut);
-		invoker.invoke("diff", workDir, "-r", "124:456");
+		invoker.invoke("diff", workDir, "-r", "123:456");
 		expectLastCall().andThrow(new IOException());
 		expect(invoker.getErrorText()).andReturn("invalid command");
 		expect(invoker.getExitCode()).andReturn(-1);
