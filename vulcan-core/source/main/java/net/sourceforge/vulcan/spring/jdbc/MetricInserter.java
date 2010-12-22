@@ -52,7 +52,7 @@ class MetricInserter extends SqlUpdate {
 
 		for (MetricDto dto : metrics) {
 			params[1] = dto.getMessageKey();
-			params[2] = dto.getType().getId();
+			params[2] = Character.toString(dto.getType().getId());
 			params[3] = dto.getValue();
 			
 			count += update(params);
