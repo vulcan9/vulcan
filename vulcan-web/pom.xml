@@ -42,9 +42,16 @@
 								<mkdir dir="${snapshot.directory}"/>
 								<copy file="${project.build.directory}/${pom.artifactId}-${pom.version}.war"
 									todir="${snapshot.directory}"/>
-								<symlink link="${project.build.directory}/snapshots" resource="${snapshot.directory}"/>
+								<symlink overwrite="true" link="${project.build.directory}/snapshots" resource="${snapshot.directory}"/>
 							</tasks>
 						</configuration>
+						<dependencies>
+							<dependency>
+								<groupId>org.apache.ant</groupId>
+								<artifactId>ant-nodeps</artifactId>
+								<version>1.7.1</version>
+							</dependency>
+						</dependencies>
 					</plugin>
 				</plugins>
 			</build>			
