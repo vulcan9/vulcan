@@ -42,6 +42,7 @@
 								<mkdir dir="${snapshot.directory}"/>
 								<copy file="${project.build.directory}/${pom.artifactId}-${pom.version}.war"
 									todir="${snapshot.directory}"/>
+								<symlink link="${project.build.directory}/snapshots" resource="${snapshot.directory}"/>
 							</tasks>
 						</configuration>
 					</plugin>
