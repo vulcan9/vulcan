@@ -74,4 +74,11 @@
 		<from>^/projects/([^/]+)/(LATEST|NEWEST|RECENT|CURRENT)/(.*)$</from>
 		<to>/viewProjectStatus.do?projectName=$1&amp;transform=$3</to>
 	</rule>
+	
+	<rule>
+		<name>Google Code Commit Hook</name>
+		<from>^/googleCodeCommitHook</from>
+		<to>/buildmanagement/manualBuild.do</to>
+	</rule>
+	
 </urlrewrite>
