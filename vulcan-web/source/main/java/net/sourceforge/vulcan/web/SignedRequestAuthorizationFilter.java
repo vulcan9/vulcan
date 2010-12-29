@@ -21,11 +21,10 @@ package net.sourceforge.vulcan.web;
 import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
 
-import javax.crypto.KeyGenerator;
 import javax.crypto.Mac;
 import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -59,17 +58,14 @@ public class SignedRequestAuthorizationFilter extends OncePerRequestFilter {
 			return;
 		}
 		
-		KeyGenerator kg;
 		try {
-			kg = KeyGenerator.getInstance(algorithm);
-			kg.init(new SecureRandom(sharedSecret.getBytes()));
-
-			secretKey = kg.generateKey();
+			secretKey = new SecretKeySpec(sharedSecret.getBytes(), algorithm);
 			
 			// Initialize a mac instance to fail fast on NoSuchAlgorithmException or InvalidKeyException.
 			// This way any configuration errors will prevent the application from starting instead of causing
 			// problems later.
 			final Mac mac = Mac.getInstance(algorithm);
+			
 			mac.init(secretKey);
 		} catch (NoSuchAlgorithmException e) {
 			throw new ServletException(e);

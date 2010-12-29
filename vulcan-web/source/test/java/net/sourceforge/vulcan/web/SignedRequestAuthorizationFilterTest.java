@@ -20,10 +20,9 @@ package net.sourceforge.vulcan.web;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.security.SecureRandom;
 
-import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.ServletInputStream;
@@ -55,9 +54,7 @@ public class SignedRequestAuthorizationFilterTest extends EasyMockTestCase {
 	protected void setUp() throws Exception {
 		super.setUp();
 		
-		final KeyGenerator kg = KeyGenerator.getInstance("HmacMD5");
-		kg.init(new SecureRandom("my secret".getBytes()));
-		secretKey = kg.generateKey();
+		secretKey = new SecretKeySpec("my secret".getBytes(), "HmacMD5");
 		
 		checkOrder(false);
 		
@@ -166,7 +163,7 @@ public class SignedRequestAuthorizationFilterTest extends EasyMockTestCase {
 		
 		replay();
 		
-		assertEquals("2241de4559bce12d9dd4875f899cb3a5", filter.hashRequestBody(request, secretKey));
+		assertEquals("14f2baafbf2441af0d057b1aa1db012a", filter.hashRequestBody(request, secretKey));
 		
 		verify();
 		
