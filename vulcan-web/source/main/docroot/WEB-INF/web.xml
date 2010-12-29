@@ -76,6 +76,10 @@
 			<param-name>sharedSecret</param-name>
 			<param-value></param-value>
 		</init-param>
+		<init-param>
+			<param-name>principalParameterName</param-name>
+			<param-value>requestBy</param-value>
+		</init-param>
 	</filter>
 	
 	<filter-mapping>
