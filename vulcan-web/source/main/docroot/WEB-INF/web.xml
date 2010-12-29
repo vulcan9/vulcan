@@ -74,7 +74,7 @@
 		</init-param>
 		<init-param>
 			<param-name>sharedSecret</param-name>
-			<param-value>fred</param-value>
+			<param-value></param-value>
 		</init-param>
 	</filter>
 	
