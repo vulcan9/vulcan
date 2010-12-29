@@ -21,6 +21,7 @@ package net.sourceforge.vulcan.web;
 import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.security.Principal;
 
 import javax.crypto.Mac;
 import javax.crypto.SecretKey;
@@ -28,6 +29,7 @@ import javax.crypto.spec.SecretKeySpec;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletRequestWrapper;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.codec.binary.Hex;
@@ -43,6 +45,7 @@ public class SignedRequestAuthorizationFilter extends OncePerRequestFilter {
 	private String algorithm = "HmacMD5";
 	private String signatureHeaderName;
 	private String sharedSecret;
+	private String principalParameterName;
 	
 	private SecretKey secretKey;
 	
@@ -77,6 +80,12 @@ public class SignedRequestAuthorizationFilter extends OncePerRequestFilter {
 	@Override
 	protected void doFilterInternal(HttpServletRequest request,	HttpServletResponse response, FilterChain chain) throws ServletException, IOException {
 		if (validate(request, secretKey)) {
+			if (StringUtils.isNotBlank(principalParameterName) && request.getUserPrincipal() == null) {
+				final String requestBy = request.getParameter(principalParameterName);
+				if (StringUtils.isNotBlank(requestBy)) {
+					request = new RequestWrapperWithPrincipal(request, new SignedRequestPrincipal(requestBy));	
+				}
+			}
 			chain.doFilter(request, response);
 		} else {
 			response.sendError(HttpServletResponse.SC_FORBIDDEN);
@@ -118,8 +127,7 @@ public class SignedRequestAuthorizationFilter extends OncePerRequestFilter {
 			throw new ServletException(e);
 		}
 
-		String resultStr = new String(Hex.encodeHex(result));
-		return resultStr;
+		return new String(Hex.encodeHex(result));
 	}
 
 	public void setAlgorithm(String algorithm) {
@@ -134,7 +142,38 @@ public class SignedRequestAuthorizationFilter extends OncePerRequestFilter {
 		this.sharedSecret = sharedSecret;
 	}
 	
+	public void setPrincipalParameterName(String principalParameterName) {
+		this.principalParameterName = principalParameterName;
+	}
+	
 	protected SecretKey getSecretKey() {
 		return secretKey;
+	}
+	
+	static class RequestWrapperWithPrincipal extends HttpServletRequestWrapper {
+		private final Principal principal;
+
+		public RequestWrapperWithPrincipal(HttpServletRequest delegate, Principal principal) {
+			super(delegate);
+			this.principal = principal;
+		}
+		
+		@Override
+		public Principal getUserPrincipal() {
+			return principal;
+		}
+	}
+	
+	static class SignedRequestPrincipal implements Principal {
+		private final String name;
+		
+		public SignedRequestPrincipal(String name) {
+			this.name = name;
+		}
+
+		@Override
+		public String getName() {
+			return name;
+		}
 	}
 }
