@@ -305,6 +305,17 @@ public class JdbcBuildOutcomeStoreTest extends TestCase {
 		assertPersistence();
 	}
 
+	public void testRenameProjectBeforeSavingFirstBuild() throws Exception {
+		store.init();
+		initCalled = true;
+
+		store.projectNameChanged(outcome.getName(), "newName");
+		
+		outcome.setName("newName");
+		
+		assertPersistence();
+	}
+
 	/**
 	 * See http://code.google.com/p/vulcan/issues/detail?id=155
 	 */

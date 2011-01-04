@@ -286,6 +286,11 @@ public class JdbcBuildOutcomeStore implements BuildOutcomeStore, ProjectNameChan
 		oldName = oldName.toLowerCase();
 		newName = newName.toLowerCase();
 		
+		if (!projectNames.contains(oldName)) {
+			// Nothing to do, no build history for this project.
+			return;
+		}
+		
 		if (projectNames.contains(newName)) {
 			int i=2;
 			while (projectNames.contains(newName + "_" + i)) {
