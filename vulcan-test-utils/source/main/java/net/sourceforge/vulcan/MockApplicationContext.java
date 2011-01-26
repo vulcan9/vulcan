@@ -18,7 +18,6 @@
  */
 package net.sourceforge.vulcan;
 
-import org.springframework.beans.BeansException;
 import org.springframework.context.support.AbstractApplicationContext;
 import org.springframework.context.support.AbstractMessageSource;
 import org.springframework.context.support.StaticApplicationContext;
@@ -30,8 +29,5 @@ public class MockApplicationContext extends StaticApplicationContext {
 		
 		((AbstractMessageSource)super.getBean(AbstractApplicationContext.MESSAGE_SOURCE_BEAN_NAME))
 				.setUseCodeAsDefaultMessage(true);
-	}
-	public void registerSingleton(String beanName, Object bean) throws BeansException {
-		getBeanFactory().registerSingleton(beanName, bean);
 	}
 }

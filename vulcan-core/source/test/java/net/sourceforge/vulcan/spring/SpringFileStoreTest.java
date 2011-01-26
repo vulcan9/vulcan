@@ -89,7 +89,7 @@ public class SpringFileStoreTest extends EasyMockTestCase {
 		});
 		
 		pluginMgr = createStrictMock(PluginManager.class);
-		ctx.registerSingleton("pluginManager", pluginMgr);
+		ctx.getBeanFactory().registerSingleton("pluginManager", pluginMgr);
 
 		beanEncoder = createStrictMock(BeanEncoder.class);
 		
