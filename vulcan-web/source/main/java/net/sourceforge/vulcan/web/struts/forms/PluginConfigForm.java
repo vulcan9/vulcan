@@ -60,7 +60,7 @@ public final class PluginConfigForm extends ValidatorForm implements DispatchFor
 	
 	private static final class EnumConverter implements Converter {
 		@SuppressWarnings("unchecked")
-		public Object convert(Class target, Object arg) {
+		public Object convert(@SuppressWarnings("rawtypes") Class target, Object arg) {
 			return Enum.valueOf(target, (String)arg);
 		}
 	};
@@ -315,7 +315,7 @@ public final class PluginConfigForm extends ValidatorForm implements DispatchFor
 
 	@SuppressWarnings("unchecked")
 	private String getTypeAndPrepare(String propertyName, PropertyDescriptor pd) {
-		final Class c = pd.getPropertyType();
+		final Class<?> c = pd.getPropertyType();
 		final ConfigChoice choicesType = 
 			(ConfigChoice) pd.getValue(PluginConfigDto.ATTR_CHOICE_TYPE);
 		
@@ -342,7 +342,7 @@ public final class PluginConfigForm extends ValidatorForm implements DispatchFor
 		}
 		
 		if (c.isArray()) {
-			final Class componentType = c.getComponentType();
+			final Class<?> componentType = c.getComponentType();
 			if (isPrimitive(componentType)) {
 				return "primitive-array";
 			} else if (Enum.class.isAssignableFrom(componentType)) {

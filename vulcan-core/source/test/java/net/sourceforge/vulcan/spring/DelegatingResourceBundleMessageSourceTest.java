@@ -42,13 +42,14 @@ public class DelegatingResourceBundleMessageSourceTest extends TestCase {
 			}
 			return super.containsBean(name);
 		}
+		
 		@Override
 		public Object getBean(String name) throws BeansException {
 			return this.getBean(name, null);
 		}
+		
 		@Override
-		@SuppressWarnings("unchecked")
-		public Object getBean(String name, Class cls) throws BeansException {
+		public Object getBean(String name, @SuppressWarnings("rawtypes") Class cls) throws BeansException {
 			if (AbstractApplicationContext.MESSAGE_SOURCE_BEAN_NAME.equals(name)) {
 				return source;
 			}
@@ -175,13 +176,14 @@ public class DelegatingResourceBundleMessageSourceTest extends TestCase {
 				}
 				return super.containsBean(name);
 			}
+			
 			@Override
 			public Object getBean(String name) throws BeansException {
 				return this.getBean(name, null);
 			}
+			
 			@Override
-			@SuppressWarnings("unchecked")
-			public Object getBean(String name, Class cls) throws BeansException {
+			public Object getBean(String name, @SuppressWarnings("rawtypes") Class cls) throws BeansException {
 				if (AbstractApplicationContext.MESSAGE_SOURCE_BEAN_NAME.equals(name)) {
 					return src;
 				}

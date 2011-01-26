@@ -30,7 +30,6 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import net.sourceforge.vulcan.RepositoryAdaptor;
 import net.sourceforge.vulcan.StateManager;
@@ -406,7 +405,7 @@ public class SubversionRepositoryAdaptor extends SubversionSupport implements Re
 		tags.add(trunkTag);
 		
 		try {
-			final Collection<SVNDirEntry> entries = svnRepository.getDir(projectRoot, -1, null, (Collection) null);
+			final Collection<SVNDirEntry> entries = svnRepository.getDir(projectRoot, -1, null, (Collection<?>) null);
 			
 			for (SVNDirEntry entry : entries) {
 				final String folderName = entry.getName();
@@ -575,7 +574,7 @@ public class SubversionRepositoryAdaptor extends SubversionSupport implements Re
 	private void addTags(String projectRoot, String folderName, List<RepositoryTagDto> tags) throws SVNException {
 		final String path = projectRoot + "/" + folderName;
 		
-		final Collection<SVNDirEntry> entries = svnRepository.getDir(path, -1, null, (Collection) null);
+		final Collection<SVNDirEntry> entries = svnRepository.getDir(path, -1, null, (Collection<?>) null);
 		
 		for (SVNDirEntry entry : entries) {
 			final String tagName = entry.getName();

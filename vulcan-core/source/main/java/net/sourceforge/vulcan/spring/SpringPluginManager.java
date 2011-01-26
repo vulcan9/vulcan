@@ -207,6 +207,7 @@ public class SpringPluginManager
 			}
 		}
 	}
+	
 	public void shutdown() {
 		while (plugins.size() > 0) {
 			final String id = plugins.keySet().iterator().next();
@@ -218,14 +219,17 @@ public class SpringPluginManager
 		final PluginMetaDataDto pluginConfig = configurationStore.extractPlugin(in);
 		createPlugin(pluginConfig, true);
 	}
+	
 	public synchronized void removePlugin(String id) throws StoreException, PluginNotFoundException {
 		destroyPlugin(id);
 		
 		configurationStore.deletePlugin(id);
 	}
+	
 	public synchronized File getPluginDirectory(String id) throws PluginNotFoundException {
 		return findPluginState(id).pluginConfig.getDirectory();
 	}
+	
 	public synchronized PluginConfigDto getPluginConfigInfo(String id) throws PluginNotConfigurableException, PluginNotFoundException {
 		final PluginState state = findPluginState(id);
 		
@@ -236,6 +240,7 @@ public class SpringPluginManager
 		}
 		throw new PluginNotConfigurableException();
 	}
+	
 	public void configurePlugin(PluginConfigDto pluginConfig) throws PluginNotFoundException {
 		final PluginState state = findPluginState(pluginConfig.getPluginId());
 		
@@ -243,6 +248,7 @@ public class SpringPluginManager
 			((ConfigurablePlugin)state.plugin).setConfiguration(pluginConfig);
 		}
 	}
+	
 	public Object createObject(String id, String className) throws PluginNotFoundException, ClassNotFoundException, InstantiationException, IllegalAccessException {
 		final PluginState state = findPluginState(id);
 		
@@ -253,12 +259,15 @@ public class SpringPluginManager
 		
 		return object;
 	}
+	
 	@SuppressWarnings("unchecked")
-	public Enum createEnum(String id, String className, String enumName) throws ClassNotFoundException, PluginNotFoundException {
+	public Enum<?> createEnum(String id, String className, String enumName) throws ClassNotFoundException, PluginNotFoundException {
 		final PluginState state = findPluginState(id);
 		
-		 Class c = state.classLoader.loadClass(className);
-		 return Enum.valueOf(c, enumName);
+		@SuppressWarnings("rawtypes")
+		Class c = state.classLoader.loadClass(className);
+		
+		return Enum.valueOf(c, enumName);
 	}
 
 	@SuppressWarnings("unchecked")
