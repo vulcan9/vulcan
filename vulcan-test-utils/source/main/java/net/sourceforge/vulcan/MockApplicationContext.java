@@ -21,10 +21,10 @@ package net.sourceforge.vulcan;
 import org.springframework.beans.BeansException;
 import org.springframework.context.support.AbstractApplicationContext;
 import org.springframework.context.support.AbstractMessageSource;
-import org.springframework.web.context.support.StaticWebApplicationContext;
+import org.springframework.context.support.StaticApplicationContext;
 
 
-public class MockApplicationContext extends StaticWebApplicationContext {
+public class MockApplicationContext extends StaticApplicationContext {
 	public MockApplicationContext() {
 		super();
 		

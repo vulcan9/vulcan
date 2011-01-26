@@ -23,17 +23,17 @@ import java.io.IOException;
 import javax.servlet.ServletException;
 import javax.servlet.http.Cookie;
 
-import net.sourceforge.vulcan.MockApplicationContext;
 import net.sourceforge.vulcan.dto.PreferencesDto;
 
 import org.easymock.EasyMock;
 import org.easymock.IMocksControl;
 import org.springframework.web.context.WebApplicationContext;
+import org.springframework.web.context.support.StaticWebApplicationContext;
 
 public class PreferencesFilterTest extends ServletFilterTestCase {
 	EasyMock mock = new EasyMock();
 	PreferencesFilter filter = new PreferencesFilter();
-	MockApplicationContext wac = new MockApplicationContext();
+	StaticWebApplicationContext wac = new StaticWebApplicationContext();
 	PreferencesStore prefStore;
 	
 	IMocksControl control = EasyMock.createControl();
@@ -84,6 +84,7 @@ public class PreferencesFilterTest extends ServletFilterTestCase {
 
 		assertSame(oldPrefs, request.getSession().getAttribute(Keys.PREFERENCES));
 	}
+	
 	private void filter() throws ServletException, IOException {
 		final boolean sessionExisted = request.getSession(false) != null;
 		
