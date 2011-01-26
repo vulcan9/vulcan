@@ -18,6 +18,13 @@
  */
 package net.sourceforge.vulcan.spring;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -26,19 +33,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.Writer;
-
 import net.sourceforge.vulcan.core.BeanEncoder;
 import net.sourceforge.vulcan.core.ProjectNameChangeListener;
 import net.sourceforge.vulcan.core.support.AbstractFileStore;
-import net.sourceforge.vulcan.core.support.UUIDUtils;
-import net.sourceforge.vulcan.dto.ProjectStatusDto;
 import net.sourceforge.vulcan.dto.StateManagerConfigDto;
 import net.sourceforge.vulcan.event.WarningEvent;
 import net.sourceforge.vulcan.exception.StoreException;
@@ -65,6 +62,7 @@ public class SpringFileStore extends AbstractFileStore implements BeanFactoryAwa
 		beanFactory.registerCustomEditor(java.util.Date.class, new DateEditor());
 		return (StateManagerConfigDto) beanFactory.getBean("configuration");
 	}
+	
 	public synchronized void exportConfiguration(OutputStream os) throws IOException, StoreException {
 		final InputStream is = getConfigurationResource().getInputStream();
 		
@@ -74,9 +72,11 @@ public class SpringFileStore extends AbstractFileStore implements BeanFactoryAwa
 			is.close();
 		}
 	}
+	
 	public String getExportMimeType() {
 		return "application/xml";
 	}
+	
 	public synchronized void importConfiguration(InputStream is) throws StoreException, IOException {
 		final OutputStream os = new FileOutputStream(getConfigFile());
 		
@@ -90,6 +90,7 @@ public class SpringFileStore extends AbstractFileStore implements BeanFactoryAwa
 			}
 		}
 	}
+	
 	public synchronized void storeConfiguration(StateManagerConfigDto config) throws StoreException {
 		beanEncoder.reset();
 		beanEncoder.addBean("configuration", config);
@@ -119,44 +120,7 @@ public class SpringFileStore extends AbstractFileStore implements BeanFactoryAwa
 			throw new StoreException("Error comparing config files", e);
 		}
 	}
-	public synchronized void archiveBuildOutcome(String projectName, UUID id, boolean success) {
-		final File dir = new File(
-				getProjectDir(projectName),
-				"converted-outcomes" + File.separator + (success ? "success" : "failures"));
-		
-		if (!dir.exists()) {
-			dir.mkdirs();
-		}
-
-		final File oldFile = new File(getOutcomeDir(projectName), id.toString());
-		
-		oldFile.renameTo(new File(dir, id.toString()));
-	}
-	public synchronized ProjectStatusDto loadBuildOutcome(String projectName, UUID id) throws StoreException {
-		final File file = new File(getOutcomeDir(projectName), id.toString());
-		
-		if (!file.exists()) {
-			throw new StoreException("No such build outcome for project " + projectName, null);
-		}
-		
-		final ProjectStatusDto outcome;
-		
-		try {
-			final XmlBeanFactory beanFactory = new XmlBeanFactory(new FileSystemResource(file), this.beanFactory);
-			beanFactory.registerCustomEditor(java.util.Date.class, new DateEditor());
-			
-			outcome = (ProjectStatusDto) beanFactory.getBean("build-outcome");
-
-			// In case project was renamed, force status to use current name
-			outcome.setName(projectName);
-		} catch (Exception e) {
-			throw new StoreException(e);
-		}
-		
-		removeUnusedResources(projectName, outcome);
-
-		return outcome;
-	}
+	
 	public void projectNameChanged(String oldName, String newName) {
 		final File oldDir = new File(getProjectDir(oldName));
 		final File newDir = new File(getProjectDir(newName));
@@ -171,28 +135,19 @@ public class SpringFileStore extends AbstractFileStore implements BeanFactoryAwa
 			}
 		}
 	}
-	public ProjectStatusDto createBuildOutcome(String projectName) {
-		final ProjectStatusDto status = new ProjectStatusDto();
-		
-		final UUID id = UUIDUtils.generateTimeBasedUUID();
-		
-		status.setName(projectName);
-		status.setId(id);
-		status.setDiffId(id);
-		status.setBuildLogId(id);
-		
-		return status;
-	}
+	
 	public boolean buildLogExists(String projectName, UUID id) {
 		final File buildLog = new File(getBuildLogDir(projectName), id.toString());
 		
 		return deleteFileIfEmpty(buildLog);
 	}
+	
 	public boolean diffExists(String projectName, UUID id) {
 		final File buildLog = new File(getChangeLogDir(projectName), id.toString());
 		
 		return deleteFileIfEmpty(buildLog);
 	}
+	
 	public File getBuildLog(String projectName, UUID id) throws StoreException {
 		final File dir = getBuildLogDir(projectName);
 		
@@ -202,6 +157,7 @@ public class SpringFileStore extends AbstractFileStore implements BeanFactoryAwa
 		
 		return new File(dir, id.toString());
 	}
+	
 	public File getChangeLog(String projectName, UUID id) throws StoreException {
 		final File dir = getChangeLogDir(projectName);
 		
@@ -211,6 +167,7 @@ public class SpringFileStore extends AbstractFileStore implements BeanFactoryAwa
 		
 		return new File(dir, id.toString());
 	}
+	
 	public synchronized Map<String, List<UUID>> getBuildOutcomeIDs() {
 		final Map<String, List<UUID>> map = new HashMap<String, List<UUID>>();
 		final File[] projects = getProjectsRoot().listFiles();
@@ -249,18 +206,23 @@ public class SpringFileStore extends AbstractFileStore implements BeanFactoryAwa
 		}
 		return map;
 	}
+	
 	public BeanFactory getBeanFactory() {
 		return beanFactory;
 	}
+	
 	public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
 		this.beanFactory = beanFactory;
 	}
+	
 	public BeanEncoder getBeanEncoder() {
 		return beanEncoder;
 	}
+	
 	public void setBeanEncoder(BeanEncoder beanEncoder) {
 		this.beanEncoder = beanEncoder;
 	}
+	
 	Resource getConfigurationResource() throws StoreException {
 		final File config = getConfigFile();
 		final Resource configResource;
@@ -295,41 +257,23 @@ public class SpringFileStore extends AbstractFileStore implements BeanFactoryAwa
 			}
 		}
 	}
+	
 	private String getProjectDir(String projectName) {
 		return getProjectsRoot() + File.separator + projectName;
 	}
-	private File getOutcomeDir(String projectName) {
-		return new File(
-				getProjectDir(projectName),
-				"outcomes");
-	}
+	
 	private File getChangeLogDir(String projectName) {
 		return new File(
 				getProjectDir(projectName),
 				"changelogs");
 	}
+	
 	private File getBuildLogDir(String projectName) {
 		return new File(
 				getProjectDir(projectName),
 				"buildlogs");
 	}
-	/**
-	 * Delete empty/missing build log / unified diff references. 
-	 */
-	private void removeUnusedResources(String projectName, final ProjectStatusDto outcome) {
-		final UUID id = outcome.getBuildLogId();
-		if (id != null) {
-			if (!buildLogExists(projectName, id)) {
-				outcome.setBuildLogId(null);
-			}
-		}
-		
-		if (outcome.getDiffId() != null) {
-			if (!diffExists(projectName, outcome.getDiffId())) {
-				outcome.setDiffId(null);
-			}
-		}
-	}
+	
 	/**
 	 * @return true if the file exists and is not empty, false otherwise.
 	 */

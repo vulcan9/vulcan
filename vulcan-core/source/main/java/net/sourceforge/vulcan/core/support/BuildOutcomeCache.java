@@ -76,12 +76,12 @@ public class BuildOutcomeCache implements ProjectNameChangeListener {
 		writeLock = lock.writeLock();
 	}
 	
-	@SuppressWarnings("unchecked")
 	public void init() {
 		if (cacheSize <= 0) {
 			throw new IllegalStateException("Must set cacheSize > 0.");
 		}
-		outcomes = new LRUMap(cacheSize);
+		
+		outcomes = createLRUMap(cacheSize);
 		
 		writeLock.lock();
 		
@@ -102,6 +102,11 @@ public class BuildOutcomeCache implements ProjectNameChangeListener {
 		} finally { 
 			writeLock.unlock();
 		}
+	}
+
+	@SuppressWarnings("unchecked")
+	private static Map<UUID, ProjectStatusDto> createLRUMap(int cacheSize) {
+		return new LRUMap(cacheSize);
 	}
 	
 	/**

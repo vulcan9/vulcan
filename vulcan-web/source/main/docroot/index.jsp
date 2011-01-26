@@ -26,22 +26,8 @@
 </div>
 
 <c:choose>
-<c:when test="${not stateManager.running and not buildOutcomeConverter.running}">
+<c:when test="${not stateManager.running}">
 	<v:bubble styleClass="error"><span class="error"><spring:message code="errors.not.running"/></span></v:bubble>
-</c:when>
-<c:when test="${buildOutcomeConverter.running}">
-	<c:set var="pctComplete" value="${buildOutcomeConverter.convertedCount * 100 / buildOutcomeConverter.totalCount}"/>
-	<v:bubble styleClass="warning">
-		<span class="warning">
-			Vulcan is converting build history to a new storage layer 
-			(<fmt:formatNumber value="${pctComplete}" maxFractionDigits="0"/>
-			<c:out value="% complete; "/>
-			<fmt:formatNumber value="${buildOutcomeConverter.convertedCount}" type="number"/>
-			<c:out value=" out of "/>
-			<fmt:formatNumber value="${buildOutcomeConverter.totalCount}" type="number"/>
-			<c:out value=" builds converted)."/>
-		</span>
-	</v:bubble>
 </c:when>
 <c:otherwise>
 
