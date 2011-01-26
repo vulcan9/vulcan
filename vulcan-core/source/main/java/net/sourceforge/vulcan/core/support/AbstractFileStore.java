@@ -67,6 +67,7 @@ public abstract class AbstractFileStore implements ConfigurationStore {
 		}
 		getProjectsRoot().mkdirs();
 	}
+	
 	public final PluginMetaDataDto extractPlugin(InputStream is) throws StoreException {
 		final File pluginsDir = getPluginsRoot();
 		String toplevel = null;
@@ -137,6 +138,7 @@ public abstract class AbstractFileStore implements ConfigurationStore {
 			}
 		}
 	}
+	
 	public final void deletePlugin(String id) throws StoreException {
 		final File dir = new File(getPluginsRoot(), id);
 		try {
@@ -155,6 +157,7 @@ public abstract class AbstractFileStore implements ConfigurationStore {
 			throw new StoreException(e.getMessage(), e);
 		}
 	}
+	
 	public final PluginMetaDataDto[] getPluginConfigs() {
 		final List<PluginMetaDataDto> plugins = new ArrayList<PluginMetaDataDto>();
 		final File[] dirs = getPluginsRoot().listFiles((FileFilter)FileFilterUtils.directoryFileFilter());
@@ -182,12 +185,15 @@ public abstract class AbstractFileStore implements ConfigurationStore {
 		}
 		return plugins.toArray(new PluginMetaDataDto[plugins.size()]);
 	}
+	
 	public final void setConfigRoot(String root) {
 		configRoot = new File(root);
 	}
+	
 	public final String getConfigRoot() {
 		return configRoot.getPath();
 	}
+	
 	public String getWorkingCopyLocationPattern() {
 		if (new File(workingCopyLocationPattern).isAbsolute()) {
 			return workingCopyLocationPattern;
@@ -195,9 +201,11 @@ public abstract class AbstractFileStore implements ConfigurationStore {
 		
 		return new File(configRoot, workingCopyLocationPattern).getAbsolutePath();
 	}
+	
 	public void setWorkingCopyLocationPattern(String workingCopyLocationPattern) {
 		this.workingCopyLocationPattern = workingCopyLocationPattern;
 	}
+	
 	public boolean isWorkingCopyLocationInvalid(String location) {
 		final File file = new File(location);
 		
@@ -207,21 +215,27 @@ public abstract class AbstractFileStore implements ConfigurationStore {
 		}
 		return false;
 	}
+	
 	public final File getConfigFile() {
 		return new File(configRoot, "config.xml");
 	}
+	
 	public final File getPluginsRoot() {
 		return new File(getConfigRoot(), "plugins");
 	}
+	
 	public final File getProjectsRoot() {
 		return new File(getConfigRoot(), "projects");
 	}
+	
 	public EventHandler getEventHandler() {
 		return eventHandler;
 	}
+	
 	public void setEventHandler(EventHandler errorHandler) {
 		this.eventHandler = errorHandler;
 	}
+	
 	@SuppressWarnings("unchecked")
 	final URL[] getJars(File dir) {
 		final List<URL> list = new ArrayList<URL>();
@@ -237,6 +251,7 @@ public abstract class AbstractFileStore implements ConfigurationStore {
 		}
 		return list.toArray(new URL[list.size()]);
 	}
+	
 	protected final PluginMetaDataDto createPluginConfig(File pluginDir) throws IOException {
 		final PluginMetaDataDto plugin = new PluginMetaDataDto();
 		plugin.setId(pluginDir.getName());
@@ -265,6 +280,7 @@ public abstract class AbstractFileStore implements ConfigurationStore {
 
 		return plugin;
 	}
+	
 	protected void checkPluginVersion(File pluginsDir, String id) throws IOException, InvalidPluginLayoutException, DuplicatePluginIdException {
 		final File tmpDir = new File(pluginsDir, "tmp-" + id);
 		final File newVersionFile = new File(tmpDir, "plugin-version.xml");
@@ -298,6 +314,7 @@ public abstract class AbstractFileStore implements ConfigurationStore {
 		
 		eventHandler.reportEvent(new WarningEvent(this, "FileStore.plugin.updated", new String[] {id}));
 	}
+	
 	private PluginVersionSpec parsePluginVersion(final File existingVersionFile) throws FileNotFoundException, IOException {
 		final InputStream is = new FileInputStream(existingVersionFile);
 
@@ -307,6 +324,7 @@ public abstract class AbstractFileStore implements ConfigurationStore {
 			is.close();
 		}
 	}
+	
 	private void createDir(final File dir) throws CannotCreateDirectoryException {
 		if (!dir.mkdirs()) {
 			throw new CannotCreateDirectoryException(dir);

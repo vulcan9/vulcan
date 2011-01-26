@@ -155,7 +155,7 @@
 		<property name="beanEncoder" ref="beanEncoder"/>
 	</bean>
 	
-	<bean id="buildOutcomeCache" class="net.sourceforge.vulcan.core.support.BuildOutcomeCache">
+	<bean id="buildOutcomeCache" class="net.sourceforge.vulcan.core.support.BuildOutcomeCache" init-method="init">
 		<property name="buildOutcomeStore" ref="buildOutcomeStore"/>
 		<property name="eventHandler" ref="eventHandler"/>
 		<property name="cacheSize" value="500"/>
@@ -241,15 +241,6 @@
 				<entry key="OpenFlashChart-Metrics" value="xsl/OpenFlashChart-Metrics.xsl"/>
 			</map>
 		</property>
-	</bean>
-
-	<bean id="buildOutcomeConverter" class="net.sourceforge.vulcan.core.conversion.BuildOutcomeConverter"
-			init-method="convertOldBuildOutcomes">
-		<property name="buildOutcomeStore" ref="buildOutcomeStore"/>
-		<property name="buildOutcomeCache" ref="buildOutcomeCache"/>
-		<property name="fileStore" ref="configurationStore"/>
-		<property name="eventHandler" ref="eventHandler"/>
-		<property name="stateManager" ref="stateManager"/>
 	</bean>
 	
 	<bean id="messageSource" class="net.sourceforge.vulcan.spring.DelegatingResourceBundleMessageSource">

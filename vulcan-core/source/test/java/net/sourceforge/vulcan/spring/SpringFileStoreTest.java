@@ -38,7 +38,6 @@ import net.sourceforge.vulcan.TestUtils;
 import net.sourceforge.vulcan.core.BeanEncoder;
 import net.sourceforge.vulcan.dto.PluginMetaDataDto;
 import net.sourceforge.vulcan.dto.ProjectConfigDto;
-import net.sourceforge.vulcan.dto.ProjectStatusDto;
 import net.sourceforge.vulcan.dto.RevisionTokenDto;
 import net.sourceforge.vulcan.dto.StateManagerConfigDto;
 import net.sourceforge.vulcan.event.Event;
@@ -58,6 +57,7 @@ public class SpringFileStoreTest extends EasyMockTestCase {
 			return super.createPluginConfig(f);
 		}
 	}
+	
 	SpringFileStoreExt store;
 	File configFile = new File(System.getProperty("java.io.tmpdir"), "config.xml");
 	File mockPluginDir;
@@ -98,6 +98,7 @@ public class SpringFileStoreTest extends EasyMockTestCase {
 		
 		config.setName("a name");
 	}
+	
 	@Override
 	public void tearDown() throws Exception {
 		System.setProperty("os.name", osName);
@@ -108,9 +109,11 @@ public class SpringFileStoreTest extends EasyMockTestCase {
 		FileUtils.deleteDirectory(new File(System.getProperty("user.home") + File.separator + "vulcan-junit"));
 		FileUtils.deleteDirectory(new File(store.getConfigRoot(), "buildLogs"));
 	}
+	
 	public void testGetExportMimeType() throws Exception {
 		assertEquals("application/xml", store.getExportMimeType());
 	}
+	
 	public void testExport() throws Exception {
 		OutputStream os = new ByteArrayOutputStream();
 		
@@ -119,6 +122,7 @@ public class SpringFileStoreTest extends EasyMockTestCase {
 		
 		assertTrue(os.toString().length() > 0);
 	}
+	
 	public void testCreatesFile() throws Exception {
 		assertFalse(configFile.exists());
 		
@@ -126,6 +130,7 @@ public class SpringFileStoreTest extends EasyMockTestCase {
 		
 		assertTrue(configFile.exists());
 	}
+	
 	public void testDoesNotOverwriteIfNotChanged() throws Exception {
 		store.storeConfiguration(new StateManagerConfigDto());
 
@@ -142,6 +147,7 @@ public class SpringFileStoreTest extends EasyMockTestCase {
 		// should delete temp file
 		assertEquals(beforeCount, FileUtils.listFiles(configFile.getParentFile(), new PrefixFileFilter("config"), FalseFileFilter.INSTANCE).size());
 	}
+	
 	public void testCreatesNestedPath() throws Exception {
 		final File parent = new File(System.getProperty("user.home"), "vulcan-junit");
 		final File root = new File(parent, "config-dir");
@@ -163,6 +169,7 @@ public class SpringFileStoreTest extends EasyMockTestCase {
 			tryToDelete(parent);
 		}
 	}
+	
 	public void testLoadDefaultIfConfigFileNotPresent() throws Exception {
 		store.setConfigRoot("${user.home}/vulcan-junit");
 		
@@ -172,6 +179,7 @@ public class SpringFileStoreTest extends EasyMockTestCase {
 		
 		assertFalse(new File(store.getConfigRoot(), "config.xml").exists());
 	}
+	
 	public void testExtractCorruptPlugin() throws Exception {
 		final File zip = TestUtils.resolveRelativeFile("source/test/pluginTests/corrupt.zip");
 		assertTrue(zip.exists());
@@ -182,6 +190,7 @@ public class SpringFileStoreTest extends EasyMockTestCase {
 		} catch (StoreException e) {
 		}
 	}
+	
 	public void testExtractPlugin() throws Exception {
 		try {
 			final File zip = TestUtils.resolveRelativeFile("source/test/pluginTests/mockPlugin.zip");
@@ -201,6 +210,7 @@ public class SpringFileStoreTest extends EasyMockTestCase {
 			FileUtils.deleteDirectory(mockPluginDir);
 		}
 	}
+	
 	public void testExtractPluginVersionDescriptorNotFirstEntry() throws Exception {
 		try {
 			final File zip = TestUtils.resolveRelativeFile("source/test/pluginTests/mockPluginUnordered.zip");
@@ -220,6 +230,7 @@ public class SpringFileStoreTest extends EasyMockTestCase {
 			FileUtils.deleteDirectory(mockPluginDir);
 		}
 	}
+	
 	public void testExtractPluginNoTopLevel() throws Exception {
 		final File zip = TestUtils.resolveRelativeFile("source/test/pluginTests/flat.zip");
 		assertTrue(zip.exists());
@@ -236,6 +247,7 @@ public class SpringFileStoreTest extends EasyMockTestCase {
 		}
 		assertEquals(0, pluginsDir.list().length);
 	}
+	
 	public void testExtractPluginEmpty() throws Exception {
 		final File zip = TestUtils.resolveRelativeFile("source/test/pluginTests/empty.zip");
 		assertTrue(zip.exists());
@@ -252,6 +264,7 @@ public class SpringFileStoreTest extends EasyMockTestCase {
 		}
 		assertEquals(0, pluginsDir.list().length);
 	}
+	
 	public void testExtractPluginMoreThanOneTopLevel() throws Exception {
 		final File zip = TestUtils.resolveRelativeFile("source/test/pluginTests/toomanydirs.zip");
 		assertTrue(zip.exists());
@@ -268,6 +281,7 @@ public class SpringFileStoreTest extends EasyMockTestCase {
 		}
 		assertEquals(0, pluginsDir.list().length);
 	}
+	
 	public void testExtractPluginFileInRootAfterTopLevel() throws Exception {
 		final File zip = TestUtils.resolveRelativeFile("source/test/pluginTests/fileinroot.zip");
 		assertTrue(zip.exists());
@@ -284,6 +298,7 @@ public class SpringFileStoreTest extends EasyMockTestCase {
 		}
 		assertEquals(0, pluginsDir.list().length);
 	}
+	
 	public void testExtractPluginTwiceThrows() throws Exception {
 		final File zip = TestUtils.resolveRelativeFile("source/test/pluginTests/mockPlugin.zip");
 		assertTrue(zip.exists());
@@ -305,6 +320,7 @@ public class SpringFileStoreTest extends EasyMockTestCase {
 		
 		assertTrue(mockPluginDir.isDirectory());
 	}
+	
 	public void testExtractPluginOverOldVersion() throws Exception {
 		final File zip = TestUtils.resolveRelativeFile("source/test/pluginTests/mockPlugin.zip");
 		assertTrue(zip.exists());
@@ -338,6 +354,7 @@ public class SpringFileStoreTest extends EasyMockTestCase {
 		assertTrue(versionFile.exists());
 		assertFalse("Did not delete old file", shouldBeDeleted.exists());
 	}
+	
 	public void testLoadsPluginVersion() throws Exception {
 		final File versionFile = new File(mockPluginDir, "plugin-version.xml");
 		mockPluginDir.mkdirs();
@@ -354,6 +371,7 @@ public class SpringFileStoreTest extends EasyMockTestCase {
 		assertEquals(1, info.getRevision());
 		assertEquals("a.v.t.y", info.getVersion());
 	}
+	
 	public void testDeletePlugin() throws Exception {
 		store.extractPlugin(new FileInputStream(TestUtils.resolveRelativeFile("source/test/pluginTests/mockPlugin.zip")));
 		
@@ -363,6 +381,7 @@ public class SpringFileStoreTest extends EasyMockTestCase {
 		
 		assertFalse(new File(mockPluginDir, "mock").exists());
 	}
+	
 	public void testDeletePluginFailsSchedulesForLater() throws Exception {
 		store.extractPlugin(new FileInputStream(TestUtils.resolveRelativeFile("source/test/pluginTests/mockPlugin.zip")));
 		
@@ -388,6 +407,7 @@ public class SpringFileStoreTest extends EasyMockTestCase {
 			lock.delete();
 		}
 	}
+	
 	public void testGetPluginURLsDeletesMarkedPlugin() throws Exception {
 		store.extractPlugin(new FileInputStream(TestUtils.resolveRelativeFile("source/test/pluginTests/mockPlugin.zip")));
 		new File(mockPluginDir, ".delete").createNewFile();
@@ -398,6 +418,7 @@ public class SpringFileStoreTest extends EasyMockTestCase {
 		
 		assertFalse(mockPluginDir.exists());
 	}
+	
 	public void testDeleteInvalidThrows() {
 		try {
 			store.deletePlugin("mock");
@@ -406,6 +427,7 @@ public class SpringFileStoreTest extends EasyMockTestCase {
 			assertSame(FileNotFoundException.class, e.getCause().getClass());
 		}
 	}
+	
 	public void testGetPluginDirs() throws Exception {
 		assertFalse(mockPluginDir.exists());
 		
@@ -424,14 +446,6 @@ public class SpringFileStoreTest extends EasyMockTestCase {
 		assertEquals(new File(mockPluginDir, "token.jar").toURI().toURL(), plugins[0].getClassPath()[0]);
 	}
 
-	public void testThrowsOnOutcomeNotFound() throws Exception {
-		try {
-			store.loadBuildOutcome("fake", UUID.randomUUID());
-			fail("expected exception");
-		} catch (StoreException e) {
-		}
-	}
-	
 	public void testGetOutcomeIds() throws Exception {
 		final File dir1 = new File(projectsDir + File.separator + "fake", "outcomes");
 		final File dir2 = new File(projectsDir + File.separator + "fakey", "outcomes");
@@ -457,6 +471,7 @@ public class SpringFileStoreTest extends EasyMockTestCase {
 		assertTrue(ids.get("fake").contains(u2));
 		assertTrue(ids.get("fakey").contains(u3));
 	}
+	
 	public void testRenamesProjectDirOnProjectNameChanged() throws Exception {
 		final File dir1 = new File(projectsDir + File.separator + "old-fake", "outcomes");
 		final File dir2 = new File(projectsDir + File.separator + "new-fake", "outcomes");
@@ -468,30 +483,20 @@ public class SpringFileStoreTest extends EasyMockTestCase {
 		assertFalse(dir1.exists());
 		assertTrue(dir2.exists());
 	}
-	public void testCreateBuildOutcome() throws Exception {
-		ProjectStatusDto s = store.createBuildOutcome("myProject");
-		
-		assertNotNull(s);
-		assertEquals("myProject", s.getName());
-		assertNotNull(s.getId());
-		assertNotNull(s.getDiffId());
-		assertNotNull(s.getBuildLogId());
-	}
+	
 	public void testGetChangeLogOutputStream() throws Exception {
-		ProjectStatusDto st1 = store.createBuildOutcome("myProject");
-		
-		File f1 = store.getChangeLog("myProject", st1.getDiffId());
+		File f1 = store.getChangeLog("myProject", UUID.randomUUID());
 
 		assertTrue(f1.getParentFile().exists());
 		assertFalse(f1.exists());
 	}
+	
 	public void testGetBuildLogOutputStream() throws Exception {
-		ProjectStatusDto st1 = store.createBuildOutcome("myProject");
-		
-		File f1 = store.getBuildLog("myProject", st1.getDiffId());
+		File f1 = store.getBuildLog("myProject", UUID.randomUUID());
 		assertTrue(f1.getParentFile().exists());
 		assertFalse(f1.exists());
 	}
+	
 	private void tryToDelete(File file) throws Exception {
 		final long maxSleep = 1000;
 		final long interval = 10;

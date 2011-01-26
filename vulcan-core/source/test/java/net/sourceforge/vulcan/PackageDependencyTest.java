@@ -116,6 +116,6 @@ public class PackageDependencyTest extends TestCase {
 	 * as long as no cycles exist (which would be caught by the cycles test.
 	 */
 	private boolean isSupportPackage(final String name) {
-		return name.indexOf("support") > 0 || name.indexOf("spring") > 0 || name.indexOf("conversion") > 0;
+		return name.indexOf("support") > 0 || name.indexOf("spring") > 0;
 	}
 }
