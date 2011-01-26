@@ -1,6 +1,6 @@
 /*
  * Vulcan Build Manager
- * Copyright (C) 2005-2010 Chris Eldredge
+ * Copyright (C) 2005-2011 Chris Eldredge
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,6 +27,7 @@ import java.util.Locale;
 
 import net.sourceforge.vulcan.dto.ChangeLogDto;
 import net.sourceforge.vulcan.dto.ChangeSetDto;
+import net.sourceforge.vulcan.dto.PathModification;
 
 import org.apache.commons.digester.Digester;
 import org.apache.commons.digester.Rule;
@@ -42,14 +43,15 @@ public class CommitLogParser {
 		digester.addObjectCreate("log/logentry", ChangeSetDto.class);
 		digester.addRule("log/logentry", new LogEntryRevisionCompositionRule());
 		
-		digester.addBeanPropertySetter("log/logentry/author", "author");
+		digester.addBeanPropertySetter("log/logentry/author", "authorName");
+		digester.addSetProperties("log/logentry/author", "email", "authorEmail");
+		
 		digester.addBeanPropertySetter("log/logentry/msg", "message");
 		
 		digester.addRule("log/logentry/date", new LogEntryDateParseRule());
 		
-		digester.addCallMethod("log/logentry/paths/path", "addModifiedPath", 1);
-		digester.addCallParam("log/logentry/paths/path", 0);
-		
+		digester.addRule("log/logentry/paths/path", new ModifiedPathRule());
+	
 		digester.addSetNext("log/logentry", "addChangeSet");
 		
 		return (ChangeLogDto) digester.parse(new StringReader(text));
@@ -68,6 +70,34 @@ public class CommitLogParser {
 			}
 			
 			change.setRevisionLabel(revision + ":" + node);
+		}
+	}
+	
+	static class ModifiedPathRule extends Rule {
+		private ChangeSetDto change;
+		private PathModification action;
+		
+		@Override
+		public void begin(String namespace, String name, Attributes attributes)	throws Exception {
+			change = (ChangeSetDto) digester.peek();
+			final char actionCode = attributes.getValue("action").charAt(0);
+			
+			switch (actionCode) {
+				case 'A':
+					action = PathModification.Add;
+					break;
+				case 'M':
+					action = PathModification.Modify;
+					break;
+				case 'R':
+					action = PathModification.Remove;
+					break;
+			}
+		}
+		
+		@Override
+		public void body(String namespace, String name, String text) throws Exception {
+			change.addModifiedPath(text, action);
 		}
 	}
 	

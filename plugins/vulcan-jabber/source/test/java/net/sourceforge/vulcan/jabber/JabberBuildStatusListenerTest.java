@@ -78,7 +78,7 @@ public class JabberBuildStatusListenerTest extends EasyMockTestCase {
 	
 	private ChangeSetDto makeChangeSet(String author) {
 		final ChangeSetDto dto = new ChangeSetDto();
-		dto.setAuthor(author);
+		dto.setAuthorName(author);
 		return dto;
 	}
 
@@ -155,8 +155,8 @@ public class JabberBuildStatusListenerTest extends EasyMockTestCase {
 
 	public void testSkipsNullAndBlank() throws Exception {
 		status.setChangeLog(changeLog);
-		commit2.setAuthor("");
-		commit4.setAuthor(null);
+		commit2.setAuthorName("");
+		commit4.setAuthorName(null);
 		changeLog.setChangeSets(Arrays.asList(commit1, commit2, commit3, commit4));
 		
 		listener.addRecipients("permanentjoe");

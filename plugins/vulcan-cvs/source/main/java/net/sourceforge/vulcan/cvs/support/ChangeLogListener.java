@@ -28,6 +28,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import net.sourceforge.vulcan.dto.ChangeSetDto;
+import net.sourceforge.vulcan.dto.ModifiedPathDto;
 
 import org.netbeans.lib.cvsclient.command.log.LogInformation;
 
@@ -76,7 +77,7 @@ public class ChangeLogListener extends LogListener {
 				matcher.start();
 		
 				currentEntry.setTimestamp(new Date(parseDate(matcher.group(1)).getTime()));
-				currentEntry.setAuthor(matcher.group(2));
+				currentEntry.setAuthorName(matcher.group(2));
 				
 				readingMessage = true;
 				this.msgBuf = new StringBuilder();
@@ -95,10 +96,8 @@ public class ChangeLogListener extends LogListener {
 
 	@Override
 	protected void processLogInfo(LogInformation logInfo) {
-		final String repositoryFilename = logInfo.getRepositoryFilename();
-		
 		for (ChangeSetDto e : currentEntries) {
-			e.setModifiedPaths(Collections.singletonList(repositoryFilename));
+			e.setModifiedPaths(Collections.singletonList(new ModifiedPathDto(logInfo.getRepositoryFilename(), null)));
 		}
 		
 		allEntries.addAll(currentEntries);

@@ -53,7 +53,7 @@ public class GetChangeLogs {
 
 	private static void printChangeLog(ChangeLogDto changeLog) {
 		for (ChangeSetDto c : changeLog.getChangeSets()) {
-			System.out.println("Revision: " + c.getRevisionLabel() + " Author: " + c.getAuthor()
+			System.out.println("Revision: " + c.getRevisionLabel() + " Author: " + c.getAuthorName()
 					+ " Timestamp: " + c.getTimestamp());
 			System.out.println("Modified paths:");
 			System.out.println(StringUtils.join(c.getModifiedPaths(), "\n"));

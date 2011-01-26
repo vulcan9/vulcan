@@ -93,7 +93,7 @@ class JabberBuildStatusListener implements BuildStatusListener {
 			}
 			
 			for (ChangeSetDto commit : outcome.getChangeLog().getChangeSets()) {
-				final String author = commit.getAuthor();
+				final String author = commit.getAuthorName();
 			
 				if (!StringUtils.isEmpty(author) && !uniques.contains(author)) {
 					uniques.add(author);

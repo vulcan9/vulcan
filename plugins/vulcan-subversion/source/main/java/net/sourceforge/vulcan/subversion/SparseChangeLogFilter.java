@@ -24,6 +24,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import net.sourceforge.vulcan.dto.ChangeSetDto;
+import net.sourceforge.vulcan.dto.ModifiedPathDto;
 import net.sourceforge.vulcan.subversion.dto.CheckoutDepth;
 import net.sourceforge.vulcan.subversion.dto.SparseCheckoutDto;
 import net.sourceforge.vulcan.subversion.dto.SubversionProjectConfigDto;
@@ -71,7 +72,9 @@ public class SparseChangeLogFilter {
 	}
 
 	private boolean isMatch(ChangeSetDto changeSet) {
-		for (String path : changeSet.getModifiedPaths()) {
+		for (ModifiedPathDto pathDto : changeSet.getModifiedPaths()) {
+			final String path = pathDto.getPath();
+			
 			for (SparseCheckoutDto folder : folders) {
 				final String sparseDir = folder.getDirectoryName();
 				

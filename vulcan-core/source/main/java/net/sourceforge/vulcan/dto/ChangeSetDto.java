@@ -1,6 +1,6 @@
 /*
  * Vulcan Build Manager
- * Copyright (C) 2005-2010 Chris Eldredge
+ * Copyright (C) 2005-2011 Chris Eldredge
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,31 +23,40 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
-
 public class ChangeSetDto extends BaseDto {
 	private String revisionLabel;
-	private String author;
+	private String authorName;
+	private String authorEmail;
 	private Date timestamp;
 	private String message;
-	private List<String> modifiedPaths = Collections.emptyList();
+	private List<ModifiedPathDto> modifiedPaths = Collections.emptyList();
 
 	public ChangeSetDto() {
 	}
 	
-	public ChangeSetDto(String revisionLabel, String author, Date timestamp, String message, List<String> modifiedPaths) {
+	public ChangeSetDto(String revisionLabel, String authorName, String authorEmail, Date timestamp, String message, List<ModifiedPathDto> modifiedPaths) {
 		this.revisionLabel = revisionLabel;
-		this.author = author;
+		this.authorName = authorName;
+		this.authorEmail = authorEmail;
 		this.timestamp = timestamp;
 		this.message = message;
 		this.modifiedPaths = modifiedPaths;
 	}
 	
-	public String getAuthor() {
-		return author;
+	public String getAuthorName() {
+		return authorName;
 	}
 	
-	public void setAuthor(String author) {
-		this.author = author;
+	public void setAuthorName(String author) {
+		this.authorName = author;
+	}
+	
+	public String getAuthorEmail() {
+		return authorEmail;
+	}
+	
+	public void setAuthorEmail(String authorEmail) {
+		this.authorEmail = authorEmail;
 	}
 	
 	public String getMessage() {
@@ -58,20 +67,20 @@ public class ChangeSetDto extends BaseDto {
 		this.message = message;
 	}
 	
-	public List<String> getModifiedPaths() {
+	public List<ModifiedPathDto> getModifiedPaths() {
 		return modifiedPaths;
 	}
 	
-	public void setModifiedPaths(List<String> modifiedPaths) {
+	public void setModifiedPaths(List<ModifiedPathDto> modifiedPaths) {
 		this.modifiedPaths = modifiedPaths;
 	}
 	
-	public void addModifiedPath(String path) {
-		if (modifiedPaths == Collections.<String>emptyList()) {
-			modifiedPaths = new ArrayList<String>();
+	public void addModifiedPath(String path, PathModification action) {
+		if (modifiedPaths == Collections.<ModifiedPathDto>emptyList()) {
+			modifiedPaths = new ArrayList<ModifiedPathDto>();
 		}
 		
-		modifiedPaths.add(path);
+		modifiedPaths.add(new ModifiedPathDto(path, action));
 	}
 	
 	@Deprecated

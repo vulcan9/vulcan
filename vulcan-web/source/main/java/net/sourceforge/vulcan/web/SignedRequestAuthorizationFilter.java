@@ -171,7 +171,6 @@ public class SignedRequestAuthorizationFilter extends OncePerRequestFilter {
 			this.name = name;
 		}
 
-		@Override
 		public String getName() {
 			return name;
 		}

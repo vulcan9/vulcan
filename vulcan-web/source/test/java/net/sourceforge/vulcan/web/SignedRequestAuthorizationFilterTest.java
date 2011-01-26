@@ -224,7 +224,6 @@ public class SignedRequestAuthorizationFilterTest extends EasyMockTestCase {
 		EasyMock.reportMatcher(new IArgumentMatcher() {
 			private String message;
 			
-			@Override
 			public boolean matches(Object argument) {
 				if (!(argument instanceof HttpServletRequestWrapper)) {
 					message = "instanceof HttpServletRequestWrapper";
@@ -247,7 +246,6 @@ public class SignedRequestAuthorizationFilterTest extends EasyMockTestCase {
 				return true;
 			}
 			
-			@Override
 			public void appendTo(StringBuffer buffer) {
 				buffer.append(message);
 			}

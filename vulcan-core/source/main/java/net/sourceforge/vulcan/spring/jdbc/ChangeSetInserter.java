@@ -35,14 +35,15 @@ class ChangeSetInserter extends SqlUpdate {
 	public ChangeSetInserter(DataSource dataSource) {
 		setDataSource(dataSource);
 		setSql("insert into change_sets " +
-				"(build_id, change_set_id, message, revision_label, commit_timestamp, author) " +
-				"values (?, ?, ?, ?, ?, ?)");
+				"(build_id, change_set_id, message, revision_label, commit_timestamp, author, author_email) " +
+				"values (?, ?, ?, ?, ?, ?, ?)");
 		
 		declareParameter(new SqlParameter(Types.NUMERIC));
 		declareParameter(new SqlParameter(Types.NUMERIC));
 		declareParameter(new SqlParameter(Types.VARCHAR));
 		declareParameter(new SqlParameter(Types.VARCHAR));
 		declareParameter(new SqlParameter(Types.TIMESTAMP));
+		declareParameter(new SqlParameter(Types.VARCHAR));
 		declareParameter(new SqlParameter(Types.VARCHAR));
 		
 		compile();
@@ -53,7 +54,7 @@ class ChangeSetInserter extends SqlUpdate {
 	public int insert(int primaryKey, List<ChangeSetDto> changeSets) {
 		int count = 0;
 		
-		final Object[] params = new Object[6];
+		final Object[] params = new Object[7];
 		
 		params[0] = primaryKey;
 
@@ -64,7 +65,8 @@ class ChangeSetInserter extends SqlUpdate {
 			params[2] = JdbcBuildOutcomeStore.truncate(dto.getMessage(), JdbcBuildOutcomeStore.MAX_COMMIT_MESSAGE_LENGTH);
 			params[3] = dto.getRevisionLabel();
 			params[4] = dto.getTimestamp();
-			params[5] = dto.getAuthor();
+			params[5] = dto.getAuthorName();
+			params[6] = dto.getAuthorEmail();
 			
 			count += update(params);
 			

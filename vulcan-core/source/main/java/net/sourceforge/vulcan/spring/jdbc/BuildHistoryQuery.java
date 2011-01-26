@@ -61,7 +61,7 @@ class BuildHistoryQuery extends BuildQuery implements BuilderQuery {
 	
 	@SuppressWarnings("unchecked")
 	public List<JdbcBuildOutcomeDto> queryForHistory() {
-		final List results = execute(parameterValues);
+		final List<JdbcBuildOutcomeDto> results = execute(parameterValues);
 
 		/*
 		 * Reverse to invert descending order specified

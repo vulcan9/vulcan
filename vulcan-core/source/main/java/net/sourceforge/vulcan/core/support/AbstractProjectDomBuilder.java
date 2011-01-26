@@ -51,11 +51,12 @@ import net.sourceforge.vulcan.dto.BuildMessageDto;
 import net.sourceforge.vulcan.dto.ChangeLogDto;
 import net.sourceforge.vulcan.dto.ChangeSetDto;
 import net.sourceforge.vulcan.dto.MetricDto;
+import net.sourceforge.vulcan.dto.ModifiedPathDto;
 import net.sourceforge.vulcan.dto.ProjectConfigDto;
 import net.sourceforge.vulcan.dto.ProjectStatusDto;
+import net.sourceforge.vulcan.dto.ProjectStatusDto.Status;
 import net.sourceforge.vulcan.dto.RevisionTokenDto;
 import net.sourceforge.vulcan.dto.TestFailureDto;
-import net.sourceforge.vulcan.dto.ProjectStatusDto.Status;
 import net.sourceforge.vulcan.event.ErrorEvent;
 import net.sourceforge.vulcan.event.EventHandler;
 import net.sourceforge.vulcan.exception.NoSuchProjectException;
@@ -373,8 +374,8 @@ public abstract class AbstractProjectDomBuilder implements ProjectDomBuilder {
 		for (ChangeSetDto changes : changeSetDtos) {
 			final Element changeSet = new Element("change-set");
 			
-			if (changes.getAuthor() != null) {
-				changeSet.setAttribute("author", changes.getAuthor());
+			if (changes.getAuthorName() != null) {
+				changeSet.setAttribute("author", changes.getAuthorName());
 			}
 			
 			if (changes.getRevisionLabel() != null) {
@@ -427,12 +428,15 @@ public abstract class AbstractProjectDomBuilder implements ProjectDomBuilder {
 		}
 	}
 	
-	private static void addModifiedPaths(Element changeSet, Iterable<String> modifiedPaths) {
+	private static void addModifiedPaths(Element changeSet, Iterable<ModifiedPathDto> modifiedPaths) {
 		final Element mps = new Element("modified-paths");
 
-		for (String path : modifiedPaths) {
+		for (ModifiedPathDto path : modifiedPaths) {
 			final Element pathElem = new Element("path");
-			pathElem.setText(path);
+			pathElem.setText(path.getPath());
+			if (path.getAction() != null) {
+				pathElem.setAttribute("action", path.getAction().name());
+			}
 			mps.addContent(pathElem);
 		}
 		changeSet.addContent(mps);

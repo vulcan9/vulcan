@@ -25,6 +25,8 @@ import java.util.List;
 
 import junit.framework.TestCase;
 import net.sourceforge.vulcan.dto.ChangeSetDto;
+import net.sourceforge.vulcan.dto.ModifiedPathDto;
+import net.sourceforge.vulcan.dto.PathModification;
 import net.sourceforge.vulcan.subversion.dto.CheckoutDepth;
 import net.sourceforge.vulcan.subversion.dto.SparseCheckoutDto;
 import net.sourceforge.vulcan.subversion.dto.SubversionProjectConfigDto;
@@ -38,7 +40,7 @@ public class SparseChangeLogFilterTest extends TestCase {
 	protected void setUp() throws Exception {
 		super.setUp();
 		change1 = new ChangeSetDto();
-		change1.setModifiedPaths(Arrays.asList("/trunk/Scripts/Build"));
+		change1.setModifiedPaths(Arrays.asList(new ModifiedPathDto("/trunk/Scripts/Build", PathModification.Modify)));
 		config.setCheckoutDepth(CheckoutDepth.Infinity);
 		config.setPath("/trunk");
 		
@@ -193,7 +195,9 @@ public class SparseChangeLogFilterTest extends TestCase {
 	private ChangeSetDto makeChangeSet(String... paths) {
 		final ChangeSetDto dto = new ChangeSetDto();
 		
-		dto.setModifiedPaths(Arrays.asList(paths));
+		for (String p : paths) {
+			dto.addModifiedPath(p, PathModification.Modify);
+		}
 		
 		return dto;
 	}

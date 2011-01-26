@@ -1,6 +1,6 @@
 /*
  * Vulcan Build Manager
- * Copyright (C) 2005-2007 Chris Eldredge
+ * Copyright (C) 2005-2011 Chris Eldredge
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,21 +18,24 @@
  */
 package net.sourceforge.vulcan.spring.jdbc;
 
-import java.util.List;
-
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.util.List;
 
 import javax.sql.DataSource;
 
+import net.sourceforge.vulcan.dto.ModifiedPathDto;
+import net.sourceforge.vulcan.dto.PathModification;
+
+import org.apache.commons.lang.StringUtils;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.SqlParameter;
 import org.springframework.jdbc.object.MappingSqlQuery;
 
 class ModifiedPathQuery extends MappingSqlQuery {
 	public ModifiedPathQuery(DataSource dataSource) {
-		super(dataSource, "select modified_path " +
+		super(dataSource, "select modified_path, modification_type " +
 				"from modified_paths where build_id = ? and change_set_id = ? order by modified_path");
 		
 		declareParameter(new SqlParameter("build_id", Types.NUMERIC));
@@ -41,8 +44,8 @@ class ModifiedPathQuery extends MappingSqlQuery {
 		compile();
 	}
 	
-	public List<String> queryModifiedPaths(int buildId, int changeSetId) {
-		final List<String> paths = execute(buildId, changeSetId);
+	public List<ModifiedPathDto> queryModifiedPaths(int buildId, int changeSetId) {
+		final List<ModifiedPathDto> paths = execute(buildId, changeSetId);
 		
 		if (paths.isEmpty()) {
 			return null;
@@ -53,12 +56,31 @@ class ModifiedPathQuery extends MappingSqlQuery {
 	
 	@Override
 	@SuppressWarnings("unchecked")
-	public List<String> execute(int buildId, int changeSetId) throws DataAccessException {
+	public List<ModifiedPathDto> execute(int buildId, int changeSetId) throws DataAccessException {
 		return super.execute(buildId, changeSetId);
 	}
 	
 	@Override
-	protected String mapRow(ResultSet rs, int rowNumber) throws SQLException {
-		return rs.getString("modified_path");
+	protected ModifiedPathDto mapRow(ResultSet rs, int rowNumber) throws SQLException {
+		ModifiedPathDto dto = new ModifiedPathDto();
+		
+		dto.setPath(rs.getString("modified_path"));
+		
+		String action = rs.getString("modification_type");
+		if (StringUtils.isNotBlank(action)) {
+			dto.setAction(toEnum(action.charAt(0)));
+		}
+		
+		return dto;
+	}
+	
+	private PathModification toEnum(char id) {
+		switch (id) {
+			case 'A': return PathModification.Add;
+			case 'M': return PathModification.Modify;
+			case 'R': return PathModification.Remove;
+		}
+		
+		return null;
 	}
 }

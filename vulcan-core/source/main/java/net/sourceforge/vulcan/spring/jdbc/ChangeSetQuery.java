@@ -29,6 +29,7 @@ import javax.sql.DataSource;
 
 import net.sourceforge.vulcan.dto.ChangeLogDto;
 import net.sourceforge.vulcan.dto.ChangeSetDto;
+import net.sourceforge.vulcan.dto.ModifiedPathDto;
 
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.SqlParameter;
@@ -38,7 +39,7 @@ class ChangeSetQuery extends MappingSqlQuery {
 	private final ModifiedPathQuery modifiedPathQuery;
 
 	public ChangeSetQuery(DataSource dataSource) {
-		super(dataSource, "select message, author, commit_timestamp, revision_label, build_id, change_set_id " +
+		super(dataSource, "select message, author, author_email, commit_timestamp, revision_label, build_id, change_set_id " +
 				"from change_sets where build_id = ? order by commit_timestamp");
 		declareParameter(new SqlParameter("build_id", Types.NUMERIC));
 		compile();
@@ -69,7 +70,8 @@ class ChangeSetQuery extends MappingSqlQuery {
 		final ChangeSetDto dto = new ChangeSetDto();
 		
 		dto.setMessage(rs.getString("message"));
-		dto.setAuthor(rs.getString("author"));
+		dto.setAuthorName(rs.getString("author"));
+		dto.setAuthorEmail(rs.getString("author_email"));
 		dto.setRevisionLabel(rs.getString("revision_label"));
 		
 		final Timestamp timestamp = rs.getTimestamp("commit_timestamp");
@@ -81,7 +83,7 @@ class ChangeSetQuery extends MappingSqlQuery {
 		int buildId = rs.getInt("build_id");
 		int changeSetId = rs.getInt("change_set_id");
 		
-		final List<String> paths = modifiedPathQuery.queryModifiedPaths(buildId, changeSetId);
+		final List<ModifiedPathDto> paths = modifiedPathQuery.queryModifiedPaths(buildId, changeSetId);
 		dto.setModifiedPaths(paths);
 		
 		return dto;

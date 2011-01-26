@@ -279,7 +279,7 @@ public class EmailPlugin implements BuildManagerObserverPlugin, ConfigurablePlug
 
             final String[] profileAddresses = profile.getEmailAddresses();
             for (ChangeSetDto changeSet : changeSets) {
-                final String author = changeSet.getAuthor().trim();
+                final String author = changeSet.getAuthorName().trim();
                 if (!map.containsKey(author)) {
                 	continue;
                 }
