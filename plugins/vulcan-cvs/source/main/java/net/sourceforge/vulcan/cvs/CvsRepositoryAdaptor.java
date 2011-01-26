@@ -45,6 +45,7 @@ import net.sourceforge.vulcan.cvs.support.CheckoutListener;
 import net.sourceforge.vulcan.cvs.support.NewestRevisionsLogListener;
 import net.sourceforge.vulcan.dto.ChangeLogDto;
 import net.sourceforge.vulcan.dto.ChangeSetDto;
+import net.sourceforge.vulcan.dto.ModifiedPathDto;
 import net.sourceforge.vulcan.dto.ProjectConfigDto;
 import net.sourceforge.vulcan.dto.ProjectStatusDto;
 import net.sourceforge.vulcan.dto.RepositoryTagDto;
@@ -295,10 +296,10 @@ public class CvsRepositoryAdaptor extends CvsSupport implements RepositoryAdapto
 				final ChangeSetDto m = map.get(key);
 				m.setRevisionLabel(revisionLabel);
 				
-				final Set<String> paths = new HashSet<String>(m.getModifiedPaths());
+				final Set<ModifiedPathDto> paths = new HashSet<ModifiedPathDto>(m.getModifiedPaths());
 				paths.addAll(e.getModifiedPaths());
 				
-				m.setModifiedPaths(new ArrayList<String>(paths));
+				m.setModifiedPaths(new ArrayList<ModifiedPathDto>(paths));
 				
 				if (e.getTimestamp().after(m.getTimestamp())) {
 					m.setTimestamp(e.getTimestamp());
@@ -316,7 +317,7 @@ public class CvsRepositoryAdaptor extends CvsSupport implements RepositoryAdapto
 	}
 
 	private String key(ChangeSetDto e) {
-		return e.getAuthor() + ":" + e.getMessage();
+		return e.getAuthorName() + ":" + e.getMessage();
 	}
 	
 	/* When fetching change log, CVS sometimes returns logs on the same end date,

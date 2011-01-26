@@ -40,6 +40,7 @@ import net.sourceforge.vulcan.core.support.FileSystemImpl;
 import net.sourceforge.vulcan.core.support.RepositoryUtils;
 import net.sourceforge.vulcan.dto.ChangeLogDto;
 import net.sourceforge.vulcan.dto.ChangeSetDto;
+import net.sourceforge.vulcan.dto.PathModification;
 import net.sourceforge.vulcan.dto.ProjectConfigDto;
 import net.sourceforge.vulcan.dto.ProjectStatusDto;
 import net.sourceforge.vulcan.dto.RepositoryTagDto;
@@ -69,6 +70,7 @@ import org.tmatesoft.svn.core.SVNDirEntry;
 import org.tmatesoft.svn.core.SVNErrorCode;
 import org.tmatesoft.svn.core.SVNException;
 import org.tmatesoft.svn.core.SVNLogEntry;
+import org.tmatesoft.svn.core.SVNLogEntryPath;
 import org.tmatesoft.svn.core.SVNNodeKind;
 import org.tmatesoft.svn.core.SVNProperties;
 import org.tmatesoft.svn.core.SVNPropertyValue;
@@ -495,15 +497,32 @@ public class SubversionRepositoryAdaptor extends SubversionSupport implements Re
 				final ChangeSetDto changeSet = new ChangeSetDto();
 				
 				changeSet.setRevisionLabel("r" + logEntryRevision);
-				changeSet.setAuthor(logEntry.getAuthor());
+				changeSet.setAuthorName(logEntry.getAuthor());
 				changeSet.setMessage(logEntry.getMessage());
 				changeSet.setTimestamp(new Date(logEntry.getDate().getTime()));
 				
-				final Set<String> paths = logEntry.getChangedPaths().keySet();
-				
-				changeSet.setModifiedPaths(new ArrayList<String>(paths));
-				
+				final Collection<SVNLogEntryPath> paths = ((Map<String, SVNLogEntryPath>) logEntry.getChangedPaths()).values();
+				for (SVNLogEntryPath path : paths) {
+					changeSet.addModifiedPath(path.getPath(), toPathModification(path.getType()));
+				}
+								
 				changeSets.add(changeSet);
+			}
+
+			private PathModification toPathModification(char type) {
+				switch(type) {
+					case SVNLogEntryPath.TYPE_ADDED:
+						return PathModification.Add;
+						
+					case SVNLogEntryPath.TYPE_DELETED:
+						return PathModification.Remove;
+						
+					case SVNLogEntryPath.TYPE_REPLACED:
+					case SVNLogEntryPath.TYPE_MODIFIED:
+						return PathModification.Modify;
+				}
+
+				return null;
 			}
 		};
 		

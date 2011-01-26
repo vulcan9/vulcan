@@ -30,6 +30,7 @@ import java.util.Map;
 import junit.framework.TestCase;
 import net.sourceforge.vulcan.dto.ChangeLogDto;
 import net.sourceforge.vulcan.dto.ChangeSetDto;
+import net.sourceforge.vulcan.dto.PathModification;
 import net.sourceforge.vulcan.dto.ProjectConfigDto;
 import net.sourceforge.vulcan.dto.RepositoryTagDto;
 import net.sourceforge.vulcan.dto.RevisionTokenDto;
@@ -59,7 +60,6 @@ public class SubversionRepositoryAdaptorTest extends TestCase {
 	SubversionProjectConfigDto repoConfig = new SubversionProjectConfigDto();
 	ProjectConfigDto projectConfig = new ProjectConfigDto();
 	SubversionRepositoryProfileDto profile = new SubversionRepositoryProfileDto();
-	
 	
 	RevisionTokenDto r1 = new RevisionTokenDto(100l, "r100");
 	RevisionTokenDto r2 = new RevisionTokenDto(200l, "r200");
@@ -166,12 +166,12 @@ public class SubversionRepositoryAdaptorTest extends TestCase {
 		
 		ChangeSetDto change = new ChangeSetDto();
 		
-		change.setModifiedPaths(Collections.singletonList("/some/included/path"));
+		change.addModifiedPath("/some/included/path", PathModification.Modify);
 		change.setRevisionLabel("r125");
 		fakeChangeSets.add(change);
 		
 		change = new ChangeSetDto();
-		change.setModifiedPaths(Collections.singletonList("/some/excluded/path"));
+		change.addModifiedPath("/some/excluded/path", PathModification.Modify);
 		change.setRevisionLabel("r150");
 		fakeChangeSets.add(change);		
 		
@@ -193,7 +193,7 @@ public class SubversionRepositoryAdaptorTest extends TestCase {
 		repoConfig.setCheckoutDepth(CheckoutDepth.Empty);
 		
 		ChangeSetDto change = new ChangeSetDto();
-		change.setModifiedPaths(Collections.singletonList("/some/excluded/path"));
+		change.addModifiedPath("/some/excluded/path", PathModification.Modify);
 		change.setRevisionLabel("r125");
 		fakeChangeSets.add(change);
 		
@@ -214,7 +214,7 @@ public class SubversionRepositoryAdaptorTest extends TestCase {
 		repoConfig.setCheckoutDepth(CheckoutDepth.Empty);
 		
 		ChangeSetDto change = new ChangeSetDto();
-		change.setModifiedPaths(Collections.singletonList("/some/excluded/path"));
+		change.addModifiedPath("/some/excluded/path", PathModification.Modify);
 		change.setRevisionLabel("r125");
 		fakeChangeSets.add(change);
 		
@@ -281,7 +281,7 @@ public class SubversionRepositoryAdaptorTest extends TestCase {
 	
 	public void testFiltersSparseChangeSets() throws Exception {
 		final ChangeSetDto change = new ChangeSetDto();
-		change.setModifiedPaths(Collections.singletonList("some/excluded/path"));
+		change.addModifiedPath("/some/excluded/path", PathModification.Modify);
 		repoConfig.setCheckoutDepth(CheckoutDepth.Empty);
 		
 		fakeChangeSets.add(change);
@@ -293,7 +293,7 @@ public class SubversionRepositoryAdaptorTest extends TestCase {
 	
 	public void testGetChangeLogCachesResult() throws Exception {
 		final ChangeSetDto change = new ChangeSetDto();
-		change.setModifiedPaths(Collections.singletonList("some/excluded/path"));
+		change.addModifiedPath("/some/excluded/path", PathModification.Modify);
 		repoConfig.setCheckoutDepth(CheckoutDepth.Empty);
 		
 		fakeChangeSets.add(change);

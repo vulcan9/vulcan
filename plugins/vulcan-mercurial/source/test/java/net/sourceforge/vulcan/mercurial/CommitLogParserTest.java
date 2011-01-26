@@ -26,6 +26,8 @@ import java.util.List;
 import junit.framework.TestCase;
 import net.sourceforge.vulcan.dto.ChangeLogDto;
 import net.sourceforge.vulcan.dto.ChangeSetDto;
+import net.sourceforge.vulcan.dto.ModifiedPathDto;
+import net.sourceforge.vulcan.dto.PathModification;
 import net.sourceforge.vulcan.mercurial.CommitLogParser.LogEntryDateParseRule;
 
 import org.apache.commons.lang.time.DateUtils;
@@ -42,16 +44,16 @@ public class CommitLogParserTest extends TestCase {
 				"<msg xml:space='preserve'>sample message 1</msg>" +
 				"<paths>" +
 					"<path action='A'>plugins/MercurialConfig.java</path>" +
-					"<path action='A'>plugins/ProcessInvokerTest.java</path>" +
+					"<path action='M'>plugins/ProcessInvokerTest.java</path>" +
 				"</paths>" +
 			"</logentry>" +
 			"<logentry revision='474' node='f0bb3a6e49c3f26797df9ad6d187ba7e6e552a17'>" +
-				"<author email='user-2@example.com'>Sample User Two</author>" +
+				"<author>Sample User Two</author>" +
 				"<date>2010-12-14T19:31:44-05:00</date>" +
 				"<msg xml:space='preserve'>sample message 2</msg>" +
 				"<paths>" +
-					"<path action='A'>file three</path>" +
-					"<path action='A'>4th.txt</path>" +
+					"<path action='M'>file three</path>" +
+					"<path action='R'>4th.txt</path>" +
 				"</paths>" +
 			"</logentry>" +
 		"</log>";
@@ -73,8 +75,10 @@ public class CommitLogParserTest extends TestCase {
 	public void testParseAuthor() throws Exception {
 		final List<ChangeSetDto> actual = new CommitLogParser().parse(changeLogXml).getChangeSets();
 		
-		assertEquals("Example One", actual.get(0).getAuthor());
-		assertEquals("Sample User Two", actual.get(1).getAuthor());
+		assertEquals("Example One", actual.get(0).getAuthorName());
+		assertEquals("one@localhost", actual.get(0).getAuthorEmail());
+		assertEquals("Sample User Two", actual.get(1).getAuthorName());
+		assertEquals(null, actual.get(1).getAuthorEmail());
 	}
 	
 	public void testParseMessage() throws Exception {
@@ -87,8 +91,8 @@ public class CommitLogParserTest extends TestCase {
 	public void testParseModifiedPaths() throws Exception {
 		final List<ChangeSetDto> actual = new CommitLogParser().parse(changeLogXml).getChangeSets();
 		
-		assertEquals(Arrays.asList("plugins/MercurialConfig.java", "plugins/ProcessInvokerTest.java"), actual.get(0).getModifiedPaths());
-		assertEquals(Arrays.asList("file three", "4th.txt"), actual.get(1).getModifiedPaths());
+		assertEquals(Arrays.asList(new ModifiedPathDto("plugins/MercurialConfig.java", PathModification.Add), new ModifiedPathDto("plugins/ProcessInvokerTest.java", PathModification.Modify)), actual.get(0).getModifiedPaths());
+		assertEquals(Arrays.asList(new ModifiedPathDto("file three", PathModification.Modify), new ModifiedPathDto("4th.txt", PathModification.Remove)), actual.get(1).getModifiedPaths());
 	}
 	
 	public void testParseRevision() throws Exception {

@@ -52,6 +52,8 @@ import net.sourceforge.vulcan.dto.BuildMessageDto;
 import net.sourceforge.vulcan.dto.ChangeLogDto;
 import net.sourceforge.vulcan.dto.ChangeSetDto;
 import net.sourceforge.vulcan.dto.MetricDto;
+import net.sourceforge.vulcan.dto.ModifiedPathDto;
+import net.sourceforge.vulcan.dto.PathModification;
 import net.sourceforge.vulcan.dto.ProjectConfigDto;
 import net.sourceforge.vulcan.dto.ProjectStatusDto;
 import net.sourceforge.vulcan.dto.RevisionTokenDto;
@@ -470,11 +472,11 @@ public class AbstractProjectDomBuilderTest extends EasyMockTestCase {
 		final ChangeLogDto changeLog = new ChangeLogDto();
 		final ChangeSetDto changeSet = new ChangeSetDto();
 		
-		changeSet.setAuthor("jane");
+		changeSet.setAuthorName("jane");
 		changeSet.setRevisionLabel(projectStatus.getRevision().getLabel());
 		changeSet.setTimestamp(new Date(date.getTime() + 1000000));
 		changeSet.setMessage("fixed every bug ever in the entire project");
-		changeSet.setModifiedPaths(Arrays.asList("/a/file", "/other/stuff"));
+		changeSet.setModifiedPaths(Arrays.asList(new ModifiedPathDto("/a/file", PathModification.Modify), new ModifiedPathDto("/other/stuff", PathModification.Remove)));
 		
 		changeLog.setChangeSets(Collections.singletonList(changeSet));
 		
@@ -509,7 +511,7 @@ public class AbstractProjectDomBuilderTest extends EasyMockTestCase {
 		final ChangeLogDto changeLog = new ChangeLogDto();
 		final ChangeSetDto changeSet = new ChangeSetDto();
 		
-		changeSet.setAuthor(null);
+		changeSet.setAuthorName(null);
 		changeSet.setRevisionLabel(null);
 		changeSet.setTimestamp(null);
 		changeSet.setMessage(null);
@@ -612,11 +614,11 @@ public class AbstractProjectDomBuilderTest extends EasyMockTestCase {
 		final ChangeLogDto changeLog = new ChangeLogDto();
 		final ChangeSetDto changeSet = new ChangeSetDto();
 		
-		changeSet.setAuthor("jane");
+		changeSet.setAuthorName("jane");
 		changeSet.setRevisionLabel(projectStatus.getRevision().getLabel());
 		changeSet.setTimestamp(new Date(date.getTime() + 1000000));
 		changeSet.setMessage("fixed every bug including bug 4352, issue 12, bug #54, bug: 51 and bug:#5443.  And stuff.");
-		changeSet.setModifiedPaths(Arrays.asList("/a/file", "/other/stuff"));
+		changeSet.setModifiedPaths(Arrays.asList(new ModifiedPathDto("/a/file", PathModification.Modify), new ModifiedPathDto("/other/stuff", PathModification.Remove)));
 		
 		changeLog.setChangeSets(Collections.singletonList(changeSet));
 		
@@ -650,11 +652,11 @@ public class AbstractProjectDomBuilderTest extends EasyMockTestCase {
 		final ChangeLogDto changeLog = new ChangeLogDto();
 		final ChangeSetDto changeSet = new ChangeSetDto();
 		
-		changeSet.setAuthor("jane");
+		changeSet.setAuthorName("jane");
 		changeSet.setRevisionLabel(projectStatus.getRevision().getLabel());
 		changeSet.setTimestamp(new Date(date.getTime() + 1000000));
 		changeSet.setMessage("fixed every bug including bug 4352, issue 12, bug #54, bug: 51 and bug:#5443.  And stuff.");
-		changeSet.setModifiedPaths(Arrays.asList("/a/file", "/other/stuff"));
+		changeSet.setModifiedPaths(Arrays.asList(new ModifiedPathDto("/a/file", PathModification.Modify), new ModifiedPathDto("/other/stuff", PathModification.Remove)));
 		
 		changeLog.setChangeSets(Collections.singletonList(changeSet));
 		
@@ -701,11 +703,11 @@ public class AbstractProjectDomBuilderTest extends EasyMockTestCase {
 		final ChangeLogDto changeLog = new ChangeLogDto();
 		final ChangeSetDto changeSet = new ChangeSetDto();
 		
-		changeSet.setAuthor("jane");
+		changeSet.setAuthorName("jane");
 		changeSet.setRevisionLabel(projectStatus.getRevision().getLabel());
 		changeSet.setTimestamp(new Date(date.getTime() + 1000000));
 		changeSet.setMessage("Used new feature found at http://www.example.com Bug# 27172\nWorks great.");
-		changeSet.setModifiedPaths(Arrays.asList("/a/file", "/other/stuff"));
+		changeSet.setModifiedPaths(Arrays.asList(new ModifiedPathDto("/a/file", PathModification.Modify), new ModifiedPathDto("/other/stuff", PathModification.Remove)));
 		
 		changeLog.setChangeSets(Collections.singletonList(changeSet));
 		
@@ -747,11 +749,11 @@ public class AbstractProjectDomBuilderTest extends EasyMockTestCase {
 		final ChangeLogDto changeLog = new ChangeLogDto();
 		final ChangeSetDto changeSet = new ChangeSetDto();
 		
-		changeSet.setAuthor("jane");
+		changeSet.setAuthorName("jane");
 		changeSet.setRevisionLabel(projectStatus.getRevision().getLabel());
 		changeSet.setTimestamp(new Date(date.getTime() + 1000000));
 		changeSet.setMessage("Used new feature found at http://www.example.com.");
-		changeSet.setModifiedPaths(Arrays.asList("/a/file", "/other/stuff"));
+		changeSet.setModifiedPaths(Arrays.asList(new ModifiedPathDto("/a/file", PathModification.Modify), new ModifiedPathDto("/other/stuff", PathModification.Remove)));
 		
 		changeLog.setChangeSets(Collections.singletonList(changeSet));
 		
@@ -795,12 +797,12 @@ public class AbstractProjectDomBuilderTest extends EasyMockTestCase {
 		final ChangeLogDto changeLog = new ChangeLogDto();
 		final ChangeSetDto changeSet = new ChangeSetDto();
 		
-		changeSet.setAuthor("jane");
+		changeSet.setAuthorName("jane");
 		changeSet.setRevisionLabel(projectStatus.getRevision().getLabel());
 		changeSet.setTimestamp(new Date(date.getTime() + 1000000));
 		changeSet.setMessage("Used new feature (see http://www.example.com)." +
 				"  Also https://www.example.com...");
-		changeSet.setModifiedPaths(Arrays.asList("/a/file", "/other/stuff"));
+		changeSet.setModifiedPaths(Arrays.asList(new ModifiedPathDto("/a/file", PathModification.Modify), new ModifiedPathDto("/other/stuff", PathModification.Remove)));
 		
 		changeLog.setChangeSets(Collections.singletonList(changeSet));
 		

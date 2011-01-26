@@ -35,6 +35,8 @@ import net.sourceforge.vulcan.dto.BuildOutcomeQueryDto;
 import net.sourceforge.vulcan.dto.ChangeLogDto;
 import net.sourceforge.vulcan.dto.ChangeSetDto;
 import net.sourceforge.vulcan.dto.MetricDto;
+import net.sourceforge.vulcan.dto.ModifiedPathDto;
+import net.sourceforge.vulcan.dto.PathModification;
 import net.sourceforge.vulcan.dto.ProjectStatusDto;
 import net.sourceforge.vulcan.dto.RevisionTokenDto;
 import net.sourceforge.vulcan.dto.TestFailureDto;
@@ -656,14 +658,16 @@ public class JdbcBuildOutcomeStoreTest extends TestCase {
 		final ChangeSetDto a = new ChangeSetDto();
 		a.setMessage("did some stuff");
 		a.setRevisionLabel("1.42");
-		a.setModifiedPaths(Arrays.asList("file1", "file2"));
+		a.setAuthorName("Jamie");
+		a.setAuthorEmail("jamie@localhost");
+		a.setModifiedPaths(Arrays.asList(new ModifiedPathDto("file1", PathModification.Modify), new ModifiedPathDto("file2", null)));
 		
 		final ChangeSetDto b = new ChangeSetDto();
 		b.setMessage("made some changes");
 		b.setRevisionLabel("<multiple>");
-		b.setAuthor("Barbara");
+		b.setAuthorName("Barbara");
 		b.setTimestamp(new Date());
-		b.setModifiedPaths(Arrays.asList("file3", "file4"));
+		b.setModifiedPaths(Arrays.asList(new ModifiedPathDto("file3", PathModification.Add), new ModifiedPathDto("file4", PathModification.Remove)));
 		
 		log.setChangeSets(Arrays.asList(a, b));
 		
@@ -693,7 +697,7 @@ public class JdbcBuildOutcomeStoreTest extends TestCase {
 		final ChangeSetDto a = new ChangeSetDto();
 		a.setMessage("did some stuff");
 		a.setRevisionLabel("1.42");
-		a.setModifiedPaths(Arrays.asList("a/b/c", "x/y/z"));
+		a.setModifiedPaths(Arrays.asList(new ModifiedPathDto("a/b/c", PathModification.Modify), new ModifiedPathDto("x/y/z", PathModification.Add)));
 		
 		log.setChangeSets(Arrays.asList(a));
 		

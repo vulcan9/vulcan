@@ -22,6 +22,8 @@ import java.sql.Types;
 
 import javax.sql.DataSource;
 
+import net.sourceforge.vulcan.dto.ModifiedPathDto;
+
 import org.springframework.jdbc.core.SqlParameter;
 import org.springframework.jdbc.object.SqlUpdate;
 
@@ -29,26 +31,28 @@ class ModifiedPathInserter extends SqlUpdate {
 	public ModifiedPathInserter(DataSource dataSource) {
 		setDataSource(dataSource);
 		setSql("insert into modified_paths " +
-				"(build_id, change_set_id, modified_path) " +
-				"values (?, ?, ?)");
+				"(build_id, change_set_id, modified_path, modification_type) " +
+				"values (?, ?, ?, ?)");
 		
 		declareParameter(new SqlParameter(Types.NUMERIC));
 		declareParameter(new SqlParameter(Types.NUMERIC));
 		declareParameter(new SqlParameter(Types.VARCHAR));
+		declareParameter(new SqlParameter(Types.CHAR));
 		
 		compile();
 	}
 	
-	public int insert(int buildId, int changeSetId, Iterable<String> modifiedPaths) {
+	public int insert(int buildId, int changeSetId, Iterable<ModifiedPathDto> modifiedPaths) {
 		int count = 0;
 		
-		final Object[] params = new Object[3];
+		final Object[] params = new Object[4];
 		
 		params[0] = buildId;
 		params[1] = changeSetId;
 
-		for (String path : modifiedPaths) {
-			params[2] = path;
+		for (ModifiedPathDto path : modifiedPaths) {
+			params[2] = path.getPath();
+			params[3] = path.getAction() != null ? path.getAction().name().substring(0, 1) : null;
 			
 			count += update(params);
 		}

@@ -125,9 +125,9 @@ public class EmailPluginTest extends TestCase {
 		ChangeSetDto changeSetDto = new ChangeSetDto();
 		ChangeSetDto changeSetDto2 = new ChangeSetDto();
 		ChangeSetDto changeSetDto3 = new ChangeSetDto();
-		changeSetDto.setAuthor("thedude "); //just in case of spaces
-		changeSetDto2.setAuthor(" dog"); //just in case of spaces
-		changeSetDto3.setAuthor(" thedudette"); //just in case of spaces
+		changeSetDto.setAuthorName("thedude "); //just in case of spaces
+		changeSetDto2.setAuthorName(" dog"); //just in case of spaces
+		changeSetDto3.setAuthorName(" thedudette"); //just in case of spaces
 		ArrayList<ChangeSetDto> changeSets = new ArrayList<ChangeSetDto>();
 		changeSets.add(changeSetDto);
 		changeSets.add(changeSetDto2);
@@ -151,8 +151,8 @@ public class EmailPluginTest extends TestCase {
 
 		ChangeSetDto changeSetDto = new ChangeSetDto();
 		ChangeSetDto changeSetDto2 = new ChangeSetDto();
-		changeSetDto.setAuthor("thedude "); //just in case of spaces
-		changeSetDto2.setAuthor(" dog"); //just in case of spaces
+		changeSetDto.setAuthorName("thedude "); //just in case of spaces
+		changeSetDto2.setAuthorName(" dog"); //just in case of spaces
 		ArrayList<ChangeSetDto> changeSets = new ArrayList<ChangeSetDto>();
 		changeSets.add(changeSetDto);
 		changeSets.add(changeSetDto2);
@@ -178,9 +178,9 @@ public class EmailPluginTest extends TestCase {
 		ChangeSetDto changeSetDto = new ChangeSetDto();
 		ChangeSetDto changeSetDto2 = new ChangeSetDto();
 		ChangeSetDto changeSetDto3 = new ChangeSetDto();
-		changeSetDto.setAuthor("thedude "); //just in case of spaces
-		changeSetDto2.setAuthor(" dog"); //just in case of spaces
-		changeSetDto3.setAuthor(" thedudette"); //just in case of spaces
+		changeSetDto.setAuthorName("thedude "); //just in case of spaces
+		changeSetDto2.setAuthorName(" dog"); //just in case of spaces
+		changeSetDto3.setAuthorName(" thedudette"); //just in case of spaces
 		ArrayList<ChangeSetDto> changeSets = new ArrayList<ChangeSetDto>();
 		changeSets.add(changeSetDto);
 		changeSets.add(changeSetDto2);
@@ -208,9 +208,9 @@ public class EmailPluginTest extends TestCase {
 		ChangeSetDto changeSetDto = new ChangeSetDto();
 		ChangeSetDto changeSetDto2 = new ChangeSetDto();
 		ChangeSetDto changeSetDto3 = new ChangeSetDto();
-		changeSetDto.setAuthor("thedude "); //just in case of spaces
-		changeSetDto2.setAuthor(" dog"); //just in case of spaces
-		changeSetDto3.setAuthor(" thedude"); //just in case of spaces
+		changeSetDto.setAuthorName("thedude "); //just in case of spaces
+		changeSetDto2.setAuthorName(" dog"); //just in case of spaces
+		changeSetDto3.setAuthorName(" thedude"); //just in case of spaces
 		ArrayList<ChangeSetDto> changeSets = new ArrayList<ChangeSetDto>();
 		changeSets.add(changeSetDto);
 		changeSets.add(changeSetDto2);
@@ -235,9 +235,9 @@ public class EmailPluginTest extends TestCase {
 		ChangeSetDto changeSetDto = new ChangeSetDto();
 		ChangeSetDto changeSetDto2 = new ChangeSetDto();
 		ChangeSetDto changeSetDto3 = new ChangeSetDto();
-		changeSetDto.setAuthor("thedude "); //just in case of spaces
-		changeSetDto2.setAuthor(" dog"); //just in case of spaces
-		changeSetDto3.setAuthor(" thedudette"); //just in case of spaces
+		changeSetDto.setAuthorName("thedude "); //just in case of spaces
+		changeSetDto2.setAuthorName(" dog"); //just in case of spaces
+		changeSetDto3.setAuthorName(" thedudette"); //just in case of spaces
 		ArrayList<ChangeSetDto> changeSets = new ArrayList<ChangeSetDto>();
 		changeSets.add(changeSetDto);
 		changeSets.add(changeSetDto2);
