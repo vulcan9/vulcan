@@ -119,8 +119,7 @@ public abstract class MockApplicationContextStrutsTestCase extends EasyMockStrut
 
 		context = new ServletContextSimulator() {
 			@Override
-			@SuppressWarnings("unchecked")
-			public Set getResourcePaths(String path) {
+			public Set<String> getResourcePaths(String path) {
 				return Collections.emptySet();
 			}
 		};

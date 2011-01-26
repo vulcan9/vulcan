@@ -99,8 +99,7 @@ public class SubversionRepositoryAdaptorTest extends TestCase {
 		
 		r = new SubversionRepositoryAdaptor(globalConfig, projectConfig, repoConfig, null, globalConfig.getProfiles()[0], new SVNRepositoryImpl(fakeURL, null) {
 			@Override
-			@SuppressWarnings("unchecked")
-			public Collection getDir(String path, long arg1, SVNProperties arg2, Collection arg3) throws SVNException {
+			public Collection<SVNDirEntry> getDir(String path, long arg1, SVNProperties arg2, @SuppressWarnings("rawtypes") Collection arg3) throws SVNException {
 				if (path.equals(path)) {
 					return Collections.singletonList(new SVNDirEntry(fakeURL, fakeURL, "tags", SVNNodeKind.DIR, 1, false, 1, new Date(), "tags"));
 				}

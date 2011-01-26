@@ -39,8 +39,7 @@ public class PreferencesFormTest extends TestCase {
 	
 	ServletContextSimulator context = new ServletContextSimulator() {
 		@Override
-		@SuppressWarnings("unchecked")
-		public Set getResourcePaths(String path) {
+		public Set<String> getResourcePaths(String path) {
 			if (!paths.containsKey(path)) {
 				fail("no such path " + path);
 			}

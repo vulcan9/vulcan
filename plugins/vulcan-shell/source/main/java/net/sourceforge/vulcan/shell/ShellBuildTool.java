@@ -59,7 +59,7 @@ public class ShellBuildTool implements BuildTool {
 		final String[] arguments = projectPluginConfig.getArguments();
 		
 		if (arguments.length == 0) {
-			throw new ConfigException("shell.missing.arguments", null);
+			throw new ConfigException("shell.missing.arguments");
 		}
 		
 		final String[] environment = createEnvironment(buildStatus);
@@ -70,7 +70,7 @@ public class ShellBuildTool implements BuildTool {
 		try {
 			process = execute(arguments, environment, dir);
 		} catch (IOException e) {
-			throw new ConfigException("shell.exec.failure", new String[] {arguments[0], e.getMessage()});
+			throw new ConfigException("shell.exec.failure", e, arguments[0], e.getMessage());
 		}
 		
 		startOutputProcessors(process, logFile, buildDetailCallback);

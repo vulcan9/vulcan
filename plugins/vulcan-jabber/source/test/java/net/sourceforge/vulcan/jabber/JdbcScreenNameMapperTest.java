@@ -45,9 +45,8 @@ public class JdbcScreenNameMapperTest extends TestCase {
 			}
 			return new JdbcTemplate() {
 				@Override
-				@SuppressWarnings("unchecked")
 				public Object queryForObject(String sql, Object[] args,
-						Class requiredType) throws DataAccessException {
+						@SuppressWarnings("rawtypes") Class requiredType) throws DataAccessException {
 					if (fakeResults.containsKey(args[0].toString())) {
 						return fakeResults.get(args[0].toString());
 					}
