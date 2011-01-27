@@ -125,7 +125,6 @@ public class CvsProjectConfigurator extends CvsSupport implements ProjectReposit
 			
 			cmd.setModules(new String[] {file});
 			
-			//TODO: how to allow user to specify branch/tag?
 			cmd.setExportByRevision(tag);
 			
 			cmd.setExportDirectory(exportDir.getName());
