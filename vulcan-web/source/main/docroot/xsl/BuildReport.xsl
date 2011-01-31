@@ -530,7 +530,22 @@
 						<xsl:sort select="./timestamp/@millis" order="ascending" data-type="number"/>
 						<tr>
 							<td><xsl:apply-templates select="@revision"/></td>
-							<td><xsl:apply-templates select="@author"/></td>
+							<td>
+								<xsl:choose>
+									<xsl:when test="@author-email">
+										<a>
+											<xsl:attribute name="href">
+												<xsl:text>mailto:</xsl:text>
+												<xsl:value-of select="@author-email"/>
+											</xsl:attribute>
+											<xsl:value-of select="@author"/>
+										</a>
+									</xsl:when>
+									<xsl:otherwise>
+										<xsl:value-of select="@author"/>
+									</xsl:otherwise>
+								</xsl:choose>
+							</td>
 							<td class="timestamp"><xsl:value-of select="timestamp"/></td>
 							<td class="commit-message"><xsl:apply-templates select="message"/></td>
 							<td>
