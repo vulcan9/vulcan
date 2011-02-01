@@ -117,6 +117,7 @@ public class XmppClient implements JabberClient, MessageListener {
 		
 		LOG.debug(MessageFormat.format("Message ({2}) from {0}: {1}", chat.getParticipant(), msg.getBody(), msg.getType()));
 		
+		// TODO: don't raise event if msg type is error.  maybe raise some other event.
 		synchronized(lock) {
 			for (JabberChatListener l : listeners) {
 				l.messageReceived(chat.getParticipant(), msg.getBody());

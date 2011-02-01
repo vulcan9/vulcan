@@ -49,7 +49,7 @@ public class JabberPluginConfig extends PluginConfigDto {
 	}
 	
 	public static enum ScreenNameMapperType {
-		Dictionay(new DictionaryScreenNameMapperConfig()) {
+		Dictionary(new DictionaryScreenNameMapperConfig()) {
 			@Override
 			public ScreenNameMapper createScreenNameMapper(PluginConfigDto config) {
 				return new DictionaryScreenNameMapper((DictionaryScreenNameMapperConfig) config);
@@ -92,7 +92,7 @@ public class JabberPluginConfig extends PluginConfigDto {
 	
 	private JabberTemplatesConfig templateConfig = new JabberTemplatesConfig();
 	
-	private ScreenNameMapperType screenNameMapper = ScreenNameMapperType.Dictionay;
+	private ScreenNameMapperType screenNameMapper = ScreenNameMapperType.Dictionary;
 	private String[] recipients = {};
 	private ProjectsToMonitor projectsToMonitor = ProjectsToMonitor.All;
 	private String[] selectedProjects = {};
