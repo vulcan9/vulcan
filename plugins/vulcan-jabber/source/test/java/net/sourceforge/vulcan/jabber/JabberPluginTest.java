@@ -145,6 +145,28 @@ public class JabberPluginTest extends EasyMockTestCase {
 		assertEquals(Arrays.asList(prevStatus), plugin.getBuildListener(status.getName()).getPreviousFailures());
 	}
 	
+	public void testPassesScreenNameMapperToListener() throws Exception {
+		prevStatus.setStatus(Status.FAIL);
+		
+		config.setProjectsToMonitor(ProjectsToMonitor.Specify);
+		config.setSelectedProjects(new String[] {status.getName()});
+		client.refreshConnection("example.com", 5222, "", "user", "pass");
+		client.refreshConnection("example.com", 5222, "", "user", "pass");
+		
+		expect(buildManager.getProjectBuilder(status.getName())).andReturn(projectBuilder);
+		expect(buildManager.getLatestStatus(status.getName())).andReturn(prevStatus);
+		projectBuilder.addBuildStatusListener((BuildStatusListener) notNull());
+		
+		replay();
+		
+		plugin.setConfiguration(config);
+		plugin.onBuildStarting(new BuildStartingEvent(buildManager, buildDaemonInfo, target, status));
+		
+		verify();
+		
+		assertEquals(plugin.getScreenNameResolver(), plugin.getBuildListener(status.getName()).getScreenNameResolver());
+	}
+	
 	public void testGetsPreviousFailuresLastGoodBuildNumberSingle() throws Exception {
 		prevStatus.setStatus(Status.FAIL);
 		prevStatus.setLastGoodBuildNumber(prevStatus.getBuildNumber()-1);

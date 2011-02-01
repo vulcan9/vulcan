@@ -48,20 +48,39 @@ public class JabberPluginConfig extends PluginConfigDto {
 		Warnings
 	}
 	
-	public static enum ScreenNameMapper {
-		Dictionay(new DictionaryScreenNameMapperConfig()),
-		Regex(new RegexScreenNameMapperConfig()),
-		Jdbc(new JdbcScreenNameMapperConfig());
+	public static enum ScreenNameMapperType {
+		Dictionay(new DictionaryScreenNameMapperConfig()) {
+			@Override
+			public ScreenNameMapper createScreenNameMapper(PluginConfigDto config) {
+				return new DictionaryScreenNameMapper((DictionaryScreenNameMapperConfig) config);
+			}
+		},
+		
+		Regex(new RegexScreenNameMapperConfig()) {
+			@Override
+			public ScreenNameMapper createScreenNameMapper(PluginConfigDto config) {
+				return new RegexScreenNameMapper((RegexScreenNameMapperConfig) config);
+			}
+		},
+		
+		Jdbc(new JdbcScreenNameMapperConfig()) {
+			@Override
+			public ScreenNameMapper createScreenNameMapper(PluginConfigDto config) {
+				return new JdbcScreenNameMapper((JdbcScreenNameMapperConfig) config);
+			}
+		};
 		
 		private final PluginConfigDto defaultConfig;
 		
-		ScreenNameMapper(PluginConfigDto defaultConfig) {
+		ScreenNameMapperType(PluginConfigDto defaultConfig) {
 			this.defaultConfig = defaultConfig;
 		}
 		
 		public PluginConfigDto getDefaultConfig() {
 			return defaultConfig;
 		}
+		
+		public abstract ScreenNameMapper createScreenNameMapper(PluginConfigDto config);
 	}
 	
 	private String server = "";
@@ -73,11 +92,11 @@ public class JabberPluginConfig extends PluginConfigDto {
 	
 	private JabberTemplatesConfig templateConfig = new JabberTemplatesConfig();
 	
-	private ScreenNameMapper screenNameMapper = ScreenNameMapper.Dictionay;
+	private ScreenNameMapperType screenNameMapper = ScreenNameMapperType.Dictionay;
 	private String[] recipients = {};
 	private ProjectsToMonitor projectsToMonitor = ProjectsToMonitor.All;
 	private String[] selectedProjects = {};
-	private Map<ScreenNameMapper, ? super PluginConfigDto> screenNameMapperConfig = new HashMap<ScreenNameMapper, PluginConfigDto>();
+	private Map<ScreenNameMapperType, ? super PluginConfigDto> screenNameMapperConfig = new HashMap<ScreenNameMapperType, PluginConfigDto>();
 	
 	private EventsToMonitor[] eventsToMonitor = { EventsToMonitor.Errors };
 	private String errorRegex = "";
@@ -131,8 +150,8 @@ public class JabberPluginConfig extends PluginConfigDto {
 		copy.setTemplateConfig(getTemplateConfig().copy());
 		copy.setSelectedProjects((String[]) ArrayUtils.clone(getSelectedProjects()));
 		copy.setEventsToMonitor((EventsToMonitor[]) ArrayUtils.clone(getEventsToMonitor()));
-		copy.screenNameMapperConfig = new HashMap<ScreenNameMapper, PluginConfigDto>();
-		for (ScreenNameMapper key : screenNameMapperConfig.keySet()) {
+		copy.screenNameMapperConfig = new HashMap<ScreenNameMapperType, PluginConfigDto>();
+		for (ScreenNameMapperType key : screenNameMapperConfig.keySet()) {
 			final PluginConfigDto pluginConfigDto = (PluginConfigDto) screenNameMapperConfig.get(key);
 			copy.screenNameMapperConfig.put(key, (PluginConfigDto) pluginConfigDto.copy());
 		}
@@ -253,20 +272,20 @@ public class JabberPluginConfig extends PluginConfigDto {
 		getTemplateConfig().setNotifyBuildMasterTemplate(otherUsersMessageFormat);
 	}
 	
-	public ScreenNameMapper getScreenNameMapper() {
+	public ScreenNameMapperType getScreenNameMapper() {
 		return screenNameMapper;
 	}
 	
-	public void setScreenNameMapper(ScreenNameMapper screenNameMapper) {
+	public void setScreenNameMapper(ScreenNameMapperType screenNameMapper) {
 		this.screenNameMapper = screenNameMapper;
 	}
 	
-	public Map<ScreenNameMapper, ? super PluginConfigDto> getScreenNameMapperConfigs() {
+	public Map<ScreenNameMapperType, ? super PluginConfigDto> getScreenNameMapperConfigs() {
 		return screenNameMapperConfig;
 	}
 	
 	public void setScreenNameMapperConfigs(
-			Map<ScreenNameMapper, ? super PluginConfigDto> screenNameMapperConfig) {
+			Map<ScreenNameMapperType, ? super PluginConfigDto> screenNameMapperConfig) {
 		this.screenNameMapperConfig = screenNameMapperConfig;
 	}
 	
@@ -319,5 +338,9 @@ public class JabberPluginConfig extends PluginConfigDto {
 	
 	public void setServiceName(String serviceName) {
 		this.serviceName = serviceName;
+	}
+
+	public ScreenNameMapper createScreenNameMapper() {
+		return getScreenNameMapper().createScreenNameMapper(getScreenNameMapperConfig());
 	}
 }

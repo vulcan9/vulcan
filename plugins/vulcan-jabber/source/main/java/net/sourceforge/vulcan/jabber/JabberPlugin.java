@@ -56,11 +56,16 @@ public class JabberPlugin implements BuildManagerObserverPlugin, ConfigurablePlu
 	private MessageSource messageSource;
 	private JabberClient client;
 	private JabberResponder responder;
+	private ScreenNameMapper screenNameResolver;
 	
 	public void setClient(JabberClient client) {
 		this.client = client;
 	}
-
+	
+	public void setMessageSource(MessageSource messageSource) {
+		this.messageSource = messageSource;
+	}
+	
 	public void setResponder(JabberResponder responder) {
 		this.responder = responder;
 	}
@@ -69,15 +74,12 @@ public class JabberPlugin implements BuildManagerObserverPlugin, ConfigurablePlu
 		return config;
 	}
 	
-	public void setMessageSource(MessageSource messageSource) {
-		this.messageSource = messageSource;
-	}
-	
 	public void setConfiguration(PluginConfigDto bean) {
 		config = (JabberPluginConfig) bean;
 		
 		client.refreshConnection(config.getServer(), config.getPort(), config.getServiceName(), config.getUsername(), config.getPassword());
 		responder.setConfiguration(config);
+		screenNameResolver = config.createScreenNameMapper();
 	}
 	
 	public void onBuildStarting(BuildStartingEvent event) {
@@ -88,20 +90,6 @@ public class JabberPlugin implements BuildManagerObserverPlugin, ConfigurablePlu
 		}
 		
 		client.refreshConnection(config.getServer(), config.getPort(), config.getServiceName(), config.getUsername(), config.getPassword());
-		
-		final ScreenNameMapper screenNameResolver;
-		
-		switch(config.getScreenNameMapper()) {
-			case Dictionay:
-				screenNameResolver = new DictionaryScreenNameMapper((DictionaryScreenNameMapperConfig) config.getScreenNameMapperConfig());
-				break;
-			case Jdbc:
-				screenNameResolver = new JdbcScreenNameMapper((JdbcScreenNameMapperConfig) config.getScreenNameMapperConfig());
-				break;
-			default:
-				screenNameResolver = new RegexScreenNameMapper((RegexScreenNameMapperConfig) config.getScreenNameMapperConfig());
-				break;
-		}
 		
 		final BuildManager mgr = (BuildManager)event.getSource();
 		
@@ -170,6 +158,10 @@ public class JabberPlugin implements BuildManagerObserverPlugin, ConfigurablePlu
 		return PLUGIN_NAME;
 	}
 
+	public ScreenNameMapper getScreenNameResolver() {
+		return screenNameResolver;
+	}
+	
 	private boolean isProjectMonitored(String projectName) {
 		if (config.getProjectsToMonitor() == ProjectsToMonitor.All) {
 			return true;
