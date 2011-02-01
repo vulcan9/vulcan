@@ -48,6 +48,32 @@
 				</plugins>
 			</build>			
 		</profile>
+		<profile>
+			<id>copy-resources</id>
+			<build>
+				<plugins>
+					<plugin>
+						<artifactId>maven-antrun-plugin</artifactId>
+						<executions>
+							<execution>
+								<goals>
+									<goal>run</goal>
+								</goals>
+							</execution>
+						</executions>
+						<configuration>
+							<tasks>
+								<copy todir="${project.build.directory}/${pom.artifactId}-${pom.version}">
+									<fileset dir="${basedir}/source/main/docroot">
+										<include name="**/*"/>
+									</fileset>
+								</copy>
+							</tasks>
+						</configuration>
+					</plugin>
+				</plugins>
+			</build>			
+		</profile>
 	</profiles>
 	
 	<build>
