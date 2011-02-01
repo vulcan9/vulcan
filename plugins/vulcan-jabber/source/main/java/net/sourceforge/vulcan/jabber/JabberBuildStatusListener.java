@@ -252,4 +252,8 @@ class JabberBuildStatusListener implements BuildStatusListener {
 	public void setPreviousFailures(List<ProjectStatusDto> previousFailures) {
 		this.previousFailures = previousFailures;
 	}
+	
+	public ScreenNameMapper getScreenNameResolver() {
+		return screenNameResolver;
+	}
 }
