@@ -105,3 +105,15 @@ input[type=text].new-label {
 .idle, .time-remaining {
 	color: #666;
 }
+
+.modify {
+	color: orange;
+}
+
+.add {
+	color: green;
+}
+
+.remove {
+	color: red;
+}

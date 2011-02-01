@@ -552,7 +552,15 @@
 								<ul class="modified-paths">
 								<xsl:for-each select="./modified-paths/path">
 									<xsl:sort select="." order="ascending" data-type="text"/>
-									<li><xsl:apply-templates select="."/></li>
+									<li>
+										<xsl:if test="@action">
+											<xsl:attribute name="class">
+												<xsl:value-of select="@action"/>
+											</xsl:attribute>
+										</xsl:if>
+										
+										<xsl:apply-templates select="."/>
+									</li>
 								</xsl:for-each>
 								</ul>
 							</td>
