@@ -59,7 +59,7 @@ public class SpringBeanXmlEncoderTest extends TestCase {
 		}
 	}
 	public static class Bean {
-		public enum Status { ACTIVE, PASSIVE };
+		public enum Status { ACTIVE, PASSIVE {} };
 		
 		private String value;
 		private File filename;
@@ -338,6 +338,27 @@ public class SpringBeanXmlEncoderTest extends TestCase {
 		assertEquals("targetField", props.get(1).getAttributeValue("name"));
 		assertEquals(1, props.get(1).getContentSize());
 		assertEquals(Status.ACTIVE.name(), props.get(1).getChild("value").getText());
+	}
+	@SuppressWarnings("unchecked")
+	public void testHandlesEnumSubclass() {
+		final Element root = new Element("beans");
+		
+		enc.encodeEnum(root, Status.PASSIVE);
+		
+		assertEquals(1, root.getContentSize());
+
+		final Element bean = root.getChild("bean");
+		assertNotNull(bean);
+		assertEquals(FieldRetrievingFactoryBean.class.getName(), bean.getAttributeValue("class"));
+		
+		final List<Element> props = bean.getChildren();
+		assertEquals(2, props.size());
+		assertEquals("targetClass", props.get(0).getAttributeValue("name"));
+		assertEquals(1, props.get(0).getContentSize());
+		assertEquals(Status.class.getName(), props.get(0).getChild("value").getText());
+		assertEquals("targetField", props.get(1).getAttributeValue("name"));
+		assertEquals(1, props.get(1).getContentSize());
+		assertEquals(Status.PASSIVE.name(), props.get(1).getChild("value").getText());
 	}
 	public void testHandlesFile() {
 		final Element root = new Element("beans");

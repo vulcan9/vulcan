@@ -262,7 +262,7 @@ public final class SpringBeanXmlEncoder implements BeanEncoder {
 		
 		final Element targetClass = new Element("property");
 		targetClass.setAttribute("name", "targetClass");
-		encodeAsValue(targetClass, e.getClass().getName());
+		encodeAsValue(targetClass, e.getDeclaringClass().getName());
 		
 		final Element targetField = new Element("property");
 		targetField.setAttribute("name", "targetField");
