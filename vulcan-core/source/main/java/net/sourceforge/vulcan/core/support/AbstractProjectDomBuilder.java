@@ -439,7 +439,7 @@ public abstract class AbstractProjectDomBuilder implements ProjectDomBuilder {
 			final Element pathElem = new Element("path");
 			pathElem.setText(path.getPath());
 			if (path.getAction() != null) {
-				pathElem.setAttribute("action", path.getAction().name());
+				pathElem.setAttribute("action", path.getAction().name().toLowerCase());
 			}
 			mps.addContent(pathElem);
 		}

@@ -698,3 +698,7 @@ iframe {
 	-moz-column-width: 12em;
 	-moz-column-gap: 1em;
 }
+
+.remove {
+	text-decoration: line-through;
+}
