@@ -58,11 +58,15 @@ public class PluginFactoryExpert implements SpringBeanXmlEncoder.FactoryExpert {
 		final List<String> args = new ArrayList<String>();
 		
 		args.add(id);
-		args.add(bean.getClass().getName());
 		
 		if (bean instanceof Enum<?>) {
-			args.add(((Enum<?>)bean).name());
+			final Enum<?> enumBean = (Enum<?>)bean;
+			args.add(enumBean.getDeclaringClass().getName());
+			args.add(enumBean.name());
+		} else {
+			args.add(bean.getClass().getName());
 		}
+		
 		return args;
 	}
 	public void registerPlugin(ClassLoader classLoader, String id) {
