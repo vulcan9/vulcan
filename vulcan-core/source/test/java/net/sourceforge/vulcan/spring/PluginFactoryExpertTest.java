@@ -18,6 +18,7 @@
  */
 package net.sourceforge.vulcan.spring;
 
+import java.util.Arrays;
 import java.util.List;
 
 import junit.framework.TestCase;
@@ -60,6 +61,7 @@ public class PluginFactoryExpertTest extends TestCase {
 		} catch (IllegalStateException e) {
 		}
 	}
+	
 	public void testGetCtrArgs() throws Exception {
 		id = "mock";
 		
@@ -74,7 +76,9 @@ public class PluginFactoryExpertTest extends TestCase {
 		assertEquals("mock", elems.get(0));
 		assertEquals(PluginStub.class.getName(), elems.get(1));
 	}
-	public static enum Foo { A, B };
+	
+	public static enum Foo { A, B {} };
+	
 	public void testGetFactoryMethod() throws Exception {
 		id = "clock";
 		expert.registerPlugin(PluginStub.class.getClassLoader(), id);
@@ -90,4 +94,14 @@ public class PluginFactoryExpertTest extends TestCase {
 		assertEquals(Foo.class.getName(), elems.get(1));
 		assertEquals("A", elems.get(2));
 	}
+	
+	
+	public void testUsesDeclaringClassForEnum() throws Exception {
+		id = "b";
+		
+		expert.registerPlugin(Foo.class.getClassLoader(), id);
+		
+		assertEquals(Arrays.asList("b", Foo.class.getName(), Foo.B.name()), expert.getConstructorArgs(Foo.B));
+	}
+
 }
