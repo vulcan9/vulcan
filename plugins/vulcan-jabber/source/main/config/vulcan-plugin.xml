@@ -8,6 +8,9 @@
 		</property>
 	</bean>
 	
+	<bean name="smackKeepAliveThreadInterrupter" class="net.sourceforge.vulcan.jabber.SmackKeepAliveThreadInterrupter"
+		destroy-method="interrupt"/>
+		
 	<bean name="plugin" class="net.sourceforge.vulcan.jabber.JabberPlugin">
 		<property name="client" ref="xmppClient"/>
 		<property name="responder" ref="responder"/>

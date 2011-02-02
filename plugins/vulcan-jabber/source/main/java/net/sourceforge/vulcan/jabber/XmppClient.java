@@ -73,6 +73,8 @@ public class XmppClient implements JabberClient, MessageListener {
 				return;
 			}
 			
+			LOG.info("Connecting to " + server + ":" + port);
+			
 			connect(server, port, serviceName, username, password);
 			if (connection == null) {
 				this.connectionString = null;
@@ -83,6 +85,7 @@ public class XmppClient implements JabberClient, MessageListener {
 	public void disconnect() {
 		synchronized (lock) {
 			if (connection != null) {
+				LOG.info("Disconnecting from XMPP server.");
 				connection.disconnect();
 				connection = null;
 				connectionString = null;
@@ -144,7 +147,12 @@ public class XmppClient implements JabberClient, MessageListener {
 
 		connection = new XMPPConnection(config);
 		
+		final ClassLoader parentClassLoader = Thread.currentThread().getContextClassLoader();
+		
 		try {
+			// Set context class loader on current thread so threads started by Smack will inherit it.
+			Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
+			
 			connection.connect();
 			connection.login(username, password);
 			connection.getChatManager().addChatListener(new ChatManagerListener() {
@@ -158,6 +166,8 @@ public class XmppClient implements JabberClient, MessageListener {
 					new Object[] {server, port, username, e.getMessage()}, e));
 			
 			connection = null;
+		} finally {
+			Thread.currentThread().setContextClassLoader(parentClassLoader);
 		}
 	}
 	
