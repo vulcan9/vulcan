@@ -30,7 +30,7 @@ import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jndi.JndiObjectFactoryBean;
 
-public class JdbcScreenNameMapper  implements ScreenNameMapper {
+public class JdbcScreenNameMapper implements ScreenNameMapper {
 	private final static Log LOG = LogFactory.getLog(JdbcScreenNameMapper.class);
 	
 	private final JdbcScreenNameMapperConfig config;
