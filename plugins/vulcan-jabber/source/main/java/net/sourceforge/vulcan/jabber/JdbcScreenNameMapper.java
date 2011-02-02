@@ -39,15 +39,15 @@ public class JdbcScreenNameMapper implements ScreenNameMapper {
 		this.config = config;
 	}
 
-	public Map<String, String> lookupByAuthor(Iterable<String> authors) {
+	public Map<String, String> lookupByAuthor(Iterable<Committer> authors) {
 		final Map<String, String> screenNames = new HashMap<String, String>();
 		
 		try {
 			final JdbcTemplate template = createJdbcTemplate();
 			
-			for (String author : authors) {
+			for (Committer author : authors) {
 				try {
-					screenNames.put(author, (String) template.queryForObject(config.getSql(), new Object[] {author}, String.class));
+					screenNames.put(author.getName(), (String) template.queryForObject(config.getSql(), new Object[] {author.getName()}, String.class));
 				} catch (IncorrectResultSizeDataAccessException e) {
 					LOG.info("No screen name found for commit author " + author);
 				}

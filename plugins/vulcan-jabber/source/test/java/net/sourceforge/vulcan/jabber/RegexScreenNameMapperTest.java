@@ -33,7 +33,7 @@ public class RegexScreenNameMapperTest extends TestCase {
 		expected.put("Sam", "Sam");
 		expected.put("Jill", "Jill");
 		
-		final Map<String, String> result = mapper.lookupByAuthor(expected.keySet());
+		final Map<String, String> result = mapper.lookupByAuthor(Arrays.asList(new Committer("Sam", null), new Committer("Jill", null)));
 		
 		assertEquals(expected, result);
 		assertNotSame(expected, result);
@@ -46,7 +46,7 @@ public class RegexScreenNameMapperTest extends TestCase {
 		config.setReplacement("$1");
 		
 		final RegexScreenNameMapper mapper = new RegexScreenNameMapper(config);
-		final Map<String, String> result = mapper.lookupByAuthor(Arrays.asList("domain\\username"));
+		final Map<String, String> result = mapper.lookupByAuthor(Arrays.asList(new Committer("domain\\username", null)));
 		
 		assertEquals(Collections.singletonMap("domain\\username", "username"), result);
 	}
@@ -58,7 +58,7 @@ public class RegexScreenNameMapperTest extends TestCase {
 		config.setReplacement("$1@gmail.com");
 		
 		final RegexScreenNameMapper mapper = new RegexScreenNameMapper(config);
-		final Map<String, String> result = mapper.lookupByAuthor(Arrays.asList("chris.eldredge"));
+		final Map<String, String> result = mapper.lookupByAuthor(Arrays.asList(new Committer("chris.eldredge", null)));
 		
 		assertEquals(Collections.singletonMap("chris.eldredge", "chris.eldredge@gmail.com"), result);
 	}
