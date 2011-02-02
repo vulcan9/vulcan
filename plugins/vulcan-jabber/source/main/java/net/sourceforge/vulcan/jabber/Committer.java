@@ -18,11 +18,23 @@
  */
 package net.sourceforge.vulcan.jabber;
 
-import java.util.Map;
+import net.sourceforge.vulcan.dto.BaseDto;
 
-public interface ScreenNameMapper {
-	/**
-	 * @return Map where the key is the comitter's name and the value is the screen name.
-	 */
-	public Map<String, String> lookupByAuthor(Iterable<Committer> committers);
+public class Committer extends BaseDto {
+	private final String name;
+	private final String email;
+	
+	public Committer(String name, String email) {
+		this.name = name;
+		this.email = email;
+	}
+	
+	public String getName() {
+		return name;
+	}
+	
+	public String getEmail() {
+		return email;
+	}
+	
 }

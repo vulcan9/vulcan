@@ -18,7 +18,6 @@
  */
 package net.sourceforge.vulcan.jabber;
 
-import java.util.Arrays;
 import java.util.Collections;
 
 import junit.framework.TestCase;
@@ -29,27 +28,31 @@ public class DictionaryScreenNameMapperTest extends TestCase {
 	
 	public void testNoMappings() throws Exception {
 		mapper.digest();
-		assertEquals(Collections.emptyMap(), mapper.lookupByAuthor(Arrays.asList("noone")));
+		assertEquals(Collections.emptyMap(), mapper.lookupByAuthor(toList("noone")));
 	}
-	
+
 	public void testMappings() throws Exception {
 		config.setEntries(new String[] {"Sam=imsam84"});
 		
 		mapper.digest();
-		assertEquals(Collections.singletonMap("Sam", "imsam84"), mapper.lookupByAuthor(Arrays.asList("Sam")));
+		assertEquals(Collections.singletonMap("Sam", "imsam84"), mapper.lookupByAuthor(toList("Sam")));
 	}
 	
 	public void testCaseInsensitive() throws Exception {
 		config.setEntries(new String[] {"Sam=imsam84"});
 		
 		mapper.digest();
-		assertEquals(Collections.singletonMap("sam", "imsam84"), mapper.lookupByAuthor(Arrays.asList("sam")));
+		assertEquals(Collections.singletonMap("sam", "imsam84"), mapper.lookupByAuthor(toList("sam")));
 	}
 	
 	public void testTrims() throws Exception {
 		config.setEntries(new String[] {" Sam = im sam 84 "});
 		
 		mapper.digest();
-		assertEquals(Collections.singletonMap("Sam", "im sam 84"), mapper.lookupByAuthor(Arrays.asList("Sam")));
+		assertEquals(Collections.singletonMap("Sam", "im sam 84"), mapper.lookupByAuthor(toList("Sam")));
+	}
+	
+	private Iterable<Committer> toList(String name) {
+		return Collections.singleton(new Committer(name, null));
 	}
 }

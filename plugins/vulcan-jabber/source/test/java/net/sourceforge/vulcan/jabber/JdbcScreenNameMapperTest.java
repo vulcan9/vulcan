@@ -18,10 +18,11 @@
  */
 package net.sourceforge.vulcan.jabber;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import javax.naming.NamingException;
 
@@ -30,6 +31,7 @@ import junit.framework.TestCase;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
+
 
 public class JdbcScreenNameMapperTest extends TestCase {
 	NamingException namingException;
@@ -65,18 +67,28 @@ public class JdbcScreenNameMapperTest extends TestCase {
 		map.put("Sam", "imsam84");
 		map.put("Tara", "tara22");
 		
-		assertEquals(map, mapper.lookupByAuthor(Arrays.asList("Sam", "Tara")));
+		assertEquals(map, mapper.lookupByAuthor(makeAuthorList("Sam", "Tara")));
 	}
 	
 	public void testHandlesUserNotFound() throws Exception {
 		fakeResults.put("Tara", "tara22");
 		
-		assertEquals(Collections.singletonMap("Tara", "tara22"), mapper.lookupByAuthor(Arrays.asList("Sam", "Tara")));
+		assertEquals(Collections.singletonMap("Tara", "tara22"), mapper.lookupByAuthor(makeAuthorList("Sam", "Tara")));
 	}
 	
 	public void testHandlesNamingException() throws Exception {
 		namingException = new NamingException();
 		
-		assertEquals(Collections.emptyMap(), mapper.lookupByAuthor(Arrays.asList("Sam", "Tara")));
+		assertEquals(Collections.emptyMap(), mapper.lookupByAuthor(makeAuthorList("Sam", "Tara")));
+	}
+
+	static Iterable<Committer> makeAuthorList(String... names) {
+		Set<Committer> list = new HashSet<Committer>();
+		
+		for (String name : names) {
+			list.add(new Committer(name, null));
+		}
+		
+		return list;
 	}
 }

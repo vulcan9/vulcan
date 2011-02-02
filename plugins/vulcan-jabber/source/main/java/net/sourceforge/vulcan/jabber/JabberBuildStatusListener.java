@@ -82,7 +82,7 @@ class JabberBuildStatusListener implements BuildStatusListener {
 			return;
 		}
 		
-		final List<String> uniques = new ArrayList<String>();
+		final Set<Committer> uniques = new HashSet<Committer>();
 		
 		final List<ProjectStatusDto> outcomes = new ArrayList<ProjectStatusDto>(previousFailures);
 		outcomes.add(status);
@@ -93,10 +93,8 @@ class JabberBuildStatusListener implements BuildStatusListener {
 			}
 			
 			for (ChangeSetDto commit : outcome.getChangeLog().getChangeSets()) {
-				final String author = commit.getAuthorName();
-			
-				if (!StringUtils.isEmpty(author) && !uniques.contains(author)) {
-					uniques.add(author);
+				if (!StringUtils.isEmpty(commit.getAuthorName())) {
+					uniques.add(new Committer(commit.getAuthorName(), commit.getAuthorEmail()));
 				}
 			}
 		}

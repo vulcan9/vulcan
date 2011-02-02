@@ -25,20 +25,20 @@ import java.util.regex.Pattern;
 
 public class RegexScreenNameMapper implements ScreenNameMapper {
 	private final RegexScreenNameMapperConfig config;
-
+	private final Pattern pattern; 
+	
 	public RegexScreenNameMapper(RegexScreenNameMapperConfig config) {
 		this.config = config;
+		this.pattern = Pattern.compile(config.getRegex(), Pattern.CASE_INSENSITIVE);
 	}
 
-	public Map<String, String> lookupByAuthor(Iterable<String> uniques) {
-		final Pattern pattern = Pattern.compile(config.getRegex(), Pattern.CASE_INSENSITIVE);
-		
+	public Map<String, String> lookupByAuthor(Iterable<Committer> committers) {
 		final Map<String, String> map = new HashMap<String, String>();
 		
-		for (String s : uniques) {
-			final Matcher matcher = pattern.matcher(s);
+		for (Committer c : committers) {
+			final Matcher matcher = pattern.matcher(c.getName());
 			if (matcher.matches()) {
-				map.put(s, matcher.replaceFirst(config.getReplacement()));
+				map.put(c.getName(), matcher.replaceFirst(config.getReplacement()));
 			}
 		}
 		

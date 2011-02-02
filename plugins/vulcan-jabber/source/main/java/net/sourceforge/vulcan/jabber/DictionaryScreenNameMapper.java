@@ -37,13 +37,13 @@ public class DictionaryScreenNameMapper implements ScreenNameMapper {
 		digest();
 	}
 
-	public Map<String, String> lookupByAuthor(Iterable<String> uniques) {
+	public Map<String, String> lookupByAuthor(Iterable<Committer> committers) {
 		Map<String, String> names = new HashMap<String, String>();
 		
-		for (String s : uniques) {
-			final String sn = map.get(s.toLowerCase());
+		for (Committer c : committers) {
+			final String sn = map.get(c.getName().toLowerCase());
 			if (StringUtils.isNotBlank(sn)) {
-				names.put(s, sn);
+				names.put(c.getName(), sn);
 			}
 		}
 		

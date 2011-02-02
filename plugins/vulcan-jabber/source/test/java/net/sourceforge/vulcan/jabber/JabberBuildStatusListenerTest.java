@@ -92,7 +92,7 @@ public class JabberBuildStatusListenerTest extends EasyMockTestCase {
 		map.put("Sam", "sam82");
 		map.put("Sydney", "sidthekid");
 		
-		expect(resolver.lookupByAuthor(Arrays.asList("Sam", "Jesse", "Sydney"))).andReturn(map);
+		expect(resolver.lookupByAuthor(eq(makeAuthorList("Sam", "Jesse", "Sydney")))).andReturn(map);
 		
 		replay();
 		
@@ -112,7 +112,7 @@ public class JabberBuildStatusListenerTest extends EasyMockTestCase {
 		final Map<String, String> map = new HashMap<String, String>();
 		map.put("Sam", "sam82");
 		map.put("Jesse", "PermanentJoe");
-		expect(resolver.lookupByAuthor(Arrays.asList("Sam", "Jesse", "Sydney"))).andReturn(map);
+		expect(resolver.lookupByAuthor(makeAuthorList("Sam", "Jesse", "Sydney"))).andReturn(map);
 		
 		replay();
 		
@@ -142,7 +142,7 @@ public class JabberBuildStatusListenerTest extends EasyMockTestCase {
 		final Map<String, String> map = new HashMap<String, String>();
 		map.put("Sam", "sam82");
 		map.put("Jesse", "PermanentJoe");
-		expect(resolver.lookupByAuthor(Arrays.asList("Sam", "Sydney", "Jesse"))).andReturn(map);
+		expect(resolver.lookupByAuthor(makeAuthorList("Sam", "Sydney", "Jesse"))).andReturn(map);
 		
 		replay();
 		
@@ -161,7 +161,7 @@ public class JabberBuildStatusListenerTest extends EasyMockTestCase {
 		
 		listener.addRecipients("permanentjoe");
 		
-		expect(resolver.lookupByAuthor(Arrays.asList("Sam"))).andReturn(Collections.singletonMap("Sam", "sam82"));
+		expect(resolver.lookupByAuthor(eq(makeAuthorList("Sam")))).andReturn(Collections.singletonMap("Sam", "sam82"));
 		
 		replay();
 		
@@ -172,6 +172,10 @@ public class JabberBuildStatusListenerTest extends EasyMockTestCase {
 		assertEquals(Arrays.asList("permanentjoe", "sam82"), listener.getRecipients());
 	}
 	
+	static Iterable<Committer> makeAuthorList(String... names) {
+		return JdbcScreenNameMapperTest.makeAuthorList(names);
+	}
+
 	public void testMapsAuthorsToRecipientsOnBuildStartedNullChangeLog() throws Exception {
 		listener.addRecipients("permanentjoe");
 		
