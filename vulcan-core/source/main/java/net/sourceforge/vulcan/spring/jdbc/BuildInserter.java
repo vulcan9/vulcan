@@ -26,9 +26,8 @@ import net.sourceforge.vulcan.dto.ProjectStatusDto;
 import net.sourceforge.vulcan.dto.ProjectStatusDto.UpdateType;
 
 import org.springframework.jdbc.core.SqlParameter;
-import org.springframework.jdbc.object.SqlUpdate;
 
-class BuildInserter extends SqlUpdate {
+class BuildInserter extends RecordInserter {
 	public BuildInserter(DataSource dataSource) {
 		setDataSource(dataSource);
 		setSql("insert into builds " +
@@ -105,15 +104,15 @@ class BuildInserter extends SqlUpdate {
 			dto.getId().toString(),
 			dto.getStatus().toString(),
 			dto.getMessageKey(),
-			numMessageArgs > 0 ? messageArgs[0] : null,
-			numMessageArgs > 1 ? messageArgs[1] : null,
-			numMessageArgs > 2 ? messageArgs[2] : null,
-			numMessageArgs > 3 ? messageArgs[3] : null,
+			numMessageArgs > 0 ? truncate(messageArgs[0], JdbcBuildOutcomeStore.MAX_BUILD_REASON_ARG_LENGTH) : null,
+			numMessageArgs > 1 ? truncate(messageArgs[1], JdbcBuildOutcomeStore.MAX_BUILD_REASON_ARG_LENGTH) : null,
+			numMessageArgs > 2 ? truncate(messageArgs[2], JdbcBuildOutcomeStore.MAX_BUILD_REASON_ARG_LENGTH) : null,
+			numMessageArgs > 3 ? truncate(messageArgs[3], JdbcBuildOutcomeStore.MAX_BUILD_REASON_ARG_LENGTH) : null,
 			dto.getBuildReasonKey(),
-			numBuildReasonArgs > 0 ? buildReasonArgs[0] : null,
-			numBuildReasonArgs > 1 ? buildReasonArgs[1] : null,
-			numBuildReasonArgs > 2 ? buildReasonArgs[2] : null,
-			numBuildReasonArgs > 3 ? buildReasonArgs[3] : null,
+			numBuildReasonArgs > 0 ? truncate(buildReasonArgs[0], JdbcBuildOutcomeStore.MAX_BUILD_REASON_ARG_LENGTH) : null,
+			numBuildReasonArgs > 1 ? truncate(buildReasonArgs[1], JdbcBuildOutcomeStore.MAX_BUILD_REASON_ARG_LENGTH) : null,
+			numBuildReasonArgs > 2 ? truncate(buildReasonArgs[2], JdbcBuildOutcomeStore.MAX_BUILD_REASON_ARG_LENGTH) : null,
+			numBuildReasonArgs > 3 ? truncate(buildReasonArgs[3], JdbcBuildOutcomeStore.MAX_BUILD_REASON_ARG_LENGTH) : null,
 			dto.getStartDate(),
 			dto.getCompletionDate(),
 			dto.getBuildNumber(),
