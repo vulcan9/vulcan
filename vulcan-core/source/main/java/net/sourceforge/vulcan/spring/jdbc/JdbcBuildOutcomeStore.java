@@ -46,9 +46,12 @@ import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 public class JdbcBuildOutcomeStore implements BuildOutcomeStore, ProjectNameChangeListener {
-	public static int MAX_TEST_FAILURE_MESSAGE_LENGTH = 1024;
-	public static int MAX_TEST_FAILURE_DETAILS_LENGTH = 4096;
-	public static int MAX_COMMIT_MESSAGE_LENGTH = 2048;
+	// TODO: would be nice to get these from jdbc table metadata.
+	public static final int MAX_TEST_FAILURE_MESSAGE_LENGTH = 1024;
+	public static final int MAX_TEST_FAILURE_DETAILS_LENGTH = 4096;
+	public static final int MAX_COMMIT_MESSAGE_LENGTH = 2048;
+	public static final int MAX_BUILD_MESSAGE_LENGTH = 1000;
+	public static final int MAX_BUILD_REASON_ARG_LENGTH = 256;
 	
 	private final Set<String> projectNames = new HashSet<String>();
 	private final Set<String> brokenBuildUsers = new HashSet<String>();
@@ -410,15 +413,18 @@ public class JdbcBuildOutcomeStore implements BuildOutcomeStore, ProjectNameChan
 		return outcome.getId();
 	}
 
-	static String truncate(String str, int max) {
-		if (str == null) {
+	static String truncate(Object object, int max) {
+		if (object == null) {
 			return null;
 		}
 		
-		if (str.length() > max) {
-			return str.substring(0, max);
+		String s = object.toString();
+		
+		if (s.length() <= max) {
+			return s;
 		}
-		return str;
+		
+		return s.substring(0, max - 3) + "...";
 	}
 
 	private void loadUsersAndBuildSchedulers() {

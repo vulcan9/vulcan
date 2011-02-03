@@ -471,6 +471,16 @@ public class JdbcBuildOutcomeStoreTest extends TestCase {
 		assertPersistence();
 	}
 	
+	public void testTruncateMessageArg() throws Exception {
+		outcome.setMessageArgs(new Object[] {StringUtils.repeat("abcd", 65)});
+		
+		JdbcBuildOutcomeDto result = storeOutcome();
+		
+		outcome.getMessageArgs()[0] = StringUtils.repeat("abcd", 63) + "a...";
+		
+		assertPersistence(result);
+	}
+	
 	public void testSaveFourMessageArgs() throws Exception {
 		outcome.setMessageArgs(new Object[] {"a", "b", "c", "d"});
 		

@@ -18,17 +18,15 @@
  */
 package net.sourceforge.vulcan.spring.jdbc;
 
+import java.sql.Types;
 import java.util.Collection;
 import java.util.UUID;
-
-import java.sql.Types;
 
 import javax.sql.DataSource;
 
 import org.springframework.jdbc.core.SqlParameter;
-import org.springframework.jdbc.object.SqlUpdate;
 
-class DependencyInserter extends SqlUpdate {
+class DependencyInserter extends RecordInserter {
 	public DependencyInserter(DataSource dataSource) {
 		setDataSource(dataSource);
 		setSql("insert into build_dependencies " +

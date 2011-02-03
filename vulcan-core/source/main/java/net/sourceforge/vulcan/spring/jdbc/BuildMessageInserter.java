@@ -18,20 +18,16 @@
  */
 package net.sourceforge.vulcan.spring.jdbc;
 
-import java.util.List;
-
 import java.sql.Types;
+import java.util.List;
 
 import javax.sql.DataSource;
 
 import net.sourceforge.vulcan.dto.BuildMessageDto;
 
 import org.springframework.jdbc.core.SqlParameter;
-import org.springframework.jdbc.object.SqlUpdate;
 
-class BuildMessageInserter extends SqlUpdate {
-	public static final int MAX_MESSAGE_LENGTH = 1000;
-	
+class BuildMessageInserter extends RecordInserter {
 	public BuildMessageInserter(DataSource dataSource) {
 		setDataSource(dataSource);
 		setSql("insert into build_messages " +
@@ -57,12 +53,7 @@ class BuildMessageInserter extends SqlUpdate {
 		params[1] = type.getRdbmsValue(); 
 
 		for (BuildMessageDto dto : messages) {
-			String message = dto.getMessage();
-			if (message.length() > MAX_MESSAGE_LENGTH) {
-				message = message.substring(0, MAX_MESSAGE_LENGTH);
-			}
-			
-			params[2] = message;
+			params[2] = truncate(dto.getMessage(), JdbcBuildOutcomeStore.MAX_BUILD_MESSAGE_LENGTH);
 			params[3] = dto.getLineNumber();
 			params[4] = dto.getFile();
 			params[5] = dto.getCode();

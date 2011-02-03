@@ -18,18 +18,16 @@
  */
 package net.sourceforge.vulcan.spring.jdbc;
 
-import java.util.List;
-
 import java.sql.Types;
+import java.util.List;
 
 import javax.sql.DataSource;
 
 import net.sourceforge.vulcan.dto.ChangeSetDto;
 
 import org.springframework.jdbc.core.SqlParameter;
-import org.springframework.jdbc.object.SqlUpdate;
 
-class ChangeSetInserter extends SqlUpdate {
+class ChangeSetInserter extends RecordInserter {
 	private final ModifiedPathInserter modifiedPathInserter;
 	
 	public ChangeSetInserter(DataSource dataSource) {
