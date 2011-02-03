@@ -54,6 +54,22 @@
 						font-size:11px;
 						white-space:pre;
 					}
+					ul.modified-paths li.modify:before {
+						content: "(M) ";
+					}
+					ul.modified-paths li.add:before {
+						content: "(A) ";
+					}
+					ul.modified-paths li.add {
+						color: green;
+					}
+					ul.modified-paths li.remove:before {
+						content: "(D) ";
+					}
+					ul.modified-paths li.remove {
+						color: red;
+						text-decoration: line-through;
+					}
 					dt {
 						color: #b00;
 						font-weight: bold;
@@ -182,7 +198,15 @@
 							<ul class="modified-paths">
 							<xsl:for-each select="./modified-paths/path">
 								<xsl:sort select="." order="ascending" data-type="text"/>
-								<li><xsl:apply-templates select="."/></li>
+								<li>
+									<xsl:if test="@action">
+										<xsl:attribute name="class">
+											<xsl:value-of select="@action"/>
+										</xsl:attribute>
+									</xsl:if>
+
+									<xsl:apply-templates select="."/>
+								</li>
 							</xsl:for-each>
 							</ul>
 						</td>

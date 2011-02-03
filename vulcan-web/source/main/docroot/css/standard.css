@@ -699,6 +699,6 @@ iframe {
 	-moz-column-gap: 1em;
 }
 
-.remove {
+ul.modified-paths li.remove {
 	text-decoration: line-through;
 }
