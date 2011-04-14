@@ -28,11 +28,14 @@ import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
 
+import org.easymock.EasyMock;
+
 import net.sourceforge.vulcan.EasyMockTestCase;
 import net.sourceforge.vulcan.ProjectManager;
 import net.sourceforge.vulcan.RepositoryAdaptor;
 import net.sourceforge.vulcan.core.BuildManager;
 import net.sourceforge.vulcan.core.support.ProjectRebuildExpert.FullBuildAfterIncrementalBuildRule;
+import net.sourceforge.vulcan.core.support.ProjectRebuildExpert.IncomingChangesRule;
 import net.sourceforge.vulcan.core.support.ProjectRebuildExpert.WorkingCopyNotUsingSameTagRule;
 import net.sourceforge.vulcan.dto.BuildToolConfigDto;
 import net.sourceforge.vulcan.dto.ProjectConfigDto;
@@ -358,6 +361,60 @@ public class ProjectRebuildExpertTest extends EasyMockTestCase {
 		verify();
 	}
 	
+	public void testIncomingChanges() throws Exception {
+		IncomingChangesRule rule = expert.createIncomingChangesRule();
+		
+		expect(projectManager.getRepositoryAdaptor(project)).andReturn(repositoryAdaptor);
+		expect(repositoryAdaptor.hasIncomingChanges(previousStatus)).andReturn(true);
+		
+		replay();
+		
+		assertTrue("rule.isSatisfiedBy", rule.isSatisfiedBy(project, previousStatus));
+		
+		verify();
+		
+		assertEquals("messages.build.reason.repository.changes", expert.getMessageKey());
+	}
+	
+	public void testIncomingChangesUsesPreviousStatusFromSameWorkDir() throws Exception {
+		IncomingChangesRule rule = expert.createIncomingChangesRule();
+		
+		previousStatus.setWorkDir(previousStatus.getWorkDir() + "-alternate");
+		
+		ProjectStatusDto previousStatusByWorkDir = (ProjectStatusDto) previousStatus.copy();
+		
+		expect(buildManager.getMostRecentBuildByWorkDir(project.getName(), project.getWorkDir())).andReturn(previousStatusByWorkDir);
+		
+		expect(projectManager.getRepositoryAdaptor(project)).andReturn(repositoryAdaptor);
+		expect(repositoryAdaptor.hasIncomingChanges(EasyMock.same(previousStatusByWorkDir))).andReturn(false);
+		
+		replay();
+		
+		assertFalse("rule.isSatisfiedBy", rule.isSatisfiedBy(project, previousStatus));
+		
+		verify();
+	}
+	
+	public void testIncomingChangesUsesPreviousStatusFromSameWorkDirPreviousStatusHasNullWorkDir() throws Exception {
+		IncomingChangesRule rule = expert.createIncomingChangesRule();
+		
+		ProjectStatusDto previousStatusByWorkDir = (ProjectStatusDto) previousStatus.copy();
+		
+		previousStatus.setWorkDir(null);
+		previousStatus.setStatus(Status.SKIP);
+		
+		expect(buildManager.getMostRecentBuildByWorkDir(project.getName(), project.getWorkDir())).andReturn(previousStatusByWorkDir);
+		
+		expect(projectManager.getRepositoryAdaptor(project)).andReturn(repositoryAdaptor);
+		expect(repositoryAdaptor.hasIncomingChanges(EasyMock.same(previousStatusByWorkDir))).andReturn(false);
+		
+		replay();
+		
+		assertFalse("rule.isSatisfiedBy", rule.isSatisfiedBy(project, previousStatus));
+		
+		verify();
+	}
+	
 	class ProjectRebuildExpertStub extends ProjectRebuildExpert {
 		FullBuildAfterIncrementalBuildRule createFullBuildAfterIncrementalBuildRule() {
 			return new FullBuildAfterIncrementalBuildRule();
@@ -367,6 +424,9 @@ public class ProjectRebuildExpertTest extends EasyMockTestCase {
 		}
 		WorkingCopyNotUsingSameTagRule createWorkingCopyNotUsingSameTagRule() {
 			return new WorkingCopyNotUsingSameTagRule();
+		}
+		IncomingChangesRule createIncomingChangesRule() {
+			return new IncomingChangesRule();
 		}
 	}
 	
