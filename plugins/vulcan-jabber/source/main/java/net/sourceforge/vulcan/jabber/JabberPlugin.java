@@ -91,6 +91,10 @@ public class JabberPlugin implements BuildManagerObserverPlugin, ConfigurablePlu
 		
 		client.refreshConnection(config.getServer(), config.getPort(), config.getServiceName(), config.getUsername(), config.getPassword());
 		
+		if (!client.isConnected()) {
+			return;
+		}
+		
 		final BuildManager mgr = (BuildManager)event.getSource();
 		
 		final ProjectBuilder projectBuilder = mgr.getProjectBuilder(status.getName());

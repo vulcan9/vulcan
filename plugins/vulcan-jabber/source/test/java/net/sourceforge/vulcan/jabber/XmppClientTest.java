@@ -54,6 +54,15 @@ public class XmppClientTest extends TestCase {
 		assertEquals(1, connectCount);
 	}
 	
+	public void testIsConnected() {
+		client.refreshConnection("example.com", 5222, null, "user", "pass");
+		
+		assertEquals(connected, client.isConnected());
+		
+		connected = !connected;
+		
+		assertEquals(connected, client.isConnected());
+	}
 	public void testConnectNullPassword() throws Exception {
 		client.refreshConnection("example.com", 5222, null, null, null);
 		

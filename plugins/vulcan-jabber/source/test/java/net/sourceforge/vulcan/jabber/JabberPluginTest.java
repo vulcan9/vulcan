@@ -85,11 +85,23 @@ public class JabberPluginTest extends EasyMockTestCase {
 	}
 	
 	public void testAddsBuildListener() throws Exception {
-		client.refreshConnection("example.com", 5222, "", "user", "pass");
-		
+		expectRefreshConnection();
+				
 		expect(buildManager.getProjectBuilder(status.getName())).andReturn(projectBuilder);
 		expect(buildManager.getLatestStatus(status.getName())).andReturn(null);
 		projectBuilder.addBuildStatusListener((BuildStatusListener) notNull());
+		
+		replay();
+		
+		plugin.onBuildStarting(new BuildStartingEvent(buildManager, buildDaemonInfo, target, status));
+		
+		verify();
+	}
+	
+	public void testDoesNotListenWhenNotConfigured() throws Exception {
+		config.setServer("");
+		client.refreshConnection("", 5222, "", "user", "pass");
+		expect(client.isConnected()).andReturn(false);
 		
 		replay();
 		
@@ -112,7 +124,7 @@ public class JabberPluginTest extends EasyMockTestCase {
 	public void testAddsBuildListenerToSelectedProject() throws Exception {
 		config.setProjectsToMonitor(ProjectsToMonitor.Specify);
 		config.setSelectedProjects(new String[] {status.getName()});
-		client.refreshConnection("example.com", 5222, "", "user", "pass");
+		expectRefreshConnection();
 		
 		expect(buildManager.getProjectBuilder(status.getName())).andReturn(projectBuilder);
 		expect(buildManager.getLatestStatus(status.getName())).andReturn(prevStatus);
@@ -130,7 +142,7 @@ public class JabberPluginTest extends EasyMockTestCase {
 		
 		config.setProjectsToMonitor(ProjectsToMonitor.Specify);
 		config.setSelectedProjects(new String[] {status.getName()});
-		client.refreshConnection("example.com", 5222, "", "user", "pass");
+		expectRefreshConnection();
 		
 		expect(buildManager.getProjectBuilder(status.getName())).andReturn(projectBuilder);
 		expect(buildManager.getLatestStatus(status.getName())).andReturn(prevStatus);
@@ -151,7 +163,7 @@ public class JabberPluginTest extends EasyMockTestCase {
 		config.setProjectsToMonitor(ProjectsToMonitor.Specify);
 		config.setSelectedProjects(new String[] {status.getName()});
 		client.refreshConnection("example.com", 5222, "", "user", "pass");
-		client.refreshConnection("example.com", 5222, "", "user", "pass");
+		expectRefreshConnection();
 		
 		expect(buildManager.getProjectBuilder(status.getName())).andReturn(projectBuilder);
 		expect(buildManager.getLatestStatus(status.getName())).andReturn(prevStatus);
@@ -173,7 +185,7 @@ public class JabberPluginTest extends EasyMockTestCase {
 		
 		config.setProjectsToMonitor(ProjectsToMonitor.Specify);
 		config.setSelectedProjects(new String[] {status.getName()});
-		client.refreshConnection("example.com", 5222, "", "user", "pass");
+		expectRefreshConnection();
 		
 		expect(buildManager.getProjectBuilder(status.getName())).andReturn(projectBuilder);
 		expect(buildManager.getLatestStatus(status.getName())).andReturn(prevStatus);
@@ -194,7 +206,7 @@ public class JabberPluginTest extends EasyMockTestCase {
 		
 		config.setProjectsToMonitor(ProjectsToMonitor.Specify);
 		config.setSelectedProjects(new String[] {status.getName()});
-		client.refreshConnection("example.com", 5222, "", "user", "pass");
+		expectRefreshConnection();
 		
 		expect(buildManager.getProjectBuilder(status.getName())).andReturn(projectBuilder);
 		expect(buildManager.getLatestStatus(status.getName())).andReturn(prevStatus);
@@ -218,7 +230,7 @@ public class JabberPluginTest extends EasyMockTestCase {
 		
 		config.setProjectsToMonitor(ProjectsToMonitor.Specify);
 		config.setSelectedProjects(new String[] {status.getName()});
-		client.refreshConnection("example.com", 5222, "", "user", "pass");
+		expectRefreshConnection();
 		
 		expect(buildManager.getProjectBuilder(status.getName())).andReturn(projectBuilder);
 		expect(buildManager.getLatestStatus(status.getName())).andReturn(prevStatus);
@@ -250,6 +262,11 @@ public class JabberPluginTest extends EasyMockTestCase {
 	
 	public void testSendsNoMessageOnBuildPassWhenAttached() throws Exception {
 		doBuildCompletedTest(Status.PASS, true, false, true);
+	}
+
+	private void expectRefreshConnection() {
+		client.refreshConnection("example.com", 5222, "", "user", "pass");
+		expect(client.isConnected()).andReturn(true);
 	}
 
 	private void doBuildCompletedTest(Status result, final boolean isAttached, boolean expectMessage, boolean expectDetach) {
