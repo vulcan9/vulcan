@@ -20,6 +20,7 @@ package net.sourceforge.vulcan.jabber;
 
 public interface JabberClient {
 	void refreshConnection(String server, int port, String serviceName, String username, String password);
+	boolean isConnected();
 	void sendMessage(String recipient, String message);
 	void addMessageReceivedListener(JabberChatListener listener);
 }

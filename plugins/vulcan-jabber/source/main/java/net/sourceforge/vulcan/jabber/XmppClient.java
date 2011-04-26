@@ -82,6 +82,13 @@ public class XmppClient implements JabberClient, MessageListener {
 		}			
 	}
 	
+	@Override
+	public boolean isConnected() {
+		synchronized (lock) {
+			return connection != null && connection.isConnected();
+		}
+	}
+	
 	public void disconnect() {
 		synchronized (lock) {
 			if (connection != null) {
