@@ -101,7 +101,7 @@ public class ScheduleProjectsJob extends QuartzJobBean implements Job {
 			eventHandler.reportEvent(new ErrorEvent(
 					this,
 					e.getKey(),
-					new Object[] {e.getArgs()},
+					e.getArgs(),
 					e));
 		}
 	}
