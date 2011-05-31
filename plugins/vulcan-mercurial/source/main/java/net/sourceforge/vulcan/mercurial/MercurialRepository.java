@@ -221,13 +221,15 @@ public class MercurialRepository implements RepositoryAdaptor {
 	}
 
 	public ChangeLogDto getChangeLog(RevisionTokenDto previousRevision,	RevisionTokenDto currentRevision, OutputStream diffOutputStream) throws RepositoryException, InterruptedException {
-		final String revisionRangeForDiff = Long.toString(previousRevision.getRevision()) + ":" + Long.toString(currentRevision.getRevision());
+		final String revisionRange = Long.toString(previousRevision.getRevision()) + ":" + Long.toString(currentRevision.getRevision());
 		
-		getDiff(revisionRangeForDiff, diffOutputStream);
+		getDiff(revisionRange, diffOutputStream);
 		
-		final String revisionRangeForLog = Long.toString(previousRevision.getRevision() + 1) + ":" + Long.toString(currentRevision.getRevision());
+		ChangeLogDto changes = getChangeSets(revisionRange);
 		
-		return getChangeSets(revisionRangeForLog);
+		changes.removeChangeSet(previousRevision);
+		
+		return changes;
 	}
 
 	private void getDiff(String revisionRange, OutputStream diffOutputStream) throws RepositoryException {

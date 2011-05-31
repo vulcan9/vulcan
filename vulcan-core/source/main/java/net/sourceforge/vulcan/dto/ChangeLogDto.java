@@ -20,6 +20,7 @@ package net.sourceforge.vulcan.dto;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 
 
@@ -44,6 +45,20 @@ public class ChangeLogDto extends BaseDto {
 		changeSets.add(changeSet);
 	}
 	
+	public void removeChangeSet(RevisionTokenDto revision) {
+		if (changeSets == null || changeSets.isEmpty()) {
+			return;
+		}
+		
+		for (Iterator<ChangeSetDto> itr=changeSets.iterator(); itr.hasNext();) {
+			ChangeSetDto c = itr.next();
+			
+			if (c.getRevisionLabel().equals(revision.getLabel())) {
+				itr.remove();
+			}
+		}
+	}
+
 	@Deprecated
 	public String getDifferences() {
 		return differences;
