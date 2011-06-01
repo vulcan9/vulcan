@@ -365,7 +365,7 @@ public class MercurialRepositoryTest extends EasyMockTestCase {
 	}
 	
 	public void testGetChangeLogEmptyNullDiffStream() throws Exception {
-		invoker.invoke("log", workDir, "--style", "xml", "--verbose", "-r", "123:456");
+		invoker.invoke("log", workDir, "--style", "xml", "--verbose", "-r", "123::456");
 		returnSuccessWithOutput("<log/>");
 		
 		replay();
@@ -379,7 +379,7 @@ public class MercurialRepositoryTest extends EasyMockTestCase {
 	}
 	
 	public void testGetChangeLogEmptyFormatsRevision() throws Exception {
-		invoker.invoke("log", workDir, "--style", "xml", "--verbose", "-r", "1123456:1123458");
+		invoker.invoke("log", workDir, "--style", "xml", "--verbose", "-r", "1123456::1123458");
 		returnSuccessWithOutput("<log/>");
 		
 		replay();
@@ -409,10 +409,10 @@ public class MercurialRepositoryTest extends EasyMockTestCase {
 
 	public void testGetChangeLogDiff() throws Exception {
 		invoker.setOutputStream(diffOut);
-		invoker.invoke("diff", workDir, "-r", "1:2");
+		invoker.invoke("diff", workDir, "-r", "1::2");
 		returnSuccess();
 		
-		invoker.invoke("log", workDir, "--style", "xml", "--verbose", "-r", "1:2");
+		invoker.invoke("log", workDir, "--style", "xml", "--verbose", "-r", "1::2");
 		returnSuccessWithOutput("<log/>");
 		
 		replay();
@@ -426,7 +426,7 @@ public class MercurialRepositoryTest extends EasyMockTestCase {
 	
 	public void testGetChangeLogDiffRethrowsExceptionOnClose() throws Exception {
 		invoker.setOutputStream(diffOut);
-		invoker.invoke("diff", workDir, "-r", "123:456");
+		invoker.invoke("diff", workDir, "-r", "123::456");
 		returnSuccess();
 		
 		throwOnClose = true;
@@ -444,7 +444,7 @@ public class MercurialRepositoryTest extends EasyMockTestCase {
 	
 	public void testGetChangeLogDiffClosesStreamOnDiffError() throws Exception {
 		invoker.setOutputStream(diffOut);
-		invoker.invoke("diff", workDir, "-r", "123:456");
+		invoker.invoke("diff", workDir, "-r", "123::456");
 		expectLastCall().andThrow(new IOException());
 		expect(invoker.getErrorText()).andReturn("invalid command");
 		expect(invoker.getExitCode()).andReturn(-1);
