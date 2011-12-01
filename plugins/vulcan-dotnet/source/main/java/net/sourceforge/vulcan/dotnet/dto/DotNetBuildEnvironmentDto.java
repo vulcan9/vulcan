@@ -36,7 +36,7 @@ public class DotNetBuildEnvironmentDto extends PluginProfileDto {
 	}
 	
 	public static List<String> availableToolsVersions =
-		Arrays.asList(new String[] {"Unspecified", "2.0", "3.5"});
+		Arrays.asList(new String[] {"Unspecified", "2.0", "3.5", "4.0"});
 	
 	private String description;
 	private String location;
