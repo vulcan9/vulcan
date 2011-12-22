@@ -18,10 +18,14 @@
  */
 package net.sourceforge.vulcan.mercurial;
 
+import java.io.File;
+
+import net.sourceforge.vulcan.PluginManager;
 import net.sourceforge.vulcan.ProjectRepositoryConfigurator;
 import net.sourceforge.vulcan.dto.PluginConfigDto;
 import net.sourceforge.vulcan.dto.ProjectConfigDto;
 import net.sourceforge.vulcan.exception.ConfigException;
+import net.sourceforge.vulcan.exception.PluginNotFoundException;
 import net.sourceforge.vulcan.integration.ConfigurablePlugin;
 import net.sourceforge.vulcan.integration.RepositoryAdaptorPlugin;
 
@@ -30,9 +34,20 @@ public class MercurialPlugin implements RepositoryAdaptorPlugin, ConfigurablePlu
 	public static String PLUGIN_NAME = "Mercurial";
 	
 	private MercurialConfig config = new MercurialConfig();
+	private PluginManager pluginManager;
 	
 	public MercurialRepository createInstance(ProjectConfigDto projectConfig)	throws ConfigException {
-		return new MercurialRepository(projectConfig, config);
+		MercurialRepository instance = new MercurialRepository(projectConfig, config);
+		instance.setChangeLogTemplatePath(getChangeLogTemplatePath().getAbsolutePath());
+		return instance;
+	}
+
+	private File getChangeLogTemplatePath() {
+		try {
+			return new File(pluginManager.getPluginDirectory(getId()), "vulcan-xml.template");
+		} catch (PluginNotFoundException e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 	public ProjectRepositoryConfigurator createProjectConfigurator(String url, String username, String password) throws ConfigException {
@@ -49,6 +64,10 @@ public class MercurialPlugin implements RepositoryAdaptorPlugin, ConfigurablePlu
 	
 	public void setConfiguration(PluginConfigDto bean) {
 		config = (MercurialConfig) bean;
+	}
+	
+	public void setPluginManager(PluginManager pluginManager) {
+		this.pluginManager = pluginManager;
 	}
 	
 	public String getId() {

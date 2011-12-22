@@ -18,19 +18,26 @@
  */
 package net.sourceforge.vulcan.mercurial;
 
-import junit.framework.TestCase;
+import java.io.File;
+
+import net.sourceforge.vulcan.EasyMockTestCase;
+import net.sourceforge.vulcan.PluginManager;
 import net.sourceforge.vulcan.dto.ProjectConfigDto;
 
-public class MurcurialPluginTest extends TestCase {
+public class MurcurialPluginTest extends EasyMockTestCase {
 	private MercurialPlugin plugin = new MercurialPlugin();
 	private ProjectConfigDto projectConfig = new ProjectConfigDto();
 	private MercurialProjectConfig settings = new MercurialProjectConfig();
+	private PluginManager pluginManager;
 	
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 		
 		projectConfig.setRepositoryAdaptorConfig(settings);
+		
+		pluginManager = createMock(PluginManager.class);
+		plugin.setPluginManager(pluginManager);
 	}
 	
 	public void testDefaultConfig() throws Exception {
@@ -42,11 +49,19 @@ public class MurcurialPluginTest extends TestCase {
 	}
 	
 	public void testGetRepositoryAdapter() throws Exception {
+		File dir = new File(".");
+		expect(pluginManager.getPluginDirectory(plugin.getId())).andReturn(dir);
+		
+		replay();
+		
 		final MercurialRepository repo = plugin.createInstance(projectConfig);
+		
+		verify();
 		
 		assertEquals(plugin.getConfiguration(), repo.getGlobals());
 		assertEquals(projectConfig, repo.getProjectConfig());
 		assertEquals(projectConfig.getRepositoryAdaptorConfig(), repo.getSettings());
+		assertEquals(new File(dir, "vulcan-xml.template").getAbsolutePath(), repo.getChangeLogTemplatePath());
 	}
 
 }
