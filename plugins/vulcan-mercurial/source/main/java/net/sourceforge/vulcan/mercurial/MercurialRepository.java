@@ -78,6 +78,7 @@ public class MercurialRepository implements RepositoryAdaptor {
 	private final MercurialConfig globals;
 	
 	private FileSystem fileSystem = new FileSystemImpl();
+	private String changeLogTemplatePath = "xml";
 	
 	public MercurialRepository(ProjectConfigDto projectConfig, MercurialConfig globals) {
 		this.projectConfig = projectConfig;
@@ -250,7 +251,7 @@ public class MercurialRepository implements RepositoryAdaptor {
 	}
 
 	private ChangeLogDto getChangeSets(final String revisionRange) throws RepositoryException {
-		final InvocationResult result = tryInvoke(Command.log, "--style", "xml", "--verbose", "-r", revisionRange);
+		final InvocationResult result = tryInvoke(Command.log, "--style", changeLogTemplatePath, "--verbose", "-r", revisionRange);
 		
 		final CommitLogParser parser = new CommitLogParser();
 		
@@ -392,6 +393,14 @@ public class MercurialRepository implements RepositoryAdaptor {
 	
 	public void setFileSystem(FileSystem fileSystem) {
 		this.fileSystem = fileSystem;
+	}
+	
+	public String getChangeLogTemplatePath() {
+		return changeLogTemplatePath;
+	}
+	
+	public void setChangeLogTemplatePath(String changeLogTemplatePath) {
+		this.changeLogTemplatePath = changeLogTemplatePath;
 	}
 	
 	protected ProjectConfigDto getProjectConfig() {

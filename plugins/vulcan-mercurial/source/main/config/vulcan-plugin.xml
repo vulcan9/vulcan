@@ -3,6 +3,7 @@
 	"http://www.springframework.org/dtd/spring-beans.dtd">
 <beans>
 	<bean name="plugin" class="net.sourceforge.vulcan.mercurial.MercurialPlugin">
+		<property name="pluginManager" ref="pluginManager"/>
 	</bean>
 	
 	<bean id="messageSource" class="org.springframework.context.support.ReloadableResourceBundleMessageSource">
