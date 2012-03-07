@@ -18,7 +18,7 @@
 <table>
 	<caption>About Vulcan</caption>
 	<tbody>
-		<tr><td><pre>Vulcan, Copyright (C) 2005-2011 Chris Eldredge
+		<tr><td><pre>Vulcan, Copyright (C) 2005-2012 Chris Eldredge
 Vulcan comes with ABSOLUTELY NO WARRANTY.
 This is free software, and you are welcome
 to redistribute it under certain conditions;
