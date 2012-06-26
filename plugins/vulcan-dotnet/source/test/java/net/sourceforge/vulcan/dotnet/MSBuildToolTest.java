@@ -27,6 +27,16 @@ import net.sourceforge.vulcan.exception.ConfigException;
 
 public class MSBuildToolTest extends MSBuildToolTestBase {
 	
+	public void testSetsTargetFrameworkWhenSpecified() throws Exception {
+		dotNetProjectConfig.setTargetFrameworkVersion("v4.0");
+		assertArgsContains("/p:TargetFrameworkVersion=v4.0");
+	}
+	
+	public void testOmitTargetFrameworkWhenBlank() throws Exception {
+		dotNetProjectConfig.setTargetFrameworkVersion("");
+		assertArgsNotContains("/p:TargetFrameworkVersion=");
+	}
+
 	public void testSetsToolsVersionWhenSpecified() throws Exception {
 		buildEnv.setToolsVersion("3.5");
 		assertArgsContains("/toolsversion:3.5");

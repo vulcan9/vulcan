@@ -18,12 +18,15 @@
  */
 package net.sourceforge.vulcan.dotnet;
 
+import static org.apache.commons.lang.StringUtils.isBlank;
 import static org.apache.commons.lang.StringUtils.isNotBlank;
 
 import java.util.List;
 import java.util.Map;
 
 import java.io.File;
+
+import org.apache.commons.lang.StringUtils;
 
 import net.sourceforge.vulcan.ant.AntBuildTool;
 import net.sourceforge.vulcan.ant.AntConfig;
@@ -114,9 +117,14 @@ public abstract class DotNetBuildToolBase extends AntBuildTool {
 	}
 
 	protected void addPropertyIfNecessary(Map<String, String> antProps, String propertyName, Object value) {
-		if (isNotBlank(propertyName) && value != null) {
-			antProps.put(propertyName, value.toString());
-		}
+		if (isBlank(propertyName) || value == null) return;
+		
+		String valueString = value.toString();
+		
+		if (isBlank(valueString)) return;
+		
+		antProps.put(propertyName, valueString);
+		
 	}
 	
 	protected void setPropertySwitch(String propertySwitch) {
