@@ -32,7 +32,7 @@ public abstract class ScreenNameMapperConfig extends PluginConfigDto {
 		Email
 	}
 	
-	private CommitterField field;
+	private CommitterField field = CommitterField.Name;
 	
 	public CommitterField getField() {
 		return field;
