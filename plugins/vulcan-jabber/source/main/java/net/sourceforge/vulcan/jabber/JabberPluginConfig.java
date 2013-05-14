@@ -36,6 +36,7 @@ import net.sourceforge.vulcan.integration.ConfigChoice;
 import net.sourceforge.vulcan.metadata.Transient;
 
 import org.apache.commons.lang.ArrayUtils;
+import org.jivesoftware.smack.ConnectionConfiguration.SecurityMode;
 
 public class JabberPluginConfig extends PluginConfigDto {
 	public static enum ProjectsToMonitor {
@@ -85,6 +86,10 @@ public class JabberPluginConfig extends PluginConfigDto {
 	
 	private String server = "";
 	private int port = 5222;
+	private String resource = "vulcan";
+	private boolean SASLAuthenticationEnabled;
+	private boolean selfSignedCertificateEnabled;
+	private SecurityMode securityMode;
 	private String serviceName = "";
 	private String username = "";
 	private String password = "";
@@ -116,12 +121,18 @@ public class JabberPluginConfig extends PluginConfigDto {
 	public List<PropertyDescriptor> getPropertyDescriptors(Locale locale) {
 		final List<PropertyDescriptor> pds = new ArrayList<PropertyDescriptor>();
 
-		addProperty(pds, "server", "JabberPluginConfig.server.name", "JabberPluginConfig.server.description", locale);
-		addProperty(pds, "port", "JabberPluginConfig.port.name", "JabberPluginConfig.port.description", locale);
-		addProperty(pds, "serviceName", "JabberPluginConfig.serviceName.name", "JabberPluginConfig.serviceName.description", locale);
 		addProperty(pds, "username", "JabberPluginConfig.username.name", "JabberPluginConfig.username.description", locale);
 		addProperty(pds, "password", "JabberPluginConfig.password.name", "JabberPluginConfig.password.description", locale,
 				Collections.singletonMap(ATTR_WIDGET_TYPE, Widget.PASSWORD));
+		addProperty(pds, "serviceName", "JabberPluginConfig.serviceName.name", "JabberPluginConfig.serviceName.description", locale);
+
+		addProperty(pds, "server", "JabberPluginConfig.server.name", "JabberPluginConfig.server.description", locale);
+		addProperty(pds, "port", "JabberPluginConfig.port.name", "JabberPluginConfig.port.description", locale);
+		addProperty(pds, "resource", "JabberPluginConfig.resource.name", "JabberPluginConfig.resource.description", locale);
+
+		addProperty(pds, "securityMode", "JabberPluginConfig.securityMode.name", "JabberPluginConfig.securityMode.description", locale);
+		addProperty(pds, "SASLAuthenticationEnabled", "JabberPluginConfig.SASLAuthenticationEnabled.name", "JabberPluginConfig.SASLAuthenticationEnabled.description", locale);
+		addProperty(pds, "selfSignedCertificateEnabled", "JabberPluginConfig.selfSignedCertificateEnabled.name", "JabberPluginConfig.selfSignedCertificateEnabled.description", locale);
 		
 		addProperty(pds, "vulcanUrl", "JabberPluginConfig.vulcanUrl.name", "JabberPluginConfig.vulcanUrl.description", locale);
 		
@@ -200,6 +211,31 @@ public class JabberPluginConfig extends PluginConfigDto {
 		this.port = port;
 	}
 	
+	public SecurityMode getSecurityMode() {
+		return securityMode;
+	}
+	
+	public void setSecurityMode(SecurityMode securityMode) {
+		this.securityMode = securityMode;
+	}
+	
+	public boolean isSASLAuthenticationEnabled() {
+		return SASLAuthenticationEnabled;
+	}
+	
+	public void setSASLAuthenticationEnabled(boolean sASLAuthenticationEnabled) {
+		SASLAuthenticationEnabled = sASLAuthenticationEnabled;
+	}
+	
+	public boolean isSelfSignedCertificateEnabled() {
+		return selfSignedCertificateEnabled;
+	}
+	
+	public void setSelfSignedCertificateEnabled(
+			boolean selfSignedCertificateEnabled) {
+		this.selfSignedCertificateEnabled = selfSignedCertificateEnabled;
+	}
+	
 	public String getUsername() {
 		return username;
 	}
@@ -222,6 +258,14 @@ public class JabberPluginConfig extends PluginConfigDto {
 	
 	public void setProjectsToMonitor(ProjectsToMonitor projectsToMonitor) {
 		this.projectsToMonitor = projectsToMonitor;
+	}
+	
+	public String getResource() {
+		return resource;
+	}
+	
+	public void setResource(String resource) {
+		this.resource = resource;
 	}
 	
 	public String[] getSelectedProjects() {
