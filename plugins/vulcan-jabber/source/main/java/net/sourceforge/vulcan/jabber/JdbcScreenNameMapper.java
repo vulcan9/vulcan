@@ -30,15 +30,16 @@ import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jndi.JndiObjectFactoryBean;
 
-public class JdbcScreenNameMapper implements ScreenNameMapper {
+public class JdbcScreenNameMapper extends AbstractScreenNameMapper {
 	private final static Log LOG = LogFactory.getLog(JdbcScreenNameMapper.class);
 	
 	private final JdbcScreenNameMapperConfig config;
 	
 	public JdbcScreenNameMapper(JdbcScreenNameMapperConfig config) {
+		super(config);
 		this.config = config;
 	}
-
+	
 	public Map<String, String> lookupByAuthor(Iterable<Committer> authors) {
 		final Map<String, String> screenNames = new HashMap<String, String>();
 		
@@ -47,7 +48,8 @@ public class JdbcScreenNameMapper implements ScreenNameMapper {
 			
 			for (Committer author : authors) {
 				try {
-					screenNames.put(author.getName(), (String) template.queryForObject(config.getSql(), new Object[] {author.getName()}, String.class));
+					String field = author.getName();
+					screenNames.put(author.getName(), (String) template.queryForObject(config.getSql(), new Object[] {field}, String.class));
 				} catch (IncorrectResultSizeDataAccessException e) {
 					LOG.info("No screen name found for commit author " + author);
 				}

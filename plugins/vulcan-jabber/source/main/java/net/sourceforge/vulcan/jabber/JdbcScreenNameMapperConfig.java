@@ -19,31 +19,18 @@
 package net.sourceforge.vulcan.jabber;
 
 import java.beans.PropertyDescriptor;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 
-import net.sourceforge.vulcan.dto.PluginConfigDto;
-
-public class JdbcScreenNameMapperConfig extends PluginConfigDto {
+public class JdbcScreenNameMapperConfig extends ScreenNameMapperConfig {
 
 	private String jndiName = "";
 	private String sql = "SELECT im_name FROM employees WHERE login = ?";
 	
 	@Override
-	public String getPluginId() {
-		return JabberPlugin.PLUGIN_ID;
-	}
-
-	@Override
-	public String getPluginName() {
-		return JabberPlugin.PLUGIN_NAME;
-	}
-
-	@Override
 	public List<PropertyDescriptor> getPropertyDescriptors(Locale locale) {
-		final List<PropertyDescriptor> pds = new ArrayList<PropertyDescriptor>();
+		final List<PropertyDescriptor> pds = super.getPropertyDescriptors(locale);
 
 		addProperty(pds, "jndiName", "JdbcScreenNameMapperConfig.jndiName.name", "JdbcScreenNameMapperConfig.jndiName.description", locale);
 		addProperty(pds, "sql", "JdbcScreenNameMapperConfig.sql.name", "JdbcScreenNameMapperConfig.sql.description", locale,

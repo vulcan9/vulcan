@@ -19,32 +19,20 @@
 package net.sourceforge.vulcan.jabber;
 
 import java.beans.PropertyDescriptor;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
+import net.sourceforge.vulcan.dto.BaseDto;
+
 import org.apache.commons.lang.ArrayUtils;
 
-import net.sourceforge.vulcan.dto.BaseDto;
-import net.sourceforge.vulcan.dto.PluginConfigDto;
-
-public class DictionaryScreenNameMapperConfig extends PluginConfigDto {
+public class DictionaryScreenNameMapperConfig extends ScreenNameMapperConfig {
 
 	private String[] entries = {};
 	
 	@Override
-	public String getPluginId() {
-		return JabberPlugin.PLUGIN_ID;
-	}
-
-	@Override
-	public String getPluginName() {
-		return JabberPlugin.PLUGIN_NAME;
-	}
-
-	@Override
 	public List<PropertyDescriptor> getPropertyDescriptors(Locale locale) {
-		final List<PropertyDescriptor> pds = new ArrayList<PropertyDescriptor>();
+		final List<PropertyDescriptor> pds = super.getPropertyDescriptors(locale);
 
 		addProperty(pds, "entries", "DictionaryScreenNameMapperConfig.entries.name", "DictionaryScreenNameMapperConfig.entries.description", locale);
 
