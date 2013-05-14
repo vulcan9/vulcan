@@ -75,7 +75,7 @@ public class JabberPluginTest extends EasyMockTestCase {
 	}
 	
 	public void testSetConfigConnectsClient() throws Exception {
-		client.refreshConnection("example.com", 5222, "", "user", "pass");
+		client.refreshConnection(config);
 		
 		replay();
 		
@@ -100,7 +100,7 @@ public class JabberPluginTest extends EasyMockTestCase {
 	
 	public void testDoesNotListenWhenNotConfigured() throws Exception {
 		config.setServer("");
-		client.refreshConnection("", 5222, "", "user", "pass");
+		client.refreshConnection(config);
 		expect(client.isConnected()).andReturn(false);
 		
 		replay();
@@ -162,7 +162,7 @@ public class JabberPluginTest extends EasyMockTestCase {
 		
 		config.setProjectsToMonitor(ProjectsToMonitor.Specify);
 		config.setSelectedProjects(new String[] {status.getName()});
-		client.refreshConnection("example.com", 5222, "", "user", "pass");
+		client.refreshConnection(config);
 		expectRefreshConnection();
 		
 		expect(buildManager.getProjectBuilder(status.getName())).andReturn(projectBuilder);
@@ -265,7 +265,7 @@ public class JabberPluginTest extends EasyMockTestCase {
 	}
 
 	private void expectRefreshConnection() {
-		client.refreshConnection("example.com", 5222, "", "user", "pass");
+		client.refreshConnection(config);
 		expect(client.isConnected()).andReturn(true);
 	}
 

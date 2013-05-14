@@ -30,7 +30,7 @@ public class XmppClientTest extends TestCase {
 	
 	XmppClient client = new XmppClient() {
 		@Override
-		void connect(String server, int port, String serviceName, String username, String password) {
+		void connect(JabberPluginConfig config) {
 			connectCount++;
 			connected = true;
 			if (!failToConnectFlag) {

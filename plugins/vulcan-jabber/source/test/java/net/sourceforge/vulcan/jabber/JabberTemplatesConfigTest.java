@@ -54,7 +54,7 @@ public class JabberTemplatesConfigTest extends TestCase {
 			fail("expected exception");
 		} catch (ValidationException e) {
 			assertEquals("pithyRetortTemplate", e.getPropertyName());
-			assertEquals("NotValid", e.getArgs()[0]);
+			assertTrue(e.getArgs()[0].toString().contains("NotValid"));
 		}
 	}
 }

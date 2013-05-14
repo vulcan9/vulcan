@@ -34,15 +34,15 @@
 	
 	<dependencies>
 		<dependency>
-			<groupId>jivesoftware</groupId>
+			<groupId>org.igniterealtime.smack</groupId>
 			<artifactId>smack</artifactId>
-			<version>3.0.4</version>
+			<version>3.3.0</version>
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
-			<groupId>jivesoftware</groupId>
+			<groupId>org.igniterealtime.smack</groupId>
 			<artifactId>smackx</artifactId>
-			<version>3.0.4</version>
+			<version>3.3.0</version>
 			<scope>compile</scope>
 		</dependency>
 		<dependency>

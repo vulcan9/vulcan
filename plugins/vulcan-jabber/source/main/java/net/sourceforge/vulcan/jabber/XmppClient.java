@@ -19,6 +19,7 @@
 package net.sourceforge.vulcan.jabber;
 
 import static org.apache.commons.lang.StringUtils.isBlank;
+import static org.apache.commons.lang.StringUtils.isEmpty;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -50,17 +51,19 @@ public class XmppClient implements JabberClient, MessageListener {
 	protected XMPPConnection connection;
 	private final List<JabberChatListener> listeners = new ArrayList<JabberChatListener>();
 	
-	public void refreshConnection(String server, int port, String serviceName, String username, String password) {
+	@Override
+	public void refreshConnection(JabberPluginConfig config) {
+		String password = config.getPassword();
 		if (password == null) {
 			password = StringUtils.EMPTY;
 		}
-		final String connectionString = server + ":" + port + ":" + serviceName + ":" + username + ":" + DigestUtils.shaHex(password);
+		final String connectionString = config.getServer() + ":" + config.getPort() + ":" + config.getServiceName() + ":" + config.getUsername() + ":" + DigestUtils.shaHex(password);
 		
 		synchronized(lock) {
 			if (connectionString.equals(this.connectionString) && connection != null && connection.isConnected()) {
 				return;
 			}
-
+		
 			this.connectionString = connectionString;
 			
 			if (connection != null && connection.isConnected()) {
@@ -69,17 +72,17 @@ public class XmppClient implements JabberClient, MessageListener {
 			
 			connection = null;
 			
-			if (StringUtils.isEmpty(server)) {
+			if (isEmpty(config.getServiceName()) && isEmpty(config.getServer())) {
 				return;
 			}
 			
-			LOG.info("Connecting to " + server + ":" + port);
+			LOG.info("Connecting to " + config.getServer() + ":" + config.getPort());
 			
-			connect(server, port, serviceName, username, password);
+			connect(config);
 			if (connection == null) {
 				this.connectionString = null;
 			}
-		}			
+		}
 	}
 	
 	@Override
@@ -149,9 +152,20 @@ public class XmppClient implements JabberClient, MessageListener {
 		this.eventHandler = eventHandler;
 	}
 	
-	void connect(String server, int port, String serviceName, String username, String password) {
-		ConnectionConfiguration config = new ConnectionConfiguration(server, port, serviceName);
-
+	void connect(JabberPluginConfig pluginConfig) {
+		ConnectionConfiguration config;
+		
+		if (isBlank(pluginConfig.getServer())) {
+			// Use DNS to query for host and port.
+			config = new ConnectionConfiguration(pluginConfig.getServiceName());	
+		} else {
+			config = new ConnectionConfiguration(pluginConfig.getServer(), pluginConfig.getPort(), pluginConfig.getServiceName());
+		}
+		
+		config.setSelfSignedCertificateEnabled(pluginConfig.isSelfSignedCertificateEnabled());
+		config.setSASLAuthenticationEnabled(pluginConfig.isSASLAuthenticationEnabled());
+		config.setSecurityMode(pluginConfig.getSecurityMode());
+		
 		connection = new XMPPConnection(config);
 		
 		final ClassLoader parentClassLoader = Thread.currentThread().getContextClassLoader();
@@ -161,16 +175,23 @@ public class XmppClient implements JabberClient, MessageListener {
 			Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
 			
 			connection.connect();
-			connection.login(username, password);
+			String resource = pluginConfig.getResource();
+			if (isBlank(resource)) {
+				resource = "vulcan";
+			}
+			
+			connection.login(pluginConfig.getUsername(), pluginConfig.getPassword(), resource);
+			//thing(pluginConfig);
+			
 			connection.getChatManager().addChatListener(new ChatManagerListener() {
 				public void chatCreated(Chat chat, boolean arg1) {
 					chat.addMessageListener(XmppClient.this);
 				}
 			});
-			LOG.info("Logged into " + server + ":" + port + " as " + username);
+			LOG.info("Logged into " + pluginConfig.getServer() + ":" + pluginConfig.getPort() + " as " + pluginConfig.getUsername());
 		} catch (XMPPException e) {
 			eventHandler.reportEvent(new ErrorEvent(this, "jabber.errors.connect",
-					new Object[] {server, port, username, e.getMessage()}, e));
+					new Object[] {config.getHost(), config.getPort(), pluginConfig.getUsername(), e.getMessage()}, e));
 			
 			connection = null;
 		} finally {
@@ -180,5 +201,16 @@ public class XmppClient implements JabberClient, MessageListener {
 	
 	String escape(String string) {
 		return StringEscapeUtils.escapeHtml(string);
+	}
+
+	void refreshConnection(String server, int port, String serviceName,
+			String username, String password) {
+		JabberPluginConfig config = new JabberPluginConfig();
+		config.setServer(server);
+		config.setPort(port);
+		config.setServiceName(serviceName);
+		config.setUsername(username);
+		config.setPassword(password);
+		refreshConnection(config);
 	}
 }
