@@ -19,33 +19,21 @@
 package net.sourceforge.vulcan.jabber;
 
 import java.beans.PropertyDescriptor;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
-import net.sourceforge.vulcan.dto.PluginConfigDto;
 import net.sourceforge.vulcan.exception.ValidationException;
 
-public class RegexScreenNameMapperConfig extends PluginConfigDto {
+public class RegexScreenNameMapperConfig extends ScreenNameMapperConfig {
 
 	private String regex = "(.*)";
 	private String replacement = "$1";
 	
 	@Override
-	public String getPluginId() {
-		return JabberPlugin.PLUGIN_ID;
-	}
-
-	@Override
-	public String getPluginName() {
-		return JabberPlugin.PLUGIN_NAME;
-	}
-
-	@Override
 	public List<PropertyDescriptor> getPropertyDescriptors(Locale locale) {
-		final List<PropertyDescriptor> pds = new ArrayList<PropertyDescriptor>();
+		final List<PropertyDescriptor> pds = super.getPropertyDescriptors(locale);
 
 		addProperty(pds, "regex", "RegexScreenNameMapperConfig.regex.name", "RegexScreenNameMapperConfig.regex.description", locale);
 		addProperty(pds, "replacement", "RegexScreenNameMapperConfig.replacement.name", "RegexScreenNameMapperConfig.replacement.description", locale);

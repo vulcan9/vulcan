@@ -21,11 +21,10 @@ package net.sourceforge.vulcan.jabber;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-public class DictionaryScreenNameMapper implements ScreenNameMapper {
+public class DictionaryScreenNameMapper extends AbstractScreenNameMapper {
 	private final static Log LOG = LogFactory.getLog(DictionaryScreenNameMapper.class);
 	
 	private final DictionaryScreenNameMapperConfig config;
@@ -33,21 +32,14 @@ public class DictionaryScreenNameMapper implements ScreenNameMapper {
 	private final Map<String, String> map = new HashMap<String, String>();
 	
 	public DictionaryScreenNameMapper(DictionaryScreenNameMapperConfig config) {
+		super(config);
 		this.config = config;
 		digest();
 	}
 
-	public Map<String, String> lookupByAuthor(Iterable<Committer> committers) {
-		Map<String, String> names = new HashMap<String, String>();
-		
-		for (Committer c : committers) {
-			final String sn = map.get(c.getName().toLowerCase());
-			if (StringUtils.isNotBlank(sn)) {
-				names.put(c.getName(), sn);
-			}
-		}
-		
-		return names;
+	@Override
+	protected String lookupByAuthor(String field) {
+		return map.get(field.toLowerCase());
 	}
 
 	public void digest() {

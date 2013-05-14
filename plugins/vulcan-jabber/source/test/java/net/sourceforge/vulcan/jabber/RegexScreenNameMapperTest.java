@@ -23,6 +23,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import net.sourceforge.vulcan.jabber.ScreenNameMapperConfig.CommitterField;
+
 import junit.framework.TestCase;
 
 public class RegexScreenNameMapperTest extends TestCase {
@@ -54,6 +56,7 @@ public class RegexScreenNameMapperTest extends TestCase {
 	public void testIdentityWithSuffix() throws Exception {
 		final RegexScreenNameMapperConfig config = new RegexScreenNameMapperConfig();
 		
+		config.setField(CommitterField.Name);
 		config.setRegex("(.*)");
 		config.setReplacement("$1@gmail.com");
 		
@@ -61,5 +64,18 @@ public class RegexScreenNameMapperTest extends TestCase {
 		final Map<String, String> result = mapper.lookupByAuthor(Arrays.asList(new Committer("chris.eldredge", null)));
 		
 		assertEquals(Collections.singletonMap("chris.eldredge", "chris.eldredge@gmail.com"), result);
+	}
+
+	public void testIdentityEmail() throws Exception {
+		final RegexScreenNameMapperConfig config = new RegexScreenNameMapperConfig();
+		
+		config.setField(CommitterField.Email);
+		config.setRegex("(.*)");
+		config.setReplacement("$1");
+		
+		final RegexScreenNameMapper mapper = new RegexScreenNameMapper(config);
+		final Map<String, String> result = mapper.lookupByAuthor(Arrays.asList(new Committer("Chris Eldredge", "chris.eldredge@gmail.com")));
+		
+		assertEquals(Collections.singletonMap("Chris Eldredge", "chris.eldredge@gmail.com"), result);
 	}
 }
