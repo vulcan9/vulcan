@@ -56,7 +56,7 @@ public abstract class ScreenNameMapperConfig extends PluginConfigDto {
 	public List<PropertyDescriptor> getPropertyDescriptors(Locale locale) {
 		final List<PropertyDescriptor> pds = new ArrayList<PropertyDescriptor>();
 
-		addProperty(pds, "regex", "ScreenNameMapperConfig.field.name", "RegexScreenNameMapperConfig.field.description", locale);
+		addProperty(pds, "field", "ScreenNameMapperConfig.field.name", "RegexScreenNameMapperConfig.field.description", locale);
 		
 		return pds;
 	}
