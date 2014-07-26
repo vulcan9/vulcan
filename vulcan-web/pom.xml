@@ -15,6 +15,13 @@
 	<name>vulcan-web</name>
 	
 	<packaging>war</packaging>
+
+	<repositories>
+		<repository>
+			<id>opencast-public</id>
+			<url>http://repository.opencastproject.org/nexus/content/repositories/public/</url>
+		</repository>
+	</repositories>
 	
 	<description>
 		Vulcan is a web application providing continuous integration
@@ -229,7 +236,7 @@
 		<dependency>
 			<groupId>org.tuckey</groupId>
 			<artifactId>urlrewritefilter</artifactId>
-			<version>2.6</version>
+			<version>2.5.1</version>
 			<type>jar</type>
 			<scope>compile</scope>
 		</dependency>

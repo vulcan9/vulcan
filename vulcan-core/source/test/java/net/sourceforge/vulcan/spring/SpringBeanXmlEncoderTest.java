@@ -269,7 +269,7 @@ public class SpringBeanXmlEncoderTest extends TestCase {
 		final Element root = new Element("beans");
 		enc.encodeBean(root, "mine", p);
 		
-		assertEquals("true", root.getChild("bean").getChild("property").getChild("value").getText());
+		assertEquals("true", root.getChild("bean").getChild("property").getChild("value").getText().toLowerCase());
 	}
 	public void testIgnoresTransient() {
 		final Bean b = new Bean();
