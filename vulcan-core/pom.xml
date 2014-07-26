@@ -63,7 +63,7 @@
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
-			<groupId>opensymphony</groupId>
+			<groupId>quartz</groupId>
 			<artifactId>quartz</artifactId>
 			<version>1.5.2</version>
 			<scope>compile</scope>
