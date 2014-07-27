@@ -76,8 +76,8 @@
 	</rule>
 	
 	<rule>
-		<name>Google Code Commit Hook</name>
-		<from>^/googleCodeCommitHook</from>
+		<name>Web Hook</name>
+		<from>^/webHook</from>
 		<to>/buildmanagement/manualBuild.do</to>
 	</rule>
 	

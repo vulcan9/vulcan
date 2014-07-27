@@ -70,7 +70,7 @@
 		<filter-class>net.sourceforge.vulcan.web.SignedRequestAuthorizationFilter</filter-class>
  		<init-param>
 			<param-name>signatureHeaderName</param-name>
-			<param-value>Google-Code-Project-Hosting-Hook-Hmac</param-value>
+			<param-value>X-Payload-HMAC</param-value>
 		</init-param>
 		<init-param>
 			<param-name>sharedSecret</param-name>
@@ -84,7 +84,7 @@
 	
 	<filter-mapping>
 		<filter-name>SignedRequestAuthorizationFilter</filter-name>
-		<url-pattern>/googleCodeCommitHook</url-pattern>
+		<url-pattern>/webhook</url-pattern>
 	</filter-mapping>
 	
 	<filter-mapping>
