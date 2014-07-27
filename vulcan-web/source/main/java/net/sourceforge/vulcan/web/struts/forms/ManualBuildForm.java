@@ -49,6 +49,7 @@ public class ManualBuildForm extends ValidatorForm {
 	private WorkingCopyUpdateStrategy workingCopyUpdateStrategy;
 	
 	private boolean chooseTags;
+	private boolean fetchAvailableTags;
 	private List<String> projectNames = Collections.emptyList();
 	private List<List<RepositoryTagDto>> availableTags = Collections.emptyList();
 	private String[] selectedTags;
@@ -109,6 +110,7 @@ public class ManualBuildForm extends ValidatorForm {
 		buildOnDependencyFailure = false;
 		buildOnNoUpdates = false;
 		chooseTags = false;
+		fetchAvailableTags = true;
 	}
 	@Override
 	public ActionErrors validate(ActionMapping mapping, HttpServletRequest request) {
@@ -153,6 +155,12 @@ public class ManualBuildForm extends ValidatorForm {
 	}
 	public void setChooseTags(boolean chooseTag) {
 		this.chooseTags = chooseTag;
+	}
+	public boolean isFetchAvailableTags() {
+		return fetchAvailableTags;
+	}
+	public void setFetchAvailableTags(boolean fetchAvailableTags) {
+		this.fetchAvailableTags = fetchAvailableTags;
 	}
 	public List<String> getProjectNames() {
 		return projectNames;

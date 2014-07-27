@@ -205,24 +205,12 @@ public final class ManualBuildAction extends Action {
 			
 			List<RepositoryTagDto> projectTags = null;
 			
-			try {
-				final RepositoryAdaptor repository = projectManager.getRepositoryAdaptor(target);
-				
-				try {
-					repository.prepareRepository(new NoOpBuildDetailCallback());
-				} catch (InterruptedException e) {
-					throw new ConfigException("errors.interrupted", null, e);
-				}
-				
-				projectTags = repository.getAvailableTagsAndBranches();
-			} catch (ConfigException e) {
-				BaseDispatchAction.saveError(request, target.getName(),
-						new ActionMessage(e.getKey(), e.getArgs()));
-				
+			if (buildForm.isFetchAvailableTags()) {
+				projectTags = fetchTagsAndBranchesFromRepository(request, target);
+				setPreviouslySelectedTag(selectedTags, projectName, projectTags);
+			} else {
 				projectTags = Collections.emptyList();
 			}
-			
-			setPreviouslySelectedTag(selectedTags, projectName, projectTags);
 			
 			tags.add(projectTags);
 			workDirOverrides.add(target.getWorkDir());
@@ -230,6 +218,28 @@ public final class ManualBuildAction extends Action {
 		
 		buildForm.populateTagChoices(projectNames, tags, workDirOverrides, dg);
 		buildForm.setSelectedTags(selectedTags.toArray(new String[selectedTags.size()]));
+	}
+
+	protected List<RepositoryTagDto> fetchTagsAndBranchesFromRepository(
+			HttpServletRequest request, ProjectConfigDto target) {
+		List<RepositoryTagDto> projectTags;
+		try {
+			final RepositoryAdaptor repository = projectManager.getRepositoryAdaptor(target);
+			
+			try {
+				repository.prepareRepository(new NoOpBuildDetailCallback());
+			} catch (InterruptedException e) {
+				throw new ConfigException("errors.interrupted", null, e);
+			}
+			
+			projectTags = repository.getAvailableTagsAndBranches();
+		} catch (ConfigException e) {
+			BaseDispatchAction.saveError(request, target.getName(),
+					new ActionMessage(e.getKey(), e.getArgs()));
+			
+			projectTags = Collections.emptyList();
+		}
+		return projectTags;
 	}
 
 	private void setPreviouslySelectedTag(List<String> selectedTags, String projectName, List<RepositoryTagDto> projectTags) {
