@@ -1,6 +1,6 @@
 /*
  * Vulcan Build Manager
- * Copyright (C) 2005-2012 Chris Eldredge
+ * Copyright (C) 2005-2014 Chris Eldredge
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,6 +18,7 @@
  */
 package net.sourceforge.vulcan.web;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -79,17 +80,38 @@ public class SignedRequestAuthorizationFilter extends OncePerRequestFilter {
 	
 	@Override
 	protected void doFilterInternal(HttpServletRequest request,	HttpServletResponse response, FilterChain chain) throws ServletException, IOException {
-		if (validate(request, secretKey)) {
-			if (StringUtils.isNotBlank(principalParameterName) && request.getUserPrincipal() == null) {
-				final String requestBy = request.getParameter(principalParameterName);
-				if (StringUtils.isNotBlank(requestBy)) {
-					request = new RequestWrapperWithPrincipal(request, new SignedRequestPrincipal(requestBy));	
-				}
-			}
-			chain.doFilter(request, response);
-		} else {
+		if (!validate(request, secretKey)) {
 			response.sendError(HttpServletResponse.SC_FORBIDDEN);
+			return;
 		}
+		
+		request = decorateRequestWithFormData(request);
+		request = decorateRequestWithPrincipal(request);
+		
+		chain.doFilter(request, response);
+	}
+
+	protected HttpServletRequest decorateRequestWithFormData(HttpServletRequest request) {
+		return new ParameterParsingHttpServletRequestWrapper(request);
+	}
+
+	protected HttpServletRequest decorateRequestWithPrincipal(HttpServletRequest request) {
+		Principal principal = request.getUserPrincipal();
+		if (StringUtils.isBlank(principalParameterName) || principal != null) {
+			return request;
+		}
+		
+		final String requestBy = request.getParameter(principalParameterName);
+		if (StringUtils.isBlank(requestBy)) {
+			return request;
+		}
+		
+		return new HttpServletRequestWrapper(request) {
+			@Override
+			public Principal getUserPrincipal() {
+				return new SignedRequestPrincipal(requestBy);
+			}
+		};
 	}
 	
 	protected boolean validate(HttpServletRequest request, SecretKey secretKey) throws IOException, ServletException {
@@ -105,7 +127,12 @@ public class SignedRequestAuthorizationFilter extends OncePerRequestFilter {
 			return false;
 		}
 
-		final String resultStr = hashRequestBody(request, secretKey);
+		BufferedReader reader = request.getReader();
+		reader.mark(8192);
+		byte[] buffer = IOUtils.toByteArray(reader);
+		reader.reset();
+
+		final String resultStr = hashRequestBody(buffer, secretKey);
 
 		if (!resultStr.equals(signature)) {
 			log.warn("Forbidding access to " + request.getContextPath() + " because signature does not match request body");
@@ -115,12 +142,12 @@ public class SignedRequestAuthorizationFilter extends OncePerRequestFilter {
 		return true;
 	}
 
-	protected String hashRequestBody(HttpServletRequest request, SecretKey secretKey) throws IOException, ServletException {
+	protected String hashRequestBody(byte[] buffer, SecretKey secretKey) throws IOException, ServletException {
 		final byte[] result;
 		try {
 			final Mac mac = Mac.getInstance(algorithm);
 			mac.init(secretKey);
-			result = mac.doFinal(IOUtils.toByteArray(request.getInputStream()));
+			result = mac.doFinal(buffer);
 		} catch (NoSuchAlgorithmException e) {
 			throw new ServletException(e);
 		} catch (InvalidKeyException e) {
@@ -148,20 +175,6 @@ public class SignedRequestAuthorizationFilter extends OncePerRequestFilter {
 	
 	protected SecretKey getSecretKey() {
 		return secretKey;
-	}
-	
-	static class RequestWrapperWithPrincipal extends HttpServletRequestWrapper {
-		private final Principal principal;
-
-		public RequestWrapperWithPrincipal(HttpServletRequest delegate, Principal principal) {
-			super(delegate);
-			this.principal = principal;
-		}
-		
-		@Override
-		public Principal getUserPrincipal() {
-			return principal;
-		}
 	}
 	
 	static class SignedRequestPrincipal implements Principal {

@@ -1,6 +1,6 @@
 /*
  * Vulcan Build Manager
- * Copyright (C) 2005-2012 Chris Eldredge
+ * Copyright (C) 2005-2014 Chris Eldredge
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,22 +18,23 @@
  */
 package net.sourceforge.vulcan.web;
 
-import java.io.ByteArrayInputStream;
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.StringReader;
 import java.security.Principal;
 
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
-import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletRequestWrapper;
 import javax.servlet.http.HttpServletResponse;
 
 import net.sourceforge.vulcan.EasyMockTestCase;
 import net.sourceforge.vulcan.SimplePrincipal;
 
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringUtils;
 import org.easymock.EasyMock;
 import org.easymock.IArgumentMatcher;
 
@@ -52,6 +53,10 @@ public class SignedRequestAuthorizationFilterTest extends EasyMockTestCase {
 		protected boolean validate(HttpServletRequest request, SecretKey secretKey) {
 			return validateFlag;
 		}
+		
+		protected HttpServletRequest decorateRequestWithFormData(HttpServletRequest request) {
+			return request;
+		};
 	};
 	
 	SignedRequestAuthorizationFilter filter = new SignedRequestAuthorizationFilter();
@@ -98,9 +103,10 @@ public class SignedRequestAuthorizationFilterTest extends EasyMockTestCase {
 		validateFlag = true;
 		fakeFilter.setPrincipalParameterName("user");
 		
-		expect(request.getUserPrincipal()).andReturn(new SimplePrincipal());
+		setUpRequestBody("");
+		expect(request.getUserPrincipal()).andReturn(new SimplePrincipal()).atLeastOnce();
 		
-		chain.doFilter(request, response);
+		chain.doFilter(matchRequestWithPrincipal(request, "testuser"), eq(response));
 		
 		replay();
 		
@@ -108,15 +114,16 @@ public class SignedRequestAuthorizationFilterTest extends EasyMockTestCase {
 		
 		verify();
 	}
-	
+
 	public void testDelegateSetsPrincipal() throws Exception {
 		validateFlag = true;
 		fakeFilter.setPrincipalParameterName("requestBy");
 		
+		setUpRequestBody("");
 		expect(request.getUserPrincipal()).andReturn(null);
 		expect(request.getParameter("requestBy")).andReturn("someone");
 		
-		chain.doFilter(matchRequest(request, "someone"), eq(response));
+		chain.doFilter(matchRequestWithPrincipal(request, "someone"), eq(response));
 		
 		replay();
 		
@@ -129,7 +136,10 @@ public class SignedRequestAuthorizationFilterTest extends EasyMockTestCase {
 		validateFlag = true;
 		fakeFilter.setPrincipalParameterName("");
 		
-		chain.doFilter(eq(request), eq(response));
+		setUpRequestBody("");
+		expect(request.getUserPrincipal()).andReturn(null).atLeastOnce();
+		
+		chain.doFilter(matchRequestWithPrincipal(request, null), eq(response));
 		
 		replay();
 		
@@ -142,9 +152,11 @@ public class SignedRequestAuthorizationFilterTest extends EasyMockTestCase {
 		validateFlag = true;
 		fakeFilter.setPrincipalParameterName("user");
 		
-		expect(request.getUserPrincipal()).andReturn(null);
+		setUpRequestBody("");
+		expect(request.getUserPrincipal()).andReturn(null).atLeastOnce();
 		expect(request.getParameter("user")).andReturn(null);
-		chain.doFilter(eq(request), eq(response));
+		
+		chain.doFilter(matchRequestWithPrincipal(request, null), eq(response));
 		
 		replay();
 		
@@ -156,6 +168,7 @@ public class SignedRequestAuthorizationFilterTest extends EasyMockTestCase {
 	public void testSendsForbiddenWhenInvalid() throws Exception {
 		validateFlag = false;
 		
+		setUpRequestBody("does not validate");
 		response.sendError(HttpServletResponse.SC_FORBIDDEN);
 		
 		replay();
@@ -189,14 +202,7 @@ public class SignedRequestAuthorizationFilterTest extends EasyMockTestCase {
 		filter.setSignatureHeaderName("X-hmac");
 		
 		expect(request.getHeader("X-hmac")).andReturn("invalid");
-		expect(request.getInputStream()).andReturn(new ServletInputStream() {
-			ByteArrayInputStream stream = new ByteArrayInputStream("the body".getBytes());
-			@Override
-			public int read() throws IOException {
-				return stream.read();
-			}
-		});
-		
+		expect(request.getReader()).andReturn(new BufferedReader(new StringReader("body")));
 		replay();
 		
 		assertEquals("isValid", false, filter.validate(request, secretKey));
@@ -204,41 +210,47 @@ public class SignedRequestAuthorizationFilterTest extends EasyMockTestCase {
 		verify();
 	}
 	
-	public void testHashRequestBody() throws Exception {
-		expect(request.getInputStream()).andReturn(new ServletInputStream() {
-			ByteArrayInputStream stream = new ByteArrayInputStream("the body".getBytes());
-			@Override
-			public int read() throws IOException {
-				return stream.read();
-			}
-		});
+	public void testValidateResetsReader() throws Exception {
+		filter.setSignatureHeaderName("X-hmac");
+		BufferedReader reader = new BufferedReader(new StringReader("body"));
 		
+		expect(request.getHeader("X-hmac")).andReturn("invalid");
+		expect(request.getReader()).andReturn(reader);
 		replay();
 		
-		assertEquals("14f2baafbf2441af0d057b1aa1db012a", filter.hashRequestBody(request, secretKey));
+		filter.validate(request, secretKey);
+		
+		verify();
+		
+		assertEquals("body", IOUtils.toString(reader));
+	}
+	
+	public void testHashRequestBody() throws Exception {
+		replay();
+		
+		assertEquals("14f2baafbf2441af0d057b1aa1db012a", filter.hashRequestBody("the body".getBytes(), secretKey));
 		
 		verify();
 	}
-	
-	private static HttpServletRequest matchRequest(final HttpServletRequest expected, final String principalName) {
+
+	protected void setUpRequestBody(String body) throws IOException {
+	}
+
+	private static HttpServletRequest matchRequestWithPrincipal(final HttpServletRequest expected, final String principalName) {
 		EasyMock.reportMatcher(new IArgumentMatcher() {
 			private String message;
 			
 			public boolean matches(Object argument) {
-				if (!(argument instanceof HttpServletRequestWrapper)) {
-					message = "instanceof HttpServletRequestWrapper";
+				if (!(argument instanceof HttpServletRequest)) {
+					message = "instanceof HttpServletRequest";
 					return false;
 				}
 				
-				final HttpServletRequestWrapper w = (HttpServletRequestWrapper) argument;
-				
-				if (expected != w.getRequest()) {
-					message = "delegating to " + expected.toString();
-					return false;
-				}
+				final HttpServletRequest w = (HttpServletRequest) argument;
 				
 				final Principal userPrincipal = w.getUserPrincipal();
-				if (userPrincipal == null || !userPrincipal.getName().equals(principalName)) {
+				final String actualName = userPrincipal != null ? userPrincipal.getName() : null;
+				if (!StringUtils.equals(actualName, principalName)) {
 					message = "userPrincipal " + principalName;
 					return false;
 				}
@@ -253,5 +265,4 @@ public class SignedRequestAuthorizationFilterTest extends EasyMockTestCase {
 		});
 		return null;
 	}
-
 }
