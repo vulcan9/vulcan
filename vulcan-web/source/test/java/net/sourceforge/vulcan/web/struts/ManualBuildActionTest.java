@@ -487,6 +487,54 @@ public class ManualBuildActionTest extends MockApplicationContextStrutsTestCase 
 		assertEquals("work/a", workDirOverrides[0]);
 		assertEquals("work/b", workDirOverrides[1]);
 	}
+	public void testChooseTagsSkipFetch() throws Exception {
+		addRequestParameter("targets", new String[] {"a"});
+		addRequestParameter("buildOnNoUpdates", "true");
+		addRequestParameter("buildOnDependencyFailure", "true");
+		addRequestParameter("chooseTags", "true");
+		addRequestParameter("fetchAvailableTags", "false");
+		
+		final ProjectConfigDto project = projects[0];
+		expect(manager.getProjectConfig("a")).andReturn(project);
+		
+		final DependencyGroup dg = new DependencyGroupImpl();
+		dg.addTarget(project);
+		
+		manager.buildDependencyGroup(
+				aryEq(new ProjectConfigDto[] {project}),
+				eq(DependencyBuildPolicy.NONE),
+				eq(WorkingCopyUpdateStrategy.Default),
+				eq(true), eq(true));
+		expectLastCall().andReturn(dg);
+
+		replay();
+		
+		actionPerform();
+		
+		verifyForward("chooseTags");
+		
+		verifyNoActionMessages();
+		verifyNoActionErrors();
+		
+		verify();
+		
+		final ManualBuildForm form = (ManualBuildForm) request.getSession().getAttribute("manualBuildForm");
+		assertNotNull(form);
+		
+		final List<String> projectNames = form.getProjectNames();
+		
+		assertEquals(1, projectNames.size());
+		assertEquals("a", projectNames.get(0));
+		
+		final List<List<RepositoryTagDto>> tags = form.getAvailableTags();
+		
+		assertEquals(1, tags.size());
+
+		assertEquals(0, tags.get(0).size());
+		
+		final String[] selectedTags = form.getSelectedTags();
+		assertEquals(0, selectedTags.length);
+	}
 	public void testChooseTagsReportsRepositoryError() throws Exception {
 		addRequestParameter("targets", new String[] {"a"});
 		addRequestParameter("chooseTags", "true");
