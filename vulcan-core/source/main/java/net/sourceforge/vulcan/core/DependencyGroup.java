@@ -50,4 +50,6 @@ public interface DependencyGroup {
 	boolean isManualBuild();
 
 	void setManualBuild(boolean manualBuild);
+
+	int size();
 }

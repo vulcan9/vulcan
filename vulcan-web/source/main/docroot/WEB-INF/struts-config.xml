@@ -188,11 +188,11 @@
 				input="/admin/setup/"/>
 				
 		<action path="/buildmanagement/manualBuildForm"
-				type="org.apache.struts.actions.ForwardAction"
+				type="net.sourceforge.vulcan.web.struts.actions.ResetManualBuildFormAction"
 				name="manualBuildForm"
 				validate="false"
 				scope="session"
-				parameter="/WEB-INF/jsp/manualBuildForm.jsp"/>
+				input="/WEB-INF/jsp/manualBuildForm.jsp"/>
 		
 		<action path="/buildmanagement/manualBuild"
 				type="org.springframework.web.struts.DelegatingActionProxy"

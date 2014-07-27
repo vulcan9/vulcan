@@ -1,6 +1,6 @@
 /*
  * Vulcan Build Manager
- * Copyright (C) 2005-2012 Chris Eldredge
+ * Copyright (C) 2005-2014 Chris Eldredge
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -492,14 +492,16 @@ public class ManualBuildActionTest extends MockApplicationContextStrutsTestCase 
 		addRequestParameter("buildOnNoUpdates", "true");
 		addRequestParameter("buildOnDependencyFailure", "true");
 		addRequestParameter("chooseTags", "true");
+		addRequestParameter("selectedTags", "trunk");
+		addRequestParameter("workDirOverrides", "");
 		addRequestParameter("fetchAvailableTags", "false");
 		
 		final ProjectConfigDto project = projects[0];
 		expect(manager.getProjectConfig("a")).andReturn(project);
-		
+		project.setRepositoryTagName("trunk");
 		final DependencyGroup dg = new DependencyGroupImpl();
 		dg.addTarget(project);
-		
+		dg.getPendingProjects().get(0).setRepositoryTagName("trunk");
 		manager.buildDependencyGroup(
 				aryEq(new ProjectConfigDto[] {project}),
 				eq(DependencyBuildPolicy.NONE),
@@ -507,33 +509,19 @@ public class ManualBuildActionTest extends MockApplicationContextStrutsTestCase 
 				eq(true), eq(true));
 		expectLastCall().andReturn(dg);
 
+		buildManager.add(dg);
+		expect(manager.getBuildDaemons()).andReturn(Collections.<BuildDaemon>emptyList());
+		
 		replay();
 		
 		actionPerform();
 		
-		verifyForward("chooseTags");
+		verifyForward("dashboard");
 		
 		verifyNoActionMessages();
 		verifyNoActionErrors();
 		
 		verify();
-		
-		final ManualBuildForm form = (ManualBuildForm) request.getSession().getAttribute("manualBuildForm");
-		assertNotNull(form);
-		
-		final List<String> projectNames = form.getProjectNames();
-		
-		assertEquals(1, projectNames.size());
-		assertEquals("a", projectNames.get(0));
-		
-		final List<List<RepositoryTagDto>> tags = form.getAvailableTags();
-		
-		assertEquals(1, tags.size());
-
-		assertEquals(0, tags.get(0).size());
-		
-		final String[] selectedTags = form.getSelectedTags();
-		assertEquals(0, selectedTags.length);
 	}
 	public void testChooseTagsReportsRepositoryError() throws Exception {
 		addRequestParameter("targets", new String[] {"a"});
@@ -577,6 +565,7 @@ public class ManualBuildActionTest extends MockApplicationContextStrutsTestCase 
 		
 		withoutTagNames.addTarget(projects[0]);
 		withoutTagNames.addTarget(projects[1]);
+		withoutTagNames.setName(request.getRemoteHost());
 		
 		final DependencyGroupImpl dg = new DependencyGroupImpl();
 		final ProjectConfigDto target = (ProjectConfigDto) projects[1].copy();
@@ -599,6 +588,7 @@ public class ManualBuildActionTest extends MockApplicationContextStrutsTestCase 
 		addRequestParameter("targets", new String[] {"a", "b"});
 		
 		buildManager.add(dg);
+		expect(manager.getBuildDaemons()).andReturn(Collections.<BuildDaemon>emptyList());
 		
 		replay();
 		
@@ -616,7 +606,7 @@ public class ManualBuildActionTest extends MockApplicationContextStrutsTestCase 
 		
 		withoutTagNames.addTarget(projects[0]);
 		withoutTagNames.addTarget(projects[1]);
-		
+		withoutTagNames.setName(request.getRemoteHost());
 		final DependencyGroupImpl dg = new DependencyGroupImpl();
 		final ProjectConfigDto target = (ProjectConfigDto) projects[1].copy();
 		target.setWorkDir("another/location");
@@ -638,6 +628,8 @@ public class ManualBuildActionTest extends MockApplicationContextStrutsTestCase 
 		addRequestParameter("targets", new String[] {"a", "b"});
 		
 		buildManager.add(dg);
+		
+		expect(manager.getBuildDaemons()).andReturn(Collections.<BuildDaemon>emptyList());
 		
 		replay();
 		
