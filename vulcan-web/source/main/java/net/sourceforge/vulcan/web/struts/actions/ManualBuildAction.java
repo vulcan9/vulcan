@@ -1,6 +1,6 @@
 /*
  * Vulcan Build Manager
- * Copyright (C) 2005-2012 Chris Eldredge
+ * Copyright (C) 2005-2014 Chris Eldredge
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -59,24 +59,48 @@ public final class ManualBuildAction extends Action {
 	@Override
 	public ActionForward execute(ActionMapping mapping, ActionForm form,
 			HttpServletRequest request, HttpServletResponse response) throws Exception {
-		final String requestedBy;
-		
-		requestedBy = getRequestUsernameOrHostname(request);
 		
 		final ManualBuildForm buildForm = (ManualBuildForm) form;
 		
 		final String[] selectedTags = buildForm.getSelectedTags();
 		
 		final boolean chooseTags = buildForm.isChooseTags();
-		if (chooseTags && selectedTags != null) {
-			buildForm.applyTagNamesOnTargets();
-			final DependencyGroup dg = buildForm.getDependencyGroup();
-			dg.setName(requestedBy);
-			buildManager.add(dg);
-			//TODO: wake up build daemon(s) here too
-			return mapping.findForward("dashboard");
+		final boolean needToChooseTags = chooseTags && selectedTags == null;
+		boolean needToPopulateAvailableTags = false;
+		
+		if (buildForm.getDependencyGroup() == null) {
+			ActionForward errorForward = buildDependencyGroup(mapping, buildForm, request);
+			
+			if (errorForward != null) {
+				return errorForward;
+			}
+			
+			needToPopulateAvailableTags = chooseTags && true;
+			buildForm.setFetchAvailableTags(selectedTags == null);
 		}
 		
+		DependencyGroup dg = buildForm.getDependencyGroup();;
+
+		if (needToChooseTags || needToPopulateAvailableTags) {
+			fetchAvailableTags(buildForm, request, dg);
+		}
+		
+		if (needToChooseTags) {
+			return mapping.findForward("chooseTags");
+		} else if (chooseTags) {
+			buildForm.applyTagNamesOnTargets();
+		}
+		
+		buildManager.add(dg);
+		
+		wakeUpBuildDaemons(dg.size());
+		
+		return mapping.findForward("dashboard");
+	}
+
+	protected ActionForward buildDependencyGroup(ActionMapping mapping,
+			final ManualBuildForm buildForm, HttpServletRequest request)
+			throws ConfigException {
 		final List<ProjectConfigDto> projects = new ArrayList<ProjectConfigDto>();
 
 		for (String target : buildForm.getTargets()) {
@@ -94,7 +118,7 @@ public final class ManualBuildAction extends Action {
 		
 		boolean buildOnNoUpdates = buildForm.isBuildOnNoUpdates();
 		
-		if (chooseTags) {
+		if (buildForm.isChooseTags()) {
 			buildOnNoUpdates = true;
 		}
 		
@@ -116,19 +140,11 @@ public final class ManualBuildAction extends Action {
 			return mapping.getInputForward();
 		}
 		
-		dg.setName(requestedBy);
+		dg.setName(getRequestUsernameOrHostname(request));
 		dg.setManualBuild(true);
 		
-		if (chooseTags) {
-			fetchAvailableTags(buildForm, request, dg);
-			return mapping.findForward("chooseTags");
-		}
-		
-		buildManager.add(dg);
-		
-		wakeUpBuildDaemons(projects.size());
-		
-		return mapping.findForward("dashboard");
+		buildForm.setDependencyGroup(dg);
+		return null;
 	}
 
 	public BuildManager getBuildManager() {
@@ -217,7 +233,9 @@ public final class ManualBuildAction extends Action {
 		}
 		
 		buildForm.populateTagChoices(projectNames, tags, workDirOverrides, dg);
-		buildForm.setSelectedTags(selectedTags.toArray(new String[selectedTags.size()]));
+		if (buildForm.isFetchAvailableTags()) {
+			buildForm.setSelectedTags(selectedTags.toArray(new String[selectedTags.size()]));	
+		}
 	}
 
 	protected List<RepositoryTagDto> fetchTagsAndBranchesFromRepository(

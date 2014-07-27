@@ -171,6 +171,9 @@ public class ManualBuildForm extends ValidatorForm {
 	public DependencyGroup getDependencyGroup() {
 		return dependencyGroup;
 	}
+	public void setDependencyGroup(DependencyGroup dependencyGroup) {
+		this.dependencyGroup = dependencyGroup;
+	}
 	public String[] getSelectedTags() {
 		return selectedTags;
 	}

@@ -94,6 +94,11 @@ public final class DependencyGroupImpl implements DependencyGroup {
 		return targets.isEmpty();
 	}
 
+	@Override
+	public int size() {
+		return targets.size();
+	}
+	
 	public boolean isBlocked() throws DependencyException {
 		if (isEmpty()) {
 			throw new IllegalStateException();
